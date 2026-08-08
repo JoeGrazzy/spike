@@ -2808,13 +2808,14 @@
         };
 
         // ================================================================
-        // ONLINE STATUS
+        // ONLINE STATUS — FIXED to use onlineStatus boolean
         // ================================================================
         function updateUserStatus(userId, status) {
             if (!userId) return;
             try {
+                const isOnline = (status === 'online');
                 setDoc(doc(db, "users", userId), {
-                    status: status,
+                    onlineStatus: isOnline,
                     lastSeen: serverTimestamp()
                 }, { merge: true }).catch(err => {
                     console.error("Error updating status:", err);
@@ -2830,13 +2831,13 @@
             onSnapshot(userRef, (docSnap) => {
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    const status = data.status || 'offline';
+                    const isOnline = data.onlineStatus === true;
                     const lastSeen = data.lastSeen;
 
                     const statusEl = document.getElementById('chatUserStatus');
                     const onlineDot = document.getElementById('onlineDot');
 
-                    if (status === 'online') {
+                    if (isOnline) {
                         statusEl.textContent = 'Online';
                         statusEl.className = 'chat-user-status online';
                         onlineDot.className = 'online-dot online';

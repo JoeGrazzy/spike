@@ -405,8 +405,22 @@
             display: flex; align-items: center; justify-content: center;
             font-weight: 700; color: white; font-size: 0.8rem;
             flex-shrink: 0; overflow: hidden;
+            position: relative;
         }
         .member-item .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .member-item .online-status-dot {
+            position: absolute; bottom: 0; right: 0;
+            width: 10px; height: 10px; border-radius: 50%;
+            border: 2px solid var(--bg-card);
+            display: none;
+        }
+        .member-item .online-status-dot.online {
+            display: block; background: var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
+        }
+        .member-item .online-status-dot.offline {
+            display: block; background: var(--text-muted);
+        }
         .member-item .member-info { flex: 1; }
         .member-item .member-name { font-weight: 600; font-size: 0.85rem; }
         .member-item .member-role {
@@ -833,7 +847,7 @@
 
     <script type="module">
         // ============================================================
-        // COMMUNITY DETAIL PAGE - FULL ADMIN FEATURES
+        // COMMUNITY DETAIL PAGE - FULL ADMIN FEATURES + ONLINE STATUS
         // ============================================================
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -857,7 +871,7 @@
             increment,
             runTransaction,
             writeBatch,
-            limit   // <--- FIX: added 'limit' import
+            limit
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -874,6 +888,7 @@
         const db = getFirestore(app);
 
         let currentUser = null;
+        let currentUserUid = null;
         let communityId = null;
         let communityData = null;
         let isMember = false;
@@ -889,6 +904,16 @@
         let unsubscribeActivity = null;
         let currentPostSort = 'new';
         const ADMIN_EMAILS = ["eletexjoeytex@gmail.com"];
+
+        // ===== ONLINE STATUS MANAGEMENT (unified) =====
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ===== GET COMMUNITY ID =====
         function getCommunityIdFromURL() {
@@ -1182,7 +1207,7 @@
             document.getElementById('aboutRules').textContent = communityData.rules || 'No rules set.';
         }
 
-        // ===== LOAD MEMBERS =====
+        // ===== LOAD MEMBERS (with online status) =====
         async function loadMembers() {
             if (!communityData) return;
             const membersList = document.getElementById('membersList');
@@ -1198,16 +1223,24 @@
                     let name = 'User';
                     let avatar = '';
                     let isSuspended = false;
+                    let isOnline = false;
+                    let lastSeen = null;
                     if (userSnap.exists()) {
                         const user = userSnap.data();
                         name = user.name || user.displayName || uid;
                         avatar = user.avatar || '';
                         isSuspended = user.suspended === true;
+                        isOnline = user.onlineStatus === true;
+                        lastSeen = user.lastSeen;
                     }
                     const isCreatorBadge = uid === communityData.createdBy ? '👑 Creator' : '';
                     const isAdminBadge = communityData.admins?.includes(uid) ? '🛡️ Admin' : '';
                     const suspendedBadge = isSuspended ? '🚫 Suspended' : '';
                     const initial = name.charAt(0).toUpperCase();
+                    const avatarHTML = avatar ? `<img src="${avatar}">` : initial;
+                    // Online dot
+                    const dotClass = isOnline ? 'online' : 'offline';
+                    const lastSeenText = lastSeen ? `title="Last seen ${new Date(lastSeen.toDate?.() || lastSeen).toLocaleString()}"` : '';
                     let actionsHTML = '';
                     if ((isCreator || isAdmin) && uid !== currentUser?.uid) {
                         if (!communityData.admins?.includes(uid)) {
@@ -1222,12 +1255,14 @@
                             }
                         }
                     }
-                    const avatarHTML = avatar ? `<img src="${avatar}">` : initial;
                     html += `
                         <div class="member-item" data-name="${name.toLowerCase()}">
-                            <div class="member-avatar">${avatarHTML}</div>
+                            <div class="member-avatar">
+                                ${avatarHTML}
+                                <span class="online-status-dot ${dotClass}" ${lastSeenText}></span>
+                            </div>
                             <div class="member-info">
-                                <div class="member-name">${name}</div>
+                                <div class="member-name">${name} ${isOnline ? '🟢' : '⚪'}</div>
                                 <div class="member-role">${isCreatorBadge} ${isAdminBadge} ${suspendedBadge}</div>
                             </div>
                             ${actionsHTML ? `<div class="member-actions">${actionsHTML}</div>` : ''}
@@ -1360,7 +1395,6 @@
         function loadActivityLog() {
             if (!communityId || !(isAdmin || isCreator)) return;
             if (unsubscribeActivity) unsubscribeActivity();
-            // ✅ FIX: 'limit' is now imported
             const activityQuery = query(
                 collection(db, "communities", communityId, "activity"),
                 orderBy("createdAt", "desc"),
@@ -2284,16 +2318,33 @@
         // ===== AUTH =====
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
+                if (currentUserUid) updateUserOnlineStatus(false);
                 window.location.href = "index.html";
                 return;
             }
             currentUser = user;
+            currentUserUid = user.uid;
+            // Set online
+            updateUserOnlineStatus(true);
+
             await loadCommunity();
         });
 
-        console.log('🏠 Community Detail page loaded with ALL features!');
-        console.log('✅ Features: Join/Leave, Invite Link, Post Sorting, Pin Posts, Report Posts, Activity Log, Member Search, Full Admin Controls');
-        console.log('🔧 Fix applied: "limit" is now imported for activity log pagination.');
+        // ===== ONLINE STATUS: beforeunload & visibility =====
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) updateUserOnlineStatus(false);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else {
+                if (currentUserUid) updateUserOnlineStatus(true);
+            }
+        });
+
+        console.log('🏠 Community Detail page loaded with ALL features + unified online status!');
+        console.log('✅ Online status dots now show in members list.');
     </script>
 
 </body>

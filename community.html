@@ -855,7 +855,7 @@
 
     <script type="module">
         // ============================================================
-        // COMMUNITY.JS - Complete Community Management with HIDDEN CREATE
+        // COMMUNITY.JS - Complete Community Management + UNIFIED ONLINE STATUS
         // ============================================================
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -894,6 +894,7 @@
         const db = getFirestore(app);
 
         let currentUser = null;
+        let currentUserUid = null;
         let toastTimeout = null;
         let pendingConfirm = null;
         let unsubscribeCommunities = null;
@@ -905,6 +906,16 @@
         let createFormVisible = false;
         let searchTerm = '';
         const ADMIN_EMAILS = ["eletexjoeytex@gmail.com"];
+
+        // ===== ONLINE STATUS MANAGEMENT (unified) =====
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ===== TOAST SYSTEM =====
         function showToast(message, type = 'success', title = '') {
@@ -1779,11 +1790,16 @@
         // ===== AUTH =====
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
+                if (currentUserUid) updateUserOnlineStatus(false);
                 window.location.href = "index.html";
                 return;
             }
 
             currentUser = user;
+            currentUserUid = user.uid;
+            // Set online
+            updateUserOnlineStatus(true);
+
             isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
 
             const adminLink = document.getElementById('adminNavLink');
@@ -1801,6 +1817,19 @@
             console.log('📚 Joined communities:', joinedCommunityIds.length);
             console.log('👑 Admin:', isAdmin);
             console.log('🔒 Create Community is HIDDEN - Click the secret button to reveal!');
+        });
+
+        // ===== ONLINE STATUS: beforeunload & visibility =====
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) updateUserOnlineStatus(false);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else {
+                if (currentUserUid) updateUserOnlineStatus(true);
+            }
         });
 
         // ===== NOTIFICATION BADGE =====
@@ -1845,7 +1874,7 @@
         window.handleConfirm = handleConfirm;
         window.handleCancel = handleCancel;
 
-        console.log('👥 SPIKE Community page loaded with HIDDEN Create feature!');
+        console.log('👥 SPIKE Community page loaded with UNIFIED ONLINE STATUS!');
         console.log('🔐 Click the invisible button at bottom-right to create a community');
     </script>
 </head>

@@ -3213,6 +3213,7 @@
         // STATE
         // ============================================================
         let currentUser = null;
+        let currentUserUid = null; // <-- NEW: store uid for offline update
         let isAdmin = false;
         let selectedPostImageFile = null;
         let selectedPostVideoFile = null;
@@ -3243,6 +3244,18 @@
         // Notification tracking for sound
         let previousNotificationCount = 0;
         let isFirstNotificationCheck = true;
+
+        // ============================================================
+        // ONLINE STATUS MANAGEMENT — NEW
+        // ============================================================
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ============================================================
         // TOAST & CONFIRM (attached to window)
@@ -3316,14 +3329,11 @@
             try {
                 const audio = document.getElementById('notificationSound');
                 if (audio) {
-                    // Reset and play
                     audio.currentTime = 0;
                     const playPromise = audio.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(err => {
-                            // Autoplay was blocked — fallback: try playing on user interaction later
                             console.log('Notification sound autoplay blocked, will retry on next interaction');
-                            // Store intent to play on next user click
                             if (!window._soundRetryListener) {
                                 window._soundRetryListener = function() {
                                     try {
@@ -3339,7 +3349,7 @@
                     }
                 }
             } catch (e) {
-                // Silently fail — sound is optional
+                // Silently fail
             }
         }
 
@@ -3358,20 +3368,14 @@
                 if (readStr) { const parsed = JSON.parse(readStr); if (Array.isArray(parsed)) readSet = new Set(parsed); }
                 const unread = notifs.filter(n => !readSet.has(n.id)).length;
 
-                // === PLAY SOUND ON NEW NOTIFICATIONS ===
-                // Skip sound on first load (isFirstNotificationCheck = true)
                 if (!isFirstNotificationCheck) {
-                    // If unread count increased, play sound once per new notification
                     if (unread > previousNotificationCount) {
-                        // Play sound for each new notification (but only once per increment)
-                        // We play a single sound when count increases, which is simpler and avoids spam
                         playNotificationSound();
                     }
                 } else {
                     isFirstNotificationCheck = false;
                 }
 
-                // Update previous count for next check
                 previousNotificationCount = unread;
 
                 if (unread > 0) {
@@ -3382,22 +3386,16 @@
                 }
             } catch (e) {
                 badge.style.display = 'none';
-                // Reset previous count on error to avoid false positives
                 previousNotificationCount = 0;
             }
         }
 
-        // Listen for storage changes (from notifications page)
         window.addEventListener('storage', (e) => {
             if (e.key === CONFIG.storage.notifCacheKey || e.key === CONFIG.storage.notifReadKey) {
-                // Only update if the change came from another tab
-                // We need to re-read the values to get the new state
                 setTimeout(() => updateNotificationBadge(), 50);
             }
         });
 
-        // Also listen for changes within the same tab via a custom event
-        // The notifications page will dispatch this event when notifications are marked as read
         window.addEventListener('notificationsUpdated', () => {
             updateNotificationBadge();
         });
@@ -4843,9 +4841,13 @@
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
+                currentUserUid = user.uid;
                 isAdmin = isCurrentUserAdmin();
                 const adminBtn = document.getElementById("dropdownAdminBtn");
                 if (adminBtn) adminBtn.classList.toggle("visible", isAdmin);
+
+                // === UPDATED: set online status on load ===
+                updateUserOnlineStatus(true);
 
                 const cachedAvatar = getCachedAvatar(user.uid);
                 if (cachedAvatar) updateDropdownAvatar(cachedAvatar);
@@ -4876,6 +4878,13 @@
                 applySettings();
 
             } else {
+                // User signed out — set offline if we have a uid
+                if (currentUserUid) {
+                    const userRef = doc(db, "users", currentUserUid);
+                    updateDoc(userRef, { onlineStatus: false, lastSeen: serverTimestamp() })
+                        .catch(err => console.error("Error setting offline on sign out:", err));
+                }
+                currentUserUid = null;
                 isAdmin = false;
                 updateDropdownAvatar(null);
                 cleanupOnlineStatusListeners();
@@ -4889,6 +4898,15 @@
                 const badge = document.getElementById('headerNotifBadge');
                 if (badge) badge.style.display = 'none';
                 previousNotificationCount = 0;
+            }
+        });
+
+        // === NEW: beforeunload event to set offline ===
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) {
+                const userRef = doc(db, "users", currentUserUid);
+                updateDoc(userRef, { onlineStatus: false, lastSeen: serverTimestamp() })
+                    .catch(err => console.error("Error setting offline on beforeunload:", err));
             }
         });
 
@@ -4928,6 +4946,7 @@
         console.log('🔔 Notification sound plays once per new notification from assets/notifications.mp3');
         console.log('🔒 Regular users cannot report admin posts (eletexjoeytex@gmail.com)');
         console.log('🤖 SPIKE AI added to menu — link to studio_ai.html');
+        console.log('✅ Online status now updates correctly on page load, unload, and sign-out.');
     </script>
 </body>
 </html>

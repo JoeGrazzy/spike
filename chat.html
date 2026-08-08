@@ -599,6 +599,7 @@
         // ===== STATE =====
         const CACHE_VERSION = 'v3';
         let currentUser = null;
+        let currentUserUid = null; // for offline update
         let currentUserData = {};
         let chatListUnsubscribe = null;
         let toastTimeout = null;
@@ -609,6 +610,16 @@
         let searchTerm = '';
         let allChats = [];
         let pinnedChats = new Set();
+
+        // ===== ONLINE STATUS MANAGEMENT (unified) =====
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ===== TOAST =====
         window.showToast = function(message, type = 'success', title = '') {
@@ -761,20 +772,21 @@
         window.goToAdmin = function() { window.location.href = "administrator.html"; };
         window.goToGroups = function() { window.location.href = "community.html"; };
 
-        // ===== BUILD CHAT ITEM =====
+        // ===== BUILD CHAT ITEM (with onlineStatus) =====
         function buildChatItem(chat) {
             const avatarURL = chat.avatar || getCachedAvatar(chat.userId) || '';
             const avatarHTML = avatarURL ? 
                 `<img src="${avatarURL}" alt="${escapeHTML(chat.name)}">` : 
                 getInitials(chat.name);
             
-            const statusClass = chat.status === 'online' ? 'online' : 'offline';
+            // Use onlineStatus (boolean) and lastSeen
+            const isOnline = chat.isOnline === true;
+            const statusClass = isOnline ? 'online' : 'offline';
             const timeStr = formatTimeAgo(chat.lastMessageTime);
             const unread = chat.unread || 0;
             const isPinned = pinnedChats.has(chat.chatId);
             
             let messagePreview = chat.lastMessage || 'No messages yet';
-            // Truncate long messages
             if (messagePreview.length > 50) {
                 messagePreview = messagePreview.substring(0, 50) + '...';
             }
@@ -917,6 +929,9 @@
                                         pinnedChats.add(chat.id);
                                     }
                                     
+                                    // Read onlineStatus (boolean) and lastSeen
+                                    const isOnline = userData.onlineStatus === true;
+                                    
                                     return {
                                         chatId: chat.id,
                                         userId: chat.otherUserId,
@@ -925,7 +940,8 @@
                                         lastMessage: chat.data.lastMessage || 'New conversation',
                                         lastMessageTime: chat.data.lastMessageTime || null,
                                         unread: chat.data.unreadCount?.[currentUser.uid] || 0,
-                                        status: userData.status || 'offline'
+                                        isOnline: isOnline,
+                                        lastSeen: userData.lastSeen || null
                                     };
                                 }
                                 return null;
@@ -1100,6 +1116,8 @@
                     const name = data.name || data.displayName || data.username || 'User';
                     const email = data.email || '';
                     const avatar = data.avatar || data.photoURL || '';
+                    // onlineStatus boolean
+                    const isOnline = data.onlineStatus === true;
                     
                     if (searchTerm) {
                         const search = searchTerm.toLowerCase();
@@ -1112,7 +1130,8 @@
                         uid: uid,
                         name: name,
                         email: email,
-                        avatar: avatar || getCachedAvatar(uid) || ''
+                        avatar: avatar || getCachedAvatar(uid) || '',
+                        isOnline: isOnline
                     });
                 });
                 
@@ -1139,11 +1158,13 @@
                     `<img src="${user.avatar}" alt="${escapeHTML(user.name)}">` : 
                     getInitials(user.name);
                 
+                const statusText = user.isOnline ? '🟢 Online' : '⚪ Offline';
+                
                 html += `
                     <div class="user-item" onclick="startNewChat('${user.uid}', '${escapeHTML(user.name)}')">
                         <div class="user-avatar-sm">${avatarHTML}</div>
                         <span class="user-name">${escapeHTML(user.name)}</span>
-                        <span class="user-status">🟢 Available</span>
+                        <span class="user-status">${statusText}</span>
                     </div>
                 `;
             }
@@ -1205,10 +1226,18 @@
         // ===== AUTH STATE =====
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
+                // Sign out: set offline if we have a uid
+                if (currentUserUid) {
+                    updateUserOnlineStatus(false);
+                }
                 window.location.href = "index.html";
                 return;
             }
             currentUser = user;
+            currentUserUid = user.uid;
+            
+            // Set online status on load
+            updateUserOnlineStatus(true);
             
             // Check admin
             const adminLink = document.getElementById('adminNavLink');
@@ -1234,8 +1263,27 @@
             loadChats();
         });
 
-        console.log("🔥 🚀 SPIKE Chat page loaded with all improvements!");
-        console.log("✨ Features: Pinned chats, Search, Sort, Online status, and more!");
+        // ===== ONLINE STATUS: beforeunload & visibility =====
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) {
+                updateUserOnlineStatus(false);
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) {
+                    updateUserOnlineStatus(false);
+                }
+            } else {
+                if (currentUserUid) {
+                    updateUserOnlineStatus(true);
+                }
+            }
+        });
+
+        console.log("🔥 🚀 SPIKE Chat page loaded with unified online status!");
+        console.log("✨ Features: Pinned chats, Search, Sort, Online status (onlineStatus boolean), and more!");
         console.log("⌨️ Shortcuts: Ctrl+F to search, Esc to close modals");
     </script>
 </head>
