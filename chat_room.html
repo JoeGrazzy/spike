@@ -3919,6 +3919,8 @@
         const MAX_RECONNECT = 3;
         let isReconnecting = false;
         let remoteStream = null;
+        let callTimeoutId = null;
+        let currentCallData = null; // store call data for active UI
 
         const servers = {
             iceServers: [
@@ -3927,9 +3929,6 @@
             ],
             iceCandidatePoolSize: 10
         };
-
-        // DOM refs (already exist in the page)
-        // We'll reference them by ID as used in the HTML.
 
         // ---- Permission ----
         function showPermissionUI(needVideo = false) {
@@ -4063,35 +4062,67 @@
             }
         }
 
-        // ---- Cleanup Call ----
-        function cleanupCall() {
+        // ---- Reset Call Resources (to prevent memory leaks) ----
+        function resetCallResources() {
+            // Unsubscribe all listeners
+            callUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
+            callUnsubscribers = [];
+
+            // Clear intervals
             stopCallTimer();
             if (qualityMonitorInterval) {
                 clearInterval(qualityMonitorInterval);
                 qualityMonitorInterval = null;
             }
-            if (localStream) {
-                localStream.getTracks().forEach(t => t.stop());
-                localStream = null;
+
+            // Clear timeout
+            if (callTimeoutId) {
+                clearTimeout(callTimeoutId);
+                callTimeoutId = null;
             }
+
+            // Close peer connection
             if (peerConnection) {
                 try { peerConnection.close(); } catch (e) {}
                 peerConnection = null;
             }
+
+            // Reset flags
+            isReconnecting = false;
+            reconnectAttempts = 0;
+            currentCallData = null;
+        }
+
+        // ---- Cleanup Call ----
+        function cleanupCall() {
+            resetCallResources();
+
+            // Stop local tracks
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+
             releaseWakeLock();
             document.getElementById('remoteVideo').srcObject = null;
             document.getElementById('localVideo').srcObject = null;
-            callUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
-            callUnsubscribers = [];
+
             stopIncomingRingtone();
             stopOutgoingRingtone();
+
             isCallActive = false;
             isCallEnding = false;
-            isReconnecting = false;
+
+            // Hide all overlays
             document.getElementById('incomingCallOverlay').classList.remove('active');
             document.getElementById('ringingOverlay').classList.remove('active');
             document.getElementById('activeCallOverlay').classList.remove('active');
             document.getElementById('activeCallOverlay').classList.remove('audio-only');
+
+            // Reset UI
+            document.getElementById('activeCallTimer').textContent = '00:00';
+            document.getElementById('callStatusBadge').textContent = 'Connected';
+            document.getElementById('callStatusBadge').className = 'call-status';
         }
 
         // ---- End Call ----
@@ -4119,19 +4150,21 @@
                 endCall('reconnect_failed');
                 return;
             }
+
+            // Reset resources before reconnecting
+            resetCallResources();
+
             isReconnecting = true;
             reconnectAttempts++;
             showToast(`Reconnecting (${reconnectAttempts}/${MAX_RECONNECT})…`, 'info');
 
             try {
-                if (peerConnection) {
-                    peerConnection.close();
-                    peerConnection = null;
-                }
+                // Rebuild peer connection
                 peerConnection = new RTCPeerConnection(servers);
                 if (localStream) {
                     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
                 }
+
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
 
@@ -4146,7 +4179,7 @@
                     document.getElementById('remoteVideo').srcObject = remoteStream;
                     if (!callTimerInterval) startCallTimer();
                     const badge = document.getElementById('callStatusBadge');
-                    badge.textContent = 'Connected';
+                    badge.textContent = 'Reconnected';
                     badge.className = 'call-status';
                     requestWakeLock();
                     monitorConnectionQuality();
@@ -4173,7 +4206,7 @@
                 }
                 isReconnecting = false;
                 const badge = document.getElementById('callStatusBadge');
-                badge.textContent = 'Reconnected';
+                badge.textContent = 'Connected';
                 showToast('Call reconnected', 'success');
             } catch (err) {
                 console.warn('Reconnect error:', err);
@@ -4235,6 +4268,9 @@
                 createdAt: serverTimestamp()
             });
 
+            // Store call data for UI
+            currentCallData = { callerName, callerPhoto, isVideo: video };
+
             // Show ringing overlay
             const ringingOverlay = document.getElementById('ringingOverlay');
             ringingOverlay.classList.add('active');
@@ -4244,19 +4280,45 @@
             document.getElementById('ringingStatus').textContent = 'Ringing…';
             playOutgoingRingtone();
 
+            // Set call timeout (30 seconds)
+            callTimeoutId = setTimeout(async () => {
+                if (callDocRef) {
+                    await updateDoc(callDocRef, { status: 'ended', endReason: 'timeout' });
+                }
+                stopOutgoingRingtone();
+                ringingOverlay.classList.remove('active');
+                showToast('Call timed out', 'error');
+                cleanupCall();
+            }, 30000);
+
             // Listen for status changes
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
                 if (data.status === 'active') {
                     // Callee accepted
+                    if (callTimeoutId) {
+                        clearTimeout(callTimeoutId);
+                        callTimeoutId = null;
+                    }
                     stopOutgoingRingtone();
                     ringingOverlay.classList.remove('active');
                     initiateWebRTCAsCaller();
                 } else if (data.status === 'ended') {
                     stopOutgoingRingtone();
                     ringingOverlay.classList.remove('active');
-                    showToast(data.endReason === 'declined' ? 'Call declined' : 'Call ended', 'info');
+                    if (callTimeoutId) {
+                        clearTimeout(callTimeoutId);
+                        callTimeoutId = null;
+                    }
+                    const reason = data.endReason || 'ended';
+                    let msg = 'Call ended';
+                    if (reason === 'declined') msg = 'Call declined';
+                    else if (reason === 'cancelled') msg = 'Call cancelled';
+                    else if (reason === 'timeout') msg = 'Call timed out';
+                    else if (reason === 'busy') msg = 'User is busy';
+                    else if (reason === 'reconnect_failed') msg = 'Connection lost';
+                    showToast(msg, 'info');
                     cleanupCall();
                 }
             });
@@ -4269,6 +4331,10 @@
                 }
                 stopOutgoingRingtone();
                 ringingOverlay.classList.remove('active');
+                if (callTimeoutId) {
+                    clearTimeout(callTimeoutId);
+                    callTimeoutId = null;
+                }
                 cleanupCall();
                 showToast('Call cancelled', 'info');
             };
@@ -4342,6 +4408,15 @@
 
         // ---- Join Call (receiver) ----
         async function joinCall(callId, callData) {
+            if (isCallActive || isCallEnding) {
+                // User is busy – decline automatically
+                try {
+                    const callRef = doc(db, 'calls', callId);
+                    await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
+                } catch (e) {}
+                return;
+            }
+
             if (!localStream) {
                 try {
                     localStream = await requestMedia(callData.isVideo || false);
@@ -4351,10 +4426,16 @@
             isCaller = false;
             isVideoCall = callData.isVideo || false;
             callDocRef = doc(db, 'calls', callId);
+            // Store call data for UI
+            currentCallData = {
+                callerName: callData.callerName || 'Caller',
+                callerPhoto: callData.callerPhoto || '',
+                isVideo: callData.isVideo || false
+            };
 
             // Show incoming overlay
-            const callerName = callData.callerName || 'Caller';
-            const callerPhoto = callData.callerPhoto || '';
+            const callerName = currentCallData.callerName;
+            const callerPhoto = currentCallData.callerPhoto;
             document.getElementById('incomingName').textContent = callerName;
             const avatar = document.getElementById('incomingAvatar');
             if (callerPhoto) {
@@ -4383,14 +4464,19 @@
                 cleanupCall();
             };
 
-            // Listen for caller cancelling
+            // Listen for caller cancelling / timeout
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
                 if (data.status === 'ended') {
                     stopIncomingRingtone();
                     document.getElementById('incomingCallOverlay').classList.remove('active');
-                    showToast(data.endReason === 'cancelled' ? 'Caller cancelled' : 'Call ended', 'info');
+                    const reason = data.endReason || 'ended';
+                    let msg = 'Call ended';
+                    if (reason === 'cancelled') msg = 'Caller cancelled';
+                    else if (reason === 'timeout') msg = 'Call timed out';
+                    else if (reason === 'busy') msg = 'User busy';
+                    showToast(msg, 'info');
                     cleanupCall();
                 }
             });
@@ -4471,9 +4557,11 @@
             const overlay = document.getElementById('activeCallOverlay');
             overlay.classList.add('active');
 
-            if (!isVideoCall) {
+            const displayName = currentCallData ? currentCallData.callerName : 'User';
+            const isVideo = currentCallData ? currentCallData.isVideo : false;
+
+            if (!isVideo) {
                 overlay.classList.add('audio-only');
-                const displayName = isCaller ? otherUserName : (callDocRef ? callDocRef.callerName : 'User');
                 const initials = displayName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
                 const avatarLarge = document.getElementById('callerAvatarLarge');
                 avatarLarge.style.display = 'flex';
@@ -4488,10 +4576,8 @@
                 if (localStream) {
                     document.getElementById('localVideo').srcObject = localStream;
                 }
+                document.getElementById('activeCallerName').textContent = displayName;
             }
-
-            const callerName = isCaller ? otherUserName : (callDocRef ? callDocRef.callerName : 'User');
-            document.getElementById('activeCallerName').textContent = callerName;
 
             setupCallControls();
         }
@@ -4571,7 +4657,14 @@
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const data = change.doc.data();
-                        if (isCallActive || isCallEnding) return;
+                        // Check if we are already in a call
+                        if (isCallActive || isCallEnding) {
+                            // Automatically decline with busy
+                            try {
+                                updateDoc(doc(db, 'calls', change.doc.id), { status: 'ended', endReason: 'busy' });
+                            } catch (e) {}
+                            return;
+                        }
                         if (document.getElementById('incomingCallOverlay').classList.contains('active')) return;
                         joinCall(change.doc.id, data);
                     }

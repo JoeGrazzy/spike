@@ -828,6 +828,542 @@
             backdrop-filter: blur(16px);
         }
 
+        /* ================================================================
+           CALL OVERLAY STYLES (from chat_room.html)
+           ================================================================ */
+        .call-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 10, 15, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+        .call-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .call-overlay .call-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            padding: 32px 24px 28px;
+            max-width: 360px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7);
+        }
+        .call-overlay .call-avatar {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 12px;
+            box-shadow: 0 0 30px rgba(99,102,241,0.3);
+            overflow: hidden;
+        }
+        .call-overlay .call-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .call-overlay .call-name {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .call-overlay .call-sub {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+        .call-overlay .call-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .call-overlay .call-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .call-overlay .call-btn:active {
+            transform: scale(0.9);
+        }
+        .call-overlay .call-btn.accept {
+            background: var(--success);
+            color: white;
+            width: 64px;
+            height: 64px;
+            font-size: 1.8rem;
+        }
+        .call-overlay .call-btn.accept:hover {
+            background: #059669;
+        }
+        .call-overlay .call-btn.decline {
+            background: var(--error);
+            color: white;
+        }
+        .call-overlay .call-btn.decline:hover {
+            background: #dc2626;
+        }
+
+        .ringing-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9, 10, 15, 0.92);
+            backdrop-filter: blur(20px);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 24px;
+            animation: fadeIn 0.4s ease;
+        }
+        .ringing-overlay.active {
+            display: flex;
+        }
+        .ringing-overlay .ringing-card {
+            text-align: center;
+        }
+        .ringing-overlay .ringing-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 16px;
+            box-shadow: 0 0 40px rgba(99,102,241,0.4);
+            animation: pulse-avatar 1.5s infinite;
+            overflow: hidden;
+        }
+        .ringing-overlay .ringing-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        @keyframes pulse-avatar {
+            0% { transform: scale(1); box-shadow: 0 0 30px rgba(99,102,241,0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 60px rgba(99,102,241,0.6); }
+            100% { transform: scale(1); box-shadow: 0 0 30px rgba(99,102,241,0.3); }
+        }
+        .ringing-overlay .ringing-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .ringing-overlay .ringing-status {
+            color: var(--text-muted);
+            font-size: 1rem;
+            margin: 4px 0 16px;
+        }
+        .ringing-overlay .cancel-btn {
+            background: var(--error);
+            border: none;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+        }
+        .ringing-overlay .cancel-btn:hover {
+            background: #dc2626;
+        }
+        .ringing-overlay .cancel-btn:active {
+            transform: scale(0.95);
+        }
+
+        .active-call-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 5000;
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+        }
+        .active-call-overlay.active {
+            display: flex;
+        }
+        .active-call-overlay .remote-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #1a1d29;
+        }
+        .active-call-overlay .local-video-wrapper {
+            position: absolute;
+            top: 80px;
+            right: 16px;
+            width: 120px;
+            height: 170px;
+            border-radius: 16px;
+            overflow: hidden;
+            z-index: 10;
+            border: 2px solid rgba(255,255,255,0.2);
+            background: #1a1d29;
+            cursor: grab;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .active-call-overlay .local-video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+        .active-call-overlay .call-top-bar {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+        .active-call-overlay .call-top-bar .call-status {
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--success);
+        }
+        .active-call-overlay .call-top-bar .call-status.connecting {
+            color: var(--warning);
+        }
+        .active-call-overlay .call-top-bar .call-status.error {
+            color: var(--error);
+        }
+        .active-call-overlay .call-center-info {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            gap: 8px;
+        }
+        .active-call-overlay .call-center-info .caller-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        .active-call-overlay .call-center-info .call-timer {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        .active-call-overlay .call-controls {
+            position: relative;
+            z-index: 20;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 20px;
+        }
+        .active-call-overlay .call-controls .ctrl-btn {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(18,21,32,0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .active-call-overlay .call-controls .ctrl-btn:active {
+            transform: scale(0.92);
+        }
+        .active-call-overlay .call-controls .ctrl-btn.active {
+            background: var(--error);
+        }
+        .active-call-overlay .call-controls .ctrl-btn.end-call {
+            background: var(--error);
+            width: 64px;
+            height: 64px;
+            box-shadow: 0 8px 25px rgba(239,68,68,0.5);
+        }
+        .active-call-overlay .call-controls .ctrl-btn.end-call:hover {
+            background: #dc2626;
+        }
+        .active-call-overlay .call-controls .ctrl-btn .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--error);
+            border: 2px solid #000;
+            font-size: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .active-call-overlay .quality-indicator {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .active-call-overlay .quality-indicator.visible {
+            opacity: 1;
+        }
+        .active-call-overlay .quality-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        .active-call-overlay .quality-dot.good {
+            background: var(--success);
+        }
+        .active-call-overlay .quality-dot.poor {
+            background: var(--warning);
+        }
+        .active-call-overlay .quality-dot.bad {
+            background: var(--error);
+        }
+
+        .active-call-overlay.audio-only .remote-video {
+            display: none;
+        }
+        .active-call-overlay.audio-only .local-video-wrapper {
+            display: none;
+        }
+        .active-call-overlay.audio-only .call-center-info .caller-avatar {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin: 0 auto 12px;
+            box-shadow: 0 0 40px rgba(99,102,241,0.4);
+        }
+        .active-call-overlay.audio-only .call-center-info .caller-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .active-call-overlay.audio-only .call-center-info .caller-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .active-call-overlay.audio-only .call-center-info .call-timer {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .permission-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(9,10,15,0.9);
+            backdrop-filter: blur(10px);
+            z-index: 6000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .permission-overlay.active {
+            display: flex;
+        }
+        .permission-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 32px 24px;
+            max-width: 340px;
+            width: 100%;
+            text-align: center;
+        }
+        .permission-card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 8px;
+        }
+        .permission-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .permission-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+        }
+        .permission-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.02);
+        }
+        .permission-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Responsive for call overlays */
+        @media (max-width: 480px) {
+            .active-call-overlay .local-video-wrapper {
+                width: 90px;
+                height: 130px;
+                top: 70px;
+                right: 12px;
+            }
+            .active-call-overlay .call-controls .ctrl-btn {
+                width: 48px;
+                height: 48px;
+            }
+            .active-call-overlay .call-controls .ctrl-btn.end-call {
+                width: 56px;
+                height: 56px;
+            }
+            .active-call-overlay .call-controls {
+                gap: 12px;
+            }
+            .ringing-overlay .ringing-avatar {
+                width: 90px;
+                height: 90px;
+                font-size: 2rem;
+            }
+            .call-overlay .call-avatar {
+                width: 70px;
+                height: 70px;
+                font-size: 1.6rem;
+            }
+            .call-overlay .call-name {
+                font-size: 1.3rem;
+            }
+            .call-overlay .call-btn.accept {
+                width: 56px;
+                height: 56px;
+                font-size: 1.5rem;
+            }
+            .call-overlay .call-btn.decline {
+                width: 56px;
+                height: 56px;
+            }
+        }
+        @media (max-width: 380px) {
+            .active-call-overlay .local-video-wrapper {
+                width: 75px;
+                height: 110px;
+                top: 60px;
+                right: 8px;
+            }
+            .active-call-overlay .call-controls .ctrl-btn {
+                width: 42px;
+                height: 42px;
+            }
+            .active-call-overlay .call-controls .ctrl-btn.end-call {
+                width: 48px;
+                height: 48px;
+            }
+            .active-call-overlay .call-controls {
+                gap: 10px;
+            }
+        }
+        @media (max-height: 500px) and (orientation: landscape) {
+            .active-call-overlay .local-video-wrapper {
+                width: 80px;
+                height: 110px;
+                top: 60px;
+                right: 12px;
+            }
+            .active-call-overlay .call-center-info .caller-name {
+                font-size: 1.2rem;
+            }
+            .active-call-overlay .call-controls {
+                padding-bottom: 10px;
+            }
+        }
+        @media (pointer: coarse) {
+            .call-overlay .call-btn,
+            .ringing-overlay .cancel-btn,
+            .active-call-overlay .call-controls .ctrl-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+
         @media (max-width: 480px) {
             .community-header { padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
             .create-community-card { padding: 16px 14px; }
@@ -853,1030 +1389,13 @@
         }
     </style>
 
-    <script type="module">
-        // ============================================================
-        // COMMUNITY.JS - Complete Community Management + UNIFIED ONLINE STATUS
-        // ============================================================
-
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import {
-            getFirestore,
-            collection,
-            doc,
-            getDoc,
-            getDocs,
-            updateDoc,
-            deleteDoc,
-            setDoc,
-            onSnapshot,
-            query,
-            orderBy,
-            where,
-            addDoc,
-            serverTimestamp,
-            arrayUnion,
-            arrayRemove,
-            increment
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
-            authDomain: "grazzy-9e736.firebaseapp.com",
-            projectId: "grazzy-9e736",
-            storageBucket: "grazzy-9e736.firebasestorage.app",
-            messagingSenderId: "750326949170",
-            appId: "1:750326949170:web:5d19744aafc8675918632b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
-        let currentUserUid = null;
-        let toastTimeout = null;
-        let pendingConfirm = null;
-        let unsubscribeCommunities = null;
-        let allCommunities = [];
-        let joinedCommunityIds = [];
-        let currentTab = 'all';
-        let userData = {};
-        let isAdmin = false;
-        let createFormVisible = false;
-        let searchTerm = '';
-        const ADMIN_EMAILS = ["eletexjoeytex@gmail.com"];
-
-        // ===== ONLINE STATUS MANAGEMENT (unified) =====
-        function updateUserOnlineStatus(status) {
-            if (!currentUserUid) return;
-            const userRef = doc(db, "users", currentUserUid);
-            updateDoc(userRef, {
-                onlineStatus: status,
-                lastSeen: serverTimestamp()
-            }).catch(err => console.error("Error updating online status:", err));
-        }
-
-        // ===== TOAST SYSTEM =====
-        function showToast(message, type = 'success', title = '') {
-            const toast = document.getElementById('globalToast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-
-            if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
-
-            toast.className = 'toast-container';
-            const titles = { success: '✓ Success', error: '✕ Error', warning: '⚠️ Warning' };
-            const icons = { success: '✓', error: '✕', warning: '⚠️' };
-
-            toastTitle.textContent = title || titles[type] || 'Notification';
-            toastMessage.textContent = message;
-            toastIcon.textContent = icons[type] || '✓';
-
-            void toast.offsetWidth;
-            toast.classList.add(type, 'active');
-
-            toastTimeout = setTimeout(() => { dismissToast(); }, 3500);
-        }
-
-        function dismissToast() {
-            const toast = document.getElementById('globalToast');
-            if (!toast.classList.contains('active')) return;
-            toast.classList.add('removing');
-            setTimeout(() => {
-                toast.className = 'toast-container';
-                toast.classList.remove('removing');
-                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
-            }, 400);
-        }
-        window.dismissToast = dismissToast;
-
-        // ===== CONFIRM MODAL =====
-        function showConfirmModal(options) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('confirmModalOverlay');
-                const modal = document.getElementById('confirmModal');
-                const icon = document.getElementById('confirmModalIcon');
-                const title = document.getElementById('confirmModalTitle');
-                const message = document.getElementById('confirmModalMessage');
-                const details = document.getElementById('confirmModalDetails');
-                const confirmBtn = document.getElementById('confirmModalConfirm');
-                const cancelBtn = document.getElementById('confirmModalCancel');
-
-                modal.className = 'confirm-modal ' + (options.type || 'warning');
-                icon.textContent = options.icon || '⚠️';
-                title.textContent = options.title || 'Are you sure?';
-                message.textContent = options.message || 'This action cannot be undone.';
-                if (options.details) {
-                    details.innerHTML = options.details;
-                    details.style.display = 'block';
-                } else {
-                    details.style.display = 'none';
-                }
-                confirmBtn.textContent = options.confirmText || 'Confirm';
-                confirmBtn.className = 'btn-confirm ' + (options.confirmType || 'danger');
-                cancelBtn.textContent = options.cancelText || 'Cancel';
-
-                pendingConfirm = { resolve };
-                overlay.classList.add('active');
-            });
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModalOverlay').classList.remove('active');
-        }
-
-        window.handleConfirm = function() {
-            if (pendingConfirm) { pendingConfirm.resolve(true); pendingConfirm = null; }
-            closeConfirmModal();
-        };
-
-        window.handleCancel = function() {
-            if (pendingConfirm) { pendingConfirm.resolve(false); pendingConfirm = null; }
-            closeConfirmModal();
-        };
-
-        document.getElementById('confirmModalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) handleCancel();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') handleCancel();
-        });
-
-        // ===== NAVIGATION =====
-        window.goToFeed = function() { window.location.href = "feed.html"; };
-        window.goToFriends = function() { window.location.href = "friends.html"; };
-        window.goToMessages = function() { window.location.href = "chat.html"; };
-        window.goToNotifications = function() { window.location.href = "notifications.html"; };
-        window.goToProfile = function() { window.location.href = "profile.html"; };
-        window.goToAdmin = function() { window.location.href = "administrator.html"; };
-        window.goToSettings = function() { window.location.href = "settings.html"; };
-
-        // ===== SETTINGS =====
-        function getSettings() {
-            try {
-                const saved = localStorage.getItem('spikeSettings');
-                if (saved) return JSON.parse(saved);
-            } catch (e) {}
-            return { accentColor: '#00a884', darkMode: true };
-        }
-
-        function applySettings() {
-            const settings = getSettings();
-            document.documentElement.style.setProperty('--primary', settings.accentColor || '#00a884');
-            document.documentElement.style.setProperty('--primary-glow', (settings.accentColor || '#00a884') + '40');
-            document.documentElement.style.setProperty('--primary-hover', settings.accentColor || '#00a884');
-            if (!settings.darkMode) {
-                document.body.classList.add('light-mode');
-            } else {
-                document.body.classList.remove('light-mode');
-            }
-        }
-        applySettings();
-
-        // ===== GET USER DATA =====
-        async function getUserData(uid) {
-            try {
-                const docSnap = await getDoc(doc(db, "users", uid));
-                if (docSnap.exists()) {
-                    return docSnap.data();
-                }
-                return null;
-            } catch (error) {
-                console.error("Error getting user data:", error);
-                return null;
-            }
-        }
-
-        // ===== TOGGLE CREATE FORM =====
-        window.toggleCreateForm = function() {
-            createFormVisible = !createFormVisible;
-            const form = document.getElementById('createCommunityForm');
-            if (form) {
-                form.classList.toggle('visible', createFormVisible);
-            }
-        };
-
-        // ===== VIEW COMMUNITY (ENTER) =====
-        window.viewCommunity = async function(communityId) {
-            if (!currentUser) {
-                showToast("Please login first", "error", "Login Required");
-                return;
-            }
-
-            if (!joinedCommunityIds.includes(communityId)) {
-                showToast("You need to join this community first", "warning", "Not a Member");
-                return;
-            }
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                window.location.href = `community_detail.html?id=${communityId}`;
-
-            } catch (error) {
-                console.error("Error viewing community:", error);
-                showToast("Failed to load community", "error", "Error");
-            }
-        };
-
-        // ===== CREATE COMMUNITY =====
-        window.createCommunity = async function() {
-            if (!currentUser) {
-                showToast("Please login first", "error", "Login Required");
-                return;
-            }
-
-            const nameInput = document.getElementById('communityNameInput');
-            const descInput = document.getElementById('communityDescInput');
-            const typeSelect = document.getElementById('communityTypeSelect');
-            const name = nameInput.value.trim();
-            const description = descInput.value.trim();
-            const communityType = typeSelect.value || 'public';
-
-            if (!name) {
-                showToast("Please enter a community name", "warning", "Name Required");
-                nameInput.focus();
-                return;
-            }
-
-            if (name.length < 2) {
-                showToast("Community name must be at least 2 characters", "warning", "Too Short");
-                nameInput.focus();
-                return;
-            }
-
-            const btn = document.getElementById('createCommunityBtn');
-            btn.disabled = true;
-            btn.textContent = "Creating...";
-
-            try {
-                const isPrivate = communityType === 'private';
-                const communityData = {
-                    name: name,
-                    description: description || 'No description yet.',
-                    createdBy: currentUser.uid,
-                    createdAt: serverTimestamp(),
-                    members: [currentUser.uid],
-                    memberCount: 1,
-                    joinRequests: [],
-                    isPrivate: isPrivate,
-                    communityType: communityType,
-                    lastActivity: serverTimestamp(),
-                    coverImage: '',
-                    avatar: '',
-                    admins: [currentUser.uid],
-                    pendingRequests: 0,
-                    posts: 0,
-                    createdAtDate: new Date().toISOString(),
-                    rules: 'Be respectful and have fun!'
-                };
-
-                const docRef = await addDoc(collection(db, "communities"), communityData);
-
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, {
-                    joinedCommunities: arrayUnion(docRef.id)
-                });
-
-                joinedCommunityIds.push(docRef.id);
-
-                nameInput.value = '';
-                descInput.value = '';
-                typeSelect.value = 'public';
-                
-                // Hide the form after creation
-                createFormVisible = false;
-                document.getElementById('createCommunityForm').classList.remove('visible');
-                
-                showToast(`✨ Community "${name}" created successfully!`, "success", "Community Created");
-
-            } catch (error) {
-                console.error("Error creating community:", error);
-                showToast("Failed to create community", "error", "Error");
-            } finally {
-                btn.disabled = false;
-                btn.textContent = "+ Create Community";
-            }
-        };
-
-        // ===== JOIN COMMUNITY =====
-        window.joinCommunity = async function(communityId) {
-            if (!currentUser) {
-                showToast("Please login first", "error", "Login Required");
-                return;
-            }
-
-            if (joinedCommunityIds.includes(communityId)) {
-                showToast("You're already a member!", "warning", "Already Joined");
-                return;
-            }
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (communityData.isPrivate || communityData.communityType === 'private') {
-                    const requests = communityData.joinRequests || [];
-                    if (requests.includes(currentUser.uid)) {
-                        showToast("Join request already sent!", "warning", "Request Pending");
-                        return;
-                    }
-
-                    await updateDoc(communityRef, {
-                        joinRequests: arrayUnion(currentUser.uid),
-                        pendingRequests: increment(1)
-                    });
-                    showToast("Join request sent! Waiting for approval.", "success", "Request Sent");
-                    // Update the UI immediately
-                    filterCommunities();
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    members: arrayUnion(currentUser.uid),
-                    memberCount: increment(1)
-                });
-
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, {
-                    joinedCommunities: arrayUnion(communityId)
-                });
-
-                joinedCommunityIds.push(communityId);
-                showToast(`🎉 Joined "${communityData.name}"!`, "success", "Joined");
-
-            } catch (error) {
-                console.error("Error joining community:", error);
-                showToast("Failed to join community", "error", "Error");
-            }
-        };
-
-        // ===== LEAVE COMMUNITY =====
-        window.leaveCommunity = async function(communityId) {
-            if (!currentUser) return;
-
-            const confirmed = await showConfirmModal({
-                type: 'warning',
-                icon: '🚪',
-                title: 'Leave Community',
-                message: 'Are you sure you want to leave this community?',
-                details: 'You will lose access to all community content and conversations.',
-                confirmText: 'Leave',
-                confirmType: 'danger',
-                cancelText: 'Cancel'
-            });
-
-            if (!confirmed) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (communityData.createdBy === currentUser.uid) {
-                    showToast("You are the creator. You cannot leave, but you can delete the community.", "warning", "Creator");
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    members: arrayRemove(currentUser.uid),
-                    memberCount: increment(-1)
-                });
-
-                const userRef = doc(db, "users", currentUser.uid);
-                await updateDoc(userRef, {
-                    joinedCommunities: arrayRemove(communityId)
-                });
-
-                joinedCommunityIds = joinedCommunityIds.filter(id => id !== communityId);
-                showToast(`👋 Left "${communityData.name}"`, "warning", "Left Community");
-
-            } catch (error) {
-                console.error("Error leaving community:", error);
-                showToast("Failed to leave community", "error", "Error");
-            }
-        };
-
-        // ===== DELETE COMMUNITY =====
-        window.deleteCommunity = async function(communityId) {
-            if (!currentUser) return;
-
-            const confirmed = await showConfirmModal({
-                type: 'danger',
-                icon: '🗑️',
-                title: 'Delete Community',
-                message: 'Are you sure you want to permanently delete this community?',
-                details: 'This action cannot be undone. All community content will be lost.',
-                confirmText: 'Delete',
-                confirmType: 'danger',
-                cancelText: 'Cancel'
-            });
-
-            if (!confirmed) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (communityData.createdBy !== currentUser.uid && !communityData.admins?.includes(currentUser.uid) && !isAdmin) {
-                    showToast("You don't have permission to delete this community", "error", "Permission Denied");
-                    return;
-                }
-
-                const members = communityData.members || [];
-                for (const memberId of members) {
-                    try {
-                        const userRef = doc(db, "users", memberId);
-                        await updateDoc(userRef, {
-                            joinedCommunities: arrayRemove(communityId)
-                        });
-                    } catch (e) {
-                        console.warn("Could not remove community from user:", memberId);
-                    }
-                }
-
-                await deleteDoc(communityRef);
-                showToast(`🗑️ Community "${communityData.name}" deleted`, "error", "Deleted");
-
-            } catch (error) {
-                console.error("Error deleting community:", error);
-                showToast("Failed to delete community", "error", "Error");
-            }
-        };
-
-        // ===== APPROVE JOIN REQUEST =====
-        window.approveJoinRequest = async function(communityId, userId) {
-            if (!currentUser) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
-                    showToast("You don't have permission", "error", "Permission Denied");
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    joinRequests: arrayRemove(userId),
-                    members: arrayUnion(userId),
-                    memberCount: increment(1),
-                    pendingRequests: increment(-1)
-                });
-
-                const userRef = doc(db, "users", userId);
-                await updateDoc(userRef, {
-                    joinedCommunities: arrayUnion(communityId)
-                });
-
-                showToast("✅ Join request approved!", "success", "Approved");
-
-            } catch (error) {
-                console.error("Error approving join request:", error);
-                showToast("Failed to approve request", "error", "Error");
-            }
-        };
-
-        // ===== REJECT JOIN REQUEST =====
-        window.rejectJoinRequest = async function(communityId, userId) {
-            if (!currentUser) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
-                    showToast("You don't have permission", "error", "Permission Denied");
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    joinRequests: arrayRemove(userId),
-                    pendingRequests: increment(-1)
-                });
-
-                showToast("❌ Join request rejected", "warning", "Rejected");
-
-            } catch (error) {
-                console.error("Error rejecting join request:", error);
-                showToast("Failed to reject request", "error", "Error");
-            }
-        };
-
-        // ===== PROMOTE TO ADMIN =====
-        window.promoteToAdmin = async function(communityId, userId) {
-            if (!currentUser) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (communityData.createdBy !== currentUser.uid && !isAdmin) {
-                    showToast("Only the creator can promote admins", "error", "Permission Denied");
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    admins: arrayUnion(userId)
-                });
-
-                showToast("👑 User promoted to admin!", "success", "Promoted");
-
-            } catch (error) {
-                console.error("Error promoting user:", error);
-                showToast("Failed to promote user", "error", "Error");
-            }
-        };
-
-        // ===== DEMOTE ADMIN =====
-        window.demoteAdmin = async function(communityId, userId) {
-            if (!currentUser) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (communityData.createdBy !== currentUser.uid && !isAdmin) {
-                    showToast("Only the creator can demote admins", "error", "Permission Denied");
-                    return;
-                }
-
-                if (userId === communityData.createdBy) {
-                    showToast("Cannot demote the community creator", "warning", "Action Denied");
-                    return;
-                }
-
-                await updateDoc(communityRef, {
-                    admins: arrayRemove(userId)
-                });
-
-                showToast("🔽 Admin demoted", "warning", "Demoted");
-
-            } catch (error) {
-                console.error("Error demoting admin:", error);
-                showToast("Failed to demote admin", "error", "Error");
-            }
-        };
-
-        // ===== UPDATE COMMUNITY =====
-        window.updateCommunity = async function(communityId, data) {
-            if (!currentUser) return;
-
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-
-                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
-                    showToast("You don't have permission", "error", "Permission Denied");
-                    return;
-                }
-
-                await updateDoc(communityRef, data);
-                showToast("Community updated successfully!", "success", "Updated");
-
-            } catch (error) {
-                console.error("Error updating community:", error);
-                showToast("Failed to update community", "error", "Error");
-            }
-        };
-
-        // ===== SHOW COMMUNITY ADMIN PANEL =====
-        window.showCommunityAdmin = async function(communityId) {
-            try {
-                const communityRef = doc(db, "communities", communityId);
-                const communitySnap = await getDoc(communityRef);
-
-                if (!communitySnap.exists()) {
-                    showToast("Community not found", "error", "Error");
-                    return;
-                }
-
-                const communityData = communitySnap.data();
-                const joinRequests = communityData.joinRequests || [];
-
-                if (joinRequests.length === 0) {
-                    showToast("No pending join requests", "success", "All Clear");
-                    return;
-                }
-
-                let details = '📋 Pending Join Requests:\n\n';
-                for (const uid of joinRequests) {
-                    const user = await getUserData(uid);
-                    const name = user?.name || user?.displayName || uid;
-                    details += `• ${name}\n`;
-                }
-                details += `\nTotal: ${joinRequests.length} pending`;
-
-                const confirmed = await showConfirmModal({
-                    type: 'warning',
-                    icon: '👥',
-                    title: 'Manage Join Requests',
-                    message: 'Review and manage pending join requests.',
-                    details: details,
-                    confirmText: 'Approve All',
-                    confirmType: 'primary',
-                    cancelText: 'Close'
-                });
-
-                if (confirmed) {
-                    for (const uid of joinRequests) {
-                        try {
-                            const userRef = doc(db, "users", uid);
-                            await updateDoc(userRef, {
-                                joinedCommunities: arrayUnion(communityId)
-                            });
-                        } catch (e) {}
-                    }
-                    await updateDoc(communityRef, {
-                        members: arrayUnion(...joinRequests),
-                        memberCount: increment(joinRequests.length),
-                        joinRequests: [],
-                        pendingRequests: 0
-                    });
-                    showToast(`✅ Approved ${joinRequests.length} requests`, "success", "Approved");
-                }
-
-            } catch (error) {
-                console.error("Error showing community admin:", error);
-                showToast("Failed to load admin panel", "error", "Error");
-            }
-        };
-
-        // ===== RENDER COMMUNITIES =====
-        function renderCommunities(communities) {
-            const container = document.getElementById('communitiesList');
-            const emptyState = document.getElementById('emptyState');
-            const shimmer = document.getElementById('communityShimmer');
-
-            if (shimmer) shimmer.style.display = 'none';
-
-            if (!communities || communities.length === 0) {
-                container.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
-            }
-
-            emptyState.style.display = 'none';
-
-            let html = '';
-            communities.forEach(community => {
-                const isMember = joinedCommunityIds.includes(community.id);
-                const isCreator = community.createdBy === currentUser?.uid;
-                const isAdmin = community.admins?.includes(currentUser?.uid) || false;
-                const isPrivate = community.isPrivate || community.communityType === 'private';
-                const memberCount = community.memberCount || 0;
-                const name = community.name || 'Unnamed Community';
-                const description = community.description || 'No description yet.';
-                const memberAvatars = community.members || [];
-                const displayMembers = memberAvatars.slice(0, 3);
-                const moreCount = memberAvatars.length - 3;
-                const pendingRequests = community.pendingRequests || 0;
-
-                const avatarLetter = name.charAt(0).toUpperCase();
-
-                let memberAvatarsHTML = '';
-                if (displayMembers.length > 0) {
-                    displayMembers.forEach(uid => {
-                        const initial = uid.charAt(0).toUpperCase();
-                        memberAvatarsHTML += `
-                            <div class="mini-avatar">${initial}</div>
-                        `;
-                    });
-                    if (moreCount > 0) {
-                        memberAvatarsHTML += `<span class="more-count">+${moreCount}</span>`;
-                    }
-                }
-
-                let actionHTML = '';
-                if (isMember) {
-                    actionHTML = `
-                        <button class="action-btn joined" onclick="event.stopPropagation(); leaveCommunity('${community.id}')">✅ Joined</button>
-                        ${isCreator || isAdmin ? `
-                            <button class="action-btn admin-btn" onclick="event.stopPropagation(); showCommunityAdmin('${community.id}')">🛡️ Admin</button>
-                            <button class="action-btn delete-btn" onclick="event.stopPropagation(); deleteCommunity('${community.id}')">🗑️ Delete</button>
-                        ` : ''}
-                    `;
-                } else {
-                    if (isPrivate) {
-                        const hasRequested = community.joinRequests?.includes(currentUser?.uid) || false;
-                        if (hasRequested) {
-                            actionHTML = `<button class="action-btn pending" onclick="event.stopPropagation();">⏳ Pending Request</button>`;
-                        } else {
-                            actionHTML = `<button class="action-btn" onclick="event.stopPropagation(); joinCommunity('${community.id}')">🔒 Request to Join</button>`;
-                        }
-                    } else {
-                        actionHTML = `<button class="action-btn" onclick="event.stopPropagation(); joinCommunity('${community.id}')">➕ Join</button>`;
-                    }
-                }
-
-                let adminBadge = '';
-                if (isCreator) adminBadge = `<span class="creator-tag">👑 Creator</span>`;
-                else if (isAdmin) adminBadge = `<span class="admin-tag">🛡️ Admin</span>`;
-
-                let pendingBadge = '';
-                if ((isCreator || isAdmin) && pendingRequests > 0) {
-                    pendingBadge = `<span class="badge-count" style="background:rgba(245,158,11,0.15);color:var(--warning);">${pendingRequests} pending</span>`;
-                }
-
-                html += `
-                    <div class="community-card" onclick="viewCommunity('${community.id}')">
-                        <span class="enter-hint">▶ Click to enter</span>
-                        <div class="community-header-row">
-                            <div class="community-avatar">${avatarLetter}</div>
-                            <div class="community-info">
-                                <div class="community-name">
-                                    ${name}
-                                    <span class="community-type ${isPrivate ? 'private' : ''}">${isPrivate ? '🔒 Private' : '🌍 Public'}</span>
-                                    ${pendingBadge}
-                                </div>
-                                <div class="community-meta">
-                                    <span>👥 ${memberCount} members</span>
-                                    ${adminBadge ? `<span>${adminBadge}</span>` : ''}
-                                    ${community.createdAtDate ? `<span>📅 ${new Date(community.createdAtDate).toLocaleDateString()}</span>` : ''}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="community-description">${description}</div>
-                        ${memberAvatarsHTML ? `<div class="member-avatars">${memberAvatarsHTML}</div>` : ''}
-                        <div class="community-actions" onclick="event.stopPropagation();">
-                            ${actionHTML}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // ===== FILTER COMMUNITIES =====
-        function filterCommunities() {
-            let filtered = [...allCommunities];
-            const search = document.getElementById('searchCommunities').value.toLowerCase();
-            searchTerm = search;
-
-            if (search) {
-                filtered = filtered.filter(g =>
-                    g.name?.toLowerCase().includes(search) ||
-                    g.description?.toLowerCase().includes(search)
-                );
-            }
-
-            if (currentTab === 'joined') {
-                filtered = filtered.filter(g => joinedCommunityIds.includes(g.id));
-            } else if (currentTab === 'created') {
-                filtered = filtered.filter(g => g.createdBy === currentUser?.uid);
-            } else if (currentTab === 'admin') {
-                filtered = filtered.filter(g => g.admins?.includes(currentUser?.uid) || g.createdBy === currentUser?.uid);
-            }
-
-            renderCommunities(filtered);
-        }
-
-        // ===== UPDATE TABS =====
-        function updateTabs() {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.tab === currentTab);
-            });
-
-            const totalCount = allCommunities.length;
-            const joinedCount = allCommunities.filter(g => joinedCommunityIds.includes(g.id)).length;
-            const createdCount = allCommunities.filter(g => g.createdBy === currentUser?.uid).length;
-            const adminCount = allCommunities.filter(g => g.admins?.includes(currentUser?.uid) || g.createdBy === currentUser?.uid).length;
-
-            document.getElementById('tabAllCount').textContent = totalCount;
-            document.getElementById('tabJoinedCount').textContent = joinedCount;
-            document.getElementById('tabCreatedCount').textContent = createdCount;
-            document.getElementById('tabAdminCount').textContent = adminCount;
-
-            filterCommunities();
-        }
-
-        // ===== LISTEN TO COMMUNITIES =====
-        function listenCommunities() {
-            if (unsubscribeCommunities) unsubscribeCommunities();
-
-            const q = query(collection(db, "communities"), orderBy("createdAt", "desc"));
-
-            unsubscribeCommunities = onSnapshot(q, (snapshot) => {
-                const communities = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    communities.push({ ...data, id: doc.id });
-                });
-                allCommunities = communities;
-                updateTabs();
-            }, (error) => {
-                console.error("Communities listener error:", error);
-                showToast("Error loading communities", "error", "Database Error");
-            });
-        }
-
-        // ===== LOAD USER'S JOINED COMMUNITIES =====
-        async function loadJoinedCommunities() {
-            if (!currentUser) return;
-
-            try {
-                const userRef = doc(db, "users", currentUser.uid);
-                const userSnap = await getDoc(userRef);
-
-                if (userSnap.exists()) {
-                    const data = userSnap.data();
-                    userData = data;
-                    joinedCommunityIds = data.joinedCommunities || [];
-                }
-            } catch (error) {
-                console.error("Error loading joined communities:", error);
-            }
-        }
-
-        // ===== SEARCH INPUT HANDLING =====
-        document.getElementById('searchCommunities').addEventListener('input', function() {
-            const clearBtn = document.getElementById('searchClear');
-            if (this.value.length > 0) {
-                clearBtn.classList.add('visible');
-            } else {
-                clearBtn.classList.remove('visible');
-            }
-            filterCommunities();
-        });
-
-        document.getElementById('searchClear').addEventListener('click', function() {
-            const input = document.getElementById('searchCommunities');
-            input.value = '';
-            this.classList.remove('visible');
-            filterCommunities();
-            input.focus();
-        });
-
-        // ===== TAB SWITCHING =====
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                currentTab = this.dataset.tab;
-                updateTabs();
-            });
-        });
-
-        // ===== KEYBOARD SHORTCUT =====
-        document.getElementById('communityNameInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('createCommunityBtn').click();
-            }
-        });
-
-        // ===== AUTH =====
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                if (currentUserUid) updateUserOnlineStatus(false);
-                window.location.href = "index.html";
-                return;
-            }
-
-            currentUser = user;
-            currentUserUid = user.uid;
-            // Set online
-            updateUserOnlineStatus(true);
-
-            isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
-
-            const adminLink = document.getElementById('adminNavLink');
-            if (isAdmin) {
-                adminLink.classList.add('visible');
-            }
-
-            await loadJoinedCommunities();
-            listenCommunities();
-
-            updateNotificationBadge();
-
-            console.log('👥 Community page loaded');
-            console.log('👤 User:', user.email);
-            console.log('📚 Joined communities:', joinedCommunityIds.length);
-            console.log('👑 Admin:', isAdmin);
-            console.log('🔒 Create Community is HIDDEN - Click the secret button to reveal!');
-        });
-
-        // ===== ONLINE STATUS: beforeunload & visibility =====
-        window.addEventListener('beforeunload', () => {
-            if (currentUserUid) updateUserOnlineStatus(false);
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (currentUserUid) updateUserOnlineStatus(false);
-            } else {
-                if (currentUserUid) updateUserOnlineStatus(true);
-            }
-        });
-
-        // ===== NOTIFICATION BADGE =====
-        function updateNotificationBadge() {
-            if (!currentUser) return;
-            const badge = document.getElementById('notifBadge');
-            if (!badge) return;
-            const notifRef = collection(db, "users", currentUser.uid, "notifications");
-            onSnapshot(notifRef, (snapshot) => {
-                const unread = snapshot.docs.filter(d => !d.data().read).length;
-                if (unread > 0) {
-                    badge.textContent = unread > 99 ? '99+' : unread;
-                    badge.classList.add('active');
-                } else {
-                    badge.classList.remove('active');
-                }
-            });
-        }
-
-        // ===== EXPOSE FUNCTIONS =====
-        window.createCommunity = createCommunity;
-        window.joinCommunity = joinCommunity;
-        window.leaveCommunity = leaveCommunity;
-        window.deleteCommunity = deleteCommunity;
-        window.approveJoinRequest = approveJoinRequest;
-        window.rejectJoinRequest = rejectJoinRequest;
-        window.promoteToAdmin = promoteToAdmin;
-        window.demoteAdmin = demoteAdmin;
-        window.updateCommunity = updateCommunity;
-        window.showCommunityAdmin = showCommunityAdmin;
-        window.viewCommunity = viewCommunity;
-        window.toggleCreateForm = toggleCreateForm;
-        window.goToFeed = goToFeed;
-        window.goToFriends = goToFriends;
-        window.goToMessages = goToMessages;
-        window.goToNotifications = goToNotifications;
-        window.goToProfile = goToProfile;
-        window.goToAdmin = goToAdmin;
-        window.goToSettings = goToSettings;
-        window.showToast = showToast;
-        window.dismissToast = dismissToast;
-        window.handleConfirm = handleConfirm;
-        window.handleCancel = handleCancel;
-
-        console.log('👥 SPIKE Community page loaded with UNIFIED ONLINE STATUS!');
-        console.log('🔐 Click the invisible button at bottom-right to create a community');
-    </script>
+    <!-- ===== RINGTONES ===== -->
+    <audio id="incomingRingtone" preload="auto">
+        <source src="assets/ringtone.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="outgoingRingtone" preload="auto">
+        <source src="assets/ring.mp3" type="audio/mpeg">
+    </audio>
 </head>
 <body>
 
@@ -1989,6 +1508,71 @@
 
     </main>
 
+    <!-- ================================================================
+    CALL OVERLAYS
+    ================================================================ -->
+    <!-- Incoming Call Overlay -->
+    <div id="incomingCallOverlay" class="call-overlay">
+        <div class="call-card">
+            <div id="incomingAvatar" class="call-avatar"></div>
+            <div id="incomingName" class="call-name">Caller</div>
+            <div id="incomingSub" class="call-sub">Incoming call…</div>
+            <div class="call-actions">
+                <button id="declineBtn" class="call-btn decline">✕</button>
+                <button id="acceptBtn" class="call-btn accept">✓</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ringing Overlay (caller) -->
+    <div id="ringingOverlay" class="ringing-overlay">
+        <div class="ringing-card">
+            <div id="ringingAvatar" class="ringing-avatar"></div>
+            <div id="ringingName" class="ringing-name">Calling...</div>
+            <div id="ringingStatus" class="ringing-status">Ringing…</div>
+            <button id="cancelCallBtn" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Active Call Overlay -->
+    <div id="activeCallOverlay" class="active-call-overlay">
+        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+        <div class="local-video-wrapper" id="localVideoWrapper">
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="quality-indicator" id="qualityIndicator">
+            <span id="qualityDot" class="quality-dot good"></span>
+            <span id="qualityText">Good</span>
+        </div>
+        <div class="call-top-bar">
+            <div id="callStatusBadge" class="call-status">Connected</div>
+            <div style="display:flex;gap:8px;">
+                <span style="background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:12px;font-size:0.7rem;color:var(--text-muted);">🔒 Encrypted</span>
+            </div>
+        </div>
+        <div class="call-center-info" id="callCenterInfo">
+            <div id="callerAvatarLarge" class="caller-avatar" style="display:none;"></div>
+            <div id="activeCallerName" class="caller-name">User</div>
+            <div id="activeCallTimer" class="call-timer">00:00</div>
+        </div>
+        <div class="call-controls">
+            <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
+            <button id="callVideoBtn" class="ctrl-btn" title="Camera">📷</button>
+            <button id="callEndBtn" class="ctrl-btn end-call" title="End Call">📞</button>
+            <button id="callSpeakerBtn" class="ctrl-btn" title="Speaker">🔊</button>
+            <button id="callFlipBtn" class="ctrl-btn" title="Flip Camera">🔄</button>
+        </div>
+    </div>
+
+    <!-- Permission Overlay -->
+    <div id="permissionOverlay" class="permission-overlay">
+        <div class="permission-card">
+            <h2 id="permTitle">🎤 Microphone Access</h2>
+            <p id="permDesc">This call requires microphone access. Please grant permission.</p>
+            <button id="retryPermissionBtn" class="permission-btn">Allow Access</button>
+        </div>
+    </div>
+
     <!-- ===== TOAST ===== -->
     <div id="globalToast" class="toast-container">
         <div class="toast-content">
@@ -2019,6 +1603,1832 @@
     <footer class="feed-footer">
         <p>&copy; 2026 SPIKE. All rights reserved.</p>
     </footer>
+
+    <script type="module">
+        // ============================================================
+        // COMMUNITY.JS - Complete Community Management + UNIFIED ONLINE STATUS + CALLS
+        // ============================================================
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import {
+            getFirestore,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            updateDoc,
+            deleteDoc,
+            setDoc,
+            onSnapshot,
+            query,
+            orderBy,
+            where,
+            addDoc,
+            serverTimestamp,
+            arrayUnion,
+            arrayRemove,
+            increment
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
+            authDomain: "grazzy-9e736.firebaseapp.com",
+            projectId: "grazzy-9e736",
+            storageBucket: "grazzy-9e736.firebasestorage.app",
+            messagingSenderId: "750326949170",
+            appId: "1:750326949170:web:5d19744aafc8675918632b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentUserUid = null;
+        let toastTimeout = null;
+        let pendingConfirm = null;
+        let unsubscribeCommunities = null;
+        let allCommunities = [];
+        let joinedCommunityIds = [];
+        let currentTab = 'all';
+        let userData = {};
+        let isAdmin = false;
+        let createFormVisible = false;
+        let searchTerm = '';
+        const ADMIN_EMAILS = ["eletexjoeytex@gmail.com"];
+
+        // ================================================================
+        // CALL STATE (copied from chat_room.html)
+        // ================================================================
+        let localStream = null;
+        let peerConnection = null;
+        let callDocRef = null;
+        let callUnsubscribers = [];
+        let isCaller = false;
+        let isCallActive = false;
+        let isCallEnding = false;
+        let callTimerInterval = null;
+        let qualityMonitorInterval = null;
+        let wakeLock = null;
+        let isVideoCall = false;
+        let currentFacingMode = "user";
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT = 3;
+        let isReconnecting = false;
+        let remoteStream = null;
+        let callTimeoutId = null;
+        let currentCallData = null;
+
+        const servers = {
+            iceServers: [
+                { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
+                { urls: 'stun:stun.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10
+        };
+
+        // ---- Ringtone helpers ----
+        const incomingRing = document.getElementById('incomingRingtone');
+        const outgoingRing = document.getElementById('outgoingRingtone');
+
+        function playIncomingRingtone() {
+            if (!incomingRing) return;
+            try {
+                incomingRing.currentTime = 0;
+                const playPromise = incomingRing.play();
+                if (playPromise) playPromise.catch(() => {});
+            } catch (e) {}
+        }
+        function stopIncomingRingtone() {
+            if (incomingRing) { incomingRing.pause(); incomingRing.currentTime = 0; }
+        }
+        function playOutgoingRingtone() {
+            if (!outgoingRing) return;
+            try {
+                outgoingRing.currentTime = 0;
+                const playPromise = outgoingRing.play();
+                if (playPromise) playPromise.catch(() => {});
+            } catch (e) {}
+        }
+        function stopOutgoingRingtone() {
+            if (outgoingRing) { outgoingRing.pause(); outgoingRing.currentTime = 0; }
+        }
+
+        // ---- Permission UI ----
+        function showPermissionUI(needVideo = false) {
+            const overlay = document.getElementById('permissionOverlay');
+            const title = document.getElementById('permTitle');
+            const desc = document.getElementById('permDesc');
+            if (needVideo) {
+                title.textContent = '📹 Camera & Mic Access';
+                desc.textContent = 'This video call requires camera and microphone access. Please grant permission.';
+            } else {
+                title.textContent = '🎤 Microphone Access';
+                desc.textContent = 'This voice call requires microphone access. Please grant permission.';
+            }
+            overlay.classList.add('active');
+        }
+        function hidePermissionUI() {
+            document.getElementById('permissionOverlay').classList.remove('active');
+        }
+
+        async function requestMedia(needVideo = false) {
+            try {
+                const constraints = {
+                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    video: needVideo ? { facingMode: currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } } : false
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                hidePermissionUI();
+                return stream;
+            } catch (err) {
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    showToast('Please allow media access in browser settings', 'error');
+                    showPermissionUI(needVideo);
+                } else if (err.name === 'NotFoundError') {
+                    showToast(needVideo ? 'No camera or microphone found' : 'No microphone found', 'error');
+                } else {
+                    showToast('Media error: ' + err.message, 'error');
+                }
+                throw err;
+            }
+        }
+
+        // ---- Wake Lock ----
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (e) {}
+        }
+        function releaseWakeLock() {
+            if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        }
+
+        // ---- Call Timer ----
+        function startCallTimer() {
+            if (callTimerInterval) return;
+            let seconds = 0;
+            callTimerInterval = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('activeCallTimer').textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            }, 1000);
+        }
+        function stopCallTimer() {
+            if (callTimerInterval) {
+                clearInterval(callTimerInterval);
+                callTimerInterval = null;
+            }
+        }
+
+        // ---- Quality Monitor ----
+        function monitorConnectionQuality() {
+            if (!peerConnection) return;
+            if (qualityMonitorInterval) clearInterval(qualityMonitorInterval);
+            qualityMonitorInterval = setInterval(async () => {
+                try {
+                    if (!peerConnection || peerConnection.connectionState === 'closed') return;
+                    const stats = await peerConnection.getStats();
+                    let packetsLost = 0, totalPackets = 0, jitter = 0;
+                    stats.forEach(stat => {
+                        if (stat.type === 'inbound-rtp' && stat.kind === (isVideoCall ? 'video' : 'audio')) {
+                            packetsLost = stat.packetsLost || 0;
+                            totalPackets = stat.packetsReceived + packetsLost;
+                            jitter = stat.jitter || 0;
+                        }
+                    });
+                    if (totalPackets > 0) {
+                        const loss = packetsLost / totalPackets;
+                        const dot = document.getElementById('qualityDot');
+                        const text = document.getElementById('qualityText');
+                        const indicator = document.getElementById('qualityIndicator');
+                        if (loss < 0.01 && jitter < 20) {
+                            dot.className = 'quality-dot good';
+                            text.textContent = 'Good';
+                        } else if (loss < 0.05 && jitter < 50) {
+                            dot.className = 'quality-dot poor';
+                            text.textContent = 'Fair';
+                        } else {
+                            dot.className = 'quality-dot bad';
+                            text.textContent = 'Poor';
+                        }
+                        indicator.classList.add('visible');
+                    }
+                } catch (e) {}
+            }, 5000);
+        }
+
+        // ---- Audio Output ----
+        async function setAudioOutput(useSpeaker) {
+            const remoteVideo = document.getElementById('remoteVideo');
+            if (typeof remoteVideo.setSinkId === 'function') {
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const outputs = devices.filter(d => d.kind === 'audiooutput');
+                    if (outputs.length > 1) {
+                        const id = useSpeaker ?
+                            outputs.find(d => d.label.toLowerCase().includes('speaker'))?.deviceId || outputs[1].deviceId :
+                            outputs.find(d => d.label.toLowerCase().includes('earpiece'))?.deviceId || outputs[0].deviceId;
+                        if (id) await remoteVideo.setSinkId(id);
+                    }
+                } catch (e) {}
+            }
+        }
+
+        // ---- Reset / Cleanup ----
+        function resetCallResources() {
+            callUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
+            callUnsubscribers = [];
+            stopCallTimer();
+            if (qualityMonitorInterval) {
+                clearInterval(qualityMonitorInterval);
+                qualityMonitorInterval = null;
+            }
+            if (callTimeoutId) {
+                clearTimeout(callTimeoutId);
+                callTimeoutId = null;
+            }
+            if (peerConnection) {
+                try { peerConnection.close(); } catch (e) {}
+                peerConnection = null;
+            }
+            isReconnecting = false;
+            reconnectAttempts = 0;
+            currentCallData = null;
+        }
+
+        function cleanupCall() {
+            resetCallResources();
+            if (localStream) {
+                localStream.getTracks().forEach(t => t.stop());
+                localStream = null;
+            }
+            releaseWakeLock();
+            document.getElementById('remoteVideo').srcObject = null;
+            document.getElementById('localVideo').srcObject = null;
+            stopIncomingRingtone();
+            stopOutgoingRingtone();
+            isCallActive = false;
+            isCallEnding = false;
+            document.getElementById('incomingCallOverlay').classList.remove('active');
+            document.getElementById('ringingOverlay').classList.remove('active');
+            document.getElementById('activeCallOverlay').classList.remove('active');
+            document.getElementById('activeCallOverlay').classList.remove('audio-only');
+            document.getElementById('activeCallTimer').textContent = '00:00';
+            document.getElementById('callStatusBadge').textContent = 'Connected';
+            document.getElementById('callStatusBadge').className = 'call-status';
+        }
+
+        async function endCall(reason = 'ended') {
+            if (isCallEnding) return;
+            isCallEnding = true;
+            if (callDocRef) {
+                try {
+                    await updateDoc(callDocRef, {
+                        status: 'ended',
+                        endedAt: serverTimestamp(),
+                        endReason: reason
+                    });
+                } catch (e) {}
+            }
+            cleanupCall();
+            showToast('Call ended', 'success');
+        }
+
+        // ---- Reconnect ----
+        async function reconnectCall() {
+            if (isReconnecting || isCallEnding) return;
+            if (reconnectAttempts >= MAX_RECONNECT) {
+                showToast('Call ended due to connection issues', 'error');
+                endCall('reconnect_failed');
+                return;
+            }
+            resetCallResources();
+            isReconnecting = true;
+            reconnectAttempts++;
+            showToast(`Reconnecting (${reconnectAttempts}/${MAX_RECONNECT})…`, 'info');
+
+            try {
+                peerConnection = new RTCPeerConnection(servers);
+                if (localStream) {
+                    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+                }
+
+                const offerCandidates = collection(callDocRef, 'offerCandidates');
+                const answerCandidates = collection(callDocRef, 'answerCandidates');
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        const col = isCaller ? offerCandidates : answerCandidates;
+                        addDoc(col, event.candidate.toJSON()).catch(() => {});
+                    }
+                };
+                peerConnection.ontrack = (event) => {
+                    remoteStream = event.streams[0];
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                    if (!callTimerInterval) startCallTimer();
+                    const badge = document.getElementById('callStatusBadge');
+                    badge.textContent = 'Reconnected';
+                    badge.className = 'call-status';
+                    requestWakeLock();
+                    monitorConnectionQuality();
+                };
+                peerConnection.onconnectionstatechange = () => {
+                    if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                        if (!isCallEnding && !isReconnecting) handleDisconnection();
+                    }
+                };
+
+                const callSnap = await getDoc(callDocRef);
+                const data = callSnap.data();
+                if (isCaller) {
+                    const offer = await peerConnection.createOffer();
+                    await peerConnection.setLocalDescription(offer);
+                    await updateDoc(callDocRef, { offer: { type: offer.type, sdp: offer.sdp } });
+                } else {
+                    if (data.offer) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        await updateDoc(callDocRef, { answer: { type: answer.type, sdp: answer.sdp } });
+                    }
+                }
+                isReconnecting = false;
+                const badge = document.getElementById('callStatusBadge');
+                badge.textContent = 'Connected';
+                showToast('Call reconnected', 'success');
+            } catch (err) {
+                console.warn('Reconnect error:', err);
+                isReconnecting = false;
+                if (reconnectAttempts < MAX_RECONNECT) {
+                    setTimeout(() => reconnectCall(), 2000);
+                } else {
+                    endCall('reconnect_failed');
+                }
+            }
+        }
+
+        function handleDisconnection() {
+            if (isCallEnding || isReconnecting) return;
+            const badge = document.getElementById('callStatusBadge');
+            badge.textContent = 'Connection lost';
+            badge.className = 'call-status error';
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+            setTimeout(() => {
+                if (!isCallEnding) reconnectCall();
+            }, 2000);
+        }
+
+        // ---- Start Call (caller) ----
+        async function startCall(calleeId, calleeName, video = false) {
+            if (!currentUser) return;
+            if (!localStream) {
+                try {
+                    localStream = await requestMedia(video);
+                    if (!localStream) return;
+                } catch (e) { return; }
+            }
+            isCaller = true;
+            isVideoCall = video;
+            callDocRef = doc(collection(db, 'calls'));
+
+            let callerName = currentUser.displayName || 'User';
+            let callerPhoto = '';
+            try {
+                const mySnap = await getDoc(doc(db, 'users', currentUser.uid));
+                if (mySnap.exists()) {
+                    const data = mySnap.data();
+                    callerName = data.name || data.displayName || callerName;
+                    callerPhoto = data.photoURL || data.avatar || '';
+                }
+            } catch (e) {}
+
+            await setDoc(callDocRef, {
+                callerId: currentUser.uid,
+                calleeId: calleeId,
+                calleeName: calleeName,
+                callerName: callerName,
+                callerPhoto: callerPhoto,
+                isVideo: video,
+                status: 'ringing',
+                createdAt: serverTimestamp()
+            });
+
+            currentCallData = { callerName, callerPhoto, isVideo: video };
+
+            const ringingOverlay = document.getElementById('ringingOverlay');
+            ringingOverlay.classList.add('active');
+            const initials = calleeName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('ringingAvatar').textContent = initials;
+            document.getElementById('ringingName').textContent = calleeName;
+            document.getElementById('ringingStatus').textContent = 'Ringing…';
+            playOutgoingRingtone();
+
+            callTimeoutId = setTimeout(async () => {
+                if (callDocRef) {
+                    await updateDoc(callDocRef, { status: 'ended', endReason: 'timeout' });
+                }
+                stopOutgoingRingtone();
+                ringingOverlay.classList.remove('active');
+                showToast('Call timed out', 'error');
+                cleanupCall();
+            }, 30000);
+
+            const unsub = onSnapshot(callDocRef, (snap) => {
+                const data = snap.data();
+                if (!data) return;
+                if (data.status === 'active') {
+                    if (callTimeoutId) {
+                        clearTimeout(callTimeoutId);
+                        callTimeoutId = null;
+                    }
+                    stopOutgoingRingtone();
+                    ringingOverlay.classList.remove('active');
+                    initiateWebRTCAsCaller();
+                } else if (data.status === 'ended') {
+                    stopOutgoingRingtone();
+                    ringingOverlay.classList.remove('active');
+                    if (callTimeoutId) {
+                        clearTimeout(callTimeoutId);
+                        callTimeoutId = null;
+                    }
+                    const reason = data.endReason || 'ended';
+                    let msg = 'Call ended';
+                    if (reason === 'declined') msg = 'Call declined';
+                    else if (reason === 'cancelled') msg = 'Call cancelled';
+                    else if (reason === 'timeout') msg = 'Call timed out';
+                    else if (reason === 'busy') msg = 'User is busy';
+                    else if (reason === 'reconnect_failed') msg = 'Connection lost';
+                    showToast(msg, 'info');
+                    cleanupCall();
+                }
+            });
+            callUnsubscribers.push(unsub);
+
+            document.getElementById('cancelCallBtn').onclick = async () => {
+                if (callDocRef) {
+                    await updateDoc(callDocRef, { status: 'ended', endReason: 'cancelled' });
+                }
+                stopOutgoingRingtone();
+                ringingOverlay.classList.remove('active');
+                if (callTimeoutId) {
+                    clearTimeout(callTimeoutId);
+                    callTimeoutId = null;
+                }
+                cleanupCall();
+                showToast('Call cancelled', 'info');
+            };
+        }
+
+        async function initiateWebRTCAsCaller() {
+            if (peerConnection) return;
+            peerConnection = new RTCPeerConnection(servers);
+            if (localStream) {
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            }
+
+            const offerCandidates = collection(callDocRef, 'offerCandidates');
+            const answerCandidates = collection(callDocRef, 'answerCandidates');
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(offerCandidates, event.candidate.toJSON()).catch(() => {});
+                }
+            };
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+                startCallTimer();
+                const badge = document.getElementById('callStatusBadge');
+                badge.textContent = 'Connected';
+                badge.className = 'call-status';
+                requestWakeLock();
+                monitorConnectionQuality();
+                showActiveCallUI();
+            };
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                    if (!isCallEnding) handleDisconnection();
+                }
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            await updateDoc(callDocRef, {
+                offer: { type: offer.type, sdp: offer.sdp }
+            });
+
+            const unsub = onSnapshot(callDocRef, (snap) => {
+                const data = snap.data();
+                if (!data) return;
+                if (data.answer && !peerConnection.currentRemoteDescription) {
+                    const answer = new RTCSessionDescription(data.answer);
+                    peerConnection.setRemoteDescription(answer);
+                }
+                if (data.status === 'ended' && !isCallEnding) {
+                    endCall('remote_ended');
+                }
+            });
+            callUnsubscribers.push(unsub);
+
+            const unsubCand = onSnapshot(answerCandidates, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added' && peerConnection) {
+                        try {
+                            peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                        } catch (e) {}
+                    }
+                });
+            });
+            callUnsubscribers.push(unsubCand);
+        }
+
+        // ---- Join Call (receiver) ----
+        async function joinCall(callId, callData) {
+            if (isCallActive || isCallEnding) {
+                try {
+                    const callRef = doc(db, 'calls', callId);
+                    await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
+                } catch (e) {}
+                return;
+            }
+
+            if (!localStream) {
+                try {
+                    localStream = await requestMedia(callData.isVideo || false);
+                    if (!localStream) return;
+                } catch (e) { return; }
+            }
+            isCaller = false;
+            isVideoCall = callData.isVideo || false;
+            callDocRef = doc(db, 'calls', callId);
+            currentCallData = {
+                callerName: callData.callerName || 'Caller',
+                callerPhoto: callData.callerPhoto || '',
+                isVideo: callData.isVideo || false
+            };
+
+            const callerName = currentCallData.callerName;
+            const callerPhoto = currentCallData.callerPhoto;
+            document.getElementById('incomingName').textContent = callerName;
+            const avatar = document.getElementById('incomingAvatar');
+            if (callerPhoto) {
+                avatar.innerHTML = `<img src="${callerPhoto}" alt="${callerName}">`;
+            } else {
+                avatar.textContent = getInitials(callerName);
+            }
+            document.getElementById('incomingSub').textContent = isVideoCall ? 'Incoming video call…' : 'Incoming voice call…';
+            document.getElementById('incomingCallOverlay').classList.add('active');
+            playIncomingRingtone();
+
+            document.getElementById('acceptBtn').onclick = async () => {
+                stopIncomingRingtone();
+                document.getElementById('incomingCallOverlay').classList.remove('active');
+                await updateDoc(callDocRef, { status: 'active' });
+                initiateWebRTCAsReceiver();
+            };
+
+            document.getElementById('declineBtn').onclick = async () => {
+                stopIncomingRingtone();
+                document.getElementById('incomingCallOverlay').classList.remove('active');
+                await updateDoc(callDocRef, { status: 'ended', endReason: 'declined' });
+                showToast('Call declined', 'info');
+                cleanupCall();
+            };
+
+            const unsub = onSnapshot(callDocRef, (snap) => {
+                const data = snap.data();
+                if (!data) return;
+                if (data.status === 'ended') {
+                    stopIncomingRingtone();
+                    document.getElementById('incomingCallOverlay').classList.remove('active');
+                    const reason = data.endReason || 'ended';
+                    let msg = 'Call ended';
+                    if (reason === 'cancelled') msg = 'Caller cancelled';
+                    else if (reason === 'timeout') msg = 'Call timed out';
+                    else if (reason === 'busy') msg = 'User busy';
+                    showToast(msg, 'info');
+                    cleanupCall();
+                }
+            });
+            callUnsubscribers.push(unsub);
+        }
+
+        async function initiateWebRTCAsReceiver() {
+            if (peerConnection) return;
+            peerConnection = new RTCPeerConnection(servers);
+            if (localStream) {
+                localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+            }
+
+            const offerCandidates = collection(callDocRef, 'offerCandidates');
+            const answerCandidates = collection(callDocRef, 'answerCandidates');
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    addDoc(answerCandidates, event.candidate.toJSON()).catch(() => {});
+                }
+            };
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+                startCallTimer();
+                const badge = document.getElementById('callStatusBadge');
+                badge.textContent = 'Connected';
+                badge.className = 'call-status';
+                requestWakeLock();
+                monitorConnectionQuality();
+                showActiveCallUI();
+            };
+            peerConnection.onconnectionstatechange = () => {
+                if (peerConnection.connectionState === 'disconnected' || peerConnection.connectionState === 'failed') {
+                    if (!isCallEnding) handleDisconnection();
+                }
+            };
+
+            const unsub = onSnapshot(callDocRef, (snap) => {
+                const data = snap.data();
+                if (!data) return;
+                if (data.offer && !peerConnection.currentRemoteDescription) {
+                    const offer = new RTCSessionDescription(data.offer);
+                    peerConnection.setRemoteDescription(offer).then(async () => {
+                        const answer = await peerConnection.createAnswer();
+                        await peerConnection.setLocalDescription(answer);
+                        await updateDoc(callDocRef, {
+                            answer: { type: answer.type, sdp: answer.sdp }
+                        });
+                    });
+                }
+                if (data.status === 'ended' && !isCallEnding) {
+                    endCall('remote_ended');
+                }
+            });
+            callUnsubscribers.push(unsub);
+
+            const unsubCand = onSnapshot(offerCandidates, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added' && peerConnection) {
+                        try {
+                            peerConnection.addIceCandidate(new RTCIceCandidate(change.doc.data()));
+                        } catch (e) {}
+                    }
+                });
+            });
+            callUnsubscribers.push(unsubCand);
+        }
+
+        // ---- Show Active Call UI ----
+        function showActiveCallUI() {
+            isCallActive = true;
+            document.getElementById('incomingCallOverlay').classList.remove('active');
+            document.getElementById('ringingOverlay').classList.remove('active');
+            const overlay = document.getElementById('activeCallOverlay');
+            overlay.classList.add('active');
+
+            const displayName = currentCallData ? currentCallData.callerName : 'User';
+            const isVideo = currentCallData ? currentCallData.isVideo : false;
+
+            if (!isVideo) {
+                overlay.classList.add('audio-only');
+                const initials = displayName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
+                const avatarLarge = document.getElementById('callerAvatarLarge');
+                avatarLarge.style.display = 'flex';
+                avatarLarge.textContent = initials;
+                document.getElementById('activeCallerName').textContent = displayName;
+                document.getElementById('remoteVideo').style.display = 'none';
+                document.getElementById('localVideoWrapper').style.display = 'none';
+            } else {
+                overlay.classList.remove('audio-only');
+                document.getElementById('remoteVideo').style.display = 'block';
+                document.getElementById('localVideoWrapper').style.display = 'block';
+                if (localStream) {
+                    document.getElementById('localVideo').srcObject = localStream;
+                }
+                document.getElementById('activeCallerName').textContent = displayName;
+            }
+
+            setupCallControls();
+        }
+
+        // ---- Call Controls ----
+        let isMuted = false;
+        let isVideoOff = false;
+        let isSpeakerOn = false;
+
+        function setupCallControls() {
+            document.getElementById('callMuteBtn').onclick = () => {
+                if (!localStream) return;
+                const track = localStream.getAudioTracks()[0];
+                if (track) {
+                    isMuted = !isMuted;
+                    track.enabled = !isMuted;
+                    document.getElementById('callMuteBtn').classList.toggle('active', isMuted);
+                    showToast(isMuted ? 'Muted' : 'Unmuted', 'info');
+                }
+            };
+
+            document.getElementById('callVideoBtn').onclick = () => {
+                if (!localStream) return;
+                const track = localStream.getVideoTracks()[0];
+                if (track) {
+                    isVideoOff = !isVideoOff;
+                    track.enabled = !isVideoOff;
+                    document.getElementById('callVideoBtn').classList.toggle('active', isVideoOff);
+                    showToast(isVideoOff ? 'Camera off' : 'Camera on', 'info');
+                }
+            };
+
+            document.getElementById('callSpeakerBtn').onclick = () => {
+                isSpeakerOn = !isSpeakerOn;
+                document.getElementById('callSpeakerBtn').classList.toggle('active', isSpeakerOn);
+                setAudioOutput(isSpeakerOn);
+                showToast(isSpeakerOn ? 'Speaker on' : 'Earpiece', 'info');
+            };
+
+            document.getElementById('callFlipBtn').onclick = async () => {
+                if (!isVideoCall) return;
+                if (!localStream) return;
+                currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+                try {
+                    const newStream = await requestMedia(true);
+                    const videoTrack = newStream.getVideoTracks()[0];
+                    const audioTrack = newStream.getAudioTracks()[0];
+                    localStream.getTracks().forEach(t => t.stop());
+                    localStream = newStream;
+                    document.getElementById('localVideo').srcObject = localStream;
+                    if (peerConnection) {
+                        const sender = peerConnection.getSenders().find(s => s.track.kind === 'video');
+                        if (sender && videoTrack) sender.replaceTrack(videoTrack);
+                        const audioSender = peerConnection.getSenders().find(s => s.track.kind === 'audio');
+                        if (audioSender && audioTrack) audioSender.replaceTrack(audioTrack);
+                    }
+                    showToast('Camera flipped', 'info');
+                } catch (e) {
+                    showToast('Could not flip camera', 'error');
+                }
+            };
+
+            document.getElementById('callEndBtn').onclick = () => {
+                endCall('user_ended');
+            };
+        }
+
+        // ---- Incoming Call Listener ----
+        function listenForIncomingCalls(userId) {
+            const q = query(collection(db, 'calls'), where('calleeId', '==', userId), where('status', '==', 'ringing'));
+            const unsub = onSnapshot(q, (snap) => {
+                snap.docChanges().forEach(change => {
+                    if (change.type === 'added') {
+                        const data = change.doc.data();
+                        if (isCallActive || isCallEnding) {
+                            try {
+                                updateDoc(doc(db, 'calls', change.doc.id), { status: 'ended', endReason: 'busy' });
+                            } catch (e) {}
+                            return;
+                        }
+                        if (document.getElementById('incomingCallOverlay').classList.contains('active')) return;
+                        joinCall(change.doc.id, data);
+                    }
+                });
+            });
+            callUnsubscribers.push(unsub);
+        }
+
+        // ================================================================
+        // ONLINE STATUS MANAGEMENT
+        // ================================================================
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
+
+        // ================================================================
+        // TOAST SYSTEM
+        // ================================================================
+        function showToast(message, type = 'success', title = '') {
+            const toast = document.getElementById('globalToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+
+            toast.className = 'toast-container';
+            const titles = { success: '✓ Success', error: '✕ Error', warning: '⚠️ Warning' };
+            const icons = { success: '✓', error: '✕', warning: '⚠️' };
+
+            toastTitle.textContent = title || titles[type] || 'Notification';
+            toastMessage.textContent = message;
+            toastIcon.textContent = icons[type] || '✓';
+
+            void toast.offsetWidth;
+            toast.classList.add(type, 'active');
+
+            toastTimeout = setTimeout(() => { dismissToast(); }, 3500);
+        }
+
+        function dismissToast() {
+            const toast = document.getElementById('globalToast');
+            if (!toast.classList.contains('active')) return;
+            toast.classList.add('removing');
+            setTimeout(() => {
+                toast.className = 'toast-container';
+                toast.classList.remove('removing');
+                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+            }, 400);
+        }
+        window.dismissToast = dismissToast;
+
+        // ================================================================
+        // CONFIRM MODAL
+        // ================================================================
+        function showConfirmModal(options) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const modal = document.getElementById('confirmModal');
+                const icon = document.getElementById('confirmModalIcon');
+                const title = document.getElementById('confirmModalTitle');
+                const message = document.getElementById('confirmModalMessage');
+                const details = document.getElementById('confirmModalDetails');
+                const confirmBtn = document.getElementById('confirmModalConfirm');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+
+                modal.className = 'confirm-modal ' + (options.type || 'warning');
+                icon.textContent = options.icon || '⚠️';
+                title.textContent = options.title || 'Are you sure?';
+                message.textContent = options.message || 'This action cannot be undone.';
+                if (options.details) {
+                    details.innerHTML = options.details;
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                confirmBtn.className = 'btn-confirm ' + (options.confirmType || 'danger');
+                cancelBtn.textContent = options.cancelText || 'Cancel';
+
+                pendingConfirm = { resolve };
+                overlay.classList.add('active');
+            });
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModalOverlay').classList.remove('active');
+        }
+
+        window.handleConfirm = function() {
+            if (pendingConfirm) { pendingConfirm.resolve(true); pendingConfirm = null; }
+            closeConfirmModal();
+        };
+
+        window.handleCancel = function() {
+            if (pendingConfirm) { pendingConfirm.resolve(false); pendingConfirm = null; }
+            closeConfirmModal();
+        };
+
+        document.getElementById('confirmModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) handleCancel();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') handleCancel();
+        });
+
+        // ================================================================
+        // HELPERS
+        // ================================================================
+        function getInitials(name) {
+            if (!name) return 'U';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // ================================================================
+        // NAVIGATION
+        // ================================================================
+        window.goToFeed = function() { window.location.href = "feed.html"; };
+        window.goToFriends = function() { window.location.href = "friends.html"; };
+        window.goToMessages = function() { window.location.href = "chat.html"; };
+        window.goToNotifications = function() { window.location.href = "notifications.html"; };
+        window.goToProfile = function() { window.location.href = "profile.html"; };
+        window.goToAdmin = function() { window.location.href = "administrator.html"; };
+        window.goToSettings = function() { window.location.href = "settings.html"; };
+
+        // ================================================================
+        // SETTINGS
+        // ================================================================
+        function getSettings() {
+            try {
+                const saved = localStorage.getItem('spikeSettings');
+                if (saved) return JSON.parse(saved);
+            } catch (e) {}
+            return { accentColor: '#00a884', darkMode: true };
+        }
+
+        function applySettings() {
+            const settings = getSettings();
+            document.documentElement.style.setProperty('--primary', settings.accentColor || '#00a884');
+            document.documentElement.style.setProperty('--primary-glow', (settings.accentColor || '#00a884') + '40');
+            document.documentElement.style.setProperty('--primary-hover', settings.accentColor || '#00a884');
+            if (!settings.darkMode) {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        }
+        applySettings();
+
+        // ================================================================
+        // GET USER DATA
+        // ================================================================
+        async function getUserData(uid) {
+            try {
+                const docSnap = await getDoc(doc(db, "users", uid));
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                }
+                return null;
+            } catch (error) {
+                console.error("Error getting user data:", error);
+                return null;
+            }
+        }
+
+        // ================================================================
+        // TOGGLE CREATE FORM
+        // ================================================================
+        window.toggleCreateForm = function() {
+            createFormVisible = !createFormVisible;
+            const form = document.getElementById('createCommunityForm');
+            if (form) {
+                form.classList.toggle('visible', createFormVisible);
+            }
+        };
+
+        // ================================================================
+        // VIEW COMMUNITY (ENTER)
+        // ================================================================
+        window.viewCommunity = async function(communityId) {
+            if (!currentUser) {
+                showToast("Please login first", "error", "Login Required");
+                return;
+            }
+
+            if (!joinedCommunityIds.includes(communityId)) {
+                showToast("You need to join this community first", "warning", "Not a Member");
+                return;
+            }
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                window.location.href = `community_detail.html?id=${communityId}`;
+
+            } catch (error) {
+                console.error("Error viewing community:", error);
+                showToast("Failed to load community", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // CREATE COMMUNITY
+        // ================================================================
+        window.createCommunity = async function() {
+            if (!currentUser) {
+                showToast("Please login first", "error", "Login Required");
+                return;
+            }
+
+            const nameInput = document.getElementById('communityNameInput');
+            const descInput = document.getElementById('communityDescInput');
+            const typeSelect = document.getElementById('communityTypeSelect');
+            const name = nameInput.value.trim();
+            const description = descInput.value.trim();
+            const communityType = typeSelect.value || 'public';
+
+            if (!name) {
+                showToast("Please enter a community name", "warning", "Name Required");
+                nameInput.focus();
+                return;
+            }
+
+            if (name.length < 2) {
+                showToast("Community name must be at least 2 characters", "warning", "Too Short");
+                nameInput.focus();
+                return;
+            }
+
+            const btn = document.getElementById('createCommunityBtn');
+            btn.disabled = true;
+            btn.textContent = "Creating...";
+
+            try {
+                const isPrivate = communityType === 'private';
+                const communityData = {
+                    name: name,
+                    description: description || 'No description yet.',
+                    createdBy: currentUser.uid,
+                    createdAt: serverTimestamp(),
+                    members: [currentUser.uid],
+                    memberCount: 1,
+                    joinRequests: [],
+                    isPrivate: isPrivate,
+                    communityType: communityType,
+                    lastActivity: serverTimestamp(),
+                    coverImage: '',
+                    avatar: '',
+                    admins: [currentUser.uid],
+                    pendingRequests: 0,
+                    posts: 0,
+                    createdAtDate: new Date().toISOString(),
+                    rules: 'Be respectful and have fun!'
+                };
+
+                const docRef = await addDoc(collection(db, "communities"), communityData);
+
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    joinedCommunities: arrayUnion(docRef.id)
+                });
+
+                joinedCommunityIds.push(docRef.id);
+
+                nameInput.value = '';
+                descInput.value = '';
+                typeSelect.value = 'public';
+                
+                // Hide the form after creation
+                createFormVisible = false;
+                document.getElementById('createCommunityForm').classList.remove('visible');
+                
+                showToast(`✨ Community "${name}" created successfully!`, "success", "Community Created");
+
+            } catch (error) {
+                console.error("Error creating community:", error);
+                showToast("Failed to create community", "error", "Error");
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "+ Create Community";
+            }
+        };
+
+        // ================================================================
+        // JOIN COMMUNITY
+        // ================================================================
+        window.joinCommunity = async function(communityId) {
+            if (!currentUser) {
+                showToast("Please login first", "error", "Login Required");
+                return;
+            }
+
+            if (joinedCommunityIds.includes(communityId)) {
+                showToast("You're already a member!", "warning", "Already Joined");
+                return;
+            }
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (communityData.isPrivate || communityData.communityType === 'private') {
+                    const requests = communityData.joinRequests || [];
+                    if (requests.includes(currentUser.uid)) {
+                        showToast("Join request already sent!", "warning", "Request Pending");
+                        return;
+                    }
+
+                    await updateDoc(communityRef, {
+                        joinRequests: arrayUnion(currentUser.uid),
+                        pendingRequests: increment(1)
+                    });
+                    showToast("Join request sent! Waiting for approval.", "success", "Request Sent");
+                    // Update the UI immediately
+                    filterCommunities();
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    members: arrayUnion(currentUser.uid),
+                    memberCount: increment(1)
+                });
+
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    joinedCommunities: arrayUnion(communityId)
+                });
+
+                joinedCommunityIds.push(communityId);
+                showToast(`🎉 Joined "${communityData.name}"!`, "success", "Joined");
+
+            } catch (error) {
+                console.error("Error joining community:", error);
+                showToast("Failed to join community", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // LEAVE COMMUNITY
+        // ================================================================
+        window.leaveCommunity = async function(communityId) {
+            if (!currentUser) return;
+
+            const confirmed = await showConfirmModal({
+                type: 'warning',
+                icon: '🚪',
+                title: 'Leave Community',
+                message: 'Are you sure you want to leave this community?',
+                details: 'You will lose access to all community content and conversations.',
+                confirmText: 'Leave',
+                confirmType: 'danger',
+                cancelText: 'Cancel'
+            });
+
+            if (!confirmed) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (communityData.createdBy === currentUser.uid) {
+                    showToast("You are the creator. You cannot leave, but you can delete the community.", "warning", "Creator");
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    members: arrayRemove(currentUser.uid),
+                    memberCount: increment(-1)
+                });
+
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    joinedCommunities: arrayRemove(communityId)
+                });
+
+                joinedCommunityIds = joinedCommunityIds.filter(id => id !== communityId);
+                showToast(`👋 Left "${communityData.name}"`, "warning", "Left Community");
+
+            } catch (error) {
+                console.error("Error leaving community:", error);
+                showToast("Failed to leave community", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // DELETE COMMUNITY
+        // ================================================================
+        window.deleteCommunity = async function(communityId) {
+            if (!currentUser) return;
+
+            const confirmed = await showConfirmModal({
+                type: 'danger',
+                icon: '🗑️',
+                title: 'Delete Community',
+                message: 'Are you sure you want to permanently delete this community?',
+                details: 'This action cannot be undone. All community content will be lost.',
+                confirmText: 'Delete',
+                confirmType: 'danger',
+                cancelText: 'Cancel'
+            });
+
+            if (!confirmed) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (communityData.createdBy !== currentUser.uid && !communityData.admins?.includes(currentUser.uid) && !isAdmin) {
+                    showToast("You don't have permission to delete this community", "error", "Permission Denied");
+                    return;
+                }
+
+                const members = communityData.members || [];
+                for (const memberId of members) {
+                    try {
+                        const userRef = doc(db, "users", memberId);
+                        await updateDoc(userRef, {
+                            joinedCommunities: arrayRemove(communityId)
+                        });
+                    } catch (e) {
+                        console.warn("Could not remove community from user:", memberId);
+                    }
+                }
+
+                await deleteDoc(communityRef);
+                showToast(`🗑️ Community "${communityData.name}" deleted`, "error", "Deleted");
+
+            } catch (error) {
+                console.error("Error deleting community:", error);
+                showToast("Failed to delete community", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // APPROVE JOIN REQUEST
+        // ================================================================
+        window.approveJoinRequest = async function(communityId, userId) {
+            if (!currentUser) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
+                    showToast("You don't have permission", "error", "Permission Denied");
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    joinRequests: arrayRemove(userId),
+                    members: arrayUnion(userId),
+                    memberCount: increment(1),
+                    pendingRequests: increment(-1)
+                });
+
+                const userRef = doc(db, "users", userId);
+                await updateDoc(userRef, {
+                    joinedCommunities: arrayUnion(communityId)
+                });
+
+                showToast("✅ Join request approved!", "success", "Approved");
+
+            } catch (error) {
+                console.error("Error approving join request:", error);
+                showToast("Failed to approve request", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // REJECT JOIN REQUEST
+        // ================================================================
+        window.rejectJoinRequest = async function(communityId, userId) {
+            if (!currentUser) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
+                    showToast("You don't have permission", "error", "Permission Denied");
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    joinRequests: arrayRemove(userId),
+                    pendingRequests: increment(-1)
+                });
+
+                showToast("❌ Join request rejected", "warning", "Rejected");
+
+            } catch (error) {
+                console.error("Error rejecting join request:", error);
+                showToast("Failed to reject request", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // PROMOTE TO ADMIN
+        // ================================================================
+        window.promoteToAdmin = async function(communityId, userId) {
+            if (!currentUser) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (communityData.createdBy !== currentUser.uid && !isAdmin) {
+                    showToast("Only the creator can promote admins", "error", "Permission Denied");
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    admins: arrayUnion(userId)
+                });
+
+                showToast("👑 User promoted to admin!", "success", "Promoted");
+
+            } catch (error) {
+                console.error("Error promoting user:", error);
+                showToast("Failed to promote user", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // DEMOTE ADMIN
+        // ================================================================
+        window.demoteAdmin = async function(communityId, userId) {
+            if (!currentUser) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (communityData.createdBy !== currentUser.uid && !isAdmin) {
+                    showToast("Only the creator can demote admins", "error", "Permission Denied");
+                    return;
+                }
+
+                if (userId === communityData.createdBy) {
+                    showToast("Cannot demote the community creator", "warning", "Action Denied");
+                    return;
+                }
+
+                await updateDoc(communityRef, {
+                    admins: arrayRemove(userId)
+                });
+
+                showToast("🔽 Admin demoted", "warning", "Demoted");
+
+            } catch (error) {
+                console.error("Error demoting admin:", error);
+                showToast("Failed to demote admin", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // UPDATE COMMUNITY
+        // ================================================================
+        window.updateCommunity = async function(communityId, data) {
+            if (!currentUser) return;
+
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+
+                if (!communityData.admins?.includes(currentUser.uid) && communityData.createdBy !== currentUser.uid && !isAdmin) {
+                    showToast("You don't have permission", "error", "Permission Denied");
+                    return;
+                }
+
+                await updateDoc(communityRef, data);
+                showToast("Community updated successfully!", "success", "Updated");
+
+            } catch (error) {
+                console.error("Error updating community:", error);
+                showToast("Failed to update community", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // SHOW COMMUNITY ADMIN PANEL
+        // ================================================================
+        window.showCommunityAdmin = async function(communityId) {
+            try {
+                const communityRef = doc(db, "communities", communityId);
+                const communitySnap = await getDoc(communityRef);
+
+                if (!communitySnap.exists()) {
+                    showToast("Community not found", "error", "Error");
+                    return;
+                }
+
+                const communityData = communitySnap.data();
+                const joinRequests = communityData.joinRequests || [];
+
+                if (joinRequests.length === 0) {
+                    showToast("No pending join requests", "success", "All Clear");
+                    return;
+                }
+
+                let details = '📋 Pending Join Requests:\n\n';
+                for (const uid of joinRequests) {
+                    const user = await getUserData(uid);
+                    const name = user?.name || user?.displayName || uid;
+                    details += `• ${name}\n`;
+                }
+                details += `\nTotal: ${joinRequests.length} pending`;
+
+                const confirmed = await showConfirmModal({
+                    type: 'warning',
+                    icon: '👥',
+                    title: 'Manage Join Requests',
+                    message: 'Review and manage pending join requests.',
+                    details: details,
+                    confirmText: 'Approve All',
+                    confirmType: 'primary',
+                    cancelText: 'Close'
+                });
+
+                if (confirmed) {
+                    for (const uid of joinRequests) {
+                        try {
+                            const userRef = doc(db, "users", uid);
+                            await updateDoc(userRef, {
+                                joinedCommunities: arrayUnion(communityId)
+                            });
+                        } catch (e) {}
+                    }
+                    await updateDoc(communityRef, {
+                        members: arrayUnion(...joinRequests),
+                        memberCount: increment(joinRequests.length),
+                        joinRequests: [],
+                        pendingRequests: 0
+                    });
+                    showToast(`✅ Approved ${joinRequests.length} requests`, "success", "Approved");
+                }
+
+            } catch (error) {
+                console.error("Error showing community admin:", error);
+                showToast("Failed to load admin panel", "error", "Error");
+            }
+        };
+
+        // ================================================================
+        // RENDER COMMUNITIES
+        // ================================================================
+        function renderCommunities(communities) {
+            const container = document.getElementById('communitiesList');
+            const emptyState = document.getElementById('emptyState');
+            const shimmer = document.getElementById('communityShimmer');
+
+            if (shimmer) shimmer.style.display = 'none';
+
+            if (!communities || communities.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            let html = '';
+            communities.forEach(community => {
+                const isMember = joinedCommunityIds.includes(community.id);
+                const isCreator = community.createdBy === currentUser?.uid;
+                const isAdmin = community.admins?.includes(currentUser?.uid) || false;
+                const isPrivate = community.isPrivate || community.communityType === 'private';
+                const memberCount = community.memberCount || 0;
+                const name = community.name || 'Unnamed Community';
+                const description = community.description || 'No description yet.';
+                const memberAvatars = community.members || [];
+                const displayMembers = memberAvatars.slice(0, 3);
+                const moreCount = memberAvatars.length - 3;
+                const pendingRequests = community.pendingRequests || 0;
+
+                const avatarLetter = name.charAt(0).toUpperCase();
+
+                let memberAvatarsHTML = '';
+                if (displayMembers.length > 0) {
+                    displayMembers.forEach(uid => {
+                        const initial = uid.charAt(0).toUpperCase();
+                        memberAvatarsHTML += `
+                            <div class="mini-avatar">${initial}</div>
+                        `;
+                    });
+                    if (moreCount > 0) {
+                        memberAvatarsHTML += `<span class="more-count">+${moreCount}</span>`;
+                    }
+                }
+
+                let actionHTML = '';
+                if (isMember) {
+                    actionHTML = `
+                        <button class="action-btn joined" onclick="event.stopPropagation(); leaveCommunity('${community.id}')">✅ Joined</button>
+                        ${isCreator || isAdmin ? `
+                            <button class="action-btn admin-btn" onclick="event.stopPropagation(); showCommunityAdmin('${community.id}')">🛡️ Admin</button>
+                            <button class="action-btn delete-btn" onclick="event.stopPropagation(); deleteCommunity('${community.id}')">🗑️ Delete</button>
+                        ` : ''}
+                    `;
+                } else {
+                    if (isPrivate) {
+                        const hasRequested = community.joinRequests?.includes(currentUser?.uid) || false;
+                        if (hasRequested) {
+                            actionHTML = `<button class="action-btn pending" onclick="event.stopPropagation();">⏳ Pending Request</button>`;
+                        } else {
+                            actionHTML = `<button class="action-btn" onclick="event.stopPropagation(); joinCommunity('${community.id}')">🔒 Request to Join</button>`;
+                        }
+                    } else {
+                        actionHTML = `<button class="action-btn" onclick="event.stopPropagation(); joinCommunity('${community.id}')">➕ Join</button>`;
+                    }
+                }
+
+                let adminBadge = '';
+                if (isCreator) adminBadge = `<span class="creator-tag">👑 Creator</span>`;
+                else if (isAdmin) adminBadge = `<span class="admin-tag">🛡️ Admin</span>`;
+
+                let pendingBadge = '';
+                if ((isCreator || isAdmin) && pendingRequests > 0) {
+                    pendingBadge = `<span class="badge-count" style="background:rgba(245,158,11,0.15);color:var(--warning);">${pendingRequests} pending</span>`;
+                }
+
+                html += `
+                    <div class="community-card" onclick="viewCommunity('${community.id}')">
+                        <span class="enter-hint">▶ Click to enter</span>
+                        <div class="community-header-row">
+                            <div class="community-avatar">${avatarLetter}</div>
+                            <div class="community-info">
+                                <div class="community-name">
+                                    ${name}
+                                    <span class="community-type ${isPrivate ? 'private' : ''}">${isPrivate ? '🔒 Private' : '🌍 Public'}</span>
+                                    ${pendingBadge}
+                                </div>
+                                <div class="community-meta">
+                                    <span>👥 ${memberCount} members</span>
+                                    ${adminBadge ? `<span>${adminBadge}</span>` : ''}
+                                    ${community.createdAtDate ? `<span>📅 ${new Date(community.createdAtDate).toLocaleDateString()}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="community-description">${description}</div>
+                        ${memberAvatarsHTML ? `<div class="member-avatars">${memberAvatarsHTML}</div>` : ''}
+                        <div class="community-actions" onclick="event.stopPropagation();">
+                            ${actionHTML}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // ================================================================
+        // FILTER COMMUNITIES
+        // ================================================================
+        function filterCommunities() {
+            let filtered = [...allCommunities];
+            const search = document.getElementById('searchCommunities').value.toLowerCase();
+            searchTerm = search;
+
+            if (search) {
+                filtered = filtered.filter(g =>
+                    g.name?.toLowerCase().includes(search) ||
+                    g.description?.toLowerCase().includes(search)
+                );
+            }
+
+            if (currentTab === 'joined') {
+                filtered = filtered.filter(g => joinedCommunityIds.includes(g.id));
+            } else if (currentTab === 'created') {
+                filtered = filtered.filter(g => g.createdBy === currentUser?.uid);
+            } else if (currentTab === 'admin') {
+                filtered = filtered.filter(g => g.admins?.includes(currentUser?.uid) || g.createdBy === currentUser?.uid);
+            }
+
+            renderCommunities(filtered);
+        }
+
+        // ================================================================
+        // UPDATE TABS
+        // ================================================================
+        function updateTabs() {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === currentTab);
+            });
+
+            const totalCount = allCommunities.length;
+            const joinedCount = allCommunities.filter(g => joinedCommunityIds.includes(g.id)).length;
+            const createdCount = allCommunities.filter(g => g.createdBy === currentUser?.uid).length;
+            const adminCount = allCommunities.filter(g => g.admins?.includes(currentUser?.uid) || g.createdBy === currentUser?.uid).length;
+
+            document.getElementById('tabAllCount').textContent = totalCount;
+            document.getElementById('tabJoinedCount').textContent = joinedCount;
+            document.getElementById('tabCreatedCount').textContent = createdCount;
+            document.getElementById('tabAdminCount').textContent = adminCount;
+
+            filterCommunities();
+        }
+
+        // ================================================================
+        // LISTEN TO COMMUNITIES
+        // ================================================================
+        function listenCommunities() {
+            if (unsubscribeCommunities) unsubscribeCommunities();
+
+            const q = query(collection(db, "communities"), orderBy("createdAt", "desc"));
+
+            unsubscribeCommunities = onSnapshot(q, (snapshot) => {
+                const communities = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    communities.push({ ...data, id: doc.id });
+                });
+                allCommunities = communities;
+                updateTabs();
+            }, (error) => {
+                console.error("Communities listener error:", error);
+                showToast("Error loading communities", "error", "Database Error");
+            });
+        }
+
+        // ================================================================
+        // LOAD USER'S JOINED COMMUNITIES
+        // ================================================================
+        async function loadJoinedCommunities() {
+            if (!currentUser) return;
+
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    userData = data;
+                    joinedCommunityIds = data.joinedCommunities || [];
+                }
+            } catch (error) {
+                console.error("Error loading joined communities:", error);
+            }
+        }
+
+        // ================================================================
+        // SEARCH INPUT HANDLING
+        // ================================================================
+        document.getElementById('searchCommunities').addEventListener('input', function() {
+            const clearBtn = document.getElementById('searchClear');
+            if (this.value.length > 0) {
+                clearBtn.classList.add('visible');
+            } else {
+                clearBtn.classList.remove('visible');
+            }
+            filterCommunities();
+        });
+
+        document.getElementById('searchClear').addEventListener('click', function() {
+            const input = document.getElementById('searchCommunities');
+            input.value = '';
+            this.classList.remove('visible');
+            filterCommunities();
+            input.focus();
+        });
+
+        // ================================================================
+        // TAB SWITCHING
+        // ================================================================
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                currentTab = this.dataset.tab;
+                updateTabs();
+            });
+        });
+
+        // ================================================================
+        // KEYBOARD SHORTCUT
+        // ================================================================
+        document.getElementById('communityNameInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('createCommunityBtn').click();
+            }
+        });
+
+        // ================================================================
+        // NOTIFICATION BADGE
+        // ================================================================
+        function updateNotificationBadge() {
+            if (!currentUser) return;
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+            const notifRef = collection(db, "users", currentUser.uid, "notifications");
+            onSnapshot(notifRef, (snapshot) => {
+                const unread = snapshot.docs.filter(d => !d.data().read).length;
+                if (unread > 0) {
+                    badge.textContent = unread > 99 ? '99+' : unread;
+                    badge.classList.add('active');
+                } else {
+                    badge.classList.remove('active');
+                }
+            });
+        }
+
+        // ================================================================
+        // AUTH
+        // ================================================================
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+                window.location.href = "index.html";
+                return;
+            }
+
+            currentUser = user;
+            currentUserUid = user.uid;
+            // Set online
+            updateUserOnlineStatus(true);
+
+            isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
+
+            const adminLink = document.getElementById('adminNavLink');
+            if (isAdmin) {
+                adminLink.classList.add('visible');
+            }
+
+            await loadJoinedCommunities();
+            listenCommunities();
+
+            updateNotificationBadge();
+
+            // ---- Listen for incoming calls ----
+            listenForIncomingCalls(user.uid);
+
+            // ---- Permission retry ----
+            document.getElementById('retryPermissionBtn').onclick = async () => {
+                try {
+                    localStream = await requestMedia(isVideoCall);
+                    if (localStream) hidePermissionUI();
+                } catch (e) {}
+            };
+
+            console.log('👥 Community page loaded');
+            console.log('👤 User:', user.email);
+            console.log('📚 Joined communities:', joinedCommunityIds.length);
+            console.log('👑 Admin:', isAdmin);
+            console.log('📞 Incoming call support fully integrated.');
+        });
+
+        // ================================================================
+        // ONLINE STATUS & CALL CLEANUP: beforeunload & visibility
+        // ================================================================
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) updateUserOnlineStatus(false);
+            // Cleanup any active call
+            if (typeof cleanupCall === 'function') {
+                try { cleanupCall(); } catch (e) {}
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else {
+                if (currentUserUid) updateUserOnlineStatus(true);
+            }
+        });
+
+        console.log('👥 SPIKE Community page loaded with UNIFIED ONLINE STATUS + incoming calls!');
+        console.log('🔐 Click the invisible button at bottom-right to create a community');
+    </script>
 
 </body>
 </html>

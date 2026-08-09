@@ -1,23 +1,3 @@
-<!-- 
-  SPIKE ROOMS - COMPLETE WORKING VERSION
-  
-  IMPORTANT: This file uses Firebase SDK loaded from CDN.
-  
-  For development/testing:
-  1. Download this file
-  2. Host it on a web server (e.g., Live Server, localhost, etc.)
-  3. Do NOT open as a local file (file://) - Firebase won't work
-  
-  For production:
-  1. Uncomment the Content-Security-Policy meta tag below
-  2. Consider moving Firebase config to a backend service
-  
-  Canvas Preview Note: The canvas sandbox BLOCKS external scripts.
-  This page will NOT work in the canvas preview - you MUST download and host it.
-  
-  Companion file: room.html (for individual chat rooms)
--->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,6 +113,18 @@
             align-items: center;
             gap: 4px;
             min-height: 32px;
+        }
+        .header .online-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--text-muted);
+            display: inline-block;
+            transition: var(--transition);
+        }
+        .header .online-dot.online {
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success-glow);
         }
 
         /* TOOLBAR: Search + Sort */
@@ -537,6 +529,7 @@
         </div>
         <div class="right">
             <span class="coins">🪙 <span id="headerCoins">0</span></span>
+            <span class="online-dot" id="onlineStatusDot"></span>
         </div>
     </div>
 
@@ -623,10 +616,23 @@
         // STATE
         // ============================================================
         let currentUser = null;
+        let currentUserUid = null;
         let isAdmin = false;
         let coinBalance = 0;
         let allRooms = [];
         let filteredRooms = [];
+
+        // ============================================================
+        // ONLINE STATUS MANAGEMENT (unified)
+        // ============================================================
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ============================================================
         // DOM REFERENCES
@@ -639,6 +645,7 @@
         const roomNameInput = document.getElementById('roomNameInput');
         const roomFeeInput = document.getElementById('roomFeeInput');
         const createBtn = document.getElementById('createRoomBtn');
+        const onlineDot = document.getElementById('onlineStatusDot');
 
         // ============================================================
         // TOAST NOTIFICATIONS
@@ -941,10 +948,39 @@
             }
             
             currentUser = user;
+            currentUserUid = user.uid;
+            // Set online on load
+            updateUserOnlineStatus(true);
+            onlineDot.classList.add('online');
+
             isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
             coinBalance = await getCoins(user.uid);
             headerCoins.textContent = coinBalance;
             await loadRooms();
+        });
+
+        // ============================================================
+        // ONLINE STATUS: beforeunload & visibility
+        // ============================================================
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) {
+                updateUserOnlineStatus(false);
+                onlineDot.classList.remove('online');
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) {
+                    updateUserOnlineStatus(false);
+                    onlineDot.classList.remove('online');
+                }
+            } else {
+                if (currentUserUid) {
+                    updateUserOnlineStatus(true);
+                    onlineDot.classList.add('online');
+                }
+            }
         });
 
         // ============================================================
@@ -978,6 +1014,7 @@
         console.log('🏠 SPIKE Rooms loaded');
         console.log(`💰 Create room cost: ${CREATE_COST} 🪙`);
         console.log('🔍 Search rooms with Ctrl+K');
+        console.log('✅ Unified online status enabled.');
     </script>
 </body>
 </html>

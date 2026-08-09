@@ -172,6 +172,9 @@
     .participants-panel.open { transform:translateX(0); }
     .participants-panel .participant { display:flex; align-items:center; gap:8px; padding:4px 6px; border-radius:8px; cursor:pointer; min-height:34px; }
     .participants-panel .participant .info .name { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .participants-panel .participant .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-left:auto; }
+    .participants-panel .participant .status-dot.online { background:var(--success); }
+    .participants-panel .participant .status-dot.offline { background:var(--text-muted); }
     .participants-overlay { position:fixed; inset:0; background:var(--bg-overlay); backdrop-filter:blur(4px); z-index:50; display:none; }
     .participants-overlay.open { display:block; }
     /* ===== PROFILE MODAL ===== */
@@ -455,7 +458,7 @@
   // ============================================================
   // STATE
   // ============================================================
-  let currentUser=null, roomId=null, roomData=null, coinBalance=0, hasPaid=false, isVIP=false, isPremium=false, isElite=false, isModerator=false, isRoomOwner=false;
+  let currentUser=null, currentUserUid=null, roomId=null, roomData=null, coinBalance=0, hasPaid=false, isVIP=false, isPremium=false, isElite=false, isModerator=false, isRoomOwner=false;
   let messageUnsub=null, participantUnsub=null, toastTimeout=null, pendingConfirm=null, lastActivity=Date.now();
   let achievements=[], selectedUserUid=null, replyingTo=null, searchMode=false, userSpId=null, giftRecipientUid=null, selectedGiftEmoji=null, giftBadgeCount=0, selectedPackage=null;
   let notificationFeed = [];
@@ -485,6 +488,18 @@
   const premiumPanelOverlay = document.getElementById('premiumPanelOverlay');
   const profileModalBody = document.getElementById('profileModalBody');
   const profileModalOverlay = document.getElementById('profileModalOverlay');
+
+  // ============================================================
+  // ONLINE STATUS MANAGEMENT (unified)
+  // ============================================================
+  function updateUserOnlineStatus(status) {
+    if (!currentUserUid) return;
+    const userRef = doc(db, "users", currentUserUid);
+    updateDoc(userRef, {
+      onlineStatus: status,
+      lastSeen: serverTimestamp()
+    }).catch(err => console.error("Error updating online status:", err));
+  }
 
   // ============================================================
   // TOAST
@@ -706,7 +721,7 @@
   // PARTICIPANTS
   // ============================================================
   window.toggleParticipants = function(){ document.getElementById('participantsPanel').classList.toggle('open'); document.getElementById('participantsOverlay').classList.toggle('open'); if(document.getElementById('participantsPanel').classList.contains('open')) loadParticipants(); };
-  async function loadParticipants(){ const list=document.getElementById('participantsList'); try{ const snap=await getDocs(collection(db,'rooms',roomId,'participants')); if(snap.empty){ list.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:16px 0;">No one here</div>'; return; } let html=''; const uids=[]; snap.forEach(d=>uids.push({uid:d.id,data:d.data()})); for(const {uid,data} of uids){ let name='User', avatar='', online=false; try{ const s=await getDoc(doc(db,'users',uid)); if(s.exists()){ const d=s.data(); name=d.name||d.displayName||'User'; avatar=d.avatar||''; online=d.onlineStatus===true; } }catch(e){} const isSelf=uid===currentUser?.uid; html+=`<div class="participant" data-uid="${uid}" onclick="showUserMenu('${uid}', event)"><div class="info"><div class="name">${name}${isSelf?' (you)':''}</div></div></div>`; } list.innerHTML=html||'<div>No one</div>'; memberCountEl.textContent=uids.length; memberBadge.textContent=uids.length; }catch(e){ list.innerHTML='Failed to load'; } }
+  async function loadParticipants(){ const list=document.getElementById('participantsList'); try{ const snap=await getDocs(collection(db,'rooms',roomId,'participants')); if(snap.empty){ list.innerHTML='<div style="text-align:center;color:var(--text-muted);padding:16px 0;">No one here</div>'; return; } let html=''; const uids=[]; snap.forEach(d=>uids.push({uid:d.id,data:d.data()})); for(const {uid,data} of uids){ let name='User', avatar='', online=false; try{ const s=await getDoc(doc(db,'users',uid)); if(s.exists()){ const d=s.data(); name=d.name||d.displayName||'User'; avatar=d.avatar||''; online=d.onlineStatus===true; } }catch(e){} const isSelf=uid===currentUser?.uid; const statusDotClass = online ? 'online' : 'offline'; html+=`<div class="participant" data-uid="${uid}" onclick="showUserMenu('${uid}', event)"><div class="info"><div class="name">${name}${isSelf?' (you)':''}</div></div><span class="status-dot ${statusDotClass}"></span></div>`; } list.innerHTML=html||'<div>No one</div>'; memberCountEl.textContent=uids.length; memberBadge.textContent=uids.length; }catch(e){ list.innerHTML='Failed to load'; } }
 
   // ============================================================
   // PROFILE MODAL
@@ -748,7 +763,25 @@
   // ============================================================
   // INIT
   // ============================================================
-  async function init(){ const urlParams=new URLSearchParams(window.location.search); roomId=urlParams.get('id'); if(!roomId){ showToast('No room ID','error'); setTimeout(()=>window.location.href='rooms.html',1500); return; } onAuthStateChanged(auth, async(user)=>{ if(!user){ window.location.href='index.html'; return; } currentUser=user; try{ const docSnap=await getDoc(doc(db,'users',user.uid)); if(docSnap.exists()){ const data=docSnap.data(); userSpId=data.spId||null; if(data.achievements) achievements=data.achievements; } }catch(e){} const joined=await joinRoom(user.uid, roomId); if(!joined){ setTimeout(()=>window.location.href='rooms.html',2000); return; } coinBalance=await getCoins(user.uid); coinEl.textContent=coinBalance; document.getElementById('sendCoinsBalance').textContent=coinBalance; const msgQ=query(collection(db,'rooms',roomId,'messages'),orderBy('timestamp','asc'),limit(200)); messageUnsub=onSnapshot(msgQ, renderMessages, err=>showToast('Message error','error')); participantUnsub=onSnapshot(doc(db,'rooms',roomId), (snap)=>{ if(snap.exists()){ const data=snap.data(); memberCountEl.textContent=data.participantCount||0; memberBadge.textContent=data.participantCount||0; roomData=data; } }); setInterval(()=>{ const online=navigator.onLine; roomStatusDot.className='dot '+(online?'online':'offline'); roomStatusText.textContent=online?'online':'offline'; },10000); const today=new Date().toDateString(); const streakKey=`streak_${roomId}_${user.uid}`; if(localStorage.getItem(streakKey)!==today){ const bonus=isElite?8:isPremium?5:isVIP?4:2; await updateCoins(user.uid, bonus, 'Daily room bonus'); localStorage.setItem(streakKey,today); coinBalance=await getCoins(user.uid); coinEl.textContent=coinBalance; document.getElementById('sendCoinsBalance').textContent=coinBalance; showToast(`+${bonus} 🪙 daily bonus`,'success'); addNotification(`Daily bonus +${bonus}🪙`,'gold','Daily Bonus'); } container.scrollTop=container.scrollHeight; const typingRef=doc(db,'rooms',roomId,'typing','state'); onSnapshot(typingRef, (snap)=>{ if(snap.exists()){ const data=snap.data(); const typer=data.uid; if(typer&&typer!==currentUser.uid){ typingIndicator.textContent=`${data.name||'Someone'} is typing…`; typingIndicator.classList.add('active'); clearTimeout(typingIndicator._timeout); typingIndicator._timeout=setTimeout(()=>typingIndicator.classList.remove('active'),3000); }else{ typingIndicator.classList.remove('active'); } } }, (err)=>console.error(err)); msgInput.addEventListener('input',()=>{ if(msgInput.value.trim()){ setDoc(typingRef,{ uid:currentUser.uid, name:currentUser.displayName||'User', updatedAt:serverTimestamp() },{merge:true}); } }); msgInput.addEventListener('blur',()=>{ setDoc(typingRef,{uid:null, updatedAt:serverTimestamp()},{merge:true}); }); updateTierLocks(); loadGiftBadgeCount(); loadParticipants(); addNotification('Welcome to the room! 🎉','info','Welcome'); }); }
+  async function init(){ const urlParams=new URLSearchParams(window.location.search); roomId=urlParams.get('id'); if(!roomId){ showToast('No room ID','error'); setTimeout(()=>window.location.href='rooms.html',1500); return; } onAuthStateChanged(auth, async(user)=>{ if(!user){ window.location.href='index.html'; return; } currentUser=user; currentUserUid=user.uid; // Set online on load
+    updateUserOnlineStatus(true);
+
+    try{ const docSnap=await getDoc(doc(db,'users',user.uid)); if(docSnap.exists()){ const data=docSnap.data(); userSpId=data.spId||null; if(data.achievements) achievements=data.achievements; } }catch(e){} const joined=await joinRoom(user.uid, roomId); if(!joined){ setTimeout(()=>window.location.href='rooms.html',2000); return; } coinBalance=await getCoins(user.uid); coinEl.textContent=coinBalance; document.getElementById('sendCoinsBalance').textContent=coinBalance; const msgQ=query(collection(db,'rooms',roomId,'messages'),orderBy('timestamp','asc'),limit(200)); messageUnsub=onSnapshot(msgQ, renderMessages, err=>showToast('Message error','error')); participantUnsub=onSnapshot(doc(db,'rooms',roomId), (snap)=>{ if(snap.exists()){ const data=snap.data(); memberCountEl.textContent=data.participantCount||0; memberBadge.textContent=data.participantCount||0; roomData=data; } }); setInterval(()=>{ const online=navigator.onLine; roomStatusDot.className='dot '+(online?'online':'offline'); roomStatusText.textContent=online?'online':'offline'; },10000); const today=new Date().toDateString(); const streakKey=`streak_${roomId}_${user.uid}`; if(localStorage.getItem(streakKey)!==today){ const bonus=isElite?8:isPremium?5:isVIP?4:2; await updateCoins(user.uid, bonus, 'Daily room bonus'); localStorage.setItem(streakKey,today); coinBalance=await getCoins(user.uid); coinEl.textContent=coinBalance; document.getElementById('sendCoinsBalance').textContent=coinBalance; showToast(`+${bonus} 🪙 daily bonus`,'success'); addNotification(`Daily bonus +${bonus}🪙`,'gold','Daily Bonus'); } container.scrollTop=container.scrollHeight; const typingRef=doc(db,'rooms',roomId,'typing','state'); onSnapshot(typingRef, (snap)=>{ if(snap.exists()){ const data=snap.data(); const typer=data.uid; if(typer&&typer!==currentUser.uid){ typingIndicator.textContent=`${data.name||'Someone'} is typing…`; typingIndicator.classList.add('active'); clearTimeout(typingIndicator._timeout); typingIndicator._timeout=setTimeout(()=>typingIndicator.classList.remove('active'),3000); }else{ typingIndicator.classList.remove('active'); } } }, (err)=>console.error(err)); msgInput.addEventListener('input',()=>{ if(msgInput.value.trim()){ setDoc(typingRef,{ uid:currentUser.uid, name:currentUser.displayName||'User', updatedAt:serverTimestamp() },{merge:true}); } }); msgInput.addEventListener('blur',()=>{ setDoc(typingRef,{uid:null, updatedAt:serverTimestamp()},{merge:true}); }); updateTierLocks(); loadGiftBadgeCount(); loadParticipants(); addNotification('Welcome to the room! 🎉','info','Welcome'); }); }
+
+  // ============================================================
+  // ONLINE STATUS: beforeunload & visibility
+  // ============================================================
+  window.addEventListener('beforeunload', () => {
+    if (currentUserUid) updateUserOnlineStatus(false);
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (currentUserUid) updateUserOnlineStatus(false);
+    } else {
+      if (currentUserUid) updateUserOnlineStatus(true);
+    }
+  });
 
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape'){ if(document.getElementById('userMenu').style.display==='block') closeUserMenu(); else if(premiumPanelOverlay.classList.contains('open')) closePremiumPanel(); else if(document.getElementById('giftSendOverlay').classList.contains('open')) closeGiftSendModal(); else if(document.getElementById('giftsPanelOverlay').classList.contains('open')) closeGiftsPanel(); else if(document.getElementById('stickerPickerOverlay').classList.contains('open')) closeStickerPicker(); else if(document.getElementById('reactionPickerOverlay').classList.contains('open')) closeReactionPicker(); else if(document.getElementById('contactModalOverlay').classList.contains('open')) closeContactModal(); else if(profileModalOverlay.classList.contains('open')) closeProfileModal(); else if(document.getElementById('sendCoinsOverlay').classList.contains('open')) closeSendCoinsModal(); else if(moreDropdown.classList.contains('open')) closeMoreDropdown(); else if(isTypingOverlayOpen) closeTypingOverlay(); else if(replyingTo) cancelReply(); else window.location.href='rooms.html'; } if((e.ctrlKey||e.metaKey)&&e.key==='p'){ e.preventDefault(); openPremiumPanel(); } if((e.ctrlKey||e.metaKey)&&e.key==='f'){ e.preventDefault(); toggleSearch(); } });
 
@@ -762,7 +795,7 @@
   document.getElementById('reactionPickerOverlay').addEventListener('click', function(e){ if(e.target===this) closeReactionPicker(); });
 
   init();
-  console.log('🔥 SPIKE ELITE Room — Loaded (voice fixed)');
+  console.log('🔥 SPIKE ELITE Room — Loaded (voice fixed, online status unified)');
 </script>
 </body>
 </html>

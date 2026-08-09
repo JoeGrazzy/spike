@@ -412,7 +412,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, collection, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, query, where, limit, startAfter, orderBy 
+            getFirestore, collection, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, query, where, limit, startAfter, orderBy, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -432,6 +432,7 @@
         // ===== STATE =====
         const CACHE_VERSION = 'v3';
         let currentUser = null;
+        let currentUserUid = null;
         let allMembersCache = [];
         let currentTab = 'all';
         let toastTimeout = null;
@@ -440,6 +441,16 @@
         let friendUids = [];
         let onlineStatuses = {}; // uid: boolean
         let lastSeen = {}; // uid: timestamp
+
+        // ===== ONLINE STATUS MANAGEMENT (unified) =====
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         // ===== TOAST =====
         window.showToast = function(message, type = 'success', title = '') {
@@ -607,10 +618,14 @@
         // === AUTH ===
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
+                if (currentUserUid) updateUserOnlineStatus(false);
                 window.location.href = "index.html";
                 return;
             }
             currentUser = user;
+            currentUserUid = user.uid;
+            // Set online
+            updateUserOnlineStatus(true);
             
             const adminLink = document.getElementById('adminNavLink');
             if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
@@ -636,6 +651,19 @@
             console.log('👥 Friends page loaded');
         });
 
+        // ===== ONLINE STATUS: beforeunload & visibility =====
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) updateUserOnlineStatus(false);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else {
+                if (currentUserUid) updateUserOnlineStatus(true);
+            }
+        });
+
         async function ensureUserDocument(uid) {
             try {
                 const userRef = doc(db, "users", uid);
@@ -651,7 +679,9 @@
                         sentRequests: [],
                         blockedUsers: [],
                         joinedGroups: [],
-                        createdAt: new Date().toISOString()
+                        createdAt: new Date().toISOString(),
+                        onlineStatus: false,
+                        lastSeen: serverTimestamp()
                     };
                     await setDoc(userRef, newData);
                 }
@@ -667,13 +697,14 @@
                 if (!docSnap.exists()) return;
                 const data = docSnap.data();
                 friendUids = data.friends || [];
-                // Listen to each friend's status
+                // Listen to each friend's status (using onlineStatus)
                 friendUids.forEach(uid => {
                     const friendRef = doc(db, "users", uid);
                     onSnapshot(friendRef, (friendSnap) => {
                         if (friendSnap.exists()) {
                             const fData = friendSnap.data();
-                            onlineStatuses[uid] = fData.status === 'online';
+                            // Use onlineStatus boolean
+                            onlineStatuses[uid] = fData.onlineStatus === true;
                             lastSeen[uid] = fData.lastSeen || null;
                             // Re-render if on friends tab or all tab
                             if (currentTab === 'friends' || currentTab === 'all') {
@@ -804,7 +835,7 @@
                     const isBlocked = blockedUsers.includes(uData.id);
                     const avatarHTML = getAvatarHTML(uData, uData.id);
                     
-                    // Online status
+                    // Online status from onlineStatuses (boolean)
                     const isOnline = onlineStatuses[uData.id] || false;
                     const lastSeenTime = lastSeen[uData.id] || null;
                     const statusText = isOnline ? '🟢 Online' : (lastSeenTime ? `Last seen ${formatTimeAgo(lastSeenTime)}` : 'Offline');
@@ -1100,7 +1131,7 @@
             }
         });
 
-        console.log("🔥 🚀 SPIKE Friends page loaded with enhanced features!");
+        console.log("🔥 🚀 SPIKE Friends page loaded with enhanced features + unified online status!");
         console.log("📦 Cache Version:", CACHE_VERSION);
         console.log("⌨️ Shortcut: Ctrl+F to focus search");
     </script>

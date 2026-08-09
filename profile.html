@@ -1250,7 +1250,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
             getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, getDocs, 
-            query, where, deleteDoc, arrayRemove, setDoc
+            query, where, deleteDoc, arrayRemove, setDoc, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1282,6 +1282,7 @@
         };
 
         let currentUser = null;
+        let currentUserUid = null;
         let userData = {};
         let postsCount = 0;
         let likesCount = 0;
@@ -1289,13 +1290,23 @@
         let spId = null;
         let unsubscribePosts = null;
         let unsubscribeUser = null;
-        let unsubscribeNotif = null;   // <-- NEW for notification listener
+        let unsubscribeNotif = null;
         let toastTimeout = null;
         let isAdmin = false;
         let isSuspended = false;
         let maintenanceMode = false;
         let showAllFields = false;
         let previousVerificationStatus = null;
+
+        // ===== ONLINE STATUS MANAGEMENT (unified) =====
+        function updateUserOnlineStatus(status) {
+            if (!currentUserUid) return;
+            const userRef = doc(db, "users", currentUserUid);
+            updateDoc(userRef, {
+                onlineStatus: status,
+                lastSeen: serverTimestamp()
+            }).catch(err => console.error("Error updating online status:", err));
+        }
 
         function escapeHTML(str) {
             return String(str || '').replace(/[&<>'"]/g, 
@@ -1643,10 +1654,9 @@
             });
         }
 
-        // ===== NEW: Single notification listener =====
+        // ===== NOTIFICATION LISTENER =====
         function initNotificationListener() {
             if (!currentUser) return;
-            // Cleanup any previous listener
             if (unsubscribeNotif) {
                 unsubscribeNotif();
                 unsubscribeNotif = null;
@@ -1811,7 +1821,6 @@
             
             const status = getVerificationStatus();
             
-            // If verified, hide everything
             if (status.status === 'verified') {
                 container.style.display = 'none';
                 const verifyBtn = document.getElementById('verifyBtn');
@@ -1819,11 +1828,8 @@
                 return;
             }
             
-            // If unlocked, hide progress bar, show verify button (if not already shown)
             if (status.status === 'unlocked') {
                 container.style.display = 'none';
-                
-                // Show verify button
                 const verifyBtn = document.getElementById('verifyBtn');
                 if (verifyBtn) {
                     verifyBtn.style.display = 'flex';
@@ -1832,8 +1838,6 @@
                     verifyBtn.disabled = false;
                     verifyBtn.onclick = goToVerify;
                 }
-                
-                // Show congratulations modal only once
                 const congratsShown = localStorage.getItem('spike_congrats_shown');
                 if (!congratsShown) {
                     showCongratulationsModal();
@@ -1842,7 +1846,6 @@
                 return;
             }
             
-            // Locked: show progress bar, hide verify button
             container.style.display = 'block';
             const verifyBtn = document.getElementById('verifyBtn');
             if (verifyBtn) verifyBtn.style.display = 'none';
@@ -1954,7 +1957,11 @@
             
             const settings = getSettings();
             const dot = document.getElementById('onlineStatusDot');
-            if (dot) dot.classList.toggle('show', settings.onlineStatus !== false && !isSuspendedUser);
+            if (dot) {
+                // Show if onlineStatus is true and not suspended
+                const isOnline = userData.onlineStatus === true && !isSuspendedUser;
+                dot.classList.toggle('show', settings.onlineStatus !== false && isOnline);
+            }
             
             const card = document.getElementById('profileCard');
             if (card) {
@@ -2036,11 +2043,8 @@
             if (shimmer) shimmer.style.display = 'none';
             if (cardEl) cardEl.style.display = 'flex';
             
-            // Notification listener is now handled separately – do NOT call updateNotificationBadge() here
             renderVerificationProgress();
         }
-
-        // ===== REMOVED: updateNotificationBadge() – replaced by initNotificationListener =====
 
         window.uploadAvatar = async function(event) {
             const file = event.target.files[0];
@@ -2119,9 +2123,11 @@
             });
             if (!confirmed) return;
             try {
+                // Set offline before signing out
+                if (currentUserUid) updateUserOnlineStatus(false);
                 if (unsubscribePosts) { unsubscribePosts(); unsubscribePosts = null; }
                 if (unsubscribeUser) { unsubscribeUser(); unsubscribeUser = null; }
-                if (unsubscribeNotif) { unsubscribeNotif(); unsubscribeNotif = null; } // <-- cleanup
+                if (unsubscribeNotif) { unsubscribeNotif(); unsubscribeNotif = null; }
                 await signOut(auth);
                 window.location.href = "index.html";
             } catch (err) {
@@ -2148,12 +2154,28 @@
             }
         });
 
+        // ===== ONLINE STATUS: beforeunload & visibility =====
+        window.addEventListener('beforeunload', () => {
+            if (currentUserUid) updateUserOnlineStatus(false);
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else {
+                if (currentUserUid) updateUserOnlineStatus(true);
+            }
+        });
+
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "index.html";
                 return;
             }
             currentUser = user;
+            currentUserUid = user.uid;
+            // Set online on load
+            updateUserOnlineStatus(true);
             
             isAdmin = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
             
@@ -2179,8 +2201,8 @@
                 Promise.resolve().then(() => { listenToUserPosts(); })
             ]);
             
-            // Initialize notification listener once
-            initNotificationListener();   // <-- added
+            // Initialize notification listener
+            initNotificationListener();
             
             renderProfile();
             renderVerificationProgress();
@@ -2194,7 +2216,7 @@
         console.log("🚀 SPIKE Profile loaded");
         console.log("📋 All profile fields moved inside Data toggle!");
         console.log("💎 Verification requirements: 1 year, 500 friends, 1k posts, 200 reactions, 200 reposts");
-        console.log("✅ Notification listener fixed – single instance only.");
+        console.log("✅ Unified online status enabled.");
     </script>
 </head>
 <body>
