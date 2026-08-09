@@ -922,10 +922,6 @@
             color: white;
             text-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
-        .active-call-overlay .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
         .active-call-overlay .call-controls {
             position: relative;
             z-index: 20;
@@ -1045,10 +1041,7 @@
             font-size: 1.8rem;
             font-weight: 700;
         }
-        .active-call-overlay.audio-only .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
+        /* timer removed from center, now in top bar */
 
         .permission-overlay {
             position: fixed;
@@ -1372,14 +1365,14 @@
         </div>
         <div class="call-top-bar">
             <div id="callStatusBadge" class="call-status">Connected</div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+                <span id="activeCallTimer" class="call-timer">00:00</span>
                 <span style="background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:12px;font-size:0.7rem;color:var(--text-muted);">🔒 Encrypted</span>
             </div>
         </div>
         <div class="call-center-info" id="callCenterInfo">
             <div id="callerAvatarLarge" class="caller-avatar" style="display:none;"></div>
             <div id="activeCallerName" class="caller-name">User</div>
-            <div id="activeCallTimer" class="call-timer">00:00</div>
         </div>
         <div class="call-controls">
             <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>

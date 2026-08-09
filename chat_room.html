@@ -1142,7 +1142,7 @@
         }
 
         /* ================================================================
-           CALL OVERLAY STYLES (added)
+           CALL OVERLAY STYLES (updated)
            ================================================================ */
         /* Incoming call overlay */
         .call-overlay {
@@ -1393,6 +1393,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
+            gap: 12px;
         }
         .active-call-overlay .call-top-bar .call-status {
             background: rgba(0,0,0,0.5);
@@ -1411,6 +1412,15 @@
         .active-call-overlay .call-top-bar .call-status.error {
             color: var(--error);
         }
+        /* Timer in top bar */
+        .active-call-overlay .call-top-bar .call-timer {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+        }
         .active-call-overlay .call-center-info {
             position: relative;
             z-index: 20;
@@ -1426,10 +1436,6 @@
             font-weight: 700;
             color: white;
             text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        }
-        .active-call-overlay .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
         }
         .active-call-overlay .call-controls {
             position: relative;
@@ -1551,10 +1557,7 @@
             font-size: 1.8rem;
             font-weight: 700;
         }
-        .active-call-overlay.audio-only .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
+        /* timer removed from center, now in top bar */
 
         /* ===== PERMISSION OVERLAY ===== */
         .permission-overlay {
@@ -2154,6 +2157,9 @@
                 width: 56px;
                 height: 56px;
             }
+            .active-call-overlay .call-top-bar .call-timer {
+                font-size: 0.7rem;
+            }
         }
 
         @media (max-width: 380px) {
@@ -2443,14 +2449,14 @@
         </div>
         <div class="call-top-bar">
             <div id="callStatusBadge" class="call-status">Connected</div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:12px;align-items:center;">
+                <span id="activeCallTimer" class="call-timer">00:00</span>
                 <span style="background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:12px;font-size:0.7rem;color:var(--text-muted);">🔒 Encrypted</span>
             </div>
         </div>
         <div class="call-center-info" id="callCenterInfo">
             <div id="callerAvatarLarge" class="caller-avatar" style="display:none;"></div>
             <div id="activeCallerName" class="caller-name">User</div>
-            <div id="activeCallTimer" class="call-timer">00:00</div>
         </div>
         <div class="call-controls">
             <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
@@ -2794,6 +2800,27 @@
             const days = Math.floor(hours / 24);
             if (days < 7) return `${days}d ago`;
             return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+        // ================================================================
+        // CROSS‑TAB CALL FLAG
+        // ================================================================
+        function setActiveCallFlag(callId) {
+            try {
+                sessionStorage.setItem('spike_active_call', callId);
+            } catch (e) {}
+        }
+
+        function getActiveCallFlag() {
+            try {
+                return sessionStorage.getItem('spike_active_call');
+            } catch (e) { return null; }
+        }
+
+        function clearActiveCallFlag() {
+            try {
+                sessionStorage.removeItem('spike_active_call');
+            } catch (e) {}
         }
 
         // ================================================================
@@ -3881,6 +3908,7 @@
 
             window.addEventListener('beforeunload', () => {
                 updateUserStatus(currentUser.uid, 'offline');
+                clearActiveCallFlag();
             });
 
             document.addEventListener('visibilitychange', () => {
@@ -4123,6 +4151,8 @@
             document.getElementById('activeCallTimer').textContent = '00:00';
             document.getElementById('callStatusBadge').textContent = 'Connected';
             document.getElementById('callStatusBadge').className = 'call-status';
+
+            clearActiveCallFlag();
         }
 
         // ---- End Call ----
@@ -4417,6 +4447,17 @@
                 return;
             }
 
+            // Check if another tab is already handling this call
+            const existingFlag = getActiveCallFlag();
+            if (existingFlag && existingFlag !== callId) {
+                // Another call is active elsewhere – decline
+                try {
+                    const callRef = doc(db, 'calls', callId);
+                    await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
+                } catch (e) {}
+                return;
+            }
+
             if (!localStream) {
                 try {
                     localStream = await requestMedia(callData.isVideo || false);
@@ -4432,6 +4473,9 @@
                 callerPhoto: callData.callerPhoto || '',
                 isVideo: callData.isVideo || false
             };
+
+            // Set flag to prevent duplicate handling in other tabs
+            setActiveCallFlag(callId);
 
             // Show incoming overlay
             const callerName = currentCallData.callerName;
@@ -4460,6 +4504,7 @@
                 stopIncomingRingtone();
                 document.getElementById('incomingCallOverlay').classList.remove('active');
                 await updateDoc(callDocRef, { status: 'ended', endReason: 'declined' });
+                clearActiveCallFlag();
                 showToast('Call declined', 'info');
                 cleanupCall();
             };
@@ -4477,6 +4522,7 @@
                     else if (reason === 'timeout') msg = 'Call timed out';
                     else if (reason === 'busy') msg = 'User busy';
                     showToast(msg, 'info');
+                    clearActiveCallFlag();
                     cleanupCall();
                 }
             });
@@ -4559,6 +4605,17 @@
 
             const displayName = currentCallData ? currentCallData.callerName : 'User';
             const isVideo = currentCallData ? currentCallData.isVideo : false;
+
+            // Hide/show video-specific controls
+            const videoBtn = document.getElementById('callVideoBtn');
+            const flipBtn = document.getElementById('callFlipBtn');
+            if (isVideo) {
+                videoBtn.style.display = '';
+                flipBtn.style.display = '';
+            } else {
+                videoBtn.style.display = 'none';
+                flipBtn.style.display = 'none';
+            }
 
             if (!isVideo) {
                 overlay.classList.add('audio-only');

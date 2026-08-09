@@ -540,7 +540,7 @@
             border-top: 1px solid var(--border-color); flex-shrink: 0; background: var(--bg-glass); backdrop-filter: blur(16px);
         }
 
-        /* === CALL OVERLAY STYLES (from chat_room.html) === */
+        /* === CALL OVERLAY STYLES (updated: timer in top bar) === */
         .call-overlay {
             position: fixed;
             top: 0;
@@ -720,6 +720,7 @@
             transform: scale(0.95);
         }
 
+        /* Active call overlay – timer moved to top bar */
         .active-call-overlay {
             position: fixed;
             top: 0;
@@ -772,6 +773,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
+            gap: 12px;
         }
         .active-call-overlay .call-top-bar .call-status {
             background: rgba(0,0,0,0.5);
@@ -790,6 +792,15 @@
         .active-call-overlay .call-top-bar .call-status.error {
             color: var(--error);
         }
+        /* Timer in top bar */
+        .active-call-overlay .call-top-bar .call-timer {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.5);
+            padding: 4px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
+        }
         .active-call-overlay .call-center-info {
             position: relative;
             z-index: 20;
@@ -805,10 +816,6 @@
             font-weight: 700;
             color: white;
             text-shadow: 0 4px 12px rgba(0,0,0,0.6);
-        }
-        .active-call-overlay .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
         }
         .active-call-overlay .call-controls {
             position: relative;
@@ -929,10 +936,7 @@
             font-size: 1.8rem;
             font-weight: 700;
         }
-        .active-call-overlay.audio-only .call-center-info .call-timer {
-            font-size: 1rem;
-            color: var(--text-muted);
-        }
+        /* timer removed from center, now in top bar */
 
         .permission-overlay {
             position: fixed;
@@ -1030,6 +1034,9 @@
             .call-overlay .call-btn.decline {
                 width: 56px;
                 height: 56px;
+            }
+            .active-call-overlay .call-top-bar .call-timer {
+                font-size: 0.7rem;
             }
         }
         @media (max-width: 380px) {
@@ -1161,7 +1168,7 @@
 
     </main>
 
-    <!-- ===== CALL OVERLAYS ===== -->
+    <!-- ===== CALL OVERLAYS (updated timer position) ===== -->
     <!-- Incoming Call Overlay -->
     <div id="incomingCallOverlay" class="call-overlay">
         <div class="call-card">
@@ -1197,14 +1204,14 @@
         </div>
         <div class="call-top-bar">
             <div id="callStatusBadge" class="call-status">Connected</div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:12px;align-items:center;">
+                <span id="activeCallTimer" class="call-timer">00:00</span>
                 <span style="background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:12px;font-size:0.7rem;color:var(--text-muted);">🔒 Encrypted</span>
             </div>
         </div>
         <div class="call-center-info" id="callCenterInfo">
             <div id="callerAvatarLarge" class="caller-avatar" style="display:none;"></div>
             <div id="activeCallerName" class="caller-name">User</div>
-            <div id="activeCallTimer" class="call-timer">00:00</div>
         </div>
         <div class="call-controls">
             <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
@@ -1310,6 +1317,17 @@
         let searchTerm = '';
         let allChats = [];
         let pinnedChats = new Set();
+
+        // ===== CROSS‑TAB CALL FLAG (sessionStorage) =====
+        function setActiveCallFlag(callId) {
+            try { sessionStorage.setItem('spike_active_call', callId); } catch (e) {}
+        }
+        function getActiveCallFlag() {
+            try { return sessionStorage.getItem('spike_active_call'); } catch (e) { return null; }
+        }
+        function clearActiveCallFlag() {
+            try { sessionStorage.removeItem('spike_active_call'); } catch (e) {}
+        }
 
         // ===== ONLINE STATUS MANAGEMENT =====
         function updateUserOnlineStatus(status) {
@@ -1912,7 +1930,7 @@
         });
 
         // ================================================================
-        //  CALL FUNCTIONALITY (copied from chat_room.html)
+        //  CALL FUNCTIONALITY (with fixes: timer position, controls, cross-tab)
         // ================================================================
 
         // ---- Call State ----
@@ -2114,6 +2132,7 @@
             isReconnecting = false;
             reconnectAttempts = 0;
             currentCallData = null;
+            clearActiveCallFlag();
         }
 
         function cleanupCall() {
@@ -2136,6 +2155,7 @@
             document.getElementById('activeCallTimer').textContent = '00:00';
             document.getElementById('callStatusBadge').textContent = 'Connected';
             document.getElementById('callStatusBadge').className = 'call-status';
+            clearActiveCallFlag();
         }
 
         async function endCall(reason = 'ended') {
@@ -2405,9 +2425,19 @@
             callUnsubscribers.push(unsubCand);
         }
 
-        // ---- Join Call (receiver) ----
+        // ---- Join Call (receiver) with cross-tab check ----
         async function joinCall(callId, callData) {
             if (isCallActive || isCallEnding) {
+                try {
+                    const callRef = doc(db, 'calls', callId);
+                    await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
+                } catch (e) {}
+                return;
+            }
+
+            // Check if another tab is already handling this call
+            const existingFlag = getActiveCallFlag();
+            if (existingFlag && existingFlag !== callId) {
                 try {
                     const callRef = doc(db, 'calls', callId);
                     await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
@@ -2429,6 +2459,9 @@
                 callerPhoto: callData.callerPhoto || '',
                 isVideo: callData.isVideo || false
             };
+
+            // Set flag to prevent duplicate handling in other tabs
+            setActiveCallFlag(callId);
 
             const callerName = currentCallData.callerName;
             const callerPhoto = currentCallData.callerPhoto;
@@ -2454,6 +2487,7 @@
                 stopIncomingRingtone();
                 document.getElementById('incomingCallOverlay').classList.remove('active');
                 await updateDoc(callDocRef, { status: 'ended', endReason: 'declined' });
+                clearActiveCallFlag();
                 showToast('Call declined', 'info');
                 cleanupCall();
             };
@@ -2470,6 +2504,7 @@
                     else if (reason === 'timeout') msg = 'Call timed out';
                     else if (reason === 'busy') msg = 'User busy';
                     showToast(msg, 'info');
+                    clearActiveCallFlag();
                     cleanupCall();
                 }
             });
@@ -2539,7 +2574,7 @@
             callUnsubscribers.push(unsubCand);
         }
 
-        // ---- Show Active Call UI ----
+        // ---- Show Active Call UI (with controls visibility) ----
         function showActiveCallUI() {
             isCallActive = true;
             document.getElementById('incomingCallOverlay').classList.remove('active');
@@ -2549,6 +2584,17 @@
 
             const displayName = currentCallData ? currentCallData.callerName : 'User';
             const isVideo = currentCallData ? currentCallData.isVideo : false;
+
+            // Hide/show video-specific controls
+            const videoBtn = document.getElementById('callVideoBtn');
+            const flipBtn = document.getElementById('callFlipBtn');
+            if (isVideo) {
+                videoBtn.style.display = '';
+                flipBtn.style.display = '';
+            } else {
+                videoBtn.style.display = 'none';
+                flipBtn.style.display = 'none';
+            }
 
             if (!isVideo) {
                 overlay.classList.add('audio-only');
@@ -2709,6 +2755,7 @@
             if (currentUserUid) {
                 updateUserOnlineStatus(false);
             }
+            clearActiveCallFlag();
         });
 
         document.addEventListener('visibilitychange', () => {
@@ -2723,8 +2770,8 @@
             }
         });
 
-        console.log("🔥 🚀 SPIKE Chat page loaded with global call support!");
-        console.log("✨ Features: Pinned chats, Search, Sort, Online status, and now global incoming calls!");
+        console.log("🔥 🚀 SPIKE Chat page loaded with global call support and all fixes!");
+        console.log("✨ Features: Pinned chats, Search, Sort, Online status, global calls, cross-tab prevention.");
     </script>
 </body>
 </html>

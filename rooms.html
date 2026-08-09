@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
-    <!-- Content-Security-Policy removed for development. Uncomment for production: -->
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://*.firebaseapp.com https://*.firebasestorage.app https://www.googleapis.com; img-src 'self' data: https:; frame-src 'self'" /> -->
     <meta name="description" content="SPIKE Community Rooms - Browse and join chat rooms with entry fees and VIP features" />
     <title>Rooms — SPIKE Community</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
@@ -553,13 +551,13 @@
     </div>
 
     <!-- CREATE BUTTON -->
-    <button class="create-btn" onclick="openCreateModal()" aria-label="Create new room">➕ Create New Room (🪙 200)</button>
+    <button class="create-btn" onclick="openCreateModal()" aria-label="Create new room">➕ Create New Room (🪙 1,000)</button>
 
     <!-- CREATE ROOM MODAL -->
     <div class="modal-overlay" id="createModal" aria-hidden="true">
         <div class="modal-box">
             <div class="title">🏠 Create Room</div>
-            <div class="sub">Costs <strong>200 🪙</strong> to create. Set your own entry fee (default 50).</div>
+            <div class="sub">Costs <strong>1,000 🪙</strong> to create. Set your own entry fee (default 50).</div>
             <div class="field">
                 <label for="roomNameInput">Room Name</label>
                 <input type="text" id="roomNameInput" placeholder="e.g., Gaming Lounge" maxlength="40" aria-label="Room name">
@@ -570,7 +568,7 @@
             </div>
             <div class="actions">
                 <button class="cancel" onclick="closeCreateModal()">Cancel</button>
-                <button class="create" id="createRoomBtn" onclick="createRoom()">Create (200 🪙)</button>
+                <button class="create" id="createRoomBtn" onclick="createRoom()">Create (1,000 🪙)</button>
             </div>
         </div>
     </div>
@@ -865,7 +863,7 @@
         // ============================================================
         // CREATE ROOM MODAL
         // ============================================================
-        const CREATE_COST = 200;
+        const CREATE_COST = 1000; // Updated from 200 to 1000
 
         window.openCreateModal = function() {
             if (!currentUser) {
@@ -925,7 +923,7 @@
                 showToast(err.message || 'Failed to create room', 'error');
             } finally {
                 createBtn.disabled = false;
-                createBtn.textContent = `Create (${CREATE_COST} 🪙)`;
+                createBtn.textContent = `Create (${CREATE_COST.toLocaleString()} 🪙)`;
             }
         };
 
