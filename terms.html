@@ -1,538 +1,803 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Terms of Service — SPIKE</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <title>Terms · SPIKE</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
+        /* ===== PREMIUM DARK THEME ===== */
         :root {
             --bg-deep: #070b10;
             --bg-surface: #0d1520;
             --bg-card: rgba(20, 32, 48, 0.7);
             --bg-glass: rgba(13, 21, 32, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(0, 168, 132, 0.25);
+            --border-glow: rgba(0, 168, 132, 0.3);
             --primary: #00a884;
             --primary-hover: #00c29a;
-            --primary-glow: rgba(0, 168, 132, 0.35);
+            --primary-glow: rgba(0, 168, 132, 0.4);
             --accent: #0ea5e9;
             --error: #f43f5e;
-            --error-glow: rgba(244, 63, 94, 0.35);
-            --success: #00a884;
             --warning: #f59e0b;
+            --gold: #ffd700;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --transition: all 0.25s ease;
             --radius: 16px;
-            --radius-sm: 10px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --success: #34d399;
+            --success-glow: rgba(52, 211, 153, 0.3);
+            --pink: #ec4899;
+            --pink-glow: rgba(236, 72, 153, 0.3);
+            --blue: #3b82f6;
+            --blue-glow: rgba(59, 130, 246, 0.3);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; min-height: 100vh; overflow-x: hidden; background: var(--bg-deep); color: var(--text-main); font-family: var(--font-main); }
-        body { display: flex; flex-direction: column; align-items: center; position: relative; background: radial-gradient(ellipse at 20% 50%, rgba(0, 168, 132, 0.04) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.02) 0%, transparent 50%); min-height: 100dvh; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            background-image: radial-gradient(circle at 20% 30%, rgba(236, 72, 153, 0.04) 0%, transparent 60%),
+                radial-gradient(circle at 80% 70%, rgba(59, 130, 246, 0.04) 0%, transparent 50%);
+            min-height: 100vh;
+        }
 
-        ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: rgba(0, 168, 132, 0.3); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 168, 132, 0.5); }
-
-        /* --- HEADER --- */
-        .page-header {
-            width: 100%; max-width: 800px; padding: 12px 16px;
-            display: flex; justify-content: space-between; align-items: center;
+        /* ===== HEADER ===== */
+        .terms-header {
+            width: 100%;
+            max-width: 800px;
+            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             flex-shrink: 0;
-            background: var(--bg-glass); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-color);
-            position: sticky; top: 0; z-index: 100;
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            min-height: 60px;
+            gap: 8px;
         }
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .back-btn {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
-            color: var(--text-muted); width: 40px; height: 40px; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: var(--transition);
-            font-size: 1.2rem; font-family: inherit;
+
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            font-family: var(--font-main);
         }
-        .back-btn:hover { background: rgba(255,255,255,0.08); color: var(--text-main); }
-        .back-btn:active { transform: scale(0.92); }
+
+        .logo-icon {
+            font-size: clamp(28px, 4.5vw, 40px);
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: clamp(28px, 4.5vw, 40px);
+            height: clamp(28px, 4.5vw, 40px);
+            background: linear-gradient(135deg, var(--primary), #00c29a);
+            border-radius: 10px;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 2px 12px var(--primary-glow);
+            user-select: none;
+        }
 
         .logo-text {
-            font-size: clamp(1.2rem, 4vw, 1.6rem); font-weight: 900; letter-spacing: -0.5px;
+            font-size: clamp(1.4rem, 5vw, 2.2rem);
+            font-weight: 900;
+            letter-spacing: -0.5px;
             background: linear-gradient(135deg, var(--text-main) 20%, var(--primary) 80%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-decoration: none; cursor: pointer;
-        }
-        .header-right { display: flex; align-items: center; gap: 8px; }
-        .header-right .nav-link {
-            color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.82rem;
-            padding: 6px 12px; border-radius: 8px; transition: var(--transition);
-        }
-        .header-right .nav-link:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
-        .header-right .nav-link.active { color: var(--primary); background: rgba(0,168,132,0.08); }
-
-        /* --- MAIN CONTENT --- */
-        .main-content {
-            flex: 1; width: 100%; max-width: 740px; padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 32px);
-            margin: 0 auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 40px rgba(0, 168, 132, 0.1);
+            line-height: 1;
         }
 
-        /* --- HERO SECTION --- */
-        .terms-hero {
-            text-align: center; padding: 20px 0 32px 0;
-        }
-        .terms-hero .icon {
-            font-size: 3rem; display: block; margin-bottom: 12px;
-        }
-        .terms-hero h1 {
-            font-size: clamp(1.8rem, 5vw, 2.6rem); font-weight: 800; letter-spacing: -0.8px;
-            color: var(--text-main); margin-bottom: 8px;
-        }
-        .terms-hero p {
-            font-size: clamp(0.9rem, 2.2vw, 1.05rem); color: var(--text-muted); max-width: 560px; margin: 0 auto; line-height: 1.6;
-        }
-        .terms-hero .last-updated {
-            display: inline-block; margin-top: 12px; font-size: 0.8rem; color: var(--text-muted); opacity: 0.7;
-            background: rgba(255,255,255,0.03); padding: 4px 16px; border-radius: 20px; border: 1px solid var(--border-color);
-        }
-
-        /* --- CONTENT CARDS --- */
-        .terms-card {
-            background: var(--bg-card); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            border-radius: clamp(18px, 4vw, 20px);
-            padding: clamp(20px, 4vw, 28px);
-            margin-bottom: clamp(16px, 3vw, 24px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: var(--transition);
-        }
-        .terms-card:hover { border-color: rgba(0, 168, 132, 0.2); }
-
-        .terms-card .card-label {
-            font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.8px;
-            color: var(--primary); font-weight: 700; margin-bottom: 4px;
-        }
-        .terms-card h2 {
-            font-size: clamp(1.1rem, 3vw, 1.3rem); font-weight: 700; color: var(--text-main);
-            margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
-        }
-        .terms-card h2 .emoji { font-size: 1.2rem; }
-        .terms-card p {
-            font-size: clamp(0.85rem, 2.2vw, 0.95rem); color: var(--text-muted); line-height: 1.7;
-            margin-bottom: 10px;
-        }
-        .terms-card p:last-child { margin-bottom: 0; }
-        .terms-card ul {
-            list-style: none; padding: 0; margin: 8px 0 4px 0;
-        }
-        .terms-card ul li {
-            padding: 6px 0 6px 28px; position: relative; font-size: clamp(0.85rem, 2.2vw, 0.95rem);
-            color: var(--text-muted); line-height: 1.6;
-        }
-        .terms-card ul li::before {
-            content: '▸'; position: absolute; left: 4px; color: var(--primary); font-weight: 700;
-        }
-        .terms-card ul li strong { color: var(--text-main); }
-
-        /* --- ACCEPTANCE CHECKBOX --- */
-        .acceptance-box {
-            background: rgba(0,168,132,0.04); border: 1px solid rgba(0,168,132,0.15);
-            border-radius: 14px; padding: 16px 18px; margin-top: 4px;
-            display: flex; align-items: flex-start; gap: 14px;
-        }
-        .acceptance-box input[type="checkbox"] {
-            appearance: none; -webkit-appearance: none; width: 20px; height: 20px;
-            background: rgba(9,10,15,0.75); border: 2px solid var(--border-color); border-radius: 6px;
-            outline: none; cursor: pointer; transition: var(--transition);
-            flex-shrink: 0; margin-top: 2px;
-        }
-        .acceptance-box input[type="checkbox"]:checked {
-            background: var(--primary); border-color: var(--primary);
-        }
-        .acceptance-box input[type="checkbox"]:checked::after {
-            content: '✓'; display: block; color: white; font-size: 0.8rem; font-weight: 800;
-            text-align: center; line-height: 18px;
-        }
-        .acceptance-box label {
-            font-size: clamp(0.85rem, 2.2vw, 0.95rem); color: var(--text-muted); line-height: 1.6;
-            cursor: pointer;
-        }
-        .acceptance-box label strong { color: var(--text-main); }
-        .acceptance-box label .accept-btn {
-            background: var(--primary); color: white; border: none; padding: 8px 20px;
-            border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
-            transition: var(--transition); font-family: inherit; margin-top: 6px;
-        }
-        .acceptance-box label .accept-btn:hover { background: var(--primary-hover); }
-        .acceptance-box label .accept-btn:active { transform: scale(0.95); }
-
-        /* --- BACK TO TOP --- */
-        .back-to-top {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border-radius: 12px;
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color);
-            color: var(--text-muted); cursor: pointer; transition: var(--transition);
-            font-family: inherit; font-weight: 600; font-size: 0.85rem;
-            margin: 12px 0 8px 0;
-        }
-        .back-to-top:hover { background: rgba(255,255,255,0.06); color: var(--text-main); border-color: rgba(255,255,255,0.12); }
-        .back-to-top:active { transform: scale(0.95); }
-
-        /* --- FOOTER --- */
-        .page-footer {
-            width: 100%; max-width: 800px; padding: 14px 16px;
-            display: flex; justify-content: space-between; align-items: center;
-            background: var(--bg-glass); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-top: 1px solid var(--border-color);
-            font-size: 0.78rem; color: var(--text-muted);
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: clamp(4px, 1.5vw, 8px);
             flex-shrink: 0;
         }
-        .footer-links { display: flex; gap: 14px; }
-        .footer-links a { color: var(--text-muted); text-decoration: none; transition: var(--transition); cursor: pointer; }
-        .footer-links a:hover { color: var(--text-main); }
-        .footer-links a.active { color: var(--primary); }
 
-        /* --- TOAST --- */
+        .back-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: clamp(36px, 9vw, 40px);
+            height: clamp(36px, 9vw, 40px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            cursor: pointer;
+            transition: var(--transition);
+            touch-action: manipulation;
+            min-width: 36px;
+            min-height: 36px;
+        }
+        .back-btn:active {
+            transform: scale(0.9);
+        }
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        /* ===== TERMS CARD ===== */
+        .terms-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 32px 28px;
+            max-width: 780px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            animation: cardIn 0.5s ease-out;
+            position: relative;
+            overflow: hidden;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        .terms-card::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terms-card::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .terms-card::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .terms-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .terms-card::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.04) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        @keyframes cardIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .terms-card .brand {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .terms-card .brand .logo {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--text-main) 20%, var(--primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+            display: inline-block;
+        }
+        .terms-card .brand .sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .terms-card .tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        .terms-card .tabs .tab {
+            flex: 1;
+            padding: 8px;
+            border-radius: 10px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: var(--transition);
+        }
+        .terms-card .tabs .tab.active {
+            background: var(--primary);
+            color: var(--bg-deep);
+            box-shadow: 0 0 16px var(--primary-glow);
+        }
+        .terms-card .tabs .tab:hover:not(.active) {
+            color: var(--text-main);
+        }
+
+        .terms-card .content {
+            position: relative;
+            z-index: 1;
+        }
+        .terms-card .content .panel {
+            display: none;
+            animation: fadePanel 0.3s ease;
+        }
+        .terms-card .content .panel.active {
+            display: block;
+        }
+
+        @keyframes fadePanel {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .terms-card .content .panel h2 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+        .terms-card .content .panel .last-updated {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+        .terms-card .content .panel p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+        .terms-card .content .panel h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 16px;
+            margin-bottom: 4px;
+        }
+        .terms-card .content .panel ul {
+            list-style: none;
+            padding: 0;
+            margin: 4px 0 12px;
+        }
+        .terms-card .content .panel ul li {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            padding: 4px 0 4px 20px;
+            position: relative;
+        }
+        .terms-card .content .panel ul li::before {
+            content: '•';
+            position: absolute;
+            left: 4px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .terms-card .content .panel .highlight {
+            background: linear-gradient(135deg, rgba(0, 168, 132, 0.08), rgba(59, 130, 246, 0.06));
+            border: 1px solid rgba(0, 168, 132, 0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin: 8px 0 12px;
+        }
+        .terms-card .content .panel .highlight strong {
+            color: var(--text-main);
+        }
+
+        .terms-card .content .panel .divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 16px 0;
+        }
+
+        .terms-card .footer-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+        }
+        .terms-card .footer-actions button {
+            padding: 10px 28px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: var(--transition);
+            min-height: 44px;
+        }
+        .terms-card .footer-actions .primary-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        .terms-card .footer-actions .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 32px var(--primary-glow);
+        }
+        .terms-card .footer-actions .secondary-btn {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+        .terms-card .footer-actions .secondary-btn:hover {
+            border-color: var(--primary);
+            color: var(--text-main);
+        }
+
+        /* ===== TOAST ===== */
         .toast-container {
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-20px);
-            z-index: 5000; width: calc(100% - 32px); max-width: 400px;
-            opacity: 0; visibility: hidden; transition: var(--transition); pointer-events: none;
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            z-index: 99999;
+            width: calc(100% - 32px);
+            max-width: 400px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
         }
-        .toast-container.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .toast-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
         .toast-content {
-            background: var(--bg-surface); backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color); border-radius: 16px;
-            padding: 14px 18px; display: flex; align-items: center; gap: 14px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            background: var(--bg-glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
         }
-        .toast-icon {
-            width: 28px; height: 28px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 800; flex-shrink: 0;
+        .toast-content .icon {
+            font-size: 1.2rem;
         }
-        .toast-container.success .toast-icon { background: rgba(0,168,132,0.2); color: var(--success); }
-        .toast-container.error .toast-icon { background: rgba(244,63,94,0.2); color: var(--error); }
-        .toast-text { font-size: 0.9rem; font-weight: 600; color: var(--text-main); flex: 1; }
+        .toast-content .msg {
+            flex: 1;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .toast-content .close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 4px;
+        }
 
-        /* --- RESPONSIVE --- */
-        @media (max-width: 600px) {
-            .page-footer { flex-direction: column; gap: 10px; text-align: center; }
-            .acceptance-box { flex-direction: column; align-items: stretch; }
-        }
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .page-header { padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
-            .header-right .nav-link { font-size: 0.7rem; padding: 4px 8px; }
-            .back-btn { width: 34px; height: 34px; font-size: 1rem; }
-            .terms-card { padding: 16px; }
+            body {
+                padding: 12px;
+            }
+            .terms-card {
+                padding: 22px 16px;
+                max-height: calc(100vh - 100px);
+            }
+            .terms-card .brand .logo {
+                font-size: 1.6rem;
+            }
+            .terms-card .content .panel h2 {
+                font-size: 1rem;
+            }
+            .terms-card .content .panel p {
+                font-size: 0.8rem;
+            }
+            .terms-card .content .panel ul li {
+                font-size: 0.78rem;
+            }
+            .terms-card .footer-actions button {
+                padding: 8px 18px;
+                font-size: 0.8rem;
+                min-height: 38px;
+                flex: 1;
+            }
+            .terms-card .tabs .tab {
+                font-size: 0.7rem;
+                padding: 6px;
+            }
         }
+
         @media (pointer: coarse) {
-            .back-btn, .back-to-top { min-height: 44px; min-width: 44px; }
+            .terms-card .footer-actions button,
+            .terms-card .tabs .tab {
+                min-height: 44px;
+            }
         }
     </style>
-
-    <script>
-        // ===== TOAST =====
-        let toastTimeout;
-
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('globalToast');
-            const toastText = document.getElementById('toastText');
-            const toastIcon = document.getElementById('toastIcon');
-            toast.className = `toast-container ${type} active`;
-            toastText.textContent = message;
-            toastIcon.textContent = type === 'success' ? '✓' : '✕';
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('active');
-            }, 3500);
-        }
-
-        function dismissToast() {
-            const toast = document.getElementById('globalToast');
-            toast.classList.remove('active');
-            clearTimeout(toastTimeout);
-        }
-
-        // ===== ACCEPT TERMS =====
-        function acceptTerms() {
-            const checkbox = document.getElementById('acceptCheckbox');
-            if (!checkbox.checked) {
-                showToast('Please check the box to accept the Terms of Service.', 'error');
-                return;
-            }
-            localStorage.setItem('spikeTermsAccepted', 'true');
-            showToast('✅ Terms accepted! Thank you for choosing SPIKE.', 'success');
-            
-            // Optional: redirect to home or dashboard
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 1200);
-        }
-
-        // ===== CHECK IF TERMS WERE ALREADY ACCEPTED =====
-        function checkTermsAccepted() {
-            const accepted = localStorage.getItem('spikeTermsAccepted') === 'true';
-            if (accepted) {
-                const checkbox = document.getElementById('acceptCheckbox');
-                if (checkbox) checkbox.checked = true;
-            }
-            return accepted;
-        }
-
-        // ===== BACK TO TOP =====
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ===== INIT =====
-        document.addEventListener('DOMContentLoaded', () => {
-            checkTermsAccepted();
-            console.log('📄 SPIKE Terms of Service loaded');
-            console.log('📅 Last updated: March 2026');
-        });
-    </script>
 </head>
 <body>
 
-    <!-- ===== TOAST ===== -->
-    <div id="globalToast" class="toast-container" onclick="dismissToast()">
-        <div class="toast-content">
-            <div id="toastIcon" class="toast-icon">✓</div>
-            <div id="toastText" class="toast-text">Notification</div>
-        </div>
-    </div>
-
     <!-- ===== HEADER ===== -->
-    <header class="page-header">
-        <div class="header-left">
-            <button class="back-btn" onclick="window.location.href='index.html'" aria-label="Back">←</button>
-            <a href="index.html" class="logo-text">SPIKE</a>
+    <header class="terms-header">
+        <div class="logo-wrapper" onclick="window.location.href='feed.html'">
+            <span class="logo-icon">⚡</span>
+            <span class="logo-text">SPIKE</span>
         </div>
         <div class="header-right">
-            <a href="index.html" class="nav-link">Home</a>
-            <a href="privacy.html" class="nav-link">Privacy</a>
-            <a href="terms.html" class="nav-link active">Terms</a>
+            <button class="back-btn" onclick="goBack()">←</button>
         </div>
     </header>
 
-    <!-- ===== MAIN ===== -->
-    <main class="main-content">
-
-        <!-- Hero -->
-        <div class="terms-hero">
-            <span class="icon">📜</span>
-            <h1>Terms of Service</h1>
-            <p>Welcome to SPIKE! By using our platform, you agree to these terms. Please read them carefully.</p>
-            <span class="last-updated">📅 Last Updated: March 2026</span>
+    <!-- ===== TERMS CARD ===== -->
+    <div class="terms-card">
+        <div class="brand">
+            <div class="logo">⚡ SPIKE</div>
+            <div class="sub">Terms &amp; Policies</div>
         </div>
 
-        <!-- ===== CARD 1: Introduction ===== -->
-        <div class="terms-card">
-            <div class="card-label">Agreement</div>
-            <h2><span class="emoji">🤝</span> Acceptance of Terms</h2>
-            <p>
-                By creating an account, accessing, or using SPIKE ("the Service"), you agree to be bound by these Terms of Service 
-                ("Terms"). If you do not agree to these Terms, please do not use the Service.
-            </p>
-            <p>
-                These Terms apply to all users, including those who post content, send messages, or simply browse. We reserve the right 
-                to update or modify these Terms at any time. Continued use after changes constitutes acceptance of the updated Terms.
-            </p>
+        <div class="tabs" id="tabsContainer">
+            <button class="tab active" data-tab="terms" onclick="switchTab('terms')">Terms of Service</button>
+            <button class="tab" data-tab="privacy" onclick="switchTab('privacy')">Privacy Policy</button>
         </div>
 
-        <!-- ===== CARD 2: Account Registration ===== -->
-        <div class="terms-card">
-            <div class="card-label">Accounts</div>
-            <h2><span class="emoji">👤</span> Account Registration</h2>
-            <p>To access certain features, you must create an account. You agree to:</p>
-            <ul>
-                <li><strong>Provide Accurate Information</strong> — You must provide truthful and complete information during registration.</li>
-                <li><strong>Maintain Security</strong> — You are responsible for safeguarding your password and account credentials.</li>
-                <li><strong>Notify Us</strong> — Immediately notify us of any unauthorized use of your account.</li>
-                <li><strong>Age Requirement</strong> — You must be at least 13 years old (or 16 in the EU) to use SPIKE.</li>
-                <li><strong>One Account</strong> — You may only have one active account. Multiple accounts are not permitted.</li>
-            </ul>
-            <p>
-                We reserve the right to suspend or terminate accounts that violate these Terms or pose a security risk.
-            </p>
-        </div>
+        <div class="content">
 
-        <!-- ===== CARD 3: User Content ===== -->
-        <div class="terms-card">
-            <div class="card-label">Content</div>
-            <h2><span class="emoji">📝</span> User-Generated Content</h2>
-            <p>
-                You retain ownership of the content you create and share on SPIKE. By posting content, you grant SPIKE a 
-                non-exclusive, worldwide, royalty-free license to use, display, and distribute your content for the purpose 
-                of operating and improving the Service.
-            </p>
-            <p>You agree not to post content that:</p>
-            <ul>
-                <li>Is illegal, defamatory, or promotes violence.</li>
-                <li>Infringes on intellectual property rights.</li>
-                <li>Contains hate speech, harassment, or bullying.</li>
-                <li>Includes explicit or sexually suggestive material.</li>
-                <li>Spreads misinformation or deceptive content.</li>
-                <li>Violates any applicable laws or regulations.</li>
-            </ul>
-            <p>
-                We reserve the right to remove any content that violates these Terms or is otherwise objectionable.
-            </p>
-        </div>
+            <!-- ===== TERMS OF SERVICE ===== -->
+            <div class="panel active" id="termsPanel">
+                <h2>Terms of Service</h2>
+                <div class="last-updated">Last updated: August 10, 2026</div>
 
-        <!-- ===== CARD 4: Acceptable Use ===== -->
-        <div class="terms-card">
-            <div class="card-label">Conduct</div>
-            <h2><span class="emoji">✅</span> Acceptable Use</h2>
-            <p>You agree to use SPIKE in a responsible and lawful manner. You will not:</p>
-            <ul>
-                <li>Attempt to hack, disrupt, or compromise the security of the Service.</li>
-                <li>Use automated systems (bots, scrapers) to access or collect data.</li>
-                <li>Impersonate other users or entities.</li>
-                <li>Engage in spamming, phishing, or other malicious activities.</li>
-                <li>Share or post personal information of others without consent.</li>
-                <li>Interfere with the experience of other users.</li>
-            </ul>
-            <p>
-                Violation of these rules may result in immediate suspension or termination of your account.
-            </p>
-        </div>
+                <p>
+                    Welcome to <strong>Spike</strong>! By creating an account, using our platform, or interacting with our community,
+                    you agree to be bound by these Terms of Service. Please read them carefully.
+                </p>
 
-        <!-- ===== CARD 5: Intellectual Property ===== -->
-        <div class="terms-card">
-            <div class="card-label">IP Rights</div>
-            <h2><span class="emoji">©️</span> Intellectual Property</h2>
-            <p>
-                SPIKE and its original content, features, and functionality are owned by MediaChat, Inc. and are protected 
-                by international copyright, trademark, and other intellectual property laws.
-            </p>
-            <p>You may not:</p>
-            <ul>
-                <li>Copy, modify, or distribute SPIKE's code, design, or branding without permission.</li>
-                <li>Reverse engineer or attempt to extract the source code.</li>
-                <li>Use SPIKE's trademarks or logos without prior written consent.</li>
-            </ul>
-            <p>
-                All content uploaded by users remains the intellectual property of the respective creators, subject to the 
-                license granted above.
-            </p>
-        </div>
+                <div class="highlight">
+                    <strong>📌 Quick Summary:</strong> Spike is a community platform where users connect, share, and interact.
+                    Your Lifetime SP ID is your permanent identity. We value your privacy and security.
+                </div>
 
-        <!-- ===== CARD 6: Privacy ===== -->
-        <div class="terms-card">
-            <div class="card-label">Privacy</div>
-            <h2><span class="emoji">🔒</span> Privacy &amp; Data Protection</h2>
-            <p>
-                Your privacy is important to us. Our <a href="privacy.html" style="color:var(--primary);text-decoration:none;font-weight:600;">Privacy Policy</a> 
-                explains how we collect, use, and protect your personal data. By using SPIKE, you consent to our data practices 
-                as described in that policy.
-            </p>
-            <p>
-                We implement industry-standard security measures to protect your data, but no method of transmission over the 
-                internet is 100% secure. You acknowledge that you share data at your own risk.
-            </p>
-        </div>
+                <h3>1. Acceptance of Terms</h3>
+                <p>
+                    By registering for or using Spike, you agree to these Terms. If you do not agree, please do not use the platform.
+                    We reserve the right to update these Terms at any time. Continued use after changes constitutes acceptance.
+                </p>
 
-        <!-- ===== CARD 7: Termination ===== -->
-        <div class="terms-card">
-            <div class="card-label">Termination</div>
-            <h2><span class="emoji">⛔</span> Account Termination</h2>
-            <p>
-                You may delete your account at any time through your profile settings. Upon deletion, your content will be 
-                removed from public view within a reasonable timeframe.
-            </p>
-            <p>
-                We may suspend or terminate your account without notice if you violate these Terms, pose a security risk, 
-                or engage in unlawful behavior. We may also terminate accounts that are inactive for a prolonged period.
-            </p>
-            <p>
-                Upon termination, your right to use the Service immediately ceases. Data that is required for legal or 
-                operational reasons may be retained in accordance with our Privacy Policy.
-            </p>
-        </div>
+                <h3>2. Your Account</h3>
+                <ul>
+                    <li><strong>Lifetime SP ID:</strong> Upon registration, you receive a permanent, non-transferable SP ID. This is your identity on Spike.</li>
+                    <li><strong>Account Security:</strong> You are responsible for maintaining the confidentiality of your credentials. Notify us immediately of any unauthorized use.</li>
+                    <li><strong>Accuracy:</strong> You must provide accurate and complete information. Your email must be verified.</li>
+                    <li><strong>Age Requirement:</strong> You must be at least 13 years old (or the minimum age in your jurisdiction) to use Spike.</li>
+                </ul>
 
-        <!-- ===== CARD 8: Disclaimer & Liability ===== -->
-        <div class="terms-card">
-            <div class="card-label">Disclaimer</div>
-            <h2><span class="emoji">⚠️</span> Disclaimer of Warranties</h2>
-            <p>
-                SPIKE is provided "as is" and "as available" without warranties of any kind, either express or implied. 
-                We do not guarantee that the Service will be error-free, secure, or uninterrupted.
-            </p>
-            <p>
-                To the fullest extent permitted by law, SPIKE and its affiliates are not liable for any indirect, incidental, 
-                special, or consequential damages arising from your use of the Service. This includes loss of data, profits, 
-                or business opportunities.
-            </p>
-            <p>
-                Some jurisdictions do not allow the exclusion of certain warranties, so this limitation may not apply to you.
-            </p>
-        </div>
+                <h3>3. User Conduct</h3>
+                <ul>
+                    <li><strong>Respect Others:</strong> Treat all members with respect. Harassment, hate speech, and bullying are strictly prohibited.</li>
+                    <li><strong>No Illegal Activity:</strong> Do not use Spike for any unlawful purpose or to share illegal content.</li>
+                    <li><strong>No Impersonation:</strong> Do not impersonate other users, public figures, or Spike staff.</li>
+                    <li><strong>No Spam:</strong> Unsolicited advertising, promotional content, or spam is not allowed.</li>
+                    <li><strong>Intellectual Property:</strong> Do not share content that infringes on others' intellectual property rights.</li>
+                </ul>
 
-        <!-- ===== CARD 9: Governing Law ===== -->
-        <div class="terms-card">
-            <div class="card-label">Jurisdiction</div>
-            <h2><span class="emoji">⚖️</span> Governing Law</h2>
-            <p>
-                These Terms are governed by and construed in accordance with the laws of the State of California, 
-                without regard to its conflict of law provisions. Any legal disputes shall be resolved exclusively in 
-                the courts of San Francisco, California.
-            </p>
-            <p>
-                If any provision of these Terms is found to be unenforceable, the remaining provisions will continue in 
-                full force and effect.
-            </p>
-        </div>
+                <h3>4. Content Ownership &amp; License</h3>
+                <ul>
+                    <li><strong>Your Content:</strong> You retain ownership of the content you create and share on Spike.</li>
+                    <li><strong>License to Spike:</strong> By posting content, you grant Spike a worldwide, non-exclusive, royalty-free license to host, display, and distribute your content within the platform.</li>
+                    <li><strong>Removal:</strong> We reserve the right to remove any content that violates these Terms or is otherwise objectionable.</li>
+                </ul>
 
-        <!-- ===== CARD 10: Acceptance ===== -->
-        <div class="terms-card">
-            <div class="card-label">Agreement</div>
-            <h2><span class="emoji">✍️</span> Acknowledge &amp; Accept</h2>
-            <p>
-                By checking the box below, you acknowledge that you have read, understood, and agree to be bound by these 
-                Terms of Service and our <a href="privacy.html" style="color:var(--primary);text-decoration:none;font-weight:600;">Privacy Policy</a>.
-            </p>
+                <h3>5. SP Coins &amp; Rewards</h3>
+                <ul>
+                    <li><strong>SP Coins:</strong> Spike may offer a virtual currency ("SP Coins") for engagement, rewards, and promotions.</li>
+                    <li><strong>Non-Transferable:</strong> SP Coins are non-transferable between users and have no real-world value.</li>
+                    <li><strong>No Manipulation:</strong> Attempting to manipulate SP Coins through automated means or exploits is prohibited.</li>
+                </ul>
 
-            <div class="acceptance-box">
-                <input type="checkbox" id="acceptCheckbox">
-                <label for="acceptCheckbox">
-                    <strong>I have read and agree to the Terms of Service and Privacy Policy.</strong>
-                    <br>
-                    <button class="accept-btn" onclick="acceptTerms()">✅ Accept &amp; Continue</button>
-                </label>
+                <h3>6. Privacy</h3>
+                <p>
+                    Your privacy matters to us. Please review our <strong>Privacy Policy</strong> (available in the tab above) to understand
+                    how we collect, use, and protect your personal data.
+                </p>
+
+                <h3>7. Termination</h3>
+                <ul>
+                    <li><strong>By You:</strong> You may delete your account at any time by contacting support. Your SP ID cannot be reused.</li>
+                    <li><strong>By Us:</strong> We reserve the right to suspend or terminate accounts that violate these Terms or pose a risk to the community.</li>
+                </ul>
+
+                <h3>8. Disclaimer &amp; Limitation of Liability</h3>
+                <ul>
+                    <li><strong>As-Is:</strong> Spike is provided "as-is" without warranties of any kind.</li>
+                    <li><strong>No Liability:</strong> To the fullest extent permitted by law, Spike and its affiliates are not liable for any indirect, incidental, or consequential damages arising from your use of the platform.</li>
+                </ul>
+
+                <h3>9. Governing Law</h3>
+                <p>
+                    These Terms are governed by the laws of the jurisdiction in which Spike operates, without regard to conflict of law principles.
+                </p>
+
+                <h3>10. Contact</h3>
+                <p>
+                    For any questions regarding these Terms, please reach out to us at <strong style="color:var(--text-main);">support@spike.com</strong>.
+                </p>
+
+                <div class="divider"></div>
+
+                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;">
+                    By using Spike, you acknowledge that you have read, understood, and agree to these Terms of Service.
+                </p>
             </div>
 
-            <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-                <button class="back-to-top" onclick="scrollToTop()">
-                    ↑ Back to Top
-                </button>
-                <button class="back-to-top" onclick="window.location.href='index.html'">
-                    🏠 Home
-                </button>
+            <!-- ===== PRIVACY POLICY ===== -->
+            <div class="panel" id="privacyPanel">
+                <h2>Privacy Policy</h2>
+                <div class="last-updated">Last updated: August 10, 2026</div>
+
+                <p>
+                    At <strong>Spike</strong>, we take your privacy seriously. This Privacy Policy explains how we collect, use, and safeguard
+                    your personal information when you use our platform.
+                </p>
+
+                <div class="highlight">
+                    <strong>🔒 Our Promise:</strong> We will never sell your personal data. Your trust is our priority.
+                </div>
+
+                <h3>1. Information We Collect</h3>
+                <ul>
+                    <li><strong>Account Data:</strong> Name, email address, SP ID, profile information, and account settings.</li>
+                    <li><strong>Usage Data:</strong> How you interact with Spike, including messages, rooms, and features you use.</li>
+                    <li><strong>Device Data:</strong> Device type, browser version, IP address, and operating system for analytics and security.</li>
+                    <li><strong>Content:</strong> Messages, posts, and files you choose to share on the platform.</li>
+                </ul>
+
+                <h3>2. How We Use Your Information</h3>
+                <ul>
+                    <li><strong>To Provide Services:</strong> To operate, maintain, and improve Spike.</li>
+                    <li><strong>To Communicate:</strong> To send you updates, security alerts, and support messages.</li>
+                    <li><strong>To Personalize:</strong> To tailor your experience and show relevant content.</li>
+                    <li><strong>For Security:</strong> To detect and prevent fraud, abuse, and unauthorized access.</li>
+                    <li><strong>To Comply with Law:</strong> To meet legal obligations and respond to lawful requests.</li>
+                </ul>
+
+                <h3>3. Data Storage &amp; Security</h3>
+                <ul>
+                    <li><strong>Secure Infrastructure:</strong> Your data is stored on secured servers with industry-standard encryption.</li>
+                    <li><strong>Access Control:</strong> Only authorized personnel have access to user data, and only when necessary.</li>
+                    <li><strong>Data Retention:</strong> We retain your data for as long as your account is active. You may request deletion at any time.</li>
+                </ul>
+
+                <h3>4. Sharing Your Information</h3>
+                <ul>
+                    <li><strong>We Do Not Sell Your Data:</strong> We never sell or rent your personal information to third parties.</li>
+                    <li><strong>Service Providers:</strong> We may share data with trusted partners who help us operate Spike (e.g., hosting, analytics).</li>
+                    <li><strong>Legal Requirements:</strong> We may disclose information if required by law or to protect our rights.</li>
+                    <li><strong>Aggregated Data:</strong> We may share anonymized, aggregated data for research or analytics purposes.</li>
+                </ul>
+
+                <h3>5. Your Choices &amp; Rights</h3>
+                <ul>
+                    <li><strong>Access &amp; Update:</strong> You can view and update your profile information at any time.</li>
+                    <li><strong>Delete Account:</strong> You may request account deletion. Your SP ID will be permanently retired.</li>
+                    <li><strong>Opt-Out:</strong> You can opt out of promotional emails at any time.</li>
+                    <li><strong>Data Portability:</strong> You may request a copy of your data in a portable format.</li>
+                </ul>
+
+                <h3>6. Cookies &amp; Tracking</h3>
+                <ul>
+                    <li><strong>Essential Cookies:</strong> Used for authentication and platform functionality.</li>
+                    <li><strong>Analytics:</strong> We use cookies to understand usage patterns and improve our service.</li>
+                    <li><strong>Preferences:</strong> Cookies store your settings and preferences for a better experience.</li>
+                    <li><strong>Control:</strong> You can manage cookies in your browser settings.</li>
+                </ul>
+
+                <h3>7. Children's Privacy</h3>
+                <p>
+                    Spike is not intended for children under 13. We do not knowingly collect personal information from children.
+                    If you believe a child has provided data to us, please contact us immediately.
+                </p>
+
+                <h3>8. International Data Transfers</h3>
+                <p>
+                    Your data may be stored and processed in countries outside your jurisdiction. We take steps to ensure
+                    your data is protected in accordance with this Privacy Policy and applicable laws.
+                </p>
+
+                <h3>9. Updates to This Policy</h3>
+                <p>
+                    We may update this Privacy Policy from time to time. We will notify you of significant changes via email
+                    or platform notification. Your continued use of Spike constitutes acceptance of the updated policy.
+                </p>
+
+                <h3>10. Contact Us</h3>
+                <p>
+                    If you have any questions, concerns, or requests regarding your privacy, please contact us at:
+                    <br />
+                    <strong style="color:var(--text-main);">privacy@spike.com</strong>
+                    <br />
+                    We will respond to all inquiries within 30 days.
+                </p>
+
+                <div class="divider"></div>
+
+                <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;">
+                    Your privacy is not just a policy—it's our promise.
+                </p>
             </div>
+
         </div>
 
-    </main>
-
-    <!-- ===== FOOTER ===== -->
-    <footer class="page-footer">
-        <div>&copy; 2026 SPIKE. All rights reserved.</div>
-        <div class="footer-links">
-            <a href="index.html">Home</a>
-            <a href="privacy.html">Privacy</a>
-            <a href="terms.html" class="active">Terms</a>
-            <a href="#" onclick="showToast('Support portal coming soon!', 'success')">Support</a>
+        <div class="footer-actions">
+            <button class="secondary-btn" onclick="goBack()">← Back to Spike</button>
+            <button class="primary-btn" onclick="acceptTerms()">✓ I Understand</button>
         </div>
-    </footer>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast-container" id="toast">
+        <div class="toast-content">
+            <span class="icon" id="toastIcon">✓</span>
+            <span class="msg" id="toastMsg">Done</span>
+            <button class="close" onclick="dismissToast()">✕</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('#tabsContainer .tab').forEach(el => {
+                el.classList.toggle('active', el.dataset.tab === tab);
+            });
+            document.getElementById('termsPanel').classList.toggle('active', tab === 'terms');
+            document.getElementById('privacyPanel').classList.toggle('active', tab === 'privacy');
+        }
+        window.switchTab = switchTab;
+
+        // ============================================================
+        // TOAST SYSTEM
+        // ============================================================
+        let toastTimeout = null;
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msgEl = document.getElementById('toastMsg');
+
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+
+            t.className = 'toast-container';
+            const icons = { success: '✓', error: '✕', warning: '⚠️', info: 'ℹ️' };
+            icon.textContent = icons[type] || '✓';
+            msgEl.textContent = msg;
+
+            void t.offsetWidth;
+            t.classList.add('active');
+
+            toastTimeout = setTimeout(() => {
+                t.classList.remove('active');
+            }, 3000);
+        }
+
+        function dismissToast() {
+            const t = document.getElementById('toast');
+            t.classList.remove('active');
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+        }
+        window.dismissToast = dismissToast;
+        window.showToast = showToast;
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function goBack() {
+            window.history.back();
+        }
+        window.goBack = goBack;
+
+        function acceptTerms() {
+            showToast('Thank you for reading our Terms &amp; Privacy Policy!', 'success');
+            setTimeout(() => {
+                window.history.back();
+            }, 800);
+        }
+        window.acceptTerms = acceptTerms;
+
+        // ============================================================
+        // KEYBOARD SHORTCUTS
+        // ============================================================
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                goBack();
+            }
+            if (e.key === 'Enter') {
+                const activeTab = document.querySelector('#tabsContainer .tab.active');
+                if (activeTab) {
+                    const tab = activeTab.dataset.tab;
+                    const nextTab = tab === 'terms' ? 'privacy' : 'terms';
+                    switchTab(nextTab);
+                    document.querySelector(`#tabsContainer .tab[data-tab="${nextTab}"]`).focus();
+                }
+            }
+        });
+
+        console.log('📄 SPIKE — Terms of Service & Privacy Policy');
+        console.log('🔒 Press ESC to go back | Press ENTER to switch tabs');
+    </script>
 
 </body>
 </html>

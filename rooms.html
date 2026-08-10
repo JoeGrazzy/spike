@@ -10,16 +10,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
+        /* ===== PREMIUM DARK THEME ===== */
         :root {
             --bg-deep: #070b10;
             --bg-surface: #0d1520;
-            --bg-card: rgba(20,32,48,0.7);
-            --bg-glass: rgba(13,21,32,0.85);
-            --border-color: rgba(255,255,255,0.08);
-            --border-glow: rgba(0,168,132,0.3);
+            --bg-card: rgba(20, 32, 48, 0.7);
+            --bg-glass: rgba(13, 21, 32, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 168, 132, 0.3);
             --primary: #00a884;
             --primary-hover: #00c29a;
-            --primary-glow: rgba(0,168,132,0.4);
+            --primary-glow: rgba(0, 168, 132, 0.4);
             --accent: #0ea5e9;
             --error: #f43f5e;
             --warning: #f59e0b;
@@ -29,7 +30,10 @@
             --font-main: 'Plus Jakarta Sans', sans-serif;
             --transition: all 0.25s ease;
             --radius: 16px;
-            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --success: #34d399;
+            --success-glow: rgba(52, 211, 153, 0.3);
+            --premium-gradient: linear-gradient(135deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff);
         }
 
         * {
@@ -38,7 +42,8 @@
             padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
-        html, body {
+        html,
+        body {
             width: 100%;
             min-height: 100vh;
             background: var(--bg-deep);
@@ -54,7 +59,7 @@
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* HEADER */
+        /* ===== HEADER ===== */
         .header {
             width: 100%;
             max-width: 620px;
@@ -85,8 +90,15 @@
             align-items: center;
             justify-content: center;
             border-radius: 8px;
+            transition: var(--transition);
         }
-        .header .back:active { transform: scale(0.92); }
+        .header .back:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .header .back:active {
+            transform: scale(0.92);
+        }
         .header .logo {
             font-size: 1.2rem;
             font-weight: 800;
@@ -100,8 +112,8 @@
             gap: 8px;
         }
         .header .coins {
-            background: rgba(0,168,132,0.12);
-            border: 1px solid rgba(0,168,132,0.15);
+            background: rgba(0, 168, 132, 0.12);
+            border: 1px solid rgba(0, 168, 132, 0.15);
             padding: 2px 12px;
             border-radius: 20px;
             font-weight: 700;
@@ -125,7 +137,7 @@
             box-shadow: 0 0 8px var(--success-glow);
         }
 
-        /* TOOLBAR: Search + Sort */
+        /* ===== TOOLBAR ===== */
         .toolbar {
             width: 100%;
             max-width: 620px;
@@ -147,7 +159,7 @@
         }
         .toolbar .search-wrap:focus-within {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0,168,132,0.08);
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.08);
         }
         .toolbar .search-wrap input {
             flex: 1;
@@ -167,6 +179,18 @@
             color: var(--text-muted);
             font-size: 1rem;
             margin-right: 6px;
+        }
+        .toolbar .search-wrap .clear-search {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 4px;
+            display: none;
+        }
+        .toolbar .search-wrap .clear-search.visible {
+            display: block;
         }
 
         .toolbar .sort-select {
@@ -192,7 +216,104 @@
             border-color: var(--primary);
         }
 
-        /* ROOM GRID */
+        .toolbar .refresh-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            min-height: 36px;
+            min-width: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .toolbar .refresh-btn:hover {
+            color: var(--text-main);
+            border-color: var(--primary);
+        }
+        .toolbar .refresh-btn:active {
+            transform: scale(0.92);
+        }
+        .toolbar .refresh-btn.spinning {
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== FILTER CHIPS ===== */
+        .filter-chips {
+            width: 100%;
+            max-width: 620px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+        .filter-chips .chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .filter-chips .chip:hover {
+            border-color: var(--primary);
+            color: var(--text-main);
+        }
+        .filter-chips .chip.active {
+            background: var(--primary);
+            color: var(--bg-deep);
+            border-color: var(--primary);
+        }
+
+        /* ===== RECENT SECTION ===== */
+        .recent-section {
+            width: 100%;
+            max-width: 620px;
+            margin-bottom: 12px;
+        }
+        .recent-section .recent-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .recent-section .recent-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .recent-section .recent-chips .chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        .recent-section .recent-chips .chip:hover {
+            border-color: var(--primary);
+            background: rgba(0, 168, 132, 0.06);
+        }
+
+        /* ===== ROOM GRID ===== */
         .room-grid {
             width: 100%;
             max-width: 620px;
@@ -201,21 +322,53 @@
             gap: 10px;
         }
 
+        /* Skeleton loading */
+        .room-card.skeleton {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .room-card.skeleton .skeleton-line {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            height: 12px;
+            margin-bottom: 6px;
+            animation: shimmer 1.5s infinite;
+        }
+        .room-card.skeleton .skeleton-line:last-child {
+            width: 60%;
+        }
+        @keyframes shimmer {
+            0% {
+                opacity: 0.3;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Room Card */
         .room-card {
             background: var(--bg-card);
             backdrop-filter: blur(12px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius);
-            padding: 12px 14px;
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             transition: var(--transition);
             cursor: pointer;
             box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
         }
         .room-card:hover {
             border-color: var(--border-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
         }
         .room-card:active {
             transform: scale(0.98);
@@ -223,6 +376,9 @@
         .room-card .info {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
         .room-card .info .name {
             font-weight: 700;
@@ -250,20 +406,29 @@
         }
         .room-card .info .name .admin-badge {
             font-size: 0.5rem;
-            background: rgba(244,63,94,0.15);
+            background: rgba(244, 63, 94, 0.15);
             color: var(--error);
             padding: 0 6px;
             border-radius: 10px;
             font-weight: 700;
-            border: 1px solid rgba(244,63,94,0.2);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+        .room-card .info .name .trending-badge {
+            font-size: 0.5rem;
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+            padding: 0 6px;
+            border-radius: 10px;
+            font-weight: 700;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
         .room-card .info .meta {
             font-size: 0.7rem;
             color: var(--text-muted);
-            margin-top: 2px;
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .room-card .info .meta .fee {
             color: var(--primary);
@@ -283,9 +448,18 @@
             animation: pulse-dot 1.5s infinite;
         }
         @keyframes pulse-dot {
-            0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
         .room-card .info .meta .creator {
             color: var(--text-muted);
@@ -293,6 +467,37 @@
         .room-card .info .meta .creator span {
             color: var(--text-main);
             font-weight: 500;
+        }
+        .room-card .info .meta .timestamp {
+            color: var(--text-muted);
+            font-size: 0.65rem;
+        }
+
+        .room-card .right-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .room-card .right-actions .fav-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: var(--transition);
+            padding: 4px;
+            min-height: 36px;
+            min-width: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .room-card .right-actions .fav-btn:hover {
+            color: var(--warning);
+        }
+        .room-card .right-actions .fav-btn.favorited {
+            color: var(--gold);
         }
 
         .room-card .enter-btn {
@@ -325,7 +530,7 @@
             margin-bottom: 8px;
         }
 
-        /* CREATE BUTTON */
+        /* ===== CREATE BUTTON ===== */
         .create-btn {
             width: 100%;
             max-width: 620px;
@@ -346,14 +551,14 @@
             transform: scale(0.98);
         }
         .create-btn:hover {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
         }
 
-        /* CREATE ROOM MODAL */
+        /* ===== MODALS ===== */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(3,7,13,0.85);
+            background: rgba(3, 7, 13, 0.85);
             backdrop-filter: blur(20px);
             z-index: 9000;
             display: none;
@@ -375,8 +580,14 @@
             animation: modalIn 0.3s ease;
         }
         @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
         .modal-box .title {
             font-weight: 800;
@@ -400,7 +611,8 @@
             color: var(--text-muted);
             margin-bottom: 4px;
         }
-        .modal-box .field input {
+        .modal-box .field input,
+        .modal-box .field textarea {
             width: 100%;
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
@@ -413,8 +625,14 @@
             transition: var(--transition);
             min-height: 44px;
         }
-        .modal-box .field input:focus {
+        .modal-box .field input:focus,
+        .modal-box .field textarea:focus {
             border-color: var(--primary);
+        }
+        .modal-box .field textarea {
+            resize: vertical;
+            min-height: 80px;
+            font-size: 0.85rem;
         }
         .modal-box .actions {
             display: flex;
@@ -437,21 +655,45 @@
             transform: scale(0.95);
         }
         .modal-box .actions .cancel {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             color: var(--text-muted);
             border: 1px solid var(--border-color);
         }
-        .modal-box .actions .create {
+        .modal-box .actions .create,
+        .modal-box .actions .confirm-join {
             background: var(--primary);
             color: white;
             box-shadow: 0 0 16px var(--primary-glow);
         }
-        .modal-box .actions .create:disabled {
+        .modal-box .actions .create:disabled,
+        .modal-box .actions .confirm-join:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
+        .modal-box .room-preview-details {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .modal-box .room-preview-details .detail-row {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+        }
+        .modal-box .room-preview-details .detail-row .label {
+            font-weight: 600;
+        }
+        .modal-box .room-preview-details .detail-row .value {
+            color: var(--text-main);
+            font-weight: 500;
+        }
 
-        /* TOAST */
+        /* ===== TOAST ===== */
         .toast-container {
             position: fixed;
             top: 28px;
@@ -462,7 +704,7 @@
             max-width: 400px;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
         .toast-container.active {
@@ -499,27 +741,72 @@
             padding: 0 4px;
         }
 
-        /* RESPONSIVE */
+        /* ===== CONFIRM MODAL (reuse) ===== */
+        .confirm-modal .actions .confirm-join {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 16px var(--primary-glow);
+        }
+        .confirm-modal .actions .confirm-join.danger {
+            background: var(--error);
+            box-shadow: 0 0 16px rgba(244, 63, 94, 0.3);
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .header { padding: 8px 0; }
-            .header .logo { font-size: 1rem; }
-            .header .coins { font-size: 0.7rem; padding: 2px 8px; }
-            .toolbar { flex-direction: column; gap: 6px; }
-            .room-card { padding: 10px; flex-wrap: wrap; }
-            .room-card .info .name { font-size: 0.9rem; }
-            .room-card .enter-btn { font-size: 0.65rem; padding: 4px 12px; min-height: 32px; }
-            .modal-box { padding: 18px; }
+            .header {
+                padding: 8px 0;
+            }
+            .header .logo {
+                font-size: 1rem;
+            }
+            .header .coins {
+                font-size: 0.7rem;
+                padding: 2px 8px;
+            }
+            .toolbar {
+                flex-direction: column;
+                gap: 6px;
+            }
+            .room-card {
+                padding: 10px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .room-card .info .name {
+                font-size: 0.9rem;
+            }
+            .room-card .enter-btn {
+                font-size: 0.65rem;
+                padding: 4px 12px;
+                min-height: 32px;
+            }
+            .modal-box {
+                padding: 18px;
+            }
+            .room-card .right-actions .fav-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
 
         @media (pointer: coarse) {
-            .back, .enter-btn, .create-btn, .modal-box .actions button,
-            .toolbar .search-wrap input { min-height: 44px; }
+            .back,
+            .enter-btn,
+            .create-btn,
+            .modal-box .actions button,
+            .toolbar .search-wrap input,
+            .toolbar .refresh-btn,
+            .room-card .right-actions .fav-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="left">
             <button class="back" onclick="window.location.href='feed.html'" aria-label="Back">‹</button>
@@ -531,11 +818,12 @@
         </div>
     </div>
 
-    <!-- TOOLBAR -->
+    <!-- ===== TOOLBAR ===== -->
     <div class="toolbar">
         <div class="search-wrap">
             <span class="icon">🔍</span>
             <input type="text" id="searchInput" placeholder="Search rooms..." oninput="applyFilters()" aria-label="Search rooms">
+            <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" aria-label="Clear search">✕</button>
         </div>
         <select class="sort-select" id="sortSelect" onchange="applyFilters()" aria-label="Sort rooms">
             <option value="newest">Newest</option>
@@ -543,17 +831,35 @@
             <option value="cheapest">Cheapest Entry</option>
             <option value="expensive">Highest Entry</option>
         </select>
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshRooms()" aria-label="Refresh rooms">
+            🔄
+        </button>
     </div>
 
-    <!-- ROOM GRID -->
+    <!-- ===== FILTER CHIPS ===== -->
+    <div class="filter-chips" id="filterChips">
+        <span class="chip active" data-filter="all" onclick="setFilter('all')">All</span>
+        <span class="chip" data-filter="live" onclick="setFilter('live')">🟢 Live</span>
+        <span class="chip" data-filter="trending" onclick="setFilter('trending')">🔥 Trending</span>
+        <span class="chip" data-filter="premium" onclick="setFilter('premium')">👑 Premium</span>
+        <span class="chip" data-filter="favorites" onclick="setFilter('favorites')">⭐ Favorites</span>
+    </div>
+
+    <!-- ===== RECENT SECTION ===== -->
+    <div class="recent-section" id="recentSection" style="display:none;">
+        <div class="recent-title">🕒 Recently Visited</div>
+        <div class="recent-chips" id="recentChips"></div>
+    </div>
+
+    <!-- ===== ROOM GRID ===== -->
     <div class="room-grid" id="roomGrid">
-        <div class="empty-state"><span class="icon">🏠</span>Loading rooms...</div>
+        <!-- Skeleton cards will be rendered here -->
     </div>
 
-    <!-- CREATE BUTTON -->
+    <!-- ===== CREATE BUTTON ===== -->
     <button class="create-btn" onclick="openCreateModal()" aria-label="Create new room">➕ Create New Room (🪙 1,000)</button>
 
-    <!-- CREATE ROOM MODAL -->
+    <!-- ===== CREATE ROOM MODAL ===== -->
     <div class="modal-overlay" id="createModal" aria-hidden="true">
         <div class="modal-box">
             <div class="title">🏠 Create Room</div>
@@ -573,7 +879,25 @@
         </div>
     </div>
 
-    <!-- TOAST -->
+    <!-- ===== ROOM PREVIEW MODAL ===== -->
+    <div class="modal-overlay" id="previewModal" aria-hidden="true">
+        <div class="modal-box">
+            <div class="title" id="previewTitle">Room Preview</div>
+            <div class="room-preview-details" id="previewDetails">
+                <div class="detail-row"><span class="label">Owner</span><span class="value" id="previewOwner">—</span></div>
+                <div class="detail-row"><span class="label">Members</span><span class="value" id="previewMembers">0</span></div>
+                <div class="detail-row"><span class="label">Entry Fee</span><span class="value" id="previewFee">0 🪙</span></div>
+                <div class="detail-row"><span class="label">Created</span><span class="value" id="previewCreated">—</span></div>
+                <div class="detail-row"><span class="label">Status</span><span class="value" id="previewStatus">—</span></div>
+            </div>
+            <div class="actions">
+                <button class="cancel" onclick="closePreviewModal()">Close</button>
+                <button class="confirm-join" id="previewJoinBtn" onclick="joinFromPreview()">Join Room</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
     <div class="toast-container" id="toast" aria-live="polite" aria-atomic="true">
         <div class="toast-content">
             <span class="icon" id="toastIcon">✓</span>
@@ -584,16 +908,28 @@
 
     <script type="module">
         // ============================================================
-        // ROOMS.JS - SPIKE Community Rooms
-        // NOTE: Firebase config is exposed in client-side code.
-        // For production, consider using environment variables or a backend service.
+        // ROOMS.JS - SPIKE Community Rooms (Premium UI + Features)
         // ============================================================
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
-            getFirestore, collection, doc, getDoc, getDocs, addDoc, updateDoc, query, orderBy,
-            runTransaction, serverTimestamp, increment, where
+            getFirestore,
+            collection,
+            doc,
+            getDoc,
+            getDocs,
+            addDoc,
+            updateDoc,
+            setDoc,
+            deleteDoc,
+            query,
+            orderBy,
+            where,
+            runTransaction,
+            serverTimestamp,
+            increment,
+            writeBatch
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const CONFIG = {
@@ -619,9 +955,116 @@
         let coinBalance = 0;
         let allRooms = [];
         let filteredRooms = [];
+        let favorites = new Set(); // set of room IDs
+        let recentRooms = []; // array of room IDs (max 5)
+        let previewRoomId = null; // for preview modal
+        let currentFilter = 'all'; // 'all', 'live', 'trending', 'premium', 'favorites'
 
         // ============================================================
-        // ONLINE STATUS MANAGEMENT (unified)
+        // DOM REFERENCES
+        // ============================================================
+        const grid = document.getElementById('roomGrid');
+        const searchInput = document.getElementById('searchInput');
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const sortSelect = document.getElementById('sortSelect');
+        const headerCoins = document.getElementById('headerCoins');
+        const createModal = document.getElementById('createModal');
+        const roomNameInput = document.getElementById('roomNameInput');
+        const roomFeeInput = document.getElementById('roomFeeInput');
+        const createBtn = document.getElementById('createRoomBtn');
+        const onlineDot = document.getElementById('onlineStatusDot');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const recentSection = document.getElementById('recentSection');
+        const recentChips = document.getElementById('recentChips');
+        const previewModal = document.getElementById('previewModal');
+        const previewTitle = document.getElementById('previewTitle');
+        const previewOwner = document.getElementById('previewOwner');
+        const previewMembers = document.getElementById('previewMembers');
+        const previewFee = document.getElementById('previewFee');
+        const previewCreated = document.getElementById('previewCreated');
+        const previewStatus = document.getElementById('previewStatus');
+        const previewJoinBtn = document.getElementById('previewJoinBtn');
+        const filterChips = document.getElementById('filterChips');
+
+        // ============================================================
+        // TOAST NOTIFICATIONS
+        // ============================================================
+        let toastTimeout = null;
+
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            const msgEl = document.getElementById('toastMsg');
+
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+
+            t.className = 'toast-container';
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            icon.textContent = icons[type] || '✓';
+            msgEl.textContent = msg;
+
+            void t.offsetWidth;
+            t.classList.add('active');
+
+            toastTimeout = setTimeout(() => {
+                t.classList.remove('active');
+            }, 3000);
+        }
+
+        window.dismissToast = function() {
+            const t = document.getElementById('toast');
+            t.classList.remove('active');
+            if (toastTimeout) {
+                clearTimeout(toastTimeout);
+                toastTimeout = null;
+            }
+        };
+
+        // ============================================================
+        // CONFIRM MODAL (custom)
+        // ============================================================
+        function showConfirm(options) {
+            return new Promise((resolve) => {
+                // Repurpose preview modal for confirm
+                const modal = previewModal;
+                const title = modal.querySelector('.title');
+                const details = modal.querySelector('.room-preview-details');
+                const joinBtn = document.getElementById('previewJoinBtn');
+
+                // Override content
+                title.textContent = options.title || 'Confirm';
+                details.innerHTML = `
+                    <div style="text-align:center;padding:8px 0;color:var(--text-muted);">${options.message || 'Are you sure?'}</div>
+                `;
+                joinBtn.textContent = options.confirmText || 'Confirm';
+                joinBtn.className = 'confirm-join ' + (options.confirmType === 'danger' ? 'danger' : '');
+                joinBtn.onclick = () => {
+                    closePreviewModal();
+                    resolve(true);
+                };
+                // Cancel button
+                const cancelBtn = modal.querySelector('.actions .cancel');
+                cancelBtn.textContent = options.cancelText || 'Cancel';
+                cancelBtn.onclick = () => {
+                    closePreviewModal();
+                    resolve(false);
+                };
+
+                modal.classList.add('active');
+                modal.dataset.confirm = 'true';
+            });
+        }
+
+        // ============================================================
+        // ONLINE STATUS
         // ============================================================
         function updateUserOnlineStatus(status) {
             if (!currentUserUid) return;
@@ -633,55 +1076,6 @@
         }
 
         // ============================================================
-        // DOM REFERENCES
-        // ============================================================
-        const grid = document.getElementById('roomGrid');
-        const searchInput = document.getElementById('searchInput');
-        const sortSelect = document.getElementById('sortSelect');
-        const headerCoins = document.getElementById('headerCoins');
-        const createModal = document.getElementById('createModal');
-        const roomNameInput = document.getElementById('roomNameInput');
-        const roomFeeInput = document.getElementById('roomFeeInput');
-        const createBtn = document.getElementById('createRoomBtn');
-        const onlineDot = document.getElementById('onlineStatusDot');
-
-        // ============================================================
-        // TOAST NOTIFICATIONS
-        // ============================================================
-        let toastTimeout = null;
-        
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            const icon = document.getElementById('toastIcon');
-            const msgEl = document.getElementById('toastMsg');
-            
-            if (toastTimeout) {
-                clearTimeout(toastTimeout);
-                toastTimeout = null;
-            }
-            
-            t.className = 'toast-container';
-            icon.textContent = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ️';
-            msgEl.textContent = msg;
-            
-            void t.offsetWidth;
-            t.classList.add('active');
-            
-            toastTimeout = setTimeout(() => {
-                t.classList.remove('active');
-            }, 3000);
-        }
-        
-        window.dismissToast = function() {
-            const t = document.getElementById('toast');
-            t.classList.remove('active');
-            if (toastTimeout) {
-                clearTimeout(toastTimeout);
-                toastTimeout = null;
-            }
-        };
-
-        // ============================================================
         // COIN MANAGEMENT
         // ============================================================
         async function getCoins(uid) {
@@ -689,81 +1083,177 @@
                 const s = await getDoc(doc(db, 'users', uid));
                 return s.exists() ? (s.data().coins || 0) : 0;
             } catch {
-                console.error('Failed to get coins for user:', uid);
                 return 0;
             }
         }
-        
+
         async function updateCoins(uid, amount, reason) {
-            try {
-                await runTransaction(db, async (tx) => {
-                    const ref = doc(db, 'users', uid);
-                    const s = await tx.get(ref);
-                    const cur = s.exists() ? (s.data().coins || 0) : 0;
-                    
-                    if (cur + amount < 0) {
-                        throw new Error('Insufficient coins');
-                    }
-                    
-                    tx.update(ref, { coins: cur + amount });
-                    
-                    await tx.set(doc(collection(db, 'transactions')), {
-                        userId: uid,
-                        amount,
-                        newBalance: cur + amount,
-                        reason,
-                        timestamp: serverTimestamp()
-                    });
+            await runTransaction(db, async (tx) => {
+                const ref = doc(db, 'users', uid);
+                const s = await tx.get(ref);
+                const cur = s.exists() ? (s.data().coins || 0) : 0;
+                if (cur + amount < 0) throw new Error('Insufficient coins');
+                tx.update(ref, { coins: cur + amount });
+                await tx.set(doc(collection(db, 'transactions')), {
+                    userId: uid,
+                    amount,
+                    newBalance: cur + amount,
+                    reason,
+                    timestamp: serverTimestamp()
                 });
-            } catch (err) {
-                console.error('Transaction failed:', err);
-                throw err;
+            });
+        }
+
+        // ============================================================
+        // FAVORITES
+        // ============================================================
+        async function loadFavorites() {
+            if (!currentUserUid) return;
+            try {
+                const snap = await getDocs(collection(db, 'users', currentUserUid, 'favorites'));
+                favorites = new Set();
+                snap.forEach(d => favorites.add(d.id));
+            } catch (e) {
+                console.error('Failed to load favorites:', e);
+                favorites = new Set();
             }
+        }
+
+        async function toggleFavorite(roomId) {
+            if (!currentUserUid) {
+                showToast('Please sign in first', 'warning');
+                return;
+            }
+            const favRef = doc(db, 'users', currentUserUid, 'favorites', roomId);
+            if (favorites.has(roomId)) {
+                await deleteDoc(favRef);
+                favorites.delete(roomId);
+                showToast('Removed from favorites', 'info');
+            } else {
+                await setDoc(favRef, { roomId, addedAt: serverTimestamp() });
+                favorites.add(roomId);
+                showToast('Added to favorites', 'success');
+            }
+            applyFilters(); // re-render to update star icons
+        }
+
+        // ============================================================
+        // RECENT ROOMS (localStorage)
+        // ============================================================
+        function loadRecentRooms() {
+            try {
+                const data = localStorage.getItem('spike_recent_rooms');
+                if (data) {
+                    recentRooms = JSON.parse(data);
+                    if (!Array.isArray(recentRooms)) recentRooms = [];
+                } else {
+                    recentRooms = [];
+                }
+                // Limit to 5
+                if (recentRooms.length > 5) recentRooms = recentRooms.slice(0, 5);
+                updateRecentUI();
+            } catch (e) {
+                recentRooms = [];
+            }
+        }
+
+        function addRecentRoom(roomId) {
+            // Remove if exists
+            recentRooms = recentRooms.filter(id => id !== roomId);
+            // Add to front
+            recentRooms.unshift(roomId);
+            if (recentRooms.length > 5) recentRooms = recentRooms.slice(0, 5);
+            localStorage.setItem('spike_recent_rooms', JSON.stringify(recentRooms));
+            updateRecentUI();
+        }
+
+        function updateRecentUI() {
+            if (recentRooms.length === 0) {
+                recentSection.style.display = 'none';
+                return;
+            }
+            recentSection.style.display = 'block';
+            recentChips.innerHTML = recentRooms.map(id => {
+                const room = allRooms.find(r => r.id === id);
+                const name = room ? escapeHTML(room.name || 'Room') : 'Unknown';
+                return `<span class="chip" onclick="enterRoom('${id}')">${name}</span>`;
+            }).join('');
         }
 
         // ============================================================
         // LOAD ROOMS
         // ============================================================
-        async function loadRooms() {
+        async function loadRooms(showLoading = true) {
+            if (showLoading) {
+                grid.innerHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    grid.innerHTML += `
+                        <div class="room-card skeleton">
+                            <div class="info">
+                                <div class="skeleton-line" style="width:60%;"></div>
+                                <div class="skeleton-line" style="width:80%;"></div>
+                                <div class="skeleton-line" style="width:40%;"></div>
+                            </div>
+                            <div style="width:80px;height:36px;background:rgba(255,255,255,0.05);border-radius:10px;"></div>
+                        </div>
+                    `;
+                }
+            }
+
             try {
                 const q = query(collection(db, 'rooms'), orderBy('createdAt', 'desc'));
                 const snap = await getDocs(q);
-                
+
                 allRooms = [];
-                
+
                 for (const docSnap of snap.docs) {
                     const data = docSnap.data();
                     const id = docSnap.id;
                     let creatorName = 'Unknown';
-                    
+                    let isAdminRoom = false;
+                    let creatorEmail = '';
+
                     if (data.createdBy) {
                         try {
                             const uSnap = await getDoc(doc(db, 'users', data.createdBy));
                             if (uSnap.exists()) {
                                 const userData = uSnap.data();
                                 creatorName = escapeHTML(userData.name || userData.displayName || 'User');
+                                creatorEmail = userData.email || '';
+                                isAdminRoom = ADMIN_EMAILS.includes(creatorEmail.toLowerCase());
                             }
                         } catch (e) {
                             console.error('Failed to load creator info:', e);
                         }
                     }
-                    
+
+                    const createdAt = data.createdAt?.toDate?.() || null;
+                    const memberCount = data.participantCount || 0;
+
                     allRooms.push({
                         id,
                         ...data,
                         creatorName,
-                        isAdminRoom: data.createdBy ? ADMIN_EMAILS.includes(data.createdBy) : false
+                        isAdminRoom,
+                        createdAtDate: createdAt,
+                        memberCount,
+                        // computed
+                        isTrending: memberCount >= 10,
+                        isLive: memberCount >= 5,
                     });
                 }
-                
+
+                // Load favorites after rooms loaded
+                await loadFavorites();
                 applyFilters();
+                updateRecentUI();
             } catch (e) {
                 console.error('Failed to load rooms:', e);
                 grid.innerHTML = `<div class="empty-state">
                     <span class="icon">⚠️</span>
                     Failed to load rooms.
                     <br>
-                    <button onclick="loadRooms()" 
+                    <button onclick="refreshRooms()" 
                         style="background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer;">
                         Retry
                     </button>
@@ -772,23 +1262,56 @@
         }
 
         // ============================================================
-        // FILTER AND SORT ROOMS
+        // REFRESH
+        // ============================================================
+        let refreshing = false;
+
+        window.refreshRooms = function() {
+            if (refreshing) return;
+            refreshing = true;
+            refreshBtn.classList.add('spinning');
+            loadRooms(true).finally(() => {
+                refreshing = false;
+                refreshBtn.classList.remove('spinning');
+            });
+        };
+
+        // ============================================================
+        // FILTER AND SORT
         // ============================================================
         window.applyFilters = function() {
             const query = searchInput.value.toLowerCase().trim();
             const sort = sortSelect.value;
 
+            // Show clear button if query not empty
+            clearSearchBtn.classList.toggle('visible', query.length > 0);
+
             let filtered = allRooms.filter(room => {
                 if (!room.name) return false;
-                return room.name.toLowerCase().includes(query);
+                const nameMatch = room.name.toLowerCase().includes(query);
+                if (!nameMatch) return false;
+
+                // Apply chip filter
+                switch (currentFilter) {
+                    case 'live':
+                        return room.isLive;
+                    case 'trending':
+                        return room.isTrending;
+                    case 'premium':
+                        return room.vip === true;
+                    case 'favorites':
+                        return favorites.has(room.id);
+                    default:
+                        return true;
+                }
             });
 
             switch (sort) {
                 case 'newest':
-                    filtered.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+                    filtered.sort((a, b) => (b.createdAtDate?.getTime?.() || 0) - (a.createdAtDate?.getTime?.() || 0));
                     break;
                 case 'popular':
-                    filtered.sort((a, b) => (b.participantCount || 0) - (a.participantCount || 0));
+                    filtered.sort((a, b) => (b.memberCount || 0) - (a.memberCount || 0));
                     break;
                 case 'cheapest':
                     filtered.sort((a, b) => (a.entryFee || 50) - (b.entryFee || 50));
@@ -804,14 +1327,33 @@
             renderRooms(filteredRooms);
         };
 
+        window.clearSearch = function() {
+            searchInput.value = '';
+            clearSearchBtn.classList.remove('visible');
+            applyFilters();
+            searchInput.focus();
+        };
+
+        window.setFilter = function(filter) {
+            currentFilter = filter;
+            // Update active chip
+            document.querySelectorAll('.filter-chips .chip').forEach(chip => {
+                chip.classList.toggle('active', chip.dataset.filter === filter);
+            });
+            applyFilters();
+        };
+
         // ============================================================
         // RENDER ROOMS
         // ============================================================
         function renderRooms(rooms) {
             if (!rooms || rooms.length === 0) {
+                let msg = 'No rooms found.';
+                if (searchInput.value.trim()) msg = 'No rooms match your search.';
+                else if (currentFilter !== 'all') msg = 'No rooms match this filter.';
                 grid.innerHTML = `<div class="empty-state">
                     <span class="icon">🔍</span>
-                    No rooms found. Create one!
+                    ${msg}
                 </div>`;
                 return;
             }
@@ -820,22 +1362,32 @@
             rooms.forEach(room => {
                 const name = room.name || 'Unnamed Room';
                 const fee = room.entryFee || 50;
-                const count = room.participantCount || 0;
+                const count = room.memberCount || 0;
                 const isLive = count >= 5;
+                const isTrending = count >= 10;
                 const isVip = room.vip === true;
                 const isAdminRoom = room.isAdminRoom;
 
-                let badgeHTML = `<span class="badge">${fee} 🪙</span>`;
-                if (isVip) badgeHTML += ` <span class="vip-badge">👑 VIP</span>`;
-                if (isAdminRoom) badgeHTML += ` <span class="admin-badge">★ Admin</span>`;
-                if (isLive) badgeHTML += ` <span class="badge" style="background:var(--error);color:white;">Live</span>`;
+                let badges = '';
+                badges += `<span class="badge">${fee} 🪙</span>`;
+                if (isVip) badges += ` <span class="vip-badge">👑 VIP</span>`;
+                if (isAdminRoom) badges += ` <span class="admin-badge">★ Admin</span>`;
+                if (isTrending) badges += ` <span class="trending-badge">🔥 Trending</span>`;
+                if (isLive) badges += ` <span class="badge" style="background:var(--error);color:white;">Live</span>`;
+
+                const isFav = favorites.has(room.id);
+                const favIcon = isFav ? '⭐' : '☆';
+
+                const createdAtStr = room.createdAtDate ?
+                    room.createdAtDate.toLocaleDateString() :
+                    '';
 
                 html += `
-                    <div class="room-card" onclick="enterRoom('${escapeHTML(room.id)}')">
-                        <div class="info">
+                    <div class="room-card" data-roomid="${escapeHTML(room.id)}">
+                        <div class="info" onclick="openRoomPreview('${escapeHTML(room.id)}')">
                             <div class="name">
                                 🏠 ${escapeHTML(name)}
-                                ${badgeHTML}
+                                ${badges}
                             </div>
                             <div class="meta">
                                 <span class="fee">Entry: ${fee} 🪙</span>
@@ -844,9 +1396,15 @@
                                     ${isLive ? '<span class="live-dot"></span>' : ''}
                                 </span>
                                 <span class="creator">by <span>${escapeHTML(room.creatorName || 'Unknown')}</span></span>
+                                ${createdAtStr ? `<span class="timestamp">📅 ${createdAtStr}</span>` : ''}
                             </div>
                         </div>
-                        <button class="enter-btn">Join</button>
+                        <div class="right-actions">
+                            <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="event.stopPropagation(); toggleFavorite('${escapeHTML(room.id)}')" aria-label="Toggle favorite">
+                                ${favIcon}
+                            </button>
+                            <button class="enter-btn" onclick="event.stopPropagation(); joinRoom('${escapeHTML(room.id)}')">Join</button>
+                        </div>
                     </div>
                 `;
             });
@@ -857,13 +1415,100 @@
         // ROOM NAVIGATION
         // ============================================================
         window.enterRoom = function(id) {
+            addRecentRoom(id);
             window.location.href = `room.html?id=${encodeURIComponent(id)}`;
         };
 
         // ============================================================
-        // CREATE ROOM MODAL
+        // JOIN ROOM WITH CONFIRM
         // ============================================================
-        const CREATE_COST = 1000; // Updated from 200 to 1000
+        async function joinRoom(roomId) {
+            const room = allRooms.find(r => r.id === roomId);
+            if (!room) {
+                showToast('Room not found', 'error');
+                return;
+            }
+            const fee = room.entryFee || 50;
+            const name = room.name || 'Room';
+            const owner = room.creatorName || 'Unknown';
+            const members = room.memberCount || 0;
+
+            const confirmed = await showConfirm({
+                title: `Join "${name}"?`,
+                message: `
+                    <div style="text-align:left;font-size:0.85rem;line-height:1.6;">
+                        <div><strong>Owner:</strong> ${owner}</div>
+                        <div><strong>Members:</strong> ${members}</div>
+                        <div><strong>Entry Fee:</strong> ${fee} 🪙</div>
+                        <div style="margin-top:8px;color:var(--primary);">Your balance: ${coinBalance} 🪙</div>
+                        ${coinBalance < fee ? '<div style="color:var(--error);">⚠️ Insufficient coins</div>' : ''}
+                    </div>
+                `,
+                confirmText: coinBalance >= fee ? `Join (${fee} 🪙)` : 'Insufficient Coins',
+                confirmType: coinBalance >= fee ? 'primary' : 'danger',
+                cancelText: 'Cancel'
+            });
+
+            if (!confirmed) return;
+
+            if (coinBalance < fee) {
+                showToast('Not enough coins to join this room', 'error');
+                return;
+            }
+
+            try {
+                await updateCoins(currentUserUid, -fee, `Join room: ${name}`);
+                coinBalance = await getCoins(currentUserUid);
+                headerCoins.textContent = coinBalance;
+                addRecentRoom(roomId);
+                window.location.href = `room.html?id=${encodeURIComponent(roomId)}`;
+            } catch (err) {
+                showToast('Failed to join: ' + err.message, 'error');
+            }
+        }
+
+        // ============================================================
+        // ROOM PREVIEW MODAL
+        // ============================================================
+        window.openRoomPreview = function(roomId) {
+            const room = allRooms.find(r => r.id === roomId);
+            if (!room) {
+                showToast('Room not found', 'error');
+                return;
+            }
+            previewRoomId = roomId;
+            previewTitle.textContent = `🏠 ${room.name || 'Room'}`;
+            previewOwner.textContent = room.creatorName || 'Unknown';
+            previewMembers.textContent = room.memberCount || 0;
+            previewFee.textContent = (room.entryFee || 50) + ' 🪙';
+            previewCreated.textContent = room.createdAtDate ? room.createdAtDate.toLocaleDateString() : '—';
+            previewStatus.textContent = room.memberCount >= 5 ? '🟢 Active' : '🟡 Quiet';
+
+            previewJoinBtn.onclick = () => {
+                closePreviewModal();
+                joinRoom(roomId);
+            };
+
+            previewModal.classList.add('active');
+            previewModal.dataset.confirm = 'false';
+        };
+
+        window.closePreviewModal = function() {
+            previewModal.classList.remove('active');
+            previewRoomId = null;
+        };
+
+        // Click outside to close preview modal
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) {
+                closePreviewModal();
+            }
+        });
+
+        // ============================================================
+        // CREATE ROOM
+        // ============================================================
+        const CREATE_COST = 1000;
 
         window.openCreateModal = function() {
             if (!currentUser) {
@@ -887,7 +1532,7 @@
         window.createRoom = async function() {
             const name = roomNameInput.value.trim();
             const fee = parseInt(roomFeeInput.value) || 50;
-            
+
             if (!name) {
                 showToast('Please enter a room name', 'error');
                 return;
@@ -902,8 +1547,8 @@
 
             try {
                 await updateCoins(currentUser.uid, -CREATE_COST, `Created room: ${escapeHTML(name)}`);
-                
-                await addDoc(collection(db, 'rooms'), {
+
+                const roomRef = await addDoc(collection(db, 'rooms'), {
                     name: escapeHTML(name),
                     entryFee: fee,
                     createdBy: currentUser.uid,
@@ -914,10 +1559,10 @@
 
                 coinBalance = await getCoins(currentUser.uid);
                 headerCoins.textContent = coinBalance;
-                
+
                 closeCreateModal();
                 showToast(`Room "${escapeHTML(name)}" created! -${CREATE_COST} 🪙`, 'success');
-                await loadRooms();
+                await refreshRooms();
             } catch (err) {
                 console.error('Failed to create room:', err);
                 showToast(err.message || 'Failed to create room', 'error');
@@ -928,7 +1573,7 @@
         };
 
         // ============================================================
-        // UTILITY FUNCTIONS
+        // UTILITY
         // ============================================================
         function escapeHTML(s) {
             return String(s || '').replace(/[&<>'"]/g, t =>
@@ -944,17 +1589,17 @@
                 window.location.href = 'index.html';
                 return;
             }
-            
+
             currentUser = user;
             currentUserUid = user.uid;
-            // Set online on load
             updateUserOnlineStatus(true);
             onlineDot.classList.add('online');
 
             isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
             coinBalance = await getCoins(user.uid);
             headerCoins.textContent = coinBalance;
-            await loadRooms();
+            loadRecentRooms();
+            await loadRooms(true);
         });
 
         // ============================================================
@@ -989,6 +1634,9 @@
                 if (createModal.classList.contains('active')) {
                     closeCreateModal();
                 }
+                if (previewModal.classList.contains('active')) {
+                    closePreviewModal();
+                }
             }
             if (e.key === 'Enter' && createModal.classList.contains('active')) {
                 createRoom();
@@ -997,22 +1645,33 @@
                 e.preventDefault();
                 searchInput.focus();
             }
-        });
-
-        // Close modal when clicking outside
-        createModal.addEventListener('click', (e) => {
-            if (e.target === createModal) {
-                closeCreateModal();
+            if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                e.preventDefault();
+                refreshRooms();
             }
         });
 
         // ============================================================
         // INITIALIZATION
         // ============================================================
-        console.log('🏠 SPIKE Rooms loaded');
+        console.log('🏠 SPIKE Rooms v2 — Premium UI + Favorites + Recent + Preview + Filters');
         console.log(`💰 Create room cost: ${CREATE_COST} 🪙`);
-        console.log('🔍 Search rooms with Ctrl+K');
+        console.log('🔍 Search rooms with Ctrl+K, Refresh with Ctrl+R');
         console.log('✅ Unified online status enabled.');
+
+        // Expose functions to window for inline onclick
+        window.toggleFavorite = toggleFavorite;
+        window.joinRoom = joinRoom;
+        window.openRoomPreview = openRoomPreview;
+        window.closePreviewModal = closePreviewModal;
+        window.refreshRooms = refreshRooms;
+        window.enterRoom = enterRoom;
+        window.applyFilters = applyFilters;
+        window.clearSearch = clearSearch;
+        window.setFilter = setFilter;
+        window.openCreateModal = openCreateModal;
+        window.closeCreateModal = closeCreateModal;
+        window.createRoom = createRoom;
     </script>
 </body>
 </html>

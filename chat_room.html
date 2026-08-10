@@ -2531,7 +2531,7 @@
     </div>
 
     <!-- ================================================================
-    SCRIPTS (full integrated chat + calls)
+    SCRIPTS (full integrated chat + calls — FIXED)
     ================================================================ -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -3926,7 +3926,7 @@
 
         // ================================================================
         // ================================================================
-        // CALL FUNCTIONALITY (fully integrated)
+        // CALL FUNCTIONALITY — COMPLETE FIXED VERSION
         // ================================================================
         // ================================================================
 
@@ -3948,12 +3948,20 @@
         let isReconnecting = false;
         let remoteStream = null;
         let callTimeoutId = null;
-        let currentCallData = null; // store call data for active UI
+        let currentCallData = null;
+        let isCallInitializing = false; // Prevent double-click
+        let iceQueue = []; // ICE candidate queue
 
         const servers = {
             iceServers: [
                 { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
                 { urls: 'stun:stun.l.google.com:19302' }
+                // TURN can be added here when credentials are available:
+                // {
+                //   urls: 'turn:turn.example.com:3478',
+                //   username: 'user',
+                //   credential: 'pass'
+                // }
             ],
             iceCandidatePoolSize: 10
         };
@@ -4119,10 +4127,13 @@
             isReconnecting = false;
             reconnectAttempts = 0;
             currentCallData = null;
+            iceQueue = [];
         }
 
         // ---- Cleanup Call ----
         function cleanupCall() {
+            if (isCallEnding) return; // prevent double cleanup
+            isCallEnding = true;
             resetCallResources();
 
             // Stop local tracks
@@ -4139,26 +4150,22 @@
             stopOutgoingRingtone();
 
             isCallActive = false;
-            isCallEnding = false;
-
-            // Hide all overlays
             document.getElementById('incomingCallOverlay').classList.remove('active');
             document.getElementById('ringingOverlay').classList.remove('active');
             document.getElementById('activeCallOverlay').classList.remove('active');
             document.getElementById('activeCallOverlay').classList.remove('audio-only');
 
-            // Reset UI
             document.getElementById('activeCallTimer').textContent = '00:00';
             document.getElementById('callStatusBadge').textContent = 'Connected';
             document.getElementById('callStatusBadge').className = 'call-status';
 
             clearActiveCallFlag();
+            isCallEnding = false; // reset for next call
         }
 
         // ---- End Call ----
         async function endCall(reason = 'ended') {
             if (isCallEnding) return;
-            isCallEnding = true;
             if (callDocRef) {
                 try {
                     await updateDoc(callDocRef, {
@@ -4181,7 +4188,6 @@
                 return;
             }
 
-            // Reset resources before reconnecting
             resetCallResources();
 
             isReconnecting = true;
@@ -4189,7 +4195,10 @@
             showToast(`Reconnecting (${reconnectAttempts}/${MAX_RECONNECT})…`, 'info');
 
             try {
-                // Rebuild peer connection
+                // Generate a new session ID to ignore stale ICE
+                const sessionId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
+                await updateDoc(callDocRef, { sessionId: sessionId });
+
                 peerConnection = new RTCPeerConnection(servers);
                 if (localStream) {
                     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -4197,11 +4206,16 @@
 
                 const offerCandidates = collection(callDocRef, 'offerCandidates');
                 const answerCandidates = collection(callDocRef, 'answerCandidates');
+                iceQueue = [];
 
                 peerConnection.onicecandidate = (event) => {
                     if (event.candidate) {
-                        const col = isCaller ? offerCandidates : answerCandidates;
-                        addDoc(col, event.candidate.toJSON()).catch(() => {});
+                        if (peerConnection.currentRemoteDescription) {
+                            const col = isCaller ? offerCandidates : answerCandidates;
+                            addDoc(col, { ...event.candidate.toJSON(), sessionId }).catch(() => {});
+                        } else {
+                            iceQueue.push(event.candidate.toJSON());
+                        }
                     }
                 };
                 peerConnection.ontrack = (event) => {
@@ -4225,13 +4239,15 @@
                 if (isCaller) {
                     const offer = await peerConnection.createOffer();
                     await peerConnection.setLocalDescription(offer);
-                    await updateDoc(callDocRef, { offer: { type: offer.type, sdp: offer.sdp } });
+                    await updateDoc(callDocRef, { offer: { type: offer.type, sdp: offer.sdp }, sessionId: sessionId });
                 } else {
                     if (data.offer) {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                        // Flush queued ICE after remote description is set
+                        flushIceQueue();
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
-                        await updateDoc(callDocRef, { answer: { type: answer.type, sdp: answer.sdp } });
+                        await updateDoc(callDocRef, { answer: { type: answer.type, sdp: answer.sdp }, sessionId: sessionId });
                     }
                 }
                 isReconnecting = false;
@@ -4239,7 +4255,7 @@
                 badge.textContent = 'Connected';
                 showToast('Call reconnected', 'success');
             } catch (err) {
-                console.warn('Reconnect error:', err);
+                console.warn('[CALL][RECONNECT] Error:', err);
                 isReconnecting = false;
                 if (reconnectAttempts < MAX_RECONNECT) {
                     setTimeout(() => reconnectCall(), 2000);
@@ -4263,14 +4279,36 @@
             }, 2000);
         }
 
+        // ---- ICE queue flush ----
+        function flushIceQueue() {
+            if (!peerConnection) return;
+            iceQueue.forEach(candidate => {
+                try {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+                } catch (e) {}
+            });
+            iceQueue = [];
+        }
+
         // ---- Start Call (caller) ----
         async function startCall(calleeId, calleeName, video = false) {
             if (!currentUser) return;
+            if (isCallInitializing || isCallActive || isCallEnding) {
+                showToast('A call is already in progress.', 'warning');
+                return;
+            }
+            isCallInitializing = true;
             if (!localStream) {
                 try {
                     localStream = await requestMedia(video);
-                    if (!localStream) return;
-                } catch (e) { return; }
+                    if (!localStream) {
+                        isCallInitializing = false;
+                        return;
+                    }
+                } catch (e) {
+                    isCallInitializing = false;
+                    return;
+                }
             }
             isCaller = true;
             isVideoCall = video;
@@ -4298,10 +4336,8 @@
                 createdAt: serverTimestamp()
             });
 
-            // Store call data for UI
             currentCallData = { callerName, callerPhoto, isVideo: video };
 
-            // Show ringing overlay
             const ringingOverlay = document.getElementById('ringingOverlay');
             ringingOverlay.classList.add('active');
             const initials = calleeName.split(' ').map(n=>n[0]).join('').substring(0,2).toUpperCase();
@@ -4310,7 +4346,6 @@
             document.getElementById('ringingStatus').textContent = 'Ringing…';
             playOutgoingRingtone();
 
-            // Set call timeout (30 seconds)
             callTimeoutId = setTimeout(async () => {
                 if (callDocRef) {
                     await updateDoc(callDocRef, { status: 'ended', endReason: 'timeout' });
@@ -4319,14 +4354,13 @@
                 ringingOverlay.classList.remove('active');
                 showToast('Call timed out', 'error');
                 cleanupCall();
+                isCallInitializing = false;
             }, 30000);
 
-            // Listen for status changes
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
                 if (data.status === 'active') {
-                    // Callee accepted
                     if (callTimeoutId) {
                         clearTimeout(callTimeoutId);
                         callTimeoutId = null;
@@ -4334,6 +4368,7 @@
                     stopOutgoingRingtone();
                     ringingOverlay.classList.remove('active');
                     initiateWebRTCAsCaller();
+                    isCallInitializing = false;
                 } else if (data.status === 'ended') {
                     stopOutgoingRingtone();
                     ringingOverlay.classList.remove('active');
@@ -4350,11 +4385,11 @@
                     else if (reason === 'reconnect_failed') msg = 'Connection lost';
                     showToast(msg, 'info');
                     cleanupCall();
+                    isCallInitializing = false;
                 }
             });
             callUnsubscribers.push(unsub);
 
-            // Cancel button
             document.getElementById('cancelCallBtn').onclick = async () => {
                 if (callDocRef) {
                     await updateDoc(callDocRef, { status: 'ended', endReason: 'cancelled' });
@@ -4367,6 +4402,7 @@
                 }
                 cleanupCall();
                 showToast('Call cancelled', 'info');
+                isCallInitializing = false;
             };
         }
 
@@ -4380,16 +4416,21 @@
 
             const offerCandidates = collection(callDocRef, 'offerCandidates');
             const answerCandidates = collection(callDocRef, 'answerCandidates');
+            iceQueue = [];
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    addDoc(offerCandidates, event.candidate.toJSON()).catch(() => {});
+                    if (peerConnection.currentRemoteDescription) {
+                        addDoc(offerCandidates, event.candidate.toJSON()).catch(() => {});
+                    } else {
+                        iceQueue.push(event.candidate.toJSON());
+                    }
                 }
             };
             peerConnection.ontrack = (event) => {
                 remoteStream = event.streams[0];
                 document.getElementById('remoteVideo').srcObject = remoteStream;
-                startCallTimer();
+                startCallTimer(); // Timer starts only when media arrives
                 const badge = document.getElementById('callStatusBadge');
                 badge.textContent = 'Connected';
                 badge.className = 'call-status';
@@ -4409,13 +4450,14 @@
                 offer: { type: offer.type, sdp: offer.sdp }
             });
 
-            // Listen for answer
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
                 if (data.answer && !peerConnection.currentRemoteDescription) {
                     const answer = new RTCSessionDescription(data.answer);
-                    peerConnection.setRemoteDescription(answer);
+                    peerConnection.setRemoteDescription(answer).then(() => {
+                        flushIceQueue();
+                    });
                 }
                 if (data.status === 'ended' && !isCallEnding) {
                     endCall('remote_ended');
@@ -4423,7 +4465,6 @@
             });
             callUnsubscribers.push(unsub);
 
-            // Listen for remote ICE
             const unsubCand = onSnapshot(answerCandidates, (snap) => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added' && peerConnection) {
@@ -4439,7 +4480,6 @@
         // ---- Join Call (receiver) ----
         async function joinCall(callId, callData) {
             if (isCallActive || isCallEnding) {
-                // User is busy – decline automatically
                 try {
                     const callRef = doc(db, 'calls', callId);
                     await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
@@ -4450,7 +4490,6 @@
             // Check if another tab is already handling this call
             const existingFlag = getActiveCallFlag();
             if (existingFlag && existingFlag !== callId) {
-                // Another call is active elsewhere – decline
                 try {
                     const callRef = doc(db, 'calls', callId);
                     await updateDoc(callRef, { status: 'ended', endReason: 'busy' });
@@ -4458,16 +4497,10 @@
                 return;
             }
 
-            if (!localStream) {
-                try {
-                    localStream = await requestMedia(callData.isVideo || false);
-                    if (!localStream) return;
-                } catch (e) { return; }
-            }
+            // Do NOT request media yet; wait for Accept
             isCaller = false;
             isVideoCall = callData.isVideo || false;
             callDocRef = doc(db, 'calls', callId);
-            // Store call data for UI
             currentCallData = {
                 callerName: callData.callerName || 'Caller',
                 callerPhoto: callData.callerPhoto || '',
@@ -4477,7 +4510,6 @@
             // Set flag to prevent duplicate handling in other tabs
             setActiveCallFlag(callId);
 
-            // Show incoming overlay
             const callerName = currentCallData.callerName;
             const callerPhoto = currentCallData.callerPhoto;
             document.getElementById('incomingName').textContent = callerName;
@@ -4491,15 +4523,27 @@
             document.getElementById('incomingCallOverlay').classList.add('active');
             playIncomingRingtone();
 
-            // Accept
             document.getElementById('acceptBtn').onclick = async () => {
                 stopIncomingRingtone();
                 document.getElementById('incomingCallOverlay').classList.remove('active');
+                // Request media only now
+                if (!localStream) {
+                    try {
+                        localStream = await requestMedia(callData.isVideo || false);
+                        if (!localStream) {
+                            showToast('Could not access media.', 'error');
+                            await updateDoc(callDocRef, { status: 'ended', endReason: 'permission_denied' });
+                            cleanupCall();
+                            return;
+                        }
+                    } catch (e) {
+                        return;
+                    }
+                }
                 await updateDoc(callDocRef, { status: 'active' });
                 initiateWebRTCAsReceiver();
             };
 
-            // Decline
             document.getElementById('declineBtn').onclick = async () => {
                 stopIncomingRingtone();
                 document.getElementById('incomingCallOverlay').classList.remove('active');
@@ -4509,7 +4553,6 @@
                 cleanupCall();
             };
 
-            // Listen for caller cancelling / timeout
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
@@ -4539,16 +4582,21 @@
 
             const offerCandidates = collection(callDocRef, 'offerCandidates');
             const answerCandidates = collection(callDocRef, 'answerCandidates');
+            iceQueue = [];
 
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    addDoc(answerCandidates, event.candidate.toJSON()).catch(() => {});
+                    if (peerConnection.currentRemoteDescription) {
+                        addDoc(answerCandidates, event.candidate.toJSON()).catch(() => {});
+                    } else {
+                        iceQueue.push(event.candidate.toJSON());
+                    }
                 }
             };
             peerConnection.ontrack = (event) => {
                 remoteStream = event.streams[0];
                 document.getElementById('remoteVideo').srcObject = remoteStream;
-                startCallTimer();
+                startCallTimer(); // Timer starts only when media arrives
                 const badge = document.getElementById('callStatusBadge');
                 badge.textContent = 'Connected';
                 badge.className = 'call-status';
@@ -4562,18 +4610,18 @@
                 }
             };
 
-            // Listen for offer
             const unsub = onSnapshot(callDocRef, (snap) => {
                 const data = snap.data();
                 if (!data) return;
                 if (data.offer && !peerConnection.currentRemoteDescription) {
                     const offer = new RTCSessionDescription(data.offer);
-                    peerConnection.setRemoteDescription(offer).then(async () => {
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-                        await updateDoc(callDocRef, {
-                            answer: { type: answer.type, sdp: answer.sdp }
-                        });
+                    peerConnection.setRemoteDescription(offer).then(() => {
+                        flushIceQueue();
+                        return peerConnection.createAnswer();
+                    }).then(answer => {
+                        return peerConnection.setLocalDescription(answer);
+                    }).then(() => {
+                        updateDoc(callDocRef, { answer: { type: peerConnection.localDescription.type, sdp: peerConnection.localDescription.sdp } });
                     });
                 }
                 if (data.status === 'ended' && !isCallEnding) {
@@ -4582,7 +4630,6 @@
             });
             callUnsubscribers.push(unsub);
 
-            // Listen for remote ICE from caller
             const unsubCand = onSnapshot(offerCandidates, (snap) => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added' && peerConnection) {
@@ -4714,9 +4761,7 @@
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const data = change.doc.data();
-                        // Check if we are already in a call
                         if (isCallActive || isCallEnding) {
-                            // Automatically decline with busy
                             try {
                                 updateDoc(doc(db, 'calls', change.doc.id), { status: 'ended', endReason: 'busy' });
                             } catch (e) {}
@@ -4767,6 +4812,7 @@
 
         console.log("🔥🚀 Ultimate Chat + Voice/Video Call page loaded.");
         console.log("📞 Incoming: assets/ringtone.mp3  |  Outgoing: assets/ring.mp3");
+        console.log("✅ ICE queuing, media permission timing, reconnection session ID, and cleanup idempotency applied.");
     </script>
 </body>
 </html>
