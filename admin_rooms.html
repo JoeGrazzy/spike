@@ -3,38 +3,44 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Admin — SPIKE Rooms</title>
+    <title>Admin — SPIKE Rooms Premium</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <style>
-        /* ===== ROOT ===== */
+        /* ============================================================
+           ROOT — Premium Dark Theme
+           ============================================================ */
         :root {
             --bg-deep: #070b10;
             --bg-surface: #0d1520;
-            --bg-card: rgba(20,32,48,0.7);
-            --bg-glass: rgba(13,21,32,0.85);
-            --border-color: rgba(255,255,255,0.08);
-            --border-glow: rgba(0,168,132,0.3);
+            --bg-card: rgba(20, 32, 48, 0.6);
+            --bg-glass: rgba(13, 21, 32, 0.88);
+            --border-color: rgba(255, 255, 255, 0.07);
+            --border-glow: rgba(0, 168, 132, 0.3);
             --primary: #00a884;
             --primary-hover: #00c29a;
-            --primary-glow: rgba(0,168,132,0.4);
+            --primary-glow: rgba(0, 168, 132, 0.5);
             --accent: #0ea5e9;
             --error: #f43f5e;
-            --error-glow: rgba(244,63,94,0.4);
+            --error-glow: rgba(244, 63, 94, 0.5);
             --success: #00a884;
             --warning: #f59e0b;
             --gold: #ffd700;
+            --gold-glow: rgba(255, 215, 0, 0.3);
             --elite: #f97316;
-            --elite-glow: rgba(249,115,22,0.3);
+            --elite-glow: rgba(249, 115, 22, 0.3);
             --premium: #7c3aed;
-            --premium-glow: rgba(124,58,237,0.3);
+            --premium-glow: rgba(124, 58, 237, 0.3);
+            --platinum: #e5e7eb;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
             --font-main: 'Plus Jakarta Sans', sans-serif;
-            --transition: all 0.25s ease;
+            --transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             --radius: 16px;
-            --shadow: 0 10px 30px rgba(0,0,0,0.3);
+            --radius-sm: 10px;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+            --shadow-glow: 0 0 40px rgba(0, 168, 132, 0.15);
         }
         * {
             box-sizing: border-box;
@@ -42,7 +48,8 @@
             padding: 0;
             -webkit-tap-highlight-color: transparent;
         }
-        html, body {
+        html,
+        body {
             width: 100%;
             min-height: 100vh;
             background: var(--bg-deep);
@@ -54,13 +61,17 @@
             flex-direction: column;
             align-items: center;
             padding: 0 12px 20px;
+            background-image: radial-gradient(ellipse at 20% 50%, rgba(0, 168, 132, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(124, 58, 237, 0.04) 0%, transparent 60%);
         }
 
-        /* HEADER */
+        /* ============================================================
+           HEADER
+           ============================================================ */
         .admin-header {
             width: 100%;
             max-width: 800px;
-            padding: 12px 0;
+            padding: 14px 0 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -72,7 +83,7 @@
         .admin-header .logo {
             font-size: 1.2rem;
             font-weight: 800;
-            background: linear-gradient(135deg, var(--text-main), var(--error));
+            background: linear-gradient(135deg, var(--text-main) 30%, var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             display: flex;
@@ -80,142 +91,531 @@
             gap: 8px;
         }
         .admin-header .logo .badge {
-            font-size: 0.6rem;
-            background: var(--error);
-            color: white;
-            padding: 0 8px;
-            border-radius: 12px;
-            -webkit-text-fill-color: white;
+            font-size: 0.55rem;
+            background: linear-gradient(135deg, var(--primary), var(--premium));
+            color: #fff;
+            padding: 0 10px;
+            border-radius: 20px;
+            -webkit-text-fill-color: #fff;
+            letter-spacing: 0.5px;
+            font-weight: 700;
         }
         .admin-header .back {
-            background: none;
-            border: none;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
             color: var(--text-muted);
             font-size: 1.2rem;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 4px 10px;
             min-height: 36px;
             min-width: 36px;
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: var(--transition);
         }
-        .admin-header .back:active { transform: scale(0.92); }
+        .admin-header .back:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+        .admin-header .back:active {
+            transform: scale(0.92);
+        }
+        .admin-header .admin-email {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            letter-spacing: 0.3px;
+        }
 
-        /* TABS */
+        /* ============================================================
+           TABS
+           ============================================================ */
         .tabs {
             width: 100%;
             max-width: 800px;
             display: flex;
-            gap: 4px;
+            gap: 2px;
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 16px;
             flex-wrap: wrap;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            padding: 4px 4px 0;
         }
         .tab-btn {
             background: none;
             border: none;
             color: var(--text-muted);
             padding: 8px 14px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             font-family: var(--font-main);
             transition: var(--transition);
             border-bottom: 2px solid transparent;
             min-height: 40px;
+            border-radius: 8px 8px 0 0;
+            letter-spacing: 0.2px;
         }
-        .tab-btn:active { transform: scale(0.96); }
+        .tab-btn:active {
+            transform: scale(0.96);
+        }
         .tab-btn.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
+            background: rgba(0, 168, 132, 0.06);
         }
-        .tab-btn:hover { color: var(--text-main); }
+        .tab-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.03);
+        }
 
-        /* PANELS */
+        /* ============================================================
+           PANELS
+           ============================================================ */
         .panel {
             width: 100%;
             max-width: 800px;
             display: none;
             flex-direction: column;
             gap: 16px;
+            animation: panelFade 0.4s ease;
         }
-        .panel.active { display: flex; }
+        .panel.active {
+            display: flex;
+        }
+        @keyframes panelFade {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-        /* CARDS */
+        /* ============================================================
+           CARDS — Premium Glass
+           ============================================================ */
         .card {
             background: var(--bg-card);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--border-color);
             border-radius: var(--radius);
-            padding: 16px;
-            box-shadow: var(--shadow);
+            padding: 18px 20px;
+            box-shadow: var(--shadow), var(--shadow-glow);
+            transition: var(--transition);
+        }
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.10);
         }
         .card .title {
             font-weight: 700;
             font-size: 1rem;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             align-items: center;
             gap: 8px;
+            letter-spacing: -0.2px;
         }
         .card .title .badge {
-            font-size: 0.65rem;
-            background: var(--primary);
-            color: #0d1520;
-            padding: 0 8px;
-            border-radius: 12px;
+            font-size: 0.6rem;
+            background: linear-gradient(135deg, var(--primary), var(--premium));
+            color: #fff;
+            padding: 0 10px;
+            border-radius: 20px;
             font-weight: 700;
+            letter-spacing: 0.3px;
         }
 
-        /* SEARCH */
+        /* ============================================================
+           PREMIUM TOAST — Ultra Glass
+           ============================================================ */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-80px) scale(0.96);
+            z-index: 99999;
+            width: calc(100% - 32px);
+            max-width: 440px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .toast-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .toast-content {
+            background: rgba(13, 21, 32, 0.92);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            border-radius: 18px;
+            padding: 14px 18px 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.7), 0 0 60px rgba(0, 168, 132, 0.06);
+            position: relative;
+            overflow: hidden;
+        }
+        .toast-content::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0, 168, 132, 0.3), rgba(124, 58, 237, 0.2), rgba(255, 215, 0, 0.15));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .toast-content .icon-wrap {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: rgba(0, 168, 132, 0.12);
+            border: 1px solid rgba(0, 168, 132, 0.15);
+            font-size: 1.2rem;
+            position: relative;
+        }
+        .toast-content .icon-wrap.success {
+            background: rgba(0, 168, 132, 0.15);
+            border-color: rgba(0, 168, 132, 0.25);
+        }
+        .toast-content .icon-wrap.error {
+            background: rgba(244, 63, 94, 0.15);
+            border-color: rgba(244, 63, 94, 0.25);
+        }
+        .toast-content .icon-wrap.warning {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+        .toast-content .icon-wrap .pulse-ring {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 168, 132, 0.15);
+            animation: pulseRing 2s ease-out infinite;
+        }
+        .toast-content .icon-wrap .pulse-ring:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.9);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.6);
+                opacity: 0;
+            }
+        }
+        .toast-content .msg-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+        .toast-content .msg-wrap .toast-title {
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            letter-spacing: -0.1px;
+        }
+        .toast-content .msg-wrap .toast-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 1px;
+            font-weight: 400;
+        }
+        .toast-content .close-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: none;
+            color: var(--text-muted);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .toast-content .close-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2.5px;
+            background: linear-gradient(90deg, var(--primary), var(--premium), var(--gold));
+            border-radius: 0 0 18px 18px;
+            transition: width 0.05s linear;
+            width: 100%;
+        }
+
+        /* ============================================================
+           PREMIUM MODAL — Ultra Glass Confirmation
+           ============================================================ */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99998;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(7, 11, 16, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .modal-box {
+            background: rgba(13, 21, 32, 0.94);
+            backdrop-filter: blur(32px);
+            -webkit-backdrop-filter: blur(32px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 28px 30px 24px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7), 0 0 80px rgba(0, 168, 132, 0.04);
+            transform: scale(0.92) translateY(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(0, 168, 132, 0.2), rgba(124, 58, 237, 0.15), rgba(255, 215, 0, 0.08));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .modal-box .modal-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 14px;
+            background: rgba(0, 168, 132, 0.10);
+            border: 1px solid rgba(0, 168, 132, 0.12);
+            position: relative;
+        }
+        .modal-box .modal-icon .pulse-ring {
+            position: absolute;
+            inset: -6px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 168, 132, 0.10);
+            animation: pulseRing 2.4s ease-out infinite;
+        }
+        .modal-box .modal-icon .pulse-ring:nth-child(2) {
+            animation-delay: 0.8s;
+        }
+        .modal-box .modal-icon.danger {
+            background: rgba(244, 63, 94, 0.10);
+            border-color: rgba(244, 63, 94, 0.15);
+        }
+        .modal-box .modal-icon.danger .pulse-ring {
+            border-color: rgba(244, 63, 94, 0.10);
+        }
+        .modal-box .modal-icon.warning {
+            background: rgba(245, 158, 11, 0.10);
+            border-color: rgba(245, 158, 11, 0.15);
+        }
+        .modal-box .modal-icon.warning .pulse-ring {
+            border-color: rgba(245, 158, 11, 0.10);
+        }
+        .modal-box .modal-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: -0.2px;
+            margin-bottom: 6px;
+        }
+        .modal-box .modal-desc {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .modal-box .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .modal-box .modal-actions button {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+            min-height: 44px;
+            min-width: 100px;
+            font-family: var(--font-main);
+            letter-spacing: 0.2px;
+        }
+        .modal-box .modal-actions button:active {
+            transform: scale(0.95);
+        }
+        .modal-box .modal-actions .btn-confirm {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(0, 168, 132, 0.25);
+        }
+        .modal-box .modal-actions .btn-confirm:hover {
+            box-shadow: 0 6px 30px rgba(0, 168, 132, 0.35);
+            transform: translateY(-1px);
+        }
+        .modal-box .modal-actions .btn-confirm.danger {
+            background: linear-gradient(135deg, var(--error), #e11d48);
+            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.25);
+        }
+        .modal-box .modal-actions .btn-confirm.danger:hover {
+            box-shadow: 0 6px 30px rgba(244, 63, 94, 0.35);
+        }
+        .modal-box .modal-actions .btn-confirm.warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+            color: #0d1520;
+        }
+        .modal-box .modal-actions .btn-confirm.warning:hover {
+            box-shadow: 0 6px 30px rgba(245, 158, 11, 0.35);
+        }
+        .modal-box .modal-actions .btn-cancel {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+        .modal-box .modal-actions .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+
+        /* ============================================================
+           SEARCH / INPUTS
+           ============================================================ */
         .search-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             margin-bottom: 8px;
         }
-        .search-row input {
+        .search-row input,
+        .search-row select {
             flex: 1;
-            min-width: 160px;
+            min-width: 140px;
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             padding: 8px 12px;
             color: var(--text-main);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-family: var(--font-main);
             outline: none;
             min-height: 40px;
+            transition: var(--transition);
         }
-        .search-row input:focus {
+        .search-row input:focus,
+        .search-row select:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.10);
+        }
+        .search-row input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
         }
         .search-row button {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
             border: none;
-            border-radius: 10px;
-            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            padding: 8px 18px;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: var(--transition);
             min-height: 40px;
+            white-space: nowrap;
+            box-shadow: 0 2px 12px rgba(0, 168, 132, 0.15);
         }
-        .search-row button:active { transform: scale(0.95); }
+        .search-row button:active {
+            transform: scale(0.95);
+        }
+        .search-row button:hover {
+            box-shadow: 0 4px 20px rgba(0, 168, 132, 0.25);
+        }
+        .search-row button.secondary {
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+        .search-row button.secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
 
-        /* USER RESULT (for coin search) */
+        /* ============================================================
+           USER RESULT
+           ============================================================ */
         .user-result {
             display: none;
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
             margin-top: 6px;
             flex-wrap: wrap;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            transition: var(--transition);
         }
-        .user-result.active { display: flex; }
+        .user-result.active {
+            display: flex;
+        }
         .user-result .info {
             flex: 1;
             min-width: 120px;
@@ -223,96 +623,146 @@
         .user-result .info .name {
             font-weight: 700;
             font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
         .user-result .info .spid {
             font-size: 0.7rem;
             color: var(--text-muted);
         }
         .user-result .info .balance {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--gold);
             font-weight: 700;
         }
         .user-result .actions {
             display: flex;
-            gap: 4px;
+            gap: 6px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .user-result .actions input {
-            width: 70px;
+            width: 72px;
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 4px 8px;
             color: var(--text-main);
             font-size: 0.8rem;
-            min-height: 32px;
+            min-height: 34px;
+            text-align: center;
+        }
+        .user-result .actions input:focus {
+            border-color: var(--primary);
         }
         .user-result .actions button {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
             border: none;
             border-radius: 8px;
-            padding: 4px 12px;
+            padding: 4px 14px;
             font-weight: 700;
             font-size: 0.7rem;
             cursor: pointer;
-            min-height: 32px;
+            min-height: 34px;
+            transition: var(--transition);
         }
-        .user-result .actions button:active { transform: scale(0.95); }
+        .user-result .actions button:active {
+            transform: scale(0.95);
+        }
         .user-result .actions button.danger {
-            background: var(--error);
+            background: linear-gradient(135deg, var(--error), #e11d48);
         }
         .user-result .actions button.gold {
-            background: var(--gold);
+            background: linear-gradient(135deg, var(--gold), #fbbf24);
             color: #0d1520;
         }
 
         .pack-buttons {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             flex-wrap: wrap;
-            margin-top: 6px;
+            margin-top: 4px;
+            width: 100%;
         }
         .pack-buttons button {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 4px 12px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            color: var(--text-main);
+            color: var(--text-muted);
             cursor: pointer;
             transition: var(--transition);
-            min-height: 32px;
+            min-height: 30px;
         }
-        .pack-buttons button:active { transform: scale(0.92); }
+        .pack-buttons button:active {
+            transform: scale(0.92);
+        }
         .pack-buttons button:hover {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+        .pack-buttons button.primary-pack {
+            color: var(--primary);
+            border-color: rgba(0, 168, 132, 0.15);
+        }
+        .pack-buttons button.primary-pack:hover {
+            background: rgba(0, 168, 132, 0.08);
+        }
+        .pack-buttons button.danger-pack {
+            color: var(--error);
+            border-color: rgba(244, 63, 94, 0.15);
+        }
+        .pack-buttons button.danger-pack:hover {
+            background: rgba(244, 63, 94, 0.08);
         }
 
-        /* USER LIST */
+        /* ============================================================
+           USER LIST
+           ============================================================ */
         .user-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 400px;
+            max-height: 420px;
             overflow-y: auto;
+            padding-right: 4px;
+        }
+        .user-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .user-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .user-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
         }
         .user-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 10px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border-color);
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .user-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
         }
         .user-item .info .name {
             font-weight: 600;
             font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
         .user-item .info .spid {
             font-size: 0.65rem;
@@ -321,26 +771,36 @@
         .user-item .info .bal {
             font-size: 0.7rem;
             color: var(--gold);
+            font-weight: 600;
         }
         .user-item .info .roles {
             font-size: 0.6rem;
             display: flex;
             gap: 4px;
             flex-wrap: wrap;
+            margin-top: 2px;
         }
         .user-item .info .roles .role {
-            background: rgba(0,168,132,0.1);
-            padding: 0 6px;
+            background: rgba(0, 168, 132, 0.08);
+            padding: 0 8px;
             border-radius: 4px;
             color: var(--primary);
+            border: 1px solid rgba(0, 168, 132, 0.06);
         }
         .user-item .info .roles .role.elite {
-            background: rgba(249,115,22,0.1);
+            background: rgba(249, 115, 22, 0.08);
             color: var(--elite);
+            border-color: rgba(249, 115, 22, 0.06);
         }
         .user-item .info .roles .role.premium {
-            background: rgba(124,58,237,0.1);
+            background: rgba(124, 58, 237, 0.08);
             color: var(--premium);
+            border-color: rgba(124, 58, 237, 0.06);
+        }
+        .user-item .info .roles .role.vip {
+            background: rgba(255, 215, 0, 0.08);
+            color: var(--gold);
+            border-color: rgba(255, 215, 0, 0.06);
         }
         .user-item .actions {
             display: flex;
@@ -348,54 +808,100 @@
             flex-wrap: wrap;
         }
         .user-item .actions button {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 2px 10px;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 600;
             cursor: pointer;
             color: var(--text-muted);
             min-height: 28px;
+            transition: var(--transition);
         }
-        .user-item .actions button:active { transform: scale(0.95); }
+        .user-item .actions button:active {
+            transform: scale(0.95);
+        }
+        .user-item .actions button:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
         .user-item .actions button.danger {
             color: var(--error);
-            border-color: rgba(244,63,94,0.2);
+            border-color: rgba(244, 63, 94, 0.15);
+        }
+        .user-item .actions button.danger:hover {
+            background: rgba(244, 63, 94, 0.06);
         }
         .user-item .actions button.primary {
             color: var(--primary);
-            border-color: rgba(0,168,132,0.2);
+            border-color: rgba(0, 168, 132, 0.15);
+        }
+        .user-item .actions button.primary:hover {
+            background: rgba(0, 168, 132, 0.06);
         }
         .user-item .actions button.gold {
             color: var(--gold);
-            border-color: rgba(255,215,0,0.2);
+            border-color: rgba(255, 215, 0, 0.15);
+        }
+        .user-item .actions button.gold:hover {
+            background: rgba(255, 215, 0, 0.06);
         }
         .user-item .actions button.elite {
             color: var(--elite);
-            border-color: rgba(249,115,22,0.2);
+            border-color: rgba(249, 115, 22, 0.15);
+        }
+        .user-item .actions button.elite:hover {
+            background: rgba(249, 115, 22, 0.06);
         }
         .user-item .actions button.premium {
             color: var(--premium);
-            border-color: rgba(124,58,237,0.2);
+            border-color: rgba(124, 58, 237, 0.15);
+        }
+        .user-item .actions button.premium:hover {
+            background: rgba(124, 58, 237, 0.06);
+        }
+        .user-item .actions button .note-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            margin-left: 4px;
+            vertical-align: middle;
         }
 
-        /* ROOM LIST */
+        /* ============================================================
+           ROOM LIST
+           ============================================================ */
         .room-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .room-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .room-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
         }
         .room-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 10px;
-            background: rgba(255,255,255,0.02);
-            border-radius: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border-color);
             flex-wrap: wrap;
-            gap: 4px;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .room-item:hover {
+            background: rgba(255, 255, 255, 0.04);
         }
         .room-item .info .name {
             font-weight: 600;
@@ -409,26 +915,39 @@
             display: flex;
             gap: 4px;
             flex-wrap: wrap;
+            align-items: center;
         }
         .room-item .actions button {
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 2px 10px;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 600;
             cursor: pointer;
             color: var(--text-muted);
             min-height: 28px;
+            transition: var(--transition);
         }
-        .room-item .actions button:active { transform: scale(0.95); }
+        .room-item .actions button:active {
+            transform: scale(0.95);
+        }
+        .room-item .actions button:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
         .room-item .actions button.danger {
             color: var(--error);
-            border-color: rgba(244,63,94,0.2);
+            border-color: rgba(244, 63, 94, 0.15);
+        }
+        .room-item .actions button.danger:hover {
+            background: rgba(244, 63, 94, 0.06);
         }
         .room-item .actions button.primary {
             color: var(--primary);
-            border-color: rgba(0,168,132,0.2);
+            border-color: rgba(0, 168, 132, 0.15);
+        }
+        .room-item .actions button.primary:hover {
+            background: rgba(0, 168, 132, 0.06);
         }
         .room-item .actions input {
             width: 60px;
@@ -439,95 +958,143 @@
             color: var(--text-main);
             font-size: 0.7rem;
             min-height: 28px;
+            text-align: center;
+        }
+        .room-item .actions input:focus {
+            border-color: var(--primary);
         }
 
-        /* CREATE ROOM */
+        /* ============================================================
+           CREATE ROOM
+           ============================================================ */
         .create-room-row {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
             align-items: center;
-            margin-top: 8px;
+            margin-top: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
         }
         .create-room-row input {
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 6px 10px;
+            padding: 6px 12px;
             color: var(--text-main);
             font-size: 0.85rem;
             font-family: var(--font-main);
             min-height: 36px;
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
+            transition: var(--transition);
         }
         .create-room-row input:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.08);
         }
         .create-room-row button {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
             border: none;
             border-radius: 8px;
-            padding: 6px 16px;
+            padding: 6px 18px;
             font-weight: 700;
             font-size: 0.8rem;
             cursor: pointer;
             min-height: 36px;
+            transition: var(--transition);
+            box-shadow: 0 2px 12px rgba(0, 168, 132, 0.15);
         }
-        .create-room-row button:active { transform: scale(0.95); }
+        .create-room-row button:active {
+            transform: scale(0.95);
+        }
+        .create-room-row button:hover {
+            box-shadow: 0 4px 20px rgba(0, 168, 132, 0.25);
+        }
 
-        /* TRANSACTIONS */
+        /* ============================================================
+           TRANSACTIONS
+           ============================================================ */
         .tx-list {
             display: flex;
             flex-direction: column;
             gap: 4px;
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
+            padding-right: 4px;
+        }
+        .tx-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .tx-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
         }
         .tx-item {
             display: flex;
             justify-content: space-between;
-            padding: 4px 8px;
+            padding: 5px 10px;
             font-size: 0.75rem;
             border-bottom: 1px solid var(--border-color);
             color: var(--text-muted);
             flex-wrap: wrap;
             gap: 4px;
+            align-items: center;
         }
-        .tx-item .amount.positive { color: var(--success); }
-        .tx-item .amount.negative { color: var(--error); }
+        .tx-item .amount.positive {
+            color: var(--success);
+        }
+        .tx-item .amount.negative {
+            color: var(--error);
+        }
+        .tx-item .tx-time {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
 
-        /* STATS */
+        /* ============================================================
+           STATS GRID
+           ============================================================ */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 12px;
         }
         .stat-box {
-            background: rgba(255,255,255,0.02);
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: var(--radius-sm);
+            padding: 14px 12px;
             text-align: center;
+            transition: var(--transition);
+        }
+        .stat-box:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
         }
         .stat-box .value {
             font-size: 1.4rem;
             font-weight: 800;
             color: var(--gold);
+            letter-spacing: -0.5px;
         }
         .stat-box .label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-top: 2px;
         }
 
-        /* ANNOUNCEMENT & MAINTENANCE TOGGLES */
+        /* ============================================================
+           TOGGLES
+           ============================================================ */
         .toggle-row {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             flex-wrap: wrap;
         }
         .toggle-row .toggle-label {
@@ -536,16 +1103,19 @@
         }
         .toggle-row .toggle-switch {
             position: relative;
-            width: 48px;
-            height: 26px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 13px;
+            width: 50px;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
             cursor: pointer;
             transition: var(--transition);
             flex-shrink: 0;
+            border: 1px solid var(--border-color);
         }
         .toggle-row .toggle-switch.active {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(0, 168, 132, 0.15);
         }
         .toggle-row .toggle-switch .slider {
             position: absolute;
@@ -553,9 +1123,10 @@
             left: 3px;
             width: 20px;
             height: 20px;
-            background: white;
+            background: #fff;
             border-radius: 50%;
             transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
         }
         .toggle-row .toggle-switch.active .slider {
             left: 25px;
@@ -563,22 +1134,28 @@
         .toggle-row .toggle-status {
             font-size: 0.8rem;
             color: var(--text-muted);
+            font-weight: 500;
         }
+
         .announce-input {
             width: 100%;
-            padding: 8px 12px;
+            padding: 10px 14px;
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: var(--radius-sm);
             color: var(--text-main);
             font-size: 0.9rem;
             font-family: var(--font-main);
-            min-height: 40px;
+            min-height: 44px;
             margin: 6px 0;
+            resize: vertical;
+            transition: var(--transition);
         }
         .announce-input:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.08);
         }
+
         .expiry-row {
             display: flex;
             gap: 8px;
@@ -589,38 +1166,53 @@
             background: var(--bg-deep);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 4px 8px;
+            padding: 4px 10px;
             color: var(--text-main);
             font-size: 0.8rem;
-            min-height: 32px;
+            min-height: 34px;
+            transition: var(--transition);
+        }
+        .expiry-row input[type="datetime-local"]:focus {
+            border-color: var(--primary);
         }
         .expiry-row button {
-            background: var(--primary);
-            color: white;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
             border: none;
             border-radius: 8px;
-            padding: 4px 14px;
+            padding: 4px 16px;
             font-weight: 700;
             font-size: 0.75rem;
             cursor: pointer;
-            min-height: 32px;
+            min-height: 34px;
+            transition: var(--transition);
         }
-        .expiry-row button:active { transform: scale(0.95); }
+        .expiry-row button:active {
+            transform: scale(0.95);
+        }
+        .expiry-row button.danger {
+            background: linear-gradient(135deg, var(--error), #e11d48);
+        }
+        .expiry-row button.accent {
+            background: linear-gradient(135deg, var(--accent), #0284c7);
+        }
 
-        /* ===== ANNOUNCEMENT PREVIEW ===== */
+        /* ============================================================
+           ANNOUNCEMENT PREVIEW
+           ============================================================ */
         .announce-preview {
             margin-top: 10px;
-            padding: 8px 12px;
-            background: rgba(0,168,132,0.04);
+            padding: 10px 14px;
+            background: rgba(0, 168, 132, 0.04);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             display: none;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             overflow: hidden;
-            white-space: nowrap;
             color: var(--text-muted);
             font-size: 0.85rem;
+            transition: var(--transition);
         }
         .announce-preview.active {
             display: flex;
@@ -629,61 +1221,337 @@
             flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .announce-preview .preview-icon {
             font-size: 1.2rem;
             flex-shrink: 0;
         }
 
-        /* TOAST */
-        .toast-container {
-            position: fixed;
-            top: 28px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-30px);
-            z-index: 9999;
-            width: calc(100% - 32px);
-            max-width: 400px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.16,1,0.3,1);
-            pointer-events: none;
-        }
-        .toast-container.active {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) translateY(0);
-            pointer-events: auto;
-        }
-        .toast-content {
-            background: var(--bg-glass);
-            backdrop-filter: blur(24px);
+        /* ============================================================
+           REQUESTS PANEL
+           ============================================================ */
+        .request-item {
+            background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            transition: var(--transition);
+        }
+        .request-item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .request-item .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .request-item .top .title {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+        .request-item .top .room-tag {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-left: 6px;
+            border: 1px solid var(--border-color);
+        }
+        .request-item .status-badge {
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .status-badge.pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.08);
+        }
+        .status-badge.payment_pending {
+            background: rgba(124, 58, 237, 0.12);
+            color: #a78bfa;
+            border: 1px solid rgba(124, 58, 237, 0.08);
+        }
+        .status-badge.approved {
+            background: rgba(0, 168, 132, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(0, 168, 132, 0.08);
+        }
+        .status-badge.rejected {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--error);
+            border: 1px solid rgba(244, 63, 94, 0.08);
+        }
+        .request-item .details {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin: 6px 0 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+        }
+        .request-item .details strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .request-item .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .request-item .actions button {
+            padding: 4px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            min-height: 34px;
+            transition: var(--transition);
+            font-family: var(--font-main);
+        }
+        .request-item .actions button:active {
+            transform: scale(0.95);
+        }
+        .request-item .actions .btn-confirm {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(0, 168, 132, 0.15);
+        }
+        .request-item .actions .btn-confirm:hover {
+            box-shadow: 0 4px 20px rgba(0, 168, 132, 0.25);
+        }
+        .request-item .actions .btn-reject {
+            background: linear-gradient(135deg, var(--error), #e11d48);
+            color: #fff;
+            box-shadow: 0 2px 12px rgba(244, 63, 94, 0.15);
+        }
+        .request-item .actions .btn-reject:hover {
+            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.25);
+        }
+        .request-item .actions .btn-pending {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: #0d1520;
+            box-shadow: 0 2px 12px rgba(245, 158, 11, 0.15);
+        }
+        .request-item .actions .btn-pending:hover {
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.25);
+        }
+        .request-item .actions .btn-disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        /* ============================================================
+           AUDIT LOG
+           ============================================================ */
+        .audit-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 360px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .audit-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .audit-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+        }
+        .audit-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 4px;
+            align-items: center;
+        }
+        .audit-item .audit-action {
+            color: var(--text-main);
+            font-weight: 500;
+        }
+        .audit-item .audit-time {
+            font-size: 0.6rem;
+            opacity: 0.6;
+        }
+        .audit-item .audit-user {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* ============================================================
+           SYSTEM STATS
+           ============================================================ */
+        .sys-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        .sys-stat {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 12px 10px;
+            text-align: center;
+        }
+        .sys-stat .num {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--premium));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sys-stat .lbl {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* ============================================================
+           BULK OPERATIONS
+           ============================================================ */
+        .bulk-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-top: 8px;
+        }
+        .bulk-row label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
-            box-shadow: var(--shadow);
+            gap: 4px;
         }
-        .toast-content .icon { font-size: 1.2rem; }
-        .toast-content .msg { flex: 1; font-size: 0.85rem; font-weight: 500; }
-        .toast-content .close { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+        .bulk-row input {
+            width: 70px;
+            background: var(--bg-deep);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 6px;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            min-height: 32px;
+            text-align: center;
+        }
+        .bulk-row input:focus {
+            border-color: var(--primary);
+        }
+        .bulk-row button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 14px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            min-height: 32px;
+            transition: var(--transition);
+        }
+        .bulk-row button:active {
+            transform: scale(0.95);
+        }
+        .bulk-row button.danger {
+            background: linear-gradient(135deg, var(--error), #e11d48);
+        }
 
-        /* RESPONSIVE */
+        .user-item .user-check {
+            margin-right: 6px;
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
         @media (max-width: 480px) {
-            .admin-header { padding: 8px 0; }
-            .tab-btn { font-size: 0.7rem; padding: 6px 10px; }
-            .search-row input { font-size: 0.8rem; }
-            .user-result .actions input { width: 60px; }
-            .create-room-row input { min-width: 100px; }
+            .admin-header {
+                padding: 8px 0;
+            }
+            .admin-header .logo {
+                font-size: 1rem;
+            }
+            .tab-btn {
+                font-size: 0.65rem;
+                padding: 6px 8px;
+                min-height: 34px;
+            }
+            .search-row input,
+            .search-row select {
+                font-size: 0.8rem;
+                min-height: 36px;
+            }
+            .search-row button {
+                font-size: 0.7rem;
+                padding: 6px 12px;
+                min-height: 36px;
+            }
+            .user-result .actions input {
+                width: 56px;
+            }
+            .create-room-row input {
+                min-width: 80px;
+            }
+            .card {
+                padding: 14px 14px;
+            }
+            .modal-box {
+                padding: 22px 18px 18px;
+            }
+            .modal-box .modal-actions button {
+                min-width: 80px;
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sys-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
         @media (pointer: coarse) {
-            .tab-btn, .search-row button, .user-result .actions button,
-            .pack-buttons button, .user-item .actions button,
+            .tab-btn,
+            .search-row button,
+            .user-result .actions button,
+            .pack-buttons button,
+            .user-item .actions button,
             .room-item .actions button,
-            .toggle-row .toggle-switch, .expiry-row button,
-            .create-room-row button, .create-room-row input {
+            .toggle-row .toggle-switch,
+            .expiry-row button,
+            .create-room-row button,
+            .create-room-row input,
+            .request-item .actions button,
+            .bulk-row button,
+            .modal-box .modal-actions button {
                 min-height: 44px;
                 min-width: 44px;
             }
@@ -692,29 +1560,37 @@
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
     <header class="admin-header">
         <div style="display:flex;align-items:center;gap:8px;">
             <button class="back" onclick="window.location.href='administrator.html'">‹</button>
-            <span class="logo">⚙️ Admin <span class="badge">Control</span></span>
+            <span class="logo">⚙️ Admin <span class="badge">Premium</span></span>
         </div>
-        <span style="font-size:0.8rem;color:var(--text-muted);" id="adminEmail">Admin</span>
+        <span class="admin-email" id="adminEmail">Admin</span>
     </header>
 
-    <!-- TABS -->
+    <!-- ============================================================
+    TABS
+    ============================================================ -->
     <div class="tabs">
         <button class="tab-btn active" data-tab="coins" onclick="switchTab('coins')">🪙 Coins</button>
         <button class="tab-btn" data-tab="users" onclick="switchTab('users')">👥 Users</button>
         <button class="tab-btn" data-tab="rooms" onclick="switchTab('rooms')">🏠 Rooms</button>
+        <button class="tab-btn" data-tab="requests" onclick="switchTab('requests')">📦 Requests</button>
         <button class="tab-btn" data-tab="earnings" onclick="switchTab('earnings')">💰 Earnings</button>
         <button class="tab-btn" data-tab="transactions" onclick="switchTab('transactions')">📜 Transactions</button>
-        <button class="tab-btn" data-tab="announcement" onclick="switchTab('announcement')">📢 Announcement</button>
-        <button class="tab-btn" data-tab="maintenance" onclick="switchTab('maintenance')">🛠️ Maintenance</button>
+        <button class="tab-btn" data-tab="audit" onclick="switchTab('audit')">📋 Audit</button>
+        <button class="tab-btn" data-tab="announcement" onclick="switchTab('announcement')">📢 Announce</button>
+        <button class="tab-btn" data-tab="maintenance" onclick="switchTab('maintenance')">🛠️ Maint</button>
     </div>
 
-    <!-- PANELS -->
+    <!-- ============================================================
+    PANELS
+    ============================================================ -->
 
-    <!-- COINS PANEL -->
+    <!-- COINS -->
     <div class="panel active" id="panel-coins">
         <div class="card">
             <div class="title">🔍 Find User by SPIKE ID</div>
@@ -729,30 +1605,37 @@
                     <div class="balance" id="coinUserBalance">🪙 0</div>
                 </div>
                 <div class="actions">
-                    <input type="number" id="coinAmount" placeholder="Amount" min="1" />
+                    <input type="number" id="coinAmount" placeholder="Amt" min="1" />
                     <button onclick="addCoins()">➕ Add</button>
                     <button class="danger" onclick="removeCoins()">➖ Remove</button>
                 </div>
-                <div class="pack-buttons" style="width:100%;">
-                    <button onclick="addPack(50)">+50</button>
-                    <button onclick="addPack(100)">+100</button>
-                    <button onclick="addPack(500)">+500</button>
-                    <button onclick="addPack(1000)">+1000</button>
-                    <button onclick="removePack(50)">-50</button>
-                    <button onclick="removePack(100)">-100</button>
+                <div class="pack-buttons">
+                    <button class="primary-pack" onclick="addPack(50)">+50</button>
+                    <button class="primary-pack" onclick="addPack(100)">+100</button>
+                    <button class="primary-pack" onclick="addPack(500)">+500</button>
+                    <button class="primary-pack" onclick="addPack(1000)">+1000</button>
+                    <button class="danger-pack" onclick="removePack(50)">-50</button>
+                    <button class="danger-pack" onclick="removePack(100)">-100</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- USERS PANEL -->
+    <!-- USERS -->
     <div class="panel" id="panel-users">
         <div class="card">
             <div class="title">👥 All Users <span class="badge" id="userCount">0</span></div>
             <div class="search-row">
                 <input type="text" id="userSearchInput" placeholder="Search by name or SPIKE ID..." />
                 <button onclick="searchUsers()">Search</button>
-                <button onclick="loadAllUsers()">Refresh</button>
+                <button class="secondary" onclick="loadAllUsers()">↻ Refresh</button>
+            </div>
+            <!-- Bulk Operations -->
+            <div class="bulk-row" id="bulkRow">
+                <label><input type="checkbox" id="bulkSelectAll" onchange="toggleAllUsers()" /> Select All</label>
+                <label>Add <input type="number" id="bulkCoinAmount" value="50" min="1" /> coins</label>
+                <button onclick="bulkAddCoins()">➕ Bulk Add</button>
+                <button class="danger" onclick="bulkRemoveCoins()">➖ Bulk Remove</button>
             </div>
             <div class="user-list" id="userList">
                 <div style="text-align:center;color:var(--text-muted);padding:20px;">Loading users...</div>
@@ -760,23 +1643,48 @@
         </div>
     </div>
 
-    <!-- ROOMS PANEL -->
+    <!-- ROOMS -->
     <div class="panel" id="panel-rooms">
         <div class="card">
             <div class="title">🏠 All Rooms</div>
-            <button onclick="loadRooms()" style="background:var(--primary);color:white;border:none;border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;min-height:36px;margin-bottom:8px;">Refresh</button>
+            <button onclick="loadRooms()" style="background:rgba(255,255,255,0.04);color:var(--text-muted);border:1px solid var(--border-color);border-radius:8px;padding:6px 14px;font-weight:700;cursor:pointer;min-height:36px;margin-bottom:8px;transition:var(--transition);">↻ Refresh</button>
             <div class="room-list" id="roomList">
                 <div style="text-align:center;color:var(--text-muted);padding:20px;">Loading rooms...</div>
             </div>
             <div class="create-room-row">
                 <input type="text" id="roomNameInput" placeholder="Room name" />
-                <input type="number" id="roomFeeInput" placeholder="Entry fee" value="50" min="1" style="max-width:120px;" />
+                <input type="number" id="roomFeeInput" placeholder="Fee" value="50" min="1" style="max-width:100px;" />
                 <button onclick="createRoom()">➕ Create Room</button>
             </div>
         </div>
     </div>
 
-    <!-- EARNINGS PANEL (upgraded with Premium Cuts) -->
+    <!-- REQUESTS -->
+    <div class="panel" id="panel-requests">
+        <div class="card">
+            <div class="title">📦 Feature & Coin Pack Requests</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                <select id="requestStatusFilter" onchange="renderRequests()">
+                    <option value="all">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="payment_pending">Payment Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+                <select id="requestTypeFilter" onchange="renderRequests()">
+                    <option value="all">All Types</option>
+                    <option value="feature">Features</option>
+                    <option value="coin_pack">Coin Packs</option>
+                </select>
+                <input type="text" id="requestRoomFilter" placeholder="Filter by room..." oninput="renderRequests()" style="flex:1;min-width:120px;background:var(--bg-deep);border:1px solid var(--border-color);border-radius:8px;padding:6px 12px;color:var(--text-main);font-size:0.85rem;min-height:36px;" />
+            </div>
+            <div id="requestsContainer" style="display:flex;flex-direction:column;gap:8px;max-height:500px;overflow-y:auto;padding-right:4px;">
+                <div style="text-align:center;color:var(--text-muted);padding:20px;">Loading requests...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EARNINGS -->
     <div class="panel" id="panel-earnings">
         <div class="card">
             <div class="title">💰 Admin Earnings</div>
@@ -789,16 +1697,27 @@
                 <div class="stat-box"><div class="value" id="totalELITECut">0</div><div class="label">ELITE Cuts</div></div>
             </div>
         </div>
+        <!-- System Stats -->
+        <div class="card">
+            <div class="title">📊 System Status</div>
+            <div class="sys-stats-grid" id="sysStats">
+                <div class="sys-stat"><div class="num" id="sysUsers">—</div><div class="lbl">Users</div></div>
+                <div class="sys-stat"><div class="num" id="sysRooms">—</div><div class="lbl">Rooms</div></div>
+                <div class="sys-stat"><div class="num" id="sysRequests">—</div><div class="lbl">Requests</div></div>
+                <div class="sys-stat"><div class="num" id="sysTxs">—</div><div class="lbl">Transactions</div></div>
+            </div>
+        </div>
     </div>
 
-    <!-- TRANSACTIONS PANEL -->
+    <!-- TRANSACTIONS -->
     <div class="panel" id="panel-transactions">
         <div class="card">
             <div class="title">📜 Recent Transactions</div>
             <div class="search-row">
                 <input type="text" id="txSearchInput" placeholder="User SPIKE ID" />
                 <button onclick="loadTransactions()">Search</button>
-                <button onclick="loadTransactions('all')">All</button>
+                <button class="secondary" onclick="loadTransactions('all')">All</button>
+                <button class="secondary" onclick="exportTransactionsCSV()" style="color:var(--gold);border-color:rgba(255,215,0,0.15);">⬇ CSV</button>
             </div>
             <div class="tx-list" id="txList">
                 <div style="text-align:center;color:var(--text-muted);padding:20px;">Loading transactions...</div>
@@ -806,11 +1725,25 @@
         </div>
     </div>
 
-    <!-- ANNOUNCEMENT PANEL -->
+    <!-- AUDIT LOG -->
+    <div class="panel" id="panel-audit">
+        <div class="card">
+            <div class="title">📋 Admin Audit Log <span class="badge">Live</span></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                <button onclick="loadAuditLog()" style="background:rgba(255,255,255,0.04);border:1px solid var(--border-color);border-radius:8px;padding:4px 14px;font-weight:600;font-size:0.7rem;color:var(--text-muted);cursor:pointer;min-height:34px;">↻ Refresh</button>
+                <button onclick="clearAuditLog()" style="background:rgba(244,63,94,0.06);border:1px solid rgba(244,63,94,0.15);border-radius:8px;padding:4px 14px;font-weight:600;font-size:0.7rem;color:var(--error);cursor:pointer;min-height:34px;">Clear All</button>
+            </div>
+            <div class="audit-list" id="auditList">
+                <div style="text-align:center;color:var(--text-muted);padding:20px;">Loading audit log...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ANNOUNCEMENT -->
     <div class="panel" id="panel-announcement">
         <div class="card">
             <div class="title">📢 Global Announcement <span class="badge">Live</span></div>
-            <div class="toggle-row" style="margin-bottom:8px;">
+            <div class="toggle-row" style="margin-bottom:10px;">
                 <span class="toggle-label">Active</span>
                 <div class="toggle-switch" id="announceToggle" onclick="toggleAnnouncement()">
                     <div class="slider"></div>
@@ -819,11 +1752,11 @@
             </div>
             <textarea class="announce-input" id="announceText" rows="2" placeholder="Enter announcement text..."></textarea>
             <div class="expiry-row">
-                <label style="font-size:0.8rem;color:var(--text-muted);">Expiry:</label>
+                <label style="font-size:0.75rem;color:var(--text-muted);">Expiry:</label>
                 <input type="datetime-local" id="announceExpiry" />
                 <button onclick="saveAnnouncement()">Save</button>
-                <button onclick="clearAnnouncement()" style="background:var(--error);">Clear</button>
-                <button onclick="testAnnouncement()" style="background:var(--accent);">Test</button>
+                <button class="danger" onclick="clearAnnouncement()">Clear</button>
+                <button class="accent" onclick="testAnnouncement()">Test</button>
             </div>
             <div class="announce-preview" id="announcePreview">
                 <span class="preview-icon">📢</span>
@@ -832,7 +1765,7 @@
         </div>
     </div>
 
-    <!-- MAINTENANCE PANEL -->
+    <!-- MAINTENANCE -->
     <div class="panel" id="panel-maintenance">
         <div class="card">
             <div class="title">🛠️ Maintenance Mode</div>
@@ -843,29 +1776,58 @@
                 </div>
                 <span class="toggle-status" id="maintenanceStatus">Disabled</span>
             </div>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:8px;">When enabled, only admin can access the app. All other users will be redirected to a maintenance page.</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin-top:10px;">When enabled, only admin can access the app. All other users will be redirected to a maintenance page.</p>
         </div>
     </div>
 
-    <!-- TOAST -->
+    <!-- ============================================================
+    PREMIUM TOAST
+    ============================================================ -->
     <div class="toast-container" id="toast">
         <div class="toast-content">
-            <span class="icon" id="toastIcon">✓</span>
-            <span class="msg" id="toastMsg">Done</span>
-            <button class="close" onclick="dismissToast()">✕</button>
+            <div class="icon-wrap success" id="toastIconWrap">
+                <span class="pulse-ring"></span>
+                <span class="pulse-ring"></span>
+                <span id="toastIcon">✓</span>
+            </div>
+            <div class="msg-wrap">
+                <div class="toast-title" id="toastTitle">Success</div>
+                <div class="toast-sub" id="toastMsg">Operation completed</div>
+            </div>
+            <button class="close-btn" onclick="dismissToast()">✕</button>
+            <div class="toast-progress" id="toastProgress"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    PREMIUM MODAL
+    ============================================================ -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-icon" id="modalIcon">
+                <span class="pulse-ring"></span>
+                <span class="pulse-ring"></span>
+                <span id="modalIconEmoji">❓</span>
+            </div>
+            <div class="modal-title" id="modalTitle">Confirm</div>
+            <div class="modal-desc" id="modalDesc">Are you sure?</div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal(false)">Cancel</button>
+                <button class="btn-confirm" id="modalConfirmBtn" onclick="closeModal(true)">Confirm</button>
+            </div>
         </div>
     </div>
 
     <script type="module">
-        // ============================================================
-        // ADMIN_ROOMS.JS — Complete Admin Control (SP ID based)
-        // ============================================================
+        // ================================================================
+        // ADMIN_ROOMS — PREMIUM ULTRA EDITION
+        // ================================================================
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import {
             getFirestore, collection, doc, getDoc, getDocs, updateDoc, deleteDoc, query, orderBy,
-            where, setDoc, serverTimestamp, runTransaction, increment
+            where, setDoc, serverTimestamp, runTransaction, increment, addDoc, onSnapshot, limit
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const CONFIG = {
@@ -883,43 +1845,158 @@
 
         let currentUser = null;
         let isAdmin = false;
-        let selectedUserDoc = null; // { id, data } for coin operations
+        let selectedUserDoc = null;
         let toastTimeout = null;
+        let unsubscribeRequests = null;
+        let modalResolve = null;
+        let allUserDocs = [];
+        let selectedUserIds = new Set();
 
-        // ===== TOAST =====
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
+        // ================================================================
+        // PREMIUM TOAST
+        // ================================================================
+        function showToast(title, msg = '', type = 'success') {
+            const container = document.getElementById('toast');
+            const iconWrap = document.getElementById('toastIconWrap');
             const icon = document.getElementById('toastIcon');
+            const titleEl = document.getElementById('toastTitle');
             const msgEl = document.getElementById('toastMsg');
-            if (toastTimeout) clearTimeout(toastTimeout);
-            t.className = 'toast-container';
-            icon.textContent = type === 'success' ? '✓' : '✕';
-            msgEl.textContent = msg;
-            void t.offsetWidth;
-            t.classList.add('active');
-            toastTimeout = setTimeout(() => { t.classList.remove('active'); }, 3000);
+            const progress = document.getElementById('toastProgress');
+
+            if (toastTimeout) { clearTimeout(toastTimeout);
+                toastTimeout = null; }
+
+            container.className = 'toast-container';
+
+            // Reset icon wrap classes
+            iconWrap.className = 'icon-wrap';
+            if (type === 'success') iconWrap.classList.add('success');
+            else if (type === 'error') iconWrap.classList.add('error');
+            else if (type === 'warning') iconWrap.classList.add('warning');
+
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠'
+            };
+            icon.textContent = icons[type] || '✓';
+            titleEl.textContent = title;
+            msgEl.textContent = msg || '';
+
+            // Reset progress
+            progress.style.width = '100%';
+
+            void container.offsetWidth;
+            container.classList.add('active');
+
+            // Progress bar shrink
+            let start = Date.now();
+            const duration = 3200;
+            const step = () => {
+                const elapsed = Date.now() - start;
+                const pct = Math.max(0, 100 - (elapsed / duration) * 100);
+                progress.style.width = pct + '%';
+                if (pct > 0) {
+                    toastTimeout = setTimeout(step, 30);
+                } else {
+                    container.classList.remove('active');
+                }
+            };
+            toastTimeout = setTimeout(step, 30);
+
+            // Auto dismiss after duration
+            setTimeout(() => {
+                if (container.classList.contains('active')) {
+                    container.classList.remove('active');
+                }
+            }, duration + 200);
         }
+
         window.dismissToast = function() {
-            document.getElementById('toast').classList.remove('active');
-            if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
+            const container = document.getElementById('toast');
+            container.classList.remove('active');
+            if (toastTimeout) { clearTimeout(toastTimeout);
+                toastTimeout = null; }
         };
 
-        // ===== TAB SWITCHING =====
+        // ================================================================
+        // PREMIUM MODAL — Replaces confirm()
+        // ================================================================
+        function showModal(options) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('modalOverlay');
+                const icon = document.getElementById('modalIconEmoji');
+                const title = document.getElementById('modalTitle');
+                const desc = document.getElementById('modalDesc');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+
+                icon.textContent = options.icon || '❓';
+                title.textContent = options.title || 'Confirm';
+                desc.textContent = options.message || 'Are you sure?';
+
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                confirmBtn.className = 'btn-confirm';
+                if (options.type === 'danger') confirmBtn.classList.add('danger');
+                else if (options.type === 'warning') confirmBtn.classList.add('warning');
+
+                const iconBox = document.querySelector('.modal-box .modal-icon');
+                iconBox.className = 'modal-icon';
+                if (options.type === 'danger') iconBox.classList.add('danger');
+                else if (options.type === 'warning') iconBox.classList.add('warning');
+
+                overlay.classList.add('active');
+                modalResolve = resolve;
+            });
+        }
+
+        window.closeModal = function(result) {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('active');
+            if (modalResolve) {
+                modalResolve(result);
+                modalResolve = null;
+            }
+        };
+
+        // Helper: premium confirm
+        async function premiumConfirm(message, title = 'Confirm', type = 'default') {
+            const result = await showModal({
+                title,
+                message,
+                icon: type === 'danger' ? '⚠️' : type === 'warning' ? '⚡' : '❓',
+                type,
+                confirmText: type === 'danger' ? 'Yes, proceed' : 'Confirm',
+            });
+            return result;
+        }
+
+        // ================================================================
+        // TAB SWITCHING
+        // ================================================================
         window.switchTab = function(tab) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
             document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
             document.getElementById(`panel-${tab}`).classList.add('active');
+
+            if (tab === 'requests') loadRequests();
+            if (tab === 'users') loadAllUsers();
+            if (tab === 'rooms') loadRooms();
+            if (tab === 'earnings') { loadEarnings();
+                loadSystemStats(); }
+            if (tab === 'transactions') loadTransactions();
+            if (tab === 'audit') loadAuditLog();
         };
 
-        // ===== HELPERS =====
+        // ================================================================
+        // HELPERS
+        // ================================================================
         function escapeHTML(s) {
             return String(s || '').replace(/[&<>'"]/g, t =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)
             );
         }
 
-        // ===== FIND USER BY SP ID =====
         async function findUserBySpId(spId) {
             if (!spId) return null;
             const q = query(collection(db, 'users'), where('spId', '==', spId));
@@ -928,17 +2005,99 @@
             return { id: snap.docs[0].id, data: snap.docs[0].data() };
         }
 
-        // ===== COIN MANAGEMENT =====
+        // ================================================================
+        // AUDIT LOG
+        // ================================================================
+        async function logAudit(action, targetId = '', targetName = '', details = '') {
+            try {
+                await addDoc(collection(db, 'auditLog'), {
+                    action,
+                    targetId,
+                    targetName,
+                    details,
+                    adminId: currentUser?.uid || 'unknown',
+                    adminEmail: currentUser?.email || 'unknown',
+                    timestamp: serverTimestamp()
+                });
+            } catch (e) { /* ignore */ }
+        }
+
+        async function loadAuditLog() {
+            const list = document.getElementById('auditList');
+            list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</div>';
+            try {
+                const q = query(collection(db, 'auditLog'), orderBy('timestamp', 'desc'), limit(150));
+                const snap = await getDocs(q);
+                if (snap.empty) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No audit entries</div>';
+                    return;
+                }
+                let html = '';
+                snap.forEach(d => {
+                    const data = d.data();
+                    const time = data.timestamp?.toDate?.() || new Date();
+                    const action = data.action || '—';
+                    const target = data.targetName || data.targetId || '—';
+                    const admin = data.adminEmail || 'admin';
+                    const details = data.details || '';
+                    html += `
+                        <div class="audit-item">
+                            <span><span class="audit-user">${escapeHTML(admin)}</span> <span class="audit-action">${escapeHTML(action)}</span> ${target ? '→ ' + escapeHTML(target) : ''} ${details ? '(' + escapeHTML(details) + ')' : ''}</span>
+                            <span class="audit-time">${time.toLocaleString()}</span>
+                        </div>
+                    `;
+                });
+                list.innerHTML = html;
+            } catch (e) {
+                list.innerHTML = '<div style="text-align:center;color:var(--error);padding:20px;">Failed to load audit log</div>';
+                console.error(e);
+            }
+        }
+
+        window.clearAuditLog = async function() {
+            const confirmed = await premiumConfirm('This will permanently delete all audit log entries. Are you sure?', 'Clear Audit Log', 'danger');
+            if (!confirmed) return;
+            try {
+                const snap = await getDocs(collection(db, 'auditLog'));
+                for (const d of snap.docs) await deleteDoc(d.ref);
+                showToast('Audit log cleared', 'Audit log has been cleared.', 'success');
+                loadAuditLog();
+            } catch (e) {
+                showToast('Failed to clear audit log', e.message, 'error');
+            }
+        };
+
+        // ================================================================
+        // SYSTEM STATS
+        // ================================================================
+        async function loadSystemStats() {
+            try {
+                const [uSnap, rSnap, reqSnap, txSnap] = await Promise.all([
+                    getDocs(collection(db, 'users')),
+                    getDocs(collection(db, 'rooms')),
+                    getDocs(collection(db, 'premiumFeatureRequests')),
+                    getDocs(collection(db, 'transactions'))
+                ]);
+                document.getElementById('sysUsers').textContent = uSnap.size;
+                document.getElementById('sysRooms').textContent = rSnap.size;
+                document.getElementById('sysRequests').textContent = reqSnap.size;
+                document.getElementById('sysTxs').textContent = txSnap.size;
+            } catch (e) { /* ignore */ }
+        }
+
+        // ================================================================
+        // COIN MANAGEMENT
+        // ================================================================
         window.searchUserForCoins = async function() {
             const input = document.getElementById('coinSearchInput');
             const spId = input.value.trim();
-            if (!spId) { showToast('Enter a SPIKE ID', 'warning'); return; }
+            if (!spId) { showToast('Enter a SPIKE ID', 'Please enter a valid SPIKE ID.', 'warning'); return; }
 
             const resultDiv = document.getElementById('coinUserResult');
             try {
                 const user = await findUserBySpId(spId);
                 if (!user) {
-                    showToast('User not found', 'error');
+                    showToast('User not found', `No user with SPIKE ID ${spId}`, 'error');
                     resultDiv.classList.remove('active');
                     return;
                 }
@@ -952,43 +2111,44 @@
                 document.getElementById('coinUserBalance').textContent = `🪙 ${balance}`;
                 selectedUserDoc = { id: user.id, data: data };
                 resultDiv.classList.add('active');
-                showToast('User found', 'success');
+                showToast('User found', `${name} (SP: ${spIdDisplay})`, 'success');
             } catch (e) {
-                showToast('Error searching user', 'error');
+                showToast('Error searching user', e.message, 'error');
                 console.error(e);
             }
         };
 
         window.addCoins = async function() {
-            if (!selectedUserDoc) { showToast('Search a user first', 'warning'); return; }
+            if (!selectedUserDoc) { showToast('Search a user first', 'Please search for a user first.', 'warning'); return; }
             const amountInput = document.getElementById('coinAmount');
             const amount = parseInt(amountInput.value);
-            if (!amount || amount <= 0) { showToast('Enter a valid amount', 'warning'); return; }
+            if (!amount || amount <= 0) { showToast('Enter a valid amount', 'Amount must be a positive number.', 'warning'); return; }
             await modifyCoins(amount, true);
             amountInput.value = '';
         };
 
         window.removeCoins = async function() {
-            if (!selectedUserDoc) { showToast('Search a user first', 'warning'); return; }
+            if (!selectedUserDoc) { showToast('Search a user first', 'Please search for a user first.', 'warning'); return; }
             const amountInput = document.getElementById('coinAmount');
             const amount = parseInt(amountInput.value);
-            if (!amount || amount <= 0) { showToast('Enter a valid amount', 'warning'); return; }
+            if (!amount || amount <= 0) { showToast('Enter a valid amount', 'Amount must be a positive number.', 'warning'); return; }
             await modifyCoins(amount, false);
             amountInput.value = '';
         };
 
         window.addPack = async function(amount) {
-            if (!selectedUserDoc) { showToast('Search a user first', 'warning'); return; }
+            if (!selectedUserDoc) { showToast('Search a user first', 'Please search for a user first.', 'warning'); return; }
             await modifyCoins(amount, true);
         };
         window.removePack = async function(amount) {
-            if (!selectedUserDoc) { showToast('Search a user first', 'warning'); return; }
+            if (!selectedUserDoc) { showToast('Search a user first', 'Please search for a user first.', 'warning'); return; }
             await modifyCoins(amount, false);
         };
 
         async function modifyCoins(amount, isAdd) {
             const uid = selectedUserDoc.id;
             const ref = doc(db, 'users', uid);
+            const userName = selectedUserDoc.data.name || selectedUserDoc.data.displayName || 'User';
             try {
                 await runTransaction(db, async (tx) => {
                     const snap = await tx.get(ref);
@@ -997,8 +2157,8 @@
                     const newBal = isAdd ? cur + amount : cur - amount;
                     if (newBal < 0) throw new Error('Insufficient coins');
                     tx.update(ref, { coins: newBal });
-                    const txRef = collection(db, 'transactions');
-                    await tx.set(doc(txRef), {
+                    const txRef = doc(collection(db, 'transactions'));
+                    await tx.set(txRef, {
                         userId: uid,
                         spId: snap.data().spId || '',
                         amount: isAdd ? amount : -amount,
@@ -1008,23 +2168,118 @@
                         timestamp: serverTimestamp()
                     });
                 });
+                await logAudit(isAdd ? `Added ${amount} coins` : `Removed ${amount} coins`, uid, userName, `${isAdd ? '+' : '-'}${amount} coins`);
                 const snap = await getDoc(ref);
                 const newBal = snap.data().coins || 0;
                 document.getElementById('coinUserBalance').textContent = `🪙 ${newBal}`;
-                showToast(`Coins updated`, 'success');
+                showToast(`Coins updated`, `${userName} now has ${newBal} 🪙`, 'success');
                 if (document.getElementById('panel-users').classList.contains('active')) loadAllUsers();
             } catch (e) {
-                showToast(e.message || 'Operation failed', 'error');
+                showToast('Operation failed', e.message, 'error');
             }
         }
 
-        // ===== USER MANAGEMENT =====
+        // ================================================================
+        // BULK OPERATIONS
+        // ================================================================
+        window.toggleAllUsers = function() {
+            const checked = document.getElementById('bulkSelectAll').checked;
+            document.querySelectorAll('.user-check').forEach(cb => cb.checked = checked);
+            updateSelectedUserIds();
+        };
+
+        function updateSelectedUserIds() {
+            selectedUserIds.clear();
+            document.querySelectorAll('.user-check:checked').forEach(cb => {
+                selectedUserIds.add(cb.dataset.uid);
+            });
+        }
+
+        window.bulkAddCoins = async function() {
+            const amount = parseInt(document.getElementById('bulkCoinAmount').value);
+            if (!amount || amount <= 0) { showToast('Invalid amount', 'Enter a positive number.', 'warning'); return; }
+            const uids = Array.from(selectedUserIds);
+            if (uids.length === 0) { showToast('No users selected', 'Please select at least one user.', 'warning'); return; }
+            const confirmed = await premiumConfirm(`Add ${amount} coins to ${uids.length} selected user(s)?`, 'Bulk Add Coins', 'warning');
+            if (!confirmed) return;
+            let successCount = 0;
+            for (const uid of uids) {
+                try {
+                    const ref = doc(db, 'users', uid);
+                    await runTransaction(db, async (tx) => {
+                        const snap = await tx.get(ref);
+                        if (!snap.exists()) return;
+                        const cur = snap.data().coins || 0;
+                        tx.update(ref, { coins: cur + amount });
+                        const txRef = doc(collection(db, 'transactions'));
+                        await tx.set(txRef, {
+                            userId: uid,
+                            spId: snap.data().spId || '',
+                            amount: amount,
+                            newBalance: cur + amount,
+                            reason: `Bulk admin added ${amount} coins`,
+                            adminId: currentUser.uid,
+                            timestamp: serverTimestamp()
+                        });
+                    });
+                    successCount++;
+                } catch (e) { /* ignore one */ }
+            }
+            await logAudit(`Bulk added ${amount} coins to ${successCount} users`, 'bulk', `${successCount} users`);
+            showToast(`Bulk add complete`, `${amount} coins added to ${successCount} user(s).`, 'success');
+            loadAllUsers();
+        };
+
+        window.bulkRemoveCoins = async function() {
+            const amount = parseInt(document.getElementById('bulkCoinAmount').value);
+            if (!amount || amount <= 0) { showToast('Invalid amount', 'Enter a positive number.', 'warning'); return; }
+            const uids = Array.from(selectedUserIds);
+            if (uids.length === 0) { showToast('No users selected', 'Please select at least one user.', 'warning'); return; }
+            const confirmed = await premiumConfirm(`Remove ${amount} coins from ${uids.length} selected user(s)?`, 'Bulk Remove Coins', 'danger');
+            if (!confirmed) return;
+            let successCount = 0;
+            for (const uid of uids) {
+                try {
+                    const ref = doc(db, 'users', uid);
+                    await runTransaction(db, async (tx) => {
+                        const snap = await tx.get(ref);
+                        if (!snap.exists()) return;
+                        const cur = snap.data().coins || 0;
+                        const newBal = Math.max(0, cur - amount);
+                        tx.update(ref, { coins: newBal });
+                        const txRef = doc(collection(db, 'transactions'));
+                        await tx.set(txRef, {
+                            userId: uid,
+                            spId: snap.data().spId || '',
+                            amount: -(cur - newBal),
+                            newBalance: newBal,
+                            reason: `Bulk admin removed ${amount} coins`,
+                            adminId: currentUser.uid,
+                            timestamp: serverTimestamp()
+                        });
+                    });
+                    successCount++;
+                } catch (e) { /* ignore */ }
+            }
+            await logAudit(`Bulk removed ${amount} coins from ${successCount} users`, 'bulk', `${successCount} users`);
+            showToast(`Bulk remove complete`, `${amount} coins removed from ${successCount} user(s).`, 'success');
+            loadAllUsers();
+        };
+
+        // ================================================================
+        // USER MANAGEMENT
+        // ================================================================
         async function loadAllUsers() {
             const list = document.getElementById('userList');
             list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</div>';
             try {
                 const snap = await getDocs(collection(db, 'users'));
-                if (snap.empty) { list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No users</div>'; return; }
+                allUserDocs = [];
+                if (snap.empty) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No users</div>';
+                    document.getElementById('userCount').textContent = '0';
+                    return;
+                }
                 let html = '';
                 let count = 0;
                 snap.forEach(doc => {
@@ -1037,49 +2292,78 @@
                     const premium = data.premium === true;
                     const elite = data.elite === true;
                     const mod = data.moderator === true;
+                    const hasNote = data.adminNote && data.adminNote.trim() !== '';
                     count++;
+                    allUserDocs.push({ id: doc.id, data });
+                    const checked = selectedUserIds.has(doc.id) ? 'checked' : '';
                     html += `
                         <div class="user-item" data-uid="${doc.id}">
-                            <div class="info">
-                                <div class="name">${escapeHTML(name)} ${suspended ? '🚫' : ''}</div>
-                                <div class="spid">SP: ${escapeHTML(spId)}</div>
-                                <div class="bal">🪙 ${bal}</div>
-                                <div class="roles">
-                                    ${vip ? '<span class="role">👑 VIP</span>' : ''}
-                                    ${premium ? '<span class="role premium">⭐ Premium</span>' : ''}
-                                    ${elite ? '<span class="role elite">🔥 ELITE</span>' : ''}
-                                    ${mod ? '<span class="role">🛡️ Mod</span>' : ''}
-                                    ${suspended ? '<span class="role" style="color:var(--error);">🚫 Suspended</span>' : ''}
+                            <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:140px;">
+                                <input type="checkbox" class="user-check" data-uid="${doc.id}" ${checked} onchange="updateSelectedUserIds()" />
+                                <div class="info">
+                                    <div class="name">${escapeHTML(name)} ${suspended ? '🚫' : ''} ${hasNote ? '📝' : ''}</div>
+                                    <div class="spid">SP: ${escapeHTML(spId)}</div>
+                                    <div class="bal">🪙 ${bal}</div>
+                                    <div class="roles">
+                                        ${vip ? '<span class="role vip">👑 VIP</span>' : ''}
+                                        ${premium ? '<span class="role premium">⭐ Premium</span>' : ''}
+                                        ${elite ? '<span class="role elite">🔥 ELITE</span>' : ''}
+                                        ${mod ? '<span class="role">🛡️ Mod</span>' : ''}
+                                        ${suspended ? '<span class="role" style="color:var(--error);border-color:rgba(244,63,94,0.15);">🚫 Suspended</span>' : ''}
+                                    </div>
                                 </div>
                             </div>
                             <div class="actions">
                                 <button class="primary" onclick="viewUser('${escapeHTML(spId)}')">👤</button>
                                 <button class="gold" onclick="toggleRole('${doc.id}', 'vip', ${vip})">${vip ? 'Un-VIP' : 'VIP'}</button>
-                                <button class="premium" onclick="toggleRole('${doc.id}', 'premium', ${premium})">${premium ? 'Un-Premium' : 'Premium'}</button>
+                                <button class="premium" onclick="toggleRole('${doc.id}', 'premium', ${premium})">${premium ? 'Un-Prem' : 'Prem'}</button>
                                 <button class="elite" onclick="toggleRole('${doc.id}', 'elite', ${elite})">${elite ? 'Un-ELITE' : 'ELITE'}</button>
                                 <button class="primary" onclick="toggleRole('${doc.id}', 'moderator', ${mod})">${mod ? 'Un-Mod' : 'Mod'}</button>
                                 <button ${suspended ? 'class="primary"' : 'class="danger"'} onclick="toggleSuspend('${doc.id}', ${suspended})">
                                     ${suspended ? 'Unsuspend' : 'Suspend'}
                                 </button>
+                                <button class="primary" onclick="editUserNote('${doc.id}')" title="Add note">📝</button>
                             </div>
                         </div>
                     `;
                 });
                 list.innerHTML = html;
                 document.getElementById('userCount').textContent = count;
+                // Update bulk select
+                const allCheckboxes = document.querySelectorAll('.user-check');
+                const checkedBoxes = document.querySelectorAll('.user-check:checked');
+                document.getElementById('bulkSelectAll').checked = allCheckboxes.length > 0 && checkedBoxes.length === allCheckboxes.length;
             } catch (e) {
                 list.innerHTML = '<div style="text-align:center;color:var(--error);padding:20px;">Failed to load users</div>';
                 console.error(e);
             }
         }
 
+        window.editUserNote = async function(uid) {
+            const user = allUserDocs.find(u => u.id === uid);
+            if (!user) return;
+            const currentNote = user.data.adminNote || '';
+            const note = prompt('Enter admin note for this user:', currentNote);
+            if (note === null) return;
+            try {
+                await updateDoc(doc(db, 'users', uid), { adminNote: note.trim() || '' });
+                await logAudit('Updated user note', uid, user.data.name || 'User', note.trim() || '(cleared)');
+                showToast('Note saved', 'Admin note updated.', 'success');
+                loadAllUsers();
+            } catch (e) {
+                showToast('Failed to save note', e.message, 'error');
+            }
+        };
+
         window.toggleRole = async function(uid, role, current) {
             try {
                 await updateDoc(doc(db, 'users', uid), { [role]: !current });
-                showToast(`${role} toggled`, 'success');
+                const user = allUserDocs.find(u => u.id === uid);
+                await logAudit(`Toggled ${role} ${!current ? 'ON' : 'OFF'}`, uid, user?.data?.name || 'User');
+                showToast(`${role} toggled`, `${role} is now ${!current ? 'enabled' : 'disabled'}.`, 'success');
                 loadAllUsers();
             } catch (e) {
-                showToast('Failed to update role', 'error');
+                showToast('Failed to update role', e.message, 'error');
             }
         };
 
@@ -1090,14 +2374,17 @@
         };
 
         window.toggleSuspend = async function(uid, currentlySuspended) {
-            const confirmMsg = currentlySuspended ? 'Unsuspend this user?' : 'Suspend this user?';
-            if (!confirm(confirmMsg)) return;
+            const action = currentlySuspended ? 'Unsuspend' : 'Suspend';
+            const confirmed = await premiumConfirm(`${action} this user?`, `${action} User`, currentlySuspended ? 'default' : 'danger');
+            if (!confirmed) return;
             try {
                 await updateDoc(doc(db, 'users', uid), { suspended: !currentlySuspended });
-                showToast(`User ${currentlySuspended ? 'unsuspended' : 'suspended'}`, 'success');
+                const user = allUserDocs.find(u => u.id === uid);
+                await logAudit(`${currentlySuspended ? 'Unsuspended' : 'Suspended'} user`, uid, user?.data?.name || 'User');
+                showToast(`User ${currentlySuspended ? 'unsuspended' : 'suspended'}`, `Status updated.`, 'success');
                 loadAllUsers();
             } catch (e) {
-                showToast('Failed to update', 'error');
+                showToast('Failed to update', e.message, 'error');
             }
         };
 
@@ -1129,47 +2416,61 @@
                     const premium = data.premium === true;
                     const elite = data.elite === true;
                     const mod = data.moderator === true;
+                    const hasNote = data.adminNote && data.adminNote.trim() !== '';
+                    const checked = selectedUserIds.has(data.id) ? 'checked' : '';
                     html += `
                         <div class="user-item" data-uid="${data.id}">
-                            <div class="info">
-                                <div class="name">${escapeHTML(name)} ${suspended ? '🚫' : ''}</div>
-                                <div class="spid">SP: ${escapeHTML(spId)}</div>
-                                <div class="bal">🪙 ${bal}</div>
-                                <div class="roles">
-                                    ${vip ? '<span class="role">👑 VIP</span>' : ''}
-                                    ${premium ? '<span class="role premium">⭐ Premium</span>' : ''}
-                                    ${elite ? '<span class="role elite">🔥 ELITE</span>' : ''}
-                                    ${mod ? '<span class="role">🛡️ Mod</span>' : ''}
-                                    ${suspended ? '<span class="role" style="color:var(--error);">🚫 Suspended</span>' : ''}
+                            <div style="display:flex;align-items:center;gap:4px;flex:1;min-width:140px;">
+                                <input type="checkbox" class="user-check" data-uid="${data.id}" ${checked} onchange="updateSelectedUserIds()" />
+                                <div class="info">
+                                    <div class="name">${escapeHTML(name)} ${suspended ? '🚫' : ''} ${hasNote ? '📝' : ''}</div>
+                                    <div class="spid">SP: ${escapeHTML(spId)}</div>
+                                    <div class="bal">🪙 ${bal}</div>
+                                    <div class="roles">
+                                        ${vip ? '<span class="role vip">👑 VIP</span>' : ''}
+                                        ${premium ? '<span class="role premium">⭐ Premium</span>' : ''}
+                                        ${elite ? '<span class="role elite">🔥 ELITE</span>' : ''}
+                                        ${mod ? '<span class="role">🛡️ Mod</span>' : ''}
+                                        ${suspended ? '<span class="role" style="color:var(--error);border-color:rgba(244,63,94,0.15);">🚫 Suspended</span>' : ''}
+                                    </div>
                                 </div>
                             </div>
                             <div class="actions">
                                 <button class="primary" onclick="viewUser('${escapeHTML(spId)}')">👤</button>
                                 <button class="gold" onclick="toggleRole('${data.id}', 'vip', ${vip})">${vip ? 'Un-VIP' : 'VIP'}</button>
-                                <button class="premium" onclick="toggleRole('${data.id}', 'premium', ${premium})">${premium ? 'Un-Premium' : 'Premium'}</button>
+                                <button class="premium" onclick="toggleRole('${data.id}', 'premium', ${premium})">${premium ? 'Un-Prem' : 'Prem'}</button>
                                 <button class="elite" onclick="toggleRole('${data.id}', 'elite', ${elite})">${elite ? 'Un-ELITE' : 'ELITE'}</button>
                                 <button class="primary" onclick="toggleRole('${data.id}', 'moderator', ${mod})">${mod ? 'Un-Mod' : 'Mod'}</button>
                                 <button ${suspended ? 'class="primary"' : 'class="danger"'} onclick="toggleSuspend('${data.id}', ${suspended})">
                                     ${suspended ? 'Unsuspend' : 'Suspend'}
                                 </button>
+                                <button class="primary" onclick="editUserNote('${data.id}')" title="Add note">📝</button>
                             </div>
                         </div>
                     `;
                 });
                 list.innerHTML = html;
+                const allCb = document.querySelectorAll('.user-check');
+                const checkedCb = document.querySelectorAll('.user-check:checked');
+                document.getElementById('bulkSelectAll').checked = allCb.length > 0 && checkedCb.length === allCb.length;
             } catch (e) {
                 list.innerHTML = '<div style="text-align:center;color:var(--error);padding:20px;">Search failed</div>';
                 console.error(e);
             }
         };
 
-        // ===== ROOMS MANAGEMENT =====
+        // ================================================================
+        // ROOMS MANAGEMENT
+        // ================================================================
         async function loadRooms() {
             const list = document.getElementById('roomList');
             list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</div>';
             try {
                 const snap = await getDocs(collection(db, 'rooms'));
-                if (snap.empty) { list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No rooms</div>'; return; }
+                if (snap.empty) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">No rooms</div>';
+                    return;
+                }
                 let html = '';
                 snap.forEach(doc => {
                     const data = doc.data();
@@ -1201,28 +2502,31 @@
         window.setRoomFee = async function(roomId) {
             const input = document.getElementById(`feeInput_${roomId}`);
             const fee = parseInt(input.value);
-            if (!fee || fee < 1) { showToast('Invalid fee', 'warning'); return; }
+            if (!fee || fee < 1) { showToast('Invalid fee', 'Fee must be at least 1.', 'warning'); return; }
             try {
                 await updateDoc(doc(db, 'rooms', roomId), { entryFee: fee });
-                showToast('Fee updated', 'success');
+                await logAudit('Set room fee', roomId, '', `${fee} coins`);
+                showToast('Fee updated', `Room entry fee set to ${fee} 🪙`, 'success');
                 loadRooms();
             } catch (e) {
-                showToast('Failed to update fee', 'error');
+                showToast('Failed to update fee', e.message, 'error');
             }
         };
 
         window.deleteRoom = async function(roomId) {
-            if (!confirm('Delete this room and all its messages?')) return;
+            const confirmed = await premiumConfirm('Delete this room and all its messages & participants?', 'Delete Room', 'danger');
+            if (!confirmed) return;
             try {
                 const msgSnap = await getDocs(collection(db, 'rooms', roomId, 'messages'));
                 for (const d of msgSnap.docs) await deleteDoc(d.ref);
                 const partSnap = await getDocs(collection(db, 'rooms', roomId, 'participants'));
                 for (const d of partSnap.docs) await deleteDoc(d.ref);
                 await deleteDoc(doc(db, 'rooms', roomId));
-                showToast('Room deleted', 'success');
+                await logAudit('Deleted room', roomId, '', 'Room and all data removed');
+                showToast('Room deleted', 'Room has been permanently removed.', 'success');
                 loadRooms();
             } catch (e) {
-                showToast('Failed to delete room', 'error');
+                showToast('Failed to delete room', e.message, 'error');
                 console.error(e);
             }
         };
@@ -1232,8 +2536,8 @@
             const feeInput = document.getElementById('roomFeeInput');
             const name = nameInput.value.trim();
             const fee = parseInt(feeInput.value);
-            if (!name) { showToast('Enter a room name', 'warning'); return; }
-            if (!fee || fee < 1) { showToast('Enter a valid entry fee', 'warning'); return; }
+            if (!name) { showToast('Enter a room name', 'Room name cannot be empty.', 'warning'); return; }
+            if (!fee || fee < 1) { showToast('Enter a valid entry fee', 'Fee must be at least 1.', 'warning'); return; }
             try {
                 const roomRef = doc(collection(db, 'rooms'));
                 await setDoc(roomRef, {
@@ -1243,26 +2547,246 @@
                     participantCount: 0,
                     createdAt: serverTimestamp()
                 });
-                showToast('Room created', 'success');
+                await logAudit('Created room', roomRef.id, name, `Fee: ${fee} coins`);
+                showToast('Room created', `"${name}" is now open.`, 'success');
                 nameInput.value = '';
                 feeInput.value = '50';
                 loadRooms();
             } catch (e) {
-                showToast('Failed to create room', 'error');
+                showToast('Failed to create room', e.message, 'error');
                 console.error(e);
             }
         };
 
-        // ===== EARNINGS (updated with Premium Cuts) =====
+        // ================================================================
+        // REQUESTS
+        // ================================================================
+        let allRequests = [];
+
+        function loadRequests() {
+            if (unsubscribeRequests) return;
+            const q = query(collection(db, 'premiumFeatureRequests'), orderBy('createdAt', 'desc'));
+            unsubscribeRequests = onSnapshot(q, (snapshot) => {
+                allRequests = [];
+                snapshot.forEach(doc => {
+                    allRequests.push({ id: doc.id, ...doc.data() });
+                });
+                renderRequests();
+            }, (error) => {
+                console.error('Requests listener error:', error);
+                showToast('Error loading requests', error.message, 'error');
+            });
+        }
+
+        window.renderRequests = function() {
+            const container = document.getElementById('requestsContainer');
+            const statusFilter = document.getElementById('requestStatusFilter').value;
+            const typeFilter = document.getElementById('requestTypeFilter').value;
+            const roomFilter = document.getElementById('requestRoomFilter').value.toLowerCase().trim();
+
+            let filtered = allRequests.filter(r => {
+                if (statusFilter !== 'all' && r.status !== statusFilter) return false;
+                if (typeFilter !== 'all' && r.type !== typeFilter) return false;
+                if (roomFilter) {
+                    const roomName = (r.roomName || '').toLowerCase();
+                    const roomId = (r.roomId || '').toLowerCase();
+                    if (!roomName.includes(roomFilter) && !roomId.includes(roomFilter)) return false;
+                }
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML =
+                '<div style="text-align:center;color:var(--text-muted);padding:20px;">No requests match your filters.</div>';
+                return;
+            }
+
+            let html = '';
+            filtered.sort((a, b) => (b.createdAt?.toDate?.() || new Date(0)) - (a.createdAt?.toDate?.() || new Date(0)));
+
+            for (const req of filtered) {
+                const statusLabel = req.status.replace('_', ' ').toUpperCase();
+                const statusClass = req.status;
+                const isPending = req.status === 'pending' || req.status === 'payment_pending';
+                const isApproved = req.status === 'approved';
+                const isRejected = req.status === 'rejected';
+
+                let typeLabel = req.type === 'feature' ? '⭐ Feature' : '🪙 Coin Pack';
+                let name = req.type === 'feature' ? req.featureName : `${req.amount || 0} coins`;
+                let price = req.requestedPrice ? `$${req.requestedPrice.toFixed(2)}` : '—';
+
+                const roomName = req.roomName || req.roomId || 'Unknown Room';
+                const creator = req.creatorName || 'Unknown User';
+                const createdAt = req.createdAt?.toDate?.() || new Date();
+                const dateStr = createdAt.toLocaleString();
+
+                let actionsHTML = '';
+                if (isPending) {
+                    if (req.status === 'payment_pending') {
+                        actionsHTML = `
+                            <button class="btn-confirm" onclick="confirmPayment('${req.id}')">✅ Confirm Payment</button>
+                            <button class="btn-reject" onclick="rejectRequest('${req.id}')">❌ Reject</button>
+                        `;
+                    } else {
+                        actionsHTML = `
+                            <button class="btn-pending" onclick="markPaymentPending('${req.id}')">📩 Mark Payment Pending</button>
+                            <button class="btn-reject" onclick="rejectRequest('${req.id}')">❌ Reject</button>
+                        `;
+                    }
+                } else if (isApproved) {
+                    actionsHTML = `<button class="btn-disabled" disabled>✅ Approved</button>`;
+                } else if (isRejected) {
+                    actionsHTML = `<button class="btn-disabled" disabled>❌ Rejected</button>`;
+                } else {
+                    actionsHTML = `<button class="btn-disabled" disabled>${req.status}</button>`;
+                }
+
+                html += `
+                    <div class="request-item">
+                        <div class="top">
+                            <div class="title">
+                                ${escapeHTML(name)}
+                                <span class="room-tag">${escapeHTML(roomName)}</span>
+                            </div>
+                            <span class="status-badge ${statusClass}">${statusLabel}</span>
+                        </div>
+                        <div class="details">
+                            <span><strong>Type:</strong> ${typeLabel}</span>
+                            <span><strong>Price:</strong> ${price}</span>
+                            <span><strong>Requested by:</strong> ${escapeHTML(creator)}</span>
+                            <span><strong>Room ID:</strong> ${escapeHTML(req.roomId || '—')}</span>
+                            <span><strong>Date:</strong> ${dateStr}</span>
+                            ${req.rejectionReason ? `<span><strong>Reason:</strong> ${escapeHTML(req.rejectionReason)}</span>` : ''}
+                        </div>
+                        <div class="actions">${actionsHTML}</div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        };
+
+        // ---- Request Actions ----
+        window.markPaymentPending = async function(requestId) {
+            if (!isAdmin) return showToast('Not authorized', 'You do not have permission.', 'error');
+            const confirmed = await premiumConfirm('Mark this request as "Payment Pending"?', 'Payment Pending', 'warning');
+            if (!confirmed) return;
+            try {
+                const ref = doc(db, 'premiumFeatureRequests', requestId);
+                await updateDoc(ref, {
+                    status: 'payment_pending',
+                    paymentStatus: 'pending',
+                    updatedAt: serverTimestamp(),
+                });
+                await logAudit('Marked request payment pending', requestId, '', 'Payment pending');
+                showToast('Request marked as payment pending.', '', 'success');
+            } catch (e) {
+                showToast('Failed', e.message, 'error');
+            }
+        };
+
+        window.confirmPayment = async function(requestId) {
+            if (!isAdmin) return showToast('Not authorized', 'You do not have permission.', 'error');
+            const confirmed = await premiumConfirm('Confirm payment and approve this request?', 'Confirm Payment', 'default');
+            if (!confirmed) return;
+            try {
+                const ref = doc(db, 'premiumFeatureRequests', requestId);
+                const snap = await getDoc(ref);
+                if (!snap.exists()) { showToast('Request not found.', '', 'error'); return; }
+                const data = snap.data();
+
+                await updateDoc(ref, {
+                    status: 'approved',
+                    paymentStatus: 'paid',
+                    approvedAt: serverTimestamp(),
+                    approvedBy: currentUser.uid,
+                    updatedAt: serverTimestamp(),
+                });
+
+                if (data.type === 'feature') {
+                    const featureRef = doc(db, 'rooms', data.roomId, 'premiumFeatures', data.featureId);
+                    await setDoc(featureRef, {
+                        enabled: true,
+                        purchasedAt: serverTimestamp(),
+                        purchasedBy: data.creatorId,
+                        requestId: requestId,
+                    }, { merge: true });
+                    await logAudit('Approved feature request', requestId, data.featureName, `Room: ${data.roomName}`);
+                    showToast(`✅ Feature "${data.featureName}" enabled.`, `Room: ${data.roomName}`, 'success');
+                } else if (data.type === 'coin_pack') {
+                    const userRef = doc(db, 'users', data.creatorId);
+                    await runTransaction(db, async (tx) => {
+                        const userSnap = await tx.get(userRef);
+                        if (!userSnap.exists()) throw new Error('User not found');
+                        const currentCoins = userSnap.data().coins || 0;
+                        const amount = data.amount || 0;
+                        tx.update(userRef, { coins: currentCoins + amount });
+                        const txRef = doc(collection(db, 'transactions'));
+                        await tx.set(txRef, {
+                            userId: data.creatorId,
+                            spId: userSnap.data().spId || '',
+                            amount: amount,
+                            newBalance: currentCoins + amount,
+                            reason: `Purchased ${amount} coins via admin approval (Request ${requestId})`,
+                            type: 'coin_pack_purchase',
+                            roomId: data.roomId,
+                            adminId: currentUser.uid,
+                            timestamp: serverTimestamp(),
+                        });
+                    });
+                    await logAudit('Approved coin pack request', requestId, `${data.amount} coins`, `User: ${data.creatorName}`);
+                    showToast(`🪙 ${data.amount} coins credited.`, `To: ${data.creatorName}`, 'success');
+                }
+
+                try {
+                    const roomMessagesRef = collection(db, 'rooms', data.roomId, 'messages');
+                    await addDoc(roomMessagesRef, {
+                        senderId: 'system',
+                        senderName: 'Admin',
+                        text: `🎉 Admin approved ${data.type === 'feature' ? 'feature "' + data.featureName + '"' : data.amount + ' coins'} purchase!`,
+                        type: 'system',
+                        timestamp: serverTimestamp(),
+                    });
+                } catch (e) { /* ignore */ }
+
+            } catch (e) {
+                showToast('Failed', e.message, 'error');
+            }
+        };
+
+        window.rejectRequest = async function(requestId) {
+            if (!isAdmin) return showToast('Not authorized', 'You do not have permission.', 'error');
+            const reason = prompt('Reason for rejection (optional):');
+            const confirmed = await premiumConfirm('Reject this request?', 'Reject Request', 'danger');
+            if (!confirmed) return;
+            try {
+                const ref = doc(db, 'premiumFeatureRequests', requestId);
+                await updateDoc(ref, {
+                    status: 'rejected',
+                    rejectionReason: reason || 'No reason provided',
+                    rejectedAt: serverTimestamp(),
+                    rejectedBy: currentUser.uid,
+                    updatedAt: serverTimestamp(),
+                });
+                await logAudit('Rejected request', requestId, '', reason || 'No reason');
+                showToast('Request rejected.', '', 'success');
+            } catch (e) {
+                showToast('Failed', e.message, 'error');
+            }
+        };
+
+        // ================================================================
+        // EARNINGS
+        // ================================================================
         async function loadEarnings() {
             try {
                 const txSnap = await getDocs(collection(db, 'transactions'));
                 let totalEarnings = 0;
-                let giftCut = 0;
-                let raffleCut = 0;
-                let vipCut = 0;
-                let premiumCut = 0;
-                let eliteCut = 0;
+                let giftCut = 0,
+                    raffleCut = 0,
+                    vipCut = 0,
+                    premiumCut = 0,
+                    eliteCut = 0;
                 txSnap.forEach(d => {
                     const data = d.data();
                     const amount = data.amount || 0;
@@ -1287,15 +2811,18 @@
             }
         }
 
-        // ===== TRANSACTIONS =====
+        // ================================================================
+        // TRANSACTIONS
+        // ================================================================
         window.loadTransactions = async function(filter = '') {
             const list = document.getElementById('txList');
             list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px;">Loading...</div>';
             try {
-                let q = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'), limit(100));
+                let q = query(collection(db, 'transactions'), orderBy('timestamp', 'desc'), limit(150));
                 const searchVal = document.getElementById('txSearchInput').value.trim();
                 if (searchVal && filter !== 'all') {
-                    q = query(collection(db, 'transactions'), where('spId', '==', searchVal), orderBy('timestamp', 'desc'), limit(100));
+                    q = query(collection(db, 'transactions'), where('spId', '==', searchVal), orderBy('timestamp', 'desc'),
+                    limit(150));
                 }
                 const snap = await getDocs(q);
                 if (snap.empty) {
@@ -1316,7 +2843,7 @@
                             <span>${escapeHTML(reason)}</span>
                             <span>SP: ${escapeHTML(userId)}</span>
                             <span class="amount ${isPositive ? 'positive' : 'negative'}">${isPositive ? '+' : ''}${amount} 🪙</span>
-                            <span style="font-size:0.6rem;">${timeStr}</span>
+                            <span class="tx-time">${timeStr}</span>
                         </div>
                     `;
                 });
@@ -1327,7 +2854,37 @@
             }
         };
 
-        // ===== ANNOUNCEMENT =====
+        window.exportTransactionsCSV = async function() {
+            try {
+                const snap = await getDocs(query(collection(db, 'transactions'), orderBy('timestamp', 'desc'), limit(500)));
+                if (snap.empty) { showToast('No data to export', '', 'warning'); return; }
+                let csv = 'Timestamp,User,Amount,Reason,Type\n';
+                snap.forEach(d => {
+                    const data = d.data();
+                    const time = data.timestamp?.toDate?.() || new Date();
+                    const user = data.spId || data.userId || 'unknown';
+                    const amount = data.amount || 0;
+                    const reason = (data.reason || '').replace(/,/g, ';');
+                    const type = data.type || 'manual';
+                    csv +=
+                        `${time.toISOString()},${user},${amount},${reason},${type}\n`;
+                });
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `transactions_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('CSV exported', `${snap.size} transactions exported.`, 'success');
+            } catch (e) {
+                showToast('Export failed', e.message, 'error');
+            }
+        };
+
+        // ================================================================
+        // ANNOUNCEMENT
+        // ================================================================
         async function loadAnnouncement() {
             try {
                 const snap = await getDoc(doc(db, 'settings', 'announcement'));
@@ -1374,30 +2931,34 @@
             const payload = { text, active, expiry: expiry || null, updatedAt: serverTimestamp() };
             try {
                 await setDoc(doc(db, 'settings', 'announcement'), payload);
-                showToast('Announcement saved', 'success');
+                await logAudit('Updated announcement', '', '', text || '(empty)');
+                showToast('Announcement saved', active ? 'Now active' : 'Inactive', 'success');
                 updatePreview(text);
             } catch (e) {
-                showToast('Failed to save', 'error');
+                showToast('Failed to save', e.message, 'error');
             }
         };
 
-        window.clearAnnouncement = function() {
-            if (!confirm('Clear the announcement?')) return;
+        window.clearAnnouncement = async function() {
+            const confirmed = await premiumConfirm('Clear the announcement?', 'Clear Announcement', 'warning');
+            if (!confirmed) return;
             document.getElementById('announceText').value = '';
             document.getElementById('announceExpiry').value = '';
             document.getElementById('announceToggle').classList.remove('active');
             document.getElementById('announceStatus').textContent = 'Inactive';
             updatePreview('');
-            saveAnnouncement();
+            await saveAnnouncement();
         };
 
         window.testAnnouncement = function() {
             const text = document.getElementById('announceText').value.trim();
-            if (!text) { showToast('Enter announcement text first', 'warning'); return; }
-            showToast(`📢 TEST: ${text}`, 'success');
+            if (!text) { showToast('Enter announcement text first', '', 'warning'); return; }
+            showToast(`📢 TEST: ${text}`, 'This is a test preview.', 'success');
         };
 
-        // ===== MAINTENANCE =====
+        // ================================================================
+        // MAINTENANCE
+        // ================================================================
         async function loadMaintenance() {
             try {
                 const snap = await getDoc(doc(db, 'settings', 'maintenance'));
@@ -1420,13 +2981,16 @@
         async function saveMaintenance(active) {
             try {
                 await setDoc(doc(db, 'settings', 'maintenance'), { active, updatedAt: serverTimestamp() });
-                showToast(active ? 'Maintenance enabled' : 'Maintenance disabled', 'success');
+                await logAudit(active ? 'Enabled maintenance mode' : 'Disabled maintenance mode', '', '', '');
+                showToast(active ? 'Maintenance enabled' : 'Maintenance disabled', '', 'success');
             } catch (e) {
-                showToast('Failed to update', 'error');
+                showToast('Failed to update', e.message, 'error');
             }
         }
 
-        // ===== AUTH =====
+        // ================================================================
+        // AUTH
+        // ================================================================
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'index.html';
@@ -1435,11 +2999,11 @@
             currentUser = user;
             if (!ADMIN_EMAILS.includes(user.email?.toLowerCase())) {
                 document.body.innerHTML = `
-                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;">
+                    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:20px;background:var(--bg-deep);">
                         <div style="font-size:3rem;margin-bottom:12px;">⛔</div>
-                        <h1 style="font-weight:800;font-size:1.5rem;">Access Denied</h1>
+                        <h1 style="font-weight:800;font-size:1.5rem;color:var(--text-main);">Access Denied</h1>
                         <p style="color:var(--text-muted);margin:8px 0;">You are not authorized to view this page.</p>
-                        <button onclick="window.location.href='feed.html'" style="background:var(--primary);color:white;border:none;padding:10px 24px;border-radius:10px;font-weight:700;cursor:pointer;margin-top:12px;">Go to Feed</button>
+                        <button onclick="window.location.href='feed.html'" style="background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:white;border:none;padding:10px 24px;border-radius:10px;font-weight:700;cursor:pointer;margin-top:12px;">Go to Feed</button>
                     </div>
                 `;
                 return;
@@ -1453,19 +3017,33 @@
                 loadEarnings(),
                 loadTransactions(),
                 loadAnnouncement(),
-                loadMaintenance()
+                loadMaintenance(),
+                loadSystemStats()
             ]);
 
+            loadRequests();
+
+            // Event listeners
             document.getElementById('announceText').addEventListener('input', function() {
                 updatePreview(this.value);
             });
+            document.getElementById('coinSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter')
+                searchUserForCoins(); });
+            document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter')
+                searchUsers(); });
+            document.getElementById('txSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter')
+                loadTransactions(); });
 
-            document.getElementById('coinSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUserForCoins(); });
-            document.getElementById('userSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') searchUsers(); });
-            document.getElementById('txSearchInput').addEventListener('keydown', e => { if (e.key === 'Enter') loadTransactions(); });
+            document.getElementById('requestStatusFilter').addEventListener('change', renderRequests);
+            document.getElementById('requestTypeFilter').addEventListener('change', renderRequests);
+            document.getElementById('requestRoomFilter').addEventListener('input', renderRequests);
+
+            // Expose for inline onclick
+            window.updateSelectedUserIds = updateSelectedUserIds;
+
+            console.log('⚙️ Premium Admin Control Panel loaded');
+            showToast('Welcome, Admin', 'Premium Control Panel ready.', 'success');
         });
-
-        console.log('⚙️ Admin Control Panel loaded — full tier and room management');
     </script>
 </body>
 </html>
