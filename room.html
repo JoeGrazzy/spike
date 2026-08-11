@@ -638,6 +638,16 @@
             }
         }
 
+        /* Full-screen APK / front-camera clearance: keep the whole header visibly below the top cutout. */
+        @media (max-width: 768px) {
+            .room-header {
+                --apk-camera-gap: max(16px, env(safe-area-inset-top, 0px), constant(safe-area-inset-top, 0px));
+                margin-top: var(--apk-camera-gap);
+                padding-top: 8px;
+                --header-height: calc(var(--header-content-height) + 8px);
+            }
+        }
+
         @media (max-width: 400px) {
             .room-header {
                 --header-content-height: clamp(64px, 9dvh, 76px);
