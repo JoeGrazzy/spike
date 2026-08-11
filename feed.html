@@ -4218,17 +4218,43 @@
     </style>
 
     <!-- ===== RINGTONES ===== -->
-    <audio id="incomingRingtone" preload="auto">
+    <audio id="incomingRingtone" preload="none">
         <source src="assets/ringtone.mp3" type="audio/mpeg">
     </audio>
-    <audio id="outgoingRingtone" preload="auto">
+    <audio id="outgoingRingtone" preload="none">
         <source src="assets/ring.mp3" type="audio/mpeg">
     </audio>
+
+<!-- ===== TURBO FEED PERFORMANCE ===== -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="//www.gstatic.com">
+<link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+<link rel="dns-prefetch" href="//res.cloudinary.com">
+<style id="feed-turbo-performance">
+  /* Keep off-screen feed cards cheap to layout/paint while preserving their size. */
+  .post-card {
+    content-visibility:auto;
+    contain-intrinsic-size: 420px;
+  }
+  .spike-story-card {
+    contain: layout paint style;
+  }
+  .posts-stream {
+    contain: layout style;
+  }
+  /* Media is never part of the critical first paint. */
+  .post-image-wrapper img,
+  .post-video-wrapper video,
+  .repost-preview-image {
+    content-visibility:auto;
+  }
+</style>
+
 </head>
 <body>
 
     <!-- ===== HIDDEN AUDIO FOR NOTIFICATIONS ===== -->
-    <audio id="notificationSound" src="assets/notifications.mp3" preload="auto"></audio>
+    <audio id="notificationSound" src="assets/notifications.mp3" preload="none"></audio>
 
     <!-- ===== HEADER ===== -->
     <header class="feed-header">
@@ -5543,15 +5569,41 @@ function setActiveCallFlag(callId) {
             const active = spikeStorySortStories(stories);
             const uniqueUids = [...new Set(active.map(story => story.authorUid).filter(Boolean))];
 
-            const authorResults = await Promise.all(uniqueUids.map(uid => spikeStoryFetchAuthorData(uid)));
+            // TURBO: use cached/embedded author data for the first paint.
+            // Full author/following/privacy hydration continues afterward.
             const visible = [];
+            const authorJobs = [];
             for (const story of active) {
-                const authorData = spikeStoriesState.authors.get(story.authorUid) || authorResults[uniqueUids.indexOf(story.authorUid)];
-                if (!authorData) {
-                    if (story.authorUid === currentUser.uid) visible.push(story);
-                    continue;
+                const embedded = spikeStoriesState.authors.get(story.authorUid) ||
+                    getCachedUser(story.authorUid) || {
+                        name: story.authorName || 'User',
+                        avatar: story.authorAvatar || '',
+                        suspended: false,
+                        profileVisibility: 'public'
+                    };
+                spikeStoriesState.authors.set(story.authorUid, embedded);
+
+                if (story.authorUid === currentUser.uid) {
+                    visible.push(story);
+                } else {
+                    // Public/default stories can render immediately. Privacy/following
+                    // verification is performed in the background and the next refresh
+                    // reconciles visibility.
+                    const privacy = String(
+                        story.visibility ?? embedded.storyPrivacy ?? embedded.storiesPrivacy ??
+                        embedded.privacy?.stories ?? embedded.profileVisibility ?? 'public'
+                    ).toLowerCase();
+                    if (!['private', 'nobody', 'followers', 'following', 'friends', 'friend'].includes(privacy)) {
+                        visible.push(story);
+                    } else {
+                        authorJobs.push(story);
+                    }
                 }
-                if (await spikeStoryCheckViewerAccess(story, authorData)) visible.push(story);
+            }
+            if (authorJobs.length) {
+                Promise.all(uniqueUids.map(uid => spikeStoryFetchAuthorData(uid)))
+                    .then(() => spikeStoryRefresh(active))
+                    .catch(() => {});
             }
 
             spikeStoriesState.stories = visible;
@@ -7460,7 +7512,10 @@ function setActiveCallFlag(callId) {
         // ============================================================
         function initFeedStream() {
             const cached = getCachedPosts();
-            if (cached && cached.length > 0) { renderPosts(cached); }
+            if (cached && cached.length > 0) {
+                cachedPosts = cached.filter(p => p && p.id);
+                renderPosts(cachedPosts);
+            }
 
             const q = query(collection(db, "posts"), orderBy("createdAt", "desc"), limit(50));
             if (unsubscribeFeed) unsubscribeFeed();
@@ -7470,9 +7525,16 @@ function setActiveCallFlag(callId) {
                     setCachedPosts([]);
                     renderPosts([]); return; }
                 const uidsToFetch = posts.map(p => p.authorUid).filter(Boolean);
-                await batchFetchAvatars(uidsToFetch);
                 cachedPosts = posts.filter(p => p && p.id);
+
+                // TURBO: paint the feed immediately from Firestore/cache.
+                // Avatar/profile hydration continues in the background and updates
+                // already-rendered cards when it completes.
                 renderPosts(posts);
+
+                if (uidsToFetch.length) {
+                    batchFetchAvatars(uidsToFetch).catch(() => {});
+                }
             }, (error) => { console.error("Feed stream error:", error); });
         }
 
@@ -8311,29 +8373,48 @@ function setActiveCallFlag(callId) {
 
                 listenForAnnouncement();
 
-                let maintenanceActive = false;
-                try {
-                    const maintenanceRef = doc(db, "settings", "maintenance");
-                    const docSnap = await getDoc(maintenanceRef);
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        maintenanceActive = data.active === true;
-                        localStorage.setItem(CONFIG.storage.maintenanceKey, JSON.stringify(data));
-                    } else {
-                        const localData = localStorage.getItem(CONFIG.storage.maintenanceKey);
-                        if (localData) { const parsed = JSON.parse(localData);
-                            maintenanceActive = parsed.active === true; }
-                    }
-                } catch (error) { console.error('Error checking maintenance:', error); }
-                if (maintenanceActive && !isAdmin) { window.location.href = 'maintenance.html'; return; }
+                // TURBO: start the visible feed immediately. Maintenance is checked
+                // from the last-known local state first and refreshed in parallel.
+                const cachedMaintenance = (() => {
+                    try {
+                        const raw = localStorage.getItem(CONFIG.storage.maintenanceKey);
+                        return raw ? JSON.parse(raw) : null;
+                    } catch (_) { return null; }
+                })();
+                if (cachedMaintenance?.active === true && !isAdmin) {
+                    window.location.href = 'maintenance.html';
+                    return;
+                }
 
-                listenForMaintenance();
                 initFeedStream();
-                spikeStoryInit();
-                initChatBadge(); // REAL‑TIME CHAT BADGE IN HEADER
                 applySettings();
 
-                listenForIncomingCalls(user.uid);
+                // Non-critical realtime systems start after the first paint so they
+                // cannot hold up the feed.
+                const startBackgroundSystems = () => {
+                    listenForAnnouncement();
+                    listenForMaintenance();
+                    spikeStoryInit();
+                    initChatBadge();
+                    listenForIncomingCalls(user.uid);
+
+                    // Refresh maintenance without blocking feed rendering.
+                    getDoc(doc(db, "settings", "maintenance")).then(docSnap => {
+                        if (docSnap.exists()) {
+                            const data = docSnap.data();
+                            localStorage.setItem(CONFIG.storage.maintenanceKey, JSON.stringify(data));
+                            if (data.active === true && !isAdmin && !window.location.pathname.includes('maintenance.html')) {
+                                window.location.href = 'maintenance.html';
+                            }
+                        }
+                    }).catch(error => console.error('Error checking maintenance:', error));
+                };
+
+                if (typeof requestIdleCallback === 'function') {
+                    requestIdleCallback(startBackgroundSystems, { timeout: 1200 });
+                } else {
+                    setTimeout(startBackgroundSystems, 80);
+                }
 
                 document.getElementById('retryPermissionBtn').onclick = async () => {
                     try {

@@ -3800,6 +3800,81 @@
             .smart-presence-toaster { bottom: calc(12px + env(safe-area-inset-bottom)); max-width: 84vw; padding: 6px 10px; font-size: 10.5px; }
         }
 
+
+        /* ===== PREMIUM 100-LEVEL ICONS: luminous tier colors ===== */
+        .level-badge .level-icon {
+            width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;
+            position:relative;border-radius:10px;
+            background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.035));
+            border:1px solid color-mix(in srgb,var(--level-color,#fbbf24) 48%,transparent);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 0 15px var(--level-glow,rgba(251,191,36,.4));
+            overflow:visible;
+        }
+        .level-icon-img {
+            width:100%;height:100%;object-fit:contain;display:block;position:relative;z-index:2;
+            filter:drop-shadow(0 2px 2px rgba(0,0,0,.42))
+                    drop-shadow(0 0 6px var(--level-glow,rgba(251,191,36,.4)))
+                    drop-shadow(0 0 14px var(--level-glow,rgba(251,191,36,.22)));
+            transition:filter .25s ease,transform .25s ease;
+        }
+        .level-badge .level-icon::before,.level-display .level-icon::before {
+            content:"";position:absolute;inset:-5px;border-radius:inherit;z-index:0;
+            background:radial-gradient(circle,var(--level-glow,rgba(251,191,36,.3)),transparent 68%);
+            filter:blur(3px);opacity:.9;pointer-events:none;
+        }
+        .level-badge:hover .level-icon-img { transform:scale(1.08); }
+        .level-badge .level-icon-img[data-tier="0"],.level-display .level-icon-img[data-tier="0"]{--level-glow:rgba(56,189,248,.82);--level-color:#38bdf8}
+        .level-badge .level-icon-img[data-tier="1"],.level-display .level-icon-img[data-tier="1"]{--level-glow:rgba(34,197,94,.82);--level-color:#22c55e}
+        .level-badge .level-icon-img[data-tier="2"],.level-display .level-icon-img[data-tier="2"]{--level-glow:rgba(20,184,166,.84);--level-color:#14b8a6}
+        .level-badge .level-icon-img[data-tier="3"],.level-display .level-icon-img[data-tier="3"]{--level-glow:rgba(59,130,246,.86);--level-color:#3b82f6}
+        .level-badge .level-icon-img[data-tier="4"],.level-display .level-icon-img[data-tier="4"]{--level-glow:rgba(139,92,246,.9);--level-color:#8b5cf6}
+        .level-badge .level-icon-img[data-tier="5"],.level-display .level-icon-img[data-tier="5"]{--level-glow:rgba(236,72,153,.9);--level-color:#ec4899}
+        .level-badge .level-icon-img[data-tier="6"],.level-display .level-icon-img[data-tier="6"]{--level-glow:rgba(249,115,22,.92);--level-color:#f97316}
+        .level-badge .level-icon-img[data-tier="7"],.level-display .level-icon-img[data-tier="7"]{--level-glow:rgba(234,179,8,.96);--level-color:#eab308}
+        .level-badge .level-icon-img[data-tier="8"],.level-display .level-icon-img[data-tier="8"]{--level-glow:rgba(245,158,11,1);--level-color:#f59e0b}
+        .level-badge .level-icon-img[data-tier="9"],.level-display .level-icon-img[data-tier="9"]{--level-glow:rgba(250,204,21,1);--level-color:#facc15}
+
+        .level-badge .level-progress .fill,.progress-bar-big .fill {
+            background:linear-gradient(90deg,var(--level-color,#fbbf24),#fff,var(--level-color,#fbbf24));
+            box-shadow:0 0 10px var(--level-glow,rgba(251,191,36,.45)),0 0 22px var(--level-glow,rgba(251,191,36,.2));
+        }
+        .level-display { position:relative;overflow:hidden; }
+        .level-display::before {
+            content:"";position:absolute;inset:-45%;
+            background:radial-gradient(circle,var(--level-glow,rgba(251,191,36,.25)),transparent 62%);
+            opacity:.58;pointer-events:none;
+        }
+        .level-display .level-icon {
+            position:relative;z-index:1;width:96px;height:96px;margin:0 auto 10px;padding:11px;
+            border-radius:28px;display:grid;place-items:center;
+            background:linear-gradient(145deg,rgba(255,255,255,.19),rgba(255,255,255,.035));
+            border:1px solid color-mix(in srgb,var(--level-color,#fbbf24) 62%,transparent);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.25),
+                       0 0 22px var(--level-glow,rgba(251,191,36,.3)),
+                       0 0 48px var(--level-glow,rgba(251,191,36,.18));
+        }
+        .level-display .level-icon-img {
+            width:100%;height:100%;
+            filter:drop-shadow(0 4px 5px rgba(0,0,0,.44))
+                    drop-shadow(0 0 9px var(--level-glow))
+                    drop-shadow(0 0 22px var(--level-glow));
+        }
+        .level-display .level-name,.level-display .level-number {position:relative;z-index:1}
+        @media (prefers-reduced-motion:no-preference) {
+            .level-display .level-icon::after {
+                content:"";position:absolute;inset:-2px;border-radius:inherit;
+                border:1px solid color-mix(in srgb,var(--level-color,#fbbf24) 45%,transparent);
+                animation:levelPremiumPulse 2.8s ease-in-out infinite;pointer-events:none;
+            }
+        }
+        @keyframes levelPremiumPulse {
+            0%,100%{transform:scale(.98);opacity:.28;box-shadow:0 0 8px var(--level-glow)}
+            50%{transform:scale(1.035);opacity:.8;box-shadow:0 0 24px var(--level-glow),0 0 44px var(--level-glow)}
+        }
+        @media (max-width:540px){
+            .level-badge .level-icon{width:30px;height:30px;flex-basis:30px}
+            .level-display .level-icon{width:84px;height:84px}
+        }
 </style>
 
 <style id="gift-price-glow-extra">
@@ -3904,6 +3979,107 @@
 }
 </style>
 
+<style id="bunny-slippers-hidden">img[src*="bunny-slippers.png"],img[data-src*="bunny-slippers.png"]{display:none!important;visibility:hidden!important;width:0!important;height:0!important;opacity:0!important;pointer-events:none!important}</style><style id="levels-navigation-style">.levels-page-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:8px 0;padding:7px 11px;border-radius:12px;text-decoration:none;font-size:11px;font-weight:800;color:var(--text-primary,#fff);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);box-shadow:0 0 14px rgba(255,215,0,.08)}.levels-page-link:hover{background:rgba(255,255,255,.11);box-shadow:0 0 22px rgba(255,215,0,.18)}</style><style id="level-icon-no-flash">#levelIcon img{visibility:hidden}#levelIcon img.level-icon-ready{visibility:visible!important}</style>
+<style id="levels-nav-icon-style">
+.levels-nav-icon {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:40px;
+  height:40px;
+  margin-left:6px;
+  border-radius:13px;
+  text-decoration:none;
+  font-size:20px;
+  line-height:1;
+  color:inherit;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,215,0,.22);
+  box-shadow:0 0 16px rgba(255,215,0,.12);
+  transition:transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.levels-nav-icon:hover {
+  transform:translateY(-1px) scale(1.04);
+  background:rgba(255,215,0,.10);
+  box-shadow:0 0 24px rgba(255,215,0,.25);
+}
+.levels-nav-icon:active { transform:scale(.96); }
+@media (max-width:680px) {
+  .levels-nav-icon { width:36px; height:36px; font-size:18px; }
+}
+</style>
+
+
+<style id="theme-safe-text-v2">
+/* Theme-safe typography: every surface follows the active theme variables. */
+body, button, input, textarea, select { color: var(--text-primary); }
+.room-header, .room-footer, .modal, .overlay, .panel, .stats-panel,
+.member-panel, .features-panel, .theme-panel, .gift-panel, .vip-panel,
+.level-panel, .announcement-panel {
+  color: var(--text-primary);
+}
+.text-secondary, .secondary, .muted, .hint, small { color: var(--text-secondary); }
+.text-muted, .muted-text, .subtitle, .description { color: var(--text-muted); }
+input, textarea, select {
+  background: var(--bg-input);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
+button { color: var(--text-primary); }
+a { color: var(--accent); }
+a:hover { color: var(--gold); }
+.toast, .toast * {
+  color: var(--text-primary);
+}
+.toast {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: 0 8px 28px var(--accent-glow);
+}
+.levels-nav-icon, .levels-page-link {
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  box-shadow: 0 0 18px var(--accent-glow);
+}
+.levels-nav-icon:hover, .levels-page-link:hover {
+  color: var(--accent);
+  background: var(--bg-input);
+}
+</style>
+
+
+<style id="clean-header-stats-vip">
+/* Header-only stats removal */
+header .my-stats,
+header [id*="stats" i],
+header [class*="stats" i],
+.header [id*="stats" i],
+.header [class*="stats" i],
+.dropdown [id*="stats" i],
+.dropdown [class*="stats" i],
+.profile-dropdown [id*="stats" i],
+.profile-dropdown [class*="stats" i],
+.user-dropdown [id*="stats" i],
+.user-dropdown [class*="stats" i] {
+  display:none !important;
+}
+
+/* VIP welcome/status toasts are intentionally silent. */
+.vip-welcome-toast,
+.vip-welcome-popup,
+.vip-toast,
+.vip-popup,
+.vip-notification,
+.vip-assigned-toast,
+.vip-removed-toast,
+[data-vip-toast],
+[data-vip-popup] {
+  display:none !important;
+}
+</style>
+
 </head>
 <body>
 
@@ -3924,10 +4100,11 @@
                 🪙 <span id="headerEarnings">0</span>
             </span>
             <div class="level-badge" id="levelBadge" onclick="openStatsPanel()" role="button" tabindex="0" aria-label="View leveling dashboard" title="View leveling dashboard">
-                <span class="level-icon" id="levelIcon">🌱</span>
+                <span class="level-icon" id="levelIcon"><img class="level-icon-img" src="assets/levels/bunny-slippers.png" alt="Cozy Newcomer" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="0"></span>
                 <span class="level-name" id="levelName">Sprout</span>
                 <span class="level-progress" id="levelProgress"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
             </div>
+<a class="levels-nav-icon" href="levels.html" aria-label="Open Levels" title="Levels">🏆</a>
             <button class="room-features-btn" id="roomFeaturesBtn" onclick="openRoomFeaturesPanel()" aria-label="Market" title="Market">🛍️</button>
             <button class="header-btn stats-btn" onclick="openStatsPanel()">📊</button>
             <button class="header-btn send-coins-btn" onclick="openSendCoinsModal()">💸</button>
@@ -4005,7 +4182,7 @@
                 <span class="panel-title">📊 My Stats & Levels</span>
                 <button class="close-btn" onclick="closeStatsPanel()">✕</button>
             </div>
-            <div id="statsPanelBody">
+            <div id="statsPanelBody"><a class="levels-page-link" href="levels.html" aria-label="Open full leveling system">🏆 Levels</a>
                 <!-- dynamically rendered -->
             </div>
         </div>
@@ -4293,6 +4470,12 @@
     <!-- ============================================================
     MAIN SCRIPT
     ============================================================ -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="//www.gstatic.com">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js">
+    <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js">
     <script type="module">
         // ============================================================
         // FIREBASE IMPORTS & CONFIG
@@ -4333,37 +4516,25 @@
         const PREMIUM_FILE_LIMIT = 20 * 1024 * 1024;
 
         // ===== 100 LEVEL NAMES =====
-        const LEVEL_NAMES = [
-            "🌱 Sprout", "🌿 Leaf", "🌳 Sapling", "🌻 Bloom", "🐣 Hatchling",
-            "🐥 Chick", "🦅 Falcon", "🐺 Cub", "🦁 Cub", "🐉 Wyrmling",
-            "⚡ Spark", "🌊 Ripple", "🔥 Cinder", "💎 Shard", "🌟 Gleam",
-            "🌙 Crescent", "☀️ Ray", "🪐 Orbit", "🌌 Nebula", "🚀 Explorer",
-            "🛸 Traveller", "🤖 Android", "🧠 Thinker", "🦾 Forge", "🦸 Protector",
-            "🦅 Eagle", "🐺 Wolf", "🦁 Lion", "🐉 Dragon", "⚡ Storm",
-            "🌊 Wave", "🔥 Ember", "💎 Crystal", "🌟 Star", "🌙 Moon",
-            "☀️ Sun", "🪐 Planet", "🌌 Galaxy", "🚀 Rocket", "🛸 UFO",
-            "🤖 Cyborg", "🧠 Brain", "🦾 Titan", "🦸 Hero", "🧙 Wizard",
-            "👑 King", "🏛️ Emperor", "🌟 Legend", "🕊️ Myth", "⚡ Apex",
-            "⚡ Thunder", "🌊 Tsunami", "🔥 Inferno", "💎 Diamond", "🌟 Supernova",
-            "🌙 Eclipse", "☀️ Solar", "🪐 Planetary", "🌌 Galactic", "🚀 Rocket",
-            "🛸 UFO", "🤖 Cyborg", "🧠 Genius", "🦾 Titan", "🦸 Hero",
-            "🧙 Wizard", "👑 King", "🏛️ Emperor", "🌟 Legend", "🕊️ Myth",
-            "⚡ Apex", "🌊 Abyss", "🔥 Nova", "💎 Infinity Stone", "🌟 Starborn",
-            "🧙 Archmage", "🦸 Demigod", "👑 Sovereign", "🏛️ Emperor", "🌌 Celestial",
-            "🕊️ Divine", "✨ Transcendent", "🌀 Eternal", "🔱 Omnipotent", "⚖️ Cosmic Judge",
-            "🪐 Time Lord", "🌟 Infinity", "☀️ Primordial", "🌌 Void Walker", "🕯️ Luminary",
-            "🔥 Phoenix", "🌊 Leviathan", "⚡ God of Storms", "💎 Creator", "🌟 Celestial King",
-            "🧙 Grand Wizard", "👑 High Sovereign", "🌌 Universe Mind", "⚡ The One", "🕊️ Absolute"
-        ];
+        const LEVEL_DATA = [{"level":1,"name":"Cozy Newcomer","icon":"bunny-slippers.png","sp":0},{"level":2,"name":"Boba Buddy","icon":"boba.png","sp":100},{"level":3,"name":"Gentle Chatter","icon":"windchimes.png","sp":225},{"level":4,"name":"Chat Performer","icon":"accordion.png","sp":400},{"level":5,"name":"Chill Regular","icon":"sloth.png","sp":625},{"level":6,"name":"Curious Companion","icon":"axolotl.png","sp":900},{"level":7,"name":"Clever Conversationalist","icon":"fox.png","sp":1225},{"level":8,"name":"Friendly Neighbor","icon":"hedgehog.png","sp":1600},{"level":9,"name":"Social Explorer","icon":"capybara.png","sp":2025},{"level":10,"name":"Familiar Face","icon":"dodo.png","sp":2500},{"level":11,"name":"Daily Connector","icon":"canadian-goose.png","sp":3025},{"level":12,"name":"Warm Presence","icon":"deer.png","sp":3600},{"level":13,"name":"Room Participant","icon":"badger.png","sp":4225},{"level":14,"name":"Chat Companion","icon":"barn-owl.png","sp":4900},{"level":15,"name":"Community Friend","icon":"heron.png","sp":5625},{"level":16,"name":"Porcupine Pal","icon":"porcupine.png","sp":6400},{"level":17,"name":"Pangolin Partner","icon":"pangolin.png","sp":7225},{"level":18,"name":"Anteater Ally","icon":"anteater.png","sp":8100},{"level":19,"name":"Boar Buddy","icon":"boar.png","sp":9025},{"level":20,"name":"Hyena Socialite","icon":"hyena-head.png","sp":10000},{"level":21,"name":"Paper Crane Messenger","icon":"paper-crane.png","sp":11025},{"level":22,"name":"Paper Frog Friend","icon":"paper-frog.png","sp":12100},{"level":23,"name":"Creative Foldmaster","icon":"cootie-catcher.png","sp":13225},{"level":24,"name":"Prankster","icon":"prank-glasses.png","sp":14400},{"level":25,"name":"Sound Seeker","icon":"earbuds.png","sp":15625},{"level":26,"name":"Soda Socializer","icon":"soda-bottle.png","sp":16900},{"level":27,"name":"Mason Jar Mixer","icon":"mason-jar.png","sp":18225},{"level":28,"name":"Rice Bowl Regular","icon":"bowl-of-rice.png","sp":19600},{"level":29,"name":"Dumpling Friend","icon":"dumpling.png","sp":21025},{"level":30,"name":"Bao Companion","icon":"dumpling-bao.png","sp":22500},{"level":31,"name":"Bok Choy Buddy","icon":"bok-choy.png","sp":24025},{"level":32,"name":"Artichoke Adventurer","icon":"artichoke.png","sp":25600},{"level":33,"name":"Charcuterie Host","icon":"charcuterie.png","sp":27225},{"level":34,"name":"Traveling Regular","icon":"rolling-suitcase.png","sp":28900},{"level":35,"name":"Boarding Pass Explorer","icon":"boarding-pass.png","sp":30625},{"level":36,"name":"Transit Companion","icon":"subway-pass.png","sp":32400},{"level":37,"name":"Subway Regular","icon":"bus-stop.png","sp":34225},{"level":38,"name":"Phone Call Veteran","icon":"subway-train.png","sp":36100},{"level":39,"name":"Retro Chatter","icon":"rotary-phone.png","sp":38025},{"level":40,"name":"Clarinet Conversationalist","icon":"vhs.png","sp":40000},{"level":41,"name":"Bassoon Virtuoso","icon":"clarinet.png","sp":42025},{"level":42,"name":"French Horn Voice","icon":"bassoon.png","sp":44100},{"level":43,"name":"Trombone Performer","icon":"french-horn.png","sp":46225},{"level":44,"name":"Tuba Powerhouse","icon":"trombone.png","sp":48400},{"level":45,"name":"Drumbeat Leader","icon":"tuba.png","sp":50625},{"level":46,"name":"Grand Piano Maestro","icon":"drum-kit.png","sp":52900},{"level":47,"name":"Piano Virtuoso","icon":"grand-piano.png","sp":55225},{"level":48,"name":"Organ Master","icon":"pianist.png","sp":57600},{"level":49,"name":"Creative Artist","icon":"pipe-organ.png","sp":60025},{"level":50,"name":"Crafting Specialist","icon":"easel.png","sp":62500},{"level":51,"name":"Spinning Wheel Artisan","icon":"sewing-machine.png","sp":65025},{"level":52,"name":"Soldering Specialist","icon":"spinning-wheel.png","sp":67600},{"level":53,"name":"Master Craftsman","icon":"soldering-iron.png","sp":70225},{"level":54,"name":"Forge Expert","icon":"froe-and-mallet.png","sp":72900},{"level":55,"name":"Kitchen Maestro","icon":"saucepan.png","sp":75625},{"level":56,"name":"Wok Master","icon":"wok.png","sp":78400},{"level":57,"name":"Rice Cooker Pro","icon":"rice-cooker.png","sp":81225},{"level":58,"name":"Pressure Cooker Pro","icon":"pressure-cooker.png","sp":84100},{"level":59,"name":"Blend Master","icon":"blender.png","sp":87025},{"level":60,"name":"Heavy Duty Connector","icon":"stapler-heavy-duty.png","sp":90000},{"level":61,"name":"Pneumatic Powerhouse","icon":"stapler-pneumatic.png","sp":93025},{"level":62,"name":"Momentum Master","icon":"steamroller.png","sp":96100},{"level":63,"name":"Excavator Elite","icon":"bucket-wheel-excavator.png","sp":99225},{"level":64,"name":"Water Mill Keeper","icon":"water-mill.png","sp":102400},{"level":65,"name":"Treehouse Guardian","icon":"treehouse.png","sp":105625},{"level":66,"name":"Village Elder","icon":"medieval-village-01.png","sp":108900},{"level":67,"name":"Clock Tower Keeper","icon":"clock-tower.png","sp":112225},{"level":68,"name":"Mountain Climber","icon":"mountain-climbing.png","sp":115600},{"level":69,"name":"Skateboard Rider","icon":"skateboarding-01.png","sp":119025},{"level":70,"name":"Skateboard Ace","icon":"skateboarding-02.png","sp":122500},{"level":71,"name":"Coinflip Strategist","icon":"coinflip.png","sp":126025},{"level":72,"name":"Ricochet Expert","icon":"ricochet.png","sp":129600},{"level":73,"name":"Lucky Challenger","icon":"slot-machine.png","sp":133225},{"level":74,"name":"Precision Brusher","icon":"toothbrush.png","sp":136900},{"level":75,"name":"Paper Foldmaster","icon":"paper-bag-folded.png","sp":140625},{"level":76,"name":"Paper Craftmaster","icon":"paper-bag-open.png","sp":144400},{"level":77,"name":"Paper Crumple Artist","icon":"paper-bag-crumpled.png","sp":148225},{"level":78,"name":"Flytrap Tactician","icon":"venus-flytrap.png","sp":152100},{"level":79,"name":"Mole Pathfinder","icon":"mole.png","sp":156025},{"level":80,"name":"Goblin Trickster","icon":"goblin.png","sp":160000},{"level":81,"name":"Potion Alchemist","icon":"round-potion.png","sp":164025},{"level":82,"name":"Birch Grove Keeper","icon":"birch-trees.png","sp":168100},{"level":83,"name":"Lab Explorer","icon":"test-tube-held.png","sp":172225},{"level":84,"name":"Lab Master","icon":"test-tube-rack.png","sp":176400},{"level":85,"name":"Quantum Thinker","icon":"schrodingers-cat-alive.png","sp":180625},{"level":86,"name":"Quantum Survivor","icon":"schrodingers-cat-dead.png","sp":184900},{"level":87,"name":"Astrolabe Navigator","icon":"astrolabe.png","sp":189225},{"level":88,"name":"Gyroscope Master","icon":"gyroscope.png","sp":193600},{"level":89,"name":"Orrery Astronomer","icon":"orrery.png","sp":198025},{"level":90,"name":"Deer Guardian","icon":"deer-head.png","sp":202500},{"level":91,"name":"Fossil Scholar","icon":"archaeopteryx-fossil.png","sp":207025},{"level":92,"name":"Dinosaur Keeper","icon":"sauropod-skeleton.png","sp":211600},{"level":93,"name":"Cloaked Wanderer","icon":"cloaked-figure-on-horseback.png","sp":216225},{"level":94,"name":"Helm Guardian","icon":"frog-mouth-helm.png","sp":220900},{"level":95,"name":"Warlord Champion","icon":"warlord-helmet.png","sp":225625},{"level":96,"name":"Philosopher Sage","icon":"philosopher-bust.png","sp":230400},{"level":97,"name":"Heraldic Sunbearer","icon":"heraldic-sun.png","sp":235225},{"level":98,"name":"Star Ascendant","icon":"tarot-17-the-star.png","sp":240100},{"level":99,"name":"Tesla Master","icon":"tesla-coil.png","sp":245025},{"level":100,"name":"Ophanim Legend","icon":"ophanim.png","sp":250000}];
 
+        function getLevelRecord(level) { return LEVEL_DATA[Math.max(0, Math.min(99, Number(level) - 1))] || LEVEL_DATA[0]; }
         function getSPForLevel(level) { if (level <= 1) return 0; return 25 * level * level; }
-
-        function getLevelFromSP(sp) { if (sp < 0) return 1; let level = 1; while (level < 100 && sp >= getSPForLevel(level + 1)) { level++; } return level; }
-
-        function getLevelName(level) { return LEVEL_NAMES[level - 1] || "🌟 Legend"; }
-
-        function getLevelIcon(level) { const name = getLevelName(level); const icon = name.split(' ')[0]; return icon || '🌟'; }
-
+        function getLevelFromSP(sp) { if (sp < 0) return 1; let level = 1; while (level < 100 && sp >= getSPForLevel(level + 1)) level++; return level; }
+        function getLevelName(level) { return getLevelRecord(level).name; }
+        function getLevelIcon(level) { return getLevelRecord(level).icon; }
+        function getLevelTier(level) { return Math.min(9, Math.floor((Math.max(1, Number(level)) - 1) / 10)); }
+        function getLevelProgress(sp, level) {
+            level = Math.max(1, Math.min(100, Number(level) || 1));
+            if (level >= 100) return 1;
+            const prev = getSPForLevel(level), next = getSPForLevel(level + 1);
+            return Math.max(0, Math.min(1, (Number(sp) - prev) / Math.max(1, next - prev)));
+        }
+        function getLevelIconHTML(level, extraClass = '') {
+            const r = getLevelRecord(level);
+            const tier = getLevelTier(level);
+            return `<img class="level-icon-img ${extraClass}" src="assets/levels/${r.icon}" alt="${sanitizeHTML(r.name)}" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="${tier}">`;
+        }
 
         // ===== FEATURE CATALOG =====
         const PREMIUM_FEATURES = {
@@ -5579,7 +5750,44 @@
             await saveUserRoomData(currentUserUid, { sp, level, spFeed: feed });
             currentSP = sp;
             currentLevel = level;
+            writeCachedLevelData(currentUserUid, currentLevel, currentSP);
+            preloadLevelIcon(currentLevel);
             updateHeaderLevel();
+        }
+
+        // ============================================================
+        // TURBO LEVEL CACHE — paint the level icon before Firestore returns
+        // ============================================================
+        const LEVEL_CACHE_PREFIX = 'funroom:level:v1:';
+        function getLevelCacheKey(uid) { return LEVEL_CACHE_PREFIX + String(uid || ''); }
+        function readCachedLevelData(uid) {
+            try {
+                const raw = localStorage.getItem(getLevelCacheKey(uid));
+                if (!raw) return null;
+                const data = JSON.parse(raw);
+                if (!data || !Number.isFinite(Number(data.level))) return null;
+                return { level: Math.max(1, Math.min(100, Number(data.level))), sp: Math.max(0, Number(data.sp) || 0) };
+            } catch (_) { return null; }
+        }
+        function writeCachedLevelData(uid, level, sp) {
+            try { localStorage.setItem(getLevelCacheKey(uid), JSON.stringify({ level: Math.max(1, Math.min(100, Number(level) || 1)), sp: Math.max(0, Number(sp) || 0), t: Date.now() })); } catch (_) {}
+        }
+        function preloadLevelIcon(level) {
+            const record = getLevelRecord(level);
+            if (!record?.icon) return;
+            const href = `assets/levels/${record.icon}`;
+            if ([...document.querySelectorAll('link[data-level-preload]')].some(l => l.href.endsWith(href))) return;
+            const link = document.createElement('link');
+            link.rel = 'preload'; link.as = 'image'; link.href = href; link.fetchPriority = 'high';
+            link.dataset.levelPreload = String(level);
+            document.head.appendChild(link);
+        }
+        function hydrateCachedLevel(uid) {
+            const cached = readCachedLevelData(uid);
+            if (!cached) return false;
+            currentSP = cached.sp; currentLevel = cached.level;
+            preloadLevelIcon(currentLevel); updateHeaderLevel();
+            return true;
         }
 
         async function loadUserRoomData(uid) {
@@ -5588,6 +5796,8 @@
             currentLevel = data.level || 1;
             spFeed = data.spFeed || [];
             dailyChallengeState = normalizeDailyState(data);
+            writeCachedLevelData(uid, currentLevel, currentSP);
+            preloadLevelIcon(currentLevel);
             updateHeaderLevel();
             return data;
         }
@@ -5595,14 +5805,16 @@
         function updateHeaderLevel() {
             const level = currentLevel;
             const sp = currentSP;
-            const name = getLevelName(level);
-            const icon = getLevelIcon(level);
-            const nextSP = getSPForLevel(level + 1);
-            const prevSP = getSPForLevel(level);
-            const progress = (nextSP > prevSP) ? (sp - prevSP) / (nextSP - prevSP) : 1;
-            levelIcon.textContent = icon;
-            levelName.textContent = name;
-            levelProgressFill.style.width = Math.min(100, Math.round(progress * 100)) + '%';
+            const record = getLevelRecord(level);
+            const progress = getLevelProgress(sp, level);
+            preloadLevelIcon(level);
+            const nextSrc = `assets/levels/${getLevelRecord(level).icon}`;
+            const existing = levelIcon.querySelector('.level-icon-img');
+            if (!existing || !existing.src.endsWith(nextSrc)) levelIcon.innerHTML = getLevelIconHTML(level);
+            levelIcon.dataset.tier = getLevelTier(level);
+            levelName.textContent = record.name;
+            levelProgressFill.style.width = Math.round(progress * 100) + '%';
+            levelProgressFill.dataset.tier = getLevelTier(level);
         }
 
         let timeInterval = null;
@@ -5642,11 +5854,11 @@
             const body = statsPanelBody;
             const level = currentLevel;
             const sp = currentSP;
-            const name = getLevelName(level);
-            const icon = getLevelIcon(level);
-            const nextSP = getSPForLevel(level + 1);
+            const record = getLevelRecord(level);
+            const name = record.name;
+            const nextSP = level >= 100 ? getSPForLevel(100) : getSPForLevel(level + 1);
             const prevSP = getSPForLevel(level);
-            const progress = (nextSP > prevSP) ? (sp - prevSP) / (nextSP - prevSP) : 1;
+            const progress = getLevelProgress(sp, level);
 
             let feedHTML = '';
             if (spFeed.length === 0) {
@@ -5661,17 +5873,17 @@
 
             body.innerHTML = `
             <div class="level-display">
-              <span class="level-icon">${icon}</span>
+              <span class="level-icon" data-tier="${getLevelTier(level)}">${getLevelIconHTML(level)}</span>
               <div class="level-name">${name}</div>
               <div class="level-number">Level ${level}</div>
             </div>
             <div class="progress-section">
               <div class="sp-stats">
                 <span>SP: ${sp}</span>
-                <span>Next: ${nextSP} SP</span>
+                <span>${level >= 100 ? 'MAX LEVEL' : `Next: ${nextSP.toLocaleString()} SP`}</span>
               </div>
               <div class="progress-bar-big"><div class="fill" style="width:${Math.min(100, Math.round(progress*100))}%"></div></div>
-              <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${Math.round(progress*100)}% to next level</div>
+              <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${level >= 100 ? '100% · Maximum Level' : `${Math.round(progress*100)}% to next level`}</div>
             </div>
             <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Recent Activity</div>
             <div class="recent-feed">${feedHTML}</div>
@@ -7030,7 +7242,7 @@ const MESSAGE_CACHE_MAX = 200;
             if (roomVips[uid]) { showToast('User is already VIP.', 'info'); return; }
             roomVips[uid] = true;
             await saveVipList();
-            showToast('👑 VIP role assigned!', 'success');
+            /* VIP success toast suppressed */
             loadParticipants();
             renderAllMessages();
             closeMemberActionPanel();
@@ -7045,7 +7257,7 @@ const MESSAGE_CACHE_MAX = 200;
             if (!roomVips[uid]) { showToast('User is not VIP.', 'info'); return; }
             delete roomVips[uid];
             await saveVipList();
-            showToast('👑 VIP role removed.', 'info');
+            /* VIP removal toast suppressed */
             loadParticipants();
             renderAllMessages();
             closeMemberActionPanel();
@@ -8313,21 +8525,23 @@ const MESSAGE_CACHE_MAX = 200;
                 if (!user) { window.location.href = 'index.html'; return; }
                 currentUser = user;
                 currentUserUid = user.uid;
+                hydrateCachedLevel(user.uid);
 
                 // Paint the last known feed NOW — before joinRoom, Firestore reads,
                 // profile reads, coins, or any other startup work.
                 renderCachedMessagesImmediately();
 
                 startPresenceHeartbeat();
-                const profilePromise = getDoc(doc(db, 'users', user.uid)).catch(() => null);
                 const joined = await joinRoom(user.uid, roomId);
                 if (!joined) { setTimeout(() => window.location.href = 'rooms.html', 2000); return; }
+                const profilePromise = getDoc(doc(db, 'users', user.uid)).catch(() => null);
                 const messagesPromise = loadMessages(true, false);
-                const pendingVoiceNotesPromise = loadPendingVoiceNotes();
-                const [profileSnap, coins] = await Promise.all([
-                    profilePromise,
-                    getCoins(user.uid)
-                ]);
+                const cachedLevel = readCachedLevelData(user.uid);
+                const userRoomPromise = cachedLevel
+                    ? new Promise(resolve => setTimeout(() => resolve(loadUserRoomData(user.uid)), 2500))
+                        .catch((e) => console.warn('Level data background load failed', e))
+                    : loadUserRoomData(user.uid).catch((e) => console.warn('Level data background load failed', e));
+                const [profileSnap, coins] = await Promise.all([profilePromise, getCoins(user.uid)]);
                 if (profileSnap?.exists()) {
                     const data = profileSnap.data();
                     userSpId = data.spId || null;
@@ -8336,8 +8550,8 @@ const MESSAGE_CACHE_MAX = 200;
                 coinBalance = coins;
                 coinEl.textContent = coinBalance;
                 document.getElementById('sendCoinsBalance').textContent = coinBalance;
-                await messagesPromise;
-                listenForNewMessages();
+                // Cached messages are already visible; realtime attaches as soon as the network fetch settles.
+                messagesPromise.finally(() => listenForNewMessages());
                 listenForIncomingGifts();
                 participantUnsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
                     if (snap.exists()) { const data = snap.data();
@@ -8378,15 +8592,22 @@ const MESSAGE_CACHE_MAX = 200;
                     addNotification('Welcome to the room! 🎉', 'info', 'Welcome');
                 }, { timeout: 1000 });
 
-                await Promise.all([
-                    loadRoomFeatureEntitlements(),
-                    loadVipList(),
-                    loadCustomEmojis(),
-                    loadAnnouncement(),
-                    loadSavedTheme()
-                ]);
-                applyFeatureUnlocks();
-                listenRoomFeatureUpdates();
+                deferNonCritical(() => {
+                    void Promise.allSettled([
+                        loadPendingVoiceNotes(),
+                        loadRoomFeatureEntitlements(),
+                        loadVipList(),
+                        loadCustomEmojis(),
+                        loadAnnouncement(),
+                        loadSavedTheme()
+                    ]).then(() => {
+                        applyFeatureUnlocks();
+                        listenRoomFeatureUpdates();
+                    });
+                }, { timeout: 1200 });
+
+                // Level data is already loading in parallel; never block first paint on it.
+                void userRoomPromise;
 
                 if (isRoomOwner) {
                     setTimeout(() => {
@@ -8394,8 +8615,6 @@ const MESSAGE_CACHE_MAX = 200;
                         'Tip');
                     }, 2000);
                 }
-
-                await loadUserRoomData(currentUserUid);
             });
         }
 
@@ -8947,6 +9166,32 @@ const MESSAGE_CACHE_MAX = 200;
     } else {
         window.renderThemeMarket();
     }
+})();
+</script>
+
+<script id="level-icon-no-flash-runtime" type="text/javascript">(()=>{const ready=()=>{document.querySelectorAll("#levelIcon img").forEach(img=>{if(img.dataset.flashGuard)return;img.dataset.flashGuard="1";img.addEventListener("load",()=>img.classList.add("level-icon-ready"));if(img.complete&&img.naturalWidth>0)img.classList.add("level-icon-ready")})};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",ready,{once:true}):ready();new MutationObserver(ready).observe(document.documentElement,{childList:true,subtree:true})})();</script>
+<script id="vip-toast-suppressor">
+(function () {
+  const VIP_WORDS = /\b(vip|welcome\s+vip|vip\s+welcome|vip\s+assigned|vip\s+removed|vip\s+granted|vip\s+activated)\b/i;
+  const originalToast = window.showToast;
+  if (typeof originalToast === 'function' && !window.__vipToastSuppressed) {
+    window.__vipToastSuppressed = true;
+    window.showToast = function(message, ...args) {
+      if (VIP_WORDS.test(String(message || ''))) return;
+      return originalToast.call(this, message, ...args);
+    };
+  }
+
+  // Also remove dynamically-created VIP toast/popup nodes.
+  const clean = () => {
+    document.querySelectorAll(
+      '.vip-welcome-toast,.vip-welcome-popup,.vip-toast,.vip-popup,.vip-notification,.vip-assigned-toast,.vip-removed-toast,[data-vip-toast],[data-vip-popup]'
+    ).forEach(el => el.remove());
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', clean, {once:true});
+  } else clean();
+  new MutationObserver(clean).observe(document.documentElement, {childList:true, subtree:true});
 })();
 </script>
 
