@@ -357,6 +357,9 @@
             min-width: 36px;
             min-height: 36px;
             position: relative;
+            text-decoration: none;
+            font-family: var(--font-main);
+            font-weight: 600;
         }
         .header-btn:active { transform: scale(0.9); }
         .header-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main); }
@@ -372,12 +375,24 @@
             min-width: 18px;
             height: 18px;
             border-radius: 50%;
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             padding: 0 4px;
             box-shadow: 0 0 12px var(--error-glow);
             border: 2px solid var(--bg-deep);
+        }
+        .header-btn .badge-count.visible {
+            display: flex;
+        }
+
+        .header-btn.chat-link {
+            gap: 2px;
+            padding: 0 6px;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+        }
+        .header-btn.chat-link .chat-icon {
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
         }
 
         .avatar-btn {
@@ -1158,7 +1173,6 @@
             font-weight: 600;
         }
 
-        /* Email & URL link styling */
         .post-content .email-link {
             color: #ff6b9d;
             background: linear-gradient(135deg, #ff6b9d, #ffa07a);
@@ -1206,30 +1220,83 @@
 
         .post-video-wrapper {
             width: 100%;
-            max-height: 400px;
             border-radius: 14px;
             overflow: hidden;
             border: 1px solid var(--border-color);
             background: rgba(7, 11, 16, 0.4);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            max-height: 400px;
         }
         .post-video-wrapper video {
             width: 100%;
-            max-height: 400px;
+            flex: 1;
+            min-height: 0;
             display: block;
             background: #000;
+            cursor: pointer;
+            object-fit: contain;
         }
 
-        /* ===== VIDEO CONTROLS ===== */
+        .video-error-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--text-muted);
+            padding: 20px;
+            text-align: center;
+            z-index: 5;
+        }
+        .video-error-overlay.active {
+            display: flex;
+        }
+        .video-error-overlay .error-icon {
+            font-size: 2rem;
+        }
+        .video-error-overlay .error-msg {
+            font-size: 0.85rem;
+            max-width: 260px;
+        }
+        .video-error-overlay .retry-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: var(--font-main);
+            transition: var(--transition);
+            touch-action: manipulation;
+            min-height: 36px;
+        }
+        .video-error-overlay .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .video-error-overlay .retry-btn:active {
+            transform: scale(0.95);
+        }
+
         .video-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 6px 12px;
+            gap: 8px;
+            padding: 6px 10px;
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
-            border-radius: 0 0 14px 14px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+            flex-wrap: nowrap;
+            min-height: 40px;
         }
         .video-controls .play-btn {
             background: none;
@@ -1243,9 +1310,13 @@
             min-height: 32px;
             min-width: 32px;
             touch-action: manipulation;
+            flex-shrink: 0;
         }
         .video-controls .play-btn:hover {
             background: rgba(255, 255, 255, 0.1);
+        }
+        .video-controls .play-btn:active {
+            transform: scale(0.9);
         }
         .video-controls .progress-bar {
             flex: 1;
@@ -1255,23 +1326,48 @@
             cursor: pointer;
             position: relative;
             min-height: 4px;
+            touch-action: none;
         }
         .video-controls .progress-fill {
             height: 100%;
             background: var(--primary);
             border-radius: 4px;
             width: 0%;
-            transition: width 0.1s linear;
+            transition: width 0.05s linear;
         }
         .video-controls .time-display {
             color: rgba(255, 255, 255, 0.7);
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 500;
-            min-width: 36px;
+            min-width: 32px;
             font-variant-numeric: tabular-nums;
+            flex-shrink: 0;
+        }
+        .video-controls .volume-btn {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            cursor: pointer;
+            padding: 4px 4px;
+            border-radius: 6px;
+            transition: var(--transition);
+            min-height: 28px;
+            min-width: 28px;
+            touch-action: manipulation;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .video-controls .volume-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+        }
+        .video-controls .volume-btn:active {
+            transform: scale(0.9);
         }
 
-        /* ===== REPOST CARD ===== */
         .repost-card-preview {
             background: rgba(7, 11, 16, 0.4);
             border: 1px solid var(--border-color);
@@ -1304,7 +1400,6 @@
             object-fit: cover;
         }
 
-        /* ===== ACTION BAR ===== */
         .action-bar {
             display: flex;
             align-items: center;
@@ -1422,7 +1517,6 @@
             background: var(--border-color);
         }
 
-        /* ===== REACTION PANEL ===== */
         .reaction-panel-btn {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
@@ -1459,7 +1553,6 @@
             color: var(--primary);
         }
 
-        /* ===== COMMENTS ===== */
         .comments-section {
             display: none;
             flex-direction: column;
@@ -1603,7 +1696,6 @@
             background: var(--primary-hover);
         }
 
-        /* ===== EDIT POST PANEL ===== */
         .edit-post-textarea {
             background: var(--input-bg);
             border: 1px solid var(--border-color);
@@ -1665,7 +1757,6 @@
             background: var(--primary-hover);
         }
 
-        /* ===== EMPTY STATE ===== */
         .empty-state {
             text-align: center;
             color: var(--text-muted);
@@ -2641,7 +2732,6 @@
             background: #e11d48;
         }
 
-        /* ===== SHARE MODAL ===== */
         .share-modal-overlay {
             position: fixed;
             inset: 0;
@@ -2786,7 +2876,6 @@
             box-shadow: none;
         }
 
-        /* ===== LINK PREVIEW ===== */
         .link-preview-image-wrapper {
             position: relative;
             width: 100%;
@@ -2853,7 +2942,7 @@
         }
 
         /* ============================================================
-           CALL OVERLAY STYLES (updated for timer position)
+           CALL OVERLAY STYLES
            ============================================================ */
         .call-overlay {
             position: fixed;
@@ -3034,7 +3123,6 @@
             transform: scale(0.95);
         }
 
-        /* Active call overlay – timer moved to top bar */
         .active-call-overlay {
             position: fixed;
             top: 0;
@@ -3106,7 +3194,6 @@
         .active-call-overlay .call-top-bar .call-status.error {
             color: var(--error);
         }
-        /* Timer in top bar */
         .active-call-overlay .call-top-bar .call-timer {
             font-size: 0.8rem;
             color: var(--text-muted);
@@ -3250,7 +3337,6 @@
             font-size: 1.8rem;
             font-weight: 700;
         }
-        /* timer removed from center, now in top bar */
 
         .permission-overlay {
             position: fixed;
@@ -3417,6 +3503,13 @@
         </a>
 
         <div class="header-right">
+            <!-- Chat Button with Unread Badge -->
+            <button class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat.html'" title="Chat">
+                <span class="chat-icon">💬</span>
+                <span>Chat</span>
+                <span class="badge-count" id="headerChatBadge">0</span>
+            </button>
+
             <!-- Notifications Button -->
             <button class="header-btn" id="notifHeaderBtn" onclick="window.location.href='notifications.html'" title="Notifications">
                 🔔
@@ -3441,7 +3534,7 @@
                         <button class="dropdown-item" onclick="navigateTo('friends')"><span class="icon">👥</span> Friends</button>
                         <button class="dropdown-item" onclick="navigateTo('community')"><span class="icon">👨‍👩‍👧‍👦</span> Community</button>
                         <button class="dropdown-item" onclick="navigateTo('rooms')"><span class="icon">💞</span> Fun Rooms <span class="badge primary">Live</span></button>
-                        <button class="dropdown-item" onclick="navigateTo('messages')"><span class="icon">💬</span> Messages <span class="badge danger" id="dropdownChatBadge" style="display:none;">0</span></button>
+                        <!-- Messages REMOVED from dropdown — now in header as Chat with badge -->
                     </div>
                     <div class="dropdown-section">
                         <div class="dropdown-label">Account</div>
@@ -3612,9 +3705,8 @@
     </div>
 
     <!-- ============================================================
-    CALL OVERLAYS (updated timer position)
+    CALL OVERLAYS
     ============================================================ -->
-    <!-- Incoming Call Overlay -->
     <div id="incomingCallOverlay" class="call-overlay">
         <div class="call-card">
             <div id="incomingAvatar" class="call-avatar"></div>
@@ -3627,7 +3719,6 @@
         </div>
     </div>
 
-    <!-- Ringing Overlay (caller) -->
     <div id="ringingOverlay" class="ringing-overlay">
         <div class="ringing-card">
             <div id="ringingAvatar" class="ringing-avatar"></div>
@@ -3637,7 +3728,6 @@
         </div>
     </div>
 
-    <!-- Active Call Overlay -->
     <div id="activeCallOverlay" class="active-call-overlay">
         <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
         <div class="local-video-wrapper" id="localVideoWrapper">
@@ -3667,7 +3757,6 @@
         </div>
     </div>
 
-    <!-- Permission Overlay -->
     <div id="permissionOverlay" class="permission-overlay">
         <div class="permission-card">
             <h2 id="permTitle">🎤 Microphone Access</h2>
@@ -3679,7 +3768,7 @@
     <!-- ===== SCRIPTS ===== -->
     <script type="module">
         // ============================================================
-        // FEED.JS — COMPLETE FIXED (Notification sound from assets)
+        // FEED.JS — COMPLETE FIXED (Chat badge in header, removed from dropdown)
         // ============================================================
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -3745,18 +3834,53 @@
         let currentProfileUserUid = null;
         let isFollowing = false;
         let profileModalOpen = false;
-
-        // Post menu state
         let currentMenuPostId = null;
         let currentMenuIsPinned = false;
         let currentMenuIsHidden = false;
-
-        // Notification tracking for sound
         let previousNotificationCount = 0;
         let isFirstNotificationCheck = true;
+        let chatUnreadCount = 0;
 
         // ============================================================
-        // CROSS‑TAB CALL FLAG (sessionStorage)
+        // VIDEO MANAGER
+        // ============================================================
+        const videoManager = {
+            _currentPlayingId: null,
+            get currentId() { return this._currentPlayingId; },
+            onPlay(videoId) {
+                const prevId = this._currentPlayingId;
+                if (prevId && prevId !== videoId) {
+                    const prevVideo = document.getElementById(prevId);
+                    if (prevVideo && !prevVideo.paused) {
+                        prevVideo.pause();
+                        this._updatePlayButton(prevId, false);
+                    }
+                }
+                this._currentPlayingId = videoId;
+                this._updatePlayButton(videoId, true);
+            },
+            onPause(videoId) {
+                if (this._currentPlayingId === videoId) {
+                    this._currentPlayingId = null;
+                }
+                this._updatePlayButton(videoId, false);
+            },
+            clear(videoId) {
+                if (this._currentPlayingId === videoId) {
+                    this._currentPlayingId = null;
+                }
+                this._updatePlayButton(videoId, false);
+            },
+            _updatePlayButton(videoId, isPlaying) {
+                const playBtn = document.querySelector(`#play-btn-${videoId}`);
+                if (playBtn) {
+                    playBtn.textContent = isPlaying ? '❚❚' : '▶';
+                }
+            }
+        };
+
+        // ============================================================
+        // CROSS‑TAB CALL FLAG
         // ============================================================
         function setActiveCallFlag(callId) {
             try { sessionStorage.setItem('spike_active_call', callId); } catch (e) {}
@@ -3781,7 +3905,7 @@
         }
 
         // ============================================================
-        // TOAST & CONFIRM (attached to window)
+        // TOAST & CONFIRM
         // ============================================================
         window.showToast = function(message, type = 'success', title = '') {
             const toast = document.getElementById('globalToast');
@@ -3846,7 +3970,7 @@
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.handleCancel(); });
 
         // ============================================================
-        // NOTIFICATION SOUND PLAYER
+        // NOTIFICATION SOUND
         // ============================================================
         function playNotificationSound() {
             try {
@@ -3856,7 +3980,7 @@
                     const playPromise = audio.play();
                     if (playPromise !== undefined) {
                         playPromise.catch(err => {
-                            console.log('Notification sound autoplay blocked, will retry on next interaction');
+                            console.log('Notification sound autoplay blocked');
                             if (!window._soundRetryListener) {
                                 window._soundRetryListener = function() {
                                     try {
@@ -3871,13 +3995,11 @@
                         });
                     }
                 }
-            } catch (e) {
-                // Silently fail
-            }
+            } catch (e) {}
         }
 
         // ============================================================
-        // NOTIFICATION BADGE WITH SOUND
+        // NOTIFICATION BADGE
         // ============================================================
         function updateNotificationBadge() {
             const badge = document.getElementById('headerNotifBadge');
@@ -3913,15 +4035,41 @@
             }
         }
 
-        window.addEventListener('storage', (e) => {
-            if (e.key === CONFIG.storage.notifCacheKey || e.key === CONFIG.storage.notifReadKey) {
-                setTimeout(() => updateNotificationBadge(), 50);
+        // ============================================================
+        // CHAT BADGE — REAL‑TIME UNREAD COUNT (same as chat.html)
+        // ============================================================
+        function updateChatBadge(count) {
+            const badge = document.getElementById('headerChatBadge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.add('visible');
+            } else {
+                badge.textContent = '0';
+                badge.classList.remove('visible');
             }
-        });
+            chatUnreadCount = count;
+        }
 
-        window.addEventListener('notificationsUpdated', () => {
-            updateNotificationBadge();
-        });
+        function initChatBadge() {
+            if (!currentUser) return;
+            if (chatBadgeUnsubscribe) chatBadgeUnsubscribe();
+
+            const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
+            chatBadgeUnsubscribe = onSnapshot(q, (snapshot) => {
+                let totalUnread = 0;
+                snapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const unreadCount = data.unreadCount || {};
+                    const userUnread = unreadCount[currentUser.uid] || 0;
+                    totalUnread += userUnread;
+                });
+                updateChatBadge(totalUnread);
+            }, (error) => {
+                console.error("Chat badge listener error:", error);
+                updateChatBadge(0);
+            });
+        }
 
         // ============================================================
         // HELPERS
@@ -3966,15 +4114,6 @@
                     data)); } catch (e) {} }
 
         function updateDropdownAvatar(avatarUrl) {
-            const dropdownAvatar = document.getElementById('dropdownAvatar');
-            if (dropdownAvatar) {
-                if (avatarUrl && avatarUrl.trim() !== '') {
-                    dropdownAvatar.innerHTML =
-                        `<img src="${avatarUrl}" alt="Profile" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-                } else {
-                    dropdownAvatar.textContent = '👤';
-                }
-            }
             const headerProfile = document.getElementById('headerProfileBtn');
             if (headerProfile) {
                 if (avatarUrl && avatarUrl.trim() !== '') {
@@ -4088,7 +4227,7 @@
         }
 
         // ============================================================
-        // UPDATED parsePostContent — detects emails & URLs
+        // PARSE POST CONTENT
         // ============================================================
         function parsePostContent(text) {
             if (!text) return text;
@@ -4114,7 +4253,7 @@
         window.parsePostContent = parsePostContent;
 
         // ============================================================
-        // NAVIGATION (attached to window)
+        // NAVIGATION
         // ============================================================
         window.goToFriends = function() { window.location.href = "friends.html"; };
         window.goToFeed = function() { window.location.href = "feed.html"; };
@@ -4143,7 +4282,6 @@
                 friends: goToFriends,
                 community: goToCommunity,
                 rooms: goToRooms,
-                messages: goToMessages,
                 notifications: goToNotifications,
                 admin: goToAdmin,
                 profile: goToProfile,
@@ -4192,7 +4330,7 @@
         }
 
         // ============================================================
-        // MEDIA HANDLING (attached to window)
+        // MEDIA HANDLING
         // ============================================================
         window.handleImageSelect = function(event) {
             const file = event.target.files[0];
@@ -4247,7 +4385,7 @@
         }
 
         // ============================================================
-        // CREATE POST (attached to window)
+        // CREATE POST
         // ============================================================
         window.createPost = async function() {
             if (!currentUser) return;
@@ -4365,7 +4503,7 @@
         });
 
         // ============================================================
-        // DELETE POST — PREMIUM CONFIRMATION
+        // DELETE POST
         // ============================================================
         window.confirmDeletePost = function(postId) {
             postToDeleteId = postId;
@@ -4436,15 +4574,31 @@
             if (post.videoUrl) {
                 const videoId = `video-${postId}`;
                 mediaHTML = `
-                            <div class="post-video-wrapper">
+                            <div class="post-video-wrapper" id="wrapper-${videoId}">
                                 <video id="${videoId}" src="${post.videoUrl}" playsinline preload="metadata" muted
-                                    ontimeupdate="window.updateVideoProgress('${videoId}')"></video>
+                                    ontimeupdate="window.updateVideoProgress('${videoId}')"
+                                    onclick="window.toggleVideoPlay('${videoId}')"
+                                    onerror="window.handleVideoError('${videoId}')"
+                                    onended="window.handleVideoEnded('${videoId}')"
+                                    onplaying="window.handleVideoPlaying('${videoId}')"
+                                    onpause="window.handleVideoPause('${videoId}')"
+                                    crossorigin="anonymous">
+                                </video>
+                                <div class="video-error-overlay" id="error-${videoId}">
+                                    <div class="error-icon">⚠️</div>
+                                    <div class="error-msg">Unable to play video</div>
+                                    <button class="retry-btn" onclick="window.retryVideo('${videoId}')">↻ Retry</button>
+                                </div>
                                 <div class="video-controls">
-                                    <button class="play-btn" onclick="window.toggleVideoPlay('${videoId}')">▶</button>
-                                    <div class="progress-bar" onclick="window.seekVideo('${videoId}', event)">
+                                    <button class="play-btn" id="play-btn-${videoId}" onclick="window.toggleVideoPlay('${videoId}')">▶</button>
+                                    <div class="progress-bar" id="progress-bar-${videoId}"
+                                        onclick="window.seekVideo('${videoId}', event)"
+                                        ontouchstart="window.seekVideo('${videoId}', event)"
+                                        ontouchmove="window.seekVideoTouchMove('${videoId}', event)">
                                         <div class="progress-fill" id="progress-${videoId}"></div>
                                     </div>
                                     <span class="time-display" id="time-${videoId}">0:00</span>
+                                    <button class="volume-btn" id="volume-btn-${videoId}" onclick="window.toggleVideoMute('${videoId}')">🔇</button>
                                 </div>
                             </div>
                         `;
@@ -4473,7 +4627,6 @@
                         `;
             }
 
-            // REPORT BUTTON: SHOW ONLY IF USER IS ADMIN OR POST AUTHOR IS NOT ADMIN
             const showReportButton = !isOwner && (isAdmin || !isAuthorAdmin);
 
             let reportButtonHTML = "";
@@ -4552,7 +4705,6 @@
             const likes = post.likes || [];
             const isLiked = currentUser && likes.includes(currentUser.uid);
 
-            // ACTION PANEL: HIDE REPORT BUTTON FOR ADMIN POSTS (unless user is admin)
             const showReportInPanel = !isOwner && (isAdmin || !isAuthorAdmin);
 
             return `
@@ -4669,6 +4821,14 @@
 
             if (validPosts.length > 0) setCachedPosts(validPosts);
             attachPostListeners();
+
+            document.querySelectorAll('.post-video-wrapper video').forEach(video => {
+                const vid = video;
+                const videoId = vid.id;
+                if (videoId) {
+                    window.updateVideoMuteButton(videoId);
+                }
+            });
         }
 
         function attachPostListeners() {
@@ -4703,7 +4863,7 @@
         }
 
         // ============================================================
-        // POST INTERACTIONS (attached to window)
+        // POST INTERACTIONS
         // ============================================================
         window.toggleReaction = async function(postId, emoji) {
             if (!currentUser) return;
@@ -4744,7 +4904,6 @@
                 window.showToast("Failed to update pin status", "error", "Action Failed"); }
         };
 
-        // ===== EDIT POST — FIXED =====
         window.startEditPost = async function(postId) {
             const contentDiv = document.getElementById(`content-${postId}`);
             let currentText = contentDiv.textContent;
@@ -4982,12 +5141,130 @@
         };
 
         // ============================================================
-        // VIDEO CONTROLS (attached to window)
+        // VIDEO CONTROLS
         // ============================================================
         window.toggleVideoPlay = function(videoId) {
             const video = document.getElementById(videoId);
             if (!video) return;
-            if (video.paused) { video.play(); } else { video.pause(); }
+            const errorOverlay = document.getElementById(`error-${videoId}`);
+            if (errorOverlay && errorOverlay.classList.contains('active')) {
+                window.retryVideo(videoId);
+                return;
+            }
+            if (video.paused) {
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.warn(`[Video] Play failed for ${videoId}:`, err);
+                        if (err.name === 'NotAllowedError' || err.message?.includes('user gesture')) {
+                            video.muted = true;
+                            window.updateVideoMuteButton(videoId);
+                            video.play().catch(e => {
+                                console.warn(`[Video] Still blocked after unmute:`, e);
+                                window.showToast('Tap the video to play (autoplay blocked)', 'warning');
+                            });
+                        } else {
+                            window.handleVideoError(videoId);
+                        }
+                    });
+                }
+            } else {
+                video.pause();
+            }
+        };
+
+        window.handleVideoPlaying = function(videoId) {
+            videoManager.onPlay(videoId);
+            const video = document.getElementById(videoId);
+            if (video) {
+                window.updateVideoMuteButton(videoId);
+                if (video.muted) {
+                    const volBtn = document.getElementById(`volume-btn-${videoId}`);
+                    if (volBtn) volBtn.textContent = '🔇';
+                } else {
+                    const volBtn = document.getElementById(`volume-btn-${videoId}`);
+                    if (volBtn) volBtn.textContent = '🔊';
+                }
+            }
+            const errorOverlay = document.getElementById(`error-${videoId}`);
+            if (errorOverlay) errorOverlay.classList.remove('active');
+        };
+
+        window.handleVideoPause = function(videoId) {
+            videoManager.onPause(videoId);
+        };
+
+        window.handleVideoEnded = function(videoId) {
+            videoManager.onPause(videoId);
+            const timeDisplay = document.getElementById(`time-${videoId}`);
+            if (timeDisplay) timeDisplay.textContent = '0:00';
+            const progress = document.getElementById(`progress-${videoId}`);
+            if (progress) progress.style.width = '0%';
+        };
+
+        window.handleVideoError = function(videoId) {
+            const video = document.getElementById(videoId);
+            const errorOverlay = document.getElementById(`error-${videoId}`);
+            if (errorOverlay) {
+                errorOverlay.classList.add('active');
+                const msgEl = errorOverlay.querySelector('.error-msg');
+                if (msgEl) {
+                    const errorCode = video?.error?.code;
+                    if (errorCode === 4) {
+                        msgEl.textContent = 'Media format not supported';
+                    } else if (errorCode === 3) {
+                        msgEl.textContent = 'Video playback was aborted';
+                    } else if (errorCode === 2) {
+                        msgEl.textContent = 'Network error — check your connection';
+                    } else {
+                        msgEl.textContent = 'Unable to play video';
+                    }
+                }
+            }
+            videoManager.clear(videoId);
+            console.warn(`[Video] Error on ${videoId}:`, video?.error);
+        };
+
+        window.retryVideo = function(videoId) {
+            const video = document.getElementById(videoId);
+            const errorOverlay = document.getElementById(`error-${videoId}`);
+            if (errorOverlay) errorOverlay.classList.remove('active');
+            if (!video) return;
+            const src = video.src;
+            video.src = '';
+            setTimeout(() => {
+                video.src = src;
+                video.load();
+                video.play().catch(err => {
+                    console.warn(`[Video] Retry play failed for ${videoId}:`, err);
+                    if (err.name === 'NotAllowedError') {
+                        video.muted = true;
+                        window.updateVideoMuteButton(videoId);
+                        video.play().catch(e => window.handleVideoError(videoId));
+                    } else {
+                        window.handleVideoError(videoId);
+                    }
+                });
+            }, 150);
+        };
+
+        window.updateVideoMuteButton = function(videoId) {
+            const video = document.getElementById(videoId);
+            const volBtn = document.getElementById(`volume-btn-${videoId}`);
+            if (!video || !volBtn) return;
+            volBtn.textContent = video.muted ? '🔇' : '🔊';
+        };
+
+        window.toggleVideoMute = function(videoId) {
+            const video = document.getElementById(videoId);
+            if (!video) return;
+            video.muted = !video.muted;
+            window.updateVideoMuteButton(videoId);
+            if (!video.muted && video.paused) {
+                video.play().catch(err => {
+                    console.warn(`[Video] Play after unmute failed:`, err);
+                });
+            }
         };
 
         window.updateVideoProgress = function(videoId) {
@@ -4995,7 +5272,10 @@
             if (!video || !video.duration) return;
             const progress = document.getElementById(`progress-${videoId}`);
             const timeDisplay = document.getElementById(`time-${videoId}`);
-            if (progress) { progress.style.width = `${(video.currentTime / video.duration) * 100}%`; }
+            if (progress) {
+                const pct = (video.currentTime / video.duration) * 100;
+                progress.style.width = `${Math.min(100, pct)}%`;
+            }
             if (timeDisplay) {
                 const mins = Math.floor(video.currentTime / 60);
                 const secs = Math.floor(video.currentTime % 60);
@@ -5006,10 +5286,33 @@
         window.seekVideo = function(videoId, event) {
             const video = document.getElementById(videoId);
             if (!video || !video.duration) return;
-            const progress = document.getElementById(`progress-${videoId}`).parentElement;
-            const rect = progress.getBoundingClientRect();
-            const pct = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+            const progressBar = document.getElementById(`progress-bar-${videoId}`);
+            if (!progressBar) return;
+            const rect = progressBar.getBoundingClientRect();
+            let clientX = event.clientX;
+            if (event.touches && event.touches.length > 0) {
+                clientX = event.touches[0].clientX;
+            } else if (event.changedTouches && event.changedTouches.length > 0) {
+                clientX = event.changedTouches[0].clientX;
+            }
+            const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
             video.currentTime = pct * video.duration;
+            const progressFill = document.getElementById(`progress-${videoId}`);
+            if (progressFill) progressFill.style.width = `${pct * 100}%`;
+        };
+
+        window.seekVideoTouchMove = function(videoId, event) {
+            event.preventDefault();
+            const video = document.getElementById(videoId);
+            if (!video || !video.duration) return;
+            const progressBar = document.getElementById(`progress-bar-${videoId}`);
+            if (!progressBar) return;
+            const rect = progressBar.getBoundingClientRect();
+            let clientX = event.touches && event.touches.length > 0 ? event.touches[0].clientX : event.clientX;
+            const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+            video.currentTime = pct * video.duration;
+            const progressFill = document.getElementById(`progress-${videoId}`);
+            if (progressFill) progressFill.style.width = `${pct * 100}%`;
         };
 
         window.toggleActionPanel = function(postId) {
@@ -5026,7 +5329,7 @@
         window.closeLightbox = function() { document.getElementById('lightboxOverlay').classList.remove('active'); };
 
         // ============================================================
-        // PROFILE MODAL (attached to window)
+        // PROFILE MODAL
         // ============================================================
         window.openProfileModal = async function(uid, event) {
             if (event) { event.preventDefault();
@@ -5100,7 +5403,6 @@
                                 ${currentUser && uid !== currentUser.uid ? `
                                     <button class="btn-action btn-follow ${isFollowing ? 'following' : ''}" onclick="${isFollowing ? 'window.unfollowUser' : 'window.followUser'}('${uid}')" id="followBtn">${isFollowing ? '✓ Following' : '+ Follow'}</button>
                                     <button class="btn-action btn-message" onclick="window.openChatFromProfile('${uid}')">💬 Message</button>
-                                    <!-- CALL BUTTONS -->
                                     <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', false)">📞 Voice</button>
                                     <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', true)">📹 Video</button>
                                 ` : `<button class="btn-action btn-follow" onclick="window.location.href='profile.html'">View Full Profile</button>`}
@@ -5335,34 +5637,7 @@
         }
 
         // ============================================================
-        // CHAT BADGE
-        // ============================================================
-        function initBadges() {
-            if (!currentUser) return;
-            if (chatBadgeUnsubscribe) chatBadgeUnsubscribe();
-            const q = query(collection(db, "chats"), where("participants", "array-contains", currentUser.uid));
-            chatBadgeUnsubscribe = onSnapshot(q, (snapshot) => {
-                let unreadCount = 0;
-                snapshot.docs.forEach(docSnap => {
-                    const data = docSnap.data();
-                    if (data.unreadBy && data.unreadBy.includes(currentUser.uid)) unreadCount++;
-                });
-                const badge = document.getElementById("dropdownChatBadge");
-                if (badge) {
-                    if (unreadCount > 0) {
-                        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-                        badge.style.display = 'inline-block';
-                    } else {
-                        badge.style.display = 'none';
-                    }
-                }
-            });
-            // Update notification badge on load — this will set initial state and NOT play sound
-            updateNotificationBadge();
-        }
-
-        // ============================================================
-        // CALL FUNCTIONALITY (integrated from chat_room.html, with fixes)
+        // CALL FUNCTIONALITY (integrated from chat_room.html)
         // ============================================================
         let localStream = null;
         let peerConnection = null;
@@ -5382,26 +5657,17 @@
         let remoteStream = null;
         let callTimeoutId = null;
         let currentCallData = null;
-        let isCallInitializing = false; // Prevent double-click
-
-        // ---- ICE queue for each connection ----
+        let isCallInitializing = false;
         let iceQueue = [];
 
         const servers = {
             iceServers: [
                 { urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] },
                 { urls: 'stun:stun.l.google.com:19302' }
-                // TURN can be added here when credentials are available:
-                // {
-                //   urls: 'turn:turn.example.com:3478',
-                //   username: 'user',
-                //   credential: 'pass'
-                // }
             ],
             iceCandidatePoolSize: 10
         };
 
-        // ---- Ringtone helpers ----
         const incomingRing = document.getElementById('incomingRingtone');
         const outgoingRing = document.getElementById('outgoingRingtone');
 
@@ -5428,7 +5694,6 @@
             if (outgoingRing) { outgoingRing.pause(); outgoingRing.currentTime = 0; }
         }
 
-        // ---- Permission UI ----
         function showPermissionUI(needVideo = false) {
             const overlay = document.getElementById('permissionOverlay');
             const title = document.getElementById('permTitle');
@@ -5468,7 +5733,6 @@
             }
         }
 
-        // ---- Wake Lock ----
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator) {
@@ -5480,7 +5744,6 @@
             if (wakeLock) { wakeLock.release(); wakeLock = null; }
         }
 
-        // ---- Call Timer ----
         function startCallTimer() {
             if (callTimerInterval) return;
             let seconds = 0;
@@ -5498,7 +5761,6 @@
             }
         }
 
-        // ---- Quality Monitor ----
         function monitorConnectionQuality() {
             if (!peerConnection) return;
             if (qualityMonitorInterval) clearInterval(qualityMonitorInterval);
@@ -5535,7 +5797,6 @@
             }, 5000);
         }
 
-        // ---- Audio Output ----
         async function setAudioOutput(useSpeaker) {
             const remoteVideo = document.getElementById('remoteVideo');
             if (typeof remoteVideo.setSinkId === 'function') {
@@ -5552,7 +5813,6 @@
             }
         }
 
-        // ---- Reset / Cleanup ----
         function resetCallResources() {
             callUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
             callUnsubscribers = [];
@@ -5577,7 +5837,7 @@
         }
 
         function cleanupCall() {
-            if (isCallEnding) return; // prevent double cleanup
+            if (isCallEnding) return;
             isCallEnding = true;
             resetCallResources();
             if (localStream) {
@@ -5598,7 +5858,7 @@
             document.getElementById('callStatusBadge').textContent = 'Connected';
             document.getElementById('callStatusBadge').className = 'call-status';
             clearActiveCallFlag();
-            isCallEnding = false; // reset for next call
+            isCallEnding = false;
         }
 
         async function endCall(reason = 'ended') {
@@ -5616,7 +5876,6 @@
             window.showToast('Call ended', 'success');
         }
 
-        // ---- Reconnect ----
         async function reconnectCall() {
             if (isReconnecting || isCallEnding) return;
             if (reconnectAttempts >= MAX_RECONNECT) {
@@ -5630,7 +5889,6 @@
             window.showToast(`Reconnecting (${reconnectAttempts}/${MAX_RECONNECT})…`, 'info');
 
             try {
-                // Generate a new session ID to ignore stale ICE
                 const sessionId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
                 await updateDoc(callDocRef, { sessionId: sessionId });
 
@@ -5678,7 +5936,6 @@
                 } else {
                     if (data.offer) {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-                        // Flush queued ICE after remote description is set
                         flushIceQueue();
                         const answer = await peerConnection.createAnswer();
                         await peerConnection.setLocalDescription(answer);
@@ -5714,7 +5971,6 @@
             }, 2000);
         }
 
-        // ---- ICE queue flush ----
         function flushIceQueue() {
             if (!peerConnection) return;
             iceQueue.forEach(candidate => {
@@ -5725,7 +5981,6 @@
             iceQueue = [];
         }
 
-        // ---- Start Call (caller) ----
         async function startCall(calleeId, calleeName, video = false) {
             if (!currentUser) return;
             if (isCallInitializing || isCallActive || isCallEnding) {
@@ -5864,7 +6119,7 @@
             peerConnection.ontrack = (event) => {
                 remoteStream = event.streams[0];
                 document.getElementById('remoteVideo').srcObject = remoteStream;
-                startCallTimer(); // Timer starts only when media arrives
+                startCallTimer();
                 const badge = document.getElementById('callStatusBadge');
                 badge.textContent = 'Connected';
                 badge.className = 'call-status';
@@ -5911,7 +6166,6 @@
             callUnsubscribers.push(unsubCand);
         }
 
-        // ---- Join Call (receiver) with cross-tab check ----
         async function joinCall(callId, callData) {
             if (isCallActive || isCallEnding) {
                 try {
@@ -5921,7 +6175,6 @@
                 return;
             }
 
-            // Check if another tab is already handling this call
             const existingFlag = getActiveCallFlag();
             if (existingFlag && existingFlag !== callId) {
                 try {
@@ -5931,7 +6184,6 @@
                 return;
             }
 
-            // Do NOT request media yet; wait for Accept
             isCaller = false;
             isVideoCall = callData.isVideo || false;
             callDocRef = doc(db, 'calls', callId);
@@ -5941,7 +6193,6 @@
                 isVideo: callData.isVideo || false
             };
 
-            // Set flag to prevent duplicate handling in other tabs
             setActiveCallFlag(callId);
 
             const callerName = currentCallData.callerName;
@@ -5960,7 +6211,6 @@
             document.getElementById('acceptBtn').onclick = async () => {
                 stopIncomingRingtone();
                 document.getElementById('incomingCallOverlay').classList.remove('active');
-                // Request media only now
                 if (!localStream) {
                     try {
                         localStream = await requestMedia(callData.isVideo || false);
@@ -6029,7 +6279,7 @@
             peerConnection.ontrack = (event) => {
                 remoteStream = event.streams[0];
                 document.getElementById('remoteVideo').srcObject = remoteStream;
-                startCallTimer(); // Timer starts only when media arrives
+                startCallTimer();
                 const badge = document.getElementById('callStatusBadge');
                 badge.textContent = 'Connected';
                 badge.className = 'call-status';
@@ -6075,7 +6325,6 @@
             callUnsubscribers.push(unsubCand);
         }
 
-        // ---- Show Active Call UI (with controls visibility) ----
         function showActiveCallUI() {
             isCallActive = true;
             document.getElementById('incomingCallOverlay').classList.remove('active');
@@ -6086,7 +6335,6 @@
             const displayName = currentCallData ? currentCallData.callerName : 'User';
             const isVideo = currentCallData ? currentCallData.isVideo : false;
 
-            // Hide/show video-specific controls
             const videoBtn = document.getElementById('callVideoBtn');
             const flipBtn = document.getElementById('callFlipBtn');
             if (isVideo) {
@@ -6119,7 +6367,6 @@
             setupCallControls();
         }
 
-        // ---- Call Controls ----
         let isMuted = false;
         let isVideoOff = false;
         let isSpeakerOn = false;
@@ -6182,7 +6429,6 @@
             };
         }
 
-        // ---- Incoming Call Listener ----
         function listenForIncomingCalls(userId) {
             const q = query(collection(db, 'calls'), where('calleeId', '==', userId), where('status', '==', 'ringing'));
             const unsub = onSnapshot(q, (snap) => {
@@ -6214,7 +6460,6 @@
                 const adminBtn = document.getElementById("dropdownAdminBtn");
                 if (adminBtn) adminBtn.classList.toggle("visible", isAdmin);
 
-                // Set online status on load
                 updateUserOnlineStatus(true);
 
                 const cachedAvatar = getCachedAvatar(user.uid);
@@ -6242,13 +6487,11 @@
 
                 listenForMaintenance();
                 initFeedStream();
-                initBadges();
+                initChatBadge(); // REAL‑TIME CHAT BADGE IN HEADER
                 applySettings();
 
-                // ---- Listen for incoming calls ----
                 listenForIncomingCalls(user.uid);
 
-                // ---- Permission retry ----
                 document.getElementById('retryPermissionBtn').onclick = async () => {
                     try {
                         localStream = await requestMedia(isVideoCall);
@@ -6256,7 +6499,6 @@
                     } catch (e) {}
                 };
 
-                // ---- Visibility change for online status ----
                 document.addEventListener('visibilitychange', () => {
                     if (document.hidden) {
                         updateUserOnlineStatus(false);
@@ -6265,8 +6507,10 @@
                     }
                 });
 
+                // Initial notification badge update
+                setTimeout(() => updateNotificationBadge(), 500);
+
             } else {
-                // User signed out — set offline
                 if (currentUserUid) {
                     const userRef = doc(db, "users", currentUserUid);
                     updateDoc(userRef, { onlineStatus: false, lastSeen: serverTimestamp() })
@@ -6278,6 +6522,8 @@
                 cleanupOnlineStatusListeners();
                 if (announcementUnsubscribe) { announcementUnsubscribe();
                     announcementUnsubscribe = null; }
+                if (chatBadgeUnsubscribe) { chatBadgeUnsubscribe();
+                    chatBadgeUnsubscribe = null; }
                 const postsStream = document.getElementById("postsStream");
                 if (postsStream) postsStream.innerHTML =
                     `<div class="empty-state"><span class="icon">🔒</span>Please sign in to view the feed.</div>`;
@@ -6285,22 +6531,21 @@
                 if (container) container.innerHTML = '';
                 const badge = document.getElementById('headerNotifBadge');
                 if (badge) badge.style.display = 'none';
+                const chatBadge = document.getElementById('headerChatBadge');
+                if (chatBadge) chatBadge.classList.remove('visible');
                 previousNotificationCount = 0;
             }
         });
 
-        // ---- Expose call functions globally ----
         window.startCall = startCall;
         window.cleanupCall = cleanupCall;
 
-        // Set offline on beforeunload and cleanup call
         window.addEventListener('beforeunload', () => {
             if (currentUserUid) {
                 const userRef = doc(db, "users", currentUserUid);
                 updateDoc(userRef, { onlineStatus: false, lastSeen: serverTimestamp() })
                     .catch(err => console.error("Error setting offline on beforeunload:", err));
             }
-            // Cleanup any active call
             if (window.cleanupCall) {
                 try { window.cleanupCall(); } catch (e) {}
             }
@@ -6339,14 +6584,10 @@
         const initialAnn = loadAnnouncement();
         renderAnnouncement(initialAnn);
 
-        console.log('📱 Feed initialized — all features ready');
-        console.log('🔔 Notification sound plays once per new notification from assets/notifications.mp3');
-        console.log('🔒 Regular users cannot report admin posts (eletexjoeytex@gmail.com)');
-        console.log('✅ Online status now updates correctly on page load, unload, and sign-out.');
-        console.log('✅ Incoming call handling integrated (global calls).');
-        console.log('✅ Call buttons added to profile modal (Voice & Video).');
-        console.log('✅ Timer moved to top bar, video controls hidden for voice calls, cross-tab prevention added.');
-        console.log('✅ ICE queuing, reconnection session IDs, and media permission timing fixed.');
+        console.log('📱 Feed initialized — Chat badge in header with real‑time unread count');
+        console.log('✅ "Messages" removed from dropdown — Chat is now in header with badge');
+        console.log('🔔 New message count appears on the Chat icon in real time');
+        console.log('💬 Badge updates when you receive new messages, same as chat.html');
     </script>
 </body>
 </html>
