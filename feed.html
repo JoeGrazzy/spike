@@ -276,12 +276,16 @@
         }
 
         /* ============================================================
-           HEADER
+           HEADER — with safe‑area inset for notched devices
            ============================================================ */
         .feed-header {
             width: 100%;
             max-width: 800px;
             padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+            /* ═══ SAFE‑AREA FIX: keep header below front camera notch ═══ */
+            padding-top: clamp(8px, 2vw, 12px);
+            padding-top: calc(clamp(8px, 2vw, 12px) + constant(safe-area-inset-top, 0px));
+            padding-top: calc(clamp(8px, 2vw, 12px) + env(safe-area-inset-top, 0px));
             display: flex;
             justify-content: space-between;
             align-items: center;
