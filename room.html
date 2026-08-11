@@ -3751,8 +3751,6 @@
             }
         }
 
-        /* Immediate toast popups disabled: actions continue to work without intrusive overlays. */
-        #toast { display: none !important; }
     
         /* Daily streak / leveling challenges */
         .daily-challenges{margin:12px 0 16px;padding:12px;border:1px solid var(--border-color);border-radius:12px;background:rgba(255,255,255,.03)}
@@ -3814,11 +3812,26 @@
     position: fixed !important;
     left: 0 !important;
     right: 0 !important;
+    bottom: 0 !important;
+    top: auto !important;
     z-index: 1200 !important;
-    transform: translateZ(0) !important;
+    transform: none !important;
     margin: 0 !important;
     transition: none !important;
     padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  }
+
+  #bottomInputArea.centered {
+    left: var(--keyboard-center-x, 50vw) !important;
+    right: auto !important;
+    top: var(--keyboard-center-y, 50vh) !important;
+    bottom: auto !important;
+    width: min(92vw, 620px) !important;
+    max-width: calc(100vw - 16px) !important;
+    transform: translate(-50%, -50%) !important;
+    z-index: 9999 !important;
+    border-radius: 16px;
+    box-shadow: 0 18px 55px rgba(0,0,0,.28);
   }
 }
 </style>
@@ -4535,16 +4548,29 @@
         async function consumePendingVoiceNote(id) {
             const item = pendingVoiceNoteInbox.find(n => n.id === id);
             if (!item) return;
+
             try {
-                await updateDoc(doc(db, 'users', currentUserUid, 'voiceNoteInbox', id), {
-                    consumed: true, consumedAt: serverTimestamp()
-                });
+                // Permanently mark the room voice message as consumed by this
+                // receiver. The renderer uses this flag so it can never appear
+                // again for this receiver after it has been seen/acknowledged.
+                if (item.messageId && roomId) {
+                    await updateDoc(
+                        doc(db, 'rooms', roomId, 'messages', item.messageId),
+                        { [`voiceConsumedBy.${currentUserUid}`]: serverTimestamp() }
+                    );
+                }
+
+                // Remove the durable inbox item after the room message is
+                // successfully acknowledged. If deletion fails, the consumed
+                // flag still prevents the voice note from being shown again.
+                await deleteDoc(doc(db, 'users', currentUserUid, 'voiceNoteInbox', id));
+
+                pendingVoiceNoteInbox = pendingVoiceNoteInbox.filter(n => n.id !== id);
+                renderPendingVoiceNotes();
             } catch (e) {
                 console.warn('Failed to acknowledge voice note:', e);
-                return;
+                showToast('Could not mark this voice note as seen. Please try again.', 'warning');
             }
-            pendingVoiceNoteInbox = pendingVoiceNoteInbox.filter(n => n.id !== id);
-            renderPendingVoiceNotes();
         }
 
         window.playPendingVoiceNote = async function(id, url) {
@@ -5009,17 +5035,31 @@
         // ============================================================
         // GIFT FUNCTIONS
         // ============================================================
-        window.openGiftSendModal = function(recipientUid = null) {
+        let giftSendInFlight = false;
+
+        window.openGiftSendModal = async function(recipientUid = null) {
             if (!currentUser || !hasPaid) { showToast('Join the room first.', 'warning'); return; }
             selectedGiftEmoji = null;
-            giftRecipientUid = recipientUid;
+            giftRecipientUid = null;
+            giftSendInFlight = false;
             const grid = document.getElementById('giftSendGrid');
-            grid.innerHTML = GIFT_EMOJIS.map((g, idx) => `<button class="${selectedGiftEmoji === g.emoji ? 'selected' : ''}" data-emoji="${g.emoji}" data-cost="${g.cost}" onclick="selectGiftEmoji('${g.emoji}',${g.cost})">${g.emoji}<span class="gift-cost-popup">${g.cost}</span></button>`).join('');
+            const sendBtn = document.getElementById('giftSendBtn');
             const infoDiv = document.getElementById('giftRecipientInfo');
-            if (recipientUid) { loadRecipientInfo(recipientUid); } else { infoDiv.innerHTML =
-                    `<div>👤 <input type="text" id="giftRecipientInput" placeholder="Enter SP ID or name" style="background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:4px 8px;color:var(--text-primary);width:60%;"/><button onclick="findGiftRecipient()" style="background:var(--gold);border:none;border-radius:8px;padding:4px 10px;color:#0d1520;font-weight:700;cursor:pointer;">Find</button></div>`;
-                giftRecipientUid = null; }
-            document.getElementById('giftSendOverlay').classList.add('open');
+            grid.innerHTML = GIFT_EMOJIS.map(g => `<button data-emoji="${sanitizeHTML(g.emoji)}" data-cost="${g.cost}" onclick="selectGiftEmoji('${g.emoji}',${g.cost})">${g.emoji}<span class="gift-cost-popup">${g.cost}</span></button>`).join('');
+            if (sendBtn) {
+                sendBtn.disabled = true;
+                sendBtn.textContent = '💌 Select a gift';
+            }
+
+            if (recipientUid) {
+                infoDiv.textContent = '👤 Loading recipient…';
+                document.getElementById('giftSendOverlay').classList.add('open');
+                const loaded = await loadRecipientInfo(recipientUid);
+                if (!loaded) return;
+            } else {
+                infoDiv.innerHTML = `<div>👤 <input type="text" id="giftRecipientInput" placeholder="Enter SP ID or name" style="background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:4px 8px;color:var(--text-primary);width:60%;"/><button onclick="findGiftRecipient()" style="background:var(--gold);border:none;border-radius:8px;padding:4px 10px;color:#0d1520;font-weight:700;cursor:pointer;">Find</button></div>`;
+                document.getElementById('giftSendOverlay').classList.add('open');
+            }
         };
         window.closeGiftSendModal = function() { document.getElementById('giftSendOverlay').classList.remove('open');
             giftRecipientUid = null;
@@ -5027,13 +5067,23 @@
         async function loadRecipientInfo(uid) {
             try {
                 const docSnap = await getDoc(doc(db, 'users', uid));
-                if (!docSnap.exists()) { showToast('User not found', 'error'); return; }
+                if (!docSnap.exists()) {
+                    document.getElementById('giftRecipientInfo').textContent = 'Recipient not found.';
+                    showToast('User not found', 'error');
+                    return false;
+                }
                 const data = docSnap.data();
                 const name = data.name || data.displayName || 'User';
                 const spId = data.spId || 'N/A';
-                document.getElementById('giftRecipientInfo').innerHTML = `<div>👤 ${name} (SP: ${spId})</div>`;
+                const info = document.getElementById('giftRecipientInfo');
+                info.textContent = `👤 ${name} (SP: ${spId})`;
                 giftRecipientUid = uid;
-            } catch (e) { showToast('Error loading recipient', 'error'); }
+                return true;
+            } catch (e) {
+                document.getElementById('giftRecipientInfo').textContent = 'Unable to load recipient.';
+                showToast('Error loading recipient', 'error');
+                return false;
+            }
         }
         window.findGiftRecipient = async function() {
             const input = document.getElementById('giftRecipientInput');
@@ -5049,45 +5099,160 @@
             showToast('User not found', 'error');
         };
         window.selectGiftEmoji = function(emoji, cost) {
-            selectedGiftEmoji = emoji;
-            document.querySelectorAll('#giftSendGrid button').forEach(b => b.classList.toggle('selected', b.dataset.emoji === emoji));
-            document.getElementById('giftSendBtn').textContent = `💌 Send ${emoji} (${cost}🪙)`;
+            const gift = GIFT_EMOJIS.find(g => g.emoji === emoji);
+            if (!gift || Number(gift.cost) !== Number(cost)) { showToast('Invalid gift.', 'error'); return; }
+            selectedGiftEmoji = gift.emoji;
+            document.querySelectorAll('#giftSendGrid button').forEach(b => b.classList.toggle('selected', b.dataset.emoji === gift.emoji));
+            const sendBtn = document.getElementById('giftSendBtn');
+            if (sendBtn) { sendBtn.disabled = !giftRecipientUid || giftSendInFlight; sendBtn.textContent = `💌 Send ${gift.emoji} (${gift.cost}🪙)`; }
         };
         window.sendGiftToUser = async function() {
             if (!currentUser || !hasPaid) { showToast('Join the room first.', 'warning'); return; }
+            if (giftSendInFlight) return;
             if (!giftRecipientUid) { showToast('Select a recipient first.', 'warning'); return; }
             if (!selectedGiftEmoji) { showToast('Select a gift emoji.', 'warning'); return; }
+
             const giftData = GIFT_EMOJIS.find(g => g.emoji === selectedGiftEmoji);
-            if (!giftData) return;
-            const cost = giftData.cost;
-            if (!await deductCoinsIfPossible(cost, `Send gift ${selectedGiftEmoji}`)) return;
+            if (!giftData) { showToast('Gift not found.', 'error'); return; }
+            const cost = Number(giftData.cost);
+            if (!Number.isSafeInteger(cost) || cost <= 0) { showToast('Invalid gift cost.', 'error'); return; }
+
+            const sendBtn = document.getElementById('giftSendBtn');
+            giftSendInFlight = true;
+            if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = '⏳ Sending…'; }
+
+            const recipientUid = giftRecipientUid;
+            const giftEmoji = giftData.emoji;
+            const senderUid = currentUser.uid;
+            const senderName = currentUser.displayName || 'User';
+
             try {
-                const giftRef = doc(collection(db, 'users', giftRecipientUid, 'gifts'));
-                await setDoc(giftRef, { fromUid: currentUser.uid, fromName: currentUser.displayName || 'User', emoji: selectedGiftEmoji, value: cost, timestamp: serverTimestamp(), converted: false });
-                const recipientName = document.getElementById('giftRecipientInfo')?.textContent || 'user';
-                await addDoc(collection(db, 'rooms', roomId, 'messages'), { senderId: 'system', senderName: 'SPIKE', text: `🎁 ${currentUser.displayName || 'User'} sent a gift ${selectedGiftEmoji} to ${recipientName}!`, type: 'system', timestamp: serverTimestamp() });
-                // Gift rain is receiver-only; the receiver listener triggers it.
-                await addSP(5, `Sent gift ${selectedGiftEmoji}`);
-                showToast(`Gift ${selectedGiftEmoji} sent! -${cost}🪙`, 'success');
-                addNotification(`Sent ${selectedGiftEmoji} gift`, 'gold', 'Gift Sent');
+                const senderRef = doc(db, 'users', senderUid);
+                const receiverRef = doc(db, 'users', recipientUid);
+                const roomRef = doc(db, 'rooms', roomId);
+                const senderParticipantRef = doc(db, 'rooms', roomId, 'participants', senderUid);
+                const receiverParticipantRef = doc(db, 'rooms', roomId, 'participants', recipientUid);
+                const giftRef = doc(collection(db, 'users', recipientUid, 'gifts'));
+                const txRef = doc(collection(db, 'transactions'));
+
+                await runTransaction(db, async (tx) => {
+                    const [roomSnap, senderSnap, receiverSnap, senderParticipantSnap, receiverParticipantSnap] = await Promise.all([
+                        tx.get(roomRef), tx.get(senderRef), tx.get(receiverRef),
+                        tx.get(senderParticipantRef), tx.get(receiverParticipantRef)
+                    ]);
+
+                    if (!roomSnap.exists()) throw new Error('Room not found.');
+                    if (!senderSnap.exists()) throw new Error('Sender account not found.');
+                    if (!receiverSnap.exists()) throw new Error('Recipient account not found.');
+                    if (senderUid === recipientUid) throw new Error('Cannot send a gift to yourself.');
+
+                    const room = roomSnap.data() || {};
+                    const recipientIsRoomMember = recipientUid === room.createdBy || receiverParticipantSnap.exists();
+                    const senderIsRoomMember = senderUid === room.createdBy || senderParticipantSnap.exists();
+                    if (!senderIsRoomMember) throw new Error('You must be a member of this room.');
+                    if (!recipientIsRoomMember) throw new Error('Recipient is not a member of this room.');
+
+                    const senderCoins = Number(senderSnap.data().coins || 0);
+                    if (!Number.isFinite(senderCoins) || senderCoins < cost) {
+                        throw new Error(`Insufficient coins. Need ${cost} 🪙.`);
+                    }
+
+                    tx.update(senderRef, { coins: senderCoins - cost });
+                    tx.set(giftRef, {
+                        fromUid: senderUid,
+                        fromName: senderName,
+                        toUid: recipientUid,
+                        emoji: giftEmoji,
+                        value: cost,
+                        roomId,
+                        timestamp: serverTimestamp(),
+                        converted: false
+                    });
+                    tx.set(txRef, {
+                        userId: senderUid,
+                        type: 'gift_send',
+                        toUid: recipientUid,
+                        amount: -cost,
+                        newBalance: senderCoins - cost,
+                        reason: `Sent gift ${giftEmoji}`,
+                        status: 'completed',
+                        roomId,
+                        timestamp: serverTimestamp()
+                    });
+                });
+
+                coinBalance = await getCoins(senderUid);
+                if (coinEl) coinEl.textContent = coinBalance;
+                const sendBalance = document.getElementById('sendCoinsBalance');
+                if (sendBalance) sendBalance.textContent = coinBalance;
+
+                try {
+                    const recipientName = document.getElementById('giftRecipientInfo')?.textContent || 'user';
+                    await addDoc(collection(db, 'rooms', roomId, 'messages'), {
+                        senderId: 'system', senderName: 'SPIKE',
+                        text: `🎁 ${senderName} sent a gift ${giftEmoji} to ${recipientName}!`,
+                        type: 'system', timestamp: serverTimestamp()
+                    });
+                } catch (e) { console.warn('Gift system message failed:', e); }
+
+                try { await addSP(5, `Sent gift ${giftEmoji}`); }
+                catch (e) { console.warn('Gift SP award failed:', e); }
+
+                showToast(`Gift ${giftEmoji} sent! -${cost}🪙`, 'success');
+                addNotification(`Sent ${giftEmoji} gift`, 'gold', 'Gift Sent');
                 closeGiftSendModal();
-                loadGiftBadgeCount();
-            } catch (err) { showToast('Failed to send gift: ' + err.message, 'error'); }
+                await loadGiftBadgeCount();
+            } catch (err) {
+                console.error('Gift transaction failed:', err);
+                showToast(err?.message || 'Failed to send gift. Please try again.', 'error');
+            } finally {
+                giftSendInFlight = false;
+                if (sendBtn && document.getElementById('giftSendOverlay').classList.contains('open')) {
+                    sendBtn.disabled = !giftRecipientUid || !selectedGiftEmoji;
+                    if (!selectedGiftEmoji) sendBtn.textContent = '💌 Select a gift';
+                }
+            }
         };
+
+        const GIFT_RAIN_DURATION_MS = 4000;
+        let giftRainCleanupTimer = null;
 
         function triggerGiftRain(emoji, count = 20, senderName = 'Someone', value = 0) {
             const c = document.getElementById('giftRain');
-            for (let i = 0; i < count; i++) {
+            if (!c || !emoji) return;
+            if (giftRainCleanupTimer) clearTimeout(giftRainCleanupTimer);
+            c.replaceChildren();
+
+            const safeCount = Math.min(40, Math.max(10, Number(count) || 20));
+            const safeSender = String(senderName || 'Someone');
+            const safeValue = Number(value) || 0;
+
+            for (let i = 0; i < safeCount; i++) {
                 const el = document.createElement('div');
                 el.className = 'drop';
-                el.innerHTML = `<div style=\"font-size:28px\">${emoji}</div><div class=\"gift-name\">${escapeHtml(senderName)}</div><div class=\"gift-value\">${Number(value).toLocaleString()} 🪙</div>`;
+                const emojiEl = document.createElement('div');
+                emojiEl.style.fontSize = '28px';
+                emojiEl.textContent = emoji;
+                const nameEl = document.createElement('div');
+                nameEl.className = 'gift-name';
+                nameEl.textContent = safeSender;
+                const valueEl = document.createElement('div');
+                valueEl.className = 'gift-value';
+                valueEl.textContent = `${safeValue.toLocaleString()} 🪙`;
+                el.append(emojiEl, nameEl, valueEl);
                 el.style.left = Math.random() * 100 + '%';
-                el.style.fontSize = (22 + Math.random() * 30) + 'px';
-                el.style.animationDuration = (2 + Math.random() * 3) + 's';
-                el.style.animationDelay = (Math.random() * 1.5) + 's';
+                el.style.fontSize = (22 + Math.random() * 20) + 'px';
+                const delay = Math.random() * 0.25;
+                const duration = Math.max(3.1, 3.65 - delay);
+                el.style.animationDuration = duration + 's';
+                el.style.animationDelay = delay + 's';
                 c.appendChild(el);
-                setTimeout(() => el.remove(), 6000);
             }
+
+            giftRainCleanupTimer = setTimeout(() => {
+                c.replaceChildren();
+                giftRainCleanupTimer = null;
+            }, GIFT_RAIN_DURATION_MS);
         }
 
         // ============================================================
@@ -5134,42 +5299,86 @@
             const ok = await showConfirm({ icon: '🪙', title: 'Convert Gift', message: 'Convert this gift to coins?', confirmText: 'Convert', confirmType: 'primary' });
             if (!ok) return;
             try {
-                const ref = doc(db, 'users', currentUser.uid, 'gifts', giftId);
-                const snap = await getDoc(ref);
-                if (!snap.exists()) { showToast('Gift not found.', 'error'); return; }
-                const data = snap.data();
-                if (data.converted) { showToast('Already converted.', 'warning'); return; }
-                await updateCoins(currentUser.uid, data.value || 0, `Converted gift ${data.emoji}`);
-                await updateDoc(ref, { converted: true });
+                const giftRef = doc(db, 'users', currentUser.uid, 'gifts', giftId);
+                const userRef = doc(db, 'users', currentUser.uid);
+                const txRef = doc(collection(db, 'transactions'));
+                let convertedValue = 0;
+                let convertedEmoji = '🎁';
+                await runTransaction(db, async (tx) => {
+                    const giftSnap = await tx.get(giftRef);
+                    const userSnap = await tx.get(userRef);
+                    if (!giftSnap.exists()) throw new Error('Gift not found.');
+                    if (!userSnap.exists()) throw new Error('User account not found.');
+                    const data = giftSnap.data() || {};
+                    if (data.converted === true) throw new Error('Already converted.');
+                    const value = Number(data.value || 0);
+                    if (!Number.isSafeInteger(value) || value <= 0) throw new Error('Invalid gift value.');
+                    const currentCoins = Number(userSnap.data().coins || 0);
+                    convertedValue = value;
+                    convertedEmoji = data.emoji || '🎁';
+                    tx.update(userRef, { coins: currentCoins + value });
+                    tx.update(giftRef, { converted: true, convertedAt: serverTimestamp() });
+                    tx.set(txRef, { userId: currentUser.uid, type: 'gift_convert', amount: value, newBalance: currentCoins + value, reason: `Converted gift ${convertedEmoji}`, giftId, timestamp: serverTimestamp() });
+                });
                 coinBalance = await getCoins(currentUser.uid);
-                coinEl.textContent = coinBalance;
-                document.getElementById('sendCoinsBalance').textContent = coinBalance;
-                showToast(`+${data.value}🪙`, 'success');
-                loadGifts();
+                if (coinEl) coinEl.textContent = coinBalance;
+                const sendBalance = document.getElementById('sendCoinsBalance');
+                if (sendBalance) sendBalance.textContent = coinBalance;
+                showToast(`+${convertedValue}🪙`, 'success');
+                await loadGifts();
             } catch (e) { showToast('Failed: ' + e.message, 'error'); }
         };
+
         window.convertAllGifts = async function() {
             if (!currentUser) return;
             try {
                 const q = query(collection(db, 'users', currentUser.uid, 'gifts'), where('converted', '==', false));
                 const snap = await getDocs(q);
                 if (snap.empty) { showToast('No gifts to convert.', 'warning'); return; }
+                if (snap.size > 450) {
+                    showToast('Too many gifts to convert atomically. Convert them in smaller groups.', 'warning');
+                    return;
+                }
                 const ok = await showConfirm({ icon:'✨', title:'Convert All Gifts', message:`Convert ${snap.size} gift(s) into coins?`, confirmText:'Convert All', confirmType:'primary' });
                 if (!ok) return;
+
+                const userRef = doc(db, 'users', currentUser.uid);
+                const txRef = doc(collection(db, 'transactions'));
                 let total = 0;
-                for (const d of snap.docs) { const data=d.data(); total += Number(data.value||0); await updateDoc(d.ref,{converted:true}); }
-                await updateCoins(currentUser.uid,total,'Converted all received gifts');
+                await runTransaction(db, async (tx) => {
+                    const userSnap = await tx.get(userRef);
+                    if (!userSnap.exists()) throw new Error('User account not found.');
+                    const giftSnaps = [];
+                    for (const d of snap.docs) giftSnaps.push(await tx.get(d.ref));
+                    let allTotal = 0;
+                    for (const giftSnap of giftSnaps) {
+                        if (!giftSnap.exists() || giftSnap.data()?.converted === true) continue;
+                        const value = Number(giftSnap.data()?.value || 0);
+                        if (!Number.isSafeInteger(value) || value <= 0) throw new Error('Invalid gift value detected.');
+                        allTotal += value;
+                    }
+                    if (allTotal <= 0) throw new Error('No convertible gifts found.');
+                    const currentCoins = Number(userSnap.data().coins || 0);
+                    tx.update(userRef, { coins: currentCoins + allTotal });
+                    for (const giftSnap of giftSnaps) {
+                        if (giftSnap.exists() && giftSnap.data()?.converted !== true) tx.update(giftSnap.ref, { converted: true, convertedAt: serverTimestamp() });
+                    }
+                    tx.set(txRef, { userId: currentUser.uid, type: 'gift_convert_all', amount: allTotal, newBalance: currentCoins + allTotal, reason: 'Converted all received gifts', count: snap.size, timestamp: serverTimestamp() });
+                    total = allTotal;
+                });
                 coinBalance = await getCoins(currentUser.uid);
                 if (coinEl) coinEl.textContent = coinBalance;
                 showToast(`+${total}🪙 from gifts`, 'success');
-                loadGifts();
-            } catch(e) { showToast('Failed: '+e.message,'error'); }
+                await loadGifts();
+            } catch(e) { showToast('Failed: ' + e.message,'error'); }
         };
+
         let incomingGiftUnsub = null;
         let incomingGiftListenerReady = false;
 
         function listenForIncomingGifts() {
             if (!currentUser || incomingGiftUnsub) return;
+            incomingGiftListenerReady = false;
             const giftsRef = collection(db, 'users', currentUser.uid, 'gifts');
             const giftsQuery = query(giftsRef, orderBy('timestamp', 'desc'), limit(30));
             incomingGiftUnsub = onSnapshot(giftsQuery, (snap) => {
@@ -5536,9 +5745,18 @@
 
         // ----- Voice Note: Start Recording -----
         window.memberActionVoiceNote = function() {
-            if (!isRoomFeatureUnlocked('voice_note')) { showToast('🔒 Voice Notes are a premium feature. Request it from Features.', 'warning'); return; }
-            if (!memberActionTargetUid) { showToast('No member selected.', 'warning'); return; }
-            if (memberActionTargetUid === currentUserUid) { showToast('Cannot send to yourself.', 'warning'); return; }
+            if (!isRoomFeatureUnlocked('voice_note')) {
+                showToast('🔒 Voice Notes are a premium feature. Request it from Features.', 'warning');
+                return;
+            }
+            if (!memberActionTargetUid) {
+                showToast('No member selected.', 'warning');
+                return;
+            }
+            if (memberActionTargetUid === currentUserUid) {
+                showToast('Cannot send to yourself.', 'warning');
+                return;
+            }
 
             // If already recording, stop and prepare preview
             if (voiceNoteState.isRecording) {
@@ -5747,7 +5965,8 @@
                     audioUrl: downloadURL,
                     duration: voiceNoteState.duration || 0,
                     createdAt: serverTimestamp(),
-                    consumed: false
+                    consumed: false,
+                    pinned: true
                 });
 
                 await trackDailyActivity('voiceNotes', 1);
@@ -5894,6 +6113,59 @@
         // ============================================================
         // SEND MESSAGE CORE
         // ============================================================
+        async function sendPaidMessageAtomically(msgData, cost, reason) {
+            if (!currentUser || !hasPaid) return false;
+            const amount = Number(cost || 0);
+            if (!Number.isSafeInteger(amount) || amount < 0) throw new Error('Invalid message cost.');
+            if (amount === 0) {
+                await addDoc(collection(db, 'rooms', roomId, 'messages'), msgData);
+                return true;
+            }
+
+            const senderRef = doc(db, 'users', currentUser.uid);
+            const roomRef = doc(db, 'rooms', roomId);
+            const adminRef = roomAdminUid && roomAdminUid !== currentUser.uid ? doc(db, 'users', roomAdminUid) : null;
+            const messageRef = doc(collection(db, 'rooms', roomId, 'messages'));
+            const ledgerRef = doc(collection(db, 'transactions'));
+
+            await runTransaction(db, async (tx) => {
+                const reads = [tx.get(senderRef), tx.get(roomRef)];
+                if (adminRef) reads.push(tx.get(adminRef));
+                const results = await Promise.all(reads);
+                const senderSnap = results[0];
+                const roomSnap = results[1];
+                const adminSnap = adminRef ? results[2] : null;
+                if (!senderSnap.exists()) throw new Error('User account not found.');
+                if (!roomSnap.exists()) throw new Error('Room not found.');
+                const senderCoins = Number(senderSnap.data().coins || 0);
+                if (!Number.isFinite(senderCoins) || senderCoins < amount) throw new Error(`Insufficient coins. Need ${amount} 🪙.`);
+
+                tx.update(senderRef, { coins: senderCoins - amount });
+                tx.set(messageRef, msgData);
+                tx.set(ledgerRef, {
+                    userId: currentUser.uid, amount: -amount, newBalance: senderCoins - amount,
+                    reason, type: 'message_send', roomId, timestamp: serverTimestamp()
+                });
+
+                const adminCut = Math.floor(amount * 0.1);
+                if (adminRef && adminCut > 0) {
+                    if (!adminSnap?.exists()) throw new Error('Room owner account not found.');
+                    const adminData = adminSnap.data() || {};
+                    const currentEarnings = Number(adminData.roomEarnings?.[roomId] || 0);
+                    tx.update(adminRef, { [`roomEarnings.${roomId}`]: currentEarnings + adminCut });
+                    tx.set(doc(collection(db, 'transactions')), {
+                        userId: roomAdminUid, amount: adminCut, newBalance: currentEarnings + adminCut,
+                        reason: `Room earnings (10% of ${amount}) from user ${currentUser.uid}`,
+                        type: 'room_earnings', roomId, timestamp: serverTimestamp()
+                    });
+                }
+            });
+            coinBalance = await getCoins(currentUser.uid);
+            if (coinEl) coinEl.textContent = coinBalance;
+            const sendBalance = document.getElementById('sendCoinsBalance');
+            if (sendBalance) sendBalance.textContent = coinBalance;
+            return true;
+        }
         function sanitizeHTML(text) { const div = document.createElement('div');
             div.textContent = text; return div.innerHTML; }
 
@@ -5911,7 +6183,6 @@
                     return;
                 } else { showToast('Amount must be positive.', 'warning'); return; }
             }
-            if (!await deductCoinsIfPossible(COSTS.text, 'Text message')) return;
             sendBtn.disabled = true;
             try {
                 const msgData = {
@@ -5928,7 +6199,7 @@
                 };
                 if (replyingTo) { msgData.replyTo = replyingTo;
                     replyingTo = null; }
-                await addDoc(collection(db, 'rooms', roomId, 'messages'), msgData);
+                await sendPaidMessageAtomically(msgData, COSTS.text, 'Text message');
                 msgInput.value = '';
                 msgInput.focus();
                 lastActivity = Date.now();
@@ -5940,7 +6211,6 @@
 
         async function sendMessageWithType(type, content, cost = 0) {
             if (!hasPaid || !currentUser) return;
-            if (cost > 0 && !await deductCoinsIfPossible(cost, `${type} message`)) return;
             sendBtn.disabled = true;
             try {
                 const msgData = {
@@ -5957,7 +6227,7 @@
                 };
                 if (replyingTo) { msgData.replyTo = replyingTo;
                     replyingTo = null; }
-                await addDoc(collection(db, 'rooms', roomId, 'messages'), msgData);
+                await sendPaidMessageAtomically(msgData, cost, `${type} message`);
                 await trackDailyActivity('messages', 1);
                 if (type !== 'text') 
                 lastActivity = Date.now();
@@ -6026,6 +6296,15 @@
         // BUILD MESSAGE HTML
         // ============================================================
         function buildMessageHTML(data, isSelf) {
+            // Private voice-note visibility:
+            // - only the intended target receiver can see it
+            // - sender/other room members never see the voice-note message
+            // - once the receiver acknowledges it, it is permanently hidden
+            if (data.type === 'voice' && data.targetUid) {
+                if (data.targetUid !== currentUser?.uid) return '';
+                if (data.voiceConsumedBy?.[currentUser?.uid]) return '';
+            }
+
             const time = data.timestamp?.toDate ? data.timestamp.toDate() : new Date();
             const timeStr = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             if (data.type === 'system') return `<div class="system-msg">${sanitizeHTML(data.text)}</div>`;
@@ -6054,7 +6333,7 @@
                 content =
                     `<div class="voice-msg"><button onclick="playVoiceNote('${sanitizeHTML(data.text)}')">▶</button><div class="wave"><div class="fill" style="width:70%;"></div></div><span class="duration">${durStr}</span></div>`;
             } else {
-                let text = String(data.text || '');
+                let text = sanitizeHTML(String(data.text || ''));
                 text = text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
                 content = `<div class="text">${text}</div>`;
             }
@@ -6220,15 +6499,14 @@ const MESSAGE_CACHE_MAX = 200;
             if (loadMore) { const btn = getLoadMoreButton(); if (btn) btn.textContent = 'Loading…'; }
 
             try {
-                let q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'asc'), limit(
-                MESSAGE_LIMIT));
+                let q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'desc'), limit(MESSAGE_LIMIT));
                 if (loadMore && lastVisibleDoc) {
-                    q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'asc'), startAfter(
-                        lastVisibleDoc), limit(MESSAGE_LIMIT));
+                    q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'desc'), startAfter(lastVisibleDoc), limit(MESSAGE_LIMIT));
                 }
                 const snap = await getDocs(q);
                 const msgs = [];
                 snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+                msgs.reverse();
                 if (snap.empty) {
                     hasMoreMessages = false;
                     const btn = getLoadMoreButton(); if (btn) btn.style.display = 'none';
@@ -6582,34 +6860,38 @@ const MESSAGE_CACHE_MAX = 200;
 
         // ----- Member Action: Profile -----
         window.memberActionProfile = function() {
-            if (!memberActionTargetUid) return;
+            const targetUid = memberActionTargetUid;
+            if (!targetUid) return;
             closeMemberActionPanel();
-            window.openProfileModal(memberActionTargetUid);
+            window.openProfileModal(targetUid);
         };
 
         // ----- Member Action: Gift -----
-        window.memberActionGift = function() {
-            if (!memberActionTargetUid) return;
+        window.memberActionGift = async function() {
+            const targetUid = memberActionTargetUid;
+            if (!targetUid) return;
             closeMemberActionPanel();
-            window.openGiftSendModal(memberActionTargetUid);
+            await window.openGiftSendModal(targetUid);
         };
 
         // ----- Member Action: Coins -----
         window.memberActionCoins = function() {
-            if (!memberActionTargetUid) return;
+            const targetUid = memberActionTargetUid;
+            if (!targetUid) return;
             closeMemberActionPanel();
             const select = document.getElementById('sendCoinsRecipient');
             for (let opt of select.options) {
-                if (opt.value === memberActionTargetUid) { select.value = memberActionTargetUid; break; }
+                if (opt.value === targetUid) { select.value = targetUid; break; }
             }
             document.getElementById('sendCoinsOverlay').classList.add('open');
         };
 
         // ----- Member Action: DM -----
         window.memberActionMessage = function() {
-            if (!memberActionTargetUid) return;
+            const targetUid = memberActionTargetUid;
+            if (!targetUid) return;
             closeMemberActionPanel();
-            window.location.href = `chat.html?uid=${memberActionTargetUid}`;
+            window.location.href = `chat.html?uid=${encodeURIComponent(targetUid)}`;
         };
 
         // ----- Member Action: Kick -----
@@ -7847,10 +8129,40 @@ const MESSAGE_CACHE_MAX = 200;
                     startTimeSpAward();
                     return true;
                 }
-                await updateCoins(uid, -fee, `Join room: ${roomData.name || rid}`);
-                await creditAdminEarnings(fee, uid);
-                await setDoc(partRef, { joinedAt: serverTimestamp(), moderator: false });
-                await updateDoc(roomRef, { participantCount: increment(1) });
+                // Charge, membership creation, participant count, and the existing
+                // 10% admin room-earnings rule are committed atomically.
+                await runTransaction(db, async (tx) => {
+                    const [roomTxSnap, userTxSnap, participantTxSnap, adminTxSnap] = await Promise.all([
+                        tx.get(roomRef),
+                        tx.get(doc(db, 'users', uid)),
+                        tx.get(partRef),
+                        roomAdminUid && roomAdminUid !== uid ? tx.get(doc(db, 'users', roomAdminUid)) : Promise.resolve(null)
+                    ]);
+                    if (!roomTxSnap.exists()) throw new Error('Room not found.');
+                    if (participantTxSnap.exists()) return;
+                    if (!userTxSnap.exists()) throw new Error('User account not found.');
+                    const currentCoins = Number(userTxSnap.data().coins || 0);
+                    if (!Number.isFinite(currentCoins) || currentCoins < fee) throw new Error('Insufficient coins');
+                    tx.update(doc(db, 'users', uid), { coins: currentCoins - fee });
+                    tx.set(partRef, { joinedAt: serverTimestamp(), moderator: false });
+                    tx.update(roomRef, { participantCount: increment(1) });
+
+                    const adminCut = Math.floor(fee * 0.1);
+                    if (adminCut > 0 && roomAdminUid && roomAdminUid !== uid) {
+                        if (!adminTxSnap?.exists()) throw new Error('Room owner account not found.');
+                        const adminData = adminTxSnap.data() || {};
+                        const currentEarnings = Number(adminData.roomEarnings?.[rid] || 0);
+                        tx.update(doc(db, 'users', roomAdminUid), { [`roomEarnings.${rid}`]: currentEarnings + adminCut });
+                        tx.set(doc(collection(db, 'transactions')), {
+                            userId: roomAdminUid, amount: adminCut, newBalance: currentEarnings + adminCut,
+                            reason: `Room earnings (10% of ${fee}) from user ${uid}`, type: 'room_earnings', roomId: rid, timestamp: serverTimestamp()
+                        });
+                    }
+                    tx.set(doc(collection(db, 'transactions')), {
+                        userId: uid, amount: -fee, newBalance: currentCoins - fee,
+                        reason: `Join room: ${roomData.name || rid}`, type: 'room_join', roomId: rid, timestamp: serverTimestamp()
+                    });
+                });
                 hasPaid = true;
                 coinBalance = await getCoins(uid);
                 coinEl.textContent = coinBalance;
@@ -8094,6 +8406,12 @@ const MESSAGE_CACHE_MAX = 200;
             stopPresenceHeartbeat();
             if (currentUserUid) updateUserOnlineStatus(false);
             if (memberPresenceUnsub) { memberPresenceUnsub(); memberPresenceUnsub = null; }
+            if (messageUnsub) { messageUnsub(); messageUnsub = null; }
+            if (incomingGiftUnsub) { incomingGiftUnsub(); incomingGiftUnsub = null; incomingGiftListenerReady = false; }
+            if (participantUnsub) { participantUnsub(); participantUnsub = null; }
+            if (giftRainCleanupTimer) { clearTimeout(giftRainCleanupTimer); giftRainCleanupTimer = null; }
+            const giftRain = document.getElementById('giftRain');
+            if (giftRain) giftRain.replaceChildren();
             if (smartPresenceTimer) { clearTimeout(smartPresenceTimer); smartPresenceTimer = null; }
             if (unsubscribeUser) { unsubscribeUser();
                 unsubscribeUser = null; }
@@ -8131,7 +8449,6 @@ const MESSAGE_CACHE_MAX = 200;
                 else if (document.getElementById('sendCoinsOverlay').classList.contains('open'))
                     closeSendCoinsModal();
                 else if (moreDropdown.classList.contains('open')) closeMoreDropdown();
-                else if (isTypingOverlayOpen) closeTypingOverlay();
                 else if (document.getElementById('emojiManagerOverlay').classList.contains('open'))
                     closeEmojiManager();
                 else if (document.getElementById('vipManagementOverlay').classList.contains('open'))
@@ -8286,35 +8603,41 @@ const MESSAGE_CACHE_MAX = 200;
 (function () {
     const composer = document.getElementById('bottomInputArea');
     const input = document.getElementById('msgInput');
+    const vv = window.visualViewport;
     if (!composer || !input) return;
 
     let centered = false;
+    let baselineHeight = vv ? vv.height : window.innerHeight;
     let frame = 0;
+
+    function setCenterPosition() {
+        if (!vv) {
+            document.documentElement.style.setProperty('--keyboard-center-x', '50vw');
+            document.documentElement.style.setProperty('--keyboard-center-y', '50vh');
+            return;
+        }
+
+        const centerX = vv.offsetLeft + (vv.width / 2);
+        const centerY = vv.offsetTop + (vv.height / 2);
+
+        document.documentElement.style.setProperty('--keyboard-center-x', `${centerX}px`);
+        document.documentElement.style.setProperty('--keyboard-center-y', `${centerY}px`);
+    }
 
     function centerComposer() {
         if (!centered) return;
-        const vv = window.visualViewport;
-        if (!vv) return;
-        const composerHeight = composer.offsetHeight || 60;
-        const top = (vv.height - composerHeight) / 2 + vv.offsetTop;
-        composer.style.top = top + 'px';
-        composer.style.bottom = 'auto';
-        composer.style.transform = 'none';
-        composer.style.left = '0px';
-        composer.style.right = '0px';
-        composer.style.position = 'fixed';
+        setCenterPosition();
     }
 
     function resetComposer() {
         centered = false;
         composer.classList.remove('centered');
-        composer.style.top = '';
-        composer.style.bottom = '';
-        composer.style.transform = '';
-        composer.style.left = '';
-        composer.style.right = '';
-        composer.style.position = '';
-        // restore bottom positioning via the original function
+        composer.style.removeProperty('top');
+        composer.style.removeProperty('bottom');
+        composer.style.removeProperty('left');
+        composer.style.removeProperty('right');
+        composer.style.removeProperty('transform');
+        composer.style.removeProperty('position');
         placeComposer();
     }
 
@@ -8323,6 +8646,7 @@ const MESSAGE_CACHE_MAX = 200;
             centerComposer();
             return;
         }
+
         cancelAnimationFrame(frame);
         frame = requestAnimationFrame(() => {
             if (window.innerWidth > 768) {
@@ -8330,78 +8654,100 @@ const MESSAGE_CACHE_MAX = 200;
                 composer.style.bottom = '0px';
                 return;
             }
-            const vv = window.visualViewport;
-            if (!vv) {
+
+            const viewport = window.visualViewport;
+            if (!viewport) {
                 composer.style.bottom = '0px';
                 return;
             }
-            const visibleBottom = vv.offsetTop + vv.height;
-            const pageScale = vv.scale || 1;
+
+            const visibleBottom = viewport.offsetTop + viewport.height;
+            const pageScale = viewport.scale || 1;
             const viewportBottom = Math.min(window.innerHeight, visibleBottom / pageScale);
-            const composerHeight = composer.getBoundingClientRect().height || 60;
-            const bottom = Math.max(0, window.innerHeight - viewportBottom);
-            composer.style.bottom = `${Math.ceil(bottom)}px`;
-            composer.style.top = 'auto';
             const rect = composer.getBoundingClientRect();
+
+            composer.style.top = 'auto';
+            composer.style.bottom = `${Math.max(0, Math.ceil(window.innerHeight - viewportBottom))}px`;
+
+            const nextRect = composer.getBoundingClientRect();
             const safeBottom = visibleBottom / pageScale;
-            if (rect.bottom > safeBottom) {
-                const correction = rect.bottom - safeBottom + 2;
-                composer.style.bottom = `${Math.ceil(bottom + correction)}px`;
+            if (nextRect.bottom > safeBottom) {
+                composer.style.bottom =
+                    `${Math.ceil((window.innerHeight - viewportBottom) +
+                    (nextRect.bottom - safeBottom) + 2)}px`;
             }
         });
     }
 
-    input.addEventListener('focus', function() {
+    function openCentered() {
         centered = true;
         composer.classList.add('centered');
-        centerComposer();
-    });
-
-    input.addEventListener('blur', function() {
-        resetComposer();
-    });
-
-    // visualViewport resize
-    if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', function() {
-            if (centered) {
-                centerComposer();
-            } else {
-                placeComposer();
-            }
-        }, {passive:true});
-        window.visualViewport.addEventListener('scroll', function() {
-            if (centered) {
-                centerComposer();
-            } else {
-                placeComposer();
-            }
-        }, {passive:true});
+        setCenterPosition();
     }
 
-    window.addEventListener('resize', function() {
-        if (centered) {
-            centerComposer();
-        } else {
-            placeComposer();
-        }
-    }, {passive:true});
-    window.addEventListener('orientationchange', function() {
-        if (centered) {
-            centerComposer();
-        } else {
-            placeComposer();
-        }
-    }, {passive:true});
+    function syncKeyboardState() {
+        if (!vv) return;
 
-    // Also on focus, also on any input change to keep centered
-    input.addEventListener('input', function() {
-        if (centered) {
-            centerComposer();
+        const heightLoss = Math.max(0, baselineHeight - vv.height);
+        const keyboardVisible = heightLoss > 80;
+
+        if (keyboardVisible) {
+            openCentered();
+        } else if (centered && document.activeElement !== input) {
+            resetComposer();
         }
+
+        if (!keyboardVisible && document.activeElement !== input) {
+            baselineHeight = vv.height;
+        }
+
+        if (centered) setCenterPosition();
+    }
+
+    input.addEventListener('focus', function () {
+        openCentered();
+
+        requestAnimationFrame(() => {
+            setTimeout(syncKeyboardState, 80);
+            setTimeout(syncKeyboardState, 220);
+        });
     });
 
-    // initial placement
+    input.addEventListener('blur', function () {
+        setTimeout(() => {
+            if (document.activeElement !== input) {
+                resetComposer();
+                if (vv) baselineHeight = vv.height;
+            }
+        }, 180);
+    });
+
+    if (vv) {
+        vv.addEventListener('resize', syncKeyboardState, { passive: true });
+        vv.addEventListener('scroll', () => {
+            if (centered) setCenterPosition();
+            else placeComposer();
+        }, { passive: true });
+    }
+
+    window.addEventListener('resize', () => {
+        if (!centered && vv) baselineHeight = vv.height;
+        if (centered) setCenterPosition();
+        else placeComposer();
+    }, { passive: true });
+
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (vv) baselineHeight = vv.height;
+            if (centered) setCenterPosition();
+            else placeComposer();
+        }, 300);
+    });
+
+    input.addEventListener('input', () => {
+        if (centered) setCenterPosition();
+    });
+
     placeComposer();
 })();
 </script>

@@ -2309,6 +2309,267 @@
                 min-width: 30px;
             }
         }
+    
+        /* ===== SETTINGS LIGHT THEME ===== */
+        body.light-mode,
+        html.light-mode {
+            --bg-deep: #f5f7fa;
+            --bg-surface: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.88);
+            --bg-glass: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(15, 23, 42, 0.10);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+        }
+
+        body.light-mode .chat-header,
+        body.light-mode .header-btn {
+            color: var(--text-main);
+        }
+
+        body.light-mode .header-btn {
+            background: rgba(15, 23, 42, 0.03);
+        }
+
+        body.light-mode .header-btn:hover {
+            background: rgba(15, 23, 42, 0.07);
+        }
+
+    
+        /* ===== MOBILE KEYBOARD + LIGHT THEME POLISH ===== */
+
+        /* Keep the app sized to the visual viewport when Android's keyboard opens. */
+        html, body {
+            min-height: 100%;
+            min-height: 100dvh;
+            background: var(--bg-deep);
+        }
+
+        body {
+            height: 100dvh;
+            min-height: 100dvh;
+            overscroll-behavior: none;
+        }
+
+        .chat-header {
+            position: relative;
+            z-index: 20;
+            flex-shrink: 0;
+            padding-top: calc(clamp(8px, 2vw, 12px) + env(safe-area-inset-top, 0px));
+            padding-left: calc(clamp(10px, 3vw, 18px) + env(safe-area-inset-left, 0px));
+            padding-right: calc(clamp(10px, 3vw, 18px) + env(safe-area-inset-right, 0px));
+        }
+
+        .chat-main {
+            min-height: 0;
+            flex: 1 1 auto;
+        }
+
+        .messages-container {
+            min-height: 0;
+            overscroll-behavior: contain;
+        }
+
+        /* Composer stays above Android's keyboard instead of being covered. */
+        .chat-input-area {
+            position: relative;
+            z-index: 30;
+            flex-shrink: 0;
+            padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            background: var(--bg-glass);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .chat-input-area input,
+        .chat-input-area textarea {
+            min-width: 0;
+            font-size: 16px; /* prevents Android Chrome/WebView auto-zoom */
+            color: var(--text-main);
+            background: var(--bg-card);
+            border-color: var(--border-color);
+        }
+
+        .chat-input-area input::placeholder,
+        .chat-input-area textarea::placeholder {
+            color: var(--text-muted);
+            opacity: 0.9;
+        }
+
+        /* When the keyboard is open, keep the composer compact and visible. */
+        @media (max-height: 560px) {
+            .chat-input-area {
+                padding-top: 6px;
+                padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .messages-container {
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+        }
+
+        /* Complete light-mode surface treatment. */
+        body.light-mode {
+            background: #f4f7f9;
+            color: #17212b;
+        }
+
+        body.light-mode::before {
+            opacity: 0.055;
+        }
+
+        body.light-mode::after {
+            opacity: 0.045;
+        }
+
+        body.light-mode .chat-header {
+            background: rgba(255, 255, 255, 0.94);
+            border-bottom-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 2px 14px rgba(15, 23, 42, 0.08);
+        }
+
+        body.light-mode .header-btn {
+            background: rgba(15, 23, 42, 0.035);
+            border-color: rgba(15, 23, 42, 0.10);
+            color: #52606d;
+        }
+
+        body.light-mode .header-btn:hover {
+            background: rgba(15, 23, 42, 0.07);
+            color: #17212b;
+        }
+
+        body.light-mode .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(15, 23, 42, 0.16);
+        }
+
+        body.light-mode .message.received {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.09);
+            color: #17212b;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+        }
+
+        body.light-mode .message.sent {
+            color: #ffffff;
+        }
+
+        body.light-mode .message-sender {
+            color: #64748b;
+        }
+
+        body.light-mode .message-date-divider span {
+            background: #f4f7f9;
+            color: #64748b;
+        }
+
+        body.light-mode .chat-input-area {
+            background: rgba(255, 255, 255, 0.95);
+            border-top-color: rgba(15, 23, 42, 0.08);
+            box-shadow: 0 -3px 16px rgba(15, 23, 42, 0.06);
+        }
+
+        body.light-mode .chat-input-area input,
+        body.light-mode .chat-input-area textarea {
+            background: #f8fafc;
+            color: #17212b;
+            border-color: rgba(15, 23, 42, 0.12);
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.03);
+        }
+
+        body.light-mode .chat-input-area input:focus,
+        body.light-mode .chat-input-area textarea:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        body.light-mode .chat-input-area input::placeholder,
+        body.light-mode .chat-input-area textarea::placeholder {
+            color: #94a3b8;
+        }
+
+        /* Keep common overlays readable in light mode. */
+        body.light-mode .modal,
+        body.light-mode .modal-content,
+        body.light-mode .lightbox-content,
+        body.light-mode .call-modal,
+        body.light-mode .context-menu {
+            color: #17212b;
+        }
+
+        body.light-mode .modal-content,
+        body.light-mode .call-modal {
+            background: #ffffff;
+            border-color: rgba(15, 23, 42, 0.10);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.18);
+        }
+
+        body.light-mode .context-menu {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(15, 23, 42, 0.10);
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+        }
+
+        @media (max-width: 480px) {
+            .chat-header {
+                padding-top: calc(6px + env(safe-area-inset-top, 0px));
+                padding-left: calc(8px + env(safe-area-inset-left, 0px));
+                padding-right: calc(8px + env(safe-area-inset-right, 0px));
+            }
+
+            .chat-input-area {
+                padding-left: calc(8px + env(safe-area-inset-left, 0px));
+                padding-right: calc(8px + env(safe-area-inset-right, 0px));
+            }
+        }
+
+    
+        /* ===== KEYBOARD INPUT CENTER MODE — MASTER FIX ===== */
+        body.keyboard-open .chat-input-area {
+            position: fixed !important;
+            left: var(--keyboard-center-x, 50vw) !important;
+            top: var(--keyboard-center-y, 50vh) !important;
+            right: auto !important;
+            bottom: auto !important;
+            width: min(92vw, 620px) !important;
+            max-width: calc(100vw - 16px);
+            transform: translate(-50%, -50%) !important;
+            z-index: 9999 !important;
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 10px 12px;
+            box-shadow: 0 18px 55px rgba(0, 0, 0, 0.28);
+            margin: 0 !important;
+        }
+
+        body.keyboard-open .chat-input-area .input-wrapper {
+            min-width: 0;
+        }
+
+        body.keyboard-open .chat-input-area .chat-input {
+            min-width: 0;
+            width: 100%;
+            font-size: 16px !important;
+        }
+
+        body.light-mode.keyboard-open .chat-input-area {
+            background: rgba(255, 255, 255, 0.98);
+            border-color: rgba(15, 23, 42, 0.10);
+            box-shadow: 0 18px 55px rgba(15, 23, 42, 0.20);
+        }
+
+        /* Once keyboard-open is removed, the original flex composer owns its
+           position again; no fixed positioning remains. */
+        body:not(.keyboard-open) .chat-input-area {
+            left: auto;
+            top: auto;
+            right: auto;
+            bottom: auto;
+            transform: none;
+        }
+
     </style>
 
     <!-- ===== AUDIO RINGTONES ===== -->
@@ -2545,6 +2806,69 @@
     <!-- ================================================================
     SCRIPTS — FULLY INTEGRATED with PRESENCE + CALLS
     ================================================================ -->
+    <script>
+
+        /* ===== SETTINGS THEME BRIDGE =====
+           Reads the existing SPIKE settings saved by settings.html.
+           Falls back to the chat room's existing theme when no settings exist. */
+        (function applySpikeSettingsTheme() {
+            const STORAGE_KEY = 'spikeSettings';
+
+            function hexToRgba(hex, alpha) {
+                if (!hex) return null;
+                const value = String(hex).trim().replace('#', '');
+                if (![3, 6].includes(value.length) || !/^[0-9a-fA-F]+$/.test(value)) return null;
+                const full = value.length === 3
+                    ? value.split('').map(ch => ch + ch).join('')
+                    : value;
+                const r = parseInt(full.slice(0, 2), 16);
+                const g = parseInt(full.slice(2, 4), 16);
+                const b = parseInt(full.slice(4, 6), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            }
+
+            function apply() {
+                let settings;
+                try {
+                    settings = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                } catch (e) {
+                    settings = {};
+                }
+
+                const root = document.documentElement;
+                const body = document.body;
+
+                // Settings.html uses darkMode as the source of truth.
+                // Do not override the setting when it is absent.
+                if (typeof settings.darkMode === 'boolean') {
+                    body.classList.toggle('light-mode', !settings.darkMode);
+                    root.classList.toggle('light-mode', !settings.darkMode);
+                }
+
+                // Settings.html stores the selected accent as accentColor.
+                const accent = settings.accentColor;
+                const accentRgba = hexToRgba(accent, 0.4);
+                if (accent && /^#[0-9a-fA-F]{3,6}$/.test(accent)) {
+                    root.style.setProperty('--primary', accent);
+                    root.style.setProperty('--success', accent);
+                    root.style.setProperty('--primary-hover', accent);
+                    if (accentRgba) {
+                        root.style.setProperty('--primary-glow', accentRgba);
+                        root.style.setProperty('--success-glow', accentRgba);
+                        root.style.setProperty('--border-glow', accentRgba);
+                    }
+                }
+            }
+
+            apply();
+
+            // Settings page dispatches storage changes across tabs/windows.
+            window.addEventListener('storage', function(event) {
+                if (event.key === STORAGE_KEY) apply();
+            });
+        })();
+
+    </script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -4794,5 +5118,136 @@
         console.log("📞 Voice & Video calls with ringtones, ICE, reconnection support.");
         console.log("🔇 Ringtone only plays for actual calls (not messages).");
     </script>
+
+    <script>
+    /* ===== KEYBOARD INPUT POSITION CONTROLLER — MASTER FIX =====
+       Android WebView can resize either the layout viewport, the visual
+       viewport, or both. Do not depend on window.innerHeight alone.
+       Focus opens center mode immediately; VisualViewport confirms keyboard
+       closure and continuously re-centers against the visible viewport. */
+    (function setupKeyboardInputPosition() {
+        const input = document.getElementById('chatInput');
+        const area = document.querySelector('.chat-input-area');
+        const vv = window.visualViewport;
+
+        if (!input || !area) return;
+
+        let baselineHeight = vv ? vv.height : window.innerHeight;
+        let keyboardOpen = false;
+        let closeTimer = null;
+
+        function setCenterPosition() {
+            if (!vv) {
+                document.documentElement.style.setProperty(
+                    '--keyboard-center-x', '50vw'
+                );
+                document.documentElement.style.setProperty(
+                    '--keyboard-center-y', '50vh'
+                );
+                return;
+            }
+
+            const centerX = vv.offsetLeft + (vv.width / 2);
+            const centerY = vv.offsetTop + (vv.height / 2);
+
+            document.documentElement.style.setProperty(
+                '--keyboard-center-x', `${centerX}px`
+            );
+            document.documentElement.style.setProperty(
+                '--keyboard-center-y', `${centerY}px`
+            );
+        }
+
+        function openCenterMode() {
+            if (closeTimer) {
+                clearTimeout(closeTimer);
+                closeTimer = null;
+            }
+
+            keyboardOpen = true;
+            document.body.classList.add('keyboard-open');
+            setCenterPosition();
+        }
+
+        function closeCenterMode() {
+            if (document.activeElement === input) return;
+
+            keyboardOpen = false;
+            document.body.classList.remove('keyboard-open');
+        }
+
+        function detectViewportKeyboard() {
+            if (!vv) return;
+
+            const currentHeight = vv.height;
+            const heightLoss = Math.max(0, baselineHeight - currentHeight);
+
+            // Android keyboard normally removes a substantial portion of the
+            // visual viewport. Use a conservative threshold so small browser
+            // chrome changes do not close the centered composer.
+            const viewportKeyboardOpen = heightLoss > 80;
+
+            if (viewportKeyboardOpen) {
+                openCenterMode();
+            } else if (keyboardOpen && document.activeElement !== input) {
+                closeCenterMode();
+            } else if (keyboardOpen) {
+                setCenterPosition();
+            }
+
+            // When fully closed, establish the new baseline. This handles
+            // orientation changes and APK/WebView viewport changes.
+            if (!viewportKeyboardOpen && document.activeElement !== input) {
+                baselineHeight = currentHeight;
+            }
+        }
+
+        input.addEventListener('focus', () => {
+            openCenterMode();
+
+            // Give Android one frame to resize the visual viewport, then
+            // recalculate against the actual visible keyboard viewport.
+            requestAnimationFrame(() => {
+                setTimeout(detectViewportKeyboard, 80);
+                setTimeout(detectViewportKeyboard, 220);
+            });
+        });
+
+        input.addEventListener('blur', () => {
+            closeTimer = setTimeout(() => {
+                // If the keyboard was dismissed while focus remains temporarily
+                // on the textarea, VisualViewport will remove keyboard mode.
+                if (document.activeElement !== input) {
+                    closeCenterMode();
+                }
+                detectViewportKeyboard();
+            }, 180);
+        });
+
+        if (vv) {
+            vv.addEventListener('resize', detectViewportKeyboard, { passive: true });
+            vv.addEventListener('scroll', () => {
+                if (keyboardOpen) setCenterPosition();
+            }, { passive: true });
+        }
+
+        window.addEventListener('resize', () => {
+            if (!keyboardOpen && vv) baselineHeight = vv.height;
+            if (keyboardOpen) setCenterPosition();
+        }, { passive: true });
+
+        window.addEventListener('orientationchange', () => {
+            setTimeout(() => {
+                if (vv) baselineHeight = vv.height;
+                if (keyboardOpen) setCenterPosition();
+                detectViewportKeyboard();
+            }, 300);
+        });
+
+        // If the app starts with the input focused, immediately apply center mode.
+        if (document.activeElement === input) openCenterMode();
+    })();
+    </script>
+
 </body>
 </html>

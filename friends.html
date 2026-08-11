@@ -54,7 +54,7 @@
         body::after { bottom: -100px; right: -100px; background: var(--accent); }
 
         .feed-header {
-            width: 100%; max-width: 800px; padding: clamp(8px, 2vw, 14px) clamp(12px, 3vw, 24px); 
+            width: 100%; max-width: none; padding: calc(clamp(8px, 2vw, 14px) + env(safe-area-inset-top, 0px)) calc(clamp(12px, 3vw, 24px) + env(safe-area-inset-right, 0px)) clamp(8px, 2vw, 14px) calc(clamp(12px, 3vw, 24px) + env(safe-area-inset-left, 0px)); 
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
             border-bottom: 1px solid var(--border-color); background: var(--bg-glass); backdrop-filter: blur(16px); 
             -webkit-backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -252,14 +252,14 @@
         .load-more-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-main); }
 
         .feed-footer { 
-            width: 100%; max-width: 800px; padding: clamp(12px, 2.5vw, 20px) clamp(12px, 3vw, 24px); 
-            text-align: center; font-size: clamp(0.7rem, 2vw, 0.8rem); color: var(--text-muted); 
+            width: 100%; max-width: none; padding: clamp(12px, 2.5vw, 20px) clamp(12px, 3vw, 24px); 
+            text-align: center; font-size: clamp(0.7rem, 2vw, 0.8rem); color: var(--text-muted); padding-bottom: calc(clamp(12px, 2.5vw, 20px) + env(safe-area-inset-bottom, 0px)); 
             border-top: 1px solid var(--border-color); flex-shrink: 0; background: var(--bg-glass); backdrop-filter: blur(16px);
         }
 
         /* === TOAST === */
         .toast-container {
-            position: fixed; top: 28px; left: 50%; transform: translateX(-50%) translateY(-30px); z-index: 9999;
+            position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%) translateY(-30px); z-index: 9999;
             width: calc(100% - 32px); max-width: 420px; opacity: 0; visibility: hidden;
             transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
         }
@@ -412,7 +412,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, collection, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, query, where, limit, startAfter, orderBy, serverTimestamp
+            getFirestore, collection, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, writeBatch, query, limit, startAfter, orderBy, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -441,15 +441,43 @@
         let friendUids = [];
         let onlineStatuses = {}; // uid: boolean
         let lastSeen = {}; // uid: timestamp
+        const friendStatusUnsubs = new Map();
+        let selfStatusHeartbeat = null;
+        let presenceWriteInFlight = false;
+        const PRESENCE_INTERVAL_MS = 20000;
+        const PRESENCE_STALE_MS = 45000;
 
         // ===== ONLINE STATUS MANAGEMENT (unified) =====
-        function updateUserOnlineStatus(status) {
-            if (!currentUserUid) return;
-            const userRef = doc(db, "users", currentUserUid);
-            updateDoc(userRef, {
-                onlineStatus: status,
-                lastSeen: serverTimestamp()
-            }).catch(err => console.error("Error updating online status:", err));
+        async function updateUserOnlineStatus(status) {
+            if (!currentUserUid || presenceWriteInFlight) return false;
+            presenceWriteInFlight = true;
+            try {
+                await updateDoc(doc(db, "users", currentUserUid), {
+                    onlineStatus: status === true,
+                    lastSeen: serverTimestamp()
+                });
+                return true;
+            } catch (err) {
+                console.error("Error updating online status:", err);
+                return false;
+            } finally {
+                presenceWriteInFlight = false;
+            }
+        }
+
+        function startPresenceHeartbeat() {
+            if (selfStatusHeartbeat) clearInterval(selfStatusHeartbeat);
+            updateUserOnlineStatus(true);
+            selfStatusHeartbeat = setInterval(() => {
+                if (!document.hidden && currentUserUid) updateUserOnlineStatus(true);
+            }, PRESENCE_INTERVAL_MS);
+        }
+
+        function stopPresenceHeartbeat() {
+            if (selfStatusHeartbeat) {
+                clearInterval(selfStatusHeartbeat);
+                selfStatusHeartbeat = null;
+            }
         }
 
         // ===== TOAST =====
@@ -618,14 +646,15 @@
         // === AUTH ===
         onAuthStateChanged(auth, async (user) => {
             if (!user) {
-                if (currentUserUid) updateUserOnlineStatus(false);
+                stopPresenceHeartbeat();
+                if (currentUserUid) await updateUserOnlineStatus(false);
                 window.location.href = "index.html";
                 return;
             }
             currentUser = user;
             currentUserUid = user.uid;
-            // Set online
-            updateUserOnlineStatus(true);
+            // Set online and keep presence fresh while the APK/page is active.
+            startPresenceHeartbeat();
             
             const adminLink = document.getElementById('adminNavLink');
             if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
@@ -642,26 +671,57 @@
             await loadMembers();
             renderMemberDirectory();
 
-            // Listen for changes to current user's friend list
-            onSnapshot(doc(db, "users", currentUser.uid), async () => {
-                await loadMembers();
+            // Listen only for relationship changes. Presence heartbeats change
+            // onlineStatus/lastSeen and must not reload the entire directory.
+            let relationshipSignature = '';
+            onSnapshot(doc(db, "users", currentUser.uid), async (snap) => {
+                if (!snap.exists()) return;
+
+                const data = snap.data();
+                const signature = JSON.stringify({
+                    friends: Array.isArray(data.friends) ? data.friends : [],
+                    friendRequests: Array.isArray(data.friendRequests) ? data.friendRequests : [],
+                    sentRequests: Array.isArray(data.sentRequests) ? data.sentRequests : [],
+                    blockedUsers: Array.isArray(data.blockedUsers) ? data.blockedUsers : []
+                });
+
+                // Initial callback: the directory was already loaded above.
+                if (!relationshipSignature) {
+                    relationshipSignature = signature;
+                    return;
+                }
+
+                // Ignore presence-only updates.
+                if (signature === relationshipSignature) return;
+                relationshipSignature = signature;
+
+                friendUids = Array.isArray(data.friends) ? data.friends : [];
+                syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
+                await loadMembers(true);
                 renderMemberDirectory();
             });
 
             console.log('👥 Friends page loaded');
         });
 
-        // ===== ONLINE STATUS: beforeunload & visibility =====
-        window.addEventListener('beforeunload', () => {
+        // ===== ONLINE STATUS: lifecycle + heartbeat =====
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                stopPresenceHeartbeat();
+                updateUserOnlineStatus(false);
+            } else if (currentUserUid) {
+                startPresenceHeartbeat();
+            }
+        });
+
+        window.addEventListener('pagehide', () => {
+            stopPresenceHeartbeat();
             if (currentUserUid) updateUserOnlineStatus(false);
         });
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (currentUserUid) updateUserOnlineStatus(false);
-            } else {
-                if (currentUserUid) updateUserOnlineStatus(true);
-            }
+        window.addEventListener('beforeunload', () => {
+            stopPresenceHeartbeat();
+            if (currentUserUid) updateUserOnlineStatus(false);
         });
 
         async function ensureUserDocument(uid) {
@@ -693,66 +753,106 @@
         function listenToFriendStatuses() {
             if (!currentUser) return;
             const userRef = doc(db, "users", currentUser.uid);
-            onSnapshot(userRef, async (docSnap) => {
+            onSnapshot(userRef, (docSnap) => {
                 if (!docSnap.exists()) return;
                 const data = docSnap.data();
-                friendUids = data.friends || [];
-                // Listen to each friend's status (using onlineStatus)
-                friendUids.forEach(uid => {
-                    const friendRef = doc(db, "users", uid);
-                    onSnapshot(friendRef, (friendSnap) => {
-                        if (friendSnap.exists()) {
-                            const fData = friendSnap.data();
-                            // Use onlineStatus boolean
-                            onlineStatuses[uid] = fData.onlineStatus === true;
-                            lastSeen[uid] = fData.lastSeen || null;
-                            // Re-render if on friends tab or all tab
-                            if (currentTab === 'friends' || currentTab === 'all') {
-                                renderMemberDirectory();
-                            }
-                        }
-                    });
-                });
-            });
+                friendUids = Array.isArray(data.friends) ? data.friends : [];
+                syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
+            }, (err) => console.error("Friend list listener error:", err));
         }
 
+        function syncStatusListeners(uids) {
+            const wanted = new Set(uids);
+
+            for (const [uid, unsubscribe] of friendStatusUnsubs) {
+                if (!wanted.has(uid)) {
+                    unsubscribe();
+                    friendStatusUnsubs.delete(uid);
+                    delete onlineStatuses[uid];
+                    delete lastSeen[uid];
+                }
+            }
+
+            wanted.forEach(uid => {
+                if (friendStatusUnsubs.has(uid)) return;
+                const unsubscribe = onSnapshot(doc(db, "users", uid), (friendSnap) => {
+                    if (!friendSnap.exists()) {
+                        onlineStatuses[uid] = false;
+                        lastSeen[uid] = null;
+                    } else {
+                        const fData = friendSnap.data();
+                        onlineStatuses[uid] = fData.onlineStatus === true;
+                        lastSeen[uid] = fData.lastSeen || null;
+                    }
+                    if (currentTab === 'friends' || currentTab === 'all') renderMemberDirectory();
+                }, (err) => console.error(`Status listener error for ${uid}:`, err));
+                friendStatusUnsubs.set(uid, unsubscribe);
+            });
+        }
         // === LOAD MEMBERS with pagination ===
         let lastDoc = null;
         let hasMore = true;
         const PAGE_SIZE = 20;
+        let membersLoadPromise = null;
 
         async function loadMembers(reset = true) {
-            if (reset) {
-                allMembersCache = [];
-                lastDoc = null;
-                hasMore = true;
+            // Prevent overlapping reads. Auth initialization and the user snapshot
+            // can fire together; overlapping reads used to append the same users twice.
+            if (membersLoadPromise) {
+                await membersLoadPromise;
+                return;
             }
-            if (!hasMore) return;
+
+            membersLoadPromise = (async () => {
+                if (reset) {
+                    allMembersCache = [];
+                    lastDoc = null;
+                    hasMore = true;
+                }
+                if (!hasMore) return;
+
+                try {
+                    let q = query(collection(db, "users"), orderBy("name"), limit(PAGE_SIZE));
+                    if (lastDoc) {
+                        q = query(collection(db, "users"), orderBy("name"), startAfter(lastDoc), limit(PAGE_SIZE));
+                    }
+
+                    const snapshot = await getDocs(q);
+                    if (snapshot.empty) {
+                        hasMore = false;
+                        return;
+                    }
+
+                    lastDoc = snapshot.docs[snapshot.docs.length - 1];
+
+                    // Upsert by UID so every Firestore user can exist only once.
+                    const membersById = new Map(allMembersCache.map(member => [member.id, member]));
+                    snapshot.forEach(docSnap => {
+                        if (docSnap.id === currentUser.uid) return;
+                        membersById.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
+                    });
+                    allMembersCache = Array.from(membersById.values());
+
+                    syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
+
+                    if (snapshot.docs.length < PAGE_SIZE) {
+                        hasMore = false;
+                    }
+
+                    localStorage.setItem(
+                        `members_${currentUser.uid}_${CACHE_VERSION}`,
+                        JSON.stringify(allMembersCache)
+                    );
+                } catch (err) {
+                    console.error("Error loading members:", err);
+                    showToast("Failed to load members. Please refresh.", "error", "Connection Error");
+                }
+            })();
 
             try {
-                let q = query(collection(db, "users"), orderBy("name"), limit(PAGE_SIZE));
-                if (lastDoc) {
-                    q = query(collection(db, "users"), orderBy("name"), startAfter(lastDoc), limit(PAGE_SIZE));
-                }
-                const snapshot = await getDocs(q);
-                if (snapshot.empty) {
-                    hasMore = false;
-                    return;
-                }
-                lastDoc = snapshot.docs[snapshot.docs.length - 1];
-                snapshot.forEach(docSnap => {
-                    if (docSnap.id === currentUser.uid) return;
-                    const data = docSnap.data();
-                    allMembersCache.push({ id: docSnap.id, ...data });
-                });
-                if (snapshot.docs.length < PAGE_SIZE) {
-                    hasMore = false;
-                }
-                // Cache
-                localStorage.setItem(`members_${currentUser.uid}_${CACHE_VERSION}`, JSON.stringify(allMembersCache));
-            } catch (err) {
-                console.error("Error loading members:", err);
-                showToast("Failed to load members. Please refresh.", "error", "Connection Error");
+                await membersLoadPromise;
+            } finally {
+                membersLoadPromise = null;
             }
         }
 
@@ -780,6 +880,11 @@
                 const sentRequests = myData.sentRequests || [];
                 const incomingRequests = myData.friendRequests || [];
                 const blockedUsers = myData.blockedUsers || [];
+
+                // Final defensive de-duplication by Firestore UID.
+                allMembersCache = Array.from(
+                    new Map(allMembersCache.map(member => [member.id, member])).values()
+                );
 
                 let filteredMembers = allMembersCache;
 
@@ -835,9 +940,11 @@
                     const isBlocked = blockedUsers.includes(uData.id);
                     const avatarHTML = getAvatarHTML(uData, uData.id);
                     
-                    // Online status from onlineStatuses (boolean)
-                    const isOnline = onlineStatuses[uData.id] || false;
+                    // Presence is considered online only while the heartbeat is fresh.
                     const lastSeenTime = lastSeen[uData.id] || null;
+                    const lastSeenDate = lastSeenTime?.toDate ? lastSeenTime.toDate() : (lastSeenTime ? new Date(lastSeenTime) : null);
+                    const heartbeatFresh = lastSeenDate && !Number.isNaN(lastSeenDate.getTime()) && (Date.now() - lastSeenDate.getTime()) <= PRESENCE_STALE_MS;
+                    const isOnline = onlineStatuses[uData.id] === true && heartbeatFresh;
                     const statusText = isOnline ? '🟢 Online' : (lastSeenTime ? `Last seen ${formatTimeAgo(lastSeenTime)}` : 'Offline');
 
                     // Mutual friends
@@ -858,7 +965,7 @@
                     } else if (isFriend) {
                         actionHtml = `
                             <div class="action-group">
-                                <button class="btn-sm primary" onclick="window.location.href='chat_room.html?userId=${uData.id}&name=${encodeURIComponent(name)}'">💬 Chat</button>
+                                <button class="btn-sm primary" onclick="openChatRoom('${uData.id}', '${String(name).replace(/'/g, "\\'")}')">💬 Chat</button>
                                 <button class="btn-sm warning" onclick="unfriendUser('${uData.id}')">Unfriend</button>
                                 <button class="btn-sm danger" onclick="blockUser('${uData.id}')">🚫 Block</button>
                             </div>
@@ -906,7 +1013,7 @@
                                     <span class="user-handle">
                                         ${statusLabel}
                                         ${mutualCount > 0 ? `<span class="mutual-friends">${mutualCount} mutual</span>` : ''}
-                                        <span style="font-size:0.6rem;color:var(--text-muted);">${isOnline ? '🟢 Online' : ''}</span>
+                                        <span style="font-size:0.6rem;color:var(--text-muted);">${escapeHTML(statusText)}</span>
                                     </span>
                                 </div>
                             </div>
@@ -931,6 +1038,50 @@
             }
         };
 
+        // === CHAT ROOM NAVIGATION ===
+        // chat_room.html requires BOTH chatId and userId. Use the same deterministic
+        // room ID format already used by chat_room.html when creating forwarded chats:
+        // [currentUser.uid, otherUserId].sort().join('_').
+        window.openChatRoom = async function(otherUserId, otherUserName) {
+            if (!currentUser?.uid || !otherUserId || currentUser.uid === otherUserId) {
+                showToast("Unable to open this chat.", "error", "Chat Error");
+                return;
+            }
+
+            const chatId = [currentUser.uid, otherUserId].sort().join('_');
+            const chatRef = doc(db, "chats", chatId);
+
+            try {
+                const chatSnap = await getDoc(chatRef);
+
+                // Create the room if it does not exist yet. This prevents
+                // chat_room.html from receiving a non-existent/invalid room ID.
+                if (!chatSnap.exists()) {
+                    await setDoc(chatRef, {
+                        participants: [currentUser.uid, otherUserId],
+                        createdAt: serverTimestamp(),
+                        lastMessage: '',
+                        lastMessageTime: null,
+                        unreadCount: {
+                            [currentUser.uid]: 0,
+                            [otherUserId]: 0
+                        }
+                    });
+                }
+
+                const params = new URLSearchParams({
+                    chatId,
+                    userId: otherUserId,
+                    name: otherUserName || 'User'
+                });
+
+                window.location.href = `chat_room.html?${params.toString()}`;
+            } catch (err) {
+                console.error("Error opening chat room:", err);
+                showToast("Failed to open chat.", "error", "Chat Error");
+            }
+        };
+
         // === FRIEND ACTIONS ===
         window.sendRequest = async function(targetUid) {
             const btn = document.querySelector(`[onclick*="sendRequest('${targetUid}')"]`);
@@ -951,12 +1102,10 @@
                     if (btn) { btn.disabled = false; btn.textContent = 'Add Friend'; }
                     return;
                 }
-                await updateDoc(doc(db, "users", targetUid), {
-                    friendRequests: arrayUnion(currentUser.uid)
-                });
-                await updateDoc(myRef, {
-                    sentRequests: arrayUnion(targetUid)
-                });
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", targetUid), { friendRequests: arrayUnion(currentUser.uid) });
+                batch.update(myRef, { sentRequests: arrayUnion(targetUid) });
+                await batch.commit();
                 showToast("Friend request sent!", "success", "Request Sent");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -969,12 +1118,10 @@
 
         window.cancelRequest = async function(targetUid) {
             try {
-                await updateDoc(doc(db, "users", targetUid), {
-                    friendRequests: arrayRemove(currentUser.uid)
-                });
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    sentRequests: arrayRemove(targetUid)
-                });
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", targetUid), { friendRequests: arrayRemove(currentUser.uid) });
+                batch.update(doc(db, "users", currentUser.uid), { sentRequests: arrayRemove(targetUid) });
+                await batch.commit();
                 showToast("Request cancelled.", "warning", "Cancelled");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -986,14 +1133,14 @@
 
         window.acceptRequest = async function(senderUid) {
             try {
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    friends: arrayUnion(senderUid),
-                    friendRequests: arrayRemove(senderUid)
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", currentUser.uid), {
+                    friends: arrayUnion(senderUid), friendRequests: arrayRemove(senderUid)
                 });
-                await updateDoc(doc(db, "users", senderUid), {
-                    friends: arrayUnion(currentUser.uid),
-                    sentRequests: arrayRemove(currentUser.uid)
+                batch.update(doc(db, "users", senderUid), {
+                    friends: arrayUnion(currentUser.uid), sentRequests: arrayRemove(currentUser.uid)
                 });
+                await batch.commit();
                 showToast("Friend request accepted!", "success", "Connected");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -1005,12 +1152,10 @@
 
         window.declineRequest = async function(senderUid) {
             try {
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    friendRequests: arrayRemove(senderUid)
-                });
-                await updateDoc(doc(db, "users", senderUid), {
-                    sentRequests: arrayRemove(currentUser.uid)
-                });
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", currentUser.uid), { friendRequests: arrayRemove(senderUid) });
+                batch.update(doc(db, "users", senderUid), { sentRequests: arrayRemove(currentUser.uid) });
+                await batch.commit();
                 showToast("Request declined.", "warning", "Declined");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -1035,12 +1180,10 @@
             });
             if (!confirmed) return;
             try {
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    friends: arrayRemove(targetUid)
-                });
-                await updateDoc(doc(db, "users", targetUid), {
-                    friends: arrayRemove(currentUser.uid)
-                });
+                const batch = writeBatch(db);
+                batch.update(doc(db, "users", currentUser.uid), { friends: arrayRemove(targetUid) });
+                batch.update(doc(db, "users", targetUid), { friends: arrayRemove(currentUser.uid) });
+                await batch.commit();
                 showToast("Unfriended.", "warning", "Unfriended");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -1067,17 +1210,19 @@
             try {
                 const myRef = doc(db, "users", currentUser.uid);
                 const targetRef = doc(db, "users", targetUid);
-                await updateDoc(myRef, {
+                const batch = writeBatch(db);
+                batch.update(myRef, {
                     blockedUsers: arrayUnion(targetUid),
                     friends: arrayRemove(targetUid),
                     friendRequests: arrayRemove(targetUid),
                     sentRequests: arrayRemove(targetUid)
                 });
-                await updateDoc(targetRef, {
+                batch.update(targetRef, {
                     friends: arrayRemove(currentUser.uid),
                     friendRequests: arrayRemove(currentUser.uid),
                     sentRequests: arrayRemove(currentUser.uid)
                 });
+                await batch.commit();
                 showToast("User blocked.", "error", "Blocked");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -1113,15 +1258,6 @@
                 showToast("Failed to unblock user.", "error", "Action Failed");
             }
         };
-
-        // === SEARCH INPUT ===
-        let searchTimeout = null;
-        document.getElementById('searchInput')?.addEventListener('input', function(e) {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                renderMemberDirectory();
-            }, 300);
-        });
 
         // === KEYBOARD SHORTCUTS ===
         document.addEventListener('keydown', function(e) {
