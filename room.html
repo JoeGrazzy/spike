@@ -78,6 +78,7 @@
         .room-header {
             --header-content-height: clamp(72px, 9dvh, 92px);
             --header-safe-top: max(
+                18px,
                 env(safe-area-inset-top, 0px),
                 constant(safe-area-inset-top, 0px)
             );
@@ -1548,6 +1549,51 @@
             min-height: 28px;
             min-width: 28px;
         }
+
+        /* ===== OFFLINE VOICE NOTE INBOX ===== */
+        .voice-note-inbox {
+            display:none;
+            flex-direction:column;
+            gap:8px;
+            padding:8px 10px;
+            background:var(--bg-secondary);
+            border-bottom:1px solid var(--border-color);
+            box-shadow:0 8px 24px rgba(0,0,0,.18);
+            flex:0 0 auto;
+        }
+        .voice-note-inbox.show { display:flex; }
+        .voice-note-inbox-head {
+            display:flex; align-items:center; justify-content:space-between; gap:8px;
+            color:var(--text-primary); font-size:11px; font-weight:800;
+            letter-spacing:.2px;
+        }
+        .voice-note-inbox-head .badge {
+            color:var(--accent); border:1px solid var(--border-color);
+            background:var(--bg-card); border-radius:999px; padding:2px 7px; font-size:9px;
+        }
+        .voice-note-inbox-list { display:flex; flex-direction:column; gap:6px; max-height:220px; overflow:auto; }
+        .voice-note-inbox-item {
+            display:flex; align-items:center; gap:8px; padding:8px 9px;
+            background:var(--bg-card); border:1px solid var(--border-color);
+            border-radius:12px; box-shadow:0 5px 18px rgba(0,0,0,.14);
+        }
+        .voice-note-inbox-item .vn-inbox-icon {
+            width:30px; height:30px; border-radius:9px; display:grid; place-items:center;
+            background:var(--bg-bubble-other); color:var(--accent); border:1px solid var(--border-color);
+            flex:0 0 auto;
+        }
+        .voice-note-inbox-item .vn-inbox-info { min-width:0; flex:1; }
+        .voice-note-inbox-item .vn-inbox-from {
+            color:var(--accent); font-size:10px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .voice-note-inbox-item .vn-inbox-meta { color:var(--text-secondary); font-size:9px; margin-top:2px; }
+        .voice-note-inbox-item .vn-inbox-actions { display:flex; gap:5px; flex:0 0 auto; }
+        .voice-note-inbox-item button {
+            border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary);
+            border-radius:8px; padding:5px 7px; font-size:9px; font-weight:800; cursor:pointer;
+        }
+        .voice-note-inbox-item button.primary { color:var(--accent); }
+        .voice-note-inbox-item button:hover { border-color:var(--accent); box-shadow:0 0 12px var(--accent-glow); }
 
         /* ===== MESSAGES ===== */
         .messages-container {
@@ -3989,6 +4035,12 @@
     <!-- ===== SEARCH ===== -->
     <div class="search-bar" id="searchBar"><input type="text" id="searchInput" placeholder="Search messages…" oninput="performSearch(this.value)" /><button class="search-close" onclick="toggleSearch()">✕</button></div>
 
+    <!-- ===== OFFLINE VOICE NOTE INBOX ===== -->
+    <div class="voice-note-inbox" id="voiceNoteInbox" aria-live="polite">
+        <div class="voice-note-inbox-head"><span>📌 Voice Notes Waiting For You</span><span class="badge" id="voiceNoteInboxCount">0</span></div>
+        <div class="voice-note-inbox-list" id="voiceNoteInboxList"></div>
+    </div>
+
     <!-- ===== MESSAGES ===== -->
     <div class="messages-container" id="messagesContainer">
         <div class="load-more-btn" id="loadMoreBtn" style="display:none;" onclick="loadMoreMessages()">⬆ Load older messages</div>
@@ -4412,6 +4464,93 @@
             timerInterval: null,
             startTime: null,
         };
+
+        // Offline voice-note inbox: notes are stored for the recipient even when they are offline.
+        let pendingVoiceNoteInbox = [];
+        let voiceNoteInboxAudio = null;
+
+        async function loadPendingVoiceNotes() {
+            if (!currentUserUid || !roomId) return;
+            const inbox = document.getElementById('voiceNoteInbox');
+            const list = document.getElementById('voiceNoteInboxList');
+            const count = document.getElementById('voiceNoteInboxCount');
+            if (!inbox || !list) return;
+            try {
+                const snap = await getDocs(collection(db, 'users', currentUserUid, 'voiceNoteInbox'));
+                pendingVoiceNoteInbox = [];
+                snap.forEach(d => {
+                    const data = d.data() || {};
+                    if (data.roomId === roomId && data.consumed !== true) pendingVoiceNoteInbox.push({ id: d.id, ...data });
+                });
+                pendingVoiceNoteInbox.sort((a,b) => {
+                    const at = a.createdAt?.toMillis?.() || 0;
+                    const bt = b.createdAt?.toMillis?.() || 0;
+                    return at - bt;
+                });
+                renderPendingVoiceNotes();
+            } catch (e) {
+                console.warn('Offline voice-note inbox unavailable:', e);
+            }
+        }
+
+        function renderPendingVoiceNotes() {
+            const inbox = document.getElementById('voiceNoteInbox');
+            const list = document.getElementById('voiceNoteInboxList');
+            const count = document.getElementById('voiceNoteInboxCount');
+            if (!inbox || !list) return;
+            if (!pendingVoiceNoteInbox.length) {
+                inbox.classList.remove('show');
+                list.innerHTML = '';
+                if (count) count.textContent = '0';
+                return;
+            }
+            inbox.classList.add('show');
+            if (count) count.textContent = String(pendingVoiceNoteInbox.length);
+            list.innerHTML = pendingVoiceNoteInbox.map(note => {
+                const sender = sanitizeHTML(note.senderName || 'Member');
+                const duration = formatDuration(Number(note.duration) || 0);
+                const safeUrl = sanitizeHTML(note.audioUrl || note.text || '');
+                const safeId = sanitizeHTML(note.id);
+                return `<div class="voice-note-inbox-item" data-inbox-id="${safeId}">
+                    <div class="vn-inbox-icon">🎤</div>
+                    <div class="vn-inbox-info"><div class="vn-inbox-from">${sender}</div><div class="vn-inbox-meta">Offline voice note • ${duration}</div></div>
+                    <div class="vn-inbox-actions">
+                        <button class="primary" onclick="playPendingVoiceNote('${safeId}','${safeUrl}')">▶ Play</button>
+                        <button onclick="ackPendingVoiceNote('${safeId}')">✓ Done</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        async function consumePendingVoiceNote(id) {
+            const item = pendingVoiceNoteInbox.find(n => n.id === id);
+            if (!item) return;
+            try {
+                await updateDoc(doc(db, 'users', currentUserUid, 'voiceNoteInbox', id), {
+                    consumed: true, consumedAt: serverTimestamp()
+                });
+            } catch (e) {
+                console.warn('Failed to acknowledge voice note:', e);
+                return;
+            }
+            pendingVoiceNoteInbox = pendingVoiceNoteInbox.filter(n => n.id !== id);
+            renderPendingVoiceNotes();
+        }
+
+        window.playPendingVoiceNote = async function(id, url) {
+            if (!url) return;
+            try {
+                if (voiceNoteInboxAudio) { voiceNoteInboxAudio.pause(); voiceNoteInboxAudio = null; }
+                voiceNoteInboxAudio = new Audio(url);
+                await voiceNoteInboxAudio.play();
+                // Playing is the one-time acknowledgement.
+                await consumePendingVoiceNote(id);
+            } catch (e) {
+                showToast('Unable to play this voice note.', 'error');
+            }
+        };
+
+        window.ackPendingVoiceNote = function(id) { consumePendingVoiceNote(id); };
 
         const MAX_NOTIFICATIONS = 50;
 
@@ -5572,8 +5711,8 @@
                 // Send to the target member
                 const recipientName = await getUserDisplayName(voiceNoteTargetUid);
 
-                // Store the voice note in Firestore
-                await addDoc(collection(db, 'rooms', roomId, 'messages'), {
+                // Store the room message for the live chat/history.
+                const voiceMessageRef = await addDoc(collection(db, 'rooms', roomId, 'messages'), {
                     senderId: currentUser.uid,
                     senderName: currentUser.displayName || 'User',
                     text: downloadURL,
@@ -5586,6 +5725,19 @@
                     timestamp: serverTimestamp(),
                     reactions: {},
                     duration: voiceNoteState.duration || 0,
+                });
+
+                // Durable recipient inbox. This is independent of presence, so an offline
+                // member receives the note on their next login. It is acknowledged once.
+                await addDoc(collection(db, 'users', voiceNoteTargetUid, 'voiceNoteInbox'), {
+                    roomId,
+                    messageId: voiceMessageRef.id,
+                    senderId: currentUser.uid,
+                    senderName: currentUser.displayName || 'User',
+                    audioUrl: downloadURL,
+                    duration: voiceNoteState.duration || 0,
+                    createdAt: serverTimestamp(),
+                    consumed: false
                 });
 
                 await trackDailyActivity('voiceNotes', 1);
@@ -7849,6 +8001,7 @@ const MESSAGE_CACHE_MAX = 200;
                 const joined = await joinRoom(user.uid, roomId);
                 if (!joined) { setTimeout(() => window.location.href = 'rooms.html', 2000); return; }
                 const messagesPromise = loadMessages(true, false);
+                const pendingVoiceNotesPromise = loadPendingVoiceNotes();
                 const [profileSnap, coins] = await Promise.all([
                     profilePromise,
                     getCoins(user.uid)
