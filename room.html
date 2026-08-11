@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
     <title>FunRoom · Room</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -206,38 +208,7 @@
             color: var(--text-primary);
         }
 
-        .room-header .premium-badge-display {
-            font-size: 16px;
-            flex-shrink: 0;
-            display: none;
-        }
 
-        .room-header .premium-badge-display.active {
-            display: inline-block;
-        }
-
-        .room-header .room-meta {
-            font-size: 10px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .room-header .room-meta .dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-            flex-shrink: 0;
-        }
-
-        .room-header .room-meta .dot.online {
-            background: var(--success);
-            box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
-        }
 
         .room-header .right {
             display: flex;
@@ -619,9 +590,6 @@
                 font-size: 12px;
             }
 
-            .room-header .room-meta {
-                font-size: 9px;
-            }
 
             .room-header .right {
                 flex-basis: 54%;
@@ -695,9 +663,6 @@
                 font-size: 11px;
             }
 
-            .room-header .room-meta {
-                font-size: 8px;
-            }
 
             .room-header .right {
                 flex-basis: 52%;
@@ -1904,6 +1869,7 @@
         }
         .input-area .input-wrapper {
             flex: 1;
+            min-width: 0;
             display: flex;
             align-items: center;
             background: var(--bg-input);
@@ -1921,6 +1887,7 @@
         }
         .input-area .input-wrapper input {
             flex: 1;
+            min-width: 0;
             background: none;
             border: none;
             outline: none;
@@ -1999,59 +1966,30 @@
             color: var(--text-muted);
             opacity: 0.5;
         }
-        .input-area .call-buttons {
-            display: flex;
-            gap: 2px;
-            margin-left: 2px;
+
+        /* ===== PREMIUM VOICE NOTE COMPOSER ===== */
+        .voice-note-composer-btn {
+            appearance: none; border: 0; background: transparent; padding: 0;
+            width: 32px; height: 32px; border-radius: 10px; color: var(--text-muted);
+            cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+            flex: 0 0 32px; transition: transform .18s ease, background .18s ease, color .18s ease;
         }
-        .input-area .call-buttons button {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            min-width: 30px;
-            min-height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: 0.2s;
-            flex-shrink: 0;
-            position: relative;
+        .voice-note-composer-btn:hover, .voice-note-composer-btn:focus-visible {
+            color: var(--gold); background: rgba(251,191,36,.10); transform: translateY(-1px); outline: none;
         }
-        .input-area .call-buttons button:hover {
-            border-color: var(--gold);
-            color: var(--gold);
+        .voice-note-preview {
+            background: linear-gradient(145deg, rgba(251,191,36,.12), rgba(17,24,39,.94) 55%, rgba(8,12,20,.98));
+            border: 1px solid rgba(251,191,36,.28); box-shadow: 0 18px 55px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.05);
+            border-radius: 20px; padding: 16px; margin: 12px 0; backdrop-filter: blur(18px);
         }
-        .input-area .call-buttons button.locked {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-        .input-area .call-buttons button.locked:hover {
-            border-color: var(--border-color);
-            color: var(--text-muted);
-        }
-        .input-area .call-buttons button.video-call-btn {
-            font-size: 14px;
-        }
-        .input-area .call-buttons button .call-badge {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            font-size: 6px;
-            background: var(--gold);
-            color: #0d1520;
-            border-radius: 8px;
-            padding: 0 4px;
-            line-height: 12px;
-            display: none;
-        }
-        .input-area .call-buttons button .call-badge.active {
-            display: block;
-        }
+        .voice-note-preview .vn-waveform { min-height: 52px; padding: 8px 4px; border-radius: 14px; background: rgba(0,0,0,.22);}
+        .voice-note-preview .vn-controls { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-top:10px; }
+        .voice-note-preview .vn-controls button { min-height:38px; border-radius:12px; border:1px solid rgba(255,255,255,.10); padding:7px 11px; font-weight:700; cursor:pointer; }
+        .voice-note-preview .vn-play { background:var(--gold); color:#0d1520; }
+        .voice-note-preview .vn-retry,.voice-note-preview .vn-cancel { background:rgba(255,255,255,.05); color:var(--text-primary); }
+        .voice-note-preview .vn-send { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:#0d1520; }
+        .voice-note-preview .vn-duration { margin-left:auto; color:var(--gold); font-weight:800; font-variant-numeric:tabular-nums; }
+        .voice-note-preview .vn-status { margin-top:8px; color:var(--text-muted); font-size:.75rem; }
 
         /* ===== TOAST ===== */
         .toast-container {
@@ -2445,6 +2383,13 @@
             margin-left: 3px;
             border: 1px solid rgba(251, 191, 36, 0.15);
         }
+        .participants-panel .participant .presence-time {
+            margin-top: 2px;
+            font-size: 10px;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
         .participants-panel .participant .status-dot {
             width: 8px;
             height: 8px;
@@ -2680,9 +2625,6 @@
         .member-action-panel .action-grid .action-btn.danger-action:hover {
             border-color: var(--error);
             background: rgba(244, 63, 94, 0.06);
-        }
-        .member-action-panel .action-grid.cols-2 {
-            grid-template-columns: 1fr 1fr;
         }
         .member-action-panel .action-grid.cols-4 {
             grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -3158,490 +3100,6 @@
         .contact-modal .contact-actions .btn-whatsapp:hover {
             background: #1ebe5d;
         }
-
-        /* ===== USER MENU (legacy, kept for fallback) ===== */
-        .user-menu {
-            position: fixed;
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: var(--radius);
-            padding: 3px 0;
-            min-width: 150px;
-            box-shadow: var(--shadow);
-            z-index: 8001;
-            display: none;
-            backdrop-filter: blur(8px);
-        }
-        .user-menu .item {
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--text-primary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: none;
-            background: none;
-            width: 100%;
-            font-family: var(--font);
-            min-height: 34px;
-            transition: 0.15s;
-        }
-        .user-menu .item:hover {
-            background: rgba(255, 215, 0, 0.04);
-            color: var(--gold);
-        }
-        .user-menu .item.danger {
-            color: var(--error);
-        }
-        .user-menu .item.danger:hover {
-            background: rgba(244, 63, 94, 0.08);
-        }
-        .user-menu .item .vip-action {
-            color: var(--gold);
-        }
-        .user-menu-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 8000;
-            display: none;
-        }
-        .user-menu-overlay.active {
-            display: block;
-        }
-
-        /* ===== CALL OVERLAY STYLES ===== */
-        .call-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(8, 12, 20, 0.95);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            z-index: 5000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 24px;
-            animation: fadeIn 0.4s ease;
-        }
-        .call-overlay.active {
-            display: flex;
-        }
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        .call-overlay .call-card {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: 32px;
-            padding: 32px 24px 28px;
-            max-width: 360px;
-            width: 100%;
-            text-align: center;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
-        }
-        .call-overlay .call-avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #0d1520;
-            margin: 0 auto 12px;
-            box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
-            overflow: hidden;
-        }
-        .call-overlay .call-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .call-overlay .call-name {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-        .call-overlay .call-sub {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-        }
-        .call-overlay .call-actions {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-        }
-        .call-overlay .call-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            border: none;
-            font-size: 1.4rem;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-        .call-overlay .call-btn:active {
-            transform: scale(0.9);
-        }
-        .call-overlay .call-btn.accept {
-            background: linear-gradient(135deg, var(--success), #10b981);
-            color: #fff;
-            width: 64px;
-            height: 64px;
-            font-size: 1.8rem;
-        }
-        .call-overlay .call-btn.accept:hover {
-            background: #10b981;
-        }
-        .call-overlay .call-btn.decline {
-            background: var(--error);
-            color: #fff;
-        }
-        .call-overlay .call-btn.decline:hover {
-            background: #dc2626;
-        }
-
-        .ringing-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(8, 12, 20, 0.95);
-            backdrop-filter: blur(24px);
-            z-index: 5000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            padding: 24px;
-            animation: fadeIn 0.4s ease;
-        }
-        .ringing-overlay.active {
-            display: flex;
-        }
-        .ringing-overlay .ringing-card {
-            text-align: center;
-        }
-        .ringing-overlay .ringing-avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #0d1520;
-            margin: 0 auto 16px;
-            box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
-            animation: pulse-avatar 1.5s infinite;
-            overflow: hidden;
-        }
-        .ringing-overlay .ringing-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        @keyframes pulse-avatar {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 60px rgba(251, 191, 36, 0.6);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
-            }
-        }
-        .ringing-overlay .ringing-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-        .ringing-overlay .ringing-status {
-            color: var(--text-secondary);
-            font-size: 1rem;
-            margin: 4px 0 16px;
-        }
-        .ringing-overlay .cancel-btn {
-            background: var(--error);
-            border: none;
-            color: #fff;
-            padding: 12px 32px;
-            border-radius: 40px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            font-family: var(--font);
-        }
-        .ringing-overlay .cancel-btn:hover {
-            background: #dc2626;
-        }
-        .ringing-overlay .cancel-btn:active {
-            transform: scale(0.95);
-        }
-
-        .active-call-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            z-index: 5000;
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 16px;
-        }
-        .active-call-overlay.active {
-            display: flex;
-        }
-        .active-call-overlay .remote-video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background: #1a1d29;
-        }
-        .active-call-overlay .local-video-wrapper {
-            position: absolute;
-            top: 80px;
-            right: 16px;
-            width: 120px;
-            height: 170px;
-            border-radius: 16px;
-            overflow: hidden;
-            z-index: 10;
-            border: 2px solid rgba(255, 215, 0, 0.3);
-            background: #1a1d29;
-            cursor: grab;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-        }
-        .active-call-overlay .local-video-wrapper video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-        .active-call-overlay .call-top-bar {
-            position: relative;
-            z-index: 20;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-        }
-        .active-call-overlay .call-top-bar .call-status {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--success);
-        }
-        .active-call-overlay .call-top-bar .call-status.connecting {
-            color: #fbbf24;
-        }
-        .active-call-overlay .call-top-bar .call-status.error {
-            color: var(--error);
-        }
-        .active-call-overlay .call-top-bar .call-timer {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 4px 12px;
-            border-radius: 20px;
-            backdrop-filter: blur(8px);
-            font-weight: 600;
-            color: var(--gold);
-        }
-        .active-call-overlay .call-center-info {
-            position: relative;
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex: 1;
-            gap: 8px;
-        }
-        .active-call-overlay .call-center-info .caller-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #fff;
-            text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-        }
-        .active-call-overlay .call-controls {
-            position: relative;
-            z-index: 20;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 16px;
-            padding-bottom: 20px;
-        }
-        .active-call-overlay .call-controls .ctrl-btn {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: rgba(18, 21, 32, 0.75);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--border-color);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .active-call-overlay .call-controls .ctrl-btn:active {
-            transform: scale(0.92);
-        }
-        .active-call-overlay .call-controls .ctrl-btn.active {
-            background: var(--error);
-        }
-        .active-call-overlay .call-controls .ctrl-btn.end-call {
-            background: var(--error);
-            width: 64px;
-            height: 64px;
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
-        }
-        .active-call-overlay .call-controls .ctrl-btn.end-call:hover {
-            background: #dc2626;
-        }
-        .active-call-overlay .quality-indicator {
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 15;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
-            padding: 4px 12px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.7rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .active-call-overlay .quality-indicator.visible {
-            opacity: 1;
-        }
-        .active-call-overlay .quality-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-        .active-call-overlay .quality-dot.good {
-            background: var(--success);
-        }
-        .active-call-overlay .quality-dot.poor {
-            background: #fbbf24;
-        }
-        .active-call-overlay .quality-dot.bad {
-            background: var(--error);
-        }
-        .active-call-overlay.audio-only .remote-video {
-            display: none;
-        }
-        .active-call-overlay.audio-only .local-video-wrapper {
-            display: none;
-        }
-        .active-call-overlay.audio-only .call-center-info .caller-avatar {
-            width: 110px;
-            height: 110px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #0d1520;
-            margin: 0 auto 12px;
-            box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
-        }
-        .active-call-overlay.audio-only .call-center-info .caller-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-        .active-call-overlay.audio-only .call-center-info .caller-name {
-            font-size: 1.8rem;
-            font-weight: 700;
-        }
-
-        .permission-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(12px);
-            z-index: 6000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-        }
-        .permission-overlay.active {
-            display: flex;
-        }
-        .permission-card {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: 20px;
-            padding: 32px 24px;
-            max-width: 340px;
-            width: 100%;
-            text-align: center;
-        }
-        .permission-card h2 {
-            font-size: 1.3rem;
-            margin-bottom: 8px;
-        }
-        .permission-card p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
         .permission-btn {
             background: linear-gradient(135deg, var(--gold), var(--gold-dark));
             border: none;
@@ -4111,45 +3569,6 @@
             .coin-pack-grid {
                 grid-template-columns: 1fr 1fr;
             }
-            .active-call-overlay .local-video-wrapper {
-                width: 90px;
-                height: 130px;
-                top: 70px;
-                right: 12px;
-            }
-            .active-call-overlay .call-controls .ctrl-btn {
-                width: 48px;
-                height: 48px;
-            }
-            .active-call-overlay .call-controls .ctrl-btn.end-call {
-                width: 56px;
-                height: 56px;
-            }
-            .active-call-overlay .call-controls {
-                gap: 12px;
-            }
-            .ringing-overlay .ringing-avatar {
-                width: 90px;
-                height: 90px;
-                font-size: 2rem;
-            }
-            .call-overlay .call-avatar {
-                width: 70px;
-                height: 70px;
-                font-size: 1.6rem;
-            }
-            .call-overlay .call-name {
-                font-size: 1.3rem;
-            }
-            .call-overlay .call-btn.accept {
-                width: 56px;
-                height: 56px;
-                font-size: 1.5rem;
-            }
-            .call-overlay .call-btn.decline {
-                width: 56px;
-                height: 56px;
-            }
             .member-action-panel .action-grid {
                 grid-template-columns: 1fr 1fr 1fr;
             }
@@ -4181,23 +3600,6 @@
             .coin-pack-grid {
                 grid-template-columns: 1fr;
             }
-            .active-call-overlay .local-video-wrapper {
-                width: 75px;
-                height: 110px;
-                top: 60px;
-                right: 8px;
-            }
-            .active-call-overlay .call-controls .ctrl-btn {
-                width: 42px;
-                height: 42px;
-            }
-            .active-call-overlay .call-controls .ctrl-btn.end-call {
-                width: 48px;
-                height: 48px;
-            }
-            .active-call-overlay .call-controls {
-                gap: 10px;
-            }
             .member-action-panel .action-grid {
                 grid-template-columns: 1fr 1fr;
             }
@@ -4206,18 +3608,6 @@
             }
         }
         @media (max-height: 500px) and (orientation: landscape) {
-            .active-call-overlay .local-video-wrapper {
-                width: 80px;
-                height: 110px;
-                top: 60px;
-                right: 12px;
-            }
-            .active-call-overlay .call-center-info .caller-name {
-                font-size: 1.2rem;
-            }
-            .active-call-overlay .call-controls {
-                padding-bottom: 10px;
-            }
             .member-action-panel .action-grid {
                 grid-template-columns: 1fr 1fr 1fr 1fr;
             }
@@ -4228,9 +3618,7 @@
             .send-btn,
             .participant,
             .confirm-modal .actions button,
-            .user-menu .item,
             .toast-close,
-            .premium-btn,
             .room-features-btn,
             .gift-send-modal .gift-grid button,
             .gift-send-modal .send-actions button,
@@ -4262,7 +3650,56 @@
 
         /* Immediate toast popups disabled: actions continue to work without intrusive overlays. */
         #toast { display: none !important; }
-    </style>
+    
+        /* Daily streak / leveling challenges */
+        .daily-challenges{margin:12px 0 16px;padding:12px;border:1px solid var(--border-color);border-radius:12px;background:rgba(255,255,255,.03)}
+        .daily-challenges .dc-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+        .daily-challenges .dc-title{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.35px}
+        .daily-challenges .dc-streak{font-size:.72rem;font-weight:800}
+        .dc-sub{font-size:.65rem;color:var(--text-muted);margin-bottom:9px}
+        .dc-item{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:7px 0;border-top:1px solid rgba(255,255,255,.05)}
+        .dc-icon{font-size:1rem}.dc-name{font-size:.72rem;font-weight:700}.dc-meta{font-size:.62rem;color:var(--text-muted);margin-top:2px}
+        .dc-reward{font-size:.66rem;font-weight:800;white-space:nowrap}.dc-done{opacity:.65}.dc-done .dc-name{text-decoration:line-through}
+        .dc-progress{height:4px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden;margin-top:4px}.dc-progress span{display:block;height:100%;background:var(--accent);border-radius:inherit}
+
+    
+        /* ===== SMART MEMBER PRESENCE TOASTER ===== */
+        .smart-presence-toaster {
+            position: fixed;
+            left: 50%;
+            bottom: calc(18px + env(safe-area-inset-bottom));
+            transform: translate(-50%, 14px) scale(.98);
+            z-index: 12000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            max-width: min(88vw, 320px);
+            padding: 7px 11px;
+            border: 1px solid rgba(255,215,0,.18);
+            border-radius: 999px;
+            background: rgba(12,16,25,.88);
+            box-shadow: 0 10px 35px rgba(0,0,0,.38), inset 0 1px 0 rgba(255,255,255,.05);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: var(--text-primary);
+            font-size: 11px;
+            line-height: 1.2;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .18s ease, transform .22s ease;
+        }
+        .smart-presence-toaster.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+        .smart-presence-toaster .dot { width: 6px; height: 6px; border-radius: 50%; flex: 0 0 auto; box-shadow: 0 0 8px currentColor; }
+        .smart-presence-toaster.join .dot { color: #34d399; background: #34d399; }
+        .smart-presence-toaster.leave .dot { color: #94a3b8; background: #94a3b8; box-shadow: none; }
+        .smart-presence-toaster .name { font-weight: 700; color: #fbbf24; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .smart-presence-toaster .action { color: var(--text-secondary); white-space: nowrap; }
+        @media (max-width: 480px) {
+            .smart-presence-toaster { bottom: calc(12px + env(safe-area-inset-bottom)); max-width: 84vw; padding: 6px 10px; font-size: 10.5px; }
+        }
+
+</style>
 </head>
 <body>
 
@@ -4274,12 +3711,10 @@
             <div class="room-info">
                 <div class="room-name-wrapper">
                     <div class="room-name" id="roomName" aria-hidden="true" style="display:none!important;">Loading…</div>
-                    <span class="premium-badge-display" id="premiumBadgeDisplay">🏆</span>
                 </div>
-                <div class="room-meta"><span id="roomMembers">👥 0</span><span class="sep">·</span><span class="dot online" id="roomStatusDot"></span><span id="roomStatusText">online</span></div>
             </div>
         </div>
-        <div class="right" id="headerRight">
+        <div class="right">
             <span class="coins-badge">🪙 <span id="headerCoins">0</span></span>
             <span class="earnings-badge" id="earningsBadge" onclick="openEarningsPanel()">
                 🪙 <span id="headerEarnings">0</span>
@@ -4294,7 +3729,7 @@
             <button class="header-btn send-coins-btn" onclick="openSendCoinsModal()">💸</button>
             <button class="header-btn gifts-btn" onclick="openGiftsPanel()">🎁<span class="badge-gift" id="giftBadge">0</span></button>
             <button class="header-btn" onclick="toggleSearch()">🔍</button>
-            <button class="header-btn" onclick="toggleParticipants()">👥<span class="badge" id="memberBadge">0</span></button>
+            <button class="header-btn" onclick="toggleParticipants()">👥</button>
             <button class="more-btn" id="moreBtn" onclick="toggleMoreDropdown()">⋯</button>
             <div class="header-more-dropdown" id="moreDropdown">
                 <button class="item" onclick="openStatsPanel();closeMoreDropdown()">📊 My Stats</button>
@@ -4414,7 +3849,6 @@
     <!-- ===== INFO BAR ===== -->
     <div class="room-info-bar">
         <span class="fee" id="roomFee">Entry: 🪙 50</span>
-        <span class="members">👥 <span class="count" id="memberCount">0</span> online</span>
     </div>
 
     <!-- ===== SEARCH ===== -->
@@ -4434,14 +3868,10 @@
         <div class="input-row">
             <div class="input-wrapper">
                 <span class="input-icon" onclick="toggleStickerPicker()">😊</span>
-                <!-- Voice note button removed from composer – now in member action panel -->
+                <button class="input-icon voice-note-composer-btn" id="voiceNoteComposerBtn" type="button" onclick="handleVoiceNoteFromComposer()" title="Voice Note">🎤</button>
                 <span class="input-icon" onclick="triggerImageUpload()">🖼️</span>
                 <input type="text" id="msgInput" placeholder="Type a message… (1🪙)" onkeydown="if(event.key==='Enter') sendMessage()" disabled />
                 <span class="input-icon" onclick="insertMention()" style="font-size:11px;font-weight:700;">@</span>
-                <div class="call-buttons" id="callButtons">
-                    <button class="voice-call-btn" id="voiceCallBtn" onclick="handleVoiceCallFromComposer()" title="Voice Call">📞<span class="call-badge" id="voiceCallBadge">🔒</span></button>
-                    <button class="video-call-btn" id="videoCallBtn" onclick="handleVideoCallFromComposer()" title="Video Call">📹<span class="call-badge" id="videoCallBadge">🔒</span></button>
-                </div>
             </div>
             <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>➤<span class="cost-badge" id="msgCostBadge">1</span></button>
         </div>
@@ -4534,12 +3964,6 @@
                 <div class="action-grid" id="memberActionCommGrid">
                     <button class="action-btn" id="actVoiceNote" onclick="memberActionVoiceNote()">
                         <span class="action-icon">🎤</span> Voice Note
-                    </button>
-                    <button class="action-btn" id="actVoiceCall" onclick="memberActionVoiceCall()">
-                        <span class="action-icon">📞</span> Voice Call
-                    </button>
-                    <button class="action-btn" id="actVideoCall" onclick="memberActionVideoCall()">
-                        <span class="action-icon">📹</span> Video Call
                     </button>
                 </div>
             </div>
@@ -4662,78 +4086,11 @@
         </div>
     </div>
 
-    <!-- ===== CALL OVERLAYS ===== -->
-    <div id="incomingCallOverlay" class="call-overlay">
-        <div class="call-card">
-            <div id="incomingAvatar" class="call-avatar"></div>
-            <div id="incomingName" class="call-name">Caller</div>
-            <div id="incomingSub" class="call-sub">Incoming call…</div>
-            <div class="call-actions">
-                <button id="declineBtn" class="call-btn decline">✕</button>
-                <button id="acceptBtn" class="call-btn accept">✓</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="ringingOverlay" class="ringing-overlay">
-        <div class="ringing-card">
-            <div id="ringingAvatar" class="ringing-avatar"></div>
-            <div id="ringingName" class="ringing-name">Calling...</div>
-            <div id="ringingStatus" class="ringing-status">Ringing…</div>
-            <button id="cancelCallBtn" class="cancel-btn">Cancel</button>
-        </div>
-    </div>
-
-    <div id="activeCallOverlay" class="active-call-overlay">
-        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-        <div class="local-video-wrapper" id="localVideoWrapper">
-            <video id="localVideo" autoplay playsinline muted></video>
-        </div>
-        <div class="quality-indicator" id="qualityIndicator">
-            <span id="qualityDot" class="quality-dot good"></span>
-            <span id="qualityText">Good</span>
-        </div>
-        <div class="call-top-bar">
-            <div id="callStatusBadge" class="call-status">Connected</div>
-            <div style="display:flex;gap:12px;align-items:center;">
-                <span id="activeCallTimer" class="call-timer">00:00</span>
-                <span style="background:rgba(0,0,0,0.5);padding:4px 12px;border-radius:12px;font-size:0.7rem;color:var(--text-muted);">🔒 Encrypted</span>
-            </div>
-        </div>
-        <div class="call-center-info" id="callCenterInfo">
-            <div id="callerAvatarLarge" class="caller-avatar" style="display:none;"></div>
-            <div id="activeCallerName" class="caller-name">User</div>
-        </div>
-        <div class="call-controls">
-            <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
-            <button id="callVideoBtn" class="ctrl-btn" title="Camera">📷</button>
-            <button id="callEndBtn" class="ctrl-btn end-call" title="End Call">📞</button>
-            <button id="callSpeakerBtn" class="ctrl-btn" title="Speaker">🔊</button>
-            <button id="callFlipBtn" class="ctrl-btn" title="Flip Camera">🔄</button>
-        </div>
-    </div>
-
-    <div id="permissionOverlay" class="permission-overlay">
-        <div class="permission-card">
-            <h2 id="permTitle">🎤 Microphone Access</h2>
-            <p id="permDesc">This call requires microphone access. Please grant permission.</p>
-            <button id="retryPermissionBtn" class="permission-btn">Allow Access</button>
-        </div>
-    </div>
-
-    <!-- ===== RINGTONES ===== -->
-    <audio id="incomingRingtone" preload="auto"><source src="assets/ringtone.mp3" type="audio/mpeg"></audio>
-    <audio id="outgoingRingtone" preload="auto"><source src="assets/ring.mp3" type="audio/mpeg"></audio>
-
     <!-- ===== TOAST ===== -->
     <div class="toast-container" id="toast"><div class="toast-content"><div class="toast-icon-wrapper" id="toastIconWrapper"><span id="toastIcon">✓</span></div><div class="toast-body"><div class="toast-title" id="toastTitle">Success</div><div class="toast-message" id="toastMsg">Action completed</div></div><button class="toast-close" onclick="dismissToast()">✕</button><div class="toast-progress" id="toastProgress"></div></div></div>
 
     <!-- CONFIRM -->
     <div class="confirm-overlay" id="confirmOverlay"><div class="confirm-modal"><div class="icon">⚠️</div><div class="title">Are you sure?</div><div class="message">This cannot be undone.</div><div class="actions"><button class="cancel" onclick="confirmCancel()">Cancel</button><button class="danger" id="confirmConfirm" onclick="confirmOk()">Confirm</button></div></div></div>
-
-    <!-- USER MENU (legacy fallback) -->
-    <div class="user-menu-overlay" id="userMenuOverlay" onclick="closeUserMenu()"></div>
-    <div class="user-menu" id="userMenu"><button class="item" id="menuViewProfile">👤 View Profile</button><button class="item" id="menuSendCoins">💸 Send Coins</button><button class="item" id="menuPrivateMsg">💬 Private Message</button><button class="item" id="menuSendGift">🎁 Send Gift</button><button class="item" id="menuAssignVip" style="display:none;">👑 Assign VIP</button><button class="item" id="menuRemoveVip" style="display:none;">👑 Remove VIP</button><button class="item" id="menuReport">🚩 Report</button><button class="item danger" id="menuKick" style="display:none;">👢 Kick</button><button class="item danger" id="menuMute" style="display:none;">🔇 Mute</button></div>
 
     <!-- ============================================================
     MAIN SCRIPT
@@ -4744,7 +4101,7 @@
         // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, getDocs, query, orderBy, limit, onSnapshot, runTransaction, serverTimestamp, increment, where, startAfter, writeBatch, arrayUnion, arrayRemove, onSnapshotsInSync } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, getDocs, query, orderBy, limit, onSnapshot, runTransaction, serverTimestamp, increment, where, startAfter, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const CONFIG = { apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4", authDomain: "grazzy-9e736.firebaseapp.com", projectId: "grazzy-9e736", storageBucket: "grazzy-9e736.firebasestorage.app", messagingSenderId: "750326949170", appId: "1:750326949170:web:5d19744aafc8675918632b" };
@@ -4765,7 +4122,6 @@
         const DEVELOPER_WHATSAPP = '2349159096952';
         const NORMAL_FILE_LIMIT = 5 * 1024 * 1024;
         const PREMIUM_FILE_LIMIT = 20 * 1024 * 1024;
-        const STUN_SERVERS = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
         // ===== 100 LEVEL NAMES =====
         const LEVEL_NAMES = [
@@ -4799,12 +4155,10 @@
 
         function getLevelIcon(level) { const name = getLevelName(level); const icon = name.split(' ')[0]; return icon || '🌟'; }
 
-        function getProgressToNextLevel(sp, level) { const current = getSPForLevel(level); const next = getSPForLevel(level + 1); if (next === current) return 1; return Math.min(1, (sp - current) / (next - current)); }
 
         // ===== FEATURE CATALOG =====
         const PREMIUM_FEATURES = {
-            voice_call: { id: 'voice_call', name: 'Voice Calling', description: 'Enable voice calling inside the room. Crystal-clear audio.', category: 'Communication', icon: '📞', price_usd: 1.00 },
-            video_call: { id: 'video_call', name: 'Video Calling', description: 'Enable video calling inside the room. See and hear members.', category: 'Communication', icon: '📹', price_usd: 3.00 },
+            voice_note: { id: 'voice_note', name: 'Premium Voice Notes', description: 'Send crystal-clear voice notes with a beautiful recording studio, waveform preview, and quick playback.', category: 'Communication', icon: '🎤', price_usd: 1.50 },
             room_badge: { id: 'room_badge', name: 'Premium Room Badge', description: 'Give the room a premium identity badge. Stand out.', category: 'Branding', icon: '🏆', price_usd: 2.00 },
             custom_theme: { id: 'custom_theme', name: 'Custom Room Theme', description: 'Unlock premium room customization. Change colors and look.', category: 'Appearance', icon: '🎨', price_usd: 5.00 },
             colorful_chat: { id: 'colorful_chat', name: 'Colorful Chat', description: 'Customize chat colors: sender, background, accent, and more.', category: 'Appearance', icon: '🌈', price_usd: 2.00 },
@@ -4815,7 +4169,6 @@
             file_size: { id: 'file_size', name: 'Increased File Size', description: 'Allow larger image and file uploads (up to 20 MB).', category: 'Utility', icon: '📁', price_usd: 2.00 },
             pin_limit: { id: 'pin_limit', name: 'Unlimited Pinned Messages', description: 'Pin unlimited messages (instead of the default 5).', category: 'Management', icon: '📌', price_usd: 3.00 },
             member_limit: { id: 'member_limit', name: 'Member Limit Boost', description: 'Increase member capacity by 50.', category: 'Management', icon: '👥', price_usd: 5.00 },
-            voice_effects: { id: 'voice_effects', name: 'Voice Effects', description: 'Use fun voice effects during voice calls.', category: 'Communication', icon: '🎤', price_usd: 2.00 },
         };
 
         const COIN_PACKS = [{ amount: 100, price_usd: 0.99 }, { amount: 250, price_usd: 1.99 }, { amount: 500, price_usd: 3.99 }, { amount: 1000, price_usd: 5.99 }, { amount: 2500, price_usd: 12.99 }, { amount: 5000, price_usd: 19.99 }];
@@ -4835,6 +4188,10 @@
         let isRoomOwner = false;
         let messageUnsub = null;
         let participantUnsub = null;
+        let memberPresenceUnsub = null;
+        let memberPresenceReady = false;
+        const memberPresenceState = new Map();
+        let smartPresenceTimer = null;
         let toastTimeout = null;
         let pendingConfirm = null;
         let lastActivity = Date.now();
@@ -4849,7 +4206,6 @@
         let selectedPackage = null;
         let notificationFeed = [];
         let unsubscribeUser = null;
-        let lastMessageDoc = null;
         let isLoadingMore = false;
         let hasMoreMessages = false;
         let allMessages = [];
@@ -4859,13 +4215,12 @@
         let customEmojis = [];
         let roomVips = {};
         let currentAnnouncement = null;
-        let activePolls = {};
-        let callState = { active: false, type: null, remoteUid: null, callId: null, peerConnection: null, localStream: null, remoteStream: null, isInitiator: false, isAudioOnly: false, timerInterval: null, startTime: null };
 
         // SP / Level
         let currentSP = 0;
         let currentLevel = 1;
         let spFeed = [];
+        let dailyChallengeState = { date: '', counts: {}, completed: {}, streak: 0, lastCompletedDate: '', completionRewarded: false };
 
         // Custom theme
         let customTheme = { bg: '#080c14', bubbleOther: 'rgba(255,255,255,0.06)', bubbleSelf: 'linear-gradient(135deg, #fbbf24, #f59e0b)', text: '#f0f4ff', accent: '#fbbf24' };
@@ -4883,9 +4238,6 @@
             startTime: null,
         };
 
-        // Call listeners
-        let callListenerUnsub = null;
-
         const MAX_NOTIFICATIONS = 50;
 
         // DOM refs
@@ -4898,26 +4250,21 @@
         const earningsEl = document.getElementById('headerEarnings');
         const earningsPanelAmount = document.getElementById('earningsPanelAmount');
         const roomNameEl = document.getElementById('roomName');
-        const memberCountEl = document.getElementById('memberCount');
-        const memberBadge = document.getElementById('memberBadge');
         const roomFeeEl = document.getElementById('roomFee');
-        const roomStatusDot = document.getElementById('roomStatusDot');
-        const roomStatusText = document.getElementById('roomStatusText');
         const typingIndicator = document.getElementById('typingIndicator');
         const searchBar = document.getElementById('searchBar');
         const searchInput = document.getElementById('searchInput');
         const giftBadge = document.getElementById('giftBadge');
         const moreDropdown = document.getElementById('moreDropdown');
+        const moreBtn = document.getElementById('moreBtn');
         const profileModalBody = document.getElementById('profileModalBody');
         const profileModalOverlay = document.getElementById('profileModalOverlay');
-        const loadMoreBtn = document.getElementById('loadMoreBtn');
         const roomFeaturesBtn = document.getElementById('roomFeaturesBtn');
         const roomFeaturesDropdownItem = document.getElementById('roomFeaturesDropdownItem');
         const roomFeaturesOverlay = document.getElementById('roomFeaturesOverlay');
         const roomFeaturesBody = document.getElementById('roomFeaturesBody');
         const statsPanelOverlay = document.getElementById('statsPanelOverlay');
         const statsPanelBody = document.getElementById('statsPanelBody');
-        const premiumBadgeDisplay = document.getElementById('premiumBadgeDisplay');
         const announcementBar = document.getElementById('announcementBar');
         const announcementText = document.getElementById('announcementText');
         const announcementActions = document.getElementById('announcementActions');
@@ -4925,10 +4272,6 @@
         const vipManagerDropdownItem = document.getElementById('vipManagerDropdownItem');
         const announcementManagerDropdownItem = document.getElementById('announcementManagerDropdownItem');
         const pollCreatorDropdownItem = document.getElementById('pollCreatorDropdownItem');
-        const voiceCallBtn = document.getElementById('voiceCallBtn');
-        const videoCallBtn = document.getElementById('videoCallBtn');
-        const voiceCallBadge = document.getElementById('voiceCallBadge');
-        const videoCallBadge = document.getElementById('videoCallBadge');
 
         // Member action panel refs
         const memberActionOverlay = document.getElementById('memberActionOverlay');
@@ -4957,10 +4300,47 @@
         // ============================================================
         // ONLINE STATUS
         // ============================================================
+        // Presence: heartbeat keeps online status and lastSeen fresh.
+        const PRESENCE_HEARTBEAT_MS = 20000;
+        const PRESENCE_STALE_MS = 45000;
+        let presenceHeartbeat = null;
+        let presenceWriteInFlight = false;
+
         function updateUserOnlineStatus(status) {
-            if (!currentUserUid) return;
-            const userRef = doc(db, "users", currentUserUid);
-            updateDoc(userRef, { onlineStatus: status, lastSeen: serverTimestamp() }).catch(() => {});
+            if (!currentUserUid || presenceWriteInFlight) return;
+            presenceWriteInFlight = true;
+            const presenceStamp = serverTimestamp();
+            const userWrite = updateDoc(doc(db, "users", currentUserUid), { onlineStatus: status === true, lastSeen: presenceStamp });
+            const roomWrite = roomId ? updateDoc(doc(db, "rooms", roomId, "participants", currentUserUid), { roomPresence: status === true, presenceUpdatedAt: presenceStamp }).catch(() => {}) : Promise.resolve();
+            Promise.allSettled([userWrite, roomWrite]).finally(() => { presenceWriteInFlight = false; });
+        }
+        function startPresenceHeartbeat() {
+            stopPresenceHeartbeat();
+            updateUserOnlineStatus(true);
+            presenceHeartbeat = setInterval(() => {
+                if (!document.hidden && navigator.onLine) updateUserOnlineStatus(true);
+            }, PRESENCE_HEARTBEAT_MS);
+        }
+        function stopPresenceHeartbeat() {
+            if (presenceHeartbeat) { clearInterval(presenceHeartbeat); presenceHeartbeat = null; }
+        }
+        function getPresenceState(data) {
+            const lastSeen = data?.lastSeen?.toDate?.() || null;
+            const fresh = !!lastSeen && (Date.now() - lastSeen.getTime()) <= PRESENCE_STALE_MS;
+            return { online: data?.onlineStatus === true && fresh, lastSeen };
+        }
+        function formatLastSeen(date, online = false) {
+            if (online) return 'online now';
+            if (!date) return 'last seen unavailable';
+            const seconds = Math.floor(Math.max(0, Date.now() - date.getTime()) / 1000);
+            if (seconds < 60) return 'last seen just now';
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `last seen ${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `last seen ${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `last seen ${days}d ago`;
+            return `last seen ${date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' })}`;
         }
 
         // ============================================================
@@ -5480,6 +4860,60 @@
                 await setDoc(ref, data, { merge: true }); } catch (e) { console.error('Failed to save user room data:', e); }
         }
 
+        const DAILY_CHALLENGES = [
+            { id: 'messages', icon: '💬', name: 'Conversation Builder', target: 8, unit: 'messages', reward: 8 },
+            { id: 'reactions', icon: '❤️', name: 'Spread Positivity', target: 5, unit: 'reactions', reward: 7 },
+            { id: 'social', icon: '🤝', name: 'Community Challenger', target: 3, unit: 'social actions', reward: 8 },
+            { id: 'minutes', icon: '⏱️', name: 'Room Regular', target: 15, unit: 'active minutes', reward: 10 }
+        ];
+
+        function getLocalDayKey(date = new Date()) {
+            const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+            return `${y}-${m}-${d}`;
+        }
+        function daysBetween(a,b){ const x=new Date(a+'T00:00:00'), y=new Date(b+'T00:00:00'); return Math.round((y-x)/86400000); }
+        function normalizeDailyState(data = {}) {
+            const today = getLocalDayKey();
+            const saved = data.dailyChallenges || {};
+            if (saved.date !== today) {
+                return { date: today, counts: {}, completed: {}, streak: data.dailyStreak || 0, lastCompletedDate: data.lastStreakDate || '', completionRewarded: false };
+            }
+            return { date: today, counts: saved.counts || {}, completed: saved.completed || {}, streak: data.dailyStreak || saved.streak || 0, lastCompletedDate: data.lastStreakDate || saved.lastCompletedDate || '', completionRewarded: !!saved.completionRewarded };
+        }
+        async function persistDailyState() {
+            if (!currentUserUid || !roomId) return;
+            await saveUserRoomData(currentUserUid, { dailyChallenges: dailyChallengeState, dailyStreak: dailyChallengeState.streak, lastStreakDate: dailyChallengeState.lastCompletedDate });
+        }
+        async function trackDailyActivity(type, amount = 1) {
+            if (!currentUserUid || !roomId || !amount) return;
+            dailyChallengeState = normalizeDailyState({ dailyChallenges: dailyChallengeState, dailyStreak: dailyChallengeState.streak, lastStreakDate: dailyChallengeState.lastCompletedDate });
+            dailyChallengeState.counts[type] = Math.min(999, (dailyChallengeState.counts[type] || 0) + amount);
+            let changed = false;
+            for (const c of DAILY_CHALLENGES) {
+                const value = dailyChallengeState.counts[c.id] || 0;
+                if (!dailyChallengeState.completed[c.id] && value >= c.target) {
+                    dailyChallengeState.completed[c.id] = true; changed = true;
+                    await addSP(c.reward, `Daily challenge: ${c.name}`);
+                }
+            }
+            const completedCount = DAILY_CHALLENGES.filter(c => dailyChallengeState.completed[c.id]).length;
+            if (completedCount >= 3 && !dailyChallengeState.completionRewarded) {
+                const today = dailyChallengeState.date;
+                const last = dailyChallengeState.lastCompletedDate;
+                const gap = last ? daysBetween(last, today) : 999;
+                dailyChallengeState.streak = gap === 1 ? (dailyChallengeState.streak || 0) + 1 : 1;
+                dailyChallengeState.lastCompletedDate = today;
+                dailyChallengeState.completionRewarded = true;
+                const streakBonus = Math.min(30, dailyChallengeState.streak * 3);
+                await addSP(15 + streakBonus, `Daily streak ${dailyChallengeState.streak} day bonus`);
+                showToast(`🔥 Daily streak ${dailyChallengeState.streak}! +${15 + streakBonus} bonus SP`, 'gold', 'Daily Streak');
+                addNotification(`Daily streak ${dailyChallengeState.streak} completed +${15 + streakBonus} SP`, 'gold', 'Daily Streak');
+                changed = true;
+            }
+            if (changed || amount) await persistDailyState();
+            if (statsPanelOverlay?.classList.contains('open')) renderStatsPanel();
+        }
+
         async function addSP(amount, reason) {
             if (!currentUserUid || !roomId) return;
             if (amount <= 0) return;
@@ -5490,7 +4924,6 @@
             sp += amount;
             const newLevel = getLevelFromSP(sp);
             if (newLevel > level) {
-                const oldName = getLevelName(level);
                 const newName = getLevelName(newLevel);
                 showToast(`🎉 Level Up! You are now ${newName} (Level ${newLevel})`, 'gold', 'Level Up!');
                 addNotification(`Reached Level ${newLevel}: ${newName}`, 'gold', 'Level Up');
@@ -5518,6 +4951,7 @@
             currentSP = data.sp || 0;
             currentLevel = data.level || 1;
             spFeed = data.spFeed || [];
+            dailyChallengeState = normalizeDailyState(data);
             updateHeaderLevel();
             return data;
         }
@@ -5542,6 +4976,7 @@
             timeInterval = setInterval(async () => {
                 if (!currentUserUid || !hasPaid) return;
                 await addSP(1, 'Time spent in room (5 min)');
+                 await trackDailyActivity('minutes', 5);
             }, 5 * 60 * 1000);
         }
 
@@ -5553,6 +4988,7 @@
             if (!lastDaily || new Date(lastDaily).toDateString() !== today) {
                 await addSP(2, 'Daily login bonus');
                 await saveUserRoomData(currentUserUid, { lastDaily: new Date().toISOString() });
+                await trackDailyActivity('social', 1);
                 showToast('+2 SP daily login bonus!', 'success', 'Daily Bonus');
                 addNotification('Daily login +2 SP', 'gold', 'Daily Bonus');
             }
@@ -5600,6 +5036,12 @@
               </div>
               <div class="progress-bar-big"><div class="fill" style="width:${Math.min(100, Math.round(progress*100))}%"></div></div>
               <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${Math.round(progress*100)}% to next level</div>
+            </div>
+            <div class="daily-challenges">
+              <div class="dc-head"><span class="dc-title">🔥 Daily Activities</span><span class="dc-streak">Streak: ${dailyChallengeState.streak || 0} day${(dailyChallengeState.streak||0)===1?'':'s'}</span></div>
+              <div class="dc-sub">Complete any 3 of 4 each day to earn a bonus and build your streak toward the next level.</div>
+              ${DAILY_CHALLENGES.map(c => { const v=Math.min(c.target,dailyChallengeState.counts[c.id]||0); const done=!!dailyChallengeState.completed[c.id]; return `<div class="dc-item ${done?'dc-done':''}"><span class="dc-icon">${done?'✅':c.icon}</span><div><div class="dc-name">${c.name}</div><div class="dc-meta">${v}/${c.target} ${c.unit}</div><div class="dc-progress"><span style="width:${Math.round(v/c.target*100)}%"></span></div></div><span class="dc-reward">+${c.reward} SP</span></div>`; }).join('')}
+              <div class="dc-sub" style="margin:8px 0 0">Daily completion: ${DAILY_CHALLENGES.filter(c=>dailyChallengeState.completed[c.id]).length}/3 • Streak bonus up to +45 SP</div>
             </div>
             <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Recent Activity</div>
             <div class="recent-feed">${feedHTML}</div>
@@ -5673,6 +5115,7 @@
 
         // ----- Voice Note: Start Recording -----
         window.memberActionVoiceNote = function() {
+            if (!isRoomFeatureUnlocked('voice_note')) { showToast('🔒 Voice Notes are a premium feature. Request it from Features.', 'warning'); return; }
             if (!memberActionTargetUid) { showToast('No member selected.', 'warning'); return; }
             if (memberActionTargetUid === currentUserUid) { showToast('Cannot send to yourself.', 'warning'); return; }
 
@@ -5882,6 +5325,7 @@
                 });
 
                 await addSP(3, 'Voice note sent to member');
+                await trackDailyActivity('social', 1);
                 showToast('✅ Voice note sent! +3 SP', 'success');
                 addNotification('Voice note sent', 'info', 'Voice Note');
 
@@ -5916,910 +5360,16 @@
             } catch { return 'User'; }
         }
 
-        // ============================================================
-        // REAL WEBRTC CALL SYSTEM
-        // ============================================================
-        // Call state
-        let callInstance = null;
 
-        // Call configuration
-        const CALL_CONFIG = {
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
-            iceCandidatePoolSize: 10,
-        };
-
-        class CallManager {
-            constructor() {
-                this.callId = null;
-                this.remoteUid = null;
-                this.type = null; // 'voice' | 'video'
-                this.isInitiator = false;
-                this.isActive = false;
-                this.peerConnection = null;
-                this.localStream = null;
-                this.remoteStream = null;
-                this.callDocRef = null;
-                this.callUnsub = null;
-                this.timerInterval = null;
-                this.startTime = null;
-                this.isAudioOnly = false;
-                this.muted = false;
-                this.videoEnabled = true;
-                this.speakerEnabled = false;
-                this.cameraFacing = 'user';
-                this.ringtone = null;
-                this.outgoingRingtone = null;
-                this.hasAnswered = false;
-                this.iceCandidates = [];
-                this.pendingCandidates = [];
-                this.isPolite = false;
-                this.makingOffer = false;
-            }
-
-            async initCall(type, remoteUid) {
-                // Check premium
-                if (type === 'voice' && !isRoomFeatureUnlocked('voice_call')) {
-                    showToast('🔒 Voice Calling is a premium feature. Request it from Features.', 'warning');
-                    return false;
-                }
-                if (type === 'video' && !isRoomFeatureUnlocked('video_call')) {
-                    showToast('🔒 Video Calling is a premium feature. Request it from Features.', 'warning');
-                    return false;
-                }
-
-                if (this.isActive) {
-                    showToast('A call is already active.', 'warning');
-                    return false;
-                }
-
-                if (remoteUid === currentUserUid) {
-                    showToast('Cannot call yourself.', 'warning');
-                    return false;
-                }
-
-                // Check if target user is online
-                const targetSnap = await getDoc(doc(db, 'users', remoteUid));
-                if (!targetSnap.exists() || targetSnap.data().onlineStatus !== true) {
-                    showToast('User is offline.', 'warning');
-                    return false;
-                }
-
-                this.remoteUid = remoteUid;
-                this.type = type;
-                this.isInitiator = true;
-                this.isAudioOnly = (type === 'voice');
-
-                // Generate call ID
-                this.callId = `call_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
-
-                // Get caller info
-                const callerSnap = await getDoc(doc(db, 'users', currentUserUid));
-                const callerName = currentUser.displayName || 'User';
-                const callerAvatar = callerSnap.exists() ? (callerSnap.data().avatar || '') : '';
-                const callerSpId = callerSnap.exists() ? (callerSnap.data().spId || 'N/A') : 'N/A';
-                const roomName = roomData?.name || roomId || 'Room';
-
-                // Create call document
-                this.callDocRef = doc(db, 'calls', this.callId);
-                await setDoc(this.callDocRef, {
-                    callId: this.callId,
-                    type: this.type,
-                    status: 'ringing',
-                    initiatorId: currentUserUid,
-                    initiatorName: callerName,
-                    initiatorAvatar: callerAvatar,
-                    initiatorSpId: callerSpId,
-                    recipientId: remoteUid,
-                    roomId: roomId,
-                    roomName: roomName,
-                    createdAt: serverTimestamp(),
-                    updatedAt: serverTimestamp(),
-                    answeredAt: null,
-                    endedAt: null,
-                    duration: 0,
-                    offer: null,
-                    answer: null,
-                    iceCandidates: [],
-                    isAudioOnly: this.isAudioOnly,
-                });
-
-                // Show ringing overlay
-                this.showRingingOverlay(callerName, callerAvatar, true);
-
-                // Start listening for call updates
-                this.listenForCallUpdates();
-
-                // Play outgoing ringtone
-                this.playRingtone('outgoing');
-
-                // Set up timeout
-                setTimeout(() => {
-                    if (this.isActive === false && this.hasAnswered === false) {
-                        this.endCall('timeout');
-                        showToast('Call timed out. User did not answer.', 'warning');
-                    }
-                }, 30000);
-
-                // Create peer connection and offer
-                try {
-                    await this.createPeerConnection();
-                    await this.createOffer();
-                } catch (err) {
-                    console.error('Failed to create offer:', err);
-                    showToast('Failed to start call: ' + err.message, 'error');
-                    this.endCall('error');
-                    return false;
-                }
-
-                return true;
-            }
-
-            listenForCallUpdates() {
-                if (this.callUnsub) return;
-                this.callUnsub = onSnapshot(this.callDocRef, async (snap) => {
-                    if (!snap.exists()) { this.endCall('ended'); return; }
-                    const data = snap.data();
-
-                    // Handle status changes
-                    if (data.status === 'answered' && this.isInitiator && !this.hasAnswered) {
-                        this.hasAnswered = true;
-                        this.isActive = true;
-                        this.stopRingtone();
-                        // Show active call
-                        this.showActiveCallUI();
-                        // Set answer
-                        if (data.answer && this.peerConnection) {
-                            try {
-                                await this.peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                            } catch (e) { console.error('Failed to set remote answer:', e); }
-                        }
-                        // Process any pending ICE candidates
-                        if (data.iceCandidates) {
-                            for (const cand of data.iceCandidates) {
-                                try {
-                                    await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                                } catch (e) { console.error('Failed to add ICE candidate:', e); }
-                            }
-                        }
-                        showToast('Call connected!', 'success');
-                        addNotification('Call connected', 'success', 'Call');
-                        this.startTimer();
-                    }
-
-                    if (data.status === 'declined' && this.isInitiator) {
-                        this.stopRingtone();
-                        showToast('Call declined.', 'info');
-                        this.endCall('declined');
-                    }
-
-                    if (data.status === 'ended' || data.status === 'error' || data.status === 'timeout') {
-                        this.stopRingtone();
-                        if (!this.isActive) {
-                            showToast('Call ended.', 'info');
-                        }
-                        this.endCall(data.status);
-                    }
-
-                    // Handle ICE candidates for the initiator
-                    if (data.iceCandidates && this.isInitiator && this.hasAnswered) {
-                        const candidates = data.iceCandidates || [];
-                        // Only process new ones
-                        for (const cand of candidates) {
-                            try {
-                                await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                            } catch (e) { console.error('Failed to add ICE candidate:', e); }
-                        }
-                    }
-
-                    // Handle ICE candidates for the recipient
-                    if (data.iceCandidates && !this.isInitiator && this.isActive) {
-                        for (const cand of data.iceCandidates) {
-                            try {
-                                await this.peerConnection.addIceCandidate(new RTCIceCandidate(cand));
-                            } catch (e) { console.error('Failed to add ICE candidate:', e); }
-                        }
-                    }
-                }, (err) => {
-                    console.error('Call listener error:', err);
-                });
-            }
-
-            async createPeerConnection() {
-                this.peerConnection = new RTCPeerConnection(CALL_CONFIG);
-
-                // Get local media
-                const constraints = {
-                    audio: true,
-                    video: this.isAudioOnly ? false : { facingMode: 'user' }
-                };
-
-                try {
-                    this.localStream = await navigator.mediaDevices.getUserMedia(constraints);
-                    if (this.localStream) {
-                        for (const track of this.localStream.getTracks()) {
-                            this.peerConnection.addTrack(track, this.localStream);
-                        }
-                    }
-
-                    // Set up local video
-                    if (!this.isAudioOnly) {
-                        const localVideo = document.getElementById('localVideo');
-                        if (localVideo) {
-                            localVideo.srcObject = this.localStream;
-                            localVideo.onloadedmetadata = () => { localVideo.play(); };
-                        }
-                    }
-
-                    // Handle remote stream
-                    this.peerConnection.ontrack = (event) => {
-                        if (!this.remoteStream) {
-                            this.remoteStream = event.streams[0];
-                            const remoteVideo = document.getElementById('remoteVideo');
-                            if (remoteVideo && this.remoteStream) {
-                                remoteVideo.srcObject = this.remoteStream;
-                                remoteVideo.onloadedmetadata = () => { remoteVideo.play(); };
-                            }
-                            // For audio-only, show avatar
-                            if (this.isAudioOnly) {
-                                this.showAudioOnlyUI();
-                            }
-                        }
-                    };
-
-                    // Handle ICE candidates
-                    this.peerConnection.onicecandidate = (event) => {
-                        if (event.candidate) {
-                            this.addIceCandidate(event.candidate);
-                        }
-                    };
-
-                    // Connection state changes
-                    this.peerConnection.onconnectionstatechange = () => {
-                        const state = this.peerConnection.connectionState;
-                        if (state === 'connected') {
-                            this.isActive = true;
-                            this.hasAnswered = true;
-                            this.startTimer();
-                            this.updateCallStatus('connected');
-                            const badge = document.getElementById('callStatusBadge');
-                            if (badge) { badge.textContent = 'Connected';
-                                badge.className = 'call-status'; }
-                            this.showActiveCallUI();
-                            showToast('Call connected!', 'success');
-                        } else if (state === 'failed' || state === 'disconnected') {
-                            this.endCall('error');
-                            showToast('Call connection lost.', 'error');
-                        } else if (state === 'closed') {
-                            this.endCall('ended');
-                        }
-                    };
-
-                    this.peerConnection.oniceconnectionstatechange = () => {
-                        const state = this.peerConnection.iceConnectionState;
-                        if (state === 'failed' || state === 'disconnected') {
-                            // Try to recover
-                        }
-                    };
-
-                    // Quality reporting
-                    this.peerConnection.onicecandidateerror = (err) => {
-                        console.warn('ICE candidate error:', err);
-                    };
-
-                } catch (err) {
-                    showToast('Could not access media devices: ' + err.message, 'error');
-                    throw err;
-                }
-            }
-
-            async createOffer() {
-                if (!this.peerConnection) return;
-                try {
-                    const offer = await this.peerConnection.createOffer();
-                    await this.peerConnection.setLocalDescription(offer);
-
-                    // Save offer to Firestore
-                    if (this.callDocRef) {
-                        await updateDoc(this.callDocRef, {
-                            offer: { type: offer.type, sdp: offer.sdp },
-                            updatedAt: serverTimestamp(),
-                        });
-                    }
-                } catch (err) {
-                    console.error('Failed to create offer:', err);
-                    throw err;
-                }
-            }
-
-            async addIceCandidate(candidate) {
-                if (!this.callDocRef) return;
-                try {
-                    const snap = await getDoc(this.callDocRef);
-                    if (snap.exists()) {
-                        const data = snap.data();
-                        const candidates = data.iceCandidates || [];
-                        candidates.push(candidate);
-                        await updateDoc(this.callDocRef, { iceCandidates: candidates, updatedAt: serverTimestamp() });
-                    }
-                } catch (err) {
-                    console.error('Failed to add ICE candidate:', err);
-                }
-            }
-
-            // ----- Incoming Call Handling -----
-            async handleIncomingCall(callData) {
-                this.callId = callData.callId;
-                this.remoteUid = callData.initiatorId;
-                this.type = callData.type;
-                this.isInitiator = false;
-                this.isAudioOnly = callData.isAudioOnly || false;
-                this.callDocRef = doc(db, 'calls', this.callId);
-
-                // Show incoming call UI
-                this.showIncomingCallUI(callData);
-
-                // Create peer connection
-                try {
-                    await this.createPeerConnection();
-                    // Set remote offer
-                    if (callData.offer) {
-                        await this.peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
-                    }
-                    // Listen for updates
-                    this.listenForCallUpdates();
-                } catch (err) {
-                    console.error('Failed to handle incoming call:', err);
-                    showToast('Failed to handle incoming call.', 'error');
-                }
-            }
-
-            async answerCall() {
-                if (!this.peerConnection || !this.callDocRef) {
-                    showToast('Cannot answer call.', 'error');
-                    return;
-                }
-
-                try {
-                    // Create answer
-                    const answer = await this.peerConnection.createAnswer();
-                    await this.peerConnection.setLocalDescription(answer);
-
-                    // Update call status
-                    await updateDoc(this.callDocRef, {
-                        status: 'answered',
-                        answer: { type: answer.type, sdp: answer.sdp },
-                        answeredAt: serverTimestamp(),
-                        updatedAt: serverTimestamp(),
-                    });
-
-                    this.hasAnswered = true;
-                    this.isActive = true;
-                    this.stopRingtone();
-                    this.showActiveCallUI();
-                    this.startTimer();
-                    showToast('Call connected!', 'success');
-                    addNotification('Call connected', 'success', 'Call');
-
-                } catch (err) {
-                    console.error('Failed to answer call:', err);
-                    showToast('Failed to answer call.', 'error');
-                }
-            }
-
-            declineCall() {
-                if (this.callDocRef) {
-                    updateDoc(this.callDocRef, { status: 'declined', updatedAt: serverTimestamp() }).catch(() => {});
-                }
-                this.stopRingtone();
-                this.endCall('declined');
-                showToast('Call declined.', 'info');
-            }
-
-            // ----- UI Helpers -----
-            showIncomingCallUI(callData) {
-                const overlay = document.getElementById('incomingCallOverlay');
-                const avatar = document.getElementById('incomingAvatar');
-                const name = document.getElementById('incomingName');
-                const sub = document.getElementById('incomingSub');
-
-                name.textContent = callData.initiatorName || 'Caller';
-                sub.textContent = `${callData.type === 'voice' ? '📞 Voice' : '📹 Video'} call from ${callData.roomName || 'room'}`;
-
-                if (callData.initiatorAvatar) {
-                    avatar.innerHTML = `<img src="${callData.initiatorAvatar}" alt="${callData.initiatorName}" />`;
-                } else {
-                    avatar.textContent = (callData.initiatorName || 'C').charAt(0).toUpperCase();
-                }
-
-                // Show SP ID
-                const spId = callData.initiatorSpId || 'N/A';
-                const spEl = document.createElement('div');
-                spEl.style.cssText = 'font-size:0.7rem;color:var(--text-muted);margin-bottom:12px;';
-                spEl.textContent = `SP ID: ${spId}`;
-                const existing = overlay.querySelector('.call-sp-id');
-                if (existing) existing.remove();
-                spEl.className = 'call-sp-id';
-                document.querySelector('.call-card')?.appendChild(spEl);
-
-                overlay.classList.add('active');
-
-                // Play ringtone
-                this.playRingtone('incoming');
-
-                // Set up buttons
-                document.getElementById('acceptBtn').onclick = () => {
-                    if (this.isActive) return;
-                    this.answerCall();
-                    overlay.classList.remove('active');
-                };
-                document.getElementById('declineBtn').onclick = () => {
-                    this.declineCall();
-                    overlay.classList.remove('active');
-                };
-            }
-
-            showRingingOverlay(name, avatar, isOutgoing) {
-                const overlay = document.getElementById('ringingOverlay');
-                const avatarEl = document.getElementById('ringingAvatar');
-                const nameEl = document.getElementById('ringingName');
-                const statusEl = document.getElementById('ringingStatus');
-
-                nameEl.textContent = name || 'Calling...';
-                statusEl.textContent = isOutgoing ? 'Ringing…' : 'Connecting…';
-
-                if (avatar) {
-                    avatarEl.innerHTML = `<img src="${avatar}" alt="${name}" />`;
-                } else {
-                    avatarEl.textContent = (name || 'C').charAt(0).toUpperCase();
-                }
-
-                overlay.classList.add('active');
-
-                // Cancel button
-                document.getElementById('cancelCallBtn').onclick = () => {
-                    this.endCall('cancelled');
-                    overlay.classList.remove('active');
-                    showToast('Call cancelled.', 'info');
-                };
-            }
-
-            showActiveCallUI() {
-                document.getElementById('ringingOverlay').classList.remove('active');
-                document.getElementById('incomingCallOverlay').classList.remove('active');
-
-                const overlay = document.getElementById('activeCallOverlay');
-                const callerName = document.getElementById('activeCallerName');
-
-                // Get caller name
-                if (this.remoteUid) {
-                    getDoc(doc(db, 'users', this.remoteUid)).then(snap => {
-                        if (snap.exists()) {
-                            callerName.textContent = snap.data().name || snap.data().displayName || 'User';
-                        } else {
-                            callerName.textContent = 'User';
-                        }
-                    }).catch(() => { callerName.textContent = 'User'; });
-                } else {
-                    callerName.textContent = 'User';
-                }
-
-                if (this.isAudioOnly) {
-                    overlay.classList.add('audio-only');
-                    const avatarLarge = document.getElementById('callerAvatarLarge');
-                    avatarLarge.style.display = 'flex';
-                    // Try to get avatar
-                    if (this.remoteUid) {
-                        getDoc(doc(db, 'users', this.remoteUid)).then(snap => {
-                            if (snap.exists()) {
-                                const data = snap.data();
-                                if (data.avatar) {
-                                    avatarLarge.innerHTML = `<img src="${data.avatar}" alt="${data.name || 'User'}" />`;
-                                } else {
-                                    avatarLarge.textContent = (data.name || 'U').charAt(0).toUpperCase();
-                                }
-                            }
-                        }).catch(() => {});
-                    }
-                } else {
-                    overlay.classList.remove('audio-only');
-                    document.getElementById('callerAvatarLarge').style.display = 'none';
-                }
-
-                overlay.classList.add('active');
-
-                // Set up controls
-                this.setupCallControls();
-            }
-
-            setupCallControls() {
-                // Mute
-                document.getElementById('callMuteBtn').onclick = () => {
-                    this.muted = !this.muted;
-                    if (this.localStream) {
-                        for (const track of this.localStream.getAudioTracks()) {
-                            track.enabled = !this.muted;
-                        }
-                    }
-                    document.getElementById('callMuteBtn').textContent = this.muted ? '🔇' : '🔊';
-                    document.getElementById('callMuteBtn').classList.toggle('active', this.muted);
-                };
-
-                // Video toggle
-                document.getElementById('callVideoBtn').onclick = () => {
-                    if (this.isAudioOnly) return;
-                    this.videoEnabled = !this.videoEnabled;
-                    if (this.localStream) {
-                        for (const track of this.localStream.getVideoTracks()) {
-                            track.enabled = this.videoEnabled;
-                        }
-                    }
-                    document.getElementById('callVideoBtn').textContent = this.videoEnabled ? '📷' : '🚫';
-                    document.getElementById('callVideoBtn').classList.toggle('active', !this.videoEnabled);
-                };
-
-                // Speaker
-                document.getElementById('callSpeakerBtn').onclick = () => {
-                    this.speakerEnabled = !this.speakerEnabled;
-                    const remoteVideo = document.getElementById('remoteVideo');
-                    if (remoteVideo) {
-                        remoteVideo.sinkId = this.speakerEnabled ? 'default' : 'default';
-                    }
-                    document.getElementById('callSpeakerBtn').classList.toggle('active', this.speakerEnabled);
-                    showToast(this.speakerEnabled ? 'Speaker on' : 'Speaker off', 'info');
-                };
-
-                // Flip camera
-                document.getElementById('callFlipBtn').onclick = () => {
-                    if (this.isAudioOnly || !this.localStream) return;
-                    const videoTracks = this.localStream.getVideoTracks();
-                    if (videoTracks.length === 0) return;
-                    const track = videoTracks[0];
-                    const currentFacing = this.cameraFacing;
-                    const newFacing = currentFacing === 'user' ? 'environment' : 'user';
-                    this.cameraFacing = newFacing;
-                    // Reacquire stream with new facing mode
-                    navigator.mediaDevices.getUserMedia({
-                        audio: true,
-                        video: { facingMode: newFacing }
-                    }).then(stream => {
-                        const newVideoTrack = stream.getVideoTracks()[0];
-                        if (newVideoTrack) {
-                            const oldTrack = this.localStream.getVideoTracks()[0];
-                            if (oldTrack) {
-                                this.localStream.removeTrack(oldTrack);
-                                oldTrack.stop();
-                            }
-                            this.localStream.addTrack(newVideoTrack);
-                            const localVideo = document.getElementById('localVideo');
-                            if (localVideo) {
-                                localVideo.srcObject = this.localStream;
-                                localVideo.onloadedmetadata = () => { localVideo.play(); };
-                            }
-                            // Update peer connection
-                            const sender = this.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-                            if (sender) {
-                                sender.replaceTrack(newVideoTrack);
-                            }
-                        }
-                    }).catch(err => {
-                        showToast('Could not flip camera: ' + err.message, 'error');
-                        this.cameraFacing = currentFacing;
-                    });
-                };
-
-                // End call
-                document.getElementById('callEndBtn').onclick = () => {
-                    this.endCall('ended');
-                    showToast('Call ended.', 'info');
-                };
-            }
-
-            showAudioOnlyUI() {
-                const overlay = document.getElementById('activeCallOverlay');
-                overlay.classList.add('audio-only');
-                const avatarLarge = document.getElementById('callerAvatarLarge');
-                avatarLarge.style.display = 'flex';
-                if (this.remoteUid) {
-                    getDoc(doc(db, 'users', this.remoteUid)).then(snap => {
-                        if (snap.exists()) {
-                            const data = snap.data();
-                            if (data.avatar) {
-                                avatarLarge.innerHTML = `<img src="${data.avatar}" alt="${data.name || 'User'}" />`;
-                            } else {
-                                avatarLarge.textContent = (data.name || 'U').charAt(0).toUpperCase();
-                            }
-                        }
-                    }).catch(() => {});
-                }
-            }
-
-            updateCallStatus(status) {
-                const badge = document.getElementById('callStatusBadge');
-                if (!badge) return;
-                const statusMap = {
-                    'connected': { text: 'Connected', class: 'call-status' },
-                    'connecting': { text: 'Connecting…', class: 'call-status connecting' },
-                    'error': { text: 'Error', class: 'call-status error' },
-                };
-                const s = statusMap[status] || statusMap['connecting'];
-                badge.textContent = s.text;
-                badge.className = s.class;
-            }
-
-            startTimer() {
-                this.startTime = Date.now();
-                if (this.timerInterval) clearInterval(this.timerInterval);
-                this.timerInterval = setInterval(() => {
-                    const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
-                    const mins = Math.floor(elapsed / 60);
-                    const secs = elapsed % 60;
-                    const timer = document.getElementById('activeCallTimer');
-                    if (timer) {
-                        timer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                    }
-                    // Update call duration in Firestore
-                    if (this.callDocRef && this.isActive) {
-                        updateDoc(this.callDocRef, { duration: elapsed }).catch(() => {});
-                    }
-                }, 1000);
-            }
-
-            playRingtone(type) {
-                const audio = type === 'incoming' ?
-                    document.getElementById('incomingRingtone') :
-                    document.getElementById('outgoingRingtone');
-                if (!audio) return;
-                this.ringtone = audio;
-                this.ringtone.loop = true;
-                this.ringtone.volume = 0.5;
-                this.ringtone.play().catch(() => {});
-            }
-
-            stopRingtone() {
-                if (this.ringtone) {
-                    this.ringtone.pause();
-                    this.ringtone.currentTime = 0;
-                    this.ringtone = null;
-                }
-            }
-
-            endCall(reason) {
-                // Stop timer
-                if (this.timerInterval) { clearInterval(this.timerInterval);
-                    this.timerInterval = null; }
-
-                // Stop ringtone
-                this.stopRingtone();
-
-                // Close peer connection
-                if (this.peerConnection) {
-                    this.peerConnection.close();
-                    this.peerConnection = null;
-                }
-
-                // Stop local stream
-                if (this.localStream) {
-                    for (const track of this.localStream.getTracks()) {
-                        track.stop();
-                    }
-                    this.localStream = null;
-                }
-
-                // Remote stream
-                this.remoteStream = null;
-
-                // Update Firestore
-                if (this.callDocRef && this.isActive) {
-                    updateDoc(this.callDocRef, {
-                        status: 'ended',
-                        endedAt: serverTimestamp(),
-                        updatedAt: serverTimestamp(),
-                    }).catch(() => {});
-                } else if (this.callDocRef) {
-                    updateDoc(this.callDocRef, {
-                        status: reason || 'ended',
-                        updatedAt: serverTimestamp(),
-                    }).catch(() => {});
-                }
-
-                // Unsubscribe from call updates
-                if (this.callUnsub) {
-                    this.callUnsub();
-                    this.callUnsub = null;
-                }
-
-                // Remove active call overlay
-                document.getElementById('activeCallOverlay').classList.remove('active');
-                document.getElementById('ringingOverlay').classList.remove('active');
-                document.getElementById('incomingCallOverlay').classList.remove('active');
-
-                // Reset video elements
-                const remoteVideo = document.getElementById('remoteVideo');
-                if (remoteVideo) { remoteVideo.srcObject = null; }
-                const localVideo = document.getElementById('localVideo');
-                if (localVideo) { localVideo.srcObject = null; }
-
-                // Reset call state
-                this.isActive = false;
-                this.hasAnswered = false;
-                this.isInitiator = false;
-                this.remoteUid = null;
-                this.type = null;
-                this.callId = null;
-                this.callDocRef = null;
-                this.iceCandidates = [];
-                this.pendingCandidates = [];
-
-                // Clean up audio context if any
-                if (voiceNoteAudioContext) {
-                    voiceNoteAudioContext.close();
-                    voiceNoteAudioContext = null;
-                }
-
-                // Reset call state in global
-                callState.active = false;
-                callState.remoteUid = null;
-                callState.callId = null;
-                callState.peerConnection = null;
-                callState.localStream = null;
-                callState.remoteStream = null;
-                callState.isInitiator = false;
-                callState.isAudioOnly = false;
-
-                // Reset UI buttons
-                const muteBtn = document.getElementById('callMuteBtn');
-                if (muteBtn) { muteBtn.textContent = '🔇';
-                    muteBtn.classList.remove('active'); }
-                const videoBtn = document.getElementById('callVideoBtn');
-                if (videoBtn) { videoBtn.textContent = '📷';
-                    videoBtn.classList.remove('active'); }
-                const speakerBtn = document.getElementById('callSpeakerBtn');
-                if (speakerBtn) { speakerBtn.classList.remove('active'); }
-
-                // Reset quality indicator
-                document.getElementById('qualityIndicator').classList.remove('visible');
-
-                // Notify
-                if (reason !== 'ended' && reason !== 'declined' && reason !== 'cancelled' && reason !== 'error' && reason !==
-                    'timeout') {
-                    // Only show if not already notified
-                }
-
-                // Clean up any pending call listeners globally
-                if (callListenerUnsub) {
-                    callListenerUnsub();
-                    callListenerUnsub = null;
-                }
-            }
-        }
-
-        // ----- Global Call Functions -----
-        window.initCall = async function(type, targetUid) {
-            // If there's an active call, end it first
-            if (callInstance && callInstance.isActive) {
-                callInstance.endCall('ended');
-                callInstance = null;
-            }
-
-            // Check premium
-            if (type === 'voice' && !isRoomFeatureUnlocked('voice_call')) {
-                showToast('🔒 Voice Calling is a premium feature. Request it from Features.', 'warning');
-                return;
-            }
-            if (type === 'video' && !isRoomFeatureUnlocked('video_call')) {
-                showToast('🔒 Video Calling is a premium feature. Request it from Features.', 'warning');
-                return;
-            }
-
-            if (!targetUid) {
-                showToast('Please select a member to call.', 'warning');
-                return;
-            }
-
-            callInstance = new CallManager();
-            const success = await callInstance.initCall(type, targetUid);
-            if (success) {
-                callState.active = true;
-                callState.remoteUid = targetUid;
-                callState.callId = callInstance.callId;
-                callState.isInitiator = true;
-                callState.isAudioOnly = (type === 'voice');
-                // Add SP for initiating call
-                setTimeout(() => addSP(5, `Initiated ${type} call`), 2000);
-            } else {
-                callInstance = null;
-            }
-        };
-
-        // Incoming call listener
-        function startCallListener() {
-            if (callListenerUnsub) return;
-            if (!currentUserUid) return;
-
-            // Listen for incoming calls
-            const q = query(collection(db, 'calls'),
-                where('recipientId', '==', currentUserUid),
-                where('status', 'in', ['ringing', 'offer']),
-                orderBy('createdAt', 'desc'),
-                limit(1)
-            );
-
-            callListenerUnsub = onSnapshot(q, async (snap) => {
-                if (snap.empty) return;
-                const docSnap = snap.docs[0];
-                const data = docSnap.data();
-
-                // Check if we already have a call instance for this
-                if (callInstance && callInstance.isActive) {
-                    // Decline the incoming call if already in a call
-                    const ref = doc(db, 'calls', docSnap.id);
-                    await updateDoc(ref, { status: 'declined', updatedAt: serverTimestamp() });
-                    return;
-                }
-
-                // Ignore if we're the initiator
-                if (data.initiatorId === currentUserUid) return;
-
-                // Check if this call is already being handled
-                if (callInstance && callInstance.callId === docSnap.id) return;
-
-                // Create a new call instance for incoming
-                callInstance = new CallManager();
-                callInstance.callId = docSnap.id;
-                callInstance.remoteUid = data.initiatorId;
-                callInstance.type = data.type;
-                callInstance.isInitiator = false;
-                callInstance.isAudioOnly = data.isAudioOnly || false;
-                callInstance.callDocRef = doc(db, 'calls', docSnap.id);
-
-                // Handle the incoming call
-                await callInstance.handleIncomingCall({
-                    callId: docSnap.id,
-                    initiatorId: data.initiatorId,
-                    initiatorName: data.initiatorName || 'Caller',
-                    initiatorAvatar: data.initiatorAvatar || '',
-                    initiatorSpId: data.initiatorSpId || 'N/A',
-                    type: data.type,
-                    roomName: data.roomName || 'Room',
-                    offer: data.offer,
-                    isAudioOnly: data.isAudioOnly || false,
-                });
-
-                callState.active = true;
-                callState.remoteUid = data.initiatorId;
-                callState.callId = docSnap.id;
-                callState.isInitiator = false;
-                callState.isAudioOnly = data.isAudioOnly || false;
-
-            }, (err) => {
-                console.error('Call listener error:', err);
-            });
-        }
-
-        // ----- Call UI Helpers (overlay toggle) -----
-        window.handleVoiceCallFromComposer = function() {
-            if (!isRoomFeatureUnlocked('voice_call')) {
-                showToast('🔒 Voice Calling is a premium feature. Request it from Features.', 'warning');
-                return;
-            }
+        // Open the premium voice-note studio from the composer.
+        window.handleVoiceNoteFromComposer = function() {
+            if (!currentUserUid) { showToast('Please wait for the room to finish loading.', 'info'); return; }
             if (selectedUserUid && selectedUserUid !== currentUserUid) {
-                window.initCall('voice', selectedUserUid);
+                openMemberActionPanel(selectedUserUid);
+                setTimeout(() => window.memberActionVoiceNote(), 120);
                 return;
             }
-            showToast('👤 Please select a member from the member list first.', 'info');
-            toggleParticipants();
-        };
-
-        window.handleVideoCallFromComposer = function() {
-            if (!isRoomFeatureUnlocked('video_call')) {
-                showToast('🔒 Video Calling is a premium feature. Request it from Features.', 'warning');
-                return;
-            }
-            if (selectedUserUid && selectedUserUid !== currentUserUid) {
-                window.initCall('video', selectedUserUid);
-                return;
-            }
-            showToast('👤 Please select a member from the member list first.', 'info');
+            showToast('👤 Select a member first, then record your voice note.', 'info');
             toggleParticipants();
         };
 
@@ -6901,6 +5451,7 @@
                 await updateDoc(ref, { reactions });
                 closeReactionPicker();
                 await addSP(1, 'Reacted to a message');
+                await trackDailyActivity('reactions', 1);
             } catch (e) { console.error(e); }
         };
 
@@ -6971,6 +5522,8 @@
                 if (replyingTo) { msgData.replyTo = replyingTo;
                     replyingTo = null; }
                 await addDoc(collection(db, 'rooms', roomId, 'messages'), msgData);
+                await trackDailyActivity('messages', 1);
+                if (type !== 'text') await trackDailyActivity('social', 1);
                 lastActivity = Date.now();
             } catch (err) { showToast('Failed to send', 'error'); }
             sendBtn.disabled = false;
@@ -7157,6 +5710,7 @@
                 votedBy.push(currentUser.uid);
                 await updateDoc(ref, { pollData: { ...pollData, votes, votedBy } });
                 await addSP(1, 'Voted in a poll');
+                await trackDailyActivity('social', 1);
                 showToast('Vote recorded! +1 SP', 'success');
             } catch (e) { showToast('Failed to vote: ' + e.message, 'error'); }
         };
@@ -7189,7 +5743,7 @@
             if (loadMore && !hasMoreMessages) return;
             if (isLoadingMore) return;
             isLoadingMore = true;
-            if (loadMore) loadMoreBtn.textContent = 'Loading…';
+            if (loadMore) { const btn = getLoadMoreButton(); if (btn) btn.textContent = 'Loading…'; }
 
             try {
                 let q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'asc'), limit(
@@ -7203,7 +5757,7 @@
                 snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
                 if (snap.empty) {
                     hasMoreMessages = false;
-                    loadMoreBtn.style.display = 'none';
+                    const btn = getLoadMoreButton(); if (btn) btn.style.display = 'none';
                     if (reset) {
                         container.innerHTML = '<div class="empty-state"><span class="icon">💬</span>No messages yet.<br />Say hello!</div>';
                     }
@@ -7216,11 +5770,11 @@
                 if (reset) {
                     allMessages = msgs;
                     renderAllMessages();
-                    loadMoreBtn.style.display = hasMoreMessages ? 'block' : 'none';
+                    const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
                 } else {
                     allMessages = [...msgs, ...allMessages];
                     renderAllMessages();
-                    loadMoreBtn.style.display = hasMoreMessages ? 'block' : 'none';
+                    const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
                 }
             } catch (e) { console.error(e);
                 showToast('Failed to load messages', 'error'); }
@@ -7234,9 +5788,9 @@
             }
             let html = '';
             if (hasMoreMessages) {
-                html += `<div class="load-more-btn" id="loadMoreBtn" onclick="loadMoreMessages()">⬆ Load older messages</div>`;
+                html += `<div class="load-more-btn" data-role="load-more" onclick="loadMoreMessages()">⬆ Load older messages</div>`;
             } else {
-                html += `<div class="load-more-btn" style="display:none;" id="loadMoreBtn">⬆ Load older messages</div>`;
+                html += `<div class="load-more-btn" style="display:none;" data-role="load-more">⬆ Load older messages</div>`;
             }
             for (const data of allMessages) {
                 const isSelf = data.senderId === currentUser?.uid;
@@ -7246,6 +5800,8 @@
             if (!isFirstLoad) container.scrollTop = container.scrollHeight;
             isFirstLoad = false;
         }
+
+        function getLoadMoreButton() { return container.querySelector('[data-role="load-more"]'); }
 
         window.loadMoreMessages = function() { loadMessages(false, true); };
 
@@ -7320,6 +5876,58 @@
             document.getElementById('participantsOverlay').classList.toggle('open');
             if (document.getElementById('participantsPanel').classList.contains('open')) loadParticipants();
         };
+        function showSmartPresenceToast(name, joined) {
+            const safeName = String(name || 'Someone').replace(/[<>]/g, '');
+            let el = document.getElementById('smartPresenceToaster');
+            if (!el) {
+                el = document.createElement('div');
+                el.id = 'smartPresenceToaster';
+                el.className = 'smart-presence-toaster';
+                el.innerHTML = '<span class="dot"></span><span class="name"></span><span class="action"></span>';
+                document.body.appendChild(el);
+            }
+            el.className = `smart-presence-toaster ${joined ? 'join' : 'leave'} show`;
+            el.querySelector('.name').textContent = '@' + safeName.replace(/^@+/, '');
+            el.querySelector('.action').textContent = joined ? ' joined the room' : ' left the room';
+            clearTimeout(smartPresenceTimer);
+            smartPresenceTimer = setTimeout(() => el.classList.remove('show'), 2200);
+        }
+
+        function watchRoomMemberPresence() {
+            if (!roomId || memberPresenceUnsub) return;
+            memberPresenceUnsub = onSnapshot(collection(db, 'rooms', roomId, 'participants'), async (snap) => {
+                const next = new Map();
+                snap.forEach(d => {
+                    const data = d.data() || {};
+                    next.set(d.id, data.roomPresence === true);
+                });
+
+                if (!memberPresenceReady) {
+                    next.forEach((online, uid) => memberPresenceState.set(uid, online));
+                    memberPresenceReady = true;
+                    return;
+                }
+
+                const changes = [];
+                next.forEach((online, uid) => {
+                    const previous = memberPresenceState.get(uid);
+                    if (previous !== undefined && previous !== online && uid !== currentUserUid) changes.push({ uid, online });
+                });
+                memberPresenceState.clear();
+                next.forEach((online, uid) => memberPresenceState.set(uid, online));
+
+                for (const change of changes) {
+                    try {
+                        const userSnap = await getDoc(doc(db, 'users', change.uid));
+                        const data = userSnap.exists() ? userSnap.data() : {};
+                        showSmartPresenceToast(data.name || data.displayName || 'Member', change.online);
+                    } catch (_) {
+                        showSmartPresenceToast('Member', change.online);
+                    }
+                }
+            }, (err) => console.warn('Member presence listener:', err));
+        }
+
         async function loadParticipants() {
             const list = document.getElementById('participantsList');
             const countEl = document.getElementById('participantsCount');
@@ -7329,8 +5937,6 @@
                 const participants = snap.docs.map(d => ({ uid: d.id, data: d.data() }));
                 const total = participants.length;
                 if (countEl) countEl.textContent = total;
-                memberCountEl.textContent = total;
-                memberBadge.textContent = total;
 
                 if (!total) {
                     list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:12px;">No one here</div>';
@@ -7340,7 +5946,8 @@
                 // Render every participant even if a profile document is missing or slow.
                 const rows = await Promise.all(participants.map(async ({ uid, data }) => {
                     let name = data.name || data.displayName || 'User';
-                    let online = data.onlineStatus === true;
+                    let online = false;
+                    let lastSeen = data.lastSeen?.toDate?.() || null;
                     let level = Number(data.level) || 1;
                     let isVip = roomVips[uid] === true;
                     try {
@@ -7351,7 +5958,9 @@
                         if (userSnap.exists()) {
                             const d = userSnap.data();
                             name = d.name || d.displayName || name;
-                            online = d.onlineStatus === true;
+                            const presence = getPresenceState(d);
+                            online = presence.online;
+                            lastSeen = presence.lastSeen || lastSeen;
                         }
                         if (roomUserData) level = Number(roomUserData.level) || level;
                     } catch (e) {
@@ -7359,10 +5968,11 @@
                     }
                     const isSelf = uid === currentUser?.uid;
                     const statusDotClass = online ? 'online' : 'offline';
+                    const presenceText = formatLastSeen(lastSeen, online);
                     const levelName = getLevelName(level);
                     const icon = getLevelIcon(level);
                     const vipTag = isVip ? '<span class="vip-tag-participant">👑 VIP</span>' : '';
-                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${icon} ${levelName}</span>${vipTag}</div></div><span class="status-dot ${statusDotClass}"></span></div>`;
+                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${icon} ${levelName}</span>${vipTag}</div><div class="presence-time">${presenceText}</div></div><span class="status-dot ${statusDotClass}" title="${presenceText}"></span></div>`;
                 }));
                 list.innerHTML = rows.join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px 0;">No members</div>';
             } catch (e) {
@@ -7388,7 +5998,8 @@
 
             const name = memberActionTargetData.name || memberActionTargetData.displayName || 'User';
             const avatar = memberActionTargetData.avatar || '';
-            const online = memberActionTargetData.onlineStatus === true;
+            const presence = getPresenceState(memberActionTargetData);
+            const online = presence.online;
             const level = (await getUserRoomData(uid)).level || 1;
             const isVip = roomVips[uid] === true;
 
@@ -7401,42 +6012,21 @@
                 memberActionAvatar.style.background = 'linear-gradient(135deg, var(--gold), var(--gold-dark))';
             }
             memberActionStatusDot.className = 'dot-online ' + (online ? 'online' : 'offline');
-            memberActionStatusText.textContent = online ? 'online' : 'offline';
+            memberActionStatusText.textContent = formatLastSeen(presence.lastSeen, online);
             const lvlName = getLevelName(level);
             const icon = getLevelIcon(level);
             memberActionLevel.textContent = `${icon} ${lvlName}`;
             if (isVip) { memberActionVipBadge.style.display = 'inline-block'; } else { memberActionVipBadge.style
                     .display = 'none'; }
 
-            // Communication buttons
+            // Premium Voice Note
             const voiceNoteBtn = document.getElementById('actVoiceNote');
-            const voiceCallBtn = document.getElementById('actVoiceCall');
-            const videoCallBtn = document.getElementById('actVideoCall');
-
-            voiceNoteBtn.classList.remove('locked-action');
-            voiceNoteBtn.title = 'Send a voice note';
-
-            if (isRoomFeatureUnlocked('voice_call')) {
-                voiceCallBtn.classList.remove('locked-action');
-                voiceCallBtn.title = 'Voice Call';
-                voiceCallBtn.innerHTML = `<span class="action-icon">📞</span> Voice Call`;
-            } else {
-                voiceCallBtn.classList.add('locked-action');
-                voiceCallBtn.innerHTML =
-                    `<span class="action-icon">📞</span> Voice Call <span class="lock-icon-small">🔒</span>`;
-                voiceCallBtn.title = '🔒 Voice Calling is a premium feature. Request it from Features.';
-            }
-
-            if (isRoomFeatureUnlocked('video_call')) {
-                videoCallBtn.classList.remove('locked-action');
-                videoCallBtn.title = 'Video Call';
-                videoCallBtn.innerHTML = `<span class="action-icon">📹</span> Video Call`;
-            } else {
-                videoCallBtn.classList.add('locked-action');
-                videoCallBtn.innerHTML =
-                    `<span class="action-icon">📹</span> Video Call <span class="lock-icon-small">🔒</span>`;
-                videoCallBtn.title = '🔒 Video Calling is a premium feature. Request it from Features.';
-            }
+            const voiceNoteEnabled = isRoomFeatureUnlocked('voice_note');
+            voiceNoteBtn.classList.toggle('locked-action', !voiceNoteEnabled);
+            voiceNoteBtn.title = voiceNoteEnabled ? 'Send a premium voice note' : '🔒 Premium Voice Notes';
+            voiceNoteBtn.innerHTML = voiceNoteEnabled
+                ? '<span class="action-icon">🎤</span> Voice Note'
+                : '<span class="action-icon">🎤</span> Voice Note <span class="lock-icon-small">🔒</span>';
 
             // Admin/Mod section
             const adminSection = document.getElementById('memberActionAdminSection');
@@ -7499,31 +6089,6 @@
         };
 
         // ----- Member Action: Voice Note (already defined above) -----
-        // ----- Member Action: Voice Call -----
-        window.memberActionVoiceCall = function() {
-            if (!memberActionTargetUid) { showToast('No member selected.', 'warning'); return; }
-            if (memberActionTargetUid === currentUserUid) { showToast('Cannot call yourself.', 'warning'); return; }
-            if (!isRoomFeatureUnlocked('voice_call')) {
-                showToast('🔒 Voice Calling is a premium feature. Request it from the Features panel.', 'warning');
-                return;
-            }
-            window.initCall('voice', memberActionTargetUid);
-            setTimeout(() => addSP(10, 'Voice call'), 3000);
-            closeMemberActionPanel();
-        };
-
-        // ----- Member Action: Video Call -----
-        window.memberActionVideoCall = function() {
-            if (!memberActionTargetUid) { showToast('No member selected.', 'warning'); return; }
-            if (memberActionTargetUid === currentUserUid) { showToast('Cannot call yourself.', 'warning'); return; }
-            if (!isRoomFeatureUnlocked('video_call')) {
-                showToast('🔒 Video Calling is a premium feature. Request it from the Features panel.', 'warning');
-                return;
-            }
-            window.initCall('video', memberActionTargetUid);
-            setTimeout(() => addSP(10, 'Video call'), 3000);
-            closeMemberActionPanel();
-        };
 
         // ----- Member Action: Profile -----
         window.memberActionProfile = function() {
@@ -8425,37 +6990,10 @@
         };
 
         // ===== APPLY FEATURE UNLOCKS =====
+
         function applyFeatureUnlocks() {
-            if (isRoomFeatureUnlocked('room_badge')) {
-                premiumBadgeDisplay.classList.add('active');
-            } else {
-                premiumBadgeDisplay.classList.remove('active');
-            }
-
-            if (isRoomFeatureUnlocked('voice_call')) {
-                voiceCallBtn.classList.remove('locked');
-                voiceCallBtn.title = 'Voice Call';
-                voiceCallBtn.innerHTML = '📞';
-                if (voiceCallBadge) voiceCallBadge.style.display = 'none';
-            } else {
-                voiceCallBtn.classList.add('locked');
-                voiceCallBtn.title = '🔒 Voice Call (Premium)';
-                voiceCallBtn.innerHTML = '📞<span class="call-badge" id="voiceCallBadge">🔒</span>';
-                if (voiceCallBadge) voiceCallBadge.style.display = 'block';
-            }
-
-            if (isRoomFeatureUnlocked('video_call')) {
-                videoCallBtn.classList.remove('locked');
-                videoCallBtn.title = 'Video Call';
-                videoCallBtn.innerHTML = '📹';
-                if (videoCallBadge) videoCallBadge.style.display = 'none';
-            } else {
-                videoCallBtn.classList.add('locked');
-                videoCallBtn.title = '🔒 Video Call (Premium)';
-                videoCallBtn.innerHTML = '📹<span class="call-badge" id="videoCallBadge">🔒</span>';
-                if (videoCallBadge) videoCallBadge.style.display = 'block';
-            }
-
+            const composerVoiceBtn = document.getElementById('voiceNoteComposerBtn');
+            if (composerVoiceBtn) composerVoiceBtn.title = isRoomFeatureUnlocked('voice_note') ? 'Premium Voice Note' : '🔒 Premium Voice Note';
             if (isRoomFeatureUnlocked('custom_emojis')) {
                 emojiManagerDropdownItem.style.display = 'flex';
             } else {
@@ -8603,13 +7141,6 @@
                     sendBtn.disabled = false;
                     showToast('👑 Owner mode', 'gold');
                     await loadUserEarnings(uid);
-                    await loadRoomFeatureEntitlements();
-                    await loadVipList();
-                    await loadCustomEmojis();
-                    await loadAnnouncement();
-                    applyFeatureUnlocks();
-                    listenRoomFeatureUpdates();
-                    await loadUserRoomData(uid);
                     awardDailyLogin();
                     startTimeSpAward();
                     roomFeaturesBtn.style.display = 'inline-block';
@@ -8625,13 +7156,6 @@
                     roomFeeEl.textContent = `🪙 ${fee} (paid)`;
                     msgInput.disabled = false;
                     sendBtn.disabled = false;
-                    await loadRoomFeatureEntitlements();
-                    await loadVipList();
-                    await loadCustomEmojis();
-                    await loadAnnouncement();
-                    applyFeatureUnlocks();
-                    listenRoomFeatureUpdates();
-                    await loadUserRoomData(uid);
                     awardDailyLogin();
                     startTimeSpAward();
                     return true;
@@ -8649,13 +7173,6 @@
                 sendBtn.disabled = false;
                 showToast(`🎉 Joined! -${fee} 🪙`, 'success');
                 addNotification(`Joined room — paid ${fee}🪙`, 'success', 'Room Joined');
-                await loadRoomFeatureEntitlements();
-                await loadVipList();
-                await loadCustomEmojis();
-                await loadAnnouncement();
-                applyFeatureUnlocks();
-                listenRoomFeatureUpdates();
-                await loadUserRoomData(uid);
                 awardDailyLogin();
                 startTimeSpAward();
                 return true;
@@ -8841,31 +7358,31 @@
                 if (!user) { window.location.href = 'index.html'; return; }
                 currentUser = user;
                 currentUserUid = user.uid;
-                updateUserOnlineStatus(true);
-                try {
-                    const docSnap = await getDoc(doc(db, 'users', user.uid));
-                    if (docSnap.exists()) { const data = docSnap.data();
-                        userSpId = data.spId || null; if (data.achievements) achievements = data.achievements; }
-                } catch (e) {}
+                startPresenceHeartbeat();
+                const profilePromise = getDoc(doc(db, 'users', user.uid)).catch(() => null);
                 const joined = await joinRoom(user.uid, roomId);
                 if (!joined) { setTimeout(() => window.location.href = 'rooms.html', 2000); return; }
-                coinBalance = await getCoins(user.uid);
+                const messagesPromise = loadMessages(true, false);
+                const [profileSnap, coins] = await Promise.all([
+                    profilePromise,
+                    getCoins(user.uid)
+                ]);
+                if (profileSnap?.exists()) {
+                    const data = profileSnap.data();
+                    userSpId = data.spId || null;
+                    if (data.achievements) achievements = data.achievements;
+                }
+                coinBalance = coins;
                 coinEl.textContent = coinBalance;
                 document.getElementById('sendCoinsBalance').textContent = coinBalance;
-                await loadMessages(true, false);
+                await messagesPromise;
                 listenForNewMessages();
                 participantUnsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
                     if (snap.exists()) { const data = snap.data();
-                        memberCountEl.textContent = data.participantCount || 0;
-                        memberBadge.textContent = data.participantCount || 0;
+
                         roomData = data; }
                 });
-                setInterval(() => {
-                    const online = navigator.onLine;
-                    roomStatusDot.className = 'dot ' + (online ? 'online' : 'offline');
-                    roomStatusText.textContent = online ? 'online' : 'offline';
-                }, 10000);
-
+                watchRoomMemberPresence();
                 const typingRef = doc(db, 'rooms', roomId, 'typing', 'state');
                 onSnapshot(typingRef, (snap) => {
                     if (snap.exists()) {
@@ -8890,20 +7407,18 @@
                     setDoc(typingRef, { uid: null, updatedAt: serverTimestamp() }, { merge: true });
                 });
 
-                loadGiftBadgeCount();
-                loadParticipants();
+                void Promise.allSettled([loadGiftBadgeCount(), loadParticipants()]);
                 addNotification('Welcome to the room! 🎉', 'info', 'Welcome');
 
-                await loadRoomFeatureEntitlements();
-                await loadVipList();
-                await loadCustomEmojis();
-                await loadAnnouncement();
+                await Promise.all([
+                    loadRoomFeatureEntitlements(),
+                    loadVipList(),
+                    loadCustomEmojis(),
+                    loadAnnouncement(),
+                    loadSavedTheme()
+                ]);
                 applyFeatureUnlocks();
                 listenRoomFeatureUpdates();
-                await loadSavedTheme();
-
-                // Start call listener
-                startCallListener();
 
                 if (isRoomOwner) {
                     setTimeout(() => {
@@ -8920,7 +7435,10 @@
         // SAVE STATE & ONLINE STATUS
         // ============================================================
         window.addEventListener('beforeunload', () => {
+            stopPresenceHeartbeat();
             if (currentUserUid) updateUserOnlineStatus(false);
+            if (memberPresenceUnsub) { memberPresenceUnsub(); memberPresenceUnsub = null; }
+            if (smartPresenceTimer) { clearTimeout(smartPresenceTimer); smartPresenceTimer = null; }
             if (unsubscribeUser) { unsubscribeUser();
                 unsubscribeUser = null; }
             if (roomFeaturesUnsub) { roomFeaturesUnsub();
@@ -8928,21 +7446,21 @@
             if (roomRequestsUnsub) { roomRequestsUnsub();
                 roomRequestsUnsub = null; }
             if (timeInterval) clearInterval(timeInterval);
-            if (callListenerUnsub) { callListenerUnsub();
-                callListenerUnsub = null; }
-            if (callInstance) { callInstance.endCall('ended');
-                callInstance = null; }
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) { if (currentUserUid) updateUserOnlineStatus(false); } else { if (currentUserUid)
-                    updateUserOnlineStatus(true); }
+            if (document.hidden) {
+                if (currentUserUid) updateUserOnlineStatus(false);
+            } else if (currentUserUid && navigator.onLine) {
+                updateUserOnlineStatus(true);
+            }
         });
+        window.addEventListener('online', () => { if (currentUserUid && !document.hidden) updateUserOnlineStatus(true); });
+        window.addEventListener('offline', () => { if (currentUserUid) updateUserOnlineStatus(false); });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (memberActionOverlay.classList.contains('open')) closeMemberActionPanel();
-                else if (document.getElementById('userMenu').style.display === 'block') closeUserMenu();
                 else if (statsPanelOverlay.classList.contains('open')) closeStatsPanel();
                 else if (roomFeaturesOverlay.classList.contains('open')) closeRoomFeaturesPanel();
                 else if (document.getElementById('giftSendOverlay').classList.contains('open')) closeGiftSendModal();
@@ -9086,8 +7604,6 @@
         window.openMemberActionPanel = window.openMemberActionPanel;
         window.closeMemberActionPanel = window.closeMemberActionPanel;
         window.memberActionVoiceNote = window.memberActionVoiceNote;
-        window.memberActionVoiceCall = window.memberActionVoiceCall;
-        window.memberActionVideoCall = window.memberActionVideoCall;
         window.memberActionProfile = window.memberActionProfile;
         window.memberActionGift = window.memberActionGift;
         window.memberActionCoins = window.memberActionCoins;
@@ -9097,16 +7613,13 @@
         window.memberActionAssignVip = window.memberActionAssignVip;
         window.memberActionRemoveVip = window.memberActionRemoveVip;
         window.memberActionReport = window.memberActionReport;
-        window.handleVoiceCallFromComposer = window.handleVoiceCallFromComposer;
-        window.handleVideoCallFromComposer = window.handleVideoCallFromComposer;
-        window.initCall = window.initCall;
         window.toggleVoiceNotePreview = window.toggleVoiceNotePreview;
         window.retryVoiceNote = window.retryVoiceNote;
         window.cancelVoiceNote = window.cancelVoiceNote;
         window.sendVoiceNoteFromPreview = window.sendVoiceNoteFromPreview;
 
         init();
-        console.log('🔥 FunRoom — Complete Premium System v3.0 — Real WebRTC Calls + Voice Notes + Full Feature Enforcement');
+        console.log('🔥 FunRoom — Premium Voice Notes + Full Feature Enforcement');
     </script>
 </body>
 </html>
