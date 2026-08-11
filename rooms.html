@@ -55,22 +55,35 @@
             flex-direction: column;
             align-items: center;
             padding: 0 12px 20px;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: max(20px, env(safe-area-inset-bottom));
         }
 
         /* ===== HEADER ===== */
+        :root {
+            --header-height: 76px;
+        }
+
         .header {
             width: 100%;
-            max-width: 620px;
-            padding: 12px 0;
+            max-width: 720px;
+            min-height: var(--header-height);
+            padding: calc(14px + env(safe-area-inset-top, 0px)) 14px 14px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-            gap: 6px;
+            border: 1px solid var(--border-color);
+            border-top: 0;
+            border-radius: 0 0 18px 18px;
+            margin-bottom: 16px;
+            flex-wrap: nowrap;
+            gap: 12px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(7, 11, 16, 0.92);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            backdrop-filter: blur(18px) saturate(140%);
+            box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
         }
         .header .left {
             display: flex;
@@ -81,11 +94,11 @@
             background: none;
             border: none;
             color: var(--text-muted);
-            font-size: 1.4rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            padding: 4px 6px;
-            min-height: 36px;
-            min-width: 36px;
+            padding: 6px;
+            min-height: 48px;
+            min-width: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -109,15 +122,20 @@
         .header .right {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            flex-shrink: 0;
         }
         .header .coins {
             background: rgba(0, 168, 132, 0.12);
             border: 1px solid rgba(0, 168, 132, 0.15);
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-weight: 700;
-            font-size: 0.8rem;
+            padding: 8px 14px;
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: 22px;
+            font-weight: 800;
+            font-size: 0.95rem;
             color: var(--primary);
             display: flex;
             align-items: center;
@@ -754,15 +772,30 @@
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
+            :root {
+                --header-height: 68px;
+            }
             .header {
-                padding: 8px 0;
+                max-width: 100%;
+                min-height: var(--header-height);
+                padding: calc(12px + env(safe-area-inset-top, 0px)) 10px 12px;
+                margin-bottom: 12px;
+                gap: 8px;
+            }
+            .header .left {
+                gap: 6px;
+                min-width: 0;
             }
             .header .logo {
-                font-size: 1rem;
+                font-size: 1.15rem;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
             .header .coins {
-                font-size: 0.7rem;
-                padding: 2px 8px;
+                min-height: 44px;
+                padding: 7px 10px;
+                font-size: 0.82rem;
             }
             .toolbar {
                 flex-direction: column;
@@ -857,24 +890,24 @@
     </div>
 
     <!-- ===== CREATE BUTTON ===== -->
-    <button class="create-btn" onclick="openCreateModal()" aria-label="Create new room">➕ Create New Room (🪙 1,000)</button>
+    <button class="create-btn" onclick="openCreateModal()" aria-label="Create new room">➕ Create New Room (🪙 2,000)</button>
 
     <!-- ===== CREATE ROOM MODAL ===== -->
     <div class="modal-overlay" id="createModal" aria-hidden="true">
         <div class="modal-box">
             <div class="title">🏠 Create Room</div>
-            <div class="sub">Costs <strong>1,000 🪙</strong> to create. Set your own entry fee (default 50).</div>
+            <div class="sub">Costs <strong>2,000 SP</strong> to create. Members pay <strong>200 SP once</strong> to join and can return anytime.</div>
             <div class="field">
                 <label for="roomNameInput">Room Name</label>
                 <input type="text" id="roomNameInput" placeholder="e.g., Gaming Lounge" maxlength="40" aria-label="Room name">
             </div>
-            <div class="field">
-                <label for="roomFeeInput">Entry Fee (🪙)</label>
-                <input type="number" id="roomFeeInput" placeholder="50" min="1" max="100" value="50" aria-label="Entry fee">
+            <div class="membership-note" style="margin:12px 0;padding:12px;border-radius:12px;background:rgba(0,168,132,.08);border:1px solid rgba(0,168,132,.18);color:var(--text-muted);font-size:.82rem;line-height:1.5;">
+                <strong style="color:var(--text-main);">Membership fee: 200 SP one-time.</strong><br>
+                Members can leave and return anytime without paying again.
             </div>
             <div class="actions">
                 <button class="cancel" onclick="closeCreateModal()">Cancel</button>
-                <button class="create" id="createRoomBtn" onclick="createRoom()">Create (1,000 🪙)</button>
+                <button class="create" id="createRoomBtn" onclick="createRoom()">Create (2,000 SP)</button>
             </div>
         </div>
     </div>
@@ -886,7 +919,7 @@
             <div class="room-preview-details" id="previewDetails">
                 <div class="detail-row"><span class="label">Owner</span><span class="value" id="previewOwner">—</span></div>
                 <div class="detail-row"><span class="label">Members</span><span class="value" id="previewMembers">0</span></div>
-                <div class="detail-row"><span class="label">Entry Fee</span><span class="value" id="previewFee">0 🪙</span></div>
+                <div class="detail-row"><span class="label">Membership</span><span class="value" id="previewFee">200 SP • one-time</span></div>
                 <div class="detail-row"><span class="label">Created</span><span class="value" id="previewCreated">—</span></div>
                 <div class="detail-row"><span class="label">Status</span><span class="value" id="previewStatus">—</span></div>
             </div>
@@ -894,6 +927,20 @@
                 <button class="cancel" onclick="closePreviewModal()">Close</button>
                 <button class="confirm-join" id="previewJoinBtn" onclick="joinFromPreview()">Join Room</button>
             </div>
+        </div>
+    </div>
+
+    <!-- ===== FIRST VISIT WELCOME ===== -->
+    <div class="modal-overlay" id="welcomeModal" aria-hidden="true">
+        <div class="modal-box welcome-box" style="max-width:520px;">
+            <div class="title">👋 Welcome to Community Rooms</div>
+            <div class="sub">Find your people, join conversations, and discover rooms built around what you love.</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0;">
+                <div style="padding:14px;border-radius:14px;background:rgba(255,255,255,.04);text-align:center;"><strong style="display:block;font-size:1.1rem;">2,000 SP</strong><small>Create a room</small></div>
+                <div style="padding:14px;border-radius:14px;background:rgba(255,255,255,.04);text-align:center;"><strong style="display:block;font-size:1.1rem;">200 SP</strong><small>Join once</small></div>
+                <div style="padding:14px;border-radius:14px;background:rgba(255,255,255,.04);text-align:center;"><strong style="display:block;font-size:1.1rem;">∞</strong><small>Return anytime</small></div>
+            </div>
+            <div class="actions"><button class="create" id="dismissWelcome" type="button">Let's Explore</button></div>
         </div>
     </div>
 
@@ -959,6 +1006,10 @@
         let recentRooms = []; // array of room IDs (max 5)
         let previewRoomId = null; // for preview modal
         let currentFilter = 'all'; // 'all', 'live', 'trending', 'premium', 'favorites'
+        const ENTRY_FEE = 200;
+        const CREATE_COST = 2000;
+        let creatingRoom = false;
+        const paymentInProgress = new Set();
 
         // ============================================================
         // DOM REFERENCES
@@ -1314,10 +1365,10 @@
                     filtered.sort((a, b) => (b.memberCount || 0) - (a.memberCount || 0));
                     break;
                 case 'cheapest':
-                    filtered.sort((a, b) => (a.entryFee || 50) - (b.entryFee || 50));
+                    filtered.sort(() => 0);
                     break;
                 case 'expensive':
-                    filtered.sort((a, b) => (b.entryFee || 50) - (a.entryFee || 50));
+                    filtered.sort(() => 0);
                     break;
                 default:
                     break;
@@ -1361,7 +1412,7 @@
             let html = '';
             rooms.forEach(room => {
                 const name = room.name || 'Unnamed Room';
-                const fee = room.entryFee || 50;
+                const fee = ENTRY_FEE;
                 const count = room.memberCount || 0;
                 const isLive = count >= 5;
                 const isTrending = count >= 10;
@@ -1369,7 +1420,7 @@
                 const isAdminRoom = room.isAdminRoom;
 
                 let badges = '';
-                badges += `<span class="badge">${fee} 🪙</span>`;
+                badges += `<span class="badge">${fee} SP • one-time</span>`;
                 if (isVip) badges += ` <span class="vip-badge">👑 VIP</span>`;
                 if (isAdminRoom) badges += ` <span class="admin-badge">★ Admin</span>`;
                 if (isTrending) badges += ` <span class="trending-badge">🔥 Trending</span>`;
@@ -1390,7 +1441,7 @@
                                 ${badges}
                             </div>
                             <div class="meta">
-                                <span class="fee">Entry: ${fee} 🪙</span>
+                                <span class="fee">Membership: ${fee} SP • one-time</span>
                                 <span class="count">
                                     👥 ${count} member${count !== 1 ? 's' : ''}
                                     ${isLive ? '<span class="live-dot"></span>' : ''}
@@ -1403,12 +1454,33 @@
                             <button class="fav-btn ${isFav ? 'favorited' : ''}" onclick="event.stopPropagation(); toggleFavorite('${escapeHTML(room.id)}')" aria-label="Toggle favorite">
                                 ${favIcon}
                             </button>
-                            <button class="enter-btn" onclick="event.stopPropagation(); joinRoom('${escapeHTML(room.id)}')">Join</button>
+                            <button class="enter-btn" data-join-room="${escapeHTML(room.id)}" onclick="event.stopPropagation(); joinRoom('${escapeHTML(room.id)}')">Join — 200 SP</button>
                         </div>
                     </div>
                 `;
             });
             grid.innerHTML = html;
+            updateMembershipButtons(rooms);
+        }
+
+        async function getMembership(roomId) {
+            if (!currentUserUid) return null;
+            const ref = doc(db, 'rooms', roomId, 'members', currentUserUid);
+            const snap = await getDoc(ref);
+            return snap.exists() ? snap.data() : null;
+        }
+
+        async function updateMembershipButtons(rooms) {
+            if (!currentUserUid) return;
+            await Promise.all(rooms.map(async room => {
+                const btn = document.querySelector(`[data-join-room="${CSS.escape(room.id)}"]`);
+                if (!btn) return;
+                if (room.createdBy === currentUserUid) { btn.textContent = 'Owner — Enter'; return; }
+                try {
+                    const member = await getMembership(room.id);
+                    if (member) btn.textContent = 'Member — Enter';
+                } catch (e) { console.warn('Membership lookup failed', room.id, e); }
+            }));
         }
 
         // ============================================================
@@ -1420,50 +1492,102 @@
         };
 
         // ============================================================
-        // JOIN ROOM WITH CONFIRM
+        // JOIN ROOM — ONE-TIME 200 SP MEMBERSHIP
         // ============================================================
+        async function ensureOwnerMembership(room) {
+            if (!currentUserUid || room.createdBy !== currentUserUid) return false;
+            const memberRef = doc(db, 'rooms', room.id, 'members', currentUserUid);
+            await setDoc(memberRef, {
+                uid: currentUserUid,
+                joinedAt: serverTimestamp(),
+                paidEntryFee: 0,
+                role: 'owner'
+            }, { merge: true });
+            return true;
+        }
+
         async function joinRoom(roomId) {
             const room = allRooms.find(r => r.id === roomId);
-            if (!room) {
-                showToast('Room not found', 'error');
-                return;
-            }
-            const fee = room.entryFee || 50;
-            const name = room.name || 'Room';
-            const owner = room.creatorName || 'Unknown';
-            const members = room.memberCount || 0;
-
-            const confirmed = await showConfirm({
-                title: `Join "${name}"?`,
-                message: `
-                    <div style="text-align:left;font-size:0.85rem;line-height:1.6;">
-                        <div><strong>Owner:</strong> ${owner}</div>
-                        <div><strong>Members:</strong> ${members}</div>
-                        <div><strong>Entry Fee:</strong> ${fee} 🪙</div>
-                        <div style="margin-top:8px;color:var(--primary);">Your balance: ${coinBalance} 🪙</div>
-                        ${coinBalance < fee ? '<div style="color:var(--error);">⚠️ Insufficient coins</div>' : ''}
-                    </div>
-                `,
-                confirmText: coinBalance >= fee ? `Join (${fee} 🪙)` : 'Insufficient Coins',
-                confirmType: coinBalance >= fee ? 'primary' : 'danger',
-                cancelText: 'Cancel'
-            });
-
-            if (!confirmed) return;
-
-            if (coinBalance < fee) {
-                showToast('Not enough coins to join this room', 'error');
-                return;
-            }
+            if (!room || !currentUserUid) { showToast('Please sign in first', 'error'); return; }
+            if (paymentInProgress.has(roomId)) return;
 
             try {
-                await updateCoins(currentUserUid, -fee, `Join room: ${name}`);
+                if (room.createdBy === currentUserUid) {
+                    await ensureOwnerMembership(room);
+                    addRecentRoom(roomId);
+                    window.location.href = `room.html?id=${encodeURIComponent(roomId)}`;
+                    return;
+                }
+
+                const existing = await getMembership(roomId);
+                if (existing) {
+                    addRecentRoom(roomId);
+                    window.location.href = `room.html?id=${encodeURIComponent(roomId)}`;
+                    return;
+                }
+
+                if (coinBalance < ENTRY_FEE) {
+                    showToast('You need 200 SP to join this room', 'error');
+                    return;
+                }
+
+                const name = room.name || 'Room';
+                const confirmed = await showConfirm({
+                    title: `Join “${escapeHTML(name)}”?`,
+                    message: `<div style="text-align:left;line-height:1.7"><div><strong>Membership:</strong> 200 SP</div><div>One-time fee. Return anytime without paying again.</div><div style="margin-top:8px;color:var(--primary)">Your balance: ${coinBalance} SP</div></div>`,
+                    confirmText: 'Join — 200 SP',
+                    confirmType: 'primary',
+                    cancelText: 'Cancel'
+                });
+                if (!confirmed || paymentInProgress.has(roomId)) return;
+                paymentInProgress.add(roomId);
+
+                const memberRef = doc(db, 'rooms', roomId, 'members', currentUserUid);
+                const userRef = doc(db, 'users', currentUserUid);
+                const transactionRef = doc(collection(db, 'transactions'));
+
+                await runTransaction(db, async tx => {
+                    const memberSnap = await tx.get(memberRef);
+                    if (memberSnap.exists()) return;
+
+                    const userSnap = await tx.get(userRef);
+                    if (!userSnap.exists()) throw new Error('User wallet not found');
+                    const balance = Number(userSnap.data().coins || 0);
+                    if (balance < ENTRY_FEE) throw new Error('Insufficient coins');
+
+                    tx.update(userRef, { coins: balance - ENTRY_FEE });
+                    tx.set(transactionRef, {
+                        userId: currentUserUid,
+                        amount: -ENTRY_FEE,
+                        newBalance: balance - ENTRY_FEE,
+                        reason: `Joined room: ${name}`,
+                        timestamp: serverTimestamp()
+                    });
+                    tx.set(memberRef, {
+                        uid: currentUserUid,
+                        joinedAt: serverTimestamp(),
+                        paidEntryFee: ENTRY_FEE,
+                        role: 'member',
+                        welcomeShown: false
+                    });
+                    tx.update(doc(db, 'rooms', roomId), { participantCount: increment(1) });
+                });
+
                 coinBalance = await getCoins(currentUserUid);
                 headerCoins.textContent = coinBalance;
                 addRecentRoom(roomId);
-                window.location.href = `room.html?id=${encodeURIComponent(roomId)}`;
+
+                if (!localStorage.getItem(`spike_room_welcomed_${currentUserUid}_${roomId}`)) {
+                    localStorage.setItem(`spike_room_welcomed_${currentUserUid}_${roomId}`, '1');
+                    showToast(`Welcome to ${name} 🎉`, 'success');
+                }
+
+                setTimeout(() => { window.location.href = `room.html?id=${encodeURIComponent(roomId)}`; }, 450);
             } catch (err) {
-                showToast('Failed to join: ' + err.message, 'error');
+                console.error('Failed to join room:', err);
+                showToast(err.message === 'Insufficient coins' ? 'Not enough SP to join this room' : (err.message || 'Failed to join room'), 'error');
+            } finally {
+                paymentInProgress.delete(roomId);
             }
         }
 
@@ -1480,14 +1604,22 @@
             previewTitle.textContent = `🏠 ${room.name || 'Room'}`;
             previewOwner.textContent = room.creatorName || 'Unknown';
             previewMembers.textContent = room.memberCount || 0;
-            previewFee.textContent = (room.entryFee || 50) + ' 🪙';
+            previewFee.textContent = '200 SP • one-time';
             previewCreated.textContent = room.createdAtDate ? room.createdAtDate.toLocaleDateString() : '—';
             previewStatus.textContent = room.memberCount >= 5 ? '🟢 Active' : '🟡 Quiet';
 
-            previewJoinBtn.onclick = () => {
+            previewJoinBtn.textContent = 'Join — 200 SP';
+            previewJoinBtn.onclick = async () => {
                 closePreviewModal();
-                joinRoom(roomId);
+                await joinRoom(roomId);
             };
+            if (room.createdBy === currentUserUid) {
+                previewJoinBtn.textContent = 'Owner — Enter Room';
+            } else if (currentUserUid) {
+                getMembership(roomId).then(member => {
+                    if (member && previewRoomId === roomId) previewJoinBtn.textContent = 'Member — Enter Room';
+                }).catch(() => {});
+            }
 
             previewModal.classList.add('active');
             previewModal.dataset.confirm = 'false';
@@ -1506,22 +1638,16 @@
         });
 
         // ============================================================
-        // CREATE ROOM
+        // CREATE ROOM — 2,000 SP
         // ============================================================
-        const CREATE_COST = 1000;
-
         window.openCreateModal = function() {
-            if (!currentUser) {
-                showToast('Please sign in first', 'error');
-                return;
-            }
+            if (!currentUser) { showToast('Please sign in first', 'error'); return; }
             if (coinBalance < CREATE_COST) {
-                showToast(`You need at least ${CREATE_COST} 🪙 to create a room`, 'error');
+                showToast(`You need at least ${CREATE_COST.toLocaleString()} SP to create a room`, 'error');
                 return;
             }
             createModal.classList.add('active');
             roomNameInput.value = '';
-            roomFeeInput.value = '50';
             roomNameInput.focus();
         };
 
@@ -1530,45 +1656,69 @@
         };
 
         window.createRoom = async function() {
+            if (creatingRoom) return;
             const name = roomNameInput.value.trim();
-            const fee = parseInt(roomFeeInput.value) || 50;
+            if (!name) { showToast('Please enter a room name', 'error'); return; }
+            if (!currentUser || !currentUserUid) { showToast('Please sign in first', 'error'); return; }
+            if (coinBalance < CREATE_COST) { showToast(`You need ${CREATE_COST.toLocaleString()} SP to create a room`, 'error'); return; }
 
-            if (!name) {
-                showToast('Please enter a room name', 'error');
-                return;
-            }
-            if (fee < 1 || fee > 100) {
-                showToast('Fee must be between 1 and 100', 'error');
-                return;
-            }
-
+            creatingRoom = true;
             createBtn.disabled = true;
-            createBtn.textContent = 'Creating...';
+            createBtn.textContent = 'Creating…';
 
             try {
-                await updateCoins(currentUser.uid, -CREATE_COST, `Created room: ${escapeHTML(name)}`);
+                const roomRef = doc(collection(db, 'rooms'));
+                const memberRef = doc(db, 'rooms', roomRef.id, 'members', currentUserUid);
+                const userRef = doc(db, 'users', currentUserUid);
+                const transactionRef = doc(collection(db, 'transactions'));
+                const creatorName = currentUser.displayName || currentUser.email?.split('@')[0] || 'Member';
 
-                const roomRef = await addDoc(collection(db, 'rooms'), {
-                    name: escapeHTML(name),
-                    entryFee: fee,
-                    createdBy: currentUser.uid,
-                    participantCount: 0,
-                    createdAt: serverTimestamp(),
-                    vip: false
+                await runTransaction(db, async tx => {
+                    const existingRoom = await tx.get(roomRef);
+                    if (existingRoom.exists()) throw new Error('Room creation conflict. Please try again.');
+                    const userSnap = await tx.get(userRef);
+                    if (!userSnap.exists()) throw new Error('User wallet not found');
+                    const balance = Number(userSnap.data().coins || 0);
+                    if (balance < CREATE_COST) throw new Error('Insufficient coins');
+
+                    tx.update(userRef, { coins: balance - CREATE_COST });
+                    tx.set(roomRef, {
+                        name: escapeHTML(name),
+                        entryFee: ENTRY_FEE,
+                        createdBy: currentUserUid,
+                        creatorName: escapeHTML(creatorName),
+                        participantCount: 1,
+                        createdAt: serverTimestamp(),
+                        vip: false
+                    });
+                    tx.set(memberRef, {
+                        uid: currentUserUid,
+                        joinedAt: serverTimestamp(),
+                        paidEntryFee: 0,
+                        role: 'owner',
+                        welcomeShown: true
+                    });
+                    tx.set(transactionRef, {
+                        userId: currentUserUid,
+                        amount: -CREATE_COST,
+                        newBalance: balance - CREATE_COST,
+                        reason: `Created room: ${name}`,
+                        timestamp: serverTimestamp()
+                    });
                 });
 
-                coinBalance = await getCoins(currentUser.uid);
+                coinBalance = await getCoins(currentUserUid);
                 headerCoins.textContent = coinBalance;
-
                 closeCreateModal();
-                showToast(`Room "${escapeHTML(name)}" created! -${CREATE_COST} 🪙`, 'success');
-                await refreshRooms();
+                showToast(`Room “${name}” created! -${CREATE_COST.toLocaleString()} SP`, 'success');
+                await loadRooms(false);
             } catch (err) {
                 console.error('Failed to create room:', err);
                 showToast(err.message || 'Failed to create room', 'error');
             } finally {
+                creatingRoom = false;
                 createBtn.disabled = false;
-                createBtn.textContent = `Create (${CREATE_COST.toLocaleString()} 🪙)`;
+                createBtn.textContent = `Create (${CREATE_COST.toLocaleString()} SP)`;
             }
         };
 
@@ -1579,6 +1729,25 @@
             return String(s || '').replace(/[&<>'"]/g, t =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t)
             );
+        }
+
+        window.joinFromPreview = function() {
+            if (previewRoomId) joinRoom(previewRoomId);
+        };
+
+        // First-visit welcome is UI-only. Firestore remains the source of truth for membership.
+        const welcomeModal = document.getElementById('welcomeModal');
+        const dismissWelcome = document.getElementById('dismissWelcome');
+        if (dismissWelcome) dismissWelcome.onclick = () => {
+            localStorage.setItem('spike_rooms_welcome_seen', '1');
+            welcomeModal.classList.remove('active');
+            welcomeModal.setAttribute('aria-hidden', 'true');
+        };
+        if (!localStorage.getItem('spike_rooms_welcome_seen')) {
+            setTimeout(() => {
+                welcomeModal.classList.add('active');
+                welcomeModal.setAttribute('aria-hidden', 'false');
+            }, 700);
         }
 
         // ============================================================

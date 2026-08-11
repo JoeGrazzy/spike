@@ -628,6 +628,33 @@
             margin-top: 2px;
             object-fit: cover;
         }
+        .shared-post-media {
+            width: 100%;
+            max-width: 100%;
+            margin-top: 6px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.18);
+        }
+        .shared-post-media img,
+        .shared-post-media video {
+            display: block;
+            width: 100%;
+            max-height: 360px;
+            object-fit: contain;
+            border-radius: 10px;
+            background: #000;
+        }
+        .shared-post-media audio {
+            display: block;
+            width: 100%;
+            min-width: 220px;
+        }
+        .shared-post-author {
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
 
         .typing-indicator {
             display: none;
@@ -2971,9 +2998,23 @@
                     showToast("Message not found", "error", "Error");
                     return;
                 }
+
                 const data = msgSnap.data();
                 const recipientId = prompt('Enter the user ID to forward this message to:');
                 if (!recipientId) return;
+
+                // A feed share stores only sharedPostId. Resolve the original post
+                // here so the forwarded message keeps the original media fields.
+                let sharedPost = null;
+                const sharedPostId = data.sharedPostId || data.postId || '';
+                if (sharedPostId) {
+                    try {
+                        const postSnap = await getDoc(doc(db, "posts", sharedPostId));
+                        if (postSnap.exists()) sharedPost = postSnap.data();
+                    } catch (e) {
+                        console.warn("Could not load original shared post:", e);
+                    }
+                }
 
                 const newChatId = [currentUser.uid, recipientId].sort().join('_');
                 const chatRef = doc(db, "chats", newChatId);
@@ -2989,18 +3030,24 @@
                     });
                 }
 
-                await addDoc(collection(db, "chats", newChatId, "messages"), {
+                const forwardedMessage = {
                     senderUid: currentUser.uid,
                     senderName: currentUser.displayName || 'User',
-                    text: data.text || 'Forwarded message',
-                    type: data.type || 'text',
-                    imageUrl: data.imageUrl || '',
+                    text: data.text || sharedPost?.content || 'Forwarded message',
+                    type: sharedPostId ? 'share' : (data.type || 'text'),
+                    imageUrl: data.imageUrl || sharedPost?.imageUrl || '',
+                    videoUrl: data.videoUrl || sharedPost?.videoUrl || '',
+                    audioUrl: data.audioUrl || data.mp3Url || sharedPost?.audioUrl || sharedPost?.mp3Url || '',
                     voiceUrl: data.voiceUrl || '',
+                    sharedPostId: sharedPostId || '',
+                    postId: data.postId || sharedPostId || '',
                     isForwarded: true,
-                    originalSender: data.senderName || 'Unknown',
+                    originalSender: data.originalSender || data.senderName || sharedPost?.authorName || 'Unknown',
                     createdAt: serverTimestamp(),
                     readBy: [currentUser.uid]
-                });
+                };
+
+                await addDoc(collection(db, "chats", newChatId, "messages"), forwardedMessage);
 
                 await updateDoc(chatRef, {
                     lastMessage: '📨 Forwarded message',
@@ -3497,6 +3544,71 @@
         };
 
         // ================================================================
+        // SHARED POST MEDIA
+        // ================================================================
+        function getSafeMediaUrl(value) {
+            if (!value || typeof value !== 'string') return '';
+            try {
+                const url = new URL(value, window.location.href);
+                if (url.protocol !== 'http:' && url.protocol !== 'https:') return '';
+                return url.href;
+            } catch (e) {
+                return '';
+            }
+        }
+
+        async function hydrateSharedMessages(messages) {
+            return Promise.all(messages.map(async (msg) => {
+                const sharedPostId = msg.sharedPostId || msg.postId;
+                if (!sharedPostId) return msg;
+
+                const needsPostLookup = !msg.imageUrl && !msg.videoUrl && !msg.audioUrl && !msg.mp3Url;
+                if (!needsPostLookup) return { ...msg, type: 'share' };
+
+                try {
+                    const postSnap = await getDoc(doc(db, "posts", sharedPostId));
+                    if (!postSnap.exists()) return { ...msg, type: 'share' };
+
+                    const post = postSnap.data();
+                    const hydrated = {
+                        ...msg,
+                        type: 'share',
+                        text: msg.text || `Shared Post by ${post.authorName || 'User'}:\n"${post.content || ''}"`,
+                        imageUrl: msg.imageUrl || post.imageUrl || '',
+                        videoUrl: msg.videoUrl || post.videoUrl || '',
+                        audioUrl: msg.audioUrl || post.audioUrl || '',
+                        mp3Url: msg.mp3Url || post.mp3Url || '',
+                        sharedPostAuthor: post.authorName || '',
+                        sharedPostContent: post.content || '',
+                        sharedPostId
+                    };
+
+                    // Backfill media onto shares created by feed.html when the
+                    // current user owns the original chat message. Older shares
+                    // remain readable because rendering does not depend on this write.
+                    if (msg.senderId === currentUser?.uid || msg.senderUid === currentUser?.uid) {
+                        updateDoc(doc(db, "chats", chatId, "messages", msg.id), {
+                            type: 'share',
+                            sharedPostId,
+                            postId: msg.postId || sharedPostId,
+                            imageUrl: hydrated.imageUrl || '',
+                            videoUrl: hydrated.videoUrl || '',
+                            audioUrl: hydrated.audioUrl || '',
+                            mp3Url: hydrated.mp3Url || '',
+                            sharedPostAuthor: hydrated.sharedPostAuthor || '',
+                            sharedPostContent: hydrated.sharedPostContent || ''
+                        }).catch(() => {});
+                    }
+
+                    return hydrated;
+                } catch (e) {
+                    console.warn("Could not hydrate shared post:", e);
+                    return { ...msg, type: 'share' };
+                }
+            }));
+        }
+
+        // ================================================================
         // BUILD MESSAGE HTML
         // ================================================================
         function buildMessageHTML(msg, isSent, senderName) {
@@ -3513,18 +3625,60 @@
                     `;
             }
 
-            if (msg.type === 'share' && msg.postId) {
+            const sharedPostId = msg.sharedPostId || msg.postId || '';
+            const sharedImageUrl = getSafeMediaUrl(msg.imageUrl);
+            const sharedVideoUrl = getSafeMediaUrl(msg.videoUrl);
+            const sharedAudioUrl = getSafeMediaUrl(msg.audioUrl || msg.mp3Url);
+
+            if ((msg.type === 'share' || sharedPostId) && sharedPostId) {
+                const sharedText = msg.sharedPostContent || msg.text || 'Shared a post';
+                let sharedMediaHTML = '';
+                if (sharedImageUrl) {
+                    sharedMediaHTML = `
+                        <div class="shared-post-media" onclick="event.stopPropagation()">
+                            <img src="${escapeHTML(sharedImageUrl)}" alt="Shared post image" loading="lazy" onclick="openLightbox('${escapeHTML(sharedImageUrl)}')">
+                        </div>`;
+                } else if (sharedVideoUrl) {
+                    sharedMediaHTML = `
+                        <div class="shared-post-media" onclick="event.stopPropagation()">
+                            <video src="${escapeHTML(sharedVideoUrl)}" controls playsinline preload="metadata">
+                                Your browser does not support video playback.
+                            </video>
+                        </div>`;
+                } else if (sharedAudioUrl) {
+                    sharedMediaHTML = `
+                        <div class="shared-post-media" onclick="event.stopPropagation()">
+                            <audio src="${escapeHTML(sharedAudioUrl)}" controls preload="metadata">
+                                Your browser does not support audio playback.
+                            </audio>
+                        </div>`;
+                }
+
                 messageContent = `
                         ${replyHTML}
-                        <div class="shared-post-preview" onclick="window.location.href='feed.html?postId=${msg.postId}'">
+                        <div class="shared-post-preview" onclick="window.location.href='feed.html?postId=${encodeURIComponent(sharedPostId)}'">
                             <div class="post-label">📨 Shared Post</div>
-                            <div class="post-text">${escapeHTML(msg.text || 'Shared a post')}</div>
+                            ${msg.sharedPostAuthor ? `<div class="shared-post-author">${escapeHTML(msg.sharedPostAuthor)}</div>` : ''}
+                            <div class="post-text" style="white-space:pre-wrap;">${escapeHTML(sharedText)}</div>
+                            ${sharedMediaHTML}
                         </div>
                     `;
-            } else if (msg.type === 'image' && msg.imageUrl) {
+            } else if (msg.type === 'image' && sharedImageUrl) {
                 messageContent = `
                         ${replyHTML}
-                        <img src="${msg.imageUrl}" class="message-image" onclick="openLightbox('${msg.imageUrl}')" loading="lazy">
+                        <img src="${escapeHTML(sharedImageUrl)}" class="message-image" onclick="openLightbox('${escapeHTML(sharedImageUrl)}')" loading="lazy">
+                        ${msg.text ? `<div style="margin-top:2px;font-size:0.85rem;">${escapeHTML(msg.text)}</div>` : ''}
+                    `;
+            } else if (msg.type === 'video' && sharedVideoUrl) {
+                messageContent = `
+                        ${replyHTML}
+                        <div class="shared-post-media" onclick="event.stopPropagation()"><video src="${escapeHTML(sharedVideoUrl)}" controls playsinline preload="metadata">Your browser does not support video playback.</video></div>
+                        ${msg.text ? `<div style="margin-top:2px;font-size:0.85rem;">${escapeHTML(msg.text)}</div>` : ''}
+                    `;
+            } else if ((msg.type === 'audio' || msg.type === 'mp3') && sharedAudioUrl) {
+                messageContent = `
+                        ${replyHTML}
+                        <div class="shared-post-media" onclick="event.stopPropagation()"><audio src="${escapeHTML(sharedAudioUrl)}" controls preload="metadata">Your browser does not support audio playback.</audio></div>
                         ${msg.text ? `<div style="margin-top:2px;font-size:0.85rem;">${escapeHTML(msg.text)}</div>` : ''}
                     `;
             } else if (msg.type === 'voice' && msg.voiceUrl) {
@@ -3621,8 +3775,8 @@
             let unreadShown = false;
 
             for (const msg of messages) {
-                const isSent = msg.senderUid === currentUser.uid;
-                const senderName = isSent ? 'You' : (msg.senderName || 'User');
+                const isSent = (msg.senderUid || msg.senderId) === currentUser.uid;
+                const senderName = isSent ? 'You' : (msg.senderName || msg.originalSender || 'User');
 
                 const msgDate = msg.createdAt;
                 const dateLabel = formatDateDivider(msgDate);
@@ -3671,7 +3825,8 @@
                         if (change.type === 'added') {
                             const data = change.doc.data();
                             const msgId = change.doc.id;
-                            if (data.senderUid && data.senderUid !== currentUser?.uid) {
+                            const incomingSenderUid = data.senderUid || data.senderId;
+                            if (incomingSenderUid && incomingSenderUid !== currentUser?.uid) {
                                 if (!seenMessageIds.has(msgId)) {
                                     let isRecent = true;
                                     if (data.createdAt?.toDate) {
@@ -3699,10 +3854,14 @@
                     }
                 });
 
+                // feed.html creates shares with sharedPostId but does not copy the
+                // original post media into the chat message. Resolve the original
+                // post here so old and new shares render their real media.
+                messages = await hydrateSharedMessages(messages);
                 renderMessages(messages, false);
 
                 const unreadMessages = messages.filter(m =>
-                    m.senderUid !== currentUser.uid &&
+                    (m.senderUid || m.senderId) !== currentUser.uid &&
                     !m.readBy?.includes(currentUser.uid)
                 );
                 if (unreadMessages.length > 0) {

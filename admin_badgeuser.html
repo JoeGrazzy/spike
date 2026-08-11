@@ -52,6 +52,9 @@
       padding: 12px 20px; border-radius: 60px;
       border: 1px solid var(--border-color);
       box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+      /* ── safe-area inset for notched devices ── */
+      padding-top: calc(12px + constant(safe-area-inset-top, 0px));
+      padding-top: calc(12px + env(safe-area-inset-top, 0px));
     }
     .admin-header .brand {
       font-size: 1.2rem; font-weight: 800;

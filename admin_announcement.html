@@ -59,9 +59,13 @@
             z-index: 0;
         }
 
-        /* ===== HEADER ===== */
+        /* ===== HEADER with safe-area fix ===== */
         .admin-header {
-            width: 100%; max-width: 800px; padding: 12px 20px;
+            width: 100%; max-width: 800px;
+            padding: 12px 20px;
+            /* ── safe-area inset for notched devices ── */
+            padding-top: calc(12px + constant(safe-area-inset-top, 0px));
+            padding-top: calc(12px + env(safe-area-inset-top, 0px));
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color);
             background: var(--bg-glass); backdrop-filter: blur(20px);

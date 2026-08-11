@@ -59,7 +59,7 @@
         body {
             display: flex;
             flex-direction: column;
-            padding-top: var(--safe-top);
+            padding-top: 0;
             padding-bottom: var(--safe-bottom);
             background-image: radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.03) 0%, transparent 60%), radial-gradient(circle at 80% 70%, rgba(251, 191, 36, 0.02) 0%, transparent 50%);
         }
@@ -73,338 +73,676 @@
 
         /* ===== HEADER ===== */
         .room-header {
-            background: var(--bg-header);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 215, 0, 0.08);
-            padding: 0 8px;
+            --header-content-height: clamp(72px, 9dvh, 92px);
+            --header-safe-top: max(
+                env(safe-area-inset-top, 0px),
+                constant(safe-area-inset-top, 0px)
+            );
+            --header-safe-left: max(
+                env(safe-area-inset-left, 0px),
+                constant(safe-area-inset-left, 0px)
+            );
+            --header-safe-right: max(
+                env(safe-area-inset-right, 0px),
+                constant(safe-area-inset-right, 0px)
+            );
+            --header-height: calc(var(--header-content-height) + var(--header-safe-top));
+
+            background:
+                linear-gradient(180deg, rgba(12, 18, 30, 0.97), rgba(8, 12, 20, 0.94));
+            backdrop-filter: blur(20px) saturate(145%);
+            -webkit-backdrop-filter: blur(20px) saturate(145%);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.12);
+            padding:
+                var(--header-safe-top)
+                max(12px, var(--header-safe-right))
+                8px
+                max(12px, var(--header-safe-left));
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
             min-height: var(--header-height);
             height: var(--header-height);
-            gap: 4px;
+            gap: 8px;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 1000;
+            isolation: isolate;
+            box-shadow:
+                0 8px 28px rgba(0, 0, 0, 0.28),
+                0 1px 0 rgba(255, 255, 255, 0.025) inset;
         }
+
+        .room-header::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            border-radius: 0 0 18px 18px;
+            box-shadow: 0 1px 0 rgba(251, 191, 36, 0.035) inset;
+            z-index: -1;
+        }
+
         .room-header .left {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
             min-width: 0;
-            flex: 0 1 auto;
+            flex: 1 1 auto;
             overflow: hidden;
             height: 100%;
         }
+
         .room-header .back-btn {
-            background: none;
-            border: none;
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.07);
             color: var(--text-secondary);
-            font-size: 24px;
+            font-size: 30px;
+            line-height: 1;
             cursor: pointer;
-            padding: 0 4px;
-            min-height: 44px;
-            min-width: 36px;
-            border-radius: 8px;
+            padding: 0;
+            min-height: 48px;
+            min-width: 48px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             flex-shrink: 0;
-            transition: 0.2s;
+            transition: color var(--transition), background var(--transition),
+                border-color var(--transition), transform var(--transition);
         }
+
         .room-header .back-btn:hover {
             color: var(--gold);
+            background: rgba(251, 191, 36, 0.08);
+            border-color: rgba(251, 191, 36, 0.18);
         }
+
+        .room-header .back-btn:active {
+            transform: scale(0.96);
+        }
+
         .room-header .brand-title {
-            font-size: 1.8rem;
+            font-size: clamp(1.65rem, 3vw, 2rem);
             font-weight: 900;
-            letter-spacing: -0.02em;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24);
+            letter-spacing: -0.035em;
+            background: linear-gradient(135deg, #ffd86b, #fbbf24 48%, #f59e0b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            text-shadow: 0 0 40px rgba(251, 191, 36, 0.15);
-            line-height: 1.2;
+            text-shadow: 0 0 40px rgba(251, 191, 36, 0.18);
+            line-height: 1;
             white-space: nowrap;
             flex-shrink: 0;
-            margin-right: 2px;
         }
+
         .room-header .room-info {
             display: flex;
             flex-direction: column;
             min-width: 0;
-            flex: 1;
+            flex: 1 1 auto;
             overflow: hidden;
             margin-left: 2px;
             justify-content: center;
+            gap: 3px;
         }
+
         .room-header .room-name-wrapper {
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             white-space: nowrap;
             overflow: hidden;
         }
+
         .room-header .room-name {
-            font-weight: 700;
-            font-size: 14px;
+            font-weight: 800;
+            font-size: clamp(13px, 1.6vw, 15px);
             overflow: hidden;
             text-overflow: ellipsis;
             color: var(--text-primary);
         }
+
         .room-header .premium-badge-display {
-            font-size: 14px;
+            font-size: 16px;
             flex-shrink: 0;
             display: none;
         }
+
         .room-header .premium-badge-display.active {
             display: inline-block;
         }
+
         .room-header .room-meta {
-            font-size: 9px;
+            font-size: 10px;
             color: var(--text-secondary);
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
             overflow: hidden;
+            white-space: nowrap;
         }
+
         .room-header .room-meta .dot {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
             display: inline-block;
             flex-shrink: 0;
         }
+
         .room-header .room-meta .dot.online {
             background: var(--success);
-            box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+            box-shadow: 0 0 8px rgba(52, 211, 153, 0.5);
         }
+
         .room-header .right {
             display: flex;
             align-items: center;
-            gap: 4px;
-            flex-shrink: 0;
-            max-width: 75%;
+            justify-content: flex-start;
+            gap: 6px;
+            flex: 0 1 60%;
+            min-width: 0;
+            max-width: 60%;
             flex-wrap: nowrap;
             overflow-x: auto;
+            overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
-            padding: 4px 0;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(251, 191, 36, 0.35) transparent;
+            padding: 2px 2px 6px;
             height: 100%;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x;
+            scroll-behavior: smooth;
+            scroll-snap-type: x proximity;
         }
+
+        .room-header .right > * {
+            scroll-snap-align: center;
+        }
+
+        .room-header .right::after {
+            content: "";
+            flex: 0 0 2px;
+        }
+
         .room-header .right::-webkit-scrollbar {
-            height: 0;
+            height: 3px;
             background: transparent;
         }
-        .room-header .header-btn {
-            background: none;
-            border: none;
+
+        .room-header .right::-webkit-scrollbar-thumb {
+            background: rgba(251, 191, 36, 0.35);
+            border-radius: 999px;
+        }
+
+        .room-header .header-btn,
+        .room-header .more-btn {
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.065);
             color: var(--text-secondary);
-            font-size: 16px;
+            font-size: 19px;
+            line-height: 1;
             cursor: pointer;
-            padding: 0 4px;
-            min-height: 44px;
-            min-width: 36px;
-            border-radius: 8px;
-            display: flex;
+            padding: 0;
+            width: 48px;
+            min-width: 48px;
+            height: 48px;
+            min-height: 48px;
+            border-radius: 14px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             position: relative;
             flex-shrink: 0;
-            transition: 0.2s;
+            transition: color var(--transition), background var(--transition),
+                border-color var(--transition), transform var(--transition),
+                box-shadow var(--transition);
         }
-        .room-header .header-btn:hover {
+
+        .room-header .header-btn:hover,
+        .room-header .more-btn:hover {
             color: var(--gold);
-            background: rgba(255, 215, 0, 0.05);
+            background: rgba(251, 191, 36, 0.075);
+            border-color: rgba(251, 191, 36, 0.16);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
         }
-        .room-header .header-btn .badge {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--error);
-            color: #fff;
-            font-size: 6px;
-            font-weight: 700;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        .room-header .header-btn:active,
+        .room-header .more-btn:active {
+            transform: scale(0.95);
         }
+
+        .room-header .header-btn .badge,
         .room-header .header-btn .badge-gift {
             position: absolute;
-            top: 0;
-            right: 0;
-            background: var(--gold);
-            color: #0d1520;
-            font-size: 6px;
-            font-weight: 700;
-            width: 14px;
-            height: 14px;
+            top: 5px;
+            right: 5px;
+            width: 17px;
+            height: 17px;
             border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .room-header .coins-badge {
-            background: rgba(251, 191, 36, 0.10);
-            border: 1px solid rgba(251, 191, 36, 0.15);
-            border-radius: 20px;
-            padding: 0 8px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--gold);
             display: flex;
             align-items: center;
-            gap: 3px;
-            min-height: 30px;
+            justify-content: center;
+            font-size: 7px;
+            font-weight: 800;
+            border: 2px solid #101722;
+            box-sizing: border-box;
+        }
+
+        .room-header .header-btn .badge {
+            background: var(--error);
+            color: #fff;
+        }
+
+        .room-header .header-btn .badge-gift {
+            background: var(--gold);
+            color: #0d1520;
+            display: none;
+        }
+
+        .room-header .coins-badge,
+        .room-header .earnings-badge,
+        .level-badge {
+            min-height: 40px;
+            border-radius: 16px;
             flex-shrink: 0;
             white-space: nowrap;
         }
+
+        .room-header .coins-badge {
+            transform: scale(0.92);
+            transform-origin: center;
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(251, 191, 36, 0.07));
+            border: 1px solid rgba(251, 191, 36, 0.22);
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 0 4px 16px rgba(251, 191, 36, 0.06);
+        }
+
+        .room-header .coins-badge:first-letter {
+            font-size: 17px;
+        }
+
         .room-header .earnings-badge {
             background: rgba(251, 191, 36, 0.12);
             border: 1px solid rgba(251, 191, 36, 0.25);
-            border-radius: 20px;
-            padding: 0 8px;
-            font-size: 10px;
-            font-weight: 700;
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 800;
             color: var(--gold);
             display: none;
             align-items: center;
-            gap: 3px;
-            min-height: 30px;
-            flex-shrink: 0;
-            white-space: nowrap;
+            gap: 5px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: background var(--transition), transform var(--transition);
         }
+
         .room-header .earnings-badge:hover {
             background: rgba(251, 191, 36, 0.22);
-            transform: scale(1.02);
+            transform: translateY(-1px);
         }
+
         .level-badge {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
             background: rgba(255, 215, 0, 0.08);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: 20px;
-            padding: 2px 10px 2px 6px;
-            min-height: 30px;
-            flex-shrink: 0;
-            white-space: nowrap;
-            cursor: default;
+            border: 1px solid rgba(255, 215, 0, 0.16);
+            padding: 4px 11px 4px 7px;
+            cursor: pointer;
+            transition: background .18s ease, border-color .18s ease, transform .18s ease;
         }
+        .level-badge:hover {
+            background: rgba(255, 215, 0, 0.14);
+            border-color: rgba(255, 215, 0, 0.28);
+            transform: translateY(-1px);
+        }
+        .level-badge:active {
+            transform: scale(.97);
+        }
+
         .level-badge .level-icon {
-            font-size: 14px;
+            font-size: 18px;
+            line-height: 1;
         }
+
         .level-badge .level-name {
-            font-size: 9px;
-            font-weight: 700;
+            font-size: 10px;
+            font-weight: 800;
             color: var(--text-secondary);
-            max-width: 60px;
+            max-width: 72px;
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .level-badge .level-progress {
-            width: 50px;
-            height: 4px;
+            width: 56px;
+            height: 5px;
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 4px;
+            border-radius: 5px;
             overflow: hidden;
         }
+
         .level-badge .level-progress .fill {
             height: 100%;
             background: var(--gold);
-            border-radius: 4px;
+            border-radius: 5px;
             transition: width 0.5s ease;
         }
+
         .room-header .room-features-btn {
+            appearance: none;
+            -webkit-appearance: none;
             background: linear-gradient(135deg, var(--premium), #6d28d9);
-            border: none;
-            border-radius: 20px;
-            padding: 0 10px;
-            font-size: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 0 13px;
+            font-size: 10px;
             font-weight: 800;
             color: #fff;
             cursor: pointer;
-            min-height: 26px;
-            box-shadow: 0 0 16px rgba(124, 58, 237, 0.2);
+            min-height: 40px;
+            min-width: 96px;
+            box-shadow: 0 6px 20px rgba(124, 58, 237, 0.22);
             flex-shrink: 0;
             white-space: nowrap;
-            transition: 0.2s;
+            transition: transform var(--transition), box-shadow var(--transition);
             font-family: var(--font);
             display: none;
         }
+
         .room-header .room-features-btn:hover {
-            transform: scale(1.04);
-            box-shadow: 0 0 28px rgba(124, 58, 237, 0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(124, 58, 237, 0.38);
         }
-        .room-header .more-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 18px;
-            cursor: pointer;
-            padding: 0 2px;
-            min-height: 44px;
-            min-width: 28px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .room-header .more-btn:hover {
-            color: var(--gold);
-        }
+
         .header-more-dropdown {
-            position: absolute;
-            top: calc(var(--header-height) + 4px);
-            right: 4px;
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: var(--radius);
-            padding: 4px 0;
-            min-width: 170px;
-            box-shadow: var(--shadow);
-            z-index: 20;
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: rgba(15, 22, 36, 0.98);
+            border: 1px solid rgba(255, 215, 0, 0.16);
+            border-radius: 16px;
+            padding: 6px 0;
+            min-width: 210px;
+            max-width: min(92vw, 320px);
+            max-height: calc(100dvh - var(--header-height) - 16px);
+            overflow-y: auto;
+            box-shadow: 0 20px 55px rgba(0, 0, 0, 0.55);
+            z-index: 1100;
             display: none;
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
         }
+
         .header-more-dropdown.open {
             display: block;
         }
+
         .header-more-dropdown .item {
             padding: 8px 14px;
             font-size: 12px;
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-primary);
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
             background: none;
             border: none;
             width: 100%;
             font-family: var(--font);
-            min-height: 36px;
+            min-height: 44px;
             text-align: left;
-            transition: 0.15s;
+            transition: background var(--transition), color var(--transition);
         }
+
         .header-more-dropdown .item:hover {
-            background: rgba(255, 215, 0, 0.05);
+            background: rgba(255, 215, 0, 0.06);
             color: var(--gold);
         }
+
         .header-more-dropdown .item.danger {
             color: var(--error);
         }
+
         .header-more-dropdown .item.danger:hover {
             background: rgba(244, 63, 94, 0.08);
         }
+
         .header-more-dropdown .divider {
             height: 1px;
             background: rgba(255, 215, 0, 0.08);
-            margin: 4px 8px;
+            margin: 5px 10px;
+        }
+
+        /* Header-specific responsive layout. The header owns its safe-area inset. */
+        @media (max-width: 1199px) {
+            .room-header {
+                --header-content-height: clamp(70px, 8.5dvh, 88px);
+                --header-height: calc(var(--header-content-height) + var(--header-safe-top));
+            }
+
+            .room-header .right {
+                max-width: 62%;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .room-header .brand-title {
+                font-size: 1.55rem;
+            }
+
+            .room-header .right {
+                max-width: 64%;
+            }
+
+            .level-badge .level-progress {
+                width: 46px;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .room-header {
+                --header-content-height: clamp(68px, 10dvh, 84px);
+                --header-height: calc(var(--header-content-height) + var(--header-safe-top));
+                padding-bottom: 7px;
+                gap: 6px;
+            }
+
+            .room-header .left {
+                gap: 6px;
+            }
+
+            .room-header .brand-title {
+                font-size: 1.4rem;
+            }
+
+            .room-header .right {
+                flex-basis: 58%;
+                max-width: 58%;
+                gap: 5px;
+            }
+
+            .room-header .coins-badge {
+                min-height: 40px;
+                padding: 0 10px;
+                font-size: 12px;
+            }
+
+            .room-header .header-btn,
+            .room-header .more-btn {
+                width: 46px;
+                min-width: 46px;
+                height: 46px;
+                min-height: 46px;
+            }
+
+            .level-badge {
+                min-height: 40px;
+                padding-right: 8px;
+            }
+
+            .level-badge .level-progress {
+                width: 38px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .room-header {
+                --header-content-height: clamp(66px, 9.5dvh, 80px);
+                padding-left: max(10px, var(--header-safe-left));
+                padding-right: max(10px, var(--header-safe-right));
+            }
+
+            .room-header .brand-title {
+                font-size: 1.28rem;
+            }
+
+            .room-header .room-info {
+                gap: 2px;
+            }
+
+            .room-header .room-name {
+                font-size: 12px;
+            }
+
+            .room-header .room-meta {
+                font-size: 9px;
+            }
+
+            .room-header .right {
+                flex-basis: 54%;
+                max-width: 54%;
+                gap: 4px;
+            }
+
+            .level-badge .level-name,
+            .level-badge .level-progress {
+                display: none;
+            }
+
+            .level-badge {
+                width: 42px;
+                min-width: 42px;
+                padding: 0;
+                justify-content: center;
+            }
+
+            .room-header .room-features-btn {
+                min-width: 40px;
+                width: 40px;
+                height: 40px;
+                min-height: 40px;
+                padding: 0;
+                font-size: 15px;
+                border-radius: 11px;
+            }
+
+            .room-header .header-btn,
+            .room-header .more-btn {
+                width: 40px;
+                min-width: 40px;
+                height: 40px;
+                min-height: 40px;
+                border-radius: 11px;
+                font-size: 14px;
+            }
+
+            .room-header .coins-badge {
+                min-height: 38px;
+                padding: 0 9px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .room-header {
+                --header-content-height: clamp(64px, 9dvh, 76px);
+                padding-left: max(8px, var(--header-safe-left));
+                padding-right: max(8px, var(--header-safe-right));
+                gap: 4px;
+            }
+
+            .room-header .back-btn {
+                width: 44px;
+                min-width: 44px;
+                height: 44px;
+                min-height: 44px;
+            }
+
+            .room-header .brand-title {
+                font-size: 1.15rem;
+            }
+
+            .room-header .room-info {
+                min-width: 56px;
+            }
+
+            .room-header .room-name {
+                font-size: 11px;
+            }
+
+            .room-header .room-meta {
+                font-size: 8px;
+            }
+
+            .room-header .right {
+                flex-basis: 52%;
+                max-width: 52%;
+                gap: 3px;
+            }
+
+            .room-header .coins-badge {
+                min-height: 36px;
+                padding: 0 8px;
+                font-size: 10px;
+                gap: 3px;
+            }
+
+            .room-header .header-btn,
+            .room-header .more-btn {
+                width: 38px;
+                min-width: 38px;
+                height: 38px;
+                min-height: 38px;
+                font-size: 13px;
+            }
+
+            .room-header .room-features-btn {
+                width: 38px;
+                min-width: 38px;
+                height: 38px;
+                min-height: 38px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-height: 500px) and (orientation: landscape) {
+            .room-header {
+                --header-content-height: 60px;
+            }
+
+            .room-header .header-btn,
+            .room-header .more-btn,
+            .room-header .back-btn {
+                width: 42px;
+                min-width: 42px;
+                height: 42px;
+                min-height: 42px;
+            }
         }
 
         /* ===== ROOM FEATURES PANEL ===== */
@@ -2041,12 +2379,14 @@
         .participants-panel {
             position: fixed;
             right: 0;
-            top: 0;
+            top: calc(var(--header-height) + 4px);
             bottom: 0;
             width: 270px;
             max-width: 82vw;
             background: var(--bg-secondary);
             border-left: 1px solid rgba(255, 215, 0, 0.08);
+            border-top: 1px solid rgba(255, 215, 0, 0.08);
+            border-radius: 12px 0 0 0;
             padding: 14px 10px;
             transform: translateX(100%);
             transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2058,6 +2398,15 @@
         }
         .participants-panel.open {
             transform: translateX(0);
+        }
+        .participants-panel > #participantsList {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
         }
         .participants-panel .participant {
             display: flex;
@@ -3739,9 +4088,11 @@
                 min-height: 26px;
             }
             .room-header .room-features-btn {
-                font-size: 7px;
-                padding: 0 6px;
-                min-height: 22px;
+                font-size: 14px;
+                padding: 0;
+                min-height: 36px;
+                min-width: 36px;
+                width: 36px;
             }
             .level-badge {
                 padding: 2px 6px 2px 4px;
@@ -3815,8 +4166,11 @@
                 padding: 0 4px;
             }
             .room-header .room-features-btn {
-                font-size: 6px;
-                padding: 0 4px;
+                font-size: 13px;
+                padding: 0;
+                min-height: 34px;
+                min-width: 34px;
+                width: 34px;
             }
             .level-badge .level-name {
                 max-width: 30px;
@@ -3905,6 +4259,9 @@
                 min-width: 44px;
             }
         }
+
+        /* Immediate toast popups disabled: actions continue to work without intrusive overlays. */
+        #toast { display: none !important; }
     </style>
 </head>
 <body>
@@ -3916,7 +4273,7 @@
             <span class="brand-title">FunRoom</span>
             <div class="room-info">
                 <div class="room-name-wrapper">
-                    <div class="room-name" id="roomName">Loading…</div>
+                    <div class="room-name" id="roomName" aria-hidden="true" style="display:none!important;">Loading…</div>
                     <span class="premium-badge-display" id="premiumBadgeDisplay">🏆</span>
                 </div>
                 <div class="room-meta"><span id="roomMembers">👥 0</span><span class="sep">·</span><span class="dot online" id="roomStatusDot"></span><span id="roomStatusText">online</span></div>
@@ -3927,15 +4284,15 @@
             <span class="earnings-badge" id="earningsBadge" onclick="openEarningsPanel()">
                 🪙 <span id="headerEarnings">0</span>
             </span>
-            <div class="level-badge" id="levelBadge">
+            <div class="level-badge" id="levelBadge" onclick="openStatsPanel()" role="button" tabindex="0" aria-label="View leveling dashboard" title="View leveling dashboard">
                 <span class="level-icon" id="levelIcon">🌱</span>
                 <span class="level-name" id="levelName">Sprout</span>
                 <span class="level-progress" id="levelProgress"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
             </div>
-            <button class="room-features-btn" id="roomFeaturesBtn" onclick="openRoomFeaturesPanel()">⭐ Features</button>
-            <button class="header-btn" onclick="openStatsPanel()">📊</button>
-            <button class="header-btn" onclick="openSendCoinsModal()">💸</button>
-            <button class="header-btn" onclick="openGiftsPanel()">🎁<span class="badge-gift" id="giftBadge">0</span></button>
+            <button class="room-features-btn" id="roomFeaturesBtn" onclick="openRoomFeaturesPanel()" aria-label="Market" title="Market">🛍️</button>
+            <button class="header-btn stats-btn" onclick="openStatsPanel()">📊</button>
+            <button class="header-btn send-coins-btn" onclick="openSendCoinsModal()">💸</button>
+            <button class="header-btn gifts-btn" onclick="openGiftsPanel()">🎁<span class="badge-gift" id="giftBadge">0</span></button>
             <button class="header-btn" onclick="toggleSearch()">🔍</button>
             <button class="header-btn" onclick="toggleParticipants()">👥<span class="badge" id="memberBadge">0</span></button>
             <button class="more-btn" id="moreBtn" onclick="toggleMoreDropdown()">⋯</button>
@@ -4146,7 +4503,7 @@
     <div class="participants-overlay" id="participantsOverlay" onclick="toggleParticipants()"></div>
     <div class="participants-panel" id="participantsPanel">
         <div style="display:flex; justify-content:space-between; padding-bottom:6px; border-bottom:1px solid rgba(255,215,0,0.08);">
-            <span>👥 Members</span>
+            <span>👥 Members <small id="participantsCount" style="color:var(--text-muted);font-size:10px;font-weight:600;">0</small></span>
             <button onclick="toggleParticipants()" style="background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer;">✕</button>
         </div>
         <div id="participantsList"><div style="text-align:center; color:var(--text-muted); padding:16px 0; font-size:12px;">Loading…</div></div>
@@ -4587,6 +4944,12 @@
         const vnStatus = document.getElementById('vnStatus');
 
         const levelBadge = document.getElementById('levelBadge');
+        levelBadge?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openStatsPanel();
+            }
+        });
         const levelIcon = document.getElementById('levelIcon');
         const levelName = document.getElementById('levelName');
         const levelProgressFill = document.getElementById('levelProgressFill');
@@ -6959,41 +7322,53 @@
         };
         async function loadParticipants() {
             const list = document.getElementById('participantsList');
+            const countEl = document.getElementById('participantsCount');
             try {
+                list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:16px 0;font-size:12px;">Loading members…</div>';
                 const snap = await getDocs(collection(db, 'rooms', roomId, 'participants'));
-                if (snap.empty) { list.innerHTML =
-                        '<div style="text-align:center;color:var(--text-muted);padding:16px 0;">No one here</div>'; return; }
-                let html = '';
-                const uids = [];
-                snap.forEach(d => uids.push({ uid: d.id, data: d.data() }));
-                for (const { uid, data } of uids) {
-                    let name = 'User',
-                        avatar = '',
-                        online = false,
-                        level = 1,
-                        isVip = false;
+                const participants = snap.docs.map(d => ({ uid: d.id, data: d.data() }));
+                const total = participants.length;
+                if (countEl) countEl.textContent = total;
+                memberCountEl.textContent = total;
+                memberBadge.textContent = total;
+
+                if (!total) {
+                    list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:12px;">No one here</div>';
+                    return;
+                }
+
+                // Render every participant even if a profile document is missing or slow.
+                const rows = await Promise.all(participants.map(async ({ uid, data }) => {
+                    let name = data.name || data.displayName || 'User';
+                    let online = data.onlineStatus === true;
+                    let level = Number(data.level) || 1;
+                    let isVip = roomVips[uid] === true;
                     try {
-                        const s = await getDoc(doc(db, 'users', uid));
-                        if (s.exists()) { const d = s.data();
-                            name = d.name || d.displayName || 'User';
-                            avatar = d.avatar || '';
-                            online = d.onlineStatus === true; }
-                        const roomUserData = await getUserRoomData(uid);
-                        level = roomUserData.level || 1;
-                        isVip = roomVips[uid] === true;
-                    } catch (e) {}
+                        const [userSnap, roomUserData] = await Promise.all([
+                            getDoc(doc(db, 'users', uid)),
+                            getUserRoomData(uid)
+                        ]);
+                        if (userSnap.exists()) {
+                            const d = userSnap.data();
+                            name = d.name || d.displayName || name;
+                            online = d.onlineStatus === true;
+                        }
+                        if (roomUserData) level = Number(roomUserData.level) || level;
+                    } catch (e) {
+                        // Keep the participant visible using room participant data.
+                    }
                     const isSelf = uid === currentUser?.uid;
                     const statusDotClass = online ? 'online' : 'offline';
                     const levelName = getLevelName(level);
                     const icon = getLevelIcon(level);
-                    const vipTag = isVip ? `<span class="vip-tag-participant">👑 VIP</span>` : '';
-                    html +=
-                        `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${icon} ${levelName}</span>${vipTag}</div></div><span class="status-dot ${statusDotClass}"></span></div>`;
-                }
-                list.innerHTML = html || '<div>No one</div>';
-                memberCountEl.textContent = uids.length;
-                memberBadge.textContent = uids.length;
-            } catch (e) { list.innerHTML = 'Failed to load'; }
+                    const vipTag = isVip ? '<span class="vip-tag-participant">👑 VIP</span>' : '';
+                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${icon} ${levelName}</span>${vipTag}</div></div><span class="status-dot ${statusDotClass}"></span></div>`;
+                }));
+                list.innerHTML = rows.join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px 0;">No members</div>';
+            } catch (e) {
+                console.error('Failed to load participants:', e);
+                list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:12px;">Unable to load members. Tap Members again to retry.</div>';
+            }
         }
 
         // ============================================================
@@ -8319,8 +8694,48 @@
             input.focus();
             input.setSelectionRange(pos + 1, pos + 1);
         };
-        window.toggleMoreDropdown = function() { moreDropdown.classList.toggle('open'); };
-        window.closeMoreDropdown = function() { moreDropdown.classList.remove('open'); };
+        function positionMoreDropdown() {
+            if (!moreDropdown.classList.contains('open')) return;
+            const button = document.getElementById('moreBtn');
+            if (!button) return;
+            const rect = button.getBoundingClientRect();
+            const gap = 6;
+            const safeRight = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-safe-right')) || 0;
+            const viewportWidth = document.documentElement.clientWidth;
+            const viewportHeight = window.innerHeight;
+            const dropdownWidth = moreDropdown.offsetWidth;
+            const dropdownHeight = moreDropdown.offsetHeight;
+            let top = rect.bottom + gap;
+            let right = viewportWidth - rect.right;
+            const minRight = Math.max(8, safeRight);
+            const maxRight = Math.max(minRight, viewportWidth - dropdownWidth - 8);
+            right = Math.max(minRight, Math.min(right, maxRight));
+            const maxTop = Math.max(8, viewportHeight - dropdownHeight - 8);
+            top = Math.min(top, maxTop);
+            moreDropdown.style.top = `${top}px`;
+            moreDropdown.style.right = `${right}px`;
+            moreDropdown.style.left = 'auto';
+        }
+
+        window.toggleMoreDropdown = function() {
+            moreDropdown.classList.toggle('open');
+            if (moreDropdown.classList.contains('open')) {
+                requestAnimationFrame(positionMoreDropdown);
+            } else {
+                moreDropdown.style.top = '';
+                moreDropdown.style.right = '';
+                moreDropdown.style.left = '';
+            }
+        };
+        window.closeMoreDropdown = function() {
+            moreDropdown.classList.remove('open');
+            moreDropdown.style.top = '';
+            moreDropdown.style.right = '';
+            moreDropdown.style.left = '';
+        };
+
+        window.addEventListener('resize', positionMoreDropdown, { passive: true });
+        window.addEventListener('orientationchange', () => requestAnimationFrame(positionMoreDropdown), { passive: true });
         let isTypingOverlayOpen = false;
 
         function openTypingOverlay() {
