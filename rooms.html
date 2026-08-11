@@ -6,9 +6,9 @@
     <meta name="description" content="SPIKE Community Rooms - Browse and join chat rooms with entry fees and VIP features" />
     <title>Rooms — SPIKE Community</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Performance: system font first so first paint never waits for a web font. -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
     <style>
         /* ===== PREMIUM DARK THEME ===== */
         :root {
@@ -27,7 +27,7 @@
             --gold: #ffd700;
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
-            --font-main: 'Plus Jakarta Sans', sans-serif;
+            --font-main: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             --transition: all 0.25s ease;
             --radius: 16px;
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -835,6 +835,20 @@
                 min-width: 44px;
             }
         }
+
+        /* ===== FAST-LOAD / RENDER PERFORMANCE ===== */
+        html { text-rendering: optimizeSpeed; }
+        .room-grid { contain: layout paint; }
+        .room-card { contain: layout paint; }
+        .room-card, .toolbar, .filter-chips, .recent-section, .create-btn { content-visibility: auto; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -855,7 +869,7 @@
     <div class="toolbar">
         <div class="search-wrap">
             <span class="icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Search rooms..." oninput="applyFilters()" aria-label="Search rooms">
+            <input type="text" id="searchInput" placeholder="Search rooms..." oninput="scheduleFilter()" aria-label="Search rooms">
             <button class="clear-search" id="clearSearchBtn" onclick="clearSearch()" aria-label="Clear search">✕</button>
         </div>
         <select class="sort-select" id="sortSelect" onchange="applyFilters()" aria-label="Sort rooms">
@@ -1010,6 +1024,10 @@
         const CREATE_COST = 2000;
         let creatingRoom = false;
         const paymentInProgress = new Set();
+        const ROOMS_CACHE_KEY = 'spike_rooms_cache_v3';
+        const ROOMS_CACHE_TTL = 5 * 60 * 1000;
+        let roomsLoadPromise = null;
+        let roomsLoadedFromCache = false;
 
         // ============================================================
         // DOM REFERENCES
@@ -1234,82 +1252,125 @@
         // ============================================================
         // LOAD ROOMS
         // ============================================================
-        async function loadRooms(showLoading = true) {
-            if (showLoading) {
-                grid.innerHTML = '';
-                for (let i = 0; i < 5; i++) {
-                    grid.innerHTML += `
-                        <div class="room-card skeleton">
-                            <div class="info">
-                                <div class="skeleton-line" style="width:60%;"></div>
-                                <div class="skeleton-line" style="width:80%;"></div>
-                                <div class="skeleton-line" style="width:40%;"></div>
-                            </div>
-                            <div style="width:80px;height:36px;background:rgba(255,255,255,0.05);border-radius:10px;"></div>
-                        </div>
-                    `;
-                }
-            }
-
+        function saveRoomsCache(rooms) {
             try {
-                const q = query(collection(db, 'rooms'), orderBy('createdAt', 'desc'));
-                const snap = await getDocs(q);
+                const payload = {
+                    savedAt: Date.now(),
+                    rooms: rooms.map(room => ({
+                        ...room,
+                        createdAtDate: room.createdAtDate instanceof Date ? room.createdAtDate.toISOString() : room.createdAtDate
+                    }))
+                };
+                localStorage.setItem(ROOMS_CACHE_KEY, JSON.stringify(payload));
+            } catch (e) {
+                // Cache is an optimization only; never let storage errors affect rooms.
+            }
+        }
 
-                allRooms = [];
+        function loadRoomsCache() {
+            try {
+                const raw = localStorage.getItem(ROOMS_CACHE_KEY);
+                if (!raw) return false;
+                const payload = JSON.parse(raw);
+                if (!payload?.rooms?.length) return false;
 
-                for (const docSnap of snap.docs) {
-                    const data = docSnap.data();
-                    const id = docSnap.id;
-                    let creatorName = 'Unknown';
-                    let isAdminRoom = false;
-                    let creatorEmail = '';
+                allRooms = payload.rooms.map(room => ({
+                    ...room,
+                    createdAtDate: room.createdAtDate ? new Date(room.createdAtDate) : null,
+                    memberCount: Number(room.memberCount || 0),
+                    isTrending: Number(room.memberCount || 0) >= 10,
+                    isLive: Number(room.memberCount || 0) >= 5
+                }));
 
-                    if (data.createdBy) {
-                        try {
-                            const uSnap = await getDoc(doc(db, 'users', data.createdBy));
-                            if (uSnap.exists()) {
-                                const userData = uSnap.data();
-                                creatorName = escapeHTML(userData.name || userData.displayName || 'User');
-                                creatorEmail = userData.email || '';
-                                isAdminRoom = ADMIN_EMAILS.includes(creatorEmail.toLowerCase());
-                            }
-                        } catch (e) {
-                            console.error('Failed to load creator info:', e);
-                        }
-                    }
-
-                    const createdAt = data.createdAt?.toDate?.() || null;
-                    const memberCount = data.participantCount || 0;
-
-                    allRooms.push({
-                        id,
-                        ...data,
-                        creatorName,
-                        isAdminRoom,
-                        createdAtDate: createdAt,
-                        memberCount,
-                        // computed
-                        isTrending: memberCount >= 10,
-                        isLive: memberCount >= 5,
-                    });
-                }
-
-                // Load favorites after rooms loaded
-                await loadFavorites();
+                roomsLoadedFromCache = true;
                 applyFilters();
                 updateRecentUI();
+                return true;
             } catch (e) {
-                console.error('Failed to load rooms:', e);
-                grid.innerHTML = `<div class="empty-state">
-                    <span class="icon">⚠️</span>
-                    Failed to load rooms.
-                    <br>
-                    <button onclick="refreshRooms()" 
-                        style="background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer;">
-                        Retry
-                    </button>
-                </div>`;
+                return false;
             }
+        }
+
+        async function loadRooms(showLoading = true) {
+            // Never start duplicate room requests.
+            if (roomsLoadPromise) return roomsLoadPromise;
+
+            const hasCache = loadRoomsCache();
+            if (hasCache) showLoading = false;
+
+            if (showLoading && !allRooms.length) {
+                grid.innerHTML = Array.from({ length: 4 }, () => `
+                    <div class="room-card skeleton" aria-hidden="true">
+                        <div class="info">
+                            <div class="skeleton-line" style="width:60%;"></div>
+                            <div class="skeleton-line" style="width:80%;"></div>
+                            <div class="skeleton-line" style="width:40%;"></div>
+                        </div>
+                        <div style="width:80px;height:36px;background:rgba(255,255,255,0.05);border-radius:10px;"></div>
+                    </div>
+                `).join('');
+            }
+
+            roomsLoadPromise = (async () => {
+                try {
+                    const q = query(collection(db, 'rooms'), orderBy('createdAt', 'desc'));
+                    const snap = await getDocs(q);
+
+                    // Important speed optimization:
+                    // room creation already stores creatorName, so do NOT perform
+                    // one Firestore users/{uid} read for every room.
+                    allRooms = snap.docs.map(docSnap => {
+                        const data = docSnap.data();
+                        const id = docSnap.id;
+                        const memberCount = Number(data.participantCount || 0);
+                        const creatorName = data.creatorName || 'Unknown';
+
+                        return {
+                            id,
+                            ...data,
+                            creatorName: escapeHTML(creatorName),
+                            // Keep admin marker without N+1 creator reads.
+                            isAdminRoom: Boolean(data.isAdminRoom),
+                            createdAtDate: data.createdAt?.toDate?.() || null,
+                            memberCount,
+                            isTrending: memberCount >= 10,
+                            isLive: memberCount >= 5
+                        };
+                    });
+
+                    saveRoomsCache(allRooms);
+
+                    // Paint rooms as soon as Firestore returns. Favorites and
+                    // membership labels are secondary and must not block first paint.
+                    applyFilters();
+                    updateRecentUI();
+                    await loadFavorites();
+                    applyFilters();
+
+                    // Membership status is deliberately deferred until after first paint.
+                    const idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+                    idle(() => updateMembershipButtons(allRooms), { timeout: 1200 });
+
+                    roomsLoadedFromCache = false;
+                } catch (e) {
+                    console.error('Failed to load rooms:', e);
+                    if (!allRooms.length) {
+                        grid.innerHTML = `<div class="empty-state">
+                            <span class="icon">⚠️</span>
+                            Failed to load rooms.
+                            <br>
+                            <button onclick="refreshRooms()"
+                                style="background:var(--primary);color:white;border:none;padding:8px 16px;border-radius:8px;margin-top:8px;font-weight:700;cursor:pointer;">
+                                Retry
+                            </button>
+                        </div>`;
+                    }
+                } finally {
+                    roomsLoadPromise = null;
+                }
+            })();
+
+            return roomsLoadPromise;
         }
 
         // ============================================================
@@ -1321,7 +1382,7 @@
             if (refreshing) return;
             refreshing = true;
             refreshBtn.classList.add('spinning');
-            loadRooms(true).finally(() => {
+            loadRooms(false).finally(() => {
                 refreshing = false;
                 refreshBtn.classList.remove('spinning');
             });
@@ -1330,6 +1391,16 @@
         // ============================================================
         // FILTER AND SORT
         // ============================================================
+        let filterFrame = 0;
+        window.scheduleFilter = function() {
+            clearSearchBtn.classList.toggle('visible', searchInput.value.trim().length > 0);
+            if (filterFrame) cancelAnimationFrame(filterFrame);
+            filterFrame = requestAnimationFrame(() => {
+                filterFrame = 0;
+                applyFilters();
+            });
+        };
+
         window.applyFilters = function() {
             const query = searchInput.value.toLowerCase().trim();
             const sort = sortSelect.value;
@@ -1365,10 +1436,10 @@
                     filtered.sort((a, b) => (b.memberCount || 0) - (a.memberCount || 0));
                     break;
                 case 'cheapest':
-                    filtered.sort(() => 0);
+                    filtered.sort((a, b) => (Number(a.entryFee ?? ENTRY_FEE) - Number(b.entryFee ?? ENTRY_FEE)));
                     break;
                 case 'expensive':
-                    filtered.sort(() => 0);
+                    filtered.sort((a, b) => (Number(b.entryFee ?? ENTRY_FEE) - Number(a.entryFee ?? ENTRY_FEE)));
                     break;
                 default:
                     break;
@@ -1463,24 +1534,49 @@
             updateMembershipButtons(rooms);
         }
 
+        const membershipCache = new Map();
+
         async function getMembership(roomId) {
             if (!currentUserUid) return null;
+            if (membershipCache.has(roomId)) return membershipCache.get(roomId);
+
             const ref = doc(db, 'rooms', roomId, 'members', currentUserUid);
             const snap = await getDoc(ref);
-            return snap.exists() ? snap.data() : null;
+            const member = snap.exists() ? snap.data() : null;
+            membershipCache.set(roomId, member);
+            return member;
         }
 
         async function updateMembershipButtons(rooms) {
-            if (!currentUserUid) return;
-            await Promise.all(rooms.map(async room => {
-                const btn = document.querySelector(`[data-join-room="${CSS.escape(room.id)}"]`);
-                if (!btn) return;
-                if (room.createdBy === currentUserUid) { btn.textContent = 'Owner — Enter'; return; }
+            if (!currentUserUid || !rooms?.length) return;
+
+            // Only inspect a small visible batch first. The user can still join
+            // normally; labels for the remaining rooms are filled in idle time.
+            const buttons = rooms
+                .map(room => ({
+                    room,
+                    btn: document.querySelector(`[data-join-room="${CSS.escape(room.id)}"]`)
+                }))
+                .filter(x => x.btn);
+
+            const updateOne = async ({ room, btn }) => {
+                if (room.createdBy === currentUserUid) {
+                    btn.textContent = 'Owner — Enter';
+                    return;
+                }
                 try {
                     const member = await getMembership(room.id);
                     if (member) btn.textContent = 'Member — Enter';
-                } catch (e) { console.warn('Membership lookup failed', room.id, e); }
-            }));
+                } catch (e) {
+                    // Non-critical UI enhancement.
+                }
+            };
+
+            // Small batches prevent a large room list from creating a burst of reads.
+            for (let i = 0; i < buttons.length; i += 6) {
+                await Promise.all(buttons.slice(i, i + 6).map(updateOne));
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
         }
 
         // ============================================================
@@ -1744,10 +1840,15 @@
             welcomeModal.setAttribute('aria-hidden', 'true');
         };
         if (!localStorage.getItem('spike_rooms_welcome_seen')) {
-            setTimeout(() => {
-                welcomeModal.classList.add('active');
-                welcomeModal.setAttribute('aria-hidden', 'false');
-            }, 700);
+            // Defer the welcome overlay until the first room paint so it never
+            // competes with initial rendering.
+            const showWelcome = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+            showWelcome(() => {
+                if (!roomsLoadedFromCache && !welcomeModal.classList.contains('active')) {
+                    welcomeModal.classList.add('active');
+                    welcomeModal.setAttribute('aria-hidden', 'false');
+                }
+            }, { timeout: 1800 });
         }
 
         // ============================================================
@@ -1765,10 +1866,17 @@
             onlineDot.classList.add('online');
 
             isAdmin = ADMIN_EMAILS.includes(user.email?.toLowerCase());
-            coinBalance = await getCoins(user.uid);
-            headerCoins.textContent = coinBalance;
             loadRecentRooms();
-            await loadRooms(true);
+
+            // Start independent work in parallel. Rooms paint without waiting
+            // for the wallet read.
+            const coinPromise = getCoins(user.uid).then(balance => {
+                coinBalance = balance;
+                headerCoins.textContent = balance;
+            });
+
+            loadRooms(true);
+            await coinPromise;
         });
 
         // ============================================================

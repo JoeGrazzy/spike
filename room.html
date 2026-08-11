@@ -8,7 +8,8 @@
     <title>FunRoom · Room</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" /></noscript>
     <style>
         /* ===== PREMIUM ULTRA THEME ===== */
         :root {
@@ -1861,6 +1862,7 @@
             flex-shrink: 0;
             padding-bottom: calc(6px + var(--safe-bottom));
             backdrop-filter: blur(8px);
+            transition: none;
         }
         .input-area .input-row {
             display: flex;
@@ -2301,6 +2303,21 @@
             position: absolute;
             font-size: 24px;
             animation: rainFall linear forwards;
+            text-align: center;
+            font-weight: 900;
+            filter: drop-shadow(0 0 8px rgba(255, 45, 170, .9)) drop-shadow(0 0 12px rgba(0, 180, 255, .75));
+        }
+        .gift-rain .drop .gift-name {
+            color: #ff4fc3;
+            text-shadow: 0 0 6px #ff2fae, 0 0 14px #ff2fae;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .gift-rain .drop .gift-value {
+            color: #35cfff;
+            text-shadow: 0 0 6px #18bfff, 0 0 14px #008cff;
+            font-size: 12px;
+            white-space: nowrap;
         }
         @keyframes rainFall {
             0% {
@@ -2805,16 +2822,22 @@
             display: flex;
         }
         .gift-send-modal {
-            background: var(--bg-secondary);
-            border-radius: var(--radius);
-            max-width: 400px;
+            background: linear-gradient(145deg, rgba(18,22,40,.98), rgba(35,20,48,.98));
+            border-radius: 24px;
+            max-width: 460px;
             width: 100%;
-            max-height: 80vh;
+            max-height: 86vh;
             overflow-y: auto;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 215, 0, 0.08);
+            padding: 22px;
+            box-shadow: 0 24px 80px rgba(0,0,0,.55), 0 0 45px rgba(236,72,153,.12), 0 0 35px rgba(59,130,246,.10);
+            border: 1px solid rgba(236,72,153,.22);
+            position: relative;
         }
+        .gift-send-modal:before { content:''; position:absolute; inset:0; pointer-events:none; border-radius:24px; background:linear-gradient(120deg,rgba(236,72,153,.08),transparent 42%,rgba(59,130,246,.08)); }
+        .gift-send-modal > * { position:relative; z-index:1; }
+        .gift-send-modal .gift-send-title { font-size:1.25rem; font-weight:900; background:linear-gradient(90deg,#ff69b4,#7dd3fc); -webkit-background-clip:text; background-clip:text; color:transparent; }
+        .gift-send-modal .gift-send-sub { color:var(--text-muted); font-size:.76rem; margin-top:3px; }
+        .gift-send-modal .gift-recipient-card { background:linear-gradient(135deg,rgba(236,72,153,.10),rgba(59,130,246,.10)); border:1px solid rgba(236,72,153,.18); border-radius:16px; padding:12px; margin:14px 0; }
         .gift-send-modal .gift-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -2822,11 +2845,11 @@
             margin: 8px 0;
         }
         .gift-send-modal .gift-grid button {
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 6px;
-            font-size: 24px;
+            background: linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.015));
+            border: 1px solid rgba(255,255,255,.09);
+            border-radius: 15px;
+            padding: 9px 6px;
+            font-size: 28px;
             cursor: pointer;
             min-height: 54px;
             display: flex;
@@ -2840,9 +2863,10 @@
             background: rgba(255, 215, 0, 0.04);
         }
         .gift-send-modal .gift-grid button.selected {
-            border-color: var(--gold);
-            background: rgba(255, 215, 0, 0.08);
-            box-shadow: 0 0 16px rgba(251, 191, 36, 0.15);
+            border-color: #ff69b4;
+            background: linear-gradient(145deg,rgba(236,72,153,.18),rgba(59,130,246,.13));
+            box-shadow: 0 0 22px rgba(236,72,153,.22), 0 0 18px rgba(59,130,246,.14);
+            transform: translateY(-2px);
         }
         .gift-send-modal .send-actions {
             display: flex;
@@ -2874,92 +2898,115 @@
             flex: 0.4;
         }
 
-        /* ===== GIFTS PANEL ===== */
+        .gift-send-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+        .gift-send-close{width:34px;height:34px;border-radius:11px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.04);color:var(--text-muted);cursor:pointer;}
+        .gift-send-close:hover{color:#fff;border-color:rgba(236,72,153,.4);box-shadow:0 0 15px rgba(236,72,153,.15);}
+        .gift-recipient-card{display:flex;align-items:center;gap:11px;}
+        .gift-recipient-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(135deg,rgba(236,72,153,.18),rgba(59,130,246,.18));font-size:20px;}
+        .gift-recipient-label{font-size:.62rem;font-weight:800;letter-spacing:.12em;color:#ff8ac8;}
+        .gift-recipient-name{font-weight:800;color:#fff;margin-top:2px;}
+        .gift-send-section-title{font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#9bdcff;margin:12px 0 8px;}
+        .gift-send-footer{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);}
+        
+/* ===== SEND GIFT: PINK / BLUE GLOW ===== */
+.gift-send-modal .gift-grid button {
+    position: relative;
+    overflow: hidden;
+    border-color: rgba(236, 72, 153, .28);
+    box-shadow: 0 0 10px rgba(236,72,153,.06), inset 0 0 12px rgba(59,130,246,.035);
+}
+.gift-send-modal .gift-grid button .gift-cost-popup,
+.gift-send-modal .gift-grid button .gift-name,
+.gift-send-modal .gift-grid button .gift-price {
+    color: #60a5fa !important;
+    text-shadow: 0 0 7px rgba(59,130,246,.85), 0 0 14px rgba(59,130,246,.45);
+}
+.gift-send-modal .gift-grid button::after {
+    content: "";
+    position: absolute;
+    inset: auto 8px 4px;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ec4899, #60a5fa);
+    box-shadow: 0 0 8px rgba(236,72,153,.8), 0 0 10px rgba(59,130,246,.7);
+    opacity: .8;
+}
+.gift-send-modal .gift-grid button.selected {
+    border-color: #ec4899;
+    box-shadow: 0 0 18px rgba(236,72,153,.35), 0 0 24px rgba(59,130,246,.18), inset 0 0 18px rgba(236,72,153,.08);
+}
+.gift-send-modal .gift-grid button.selected .gift-cost-popup,
+.gift-send-modal .gift-grid button.selected .gift-name,
+.gift-send-modal .gift-grid button.selected .gift-price {
+    color: #f472b6 !important;
+    text-shadow: 0 0 8px rgba(244,114,182,.95), 0 0 16px rgba(96,165,250,.55);
+}
+.gift-send-modal .gift-send-title,
+.gift-send-modal .gift-send-section-title {
+    color: #f472b6;
+    text-shadow: 0 0 8px rgba(244,114,182,.8), 0 0 16px rgba(59,130,246,.35);
+}
+.gift-send-modal .gift-send-sub,
+.gift-send-modal .gift-recipient-label {
+    color: #60a5fa;
+    text-shadow: 0 0 7px rgba(59,130,246,.8);
+}
+.gift-send-modal .gift-recipient-name {
+    color: #f472b6 !important;
+    text-shadow: 0 0 8px rgba(244,114,182,.9), 0 0 15px rgba(236,72,153,.45);
+}
+.gift-send-modal .btn-send-gift {
+    background: linear-gradient(135deg, #ec4899, #60a5fa) !important;
+    color: #fff !important;
+    box-shadow: 0 0 16px rgba(236,72,153,.35), 0 0 20px rgba(59,130,246,.25);
+}
+
+/* ===== PREMIUM GIFTS PANEL ===== */
         .gifts-panel-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(8px);
-            z-index: 2200;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            position: fixed; inset: 0; padding: 16px;
+            background: radial-gradient(circle at 50% 10%, rgba(255,75,180,.14), transparent 34%), rgba(5,7,16,.82);
+            backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+            z-index: 2200; display: none; align-items: center; justify-content: center;
         }
-        .gifts-panel-overlay.open {
-            display: flex;
-        }
+        .gifts-panel-overlay.open { display:flex; animation: giftPanelIn .22s ease-out; }
+        @keyframes giftPanelIn { from {opacity:0} to {opacity:1} }
         .gifts-panel {
-            background: var(--bg-secondary);
-            border-radius: var(--radius);
-            max-width: 480px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 20px;
-            box-shadow: var(--shadow);
-            border: 1px solid rgba(255, 215, 0, 0.08);
+            position:relative; width:min(520px,100%); max-height:88vh; overflow:hidden;
+            border-radius:24px; padding:0;
+            background: linear-gradient(180deg, rgba(24,19,39,.98), rgba(12,16,29,.98));
+            border:1px solid rgba(255,105,190,.24);
+            box-shadow: 0 30px 90px rgba(0,0,0,.62), 0 0 45px rgba(255,55,170,.10), inset 0 1px 0 rgba(255,255,255,.06);
         }
+        .gifts-panel-head { padding:20px 20px 16px; background:linear-gradient(135deg,rgba(255,65,170,.13),rgba(65,145,255,.10)); border-bottom:1px solid rgba(255,255,255,.07); }
+        .gifts-panel-title-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+        .gifts-panel-title { font-size:1.05rem; font-weight:900; letter-spacing:.2px; }
+        .gifts-panel-sub { margin-top:4px; color:var(--text-muted); font-size:.72rem; }
+        .gifts-panel-close { width:34px;height:34px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:rgba(255,255,255,.04);color:#fff;cursor:pointer;font-size:17px; }
+        .gift-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+        .gift-summary-card { padding:11px 13px; border-radius:15px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.07); }
+        .gift-summary-card .label { color:var(--text-muted); font-size:.63rem; text-transform:uppercase; letter-spacing:.8px; }
+        .gift-summary-card .value { margin-top:3px; font-weight:900; font-size:1rem; }
+        .gift-summary-card.coins .value { color:#67b8ff; text-shadow:0 0 14px rgba(72,161,255,.45); }
+        .gift-summary-card.count .value { color:#ff78c8; text-shadow:0 0 14px rgba(255,70,180,.45); }
+        #giftsListContainer { max-height:58vh; overflow-y:auto; padding:14px; }
         .gifts-panel .gift-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 6px 10px;
-            margin-bottom: 6px;
+            position:relative; display:grid; grid-template-columns:48px 1fr auto; align-items:center; gap:12px;
+            padding:12px; margin-bottom:9px; border-radius:17px;
+            background:linear-gradient(135deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+            border:1px solid rgba(255,255,255,.07); transition:.18s ease;
         }
-        .gifts-panel .gift-item .gift-emoji {
-            font-size: 24px;
-            width: 36px;
-            text-align: center;
-            flex-shrink: 0;
-        }
-        .gifts-panel .gift-item .gift-actions button {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 2px 8px;
-            font-size: 0.65rem;
-            font-weight: 600;
-            cursor: pointer;
-            color: var(--text-muted);
-            min-height: 28px;
-            font-family: var(--font);
-            transition: 0.15s;
-        }
-        .gifts-panel .gift-item .gift-actions button.convert {
-            color: var(--gold);
-            border-color: rgba(255, 215, 0, 0.2);
-        }
-        .gifts-panel .gift-item .gift-actions button.convert:hover {
-            background: rgba(255, 215, 0, 0.05);
-        }
-        .gifts-panel .panel-actions {
-            margin-top: 10px;
-            display: flex;
-            gap: 8px;
-        }
-        .gifts-panel .panel-actions button {
-            flex: 1;
-            padding: 8px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            cursor: pointer;
-            font-family: var(--font);
-            min-height: 36px;
-            transition: 0.15s;
-        }
-        .gifts-panel .panel-actions .convert-all {
-            background: var(--gold);
-            color: #0d1520;
-        }
-        .gifts-panel .panel-actions .convert-all:hover {
-            background: var(--gold-dark);
-        }
+        .gifts-panel .gift-item:hover { transform:translateY(-1px); border-color:rgba(255,105,190,.25); box-shadow:0 8px 25px rgba(0,0,0,.18); }
+        .gifts-panel .gift-item .gift-emoji { width:48px;height:48px;display:grid;place-items:center;border-radius:15px;font-size:29px;background:radial-gradient(circle,rgba(255,90,190,.18),rgba(70,145,255,.08));box-shadow:inset 0 0 18px rgba(255,255,255,.04); }
+        .gift-info { min-width:0; }
+        .gift-from { font-size:.82rem; font-weight:850; color:#ff79c9; text-shadow:0 0 12px rgba(255,72,185,.35); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .gift-meta { margin-top:4px; font-size:.68rem; color:var(--text-muted); }
+        .gift-value { color:#68b9ff; font-weight:900; text-shadow:0 0 12px rgba(70,160,255,.42); }
+        .gifts-panel .gift-actions button { border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:7px 10px;font-size:.67rem;font-weight:800;cursor:pointer;color:var(--text-muted);background:rgba(255,255,255,.045);font-family:var(--font); }
+        .gifts-panel .gift-actions button.convert { color:#fff; border-color:rgba(255,105,190,.30); background:linear-gradient(135deg,rgba(255,70,180,.18),rgba(72,155,255,.12)); box-shadow:0 0 16px rgba(255,70,180,.08); }
+        .gifts-panel .panel-actions { display:flex;gap:9px;padding:0 14px 14px; }
+        .gifts-panel .panel-actions button { flex:1;padding:11px;border:0;border-radius:13px;font-weight:850;font-size:.72rem;cursor:pointer;font-family:var(--font); }
+        .gifts-panel .panel-actions .convert-all { color:#fff;background:linear-gradient(135deg,#ff4fb5,#4b9dff);box-shadow:0 8px 24px rgba(255,70,180,.16); }
+        @media (max-width:480px){ .gifts-panel{border-radius:20px}.gifts-panel-head{padding:17px}.gift-summary{gap:8px}.gifts-panel .gift-item{grid-template-columns:44px 1fr auto}.gifts-panel .gift-item .gift-emoji{width:44px;height:44px;font-size:26px} }
 
         /* ===== SEND COINS ===== */
         .send-coins-overlay {
@@ -3700,6 +3747,94 @@
         }
 
 </style>
+
+<style id="gift-price-glow-extra">
+.gift-send-modal .gift-cost-popup { color:#60a5fa !important; text-shadow:0 0 7px #60a5fa,0 0 14px rgba(59,130,246,.5); }
+</style>
+
+<style id="keyboard-safe-message-input">
+@media (max-width: 768px) {
+  #bottomInputArea {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 1200 !important;
+    transform: translateZ(0) !important;
+    margin: 0 !important;
+    transition: none !important;
+    padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  }
+}
+</style>
+
+
+<style id="message-input-visible-text">
+/* Keep everything the member types visible inside the original composer. */
+#bottomInputArea #msgInput {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    max-height: 180px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    white-space: pre-wrap !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    resize: none !important;
+    line-height: 1.45 !important;
+    padding: 12px 14px !important;
+    scroll-padding: 12px !important;
+    -webkit-overflow-scrolling: touch !important;
+    caret-color: currentColor !important;
+}
+#bottomInputArea {
+    max-height: 210px !important;
+    overflow: visible !important;
+}
+</style>
+
+<style id="rebuilt-theme-market">
+/* ===== REBUILT ROOM THEME MARKET ===== */
+.theme-market{
+    margin-top:16px;
+    padding:16px;
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:22px;
+    background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+    box-shadow:0 14px 38px rgba(0,0,0,.20);
+}
+.theme-market-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.theme-market-title{font-weight:900;font-size:1rem}
+.theme-market-subtitle{font-size:.72rem;color:var(--text-muted);margin-top:3px}
+.theme-market-badge{padding:5px 9px;border-radius:999px;font-size:.65rem;font-weight:900;color:#fff;background:linear-gradient(135deg,#ec4899,#60a5fa);box-shadow:0 0 15px rgba(236,72,153,.22)}
+.theme-market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.theme-market-card{
+    position:relative;overflow:hidden;text-align:left;cursor:pointer;color:#fff;
+    min-height:126px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.12);
+    background:var(--tm-bg);box-shadow:inset 0 0 25px rgba(255,255,255,.04),0 8px 22px rgba(0,0,0,.16);
+    transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
+}
+.theme-market-card::before{
+    content:"";position:absolute;width:150px;height:150px;right:-45px;top:-60px;border-radius:50%;
+    background:var(--tm-glow);filter:blur(12px);opacity:.34;
+}
+.theme-market-card:hover,.theme-market-card.active{
+    transform:translateY(-2px);border-color:var(--tm-accent);
+    box-shadow:0 0 25px var(--tm-glow),inset 0 0 28px rgba(255,255,255,.05);
+}
+.theme-market-card > *{position:relative;z-index:1}
+.theme-market-icon{font-size:1.45rem;margin-bottom:8px}
+.theme-market-name{font-weight:900;font-size:.82rem}
+.theme-market-desc{font-size:.66rem;opacity:.72;margin-top:4px;line-height:1.35}
+.theme-market-swatches{display:flex;gap:5px;margin-top:10px}
+.theme-market-swatch{width:22px;height:8px;border-radius:999px;box-shadow:0 0 8px rgba(255,255,255,.08)}
+.theme-market-action{margin-top:11px;font-size:.65rem;font-weight:900;letter-spacing:.2px;color:#fff}
+@media(max-width:520px){
+    .theme-market-grid{grid-template-columns:1fr}
+    .theme-market-colors{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+
 </head>
 <body>
 
@@ -3878,29 +4013,6 @@
         <div class="cost-indicator">🪙 Text: 1 &nbsp;|&nbsp; Sticker: 2 &nbsp;|&nbsp; Image: 5</div>
     </div>
 
-    <!-- ===== TYPING OVERLAY ===== -->
-    <div class="typing-overlay" id="typingOverlay" style="display:none; position:fixed; inset:0; background:rgba(8,12,20,0.92); backdrop-filter:blur(16px); z-index:3000; align-items:center; justify-content:center; padding:20px;">
-        <div class="typing-card" style="max-width:560px; width:100%; background:var(--bg-secondary); border:1px solid rgba(255,215,0,0.15); border-radius:var(--radius); padding:24px 28px 28px; box-shadow:0 24px 80px rgba(0,0,0,0.9); max-height:90vh; display:flex; flex-direction:column;">
-            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                <span style="font-weight:700;">✏️ Compose</span>
-                <button class="card-close" onclick="closeTypingOverlay()" style="background:rgba(255,255,255,0.04); border:1px solid var(--border-color); border-radius:50%; width:36px; height:36px; color:var(--text-muted); cursor:pointer; font-size:18px;">✕</button>
-            </div>
-            <textarea id="typingTextarea" placeholder="What's on your mind?" rows="4" style="width:100%; min-height:160px; max-height:50vh; background:var(--bg-input); border:1px solid var(--border-color); border-radius:12px; padding:14px 16px; color:var(--text-primary); font-size:1rem; font-family:var(--font); resize:vertical; outline:none; flex:1; line-height:1.5;"></textarea>
-            <div class="char-count" style="text-align:right; font-size:0.7rem; color:var(--text-muted); margin-top:6px;"><span id="charCount">0</span> characters</div>
-            <div class="input-tools" style="display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:8px; flex-wrap:wrap;">
-                <div class="tool-group" style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button onclick="toggleStickerPicker()" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:4px 8px; font-size:16px; cursor:pointer; min-height:40px; min-width:40px; color:var(--text-muted);">😊</button>
-                    <button onclick="triggerImageUpload()" style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:4px 8px; font-size:16px; cursor:pointer; min-height:40px; min-width:40px; color:var(--text-muted);">🖼️</button>
-                    <button onclick="insertMentionOverlay()" style="font-weight:700; font-size:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:4px 8px; cursor:pointer; min-height:40px; min-width:40px; color:var(--text-muted);">@</button>
-                    <button onclick="openPollCreator()" style="font-weight:700; font-size:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border-color); border-radius:8px; padding:4px 8px; cursor:pointer; min-height:40px; min-width:40px; color:var(--text-muted);">📊</button>
-                </div>
-                <div class="send-action" style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:0.8rem; font-weight:700; color:var(--gold);">🪙 <span id="typingCostBadge">1</span></span>
-                    <button class="btn-send-overlay" onclick="sendMessageFromOverlay()" style="background:linear-gradient(135deg,var(--gold),var(--gold-dark)); border:none; border-radius:10px; padding:8px 24px; font-weight:700; font-size:0.9rem; color:#0d1520; cursor:pointer; min-height:40px; box-shadow:0 0 16px rgba(251,191,36,0.3); font-family:var(--font);">Send</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- ===== MODALS ===== -->
     <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageUpload(event)" />
@@ -4014,16 +4126,27 @@
     <!-- GIFT SEND MODAL -->
     <div class="gift-send-overlay" id="giftSendOverlay" onclick="closeGiftSendModal()">
         <div class="gift-send-modal" onclick="event.stopPropagation()">
-            <div style="display:flex; justify-content:space-between;"><span>🎁 Send Gift</span><button onclick="closeGiftSendModal()" style="background:none; border:none; color:var(--text-muted); font-size:20px; cursor:pointer;">✕</button></div>
-            <div id="giftRecipientInfo" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.02); border:1px solid var(--border-color); border-radius:10px; padding:6px 10px; margin:8px 0;">👤 Select a user</div>
+            <div class="gift-send-head"><div><div class="gift-send-title">🎁 Send a Gift</div><div class="gift-send-sub">Choose something special for a room member</div></div><button class="gift-send-close" onclick="closeGiftSendModal()">✕</button></div>
+            <div class="gift-recipient-card"><div class="gift-recipient-icon">👤</div><div><div class="gift-recipient-label">GIFT RECIPIENT</div><div id="giftRecipientInfo" class="gift-recipient-name">Select a user</div></div></div>
+            <div class="gift-send-section-title">Choose your gift</div>
             <div class="gift-grid" id="giftSendGrid"></div>
-            <div class="send-actions"><button class="btn-send-gift" id="giftSendBtn" onclick="sendGiftToUser()">💌 Send Gift</button><button class="btn-cancel" onclick="closeGiftSendModal()">Cancel</button></div>
+            <div class="gift-send-footer"><div class="send-actions"><button class="btn-send-gift" id="giftSendBtn" onclick="sendGiftToUser()">💌 Send Gift</button><button class="btn-cancel" onclick="closeGiftSendModal()">Cancel</button></div></div>
         </div>
     </div>
 
     <!-- GIFTS PANEL -->
     <div class="gifts-panel-overlay" id="giftsPanelOverlay" onclick="closeGiftsPanel()">
-        <div class="gifts-panel" onclick="event.stopPropagation()"><div id="giftsListContainer">Loading…</div></div>
+        <div class="gifts-panel" onclick="event.stopPropagation()">
+            <div class="gifts-panel-head">
+                <div class="gifts-panel-title-row">
+                    <div><div class="gifts-panel-title">🎁 My Gift Vault</div><div class="gifts-panel-sub">Your received gifts, glowing with their sender and coin value.</div></div>
+                    <button class="gifts-panel-close" onclick="closeGiftsPanel()">✕</button>
+                </div>
+                <div class="gift-summary"><div class="gift-summary-card count"><div class="label">Unconverted Gifts</div><div class="value" id="giftSummaryCount">0</div></div><div class="gift-summary-card coins"><div class="label">Available Gift Value</div><div class="value" id="giftSummaryValue">0 🪙</div></div></div>
+            </div>
+            <div id="giftsListContainer">Loading…</div>
+            <div class="panel-actions"><button class="convert-all" id="convertAllGiftsBtn" onclick="convertAllGifts()">✨ Convert All Gifts</button></div>
+        </div>
     </div>
 
     <!-- SEND COINS MODAL -->
@@ -4114,7 +4237,18 @@
         // CONSTANTS
         // ============================================================
         const COSTS = { text: 1, sticker: 2, voice: 3, image: 5 };
-        const GIFT_EMOJIS = [{ emoji: '❤️', cost: 2 }, { emoji: '😊', cost: 2 }, { emoji: '🔥', cost: 5 }, { emoji: '🎉', cost: 5 }, { emoji: '💎', cost: 10 }, { emoji: '🌟', cost: 20 }];
+        const GIFT_EMOJIS = [
+            { emoji: '🌹', cost: 50, name: 'Rose' },
+            { emoji: '❤️', cost: 75, name: 'Love' },
+            { emoji: '😊', cost: 100, name: 'Smile' },
+            { emoji: '🔥', cost: 150, name: 'Fire' },
+            { emoji: '🎉', cost: 200, name: 'Celebration' },
+            { emoji: '💎', cost: 300, name: 'Diamond' },
+            { emoji: '👑', cost: 500, name: 'Crown' },
+            { emoji: '🚀', cost: 750, name: 'Rocket' },
+            { emoji: '💝', cost: 1000, name: 'Heart Gift' },
+            { emoji: '🏆', cost: 1500, name: 'Trophy' }
+        ];
         const coinPackages = [{ amount: 10, price: 0.09 }, { amount: 25, price: 0.19 }, { amount: 50, price: 0.39 }, { amount: 100, price: 0.79 }, { amount: 250, price: 1.99 }, { amount: 500, price: 3.99 }, { amount: 1000, price: 7.99 }];
         const stickers = { happy: ['😊', '😄', '😂', '🤣', '🥰', '😍', '🤩', '😎'], sad: ['😢', '😭', '😥', '😰', '😩', '🥺', '😔', '😞'], angry: ['😡', '😠', '🤬', '👿', '😤', '💢', '🔥', '💀'], animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼'] };
         const allStickers = Object.values(stickers).flat();
@@ -4169,6 +4303,47 @@
             file_size: { id: 'file_size', name: 'Increased File Size', description: 'Allow larger image and file uploads (up to 20 MB).', category: 'Utility', icon: '📁', price_usd: 2.00 },
             pin_limit: { id: 'pin_limit', name: 'Unlimited Pinned Messages', description: 'Pin unlimited messages (instead of the default 5).', category: 'Management', icon: '📌', price_usd: 3.00 },
             member_limit: { id: 'member_limit', name: 'Member Limit Boost', description: 'Increase member capacity by 50.', category: 'Management', icon: '👥', price_usd: 5.00 },
+            // ===== THEMES =====
+            theme_pink_blue: {
+                id: 'theme_pink_blue',
+                name: 'Pink & Blue Glow Theme',
+                description: 'Luxury neon glow with a soft premium chat finish.',
+                category: 'Themes',
+                icon: '💗💙',
+                price_usd: 2.00
+            },
+            theme_luxury_gold: {
+                id: 'theme_luxury_gold',
+                name: 'Luxury Gold Theme',
+                description: 'Elegant gold room with a rich VIP‑style finish.',
+                category: 'Themes',
+                icon: '👑✨',
+                price_usd: 2.00
+            },
+            theme_orange_pink: {
+                id: 'theme_orange_pink',
+                name: 'Orange & Pink Theme',
+                description: 'Warm energetic orange blended with premium pink.',
+                category: 'Themes',
+                icon: '🧡💗',
+                price_usd: 2.00
+            },
+            theme_royal_blue_violet: {
+                id: 'theme_royal_blue_violet',
+                name: 'Royal Blue & Violet Theme',
+                description: 'Deep royal tones with a modern glowing accent.',
+                category: 'Themes',
+                icon: '💙💜',
+                price_usd: 2.00
+            },
+            theme_emerald_cyan: {
+                id: 'theme_emerald_cyan',
+                name: 'Emerald & Cyan Theme',
+                description: 'Fresh emerald energy with a bright cyan glow.',
+                category: 'Themes',
+                icon: '💚🩵',
+                price_usd: 2.00
+            },
         };
 
         const COIN_PACKS = [{ amount: 100, price_usd: 0.99 }, { amount: 250, price_usd: 1.99 }, { amount: 500, price_usd: 3.99 }, { amount: 1000, price_usd: 5.99 }, { amount: 2500, price_usd: 12.99 }, { amount: 5000, price_usd: 19.99 }];
@@ -4445,14 +4620,29 @@
         async function deductCoinsIfPossible(amount, reason) {
             if (amount <= 0) return true;
             if (coinBalance < amount) { showToast(`Insufficient coins! Need ${amount} 🪙`, 'error'); return false; }
-            try {
-                await updateCoins(currentUser.uid, -amount, reason);
-                coinBalance = await getCoins(currentUser.uid);
-                coinEl.textContent = coinBalance;
-                document.getElementById('sendCoinsBalance').textContent = coinBalance;
-                await creditAdminEarnings(amount, currentUser.uid);
-                return true;
-            } catch (e) { showToast('Transaction failed: ' + e.message, 'error'); return false; }
+
+            // Firestore can reject a transaction when another activity updates the
+            // same user document at nearly the same time. Retry briefly instead of
+            // exposing a raw failed-precondition error to the member.
+            let lastError = null;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    await updateCoins(currentUser.uid, -amount, reason);
+                    coinBalance = await getCoins(currentUser.uid);
+                    coinEl.textContent = coinBalance;
+                    const sendBalance = document.getElementById('sendCoinsBalance');
+                    if (sendBalance) sendBalance.textContent = coinBalance;
+                    await creditAdminEarnings(amount, currentUser.uid);
+                    return true;
+                } catch (e) {
+                    lastError = e;
+                    if (e?.code !== 'failed-precondition') break;
+                    await new Promise(resolve => setTimeout(resolve, 80 * (attempt + 1)));
+                }
+            }
+            console.error('Coin transaction failed after retries:', lastError);
+            showToast('Coin transaction could not be completed. Please try again.', 'error');
+            return false;
         }
 
         // ============================================================
@@ -4727,7 +4917,7 @@
                 await setDoc(giftRef, { fromUid: currentUser.uid, fromName: currentUser.displayName || 'User', emoji: selectedGiftEmoji, value: cost, timestamp: serverTimestamp(), converted: false });
                 const recipientName = document.getElementById('giftRecipientInfo')?.textContent || 'user';
                 await addDoc(collection(db, 'rooms', roomId, 'messages'), { senderId: 'system', senderName: 'SPIKE', text: `🎁 ${currentUser.displayName || 'User'} sent a gift ${selectedGiftEmoji} to ${recipientName}!`, type: 'system', timestamp: serverTimestamp() });
-                if (cost >= 10) triggerGiftRain(selectedGiftEmoji, cost === 20 ? 40 : 20);
+                // Gift rain is receiver-only; the receiver listener triggers it.
                 await addSP(5, `Sent gift ${selectedGiftEmoji}`);
                 showToast(`Gift ${selectedGiftEmoji} sent! -${cost}🪙`, 'success');
                 addNotification(`Sent ${selectedGiftEmoji} gift`, 'gold', 'Gift Sent');
@@ -4736,12 +4926,12 @@
             } catch (err) { showToast('Failed to send gift: ' + err.message, 'error'); }
         };
 
-        function triggerGiftRain(emoji, count = 20) {
+        function triggerGiftRain(emoji, count = 20, senderName = 'Someone', value = 0) {
             const c = document.getElementById('giftRain');
             for (let i = 0; i < count; i++) {
                 const el = document.createElement('div');
                 el.className = 'drop';
-                el.textContent = emoji;
+                el.innerHTML = `<div style=\"font-size:28px\">${emoji}</div><div class=\"gift-name\">${escapeHtml(senderName)}</div><div class=\"gift-value\">${Number(value).toLocaleString()} 🪙</div>`;
                 el.style.left = Math.random() * 100 + '%';
                 el.style.fontSize = (22 + Math.random() * 30) + 'px';
                 el.style.animationDuration = (2 + Math.random() * 3) + 's';
@@ -4768,16 +4958,21 @@
                 const snap = await getDocs(q);
                 if (snap.empty) { el.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text-muted);">No gifts yet. 🌟</div>'; return; }
                 let html = '';
-                let unconverted = 0;
+                let unconverted = 0, availableValue = 0;
                 snap.forEach(d => {
                     const data = d.data();
                     const id = d.id;
                     const converted = data.converted === true;
-                    if (!converted) unconverted++;
-                    html +=
-                        `<div class="gift-item"><div class="gift-emoji">${data.emoji}</div><div class="gift-info">from ${data.fromName || 'Unknown'} (🪙${data.value})</div><div class="gift-actions">${converted ? '<button disabled>✓ Converted</button>' : `<button class="convert" onclick="convertGift('${id}')">Convert</button>`}</div></div>`;
+                    const value = Number(data.value || 0);
+                    if (!converted) { unconverted++; availableValue += value; }
+                    const safeName = String(data.fromName || 'Unknown').replace(/[<>]/g,'');
+                    const safeEmoji = String(data.emoji || '🎁').replace(/[<>]/g,'');
+                    html += `<div class="gift-item"><div class="gift-emoji">${safeEmoji}</div><div class="gift-info"><div class="gift-from">${safeName}</div><div class="gift-meta">Gift received • <span class="gift-value">🪙 ${value}</span></div></div><div class="gift-actions">${converted ? '<button disabled>✓ Converted</button>' : `<button class="convert" onclick="convertGift('${id}')">Convert</button>`}</div></div>`;
                 });
                 el.innerHTML = html;
+                document.getElementById('giftSummaryCount').textContent = unconverted;
+                document.getElementById('giftSummaryValue').textContent = `${availableValue.toLocaleString()} 🪙`;
+                document.getElementById('convertAllGiftsBtn').disabled = unconverted === 0;
                 giftBadgeCount = unconverted;
                 updateGiftBadge();
             } catch (e) { el.innerHTML = 'Failed to load gifts.'; }
@@ -4804,6 +4999,46 @@
                 loadGifts();
             } catch (e) { showToast('Failed: ' + e.message, 'error'); }
         };
+        window.convertAllGifts = async function() {
+            if (!currentUser) return;
+            try {
+                const q = query(collection(db, 'users', currentUser.uid, 'gifts'), where('converted', '==', false));
+                const snap = await getDocs(q);
+                if (snap.empty) { showToast('No gifts to convert.', 'warning'); return; }
+                const ok = await showConfirm({ icon:'✨', title:'Convert All Gifts', message:`Convert ${snap.size} gift(s) into coins?`, confirmText:'Convert All', confirmType:'primary' });
+                if (!ok) return;
+                let total = 0;
+                for (const d of snap.docs) { const data=d.data(); total += Number(data.value||0); await updateDoc(d.ref,{converted:true}); }
+                await updateCoins(currentUser.uid,total,'Converted all received gifts');
+                coinBalance = await getCoins(currentUser.uid);
+                if (coinEl) coinEl.textContent = coinBalance;
+                showToast(`+${total}🪙 from gifts`, 'success');
+                loadGifts();
+            } catch(e) { showToast('Failed: '+e.message,'error'); }
+        };
+        let incomingGiftUnsub = null;
+        let incomingGiftListenerReady = false;
+
+        function listenForIncomingGifts() {
+            if (!currentUser || incomingGiftUnsub) return;
+            const giftsRef = collection(db, 'users', currentUser.uid, 'gifts');
+            const giftsQuery = query(giftsRef, orderBy('timestamp', 'desc'), limit(30));
+            incomingGiftUnsub = onSnapshot(giftsQuery, (snap) => {
+                if (!incomingGiftListenerReady) {
+                    incomingGiftListenerReady = true;
+                    return;
+                }
+                snap.docChanges().forEach(change => {
+                    if (change.type !== 'added') return;
+                    const gift = change.doc.data() || {};
+                    if (!gift.emoji) return;
+                    triggerGiftRain(gift.emoji, gift.value >= 500 ? 35 : gift.value >= 200 ? 28 : 20, gift.fromName || 'Someone', gift.value || 0);
+                    showToast(`🎁 ${gift.fromName || 'Someone'} sent you ${gift.emoji}!`, 'success');
+                });
+                loadGiftBadgeCount();
+            }, (err) => console.error('Incoming gift listener:', err));
+        }
+
         async function loadGiftBadgeCount() {
             if (!currentUser) return;
             try {
@@ -4860,57 +5095,100 @@
                 await setDoc(ref, data, { merge: true }); } catch (e) { console.error('Failed to save user room data:', e); }
         }
 
+        // ============================================================
+        // DAILY MEMBER STREAKS
+        // Every activity owns an independent streak.
+        // Only actions available to ordinary paid room members count.
+        // ============================================================
         const DAILY_CHALLENGES = [
-            { id: 'messages', icon: '💬', name: 'Conversation Builder', target: 8, unit: 'messages', reward: 8 },
-            { id: 'reactions', icon: '❤️', name: 'Spread Positivity', target: 5, unit: 'reactions', reward: 7 },
-            { id: 'social', icon: '🤝', name: 'Community Challenger', target: 3, unit: 'social actions', reward: 8 },
-            { id: 'minutes', icon: '⏱️', name: 'Room Regular', target: 15, unit: 'active minutes', reward: 10 }
+            { id: 'messages', icon: '💬', name: 'Message Streak', target: 5, unit: 'messages', reward: 8 },
+            { id: 'reactions', icon: '❤️', name: 'Reaction Streak', target: 3, unit: 'reactions', reward: 7 },
+            { id: 'minutes', icon: '⏱️', name: 'Active Room Streak', target: 10, unit: 'active minutes', reward: 10 },
+            { id: 'voiceNotes', icon: '🎙️', name: 'Voice Note Streak', target: 1, unit: 'voice note', reward: 7 }
         ];
 
         function getLocalDayKey(date = new Date()) {
             const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
             return `${y}-${m}-${d}`;
         }
-        function daysBetween(a,b){ const x=new Date(a+'T00:00:00'), y=new Date(b+'T00:00:00'); return Math.round((y-x)/86400000); }
+
+        function daysBetween(a, b) {
+            const x = new Date(a + 'T00:00:00'), y = new Date(b + 'T00:00:00');
+            return Math.round((y - x) / 86400000);
+        }
+
         function normalizeDailyState(data = {}) {
             const today = getLocalDayKey();
             const saved = data.dailyChallenges || {};
-            if (saved.date !== today) {
-                return { date: today, counts: {}, completed: {}, streak: data.dailyStreak || 0, lastCompletedDate: data.lastStreakDate || '', completionRewarded: false };
-            }
-            return { date: today, counts: saved.counts || {}, completed: saved.completed || {}, streak: data.dailyStreak || saved.streak || 0, lastCompletedDate: data.lastStreakDate || saved.lastCompletedDate || '', completionRewarded: !!saved.completionRewarded };
+            const savedStreaks = saved.streaks || {};
+            const savedLastDates = saved.lastCompletedDates || {};
+
+            return {
+                date: today,
+                counts: saved.date === today ? (saved.counts || {}) : {},
+                completed: saved.date === today ? (saved.completed || {}) : {},
+                streaks: { ...savedStreaks },
+                lastCompletedDates: { ...savedLastDates },
+                completionRewarded: saved.date === today && saved.completionRewarded && typeof saved.completionRewarded === 'object'
+                    ? { ...saved.completionRewarded } : {}
+            };
         }
+
         async function persistDailyState() {
             if (!currentUserUid || !roomId) return;
-            await saveUserRoomData(currentUserUid, { dailyChallenges: dailyChallengeState, dailyStreak: dailyChallengeState.streak, lastStreakDate: dailyChallengeState.lastCompletedDate });
+            await saveUserRoomData(currentUserUid, { dailyChallenges: dailyChallengeState });
         }
+
         async function trackDailyActivity(type, amount = 1) {
-            if (!currentUserUid || !roomId || !amount) return;
-            dailyChallengeState = normalizeDailyState({ dailyChallenges: dailyChallengeState, dailyStreak: dailyChallengeState.streak, lastStreakDate: dailyChallengeState.lastCompletedDate });
-            dailyChallengeState.counts[type] = Math.min(999, (dailyChallengeState.counts[type] || 0) + amount);
-            let changed = false;
-            for (const c of DAILY_CHALLENGES) {
-                const value = dailyChallengeState.counts[c.id] || 0;
-                if (!dailyChallengeState.completed[c.id] && value >= c.target) {
-                    dailyChallengeState.completed[c.id] = true; changed = true;
-                    await addSP(c.reward, `Daily challenge: ${c.name}`);
-                }
+            if (!currentUserUid || !roomId || !hasPaid || !amount) return;
+            const challenge = DAILY_CHALLENGES.find(c => c.id === type);
+            if (!challenge) return;
+
+            dailyChallengeState = normalizeDailyState({ dailyChallenges: dailyChallengeState });
+            if (dailyChallengeState.completed[type]) return;
+
+            dailyChallengeState.counts[type] = Math.min(
+                challenge.target,
+                (dailyChallengeState.counts[type] || 0) + amount
+            );
+
+            if (dailyChallengeState.counts[type] < challenge.target) {
+                await persistDailyState();
+                return;
             }
-            const completedCount = DAILY_CHALLENGES.filter(c => dailyChallengeState.completed[c.id]).length;
-            if (completedCount >= 3 && !dailyChallengeState.completionRewarded) {
-                const today = dailyChallengeState.date;
-                const last = dailyChallengeState.lastCompletedDate;
-                const gap = last ? daysBetween(last, today) : 999;
-                dailyChallengeState.streak = gap === 1 ? (dailyChallengeState.streak || 0) + 1 : 1;
-                dailyChallengeState.lastCompletedDate = today;
-                dailyChallengeState.completionRewarded = true;
-                const streakBonus = Math.min(30, dailyChallengeState.streak * 3);
-                await addSP(15 + streakBonus, `Daily streak ${dailyChallengeState.streak} day bonus`);
-                showToast(`🔥 Daily streak ${dailyChallengeState.streak}! +${15 + streakBonus} bonus SP`, 'gold', 'Daily Streak');
-                addNotification(`Daily streak ${dailyChallengeState.streak} completed +${15 + streakBonus} SP`, 'gold', 'Daily Streak');
-                changed = true;
-            }
-            if (changed || amount) await persistDailyState();
+
+            // Complete ONLY this activity for today.
+            dailyChallengeState.completed[type] = true;
+
+            const today = dailyChallengeState.date;
+            const last = dailyChallengeState.lastCompletedDates[type] || '';
+            const gap = last ? daysBetween(last, today) : 999;
+
+            // Each activity has its own independent streak.
+            dailyChallengeState.streaks[type] =
+                gap === 1 ? (dailyChallengeState.streaks[type] || 0) + 1 : 1;
+
+            dailyChallengeState.lastCompletedDates[type] = today;
+            dailyChallengeState.completionRewarded[type] = true;
+
+            const streak = dailyChallengeState.streaks[type];
+            const streakBonus = Math.min(30, streak * 3);
+
+            await addSP(challenge.reward, `Daily activity: ${challenge.name}`);
+            await addSP(streakBonus, `${challenge.name} ${streak} day streak`);
+
+            showToast(
+                `🔥 ${challenge.name}: ${streak} day streak! +${challenge.reward + streakBonus} SP`,
+                'gold',
+                'Daily Streak'
+            );
+            addNotification(
+                `${challenge.name} reached a ${streak} day streak`,
+                'gold',
+                'Daily Streak'
+            );
+
+            await persistDailyState();
             if (statsPanelOverlay?.classList.contains('open')) renderStatsPanel();
         }
 
@@ -4988,7 +5266,7 @@
             if (!lastDaily || new Date(lastDaily).toDateString() !== today) {
                 await addSP(2, 'Daily login bonus');
                 await saveUserRoomData(currentUserUid, { lastDaily: new Date().toISOString() });
-                await trackDailyActivity('social', 1);
+                
                 showToast('+2 SP daily login bonus!', 'success', 'Daily Bonus');
                 addNotification('Daily login +2 SP', 'gold', 'Daily Bonus');
             }
@@ -5036,12 +5314,6 @@
               </div>
               <div class="progress-bar-big"><div class="fill" style="width:${Math.min(100, Math.round(progress*100))}%"></div></div>
               <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${Math.round(progress*100)}% to next level</div>
-            </div>
-            <div class="daily-challenges">
-              <div class="dc-head"><span class="dc-title">🔥 Daily Activities</span><span class="dc-streak">Streak: ${dailyChallengeState.streak || 0} day${(dailyChallengeState.streak||0)===1?'':'s'}</span></div>
-              <div class="dc-sub">Complete any 3 of 4 each day to earn a bonus and build your streak toward the next level.</div>
-              ${DAILY_CHALLENGES.map(c => { const v=Math.min(c.target,dailyChallengeState.counts[c.id]||0); const done=!!dailyChallengeState.completed[c.id]; return `<div class="dc-item ${done?'dc-done':''}"><span class="dc-icon">${done?'✅':c.icon}</span><div><div class="dc-name">${c.name}</div><div class="dc-meta">${v}/${c.target} ${c.unit}</div><div class="dc-progress"><span style="width:${Math.round(v/c.target*100)}%"></span></div></div><span class="dc-reward">+${c.reward} SP</span></div>`; }).join('')}
-              <div class="dc-sub" style="margin:8px 0 0">Daily completion: ${DAILY_CHALLENGES.filter(c=>dailyChallengeState.completed[c.id]).length}/3 • Streak bonus up to +45 SP</div>
             </div>
             <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Recent Activity</div>
             <div class="recent-feed">${feedHTML}</div>
@@ -5316,6 +5588,8 @@
                     duration: voiceNoteState.duration || 0,
                 });
 
+                await trackDailyActivity('voiceNotes', 1);
+
                 await addDoc(collection(db, 'rooms', roomId, 'messages'), {
                     senderId: 'system',
                     senderName: 'SPIKE',
@@ -5325,7 +5599,7 @@
                 });
 
                 await addSP(3, 'Voice note sent to member');
-                await trackDailyActivity('social', 1);
+                
                 showToast('✅ Voice note sent! +3 SP', 'success');
                 addNotification('Voice note sent', 'info', 'Voice Note');
 
@@ -5523,7 +5797,7 @@
                     replyingTo = null; }
                 await addDoc(collection(db, 'rooms', roomId, 'messages'), msgData);
                 await trackDailyActivity('messages', 1);
-                if (type !== 'text') await trackDailyActivity('social', 1);
+                if (type !== 'text') 
                 lastActivity = Date.now();
             } catch (err) { showToast('Failed to send', 'error'); }
             sendBtn.disabled = false;
@@ -5710,7 +5984,7 @@
                 votedBy.push(currentUser.uid);
                 await updateDoc(ref, { pollData: { ...pollData, votes, votedBy } });
                 await addSP(1, 'Voted in a poll');
-                await trackDailyActivity('social', 1);
+                
                 showToast('Vote recorded! +1 SP', 'success');
             } catch (e) { showToast('Failed to vote: ' + e.message, 'error'); }
         };
@@ -5734,6 +6008,44 @@
         };
 
         // ============================================================
+
+        // ============================================================
+        // INSTANT MESSAGE CACHE
+        // Render the last known room feed immediately, then silently
+        // reconcile it with Firestore in the background.
+        // ============================================================
+        const MESSAGE_CACHE_VERSION = 1;
+const MESSAGE_CACHE_MAX = 200;
+        function messageCacheKey() {
+            return `room_feed_v${MESSAGE_CACHE_VERSION}_${roomId}`;
+        }
+        function readMessageCache() {
+            try {
+                const raw = localStorage.getItem(messageCacheKey());
+                if (!raw) return [];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed.slice(-MESSAGE_CACHE_MAX) : [];
+            } catch (_) { return []; }
+        }
+        function writeMessageCache(list) {
+            try {
+                localStorage.setItem(
+                    messageCacheKey(),
+                    JSON.stringify((list || []).slice(-MESSAGE_CACHE_MAX))
+                );
+            } catch (_) {}
+        }
+        function renderCachedMessagesImmediately() {
+            const cached = readMessageCache();
+            if (!cached.length) return false;
+            allMessages = cached;
+            hasMoreMessages = true;
+            isFirstLoad = true;
+            renderAllMessages();
+            container.classList.add('instant-feed-ready');
+            return true;
+        }
+
         // MESSAGES PAGINATION
         // ============================================================
         let lastVisibleDoc = null;
@@ -5769,10 +6081,12 @@
 
                 if (reset) {
                     allMessages = msgs;
+                    writeMessageCache(allMessages);
                     renderAllMessages();
                     const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
                 } else {
                     allMessages = [...msgs, ...allMessages];
+                    writeMessageCache(allMessages);
                     renderAllMessages();
                     const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
                 }
@@ -5809,17 +6123,31 @@
             if (messageUnsub) return;
             const q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'desc'), limit(1));
             messageUnsub = onSnapshot(q, (snap) => {
+                let added = false;
                 snap.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const newMsg = { id: change.doc.id, ...change.doc.data() };
-                        if (!allMessages.find(m => m.id === newMsg.id)) {
-                            allMessages.push(newMsg);
-                            if (allMessages.length > 200) allMessages = allMessages.slice(-200);
-                            renderAllMessages();
-                            container.scrollTop = container.scrollHeight;
-                        }
-                    }
+                    if (change.type !== 'added') return;
+                    const newMsg = { id: change.doc.id, ...change.doc.data() };
+                    if (allMessages.some(m => m.id === newMsg.id)) return;
+                    allMessages.push(newMsg);
+                    if (allMessages.length > MESSAGE_CACHE_MAX) allMessages = allMessages.slice(-MESSAGE_CACHE_MAX);
+                    writeMessageCache(allMessages);
+                    added = true;
                 });
+                if (!added) return;
+                // Avoid rebuilding the entire chat DOM for every incoming message.
+                const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+                const last = allMessages[allMessages.length - 1];
+                if (last && typeof buildMessageHTML === 'function') {
+                    const empty = container.querySelector('.empty-state');
+                    if (empty) empty.remove();
+                    const loadMore = container.querySelector('[data-role="load-more"]');
+                    const html = buildMessageHTML(last, last.senderId === currentUser?.uid);
+                    if (loadMore) loadMore.insertAdjacentHTML('afterend', html);
+                    else container.insertAdjacentHTML('beforeend', html);
+                } else {
+                    renderAllMessages();
+                }
+                if (atBottom) requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
             }, err => console.error('Message listener error:', err));
         }
 
@@ -5937,44 +6265,44 @@
                 const participants = snap.docs.map(d => ({ uid: d.id, data: d.data() }));
                 const total = participants.length;
                 if (countEl) countEl.textContent = total;
-
                 if (!total) {
                     list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:12px;">No one here</div>';
                     return;
                 }
 
-                // Render every participant even if a profile document is missing or slow.
-                const rows = await Promise.all(participants.map(async ({ uid, data }) => {
-                    let name = data.name || data.displayName || 'User';
-                    let online = false;
-                    let lastSeen = data.lastSeen?.toDate?.() || null;
-                    let level = Number(data.level) || 1;
-                    let isVip = roomVips[uid] === true;
-                    try {
-                        const [userSnap, roomUserData] = await Promise.all([
-                            getDoc(doc(db, 'users', uid)),
-                            getUserRoomData(uid)
-                        ]);
-                        if (userSnap.exists()) {
-                            const d = userSnap.data();
-                            name = d.name || d.displayName || name;
-                            const presence = getPresenceState(d);
-                            online = presence.online;
-                            lastSeen = presence.lastSeen || lastSeen;
-                        }
-                        if (roomUserData) level = Number(roomUserData.level) || level;
-                    } catch (e) {
-                        // Keep the participant visible using room participant data.
-                    }
+                // Paint immediately from participant documents. Profile/level hydration is secondary.
+                const renderRow = (uid, data = {}) => {
+                    const name = data.name || data.displayName || 'User';
+                    const lastSeen = data.lastSeen?.toDate?.() || null;
+                    const online = data.roomPresence === true || getPresenceState(data).online;
+                    const level = Number(data.level) || 1;
                     const isSelf = uid === currentUser?.uid;
-                    const statusDotClass = online ? 'online' : 'offline';
+                    const isVip = roomVips[uid] === true;
                     const presenceText = formatLastSeen(lastSeen, online);
-                    const levelName = getLevelName(level);
-                    const icon = getLevelIcon(level);
                     const vipTag = isVip ? '<span class="vip-tag-participant">👑 VIP</span>' : '';
-                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${icon} ${levelName}</span>${vipTag}</div><div class="presence-time">${presenceText}</div></div><span class="status-dot ${statusDotClass}" title="${presenceText}"></span></div>`;
-                }));
-                list.innerHTML = rows.join('') || '<div style="text-align:center;color:var(--text-muted);padding:20px 0;">No members</div>';
+                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${getLevelIcon(level)} ${getLevelName(level)}</span>${vipTag}</div><div class="presence-time">${presenceText}</div></div><span class="status-dot ${online ? 'online' : 'offline'}" title="${presenceText}"></span></div>`;
+                };
+                list.innerHTML = participants.map(p => renderRow(p.uid, p.data)).join('');
+
+                // Hydrate profiles in small idle batches so opening Members stays instant.
+                const hydrate = async () => {
+                    for (let i = 0; i < participants.length; i += 5) {
+                        await Promise.all(participants.slice(i, i + 5).map(async ({ uid, data }) => {
+                            try {
+                                const userSnap = await getDoc(doc(db, 'users', uid));
+                                const roomUserData = await getUserRoomData(uid);
+                                const merged = { ...data };
+                                if (userSnap.exists()) Object.assign(merged, userSnap.data());
+                                if (roomUserData?.level) merged.level = roomUserData.level;
+                                const row = list.querySelector(`[data-uid="${CSS.escape(uid)}"]`);
+                                if (row) row.outerHTML = renderRow(uid, merged);
+                            } catch (_) {}
+                        }));
+                        await new Promise(r => setTimeout(r, 0));
+                    }
+                };
+                if ('requestIdleCallback' in window) requestIdleCallback(() => void hydrate(), { timeout: 800 });
+                else setTimeout(() => void hydrate(), 0);
             } catch (e) {
                 console.error('Failed to load participants:', e);
                 list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px 0;font-size:12px;">Unable to load members. Tap Members again to retry.</div>';
@@ -6724,26 +7052,19 @@
 
             html += `</div>`;
 
-            // Theme section
-            if (isRoomFeatureUnlocked('custom_theme') || isRoomFeatureUnlocked('colorful_chat')) {
-                html += `<div style="margin-top:16px;border-top:1px solid var(--border-color);padding-top:12px;">`;
-                html +=
-                    `<div style="font-weight:700;margin-bottom:6px;">🎨 Customize Room Theme ${isRoomFeatureUnlocked('custom_theme') ? '🟢 Active' : '🔒 Colorful Chat Active'}</div>`;
-                html += `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-              <label style="font-size:0.7rem;">Background</label>
-              <input type="color" id="themeBg" value="${customTheme.bg}" style="width:30px;height:30px;border:none;background:transparent;" />
-              <label style="font-size:0.7rem;">Bubble Other</label>
-              <input type="color" id="themeBubbleOther" value="#ffffff" style="width:30px;height:30px;border:none;background:transparent;" />
-              <label style="font-size:0.7rem;">Bubble Self</label>
-              <input type="color" id="themeBubbleSelf" value="#fbbf24" style="width:30px;height:30px;border:none;background:transparent;" />
-              <label style="font-size:0.7rem;">Text</label>
-              <input type="color" id="themeText" value="#f0f4ff" style="width:30px;height:30px;border:none;background:transparent;" />
-              <label style="font-size:0.7rem;">Accent</label>
-              <input type="color" id="themeAccent" value="#fbbf24" style="width:30px;height:30px;border:none;background:transparent;" />
-              <button onclick="applyCustomTheme()" style="background:var(--gold);border:none;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;min-height:36px;color:#0d1520;">Apply</button>
-            </div>`;
-                html += `</div>`;
-            }
+            // === Theme Market (always visible to room owner) ===
+            html += `
+                <div class="theme-market">
+                    <div class="theme-market-head">
+                        <div>
+                            <div class="theme-market-title">🎨 Theme Market</div>
+                            <div class="theme-market-subtitle">Choose a complete room look with one tap.</div>
+                        </div>
+                        <span class="theme-market-badge">5 PREMIUM</span>
+                    </div>
+                    <div id="themeMarketBody"></div>
+                </div>
+            `;
 
             // Request history
             html += `<div class="request-history-section">`;
@@ -6794,6 +7115,10 @@
           `;
 
             body.innerHTML = html;
+            // Render the theme market with current entitlements
+            if (typeof window.renderThemeMarket === 'function') {
+                window.renderThemeMarket();
+            }
         }
 
         // ===== FEATURE REQUESTS =====
@@ -7253,51 +7578,7 @@
 
         window.addEventListener('resize', positionMoreDropdown, { passive: true });
         window.addEventListener('orientationchange', () => requestAnimationFrame(positionMoreDropdown), { passive: true });
-        let isTypingOverlayOpen = false;
 
-        function openTypingOverlay() {
-            if (isTypingOverlayOpen) return;
-            isTypingOverlayOpen = true;
-            document.getElementById('typingTextarea').value = msgInput.value;
-            document.getElementById('typingOverlay').style.display = 'flex';
-            document.getElementById('bottomInputArea').style.display = 'none';
-            document.body.style.overflow = 'hidden';
-            document.getElementById('typingCostBadge').textContent = COSTS.text;
-        }
-        window.closeTypingOverlay = function() {
-            if (!isTypingOverlayOpen) return;
-            isTypingOverlayOpen = false;
-            msgInput.value = document.getElementById('typingTextarea').value;
-            document.getElementById('typingOverlay').style.display = 'none';
-            document.getElementById('bottomInputArea').style.display = 'flex';
-            document.body.style.overflow = '';
-            document.getElementById('typingTextarea').value = '';
-        };
-        document.getElementById('typingTextarea').addEventListener('input', function() {
-            document.getElementById('charCount').textContent = this.value.length;
-        });
-        msgInput.addEventListener('focus', function() {
-            if (!hasPaid || this.disabled) return;
-            if (isTypingOverlayOpen) return;
-            openTypingOverlay();
-        });
-        window.sendMessageFromOverlay = async function() {
-            const text = document.getElementById('typingTextarea').value.trim();
-            if (!text || !hasPaid || !currentUser) return;
-            closeTypingOverlay();
-            msgInput.value = text;
-            await window.sendMessage();
-            msgInput.value = '';
-        };
-
-        function insertMentionOverlay() {
-            const ta = document.getElementById('typingTextarea');
-            const pos = ta.selectionStart;
-            ta.value = ta.value.substring(0, pos) + '@' + ta.value.substring(pos);
-            ta.focus();
-            ta.setSelectionRange(pos + 1, pos + 1);
-        }
-        window.insertMentionOverlay = insertMentionOverlay;
 
         // ============================================================
         // SEND COINS MODAL FUNCTIONS
@@ -7358,6 +7639,11 @@
                 if (!user) { window.location.href = 'index.html'; return; }
                 currentUser = user;
                 currentUserUid = user.uid;
+
+                // Paint the last known feed NOW — before joinRoom, Firestore reads,
+                // profile reads, coins, or any other startup work.
+                renderCachedMessagesImmediately();
+
                 startPresenceHeartbeat();
                 const profilePromise = getDoc(doc(db, 'users', user.uid)).catch(() => null);
                 const joined = await joinRoom(user.uid, roomId);
@@ -7377,6 +7663,7 @@
                 document.getElementById('sendCoinsBalance').textContent = coinBalance;
                 await messagesPromise;
                 listenForNewMessages();
+                listenForIncomingGifts();
                 participantUnsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
                     if (snap.exists()) { const data = snap.data();
 
@@ -7397,18 +7684,24 @@
                         } else { typingIndicator.classList.remove('active'); }
                     } else { typingIndicator.classList.remove('active'); }
                 }, (err) => console.error(err));
+                let typingWriteTimer = null;
                 msgInput.addEventListener('input', () => {
-                    if (msgInput.value.trim()) {
+                    clearTimeout(typingWriteTimer);
+                    if (!msgInput.value.trim()) return;
+                    typingWriteTimer = setTimeout(() => {
                         setDoc(typingRef, { uid: currentUser.uid, name: currentUser.displayName || 'User',
-                                updatedAt: serverTimestamp() }, { merge: true });
-                    }
+                            updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+                    }, 250);
                 });
                 msgInput.addEventListener('blur', () => {
                     setDoc(typingRef, { uid: null, updatedAt: serverTimestamp() }, { merge: true });
                 });
 
-                void Promise.allSettled([loadGiftBadgeCount(), loadParticipants()]);
-                addNotification('Welcome to the room! 🎉', 'info', 'Welcome');
+                const deferNonCritical = window.requestIdleCallback || ((cb) => setTimeout(cb, 0));
+                deferNonCritical(() => {
+                    void Promise.allSettled([loadGiftBadgeCount(), loadParticipants()]);
+                    addNotification('Welcome to the room! 🎉', 'info', 'Welcome');
+                }, { timeout: 1000 });
 
                 await Promise.all([
                     loadRoomFeatureEntitlements(),
@@ -7618,8 +7911,334 @@
         window.cancelVoiceNote = window.cancelVoiceNote;
         window.sendVoiceNoteFromPreview = window.sendVoiceNoteFromPreview;
 
-        init();
+        performance.mark('room-init-start');
+        init().finally(() => performance.mark('room-init-ready'));
         console.log('🔥 FunRoom — Premium Voice Notes + Full Feature Enforcement');
     </script>
+
+
+
+
+<script id="keyboard-safe-message-input-js">
+(function () {
+    const composer = document.getElementById('bottomInputArea');
+    const input = document.getElementById('msgInput');
+    if (!composer || !input) return;
+
+    let centered = false;
+    let frame = 0;
+
+    function centerComposer() {
+        if (!centered) return;
+        const vv = window.visualViewport;
+        if (!vv) return;
+        const composerHeight = composer.offsetHeight || 60;
+        const top = (vv.height - composerHeight) / 2 + vv.offsetTop;
+        composer.style.top = top + 'px';
+        composer.style.bottom = 'auto';
+        composer.style.transform = 'none';
+        composer.style.left = '0px';
+        composer.style.right = '0px';
+        composer.style.position = 'fixed';
+    }
+
+    function resetComposer() {
+        centered = false;
+        composer.classList.remove('centered');
+        composer.style.top = '';
+        composer.style.bottom = '';
+        composer.style.transform = '';
+        composer.style.left = '';
+        composer.style.right = '';
+        composer.style.position = '';
+        // restore bottom positioning via the original function
+        placeComposer();
+    }
+
+    function placeComposer() {
+        if (centered) {
+            centerComposer();
+            return;
+        }
+        cancelAnimationFrame(frame);
+        frame = requestAnimationFrame(() => {
+            if (window.innerWidth > 768) {
+                composer.style.removeProperty('top');
+                composer.style.bottom = '0px';
+                return;
+            }
+            const vv = window.visualViewport;
+            if (!vv) {
+                composer.style.bottom = '0px';
+                return;
+            }
+            const visibleBottom = vv.offsetTop + vv.height;
+            const pageScale = vv.scale || 1;
+            const viewportBottom = Math.min(window.innerHeight, visibleBottom / pageScale);
+            const composerHeight = composer.getBoundingClientRect().height || 60;
+            const bottom = Math.max(0, window.innerHeight - viewportBottom);
+            composer.style.bottom = `${Math.ceil(bottom)}px`;
+            composer.style.top = 'auto';
+            const rect = composer.getBoundingClientRect();
+            const safeBottom = visibleBottom / pageScale;
+            if (rect.bottom > safeBottom) {
+                const correction = rect.bottom - safeBottom + 2;
+                composer.style.bottom = `${Math.ceil(bottom + correction)}px`;
+            }
+        });
+    }
+
+    input.addEventListener('focus', function() {
+        centered = true;
+        composer.classList.add('centered');
+        centerComposer();
+    });
+
+    input.addEventListener('blur', function() {
+        resetComposer();
+    });
+
+    // visualViewport resize
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', function() {
+            if (centered) {
+                centerComposer();
+            } else {
+                placeComposer();
+            }
+        }, {passive:true});
+        window.visualViewport.addEventListener('scroll', function() {
+            if (centered) {
+                centerComposer();
+            } else {
+                placeComposer();
+            }
+        }, {passive:true});
+    }
+
+    window.addEventListener('resize', function() {
+        if (centered) {
+            centerComposer();
+        } else {
+            placeComposer();
+        }
+    }, {passive:true});
+    window.addEventListener('orientationchange', function() {
+        if (centered) {
+            centerComposer();
+        } else {
+            placeComposer();
+        }
+    }, {passive:true});
+
+    // Also on focus, also on any input change to keep centered
+    input.addEventListener('input', function() {
+        if (centered) {
+            centerComposer();
+        }
+    });
+
+    // initial placement
+    placeComposer();
+})();
+</script>
+
+
+<script id="message-input-visible-text-js">
+(function () {
+    const input = document.getElementById('msgInput');
+    if (!input) return;
+
+    function keepCaretVisible() {
+        // Scroll only the textarea itself so the newest line being typed is visible.
+        input.scrollTop = input.scrollHeight;
+        const start = input.selectionStart;
+        if (typeof start === 'number') {
+            // Preserve the caret while letting the browser repaint the newest line.
+            requestAnimationFrame(() => {
+                try { input.setSelectionRange(start, start); } catch (_) {}
+                input.scrollTop = input.scrollHeight;
+            });
+        }
+    }
+
+    input.addEventListener('input', keepCaretVisible);
+    input.addEventListener('keyup', keepCaretVisible);
+    input.addEventListener('focus', keepCaretVisible);
+
+    // Auto-grow the original textarea without creating another input.
+    function fitInput() {
+        input.style.height = 'auto';
+        const max = 180;
+        input.style.height = Math.min(input.scrollHeight, max) + 'px';
+        input.scrollTop = input.scrollHeight;
+    }
+
+    input.addEventListener('input', fitInput);
+    input.addEventListener('focus', fitInput);
+    fitInput();
+})();
+</script>
+
+<script id="rebuilt-theme-market-js">
+(function(){
+    const THEME_FEATURE_IDS = [
+        'theme_pink_blue',
+        'theme_luxury_gold',
+        'theme_orange_pink',
+        'theme_royal_blue_violet',
+        'theme_emerald_cyan'
+    ];
+
+    const THEME_METADATA = {
+        theme_pink_blue: {
+            icon: "💗💙",
+            name: "Pink & Blue Glow",
+            desc: "Luxury neon glow with a soft premium chat finish.",
+            bg: "#080c18",
+            other: "#ffffff",
+            self: "#ec4899",
+            text: "#f4f7ff",
+            accent: "#60a5fa",
+            swatches: ["#080c18","#ec4899","#60a5fa"]
+        },
+        theme_luxury_gold: {
+            icon: "👑✨",
+            name: "Luxury Gold",
+            desc: "Elegant gold room with a rich VIP-style finish.",
+            bg: "#0d0b07",
+            other: "#fff8df",
+            self: "#fbbf24",
+            text: "#fff8e7",
+            accent: "#ffd86b",
+            swatches: ["#0d0b07","#fbbf24","#ffd86b"]
+        },
+        theme_orange_pink: {
+            icon: "🧡💗",
+            name: "Orange & Pink",
+            desc: "Warm energetic orange blended with premium pink.",
+            bg: "#13090d",
+            other: "#fff0f4",
+            self: "#f97316",
+            text: "#fff6f8",
+            accent: "#fb7185",
+            swatches: ["#13090d","#f97316","#fb7185"]
+        },
+        theme_royal_blue_violet: {
+            icon: "💙💜",
+            name: "Royal Blue & Violet",
+            desc: "Deep royal tones with a modern glowing accent.",
+            bg: "#080a18",
+            other: "#eef0ff",
+            self: "#6366f1",
+            text: "#f5f3ff",
+            accent: "#a78bfa",
+            swatches: ["#080a18","#6366f1","#a78bfa"]
+        },
+        theme_emerald_cyan: {
+            icon: "💚🩵",
+            name: "Emerald & Cyan",
+            desc: "Fresh emerald energy with a bright cyan glow.",
+            bg: "#061210",
+            other: "#e9fffb",
+            self: "#10b981",
+            text: "#effffc",
+            accent: "#22d3ee",
+            swatches: ["#061210","#10b981","#22d3ee"]
+        }
+    };
+
+    // Helper to apply a theme (saves to Firestore and updates UI)
+    function applyTheme(themeId) {
+        const meta = THEME_METADATA[themeId];
+        if (!meta) return;
+
+        // Check if the theme is unlocked
+        if (!window.roomFeatureEntitlements || !window.roomFeatureEntitlements[themeId]) {
+            showToast('🔒 This theme is not purchased yet. Buy it first.', 'warning');
+            return;
+        }
+
+        // Set the color pickers (they exist in the panel)
+        const setColor = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+        };
+        setColor('themeBg', meta.bg);
+        setColor('themeBubbleOther', meta.other);
+        setColor('themeBubbleSelf', meta.self);
+        setColor('themeText', meta.text);
+        setColor('themeAccent', meta.accent);
+
+        // Call the existing theme‑apply function (which saves to Firestore)
+        if (typeof window.applyCustomTheme === 'function') {
+            window.applyCustomTheme();
+        } else {
+            showToast('Theme applied locally. (Save function not available)', 'info');
+        }
+
+        // Highlight the active card
+        document.querySelectorAll('.theme-market-card').forEach(card => {
+            card.classList.toggle('active', card.dataset.theme === themeId);
+        });
+    }
+
+    // Render the theme market with buy/apply buttons
+    window.renderThemeMarket = function() {
+        const host = document.getElementById('themeMarketBody');
+        if (!host) return;
+
+        const entitlements = window.roomFeatureEntitlements || {};
+
+        let html = '<div class="theme-market-grid">';
+        for (const themeId of THEME_FEATURE_IDS) {
+            const meta = THEME_METADATA[themeId];
+            if (!meta) continue;
+
+            const isUnlocked = entitlements[themeId] === true;
+            const buttonHtml = isUnlocked
+                ? `<button class="theme-market-apply" onclick="applyMarketTheme('${themeId}')">✨ Apply</button>`
+                : `<button class="theme-market-buy" onclick="buyTheme('${themeId}')">💰 Buy $2.00</button>`;
+
+            html += `
+                <div class="theme-market-card" data-theme="${themeId}"
+                     style="--tm-bg:${meta.bg};--tm-accent:${meta.accent};--tm-glow:${meta.accent}66">
+                    <div class="theme-market-icon">${meta.icon}</div>
+                    <div class="theme-market-name">${meta.name}</div>
+                    <div class="theme-market-desc">${meta.desc}</div>
+                    <div class="theme-market-swatches">
+                        ${meta.swatches.map(c => `<span class="theme-market-swatch" style="background:${c}"></span>`).join('')}
+                    </div>
+                    <div class="theme-market-action">${buttonHtml}</div>
+                </div>
+            `;
+        }
+        html += '</div>';
+        host.innerHTML = html;
+    };
+
+    // Buy handler – triggers a feature request for the theme
+    window.buyTheme = function(themeId) {
+        if (typeof window.requestFeature === 'function') {
+            window.requestFeature(themeId);
+        } else {
+            showToast('Feature request system not available.', 'error');
+        }
+    };
+
+    // Override the global applyMarketTheme to use the new applyTheme
+    window.applyMarketTheme = function(themeId) {
+        applyTheme(themeId);
+    };
+
+    // Initial render when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', window.renderThemeMarket);
+    } else {
+        window.renderThemeMarket();
+    }
+})();
+</script>
+
 </body>
 </html>
