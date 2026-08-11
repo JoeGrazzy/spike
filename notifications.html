@@ -1,1681 +1,2241 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Notifications — SPIKE</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <style>
-    /* ===== RESET & ROOT ===== */
-    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    :root {
-      --bg-deep: #070b10;
-      --bg-surface: #0d1520;
-      --bg-card: rgba(20,32,48,0.7);
-      --bg-glass: rgba(13,21,32,0.85);
-      --border-color: rgba(255,255,255,0.08);
-      --border-glow: rgba(0,168,132,0.3);
-      --primary: #00a884;
-      --primary-hover: #00c29a;
-      --primary-glow: rgba(0,168,132,0.4);
-      --accent: #0ea5e9;
-      --error: #f43f5e;
-      --error-glow: rgba(244,63,94,0.4);
-      --success: #00a884;
-      --success-glow: rgba(0,168,132,0.4);
-      --warning: #f59e0b;
-      --warning-glow: rgba(245,158,11,0.4);
-      --text-main: #f1f5f9;
-      --text-muted: #94a3b8;
-      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-      --transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-      --online-color: #22c55e;
-      --input-bg: rgba(7,11,16,0.6);
-      --input-border: rgba(255,255,255,0.08);
-      --input-focus-bg: rgba(7,11,16,0.85);
-      --card-bg: rgba(20,32,48,0.7);
-      --radius: 16px;
-      --gold: #fbbf24;
-    }
-    body.light-mode {
-      --bg-deep: #f0f4fa;
-      --bg-surface: #e8edf4;
-      --bg-card: rgba(255,255,255,0.85);
-      --bg-glass: rgba(255,255,255,0.92);
-      --border-color: rgba(0,0,0,0.08);
-      --text-main: #0f1824;
-      --text-muted: #5a6e8a;
-      --border-glow: rgba(0,168,132,0.2);
-      --card-bg: rgba(255,255,255,0.9);
-    }
-    html, body { width:100%; min-height:100vh; background:var(--bg-deep); color:var(--text-main); font-family:var(--font-main); overflow-x:hidden; }
-    body { display:flex; flex-direction:column; align-items:center; }
-    body::before {
-      content: ''; position:fixed; inset:0; background:radial-gradient(ellipse at 20% 50%, rgba(0,168,132,0.03) 0%, transparent 60%),
-                  radial-gradient(ellipse at 80% 20%, rgba(14,165,233,0.02) 0%, transparent 50%);
-      pointer-events:none; z-index:0;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Notifications — SPIKE Ultra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        /* (same styles as before, omitted for brevity – copy from previous version) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        :root {
+            --bg-deep: #070b10;
+            --bg-surface: #0d1520;
+            --bg-card: rgba(20, 32, 48, 0.7);
+            --bg-glass: rgba(13, 21, 32, 0.85);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 168, 132, 0.3);
+            --primary: #00a884;
+            --primary-hover: #00c29a;
+            --primary-glow: rgba(0, 168, 132, 0.4);
+            --accent: #0ea5e9;
+            --error: #f43f5e;
+            --error-glow: rgba(244, 63, 94, 0.4);
+            --success: #00a884;
+            --success-glow: rgba(0, 168, 132, 0.4);
+            --warning: #f59e0b;
+            --warning-glow: rgba(245, 158, 11, 0.4);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --online-color: #22c55e;
+            --input-bg: rgba(7, 11, 16, 0.6);
+            --input-border: rgba(255, 255, 255, 0.08);
+            --input-focus-bg: rgba(7, 11, 16, 0.85);
+            --card-bg: rgba(20, 32, 48, 0.7);
+            --radius: 16px;
+            --gold: #fbbf24;
+        }
+        body.light-mode {
+            --bg-deep: #f0f4fa;
+            --bg-surface: #e8edf4;
+            --bg-card: rgba(255, 255, 255, 0.85);
+            --bg-glass: rgba(255, 255, 255, 0.92);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --text-main: #0f1824;
+            --text-muted: #5a6e8a;
+            --border-glow: rgba(0, 168, 132, 0.2);
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+        html,
+        body {
+            width: 100%;
+            min-height: 100vh;
+            background: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            overflow-x: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(0, 168, 132, 0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.02) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
 
-    /* ===== HEADER ===== */
-    .notif-header {
-      width:100%; max-width:800px; padding:clamp(8px,2vw,12px) clamp(12px,3vw,20px);
-      display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
-      border-bottom:1px solid var(--border-color);
-      background:var(--bg-glass); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
-      position:sticky; top:0; z-index:100; box-shadow:0 4px 20px rgba(0,0,0,0.3); gap:8px;
-    }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .header-left .back-btn {
-      background:rgba(255,255,255,0.03); border:1px solid var(--border-color); color:var(--text-muted);
-      width:clamp(36px,9vw,40px); height:clamp(36px,9vw,40px); border-radius:12px;
-      display:flex; align-items:center; justify-content:center; font-size:clamp(1.2rem,3vw,1.4rem);
-      cursor:pointer; transition:var(--transition); touch-action:manipulation;
-      min-width:36px; min-height:36px;
-    }
-    .header-left .back-btn:active { transform:scale(0.9); }
-    .header-left .back-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-main); }
-    .header-left .logo {
-      font-size:clamp(1.1rem,3.5vw,1.5rem); font-weight:900; letter-spacing:-0.5px;
-      background:linear-gradient(135deg, var(--text-main) 20%, var(--primary) 80%);
-      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-      text-decoration:none; cursor:pointer;
-    }
-    .header-right { display:flex; align-items:center; gap:8px; position:relative; }
-    .header-right .header-btn {
-      background:rgba(255,255,255,0.03); border:1px solid var(--border-color); color:var(--text-muted);
-      width:clamp(36px,9vw,40px); height:clamp(36px,9vw,40px); border-radius:12px;
-      display:flex; align-items:center; justify-content:center; font-size:clamp(1rem,2.8vw,1.2rem);
-      cursor:pointer; transition:var(--transition); touch-action:manipulation;
-      min-width:36px; min-height:36px; position:relative;
-    }
-    .header-right .header-btn:active { transform:scale(0.9); }
-    .header-right .header-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-main); }
-    .header-right .header-btn.danger:hover { background:rgba(244,63,94,0.15); color:var(--error); border-color:rgba(244,63,94,0.3); }
-    .header-right .badge-count {
-      position:absolute; top:-4px; right:-4px; background:var(--error); color:#fff;
-      font-size:0.55rem; font-weight:800; min-width:18px; height:18px; border-radius:50%;
-      display:flex; align-items:center; justify-content:center; padding:0 4px;
-      box-shadow:0 0 12px var(--error-glow);
-      border:2px solid var(--bg-deep);
-    }
-    .header-right .avatar-btn {
-      width:clamp(36px,9vw,40px); height:clamp(36px,9vw,40px); border-radius:50%;
-      background:linear-gradient(135deg, var(--primary), #005c4b);
-      display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff;
-      font-size:clamp(0.9rem,2.5vw,1.1rem); overflow:hidden; cursor:pointer;
-      border:1px solid var(--border-color); transition:var(--transition);
-      min-width:36px; min-height:36px;
-    }
-    .header-right .avatar-btn img { width:100%; height:100%; object-fit:cover; }
+        .notif-header {
+            width: 100%;
+            max-width: 800px;
+            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            gap: 8px;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-left .back-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: clamp(36px, 9vw, 40px);
+            height: clamp(36px, 9vw, 40px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.2rem, 3vw, 1.4rem);
+            cursor: pointer;
+            transition: var(--transition);
+            touch-action: manipulation;
+            min-width: 36px;
+            min-height: 36px;
+        }
+        .header-left .back-btn:active {
+            transform: scale(0.9);
+        }
+        .header-left .back-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+        .header-left .logo {
+            font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--text-main) 20%, var(--primary) 80%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+        .header-right .header-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: clamp(36px, 9vw, 40px);
+            height: clamp(36px, 9vw, 40px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1rem, 2.8vw, 1.2rem);
+            cursor: pointer;
+            transition: var(--transition);
+            touch-action: manipulation;
+            min-width: 36px;
+            min-height: 36px;
+            position: relative;
+        }
+        .header-right .header-btn:active {
+            transform: scale(0.9);
+        }
+        .header-right .header-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
+        .header-right .badge-count {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--error);
+            color: #fff;
+            font-size: 0.55rem;
+            font-weight: 800;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            box-shadow: 0 0 12px var(--error-glow);
+            border: 2px solid var(--bg-deep);
+        }
+        .header-right .avatar-btn {
+            width: clamp(36px, 9vw, 40px);
+            height: clamp(36px, 9vw, 40px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #005c4b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            overflow: hidden;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            min-width: 36px;
+            min-height: 36px;
+        }
+        .header-right .avatar-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    /* ===== TOOLBAR ===== */
-    .toolbar {
-      width:100%; display:flex; flex-direction:column; gap:8px; flex-shrink:0;
-      background:var(--bg-card); backdrop-filter:blur(8px);
-      border:1px solid var(--border-color); border-radius:var(--radius);
-      padding:8px 12px; margin-bottom:4px;
-    }
-    .toolbar-row { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
-    .toolbar .search-wrapper {
-      flex:1; min-width:140px; display:flex; align-items:center;
-      background:var(--input-bg); border:1px solid var(--border-color); border-radius:10px;
-      padding:0 10px; transition:var(--transition);
-    }
-    .toolbar .search-wrapper:focus-within { border-color:var(--primary); box-shadow:0 0 0 2px rgba(0,168,132,0.12); }
-    .toolbar .search-wrapper input {
-      flex:1; background:transparent; border:none; outline:none; color:var(--text-main);
-      font-family:var(--font-main); font-size:0.8rem; padding:6px 0; min-height:32px;
-    }
-    .toolbar .search-wrapper input::placeholder { color:var(--text-muted); opacity:0.6; }
-    .toolbar .search-wrapper .search-icon { color:var(--text-muted); font-size:0.9rem; margin-right:4px; }
+        .toolbar {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-shrink: 0;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 8px 12px;
+            margin-bottom: 4px;
+        }
+        .toolbar-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        .toolbar .search-wrapper {
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0 10px;
+            transition: var(--transition);
+        }
+        .toolbar .search-wrapper:focus-within {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.12);
+        }
+        .toolbar .search-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-main);
+            font-family: var(--font-main);
+            font-size: 0.8rem;
+            padding: 6px 0;
+            min-height: 32px;
+        }
+        .toolbar .search-wrapper input::placeholder {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        .toolbar .search-wrapper .search-icon {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-right: 4px;
+        }
 
-    .toolbar .filter-buttons { display:flex; gap:4px; flex-wrap:wrap; }
-    .toolbar .filter-buttons button {
-      background:rgba(255,255,255,0.03); border:1px solid var(--border-color); color:var(--text-muted);
-      padding:2px 8px; border-radius:8px; font-size:0.65rem; font-weight:600; cursor:pointer;
-      transition:var(--transition); font-family:var(--font-main); white-space:nowrap;
-      min-height:28px; touch-action:manipulation;
-    }
-    .toolbar .filter-buttons button:active { transform:scale(0.95); }
-    .toolbar .filter-buttons button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .toolbar .filter-buttons {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .toolbar .filter-buttons button {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+            white-space: nowrap;
+            min-height: 28px;
+            touch-action: manipulation;
+        }
+        .toolbar .filter-buttons button:active {
+            transform: scale(0.95);
+        }
+        .toolbar .filter-buttons button.active {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
 
-    .toolbar .settings-toggle {
-      display:flex; align-items:center; gap:4px; cursor:pointer;
-      font-size:0.7rem; color:var(--text-muted); padding:2px 6px; border-radius:8px;
-      transition:var(--transition); background:rgba(255,255,255,0.02); border:1px solid var(--border-color);
-      min-height:28px;
-    }
-    .toolbar .settings-toggle:active { transform:scale(0.95); }
-    .toolbar .settings-toggle .icon { font-size:0.9rem; }
+        .toolbar .settings-toggle {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 2px 6px;
+            border-radius: 8px;
+            transition: var(--transition);
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            min-height: 28px;
+        }
+        .toolbar .settings-toggle:active {
+            transform: scale(0.95);
+        }
+        .toolbar .settings-toggle .icon {
+            font-size: 0.9rem;
+        }
 
-    .settings-panel {
-      display:none; flex-wrap:wrap; gap:8px; padding:4px 0; border-top:1px solid var(--border-color);
-      margin-top:4px;
-    }
-    .settings-panel.open { display:flex; }
-    .settings-panel label { display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-muted); cursor:pointer; }
-    .settings-panel input[type="checkbox"] { accent-color:var(--primary); width:14px; height:14px; cursor:pointer; }
+        .settings-panel {
+            display: none;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 4px 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 4px;
+        }
+        .settings-panel.open {
+            display: flex;
+        }
+        .settings-panel label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .settings-panel input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
 
-    /* ===== NOTIFICATION LIST ===== */
-    .notif-list {
-      width:100%; display:flex; flex-direction:column; gap:6px; flex:1;
-      position:relative;
-    }
-    .notif-item {
-      background:var(--bg-card); backdrop-filter:blur(8px);
-      border:1px solid var(--border-color); border-radius:var(--radius);
-      padding:clamp(10px,2.5vw,14px) clamp(12px,3vw,16px);
-      display:flex; align-items:flex-start; gap:12px;
-      transition:var(--transition); cursor:pointer;
-      animation:notifIn 0.2s ease;
-      position:relative;
-    }
-    .notif-item:hover { border-color:var(--border-glow); }
-    .notif-item.unread { border-left:3px solid var(--primary); background:rgba(0,168,132,0.04); }
-    @keyframes notifIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+        .notif-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+            position: relative;
+        }
+        .notif-item {
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: clamp(10px, 2.5vw, 14px) clamp(12px, 3vw, 16px);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: var(--transition);
+            cursor: pointer;
+            animation: notifIn 0.2s ease;
+            position: relative;
+        }
+        .notif-item:hover {
+            border-color: var(--border-glow);
+        }
+        .notif-item.unread {
+            border-left: 3px solid var(--primary);
+            background: rgba(0, 168, 132, 0.04);
+        }
+        @keyframes notifIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-    .notif-avatar {
-      width:clamp(40px,10vw,48px); height:clamp(40px,10vw,48px); border-radius:50%;
-      background:linear-gradient(135deg, var(--primary), #005c4b);
-      display:flex; align-items:center; justify-content:center; font-weight:700; color:#fff;
-      font-size:clamp(0.9rem,2.5vw,1.1rem); overflow:hidden; flex-shrink:0;
-      position:relative;
-    }
-    .notif-avatar img { width:100%; height:100%; object-fit:cover; }
+        .notif-avatar {
+            width: clamp(40px, 10vw, 48px);
+            height: clamp(40px, 10vw, 48px);
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #005c4b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .notif-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .notif-body { flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-    .notif-message {
-      font-size:clamp(0.85rem,2.4vw,0.92rem);
-      line-height:1.4; color:var(--text-main);
-      display:flex; flex-wrap:wrap; align-items:center; gap:3px;
-    }
-    .notif-message .highlight { color:var(--primary); font-weight:600; }
-    .notif-message .em { color:var(--accent); font-weight:600; }
-    .notif-message .action-icon { font-size:1.1rem; margin-right:2px; }
+        .notif-body {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .notif-message {
+            font-size: clamp(0.85rem, 2.4vw, 0.92rem);
+            line-height: 1.4;
+            color: var(--text-main);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 3px;
+        }
+        .notif-message .action-icon {
+            font-size: 1.1rem;
+            margin-right: 2px;
+        }
 
-    .notif-meta {
-      display:flex; align-items:center; gap:8px;
-      font-size:clamp(0.65rem,1.8vw,0.72rem); color:var(--text-muted);
-      margin-top:2px;
-    }
-    .notif-meta .badge { font-size:0.55rem; padding:1px 8px; border-radius:12px; font-weight:600; }
-    .notif-meta .badge.feed { background:rgba(14,165,233,0.12); color:var(--accent); border:1px solid rgba(14,165,233,0.2); }
-    .notif-meta .badge.room { background:rgba(245,158,11,0.12); color:var(--warning); border:1px solid rgba(245,158,11,0.2); }
-    .notif-meta .badge.chat { background:rgba(0,168,132,0.12); color:var(--primary); border:1px solid rgba(0,168,132,0.2); }
-    .notif-meta .badge.community { background:rgba(168,85,247,0.12); color:#a855f7; border:1px solid rgba(168,85,247,0.2); }
-    .notif-meta .badge.verification { background:rgba(251,191,36,0.12); color:var(--gold); border:1px solid rgba(251,191,36,0.2); }
-    .notif-meta .badge.announcement { background:rgba(236,72,153,0.12); color:#ec4899; border:1px solid rgba(236,72,153,0.2); }
+        .notif-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: clamp(0.65rem, 1.8vw, 0.72rem);
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .notif-meta .badge {
+            font-size: 0.55rem;
+            padding: 1px 8px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .notif-meta .badge.feed {
+            background: rgba(14, 165, 233, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+        }
+        .notif-meta .badge.rooms {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--warning);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+        .notif-meta .badge.chats {
+            background: rgba(0, 168, 132, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(0, 168, 132, 0.2);
+        }
+        .notif-meta .badge.communities {
+            background: rgba(168, 85, 247, 0.12);
+            color: #a855f7;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+        }
+        .notif-meta .badge.verification {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--gold);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+        .notif-meta .badge.announcements {
+            background: rgba(236, 72, 153, 0.12);
+            color: #ec4899;
+            border: 1px solid rgba(236, 72, 153, 0.2);
+        }
 
-    .notif-time { color:var(--text-muted); opacity:0.6; }
-    .notif-read-dot {
-      width:8px; height:8px; border-radius:50%; background:var(--primary);
-      flex-shrink:0; margin-left:auto; align-self:center;
-      display:none;
-    }
-    .notif-item.unread .notif-read-dot { display:block; }
+        .notif-time {
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        .notif-read-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            flex-shrink: 0;
+            margin-left: auto;
+            align-self: center;
+            display: none;
+        }
+        .notif-item.unread .notif-read-dot {
+            display: block;
+        }
 
-    .notif-actions {
-      display:flex; gap:4px; flex-shrink:0; align-items:center;
-    }
-    .notif-actions button {
-      background:rgba(255,255,255,0.04); border:1px solid var(--border-color);
-      border-radius:8px; padding:2px 6px; font-size:0.6rem; font-weight:600;
-      color:var(--text-muted); cursor:pointer; transition:var(--transition);
-      font-family:var(--font-main); min-height:28px; min-width:28px;
-      touch-action:manipulation;
-    }
-    .notif-actions button:active { transform:scale(0.9); }
-    .notif-actions button:hover { background:rgba(255,255,255,0.08); color:var(--text-main); }
-    .notif-actions button.primary { background:var(--primary); color:#fff; border-color:var(--primary); }
-    .notif-actions button.primary:hover { background:var(--primary-hover); }
+        .notif-count-badge {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0 6px;
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-left: 4px;
+            flex-shrink: 0;
+            min-height: 18px;
+            display: inline-flex;
+            align-items: center;
+        }
 
-    .group-summary {
-      background:rgba(255,255,255,0.02); border-radius:8px; padding:4px 8px;
-      margin:4px 0; font-size:0.8rem; color:var(--text-muted);
-      display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-    }
-    .group-summary .more { font-weight:600; color:var(--text-main); }
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            padding: clamp(40px, 8vw, 60px) 20px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius);
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+        }
+        .empty-state .icon {
+            font-size: clamp(3rem, 8vw, 4rem);
+            display: block;
+            margin-bottom: 12px;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        .empty-state .sparkle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 12px var(--gold);
+            animation: sparkle 2s ease-in-out infinite;
+        }
+        .empty-state .sparkle:nth-child(2) {
+            top: 15%;
+            left: 10%;
+            animation-delay: 0.3s;
+            width: 4px;
+            height: 4px;
+        }
+        .empty-state .sparkle:nth-child(3) {
+            bottom: 20%;
+            right: 15%;
+            animation-delay: 0.7s;
+            width: 8px;
+            height: 8px;
+        }
+        .empty-state .sparkle:nth-child(4) {
+            top: 30%;
+            right: 20%;
+            animation-delay: 1.1s;
+            width: 5px;
+            height: 5px;
+        }
+        .empty-state .sparkle:nth-child(5) {
+            bottom: 30%;
+            left: 12%;
+            animation-delay: 1.5s;
+            width: 6px;
+            height: 6px;
+        }
+        @keyframes sparkle {
+            0%,
+            100% {
+                opacity: 0.2;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.5);
+            }
+        }
+        .empty-state .tip {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 6px;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 6px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid var(--border-color);
+        }
 
-    /* ===== PREMIUM EMPTY STATE ===== */
-    .empty-state {
-      text-align:center; color:var(--text-muted); padding:clamp(40px,8vw,60px) 20px;
-      font-size:clamp(0.9rem,2.5vw,1rem);
-      position:relative;
-      overflow:hidden;
-      border-radius:var(--radius);
-      background:var(--bg-card);
-      backdrop-filter:blur(8px);
-      border:1px solid var(--border-color);
-    }
-    .empty-state .icon {
-      font-size:clamp(3rem,8vw,4rem);
-      display:block;
-      margin-bottom:12px;
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float {
-      0%, 100% { transform:translateY(0); }
-      50% { transform:translateY(-8px); }
-    }
-    .empty-state .sparkle {
-      position:absolute;
-      width:6px;
-      height:6px;
-      border-radius:50%;
-      background:var(--gold);
-      box-shadow:0 0 12px var(--gold);
-      animation: sparkle 2s ease-in-out infinite;
-    }
-    .empty-state .sparkle:nth-child(2) { top:15%; left:10%; animation-delay:0.3s; width:4px; height:4px; }
-    .empty-state .sparkle:nth-child(3) { bottom:20%; right:15%; animation-delay:0.7s; width:8px; height:8px; }
-    .empty-state .sparkle:nth-child(4) { top:30%; right:20%; animation-delay:1.1s; width:5px; height:5px; }
-    .empty-state .sparkle:nth-child(5) { bottom:30%; left:12%; animation-delay:1.5s; width:6px; height:6px; }
-    @keyframes sparkle {
-      0%, 100% { opacity:0.2; transform:scale(1); }
-      50% { opacity:1; transform:scale(1.5); }
-    }
-    .empty-state .tip {
-      font-size:0.75rem;
-      opacity:0.7;
-      margin-top:6px;
-      background:rgba(255,255,255,0.02);
-      padding:6px 16px;
-      border-radius:20px;
-      display:inline-block;
-      border:1px solid var(--border-color);
-    }
+        .clear-all-panel {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transition: var(--transition);
+            flex-wrap: wrap;
+        }
+        .clear-all-panel:hover {
+            border-color: var(--border-glow);
+        }
+        .clear-all-panel .clear-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .clear-all-panel .clear-info .count {
+            font-weight: 700;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 0 8px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+        }
+        .clear-all-panel .clear-btn {
+            background: linear-gradient(135deg, var(--error), #e11d48);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 0.7rem;
+            padding: 6px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font-main);
+            box-shadow: 0 0 20px var(--error-glow);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            touch-action: manipulation;
+            min-height: 32px;
+        }
+        .clear-all-panel .clear-btn:active {
+            transform: scale(0.95);
+        }
+        .clear-all-panel .clear-btn:hover {
+            box-shadow: 0 0 30px var(--error-glow);
+            transform: scale(1.02);
+        }
+        .clear-all-panel .clear-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
 
-    /* ===== PREMIUM CLEAR ALL PANEL ===== */
-    .clear-all-panel {
-      width:100%;
-      margin-bottom:8px;
-      padding:10px 14px;
-      background:var(--bg-card);
-      backdrop-filter:blur(8px);
-      border:1px solid var(--border-color);
-      border-radius:var(--radius);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      transition:var(--transition);
-      flex-wrap:wrap;
-    }
-    .clear-all-panel:hover {
-      border-color:var(--border-glow);
-    }
-    .clear-all-panel .clear-info {
-      display:flex;
-      align-items:center;
-      gap:8px;
-      font-size:0.78rem;
-      color:var(--text-muted);
-    }
-    .clear-all-panel .clear-info .count {
-      font-weight:700;
-      color:var(--text-main);
-      background:rgba(255,255,255,0.04);
-      padding:0 8px;
-      border-radius:20px;
-      border:1px solid var(--border-color);
-    }
-    .clear-all-panel .clear-btn {
-      background:linear-gradient(135deg, var(--error), #e11d48);
-      border:none;
-      color:white;
-      font-weight:700;
-      font-size:0.7rem;
-      padding:6px 16px;
-      border-radius:40px;
-      cursor:pointer;
-      transition:var(--transition);
-      font-family:var(--font-main);
-      box-shadow:0 0 20px var(--error-glow);
-      display:flex;
-      align-items:center;
-      gap:4px;
-      touch-action:manipulation;
-      min-height:32px;
-    }
-    .clear-all-panel .clear-btn:active { transform:scale(0.95); }
-    .clear-all-panel .clear-btn:hover {
-      box-shadow:0 0 30px var(--error-glow);
-      transform:scale(1.02);
-    }
-    .clear-all-panel .clear-btn:disabled {
-      opacity:0.4;
-      cursor:not-allowed;
-      transform:none !important;
-      box-shadow:none;
-    }
+        .time-section {
+            margin-bottom: 6px;
+        }
+        .time-section .section-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            padding: 6px 4px 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
 
-    /* ===== CONFIRM MODAL (premium) ===== */
-    .confirm-modal-overlay {
-      position:fixed;
-      inset:0;
-      background:rgba(3,7,13,0.85);
-      backdrop-filter:blur(20px);
-      -webkit-backdrop-filter:blur(20px);
-      z-index:10000;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      opacity:0;
-      transition:opacity 0.4s cubic-bezier(0.16,1,0.3,1);
-    }
-    .confirm-modal-overlay.active {
-      display:flex;
-      opacity:1;
-      animation:modalFadeIn 0.4s ease-out;
-    }
-    @keyframes modalFadeIn { 0% { opacity:0; } 100% { opacity:1; } }
-    @keyframes modalSlideUp {
-      0% { opacity:0; transform:translateY(30px) scale(0.96); }
-      100% { opacity:1; transform:translateY(0) scale(1); }
-    }
-    .confirm-modal {
-      background:var(--bg-surface);
-      backdrop-filter:blur(24px);
-      -webkit-backdrop-filter:blur(24px);
-      border:1px solid var(--border-color);
-      border-radius:clamp(20px,5vw,28px);
-      padding:clamp(20px,5vw,32px) clamp(16px,4vw,28px);
-      max-width:440px;
-      width:100%;
-      box-shadow:0 30px 80px rgba(0,0,0,0.8);
-      animation:modalSlideUp 0.4s cubic-bezier(0.16,1,0.3,1);
-      position:relative;
-      overflow:hidden;
-    }
-    .confirm-modal::before {
-      content:'';
-      position:absolute;
-      top:-50%;
-      left:-50%;
-      width:200%;
-      height:200%;
-      background:radial-gradient(circle at 50% 0%, var(--toast-glow-color) 0%, transparent 60%);
-      opacity:0.08;
-      pointer-events:none;
-      z-index:0;
-    }
-    .confirm-modal>* { position:relative; z-index:1; }
-    .confirm-modal-icon {
-      width:clamp(56px,15vw,72px);
-      height:clamp(56px,15vw,72px);
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:clamp(1.8rem,5vw,2.2rem);
-      margin:0 auto 16px auto;
-      position:relative;
-    }
-    .confirm-modal-icon::before {
-      content:'';
-      position:absolute;
-      inset:-3px;
-      border-radius:50%;
-      background:var(--toast-glow-color);
-      opacity:0.12;
-      filter:blur(12px);
-    }
-    .confirm-modal-icon .icon { position:relative; z-index:1; }
-    .confirm-modal.danger { --toast-glow-color: rgba(244,63,94,0.4); }
-    .confirm-modal.danger .confirm-modal-icon {
-      background:rgba(244,63,94,0.1);
-      border:2px solid rgba(244,63,94,0.2);
-      color:var(--error);
-    }
-    .confirm-modal-title {
-      font-size:clamp(1.1rem,3.5vw,1.3rem);
-      font-weight:800;
-      color:var(--text-main);
-      text-align:center;
-      letter-spacing:-0.3px;
-      line-height:1.3;
-    }
-    .confirm-modal-message {
-      font-size:clamp(0.8rem,2.5vw,0.92rem);
-      color:var(--text-muted);
-      text-align:center;
-      line-height:1.6;
-      margin:8px 0 4px 0;
-      padding:0 4px;
-    }
-    .confirm-modal-details {
-      background:rgba(255,255,255,0.02);
-      border:1px solid var(--border-color);
-      border-radius:12px;
-      padding:10px 14px;
-      margin:8px 0 12px 0;
-      font-size:clamp(0.75rem,2.2vw,0.82rem);
-      color:var(--text-muted);
-      line-height:1.5;
-    }
-    .confirm-modal-actions {
-      display:flex;
-      gap:12px;
-      margin-top:8px;
-      flex-wrap:wrap;
-    }
-    .confirm-modal-actions .btn-confirm {
-      flex:1;
-      min-width:100px;
-      padding:clamp(10px,3vw,14px);
-      border-radius:14px;
-      border:none;
-      font-family:var(--font-main);
-      font-weight:700;
-      font-size:clamp(0.8rem,2.5vw,0.92rem);
-      cursor:pointer;
-      transition:var(--transition);
-      touch-action:manipulation;
-    }
-    .confirm-modal-actions .btn-confirm:active { transform:scale(0.95); }
-    .confirm-modal-actions .btn-confirm.danger {
-      background:var(--error);
-      color:white;
-      box-shadow:0 0 20px var(--error-glow);
-    }
-    .confirm-modal-actions .btn-confirm.danger:hover { background:#e11d48; }
-    .confirm-modal-actions .btn-confirm.secondary {
-      background:rgba(255,255,255,0.04);
-      color:var(--text-muted);
-      border:1px solid var(--border-color);
-    }
-    .confirm-modal-actions .btn-confirm.secondary:hover {
-      background:rgba(255,255,255,0.08);
-      color:var(--text-main);
-    }
+        /* ===== TOAST & CONFIRM (same as before, included for completeness) ===== */
+        .toast-container {
+            position: fixed;
+            top: 28px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-30px);
+            z-index: 9999;
+            width: calc(100% - 32px);
+            max-width: 420px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .toast-container.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+            pointer-events: auto;
+        }
+        .toast-content {
+            background: var(--bg-glass);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: clamp(10px, 2.5vw, 14px) clamp(14px, 4vw, 18px);
+            display: flex;
+            align-items: center;
+            gap: clamp(10px, 3vw, 14px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+            animation: toastSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes toastSlideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        @keyframes toastSlideOut {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+        }
+        .toast-container.removing .toast-content {
+            animation: toastSlideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .toast-content::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, var(--toast-glow-color) 0%, transparent 70%);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .toast-content>* {
+            position: relative;
+            z-index: 1;
+        }
+        .toast-icon-wrapper {
+            width: clamp(32px, 8vw, 40px);
+            height: clamp(32px, 8vw, 40px);
+            min-width: clamp(32px, 8vw, 40px);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.9rem, 3vw, 1.2rem);
+            font-weight: 800;
+            flex-shrink: 0;
+            position: relative;
+        }
+        .toast-icon-wrapper::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            background: var(--toast-glow-color);
+            opacity: 0.12;
+            filter: blur(8px);
+        }
+        .toast-icon-wrapper .icon {
+            position: relative;
+            z-index: 1;
+        }
 
-    /* ===== TOAST ===== */
-    .toast-container {
-      position:fixed; top:28px; left:50%; transform:translateX(-50%) translateY(-30px); z-index:9999;
-      width:calc(100% - 32px); max-width:420px; opacity:0; visibility:hidden;
-      transition:all 0.5s cubic-bezier(0.16,1,0.3,1); pointer-events:none;
-    }
-    .toast-container.active { opacity:1; visibility:visible; transform:translateX(-50%) translateY(0); pointer-events:auto; }
-    .toast-content {
-      background:var(--bg-glass); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
-      border:1px solid var(--border-color); border-radius:16px;
-      padding:clamp(10px,2.5vw,14px) clamp(14px,4vw,18px);
-      display:flex; align-items:center; gap:clamp(10px,3vw,14px);
-      box-shadow:0 20px 60px rgba(0,0,0,0.7); position:relative; overflow:hidden;
-      animation:toastSlideIn 0.5s cubic-bezier(0.16,1,0.3,1);
-    }
-    @keyframes toastSlideIn { 0% { opacity:0; transform:translateY(-20px) scale(0.95); } 100% { opacity:1; transform:translateY(0) scale(1); } }
-    @keyframes toastSlideOut { 0% { opacity:1; transform:translateY(0) scale(1); } 100% { opacity:0; transform:translateY(-20px) scale(0.95); } }
-    .toast-container.removing .toast-content { animation:toastSlideOut 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
-    .toast-content::before {
-      content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
-      background:radial-gradient(circle at 30% 30%, var(--toast-glow-color) 0%, transparent 70%);
-      opacity:0.2; pointer-events:none; z-index:0;
-    }
-    .toast-content>* { position:relative; z-index:1; }
-    .toast-icon-wrapper {
-      width:clamp(32px,8vw,40px); height:clamp(32px,8vw,40px); min-width:clamp(32px,8vw,40px);
-      border-radius:12px; display:flex; align-items:center; justify-content:center;
-      font-size:clamp(0.9rem,3vw,1.2rem); font-weight:800; flex-shrink:0; position:relative;
-    }
-    .toast-icon-wrapper::before {
-      content:''; position:absolute; inset:-2px; border-radius:14px;
-      background:var(--toast-glow-color); opacity:0.12; filter:blur(8px);
-    }
-    .toast-icon-wrapper .icon { position:relative; z-index:1; }
+        .toast-container.success {
+            --toast-glow-color: rgba(0, 168, 132, 0.6);
+        }
+        .toast-container.success .toast-icon-wrapper {
+            background: rgba(0, 168, 132, 0.12);
+            border: 1px solid rgba(0, 168, 132, 0.2);
+            color: var(--success);
+        }
+        .toast-container.error {
+            --toast-glow-color: rgba(244, 63, 94, 0.6);
+        }
+        .toast-container.error .toast-icon-wrapper {
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.2);
+            color: var(--error);
+        }
+        .toast-container.warning {
+            --toast-glow-color: rgba(245, 158, 11, 0.6);
+        }
+        .toast-container.warning .toast-icon-wrapper {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
 
-    .toast-container.success { --toast-glow-color: rgba(0,168,132,0.6); }
-    .toast-container.success .toast-icon-wrapper { background:rgba(0,168,132,0.12); border:1px solid rgba(0,168,132,0.2); color:var(--success); }
-    .toast-container.error { --toast-glow-color: rgba(244,63,94,0.6); }
-    .toast-container.error .toast-icon-wrapper { background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.2); color:var(--error); }
-    .toast-container.warning { --toast-glow-color: rgba(245,158,11,0.6); }
-    .toast-container.warning .toast-icon-wrapper { background:rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.2); color:var(--warning); }
+        .toast-text-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            min-width: 0;
+        }
+        .toast-title {
+            font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.2px;
+        }
+        .toast-message {
+            font-size: clamp(0.7rem, 2.2vw, 0.78rem);
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+        .toast-close-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            transition: var(--transition);
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+        .toast-close-btn:active {
+            transform: scale(0.9);
+        }
+        .toast-close-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 2px;
+            background: var(--toast-glow-color);
+            border-radius: 0 0 16px 16px;
+            width: 100%;
+            animation: toastProgress 3s linear forwards;
+        }
+        @keyframes toastProgress {
+            0% {
+                width: 100%;
+            }
+            100% {
+                width: 0%;
+            }
+        }
 
-    .toast-text-group { flex:1; display:flex; flex-direction:column; gap:1px; min-width:0; }
-    .toast-title { font-size:clamp(0.75rem,2.5vw,0.85rem); font-weight:800; color:var(--text-main); letter-spacing:-0.2px; }
-    .toast-message { font-size:clamp(0.7rem,2.2vw,0.78rem); font-weight:500; color:var(--text-muted); line-height:1.4; }
-    .toast-close-btn {
-      background:rgba(255,255,255,0.04); border:1px solid var(--border-color); color:var(--text-muted);
-      width:24px; height:24px; min-width:24px; border-radius:50%;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:0.6rem;
-      transition:var(--transition); flex-shrink:0; touch-action:manipulation;
-    }
-    .toast-close-btn:active { transform:scale(0.9); }
-    .toast-close-btn:hover { background:rgba(255,255,255,0.08); color:var(--text-main); border-color:rgba(255,255,255,0.2); }
-    .toast-progress {
-      position:absolute; bottom:0; left:0; height:2px; background:var(--toast-glow-color);
-      border-radius:0 0 16px 16px; width:100%; animation:toastProgress 3s linear forwards;
-    }
-    @keyframes toastProgress { 0% { width:100%; } 100% { width:0%; } }
+        .confirm-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(3, 7, 13, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .confirm-modal-overlay.active {
+            display: flex;
+            opacity: 1;
+            animation: modalFadeIn 0.4s ease-out;
+        }
+        @keyframes modalFadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        @keyframes modalSlideUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-    /* ===== SOUND TOGGLE ===== */
-    .sound-toggle { display:flex; align-items:center; gap:4px; font-size:0.7rem; color:var(--text-muted); cursor:pointer; }
-    .sound-toggle input { accent-color:var(--primary); }
+        .confirm-modal {
+            background: var(--bg-surface);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border-color);
+            border-radius: clamp(20px, 5vw, 28px);
+            padding: clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px);
+            max-width: 440px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+            animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .confirm-modal::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 50% 0%, var(--toast-glow-color) 0%, transparent 60%);
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .confirm-modal>* {
+            position: relative;
+            z-index: 1;
+        }
+        .confirm-modal-icon {
+            width: clamp(56px, 15vw, 72px);
+            height: clamp(56px, 15vw, 72px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.8rem, 5vw, 2.2rem);
+            margin: 0 auto 16px auto;
+            position: relative;
+        }
+        .confirm-modal-icon::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            background: var(--toast-glow-color);
+            opacity: 0.12;
+            filter: blur(12px);
+        }
+        .confirm-modal-icon .icon {
+            position: relative;
+            z-index: 1;
+        }
+        .confirm-modal.danger {
+            --toast-glow-color: rgba(244, 63, 94, 0.4);
+        }
+        .confirm-modal.danger .confirm-modal-icon {
+            background: rgba(244, 63, 94, 0.1);
+            border: 2px solid rgba(244, 63, 94, 0.2);
+            color: var(--error);
+        }
+        .confirm-modal-title {
+            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+            font-weight: 800;
+            color: var(--text-main);
+            text-align: center;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+        .confirm-modal-message {
+            font-size: clamp(0.8rem, 2.5vw, 0.92rem);
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.6;
+            margin: 8px 0 4px 0;
+            padding: 0 4px;
+        }
+        .confirm-modal-details {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin: 8px 0 12px 0;
+            font-size: clamp(0.75rem, 2.2vw, 0.82rem);
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+        .confirm-modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .confirm-modal-actions .btn-confirm {
+            flex: 1;
+            min-width: 100px;
+            padding: clamp(10px, 3vw, 14px);
+            border-radius: 14px;
+            border: none;
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: clamp(0.8rem, 2.5vw, 0.92rem);
+            cursor: pointer;
+            transition: var(--transition);
+            touch-action: manipulation;
+        }
+        .confirm-modal-actions .btn-confirm:active {
+            transform: scale(0.95);
+        }
+        .confirm-modal-actions .btn-confirm.danger {
+            background: var(--error);
+            color: white;
+            box-shadow: 0 0 20px var(--error-glow);
+        }
+        .confirm-modal-actions .btn-confirm.danger:hover {
+            background: #e11d48;
+        }
+        .confirm-modal-actions .btn-confirm.secondary {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+        .confirm-modal-actions .btn-confirm.secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-main);
+        }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width:480px) {
-      .notif-header { padding:6px 10px; }
-      .header-left .back-btn { width:34px; height:34px; font-size:1rem; }
-      .header-right .header-btn { width:34px; height:34px; font-size:0.9rem; }
-      .header-right .avatar-btn { width:34px; height:34px; font-size:0.8rem; }
-      .toolbar .filter-buttons button { font-size:0.55rem; padding:1px 6px; min-height:24px; }
-      .toolbar .search-wrapper input { font-size:0.7rem; min-height:28px; }
-      .clear-all-panel { flex-direction:column; align-items:stretch; gap:6px; }
-      .clear-all-panel .clear-btn { justify-content:center; }
-    }
-
-    @media (pointer:coarse) {
-      .back-btn, .header-btn, .avatar-btn, .filter-buttons button,
-      .notif-item, .notif-actions button, .settings-toggle, .clear-btn,
-      .btn-confirm, .toast-close-btn { min-height:44px; min-width:44px; }
-    }
-  </style>
+        @media (max-width: 480px) {
+            .notif-header {
+                padding: 6px 10px;
+            }
+            .header-left .back-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 1rem;
+            }
+            .header-right .header-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.9rem;
+            }
+            .header-right .avatar-btn {
+                width: 34px;
+                height: 34px;
+                font-size: 0.8rem;
+            }
+            .toolbar .filter-buttons button {
+                font-size: 0.55rem;
+                padding: 1px 6px;
+                min-height: 24px;
+            }
+            .toolbar .search-wrapper input {
+                font-size: 0.7rem;
+                min-height: 28px;
+            }
+            .clear-all-panel {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .clear-all-panel .clear-btn {
+                justify-content: center;
+            }
+        }
+        @media (pointer: coarse) {
+            .back-btn,
+            .header-btn,
+            .avatar-btn,
+            .filter-buttons button,
+            .notif-item,
+            .settings-toggle,
+            .clear-btn,
+            .btn-confirm,
+            .toast-close-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- ===== HEADER ===== -->
-<header class="notif-header">
-  <div class="header-left">
-    <button class="back-btn" onclick="window.location.href='feed.html'">←</button>
-    <a href="feed.html" class="logo">SPIKE</a>
-  </div>
-  <div class="header-right">
-    <button class="header-btn" onclick="markAllRead()" title="Mark all as read">✓✓</button>
-    <button class="header-btn" onclick="toggleSound()" id="soundBtn" title="Toggle sound">🔊</button>
-    <button class="header-btn" id="unreadBadgeBtn" style="position:relative;">
-      <span style="font-size:0.9rem;">🔔</span>
-      <span class="badge-count" id="unreadBadge" style="display:none;">0</span>
-    </button>
-    <button class="avatar-btn" id="notifAvatar" onclick="window.location.href='profile.html'">👤</button>
-  </div>
-</header>
+    <!-- ===== HEADER ===== -->
+    <header class="notif-header">
+        <div class="header-left">
+            <button class="back-btn" onclick="window.location.href='feed.html'">←</button>
+            <a href="feed.html" class="logo">SPIKE</a>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" onclick="markAllRead()" title="Mark all as read">✓✓</button>
+            <button class="header-btn" id="soundToggleBtn" onclick="toggleSound()" title="Toggle sound">🔊</button>
+            <button class="header-btn" id="unreadBadgeBtn" style="position:relative;">
+                <span style="font-size:0.9rem;">🔔</span>
+                <span class="badge-count" id="unreadBadge" style="display:none;">0</span>
+            </button>
+            <button class="avatar-btn" id="notifAvatar" onclick="window.location.href='profile.html'">👤</button>
+        </div>
+    </header>
 
-<!-- ===== MAIN ===== -->
-<main class="notif-main">
+    <!-- ===== MAIN ===== -->
+    <main style="width:100%;max-width:620px;padding:12px;display:flex;flex-direction:column;gap:8px;">
 
-  <!-- Toolbar -->
-  <div class="toolbar">
-    <div class="toolbar-row">
-      <div class="search-wrapper">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search notifications..." oninput="applyFilters()" />
-      </div>
-      <div class="filter-buttons" id="dateFilters">
-        <button data-date="today" class="active" onclick="setDateFilter('today')">Today</button>
-        <button data-date="week" onclick="setDateFilter('week')">This Week</button>
-        <button data-date="month" onclick="setDateFilter('month')">This Month</button>
-        <button data-date="older" onclick="setDateFilter('older')">Older</button>
-      </div>
-      <div class="settings-toggle" onclick="toggleSettings()">
-        <span class="icon">⚙️</span>
-        <span>Settings</span>
-      </div>
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-row">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search notifications..." oninput="renderAll()" />
+                </div>
+                <div class="filter-buttons" id="dateFilters">
+                    <button data-date="today" class="active" onclick="setDateFilter('today')">Today</button>
+                    <button data-date="week" onclick="setDateFilter('week')">This Week</button>
+                    <button data-date="month" onclick="setDateFilter('month')">This Month</button>
+                    <button data-date="older" onclick="setDateFilter('older')">Older</button>
+                </div>
+                <div class="settings-toggle" onclick="toggleSettings()">
+                    <span class="icon">⚙️</span>
+                    <span>Settings</span>
+                </div>
+            </div>
+            <div class="settings-panel" id="settingsPanel">
+                <label><input type="checkbox" checked data-category="feed" onchange="renderAll()"> Feed</label>
+                <label><input type="checkbox" checked data-category="chats" onchange="renderAll()"> Chats</label>
+                <label><input type="checkbox" checked data-category="rooms" onchange="renderAll()"> Rooms</label>
+                <label><input type="checkbox" checked data-category="communities" onchange="renderAll()"> Communities</label>
+                <label><input type="checkbox" checked data-category="verification" onchange="renderAll()"> Verification</label>
+                <label><input type="checkbox" checked data-category="announcements" onchange="renderAll()"> Announcements</label>
+                <label><input type="checkbox" id="groupSimilarCheckbox" checked onchange="updateGroupSetting()"> Group similar</label>
+            </div>
+        </div>
+
+        <!-- Clear All Panel -->
+        <div class="clear-all-panel" id="clearAllPanel">
+            <div class="clear-info">
+                <span>📬</span>
+                <span>You have <span class="count" id="notificationCount">0</span> notifications</span>
+            </div>
+            <button class="clear-btn" id="clearAllBtn" onclick="clearAll()">
+                🗑️ Clear All
+            </button>
+        </div>
+
+        <!-- Notification List -->
+        <div class="notif-list" id="notifList">
+            <!-- Rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- ===== TOAST & CONFIRM ===== -->
+    <div class="toast-container" id="globalToast">
+        <div class="toast-content">
+            <div class="toast-icon-wrapper"><span class="icon" id="toastIcon">✓</span></div>
+            <div class="toast-text-group">
+                <div class="toast-title" id="toastTitle">Notification</div>
+                <div class="toast-message" id="toastMessage">Action completed.</div>
+            </div>
+            <button class="toast-close-btn" onclick="dismissToast()">✕</button>
+            <div class="toast-progress"></div>
+        </div>
     </div>
-    <div class="settings-panel" id="settingsPanel">
-      <label><input type="checkbox" checked data-category="feed" onchange="applyFilters()"> Feed</label>
-      <label><input type="checkbox" checked data-category="chat" onchange="applyFilters()"> Chats</label>
-      <label><input type="checkbox" checked data-category="room" onchange="applyFilters()"> Rooms</label>
-      <label><input type="checkbox" checked data-category="community" onchange="applyFilters()"> Communities</label>
-      <label><input type="checkbox" checked data-category="verification" onchange="applyFilters()"> Verification</label>
-      <label><input type="checkbox" checked data-category="announcement" onchange="applyFilters()"> Announcements</label>
-      <label><input type="checkbox" id="soundEnabled" checked onchange="saveSoundPref()"> 🔔 Sound</label>
-      <label><input type="checkbox" id="groupEnabled" checked onchange="applyFilters()"> Group similar</label>
+
+    <div class="confirm-modal-overlay" id="confirmModalOverlay">
+        <div class="confirm-modal" id="confirmModal">
+            <div class="confirm-modal-icon"><span id="confirmModalIcon">⚠️</span></div>
+            <div class="confirm-modal-title" id="confirmModalTitle">Are you sure?</div>
+            <div class="confirm-modal-message" id="confirmModalMessage">This action cannot be undone.</div>
+            <div id="confirmModalDetails" class="confirm-modal-details" style="display:none;"></div>
+            <div class="confirm-modal-actions">
+                <button class="btn-confirm secondary" id="confirmModalCancel" onclick="handleCancel()">Cancel</button>
+                <button class="btn-confirm danger" id="confirmModalConfirm" onclick="handleConfirm()">Confirm</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Clear All Panel -->
-  <div class="clear-all-panel" id="clearAllPanel">
-    <div class="clear-info">
-      <span>📬</span>
-      <span>You have <span class="count" id="notificationCount">0</span> notifications</span>
-    </div>
-    <button class="clear-btn" id="clearAllBtn" onclick="clearAll()">
-      🗑️ Clear All
-    </button>
-  </div>
+    <!-- ===== FIREBASE CDN ===== -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js">
+    </script>
 
-  <!-- Notification List -->
-  <div class="notif-list" id="notifList">
-    <div class="empty-state">
-      <span class="sparkle"></span>
-      <span class="sparkle"></span>
-      <span class="sparkle"></span>
-      <span class="sparkle"></span>
-      <span class="sparkle"></span>
-      <span class="icon">🔔</span>
-      <div>No notifications yet</div>
-      <div class="tip">✨ Interact with posts, rooms, and communities to see activity here</div>
-    </div>
-  </div>
+    <script>
+        // ============================================================
+        // FIREBASE INIT
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
+            authDomain: "grazzy-9e736.firebaseapp.com",
+            projectId: "grazzy-9e736",
+            storageBucket: "grazzy-9e736.firebasestorage.app",
+            messagingSenderId: "750326949170",
+            appId: "1:750326949170:web:5d19744aafc8675918632b"
+        };
 
-</main>
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-<!-- ===== TOAST ===== -->
-<div class="toast-container" id="globalToast">
-  <div class="toast-content">
-    <div class="toast-icon-wrapper"><span class="icon" id="toastIcon">✓</span></div>
-    <div class="toast-text-group">
-      <div class="toast-title" id="toastTitle">Notification</div>
-      <div class="toast-message" id="toastMessage">Action completed.</div>
-    </div>
-    <button class="toast-close-btn" onclick="dismissToast()">✕</button>
-    <div class="toast-progress"></div>
-  </div>
-</div>
+        // ============================================================
+        // STATE
+        // ============================================================
+        let currentUser = null;
+        let currentUserUid = null;
+        let allNotifications = [];
+        let dateFilter = 'today';
+        let groupSimilar = true;
+        let categoryFilters = {
+            feed: true,
+            chats: true,
+            rooms: true,
+            communities: true,
+            verification: true,
+            announcements: true
+        };
+        let toastTimeout = null;
+        let renderTimeout = null;
+        let unsubscribers = [];
 
-<!-- ===== CONFIRM MODAL ===== -->
-<div class="confirm-modal-overlay" id="confirmModalOverlay">
-  <div class="confirm-modal" id="confirmModal">
-    <div class="confirm-modal-icon"><span id="confirmModalIcon">⚠️</span></div>
-    <div class="confirm-modal-title" id="confirmModalTitle">Are you sure?</div>
-    <div class="confirm-modal-message" id="confirmModalMessage">This action cannot be undone.</div>
-    <div id="confirmModalDetails" class="confirm-modal-details" style="display:none;"></div>
-    <div class="confirm-modal-actions">
-      <button class="btn-confirm secondary" id="confirmModalCancel" onclick="handleCancel()">Cancel</button>
-      <button class="btn-confirm danger" id="confirmModalConfirm" onclick="handleConfirm()">Confirm</button>
-    </div>
-  </div>
-</div>
+        const READ_STORAGE_KEY = 'spike_notification_reads_v1';
+        let readIds = new Set();
 
-<!-- ===== SCRIPTS ===== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-  import {
-    getFirestore, collection, doc, getDoc, getDocs, onSnapshot, query, orderBy,
-    where, limit, updateDoc, serverTimestamp, setDoc, deleteDoc, arrayRemove, arrayUnion, Timestamp
-  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        let soundEnabled = true;
+        let audioCtx = null;
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
-    authDomain: "grazzy-9e736.firebaseapp.com",
-    projectId: "grazzy-9e736",
-    storageBucket: "grazzy-9e736.firebasestorage.app",
-    messagingSenderId: "750326949170",
-    appId: "1:750326949170:web:5d19744aafc8675918632b"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
-
-  // ===== STATE =====
-  let currentUser = null;
-  let allNotifications = [];
-  let filteredNotifications = [];
-  let unsubscribers = [];
-  let toastTimeout = null;
-  let soundEnabled = true;
-  let dateFilter = 'today';
-  let groupSimilar = true;
-  let categoryFilters = { feed:true, chat:true, room:true, community:true, verification:true, announcement:true };
-  let searchQuery = '';
-  let unreadCount = 0;
-  let isLoading = true;
-
-  // Read state storage (localStorage)
-  const READ_STORAGE_KEY = 'spike_read_notifications';
-  const CACHE_KEY = 'spike_notifications_cache';
-
-  function loadReadState() {
-    try {
-      const stored = localStorage.getItem(READ_STORAGE_KEY);
-      if (stored) return new Set(JSON.parse(stored));
-    } catch (e) {}
-    return new Set();
-  }
-
-  function saveReadState(readSet) {
-    try {
-      localStorage.setItem(READ_STORAGE_KEY, JSON.stringify([...readSet]));
-    } catch (e) {}
-  }
-
-  let readIds = loadReadState();
-
-  // ===== HELPERS =====
-  function escapeHTML(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>'"]/g, tag =>
-      ({ '&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;' }[tag] || tag)
-    );
-  }
-
-  function toDate(timestamp) {
-    if (!timestamp) return new Date(0);
-    if (timestamp instanceof Timestamp) return timestamp.toDate();
-    if (timestamp?.toDate) return timestamp.toDate();
-    return new Date(timestamp);
-  }
-
-  function formatTimeAgo(timestamp) {
-    const date = toDate(timestamp);
-    if (isNaN(date.getTime())) return '';
-    const now = new Date();
-    const diff = Math.floor((now - date) / 1000);
-    if (diff < 5) return 'Just now';
-    if (diff < 60) return `${diff}s ago`;
-    const mins = Math.floor(diff / 60);
-    if (mins < 60) return `${mins}m ago`;
-    const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours}h ago`;
-    const days = Math.floor(hours / 24);
-    if (days < 7) return `${days}d ago`;
-    return date.toLocaleDateString(undefined, { month:'short', day:'numeric' });
-  }
-
-  function formatDateGroup(timestamp) {
-    const date = toDate(timestamp);
-    if (isNaN(date.getTime())) return '';
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const that = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    const diffDays = Math.floor((today - that) / (1000*60*60*24));
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString(undefined, { month:'long', day:'numeric', year:'numeric' });
-  }
-
-  function getInitials(name) {
-    if (!name) return 'U';
-    const parts = name.trim().split(' ');
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return name.substring(0,2).toUpperCase();
-  }
-
-  function playNotificationSound() {
-    if (!soundEnabled) return;
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-      oscillator.frequency.value = 800;
-      oscillator.type = 'sine';
-      gainNode.gain.value = 0.1;
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.15);
-    } catch(e) {}
-  }
-
-  // ===== TOAST =====
-  function showToast(message, type='success', title='') {
-    const toast = document.getElementById('globalToast');
-    const toastTitle = document.getElementById('toastTitle');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastIcon = document.getElementById('toastIcon');
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toast.className = 'toast-container';
-    const titles = { success:'✓ Success', error:'✕ Error', warning:'⚠️ Warning' };
-    const icons = { success:'✓', error:'✕', warning:'⚠️' };
-    toastTitle.textContent = title || titles[type] || 'Notification';
-    toastMessage.textContent = message;
-    toastIcon.textContent = icons[type] || '✓';
-    void toast.offsetWidth;
-    toast.classList.add(type, 'active');
-    toastTimeout = setTimeout(() => dismissToast(), 3500);
-  }
-  window.dismissToast = function() {
-    const toast = document.getElementById('globalToast');
-    if (!toast.classList.contains('active')) return;
-    toast.classList.add('removing');
-    setTimeout(() => {
-      toast.className = 'toast-container';
-      toast.classList.remove('removing');
-      if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
-    }, 400);
-  };
-  window.showToast = showToast;
-  window.dismissToast = window.dismissToast;
-
-  // ===== CACHE =====
-  const userCache = new Map();
-  async function getUserData(uid) {
-    if (userCache.has(uid)) return userCache.get(uid);
-    try {
-      const docSnap = await getDoc(doc(db, 'users', uid));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        userCache.set(uid, data);
-        return data;
-      }
-    } catch (e) { console.warn('Error fetching user', uid, e); }
-    return { name:'User', avatar:'' };
-  }
-
-  // ===== BUILD NOTIFICATIONS (optimized parallel) =====
-  async function buildNotifications(useCache = true) {
-    if (!currentUser) return;
-    const myUid = currentUser.uid;
-
-    // Try loading from cache first for instant display
-    if (useCache) {
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && parsed.length > 0) {
-            allNotifications = parsed;
-            applyFilters();
-            updateUnreadBadge();
-            updateNotificationCount();
-            // Still continue to fetch fresh data in background
-          }
+        // ============================================================
+        // HELPERS
+        // ============================================================
+        function generateNotificationId(prefix, ...parts) {
+            return prefix + '_' + parts.filter(Boolean).join('_');
         }
-      } catch (e) {}
-    }
 
-    // Fetch fresh data in parallel
-    try {
-      const [
-        myPostsSnap,
-        repostSnap,
-        directChatSnap,
-        roomSnap,
-        userDoc,
-        verificationSnap,
-        annSnap
-      ] = await Promise.all([
-        getDocs(query(collection(db, 'posts'), where('authorUid', '==', myUid))),
-        getDocs(query(collection(db, 'posts'), where('isRepost', '==', true))),
-        getDocs(query(collection(db, 'chats'), where('participants', 'array-contains', myUid))),
-        getDocs(query(collection(db, 'rooms'), where('participants', 'array-contains', myUid))),
-        getDoc(doc(db, 'users', myUid)),
-        getDoc(doc(db, 'verification_requests', myUid)),
-        getDoc(doc(db, 'settings', 'announcement'))
-      ]);
-
-      const newNotifications = [];
-
-      // 1. Feed
-      const myPostIds = myPostsSnap.docs.map(d => d.id);
-      const myPostData = {};
-      myPostsSnap.docs.forEach(d => { myPostData[d.id] = d.data(); });
-
-      for (const postId of myPostIds) {
-        const postData = myPostData[postId];
-        if (!postData) continue;
-        const likes = postData.likes || [];
-        for (const likerUid of likes) {
-          if (likerUid === myUid) continue;
-          const user = await getUserData(likerUid);
-          const id = `like_${postId}_${likerUid}`;
-          newNotifications.push({
-            id: id,
-            type: 'feed',
-            subType: 'like',
-            from: { uid: likerUid, name: user.name || 'User', avatar: user.avatar || '' },
-            to: myUid,
-            target: { id: postId, type: 'post' },
-            message: `${user.name || 'Someone'} liked your post`,
-            timestamp: new Date(),
-            read: readIds.has(id),
-            groupKey: `like_${postId}`
-          });
+        function toDate(timestamp) {
+            if (!timestamp) return new Date(0);
+            if (timestamp.toDate) return timestamp.toDate();
+            return new Date(timestamp);
         }
-        const comments = postData.comments || [];
-        for (const comment of comments) {
-          if (comment.authorUid === myUid) continue;
-          const user = await getUserData(comment.authorUid);
-          const preview = (comment.text || '').length > 60 ? (comment.text || '').substring(0,60)+'…' : (comment.text || '');
-          const id = `comment_${postId}_${comment.id || comment.authorUid}_${Date.now()}`;
-          newNotifications.push({
-            id: id,
-            type: 'feed',
-            subType: 'comment',
-            from: { uid: comment.authorUid, name: user.name || 'User', avatar: user.avatar || '' },
-            to: myUid,
-            target: { id: postId, type: 'post' },
-            message: `${user.name || 'Someone'} commented: "${preview}"`,
-            timestamp: new Date(comment.createdAt || Date.now()),
-            read: readIds.has(id),
-            groupKey: `comment_${postId}`
-          });
-        }
-      }
 
-      // Reposts
-      for (const docSnap of repostSnap.docs) {
-        const data = docSnap.data();
-        if (data.repostData && data.repostData.originalPostId && myPostIds.includes(data.repostData.originalPostId)) {
-          const reposterUid = data.authorUid;
-          if (reposterUid === myUid) continue;
-          const user = await getUserData(reposterUid);
-          const id = `repost_${docSnap.id}`;
-          newNotifications.push({
-            id: id,
-            type: 'feed',
-            subType: 'repost',
-            from: { uid: reposterUid, name: user.name || 'User', avatar: user.avatar || '' },
-            to: myUid,
-            target: { id: data.repostData.originalPostId, type: 'post' },
-            message: `${user.name || 'Someone'} reposted your post`,
-            timestamp: data.createdAt || new Date(),
-            read: readIds.has(id),
-            groupKey: `repost_${data.repostData.originalPostId}`
-          });
+        function formatTimeAgo(date) {
+            const d = toDate(date);
+            if (isNaN(d.getTime())) return '';
+            const now = new Date();
+            const diff = Math.floor((now - d) / 1000);
+            if (diff < 5) return 'Just now';
+            if (diff < 60) return `${diff}s ago`;
+            const mins = Math.floor(diff / 60);
+            if (mins < 60) return `${mins}m ago`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours}h ago`;
+            const days = Math.floor(hours / 24);
+            if (days < 7) return `${days}d ago`;
+            return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
         }
-      }
 
-      // 2. Direct Chats
-      for (const chatDoc of directChatSnap.docs) {
-        const chatData = chatDoc.data();
-        if (chatData.isRoom) continue;
-        const messagesQuery = query(collection(db, 'chats', chatDoc.id, 'messages'), orderBy('createdAt', 'desc'), limit(50));
-        const msgSnap = await getDocs(messagesQuery);
-        for (const msgDoc of msgSnap.docs) {
-          const msg = msgDoc.data();
-          if (msg.senderUid === myUid) continue;
-          const user = await getUserData(msg.senderUid);
-          const preview = (msg.text || '').length > 60 ? (msg.text || '').substring(0,60)+'…' : (msg.text || '');
-          const id = `chat_msg_${chatDoc.id}_${msgDoc.id}`;
-          newNotifications.push({
-            id: id,
-            type: 'chat',
-            subType: 'message',
-            from: { uid: msg.senderUid, name: user.name || 'User', avatar: user.avatar || '' },
-            to: myUid,
-            target: { id: chatDoc.id, type: 'chat' },
-            message: `${user.name || 'Someone'} sent: "${preview}"`,
-            timestamp: msg.createdAt || new Date(),
-            read: readIds.has(id) || (msg.readBy && msg.readBy.includes(myUid)),
-            groupKey: `chat_${chatDoc.id}`
-          });
+        function getTimeBucket(date) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const d = toDate(date);
+            const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            const diffDays = Math.floor((today - dDay) / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) return 'today';
+            if (diffDays <= 7) return 'week';
+            if (diffDays <= 30) return 'month';
+            return 'older';
         }
-      }
 
-      // 3. Rooms
-      for (const roomDoc of roomSnap.docs) {
-        const roomId = roomDoc.id;
-        const messagesQuery = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'desc'), limit(50));
-        const msgSnap = await getDocs(messagesQuery);
-        for (const msgDoc of msgSnap.docs) {
-          const msg = msgDoc.data();
-          if (msg.senderId === myUid) continue;
-          if (msg.type === 'system') {
-            const text = msg.text || '';
-            if (text.includes(myUid) || text.includes(currentUser.displayName || '') || text.includes(currentUser.email || '')) {
-              const user = await getUserData(msg.senderId || 'system');
-              const id = `room_system_${roomId}_${msgDoc.id}`;
-              newNotifications.push({
-                id: id,
-                type: 'room',
-                subType: 'system',
-                from: { uid: msg.senderId || 'system', name: user.name || 'SPIKE', avatar: user.avatar || '' },
-                to: myUid,
-                target: { id: roomId, type: 'room' },
-                message: text,
-                timestamp: msg.timestamp || new Date(),
-                read: readIds.has(id),
-                groupKey: `room_system_${roomId}`
-              });
+        function getBucketLabel(bucket) {
+            return { today: 'Today', week: 'This Week', month: 'This Month', older: 'Older' } [bucket] || '';
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' } [tag] || tag)
+            );
+        }
+
+        function getInitials(name) {
+            if (!name) return 'U';
+            const parts = name.trim().split(' ');
+            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        // ============================================================
+        // READ STATE
+        // ============================================================
+        function loadReadState() {
+            try {
+                const raw = localStorage.getItem(READ_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        readIds = new Set(parsed);
+                        return;
+                    }
+                }
+            } catch (e) {}
+            readIds = new Set();
+        }
+
+        function saveReadState() {
+            try {
+                localStorage.setItem(READ_STORAGE_KEY, JSON.stringify([...readIds]));
+            } catch (e) {}
+        }
+
+        function isRead(id) {
+            return readIds.has(id);
+        }
+
+        function markRead(id) {
+            if (!readIds.has(id)) {
+                readIds.add(id);
+                saveReadState();
+                const item = allNotifications.find(n => n.id === id);
+                if (item) item.read = true;
             }
-          } else {
-            const user = await getUserData(msg.senderId);
-            const preview = (msg.text || '').length > 60 ? (msg.text || '').substring(0,60)+'…' : (msg.text || '');
-            const id = `room_msg_${roomId}_${msgDoc.id}`;
-            newNotifications.push({
-              id: id,
-              type: 'room',
-              subType: 'message',
-              from: { uid: msg.senderId, name: user.name || 'User', avatar: user.avatar || '' },
-              to: myUid,
-              target: { id: roomId, type: 'room' },
-              message: `${user.name || 'Someone'} in room: "${preview}"`,
-              timestamp: msg.timestamp || new Date(),
-              read: readIds.has(id),
-              groupKey: `room_${roomId}`
+        }
+
+        function markAllRead() {
+            allNotifications.forEach(n => {
+                if (!n.read) {
+                    n.read = true;
+                    readIds.add(n.id);
+                }
             });
-          }
+            saveReadState();
+            renderAll();
+            updateBadge();
+            showToast('All marked as read', 'success', 'Done');
         }
-      }
 
-      // 4. Communities
-      const userData = userDoc.exists() ? userDoc.data() : {};
-      const joinedCommunities = userData.joinedCommunities || [];
-      for (const communityId of joinedCommunities) {
-        const communityPostsQuery = query(collection(db, 'communities', communityId, 'posts'), orderBy('createdAt', 'desc'), limit(50));
-        const postsSnap = await getDocs(communityPostsQuery);
-        for (const postDoc of postsSnap.docs) {
-          const post = postDoc.data();
-          if (post.authorUid === myUid) continue;
-          const content = post.content || '';
-          const name = currentUser.displayName || '';
-          const spId = currentUser.spId || '';
-          if (content.includes('@'+name) || content.includes('@'+spId) || content.includes('@'+myUid)) {
-            const user = await getUserData(post.authorUid);
-            const preview = content.length > 60 ? content.substring(0,60)+'…' : content;
-            const id = `community_mention_${communityId}_${postDoc.id}`;
-            newNotifications.push({
-              id: id,
-              type: 'community',
-              subType: 'mention',
-              from: { uid: post.authorUid, name: user.name || 'User', avatar: user.avatar || '' },
-              to: myUid,
-              target: { id: postDoc.id, type: 'community_post', communityId: communityId },
-              message: `${user.name || 'Someone'} mentioned you in a community post: "${preview}"`,
-              timestamp: post.createdAt || new Date(),
-              read: readIds.has(id),
-              groupKey: `community_mention_${communityId}`
+        // ============================================================
+        // TOAST & CONFIRM (global)
+        // ============================================================
+        function showToast(message, type = 'success', title = '') {
+            const toast = document.getElementById('globalToast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+            if (toastTimeout) clearTimeout(toastTimeout);
+            toast.className = 'toast-container';
+            const titles = { success: '✓ Success', error: '✕ Error', warning: '⚠️ Warning' };
+            const icons = { success: '✓', error: '✕', warning: '⚠️' };
+            toastTitle.textContent = title || titles[type] || 'Notification';
+            toastMessage.textContent = message;
+            toastIcon.textContent = icons[type] || '✓';
+            void toast.offsetWidth;
+            toast.classList.add(type, 'active');
+            toastTimeout = setTimeout(() => { dismissToast(); }, 3500);
+        }
+
+        function dismissToast() {
+            const toast = document.getElementById('globalToast');
+            if (!toast.classList.contains('active')) return;
+            toast.classList.add('removing');
+            setTimeout(() => {
+                toast.className = 'toast-container';
+                toast.classList.remove('removing');
+                if (toastTimeout) { clearTimeout(toastTimeout);
+                    toastTimeout = null; }
+            }, 400);
+        }
+
+        function showConfirm(options) {
+            return new Promise((resolve) => {
+                const overlay = document.getElementById('confirmModalOverlay');
+                const modal = document.getElementById('confirmModal');
+                const icon = document.getElementById('confirmModalIcon');
+                const title = document.getElementById('confirmModalTitle');
+                const message = document.getElementById('confirmModalMessage');
+                const details = document.getElementById('confirmModalDetails');
+                const confirmBtn = document.getElementById('confirmModalConfirm');
+                const cancelBtn = document.getElementById('confirmModalCancel');
+
+                modal.className = 'confirm-modal ' + (options.type || 'warning');
+                icon.textContent = options.icon || '⚠️';
+                title.textContent = options.title || 'Are you sure?';
+                message.textContent = options.message || 'This action cannot be undone.';
+                if (options.details) {
+                    details.innerHTML = options.details;
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+                confirmBtn.textContent = options.confirmText || 'Confirm';
+                confirmBtn.className = 'btn-confirm ' + (options.confirmType || 'danger');
+                cancelBtn.textContent = options.cancelText || 'Cancel';
+                overlay.classList.add('active');
+                window._confirmResolve = resolve;
             });
-          }
-          const comments = post.comments || [];
-          for (const comment of comments) {
-            if (comment.authorUid === myUid) continue;
-            const user = await getUserData(comment.authorUid);
-            const preview = (comment.text || '').length > 60 ? (comment.text || '').substring(0,60)+'…' : (comment.text || '');
-            const id = `community_comment_${communityId}_${postDoc.id}_${comment.id || comment.authorUid}_${Date.now()}`;
-            newNotifications.push({
-              id: id,
-              type: 'community',
-              subType: 'comment',
-              from: { uid: comment.authorUid, name: user.name || 'User', avatar: user.avatar || '' },
-              to: myUid,
-              target: { id: postDoc.id, type: 'community_post', communityId: communityId },
-              message: `${user.name || 'Someone'} commented on a community post: "${preview}"`,
-              timestamp: new Date(comment.createdAt || Date.now()),
-              read: readIds.has(id),
-              groupKey: `community_comment_${communityId}`
+        }
+
+        function closeConfirm() {
+            document.getElementById('confirmModalOverlay').classList.remove('active');
+        }
+
+        function handleConfirm() {
+            if (window._confirmResolve) {
+                window._confirmResolve(true);
+                window._confirmResolve = null;
+            }
+            closeConfirm();
+        }
+
+        function handleCancel() {
+            if (window._confirmResolve) {
+                window._confirmResolve(false);
+                window._confirmResolve = null;
+            }
+            closeConfirm();
+        }
+
+        document.getElementById('confirmModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) handleCancel();
+        });
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') handleCancel();
+        });
+
+        // ============================================================
+        // SOUND
+        // ============================================================
+        function playChime() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) {
+                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 800;
+                osc.type = 'sine';
+                gain.gain.value = 0.15;
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.12);
+            } catch (e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggleBtn').textContent = soundEnabled ? '🔊' : '🔇';
+            try {
+                localStorage.setItem('spike_notify_sound', soundEnabled ? 'on' : 'off');
+            } catch (e) {}
+            showToast(soundEnabled ? 'Sound on' : 'Sound off', 'info');
+        }
+
+        // ============================================================
+        // SETTINGS
+        // ============================================================
+        function loadSettings() {
+            try {
+                const sound = localStorage.getItem('spike_notify_sound');
+                if (sound === 'off') soundEnabled = false;
+                else soundEnabled = true;
+                document.getElementById('soundToggleBtn').textContent = soundEnabled ? '🔊' : '🔇';
+
+                const group = localStorage.getItem('spike_notify_group');
+                if (group === 'false') groupSimilar = false;
+                else groupSimilar = true;
+                document.getElementById('groupSimilarCheckbox').checked = groupSimilar;
+
+                document.querySelectorAll('#settingsPanel input[data-category]').forEach(cb => {
+                    const key = cb.dataset.category;
+                    const val = localStorage.getItem('spike_notify_cat_' + key);
+                    if (val === 'false') cb.checked = false;
+                    else cb.checked = true;
+                    categoryFilters[key] = cb.checked;
+                });
+            } catch (e) {}
+        }
+
+        function saveSettings() {
+            try {
+                localStorage.setItem('spike_notify_sound', soundEnabled ? 'on' : 'off');
+                localStorage.setItem('spike_notify_group', groupSimilar ? 'true' : 'false');
+                document.querySelectorAll('#settingsPanel input[data-category]').forEach(cb => {
+                    localStorage.setItem('spike_notify_cat_' + cb.dataset.category, cb.checked ? 'true' :
+                        'false');
+                    categoryFilters[cb.dataset.category] = cb.checked;
+                });
+            } catch (e) {}
+        }
+
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        function updateGroupSetting() {
+            groupSimilar = document.getElementById('groupSimilarCheckbox').checked;
+            saveSettings();
+            renderAll();
+        }
+
+        // ============================================================
+        // FETCH USER DATA HELPER
+        // ============================================================
+        function fetchUserData(uid) {
+            return db.collection('users').doc(uid).get().then(doc => doc.exists ? doc.data() : {});
+        }
+
+        // ============================================================
+        // NOTIFICATION BUILDERS
+        // ============================================================
+        function createNotificationItem({
+            id,
+            category,
+            type,
+            icon,
+            text,
+            actorName = '',
+            actorAvatar = '',
+            url = '',
+            createdAt,
+            read = false,
+            _groupKey = null
+        }) {
+            return {
+                id,
+                category,
+                type,
+                icon,
+                text,
+                actorName,
+                actorAvatar,
+                url,
+                createdAt: createdAt instanceof Date ? createdAt.toISOString() : (typeof createdAt === 'string' ?
+                    createdAt : new Date().toISOString()),
+                read: read || isRead(id),
+                _groupKey: _groupKey || id,
+                _count: 1
+            };
+        }
+
+        // ============================================================
+        // START LISTENERS (ENHANCED)
+        // ============================================================
+        function startListeners() {
+            if (!currentUserUid) return;
+            unsubscribers.forEach(u => u());
+            unsubscribers = [];
+            allNotifications = [];
+
+            // ----- 1. Feed: Likes on your posts -----
+            const postsQuery = db.collection('posts').where('authorUid', '==', currentUserUid);
+            unsubscribers.push(postsQuery.onSnapshot(async (snapshot) => {
+                for (const docSnap of snapshot.docs) {
+                    const post = docSnap.data();
+                    const postId = docSnap.id;
+                    const likes = post.likes || [];
+                    for (const likerUid of likes) {
+                        if (likerUid === currentUserUid) continue;
+                        const userData = await fetchUserData(likerUid);
+                        const id = generateNotificationId('like', postId, likerUid);
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'feed',
+                            type: 'like',
+                            icon: '❤️',
+                            text: `${userData.name || 'Someone'} liked your post`,
+                            actorName: userData.name || 'User',
+                            actorAvatar: userData.avatar || '',
+                            url: `feed.html?postId=${postId}`,
+                            createdAt: post.createdAt ? post.createdAt.toDate() : new Date(),
+                            _groupKey: `like_${postId}`
+                        }));
+                    }
+                    const comments = post.comments || [];
+                    for (const comment of comments) {
+                        if (comment.authorUid === currentUserUid) continue;
+                        const userData = await fetchUserData(comment.authorUid);
+                        const id = generateNotificationId('comment', postId, comment.id || comment.authorUid, Date
+                            .now().toString());
+                        const preview = (comment.text || '').length > 30 ? comment.text.substring(0, 30) + '…' :
+                            comment.text;
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'feed',
+                            type: 'comment',
+                            icon: '💬',
+                            text: `${userData.name || 'Someone'} commented: "${preview}"`,
+                            actorName: userData.name || 'User',
+                            actorAvatar: userData.avatar || '',
+                            url: `feed.html?postId=${postId}`,
+                            createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
+                            _groupKey: `comment_${postId}`
+                        }));
+                    }
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 2. Reposts on your posts -----
+            const repostQuery = db.collection('posts').where('isRepost', '==', true);
+            unsubscribers.push(repostQuery.onSnapshot(async (snapshot) => {
+                for (const docSnap of snapshot.docs) {
+                    const repost = docSnap.data();
+                    const originalPostId = repost.repostData?.originalPostId;
+                    if (!originalPostId) continue;
+                    const authorDoc = await db.collection('posts').doc(originalPostId).get();
+                    if (!authorDoc.exists || authorDoc.data().authorUid !== currentUserUid) continue;
+                    const reposterUid = repost.authorUid;
+                    if (reposterUid === currentUserUid) continue;
+                    const userData = await fetchUserData(reposterUid);
+                    const id = generateNotificationId('repost', originalPostId, reposterUid);
+                    allNotifications.push(createNotificationItem({
+                        id,
+                        category: 'feed',
+                        type: 'repost',
+                        icon: '🔁',
+                        text: `${userData.name || 'Someone'} reposted your post`,
+                        actorName: userData.name || 'User',
+                        actorAvatar: userData.avatar || '',
+                        url: `feed.html?postId=${originalPostId}`,
+                        createdAt: repost.createdAt ? repost.createdAt.toDate() : new Date(),
+                        _groupKey: `repost_${originalPostId}`
+                    }));
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 3. Friend requests (incoming) -----
+            const usersQuery = db.collection('users').where('friendRequests', 'array-contains', currentUserUid);
+            unsubscribers.push(usersQuery.onSnapshot(async (snapshot) => {
+                for (const docSnap of snapshot.docs) {
+                    const user = docSnap.data();
+                    const senderUid = docSnap.id;
+                    if (senderUid === currentUserUid) continue;
+                    const id = generateNotificationId('friend_request', senderUid);
+                    allNotifications.push(createNotificationItem({
+                        id,
+                        category: 'communities',
+                        type: 'friend_request',
+                        icon: '👥',
+                        text: `${user.name || 'Someone'} sent you a friend request`,
+                        actorName: user.name || 'User',
+                        actorAvatar: user.avatar || '',
+                        url: 'friends.html?tab=requests',
+                        createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
+                        _groupKey: `friend_request_${senderUid}`
+                    }));
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 4. Friend request accepted (when your friends list gains a new user) -----
+            // Listen to the current user's friends list and detect additions.
+            let previousFriends = new Set();
+            const selfRef = db.collection('users').doc(currentUserUid);
+            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
+                if (!snap.exists) return;
+                const data = snap.data();
+                const friends = data.friends || [];
+                const currentFriends = new Set(friends);
+                // Find new friends
+                const newFriends = [];
+                for (const uid of currentFriends) {
+                    if (!previousFriends.has(uid)) {
+                        newFriends.push(uid);
+                    }
+                }
+                previousFriends = currentFriends;
+                for (const uid of newFriends) {
+                    // Check if we sent a request to this user (to avoid duplicate notifications)
+                    // We can check if this user is in our sentRequests (we can store that)
+                    // For simplicity, we'll just notify for any new friend.
+                    const userData = await fetchUserData(uid);
+                    const id = generateNotificationId('friend_accepted', uid);
+                    allNotifications.push(createNotificationItem({
+                        id,
+                        category: 'communities',
+                        type: 'friend_accepted',
+                        icon: '✅',
+                        text: `${userData.name || 'Someone'} accepted your friend request`,
+                        actorName: userData.name || 'User',
+                        actorAvatar: userData.avatar || '',
+                        url: 'friends.html',
+                        createdAt: new Date(),
+                        _groupKey: `friend_accepted_${uid}`
+                    }));
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 5. Room mentions (already implemented) -----
+            db.collection('rooms').where('participants', 'array-contains', currentUserUid).get().then((roomsSnap) => {
+                roomsSnap.forEach((roomDoc) => {
+                    const roomId = roomDoc.id;
+                    const msgQuery = db.collection('rooms').doc(roomId).collection('messages')
+                        .orderBy('timestamp', 'desc').limit(100);
+                    unsubscribers.push(msgQuery.onSnapshot(async (snapshot) => {
+                        const userData = await fetchUserData(currentUserUid);
+                        const spId = userData.spId || '';
+                        const displayName = userData.name || currentUser.displayName || '';
+                        for (const msgDoc of snapshot.docs) {
+                            const msg = msgDoc.data();
+                            if (msg.senderId === currentUserUid) continue;
+                            const text = msg.text || '';
+                            if (text.includes('@' + displayName) || text.includes('@' + spId) ||
+                                text.includes('@' + currentUserUid)) {
+                                const senderData = await fetchUserData(msg.senderId);
+                                const id = generateNotificationId('room_mention', roomId, msgDoc.id);
+                                const preview = text.length > 30 ? text.substring(0, 30) + '…' : text;
+                                allNotifications.push(createNotificationItem({
+                                    id,
+                                    category: 'rooms',
+                                    type: 'mention',
+                                    icon: '✏️',
+                                    text: `${senderData.name || 'Someone'} mentioned you: "${preview}"`,
+                                    actorName: senderData.name || 'User',
+                                    actorAvatar: senderData.avatar || '',
+                                    url: `room.html?id=${roomId}`,
+                                    createdAt: msg.timestamp ? msg.timestamp.toDate() : new Date(),
+                                    _groupKey: `room_mention_${roomId}`
+                                }));
+                            }
+                        }
+                        deduplicateAndSort();
+                        renderAll();
+                        updateBadge();
+                    }));
+                });
             });
-          }
+
+            // ----- 6. Verification status -----
+            const verRef = db.collection('verification_requests').doc(currentUserUid);
+            unsubscribers.push(verRef.onSnapshot((snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    const status = data.status || 'none';
+                    const id = 'verification_' + status;
+                    let icon, text;
+                    if (status === 'pending') {
+                        icon = '⏳';
+                        text = 'Your verification request is pending review.';
+                    } else if (status === 'approved' || status === 'verified') {
+                        icon = '✅';
+                        text = 'Your verification was approved! You now have the badge.';
+                    } else if (status === 'rejected') {
+                        icon = '❌';
+                        text = 'Your verification was rejected. You may reapply after 5 minutes.';
+                    } else {
+                        return;
+                    }
+                    allNotifications.push(createNotificationItem({
+                        id,
+                        category: 'verification',
+                        type: status,
+                        icon,
+                        text,
+                        actorName: 'SPIKE',
+                        actorAvatar: '',
+                        url: 'profile.html',
+                        createdAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
+                        _groupKey: 'verification'
+                    }));
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 7. System announcements -----
+            const annRef = db.collection('settings').doc('announcement');
+            unsubscribers.push(annRef.onSnapshot((snap) => {
+                if (snap.exists()) {
+                    const data = snap.data();
+                    if (data.text && data.active) {
+                        const id = 'announcement_' + Date.now();
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'announcements',
+                            type: 'announcement',
+                            icon: '📢',
+                            text: data.text,
+                            actorName: 'Admin',
+                            actorAvatar: '',
+                            url: 'feed.html',
+                            createdAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
+                            _groupKey: 'announcement'
+                        }));
+                    }
+                }
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 8. Community mentions (already implemented) -----
+            db.collection('users').doc(currentUserUid).get().then((userSnap) => {
+                const userCommunities = userSnap.exists ? (userSnap.data().joinedCommunities || []) : [];
+                for (const communityId of userCommunities) {
+                    const postsQuery2 = db.collection('communities').doc(communityId).collection('posts')
+                        .orderBy('createdAt', 'desc').limit(100);
+                    unsubscribers.push(postsQuery2.onSnapshot(async (snapshot) => {
+                        for (const postDoc of snapshot.docs) {
+                            const post = postDoc.data();
+                            if (post.authorUid === currentUserUid) continue;
+                            const content = post.content || '';
+                            const userData2 = await fetchUserData(currentUserUid);
+                            const spId2 = userData2.spId || '';
+                            const displayName2 = userData2.name || currentUser.displayName || '';
+                            if (content.includes('@' + displayName2) || content.includes('@' + spId2) ||
+                                content.includes('@' + currentUserUid)) {
+                                const authorData = await fetchUserData(post.authorUid);
+                                const id = generateNotificationId('community_mention', communityId, postDoc
+                                    .id);
+                                const preview = content.length > 30 ? content.substring(0, 30) + '…' :
+                                    content;
+                                allNotifications.push(createNotificationItem({
+                                    id,
+                                    category: 'communities',
+                                    type: 'mention',
+                                    icon: '✏️',
+                                    text: `${authorData.name || 'Someone'} mentioned you in a community post: "${preview}"`,
+                                    actorName: authorData.name || 'User',
+                                    actorAvatar: authorData.avatar || '',
+                                    url: `community_detail.html?id=${communityId}&postId=${postDoc.id}`,
+                                    createdAt: post.createdAt ? post.createdAt.toDate() : new Date(),
+                                    _groupKey: `community_mention_${communityId}`
+                                }));
+                            }
+                            const comments2 = post.comments || [];
+                            for (const comment of comments2) {
+                                if (comment.authorUid === currentUserUid) continue;
+                                const commentText = comment.text || '';
+                                if (commentText.includes('@' + displayName2) || commentText.includes('@' +
+                                        spId2) ||
+                                    commentText.includes('@' + currentUserUid)) {
+                                    const authorData = await fetchUserData(comment.authorUid);
+                                    const id = generateNotificationId('community_comment_mention',
+                                        communityId, postDoc.id, comment.id || comment.authorUid);
+                                    const preview = commentText.length > 30 ? commentText.substring(0,
+                                        30) + '…' : commentText;
+                                    allNotifications.push(createNotificationItem({
+                                        id,
+                                        category: 'communities',
+                                        type: 'comment_mention',
+                                        icon: '💬',
+                                        text: `${authorData.name || 'Someone'} mentioned you in a comment: "${preview}"`,
+                                        actorName: authorData.name || 'User',
+                                        actorAvatar: authorData.avatar || '',
+                                        url: `community_detail.html?id=${communityId}&postId=${postDoc.id}`,
+                                        createdAt: comment.createdAt ? new Date(comment
+                                            .createdAt) : new Date(),
+                                        _groupKey: `community_comment_${communityId}`
+                                    }));
+                                }
+                            }
+                        }
+                        deduplicateAndSort();
+                        renderAll();
+                        updateBadge();
+                    }));
+                }
+            });
+
+            // ----- 9. Block/Unblock events (listen to current user's blocked list) -----
+            let previousBlocked = new Set();
+            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
+                if (!snap.exists) return;
+                const data = snap.data();
+                const blocked = data.blockedUsers || [];
+                const currentBlocked = new Set(blocked);
+                // Detect added (block) and removed (unblock)
+                for (const uid of currentBlocked) {
+                    if (!previousBlocked.has(uid)) {
+                        const userData = await fetchUserData(uid);
+                        const id = generateNotificationId('block', uid);
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'communities',
+                            type: 'block',
+                            icon: '🚫',
+                            text: `You blocked ${userData.name || 'someone'}`,
+                            actorName: userData.name || 'User',
+                            actorAvatar: userData.avatar || '',
+                            url: 'friends.html',
+                            createdAt: new Date(),
+                            _groupKey: `block_${uid}`
+                        }));
+                    }
+                }
+                for (const uid of previousBlocked) {
+                    if (!currentBlocked.has(uid)) {
+                        const userData = await fetchUserData(uid);
+                        const id = generateNotificationId('unblock', uid);
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'communities',
+                            type: 'unblock',
+                            icon: '🔓',
+                            text: `You unblocked ${userData.name || 'someone'}`,
+                            actorName: userData.name || 'User',
+                            actorAvatar: userData.avatar || '',
+                            url: 'friends.html',
+                            createdAt: new Date(),
+                            _groupKey: `unblock_${uid}`
+                        }));
+                    }
+                }
+                previousBlocked = currentBlocked;
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            // ----- 10. Community joins/leaves (listen to current user's joinedCommunities) -----
+            let previousCommunities = new Set();
+            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
+                if (!snap.exists) return;
+                const data = snap.data();
+                const communities = data.joinedCommunities || [];
+                const currentCommunities = new Set(communities);
+                // Detect added (join) and removed (leave)
+                for (const cid of currentCommunities) {
+                    if (!previousCommunities.has(cid)) {
+                        const commDoc = await db.collection('communities').doc(cid).get();
+                        const commName = commDoc.exists ? commDoc.data().name || 'Community' : 'Community';
+                        const id = generateNotificationId('community_join', cid);
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'communities',
+                            type: 'join',
+                            icon: '👋',
+                            text: `You joined ${commName}`,
+                            actorName: '',
+                            actorAvatar: '',
+                            url: `community_detail.html?id=${cid}`,
+                            createdAt: new Date(),
+                            _groupKey: `community_join_${cid}`
+                        }));
+                    }
+                }
+                for (const cid of previousCommunities) {
+                    if (!currentCommunities.has(cid)) {
+                        const commDoc = await db.collection('communities').doc(cid).get();
+                        const commName = commDoc.exists ? commDoc.data().name || 'Community' : 'Community';
+                        const id = generateNotificationId('community_leave', cid);
+                        allNotifications.push(createNotificationItem({
+                            id,
+                            category: 'communities',
+                            type: 'leave',
+                            icon: '🚪',
+                            text: `You left ${commName}`,
+                            actorName: '',
+                            actorAvatar: '',
+                            url: 'community.html',
+                            createdAt: new Date(),
+                            _groupKey: `community_leave_${cid}`
+                        }));
+                    }
+                }
+                previousCommunities = currentCommunities;
+                deduplicateAndSort();
+                renderAll();
+                updateBadge();
+            }));
+
+            function deduplicateAndSort() {
+                const seen = new Set();
+                allNotifications = allNotifications.filter(n => {
+                    if (seen.has(n.id)) return false;
+                    seen.add(n.id);
+                    return true;
+                });
+                allNotifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                if (allNotifications.length > 200) allNotifications = allNotifications.slice(0, 200);
+            }
+
+            deduplicateAndSort();
+            renderAll();
+            updateBadge();
         }
 
-        const activityQuery = query(collection(db, 'communities', communityId, 'activity'), orderBy('createdAt', 'desc'), limit(50));
-        const activitySnap = await getDocs(activityQuery);
-        for (const actDoc of activitySnap.docs) {
-          const act = actDoc.data();
-          if (act.userUid === myUid) continue;
-          const user = await getUserData(act.userUid || 'system');
-          const actionMap = {
-            'member_joined': 'joined the community',
-            'join_request': 'requested to join the community',
-            'post_created': 'created a new post',
-            'post_deleted': 'deleted a post',
-            'member_removed': 'was removed',
-            'admin_promoted': 'was promoted to admin',
-            'admin_demoted': 'was demoted',
-            'community_updated': 'updated community settings',
-            'member_suspended': 'was suspended'
-          };
-          const actionText = actionMap[act.type] || act.type;
-          const id = `community_activity_${communityId}_${actDoc.id}`;
-          newNotifications.push({
-            id: id,
-            type: 'community',
-            subType: 'activity',
-            from: { uid: act.userUid || 'system', name: user.name || 'SPIKE', avatar: user.avatar || '' },
-            to: myUid,
-            target: { id: communityId, type: 'community' },
-            message: `${user.name || 'Someone'} ${actionText}`,
-            timestamp: act.createdAt || new Date(),
-            read: readIds.has(id),
-            groupKey: `community_activity_${communityId}`
-          });
+        // ============================================================
+        // RENDER
+        // ============================================================
+        function renderAll() {
+            if (renderTimeout) cancelAnimationFrame(renderTimeout);
+            renderTimeout = requestAnimationFrame(() => {
+                const search = document.getElementById('searchInput').value.trim().toLowerCase();
+                const activeCats = categoryFilters;
+
+                let filtered = allNotifications.filter(n => activeCats[n.category] !== false);
+
+                if (search) {
+                    filtered = filtered.filter(n =>
+                        n.text.toLowerCase().includes(search) ||
+                        (n.actorName || '').toLowerCase().includes(search)
+                    );
+                }
+
+                if (dateFilter !== 'all') {
+                    filtered = filtered.filter(n => {
+                        const bucket = getTimeBucket(n.createdAt);
+                        return bucket === dateFilter;
+                    });
+                }
+
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                document.getElementById('notificationCount').textContent = filtered.length;
+                document.getElementById('clearAllBtn').disabled = filtered.length === 0;
+
+                let displayItems = filtered;
+                if (groupSimilar) {
+                    const groups = {};
+                    for (const n of filtered) {
+                        const key = `${n.category}|${n.type}|${n.actorName || ''}`;
+                        if (!groups[key]) groups[key] = [];
+                        groups[key].push(n);
+                    }
+                    displayItems = [];
+                    for (const key of Object.keys(groups)) {
+                        const items = groups[key];
+                        if (items.length === 1) {
+                            displayItems.push(items[0]);
+                        } else {
+                            const latest = items.reduce((a, b) => new Date(a.createdAt) > new Date(b.createdAt) ? a :
+                                b);
+                            const count = items.length;
+                            displayItems.push({
+                                ...latest,
+                                _groupCount: count,
+                                _groupItems: items
+                            });
+                        }
+                    }
+                    displayItems.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                }
+
+                const buckets = { today: [], week: [], month: [], older: [] };
+                for (const item of displayItems) {
+                    const bucket = getTimeBucket(item.createdAt);
+                    buckets[bucket].push(item);
+                }
+
+                let html = '';
+                let hasAny = false;
+
+                for (const [bucketKey, items] of Object.entries(buckets)) {
+                    if (items.length === 0) continue;
+                    hasAny = true;
+                    html += `<div class="time-section"><div class="section-label">${getBucketLabel(bucketKey)}</div>`;
+                    for (const item of items) {
+                        html += buildNotificationItem(item);
+                    }
+                    html += `</div>`;
+                }
+
+                if (!hasAny) {
+                    html = `
+                        <div class="empty-state">
+                            <span class="sparkle"></span><span class="sparkle"></span><span class="sparkle"></span>
+                            <span class="sparkle"></span><span class="sparkle"></span>
+                            <span class="icon">🔔</span>
+                            <div>No notifications yet</div>
+                            <div class="tip">✨ Interact with posts, rooms, and communities to see activity here</div>
+                        </div>
+                    `;
+                }
+
+                document.getElementById('notifList').innerHTML = html;
+            });
         }
-      }
 
-      // 5. Verification
-      if (verificationSnap.exists()) {
-        const vData = verificationSnap.data();
-        const status = vData.status || 'none';
-        if (status === 'pending') {
-          const id = 'verification_pending';
-          newNotifications.push({
-            id: id,
-            type: 'verification',
-            subType: 'pending',
-            from: { uid: 'system', name: 'SPIKE', avatar: '' },
-            to: myUid,
-            target: { id: 'verification', type: 'verification' },
-            message: '📋 Your verification request is pending review.',
-            timestamp: vData.submittedAt ? new Date(vData.submittedAt) : new Date(),
-            read: readIds.has(id),
-            groupKey: 'verification'
-          });
-        } else if (status === 'approved' || status === 'verified') {
-          const id = 'verification_approved';
-          newNotifications.push({
-            id: id,
-            type: 'verification',
-            subType: 'approved',
-            from: { uid: 'system', name: 'SPIKE', avatar: '' },
-            to: myUid,
-            target: { id: 'verification', type: 'verification' },
-            message: '✅ Your verification has been approved! You now have the VIP badge.',
-            timestamp: vData.updatedAt ? new Date(vData.updatedAt) : new Date(),
-            read: readIds.has(id),
-            groupKey: 'verification'
-          });
-        } else if (status === 'rejected') {
-          const id = 'verification_rejected';
-          newNotifications.push({
-            id: id,
-            type: 'verification',
-            subType: 'rejected',
-            from: { uid: 'system', name: 'SPIKE', avatar: '' },
-            to: myUid,
-            target: { id: 'verification', type: 'verification' },
-            message: '❌ Your verification request was rejected. You may reapply after 5 minutes.',
-            timestamp: vData.updatedAt ? new Date(vData.updatedAt) : new Date(),
-            read: readIds.has(id),
-            groupKey: 'verification'
-          });
+        function buildNotificationItem(item) {
+            const isUnread = !item.read;
+            const avatarHTML = item.actorAvatar ?
+                `<img src="${item.actorAvatar}" alt="${escapeHTML(item.actorName || 'User')}">` :
+                escapeHTML((item.actorName || 'U').charAt(0).toUpperCase());
+
+            const countBadge = item._groupCount && item._groupCount > 1 ?
+                `<span class="notif-count-badge">×${item._groupCount}</span>` :
+                '';
+
+            const categoryMap = {
+                feed: 'Feed',
+                chats: 'Chats',
+                rooms: 'Rooms',
+                communities: 'Communities',
+                verification: 'Verification',
+                announcements: 'Announcements'
+            };
+            const badgeLabel = categoryMap[item.category] || item.category;
+
+            return `
+                <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${item.id}" onclick="handleItemClick('${item.id}')">
+                    <div class="notif-avatar">${avatarHTML}</div>
+                    <div class="notif-body">
+                        <div class="notif-message">
+                            <span class="action-icon">${item.icon || '🔔'}</span>
+                            ${escapeHTML(item.text)}
+                            ${countBadge}
+                        </div>
+                        <div class="notif-meta">
+                            <span class="badge ${item.category}">${badgeLabel}</span>
+                            <span class="notif-time">${formatTimeAgo(item.createdAt)}</span>
+                            <span class="notif-read-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
-      }
 
-      // 6. Announcement
-      if (annSnap.exists()) {
-        const annData = annSnap.data();
-        if (annData.text && annData.text.trim() && annData.active) {
-          const id = 'announcement_latest';
-          newNotifications.push({
-            id: id,
-            type: 'announcement',
-            subType: 'announcement',
-            from: { uid: 'admin', name: 'Admin', avatar: '' },
-            to: myUid,
-            target: { id: 'announcement', type: 'announcement' },
-            message: `📢 ${annData.text}`,
-            timestamp: annData.updatedAt ? new Date(annData.updatedAt) : new Date(),
-            read: readIds.has(id),
-            groupKey: 'announcement'
-          });
+        // ============================================================
+        // BADGE UPDATE
+        // ============================================================
+        function updateBadge() {
+            const unread = allNotifications.filter(n => !n.read).length;
+            const badge = document.getElementById('unreadBadge');
+            if (unread > 0) {
+                badge.textContent = unread > 99 ? '99+' : unread;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+            try {
+                localStorage.setItem('spike_global_unread', unread);
+            } catch (e) {}
         }
-      }
 
-      // Sort by timestamp descending
-      newNotifications.sort((a,b) => {
-        const ta = toDate(a.timestamp).getTime();
-        const tb = toDate(b.timestamp).getTime();
-        return tb - ta;
-      });
-
-      // Deduplicate by id
-      const seen = new Set();
-      const deduped = newNotifications.filter(n => {
-        if (seen.has(n.id)) return false;
-        seen.add(n.id);
-        return true;
-      });
-
-      // Limit
-      if (deduped.length > 300) allNotifications = deduped.slice(0, 300);
-      else allNotifications = deduped;
-
-      // Cache for instant load next time
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify(allNotifications));
-      } catch (e) {}
-
-      // Update UI
-      applyFilters();
-      updateUnreadBadge();
-      updateNotificationCount();
-
-      // Play sound if new unread
-      const newUnread = allNotifications.filter(n => !n.read).length;
-      if (newUnread > unreadCount) {
-        playNotificationSound();
-      }
-      unreadCount = newUnread;
-
-    } catch (error) {
-      console.error('Error building notifications:', error);
-      // If cache was used and we had data, we keep it; otherwise show empty.
-      if (allNotifications.length === 0) {
-        applyFilters();
-        updateUnreadBadge();
-        updateNotificationCount();
-      }
-    }
-  }
-
-  // ===== FILTERS & GROUPING =====
-  function applyFilters() {
-    const search = document.getElementById('searchInput')?.value?.toLowerCase() || '';
-    const dateFilter = window._dateFilter || 'today';
-    const group = document.getElementById('groupEnabled')?.checked !== false;
-    const cats = {
-      feed: document.querySelector('[data-category="feed"]')?.checked !== false,
-      chat: document.querySelector('[data-category="chat"]')?.checked !== false,
-      room: document.querySelector('[data-category="room"]')?.checked !== false,
-      community: document.querySelector('[data-category="community"]')?.checked !== false,
-      verification: document.querySelector('[data-category="verification"]')?.checked !== false,
-      announcement: document.querySelector('[data-category="announcement"]')?.checked !== false,
-    };
-
-    let filtered = allNotifications.filter(n => cats[n.type] !== false);
-
-    // Date filter
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    if (dateFilter === 'today') {
-      filtered = filtered.filter(n => {
-        const d = toDate(n.timestamp);
-        return d >= today;
-      });
-    } else if (dateFilter === 'week') {
-      const weekAgo = new Date(today);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      filtered = filtered.filter(n => {
-        const d = toDate(n.timestamp);
-        return d >= weekAgo;
-      });
-    } else if (dateFilter === 'month') {
-      const monthAgo = new Date(today);
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      filtered = filtered.filter(n => {
-        const d = toDate(n.timestamp);
-        return d >= monthAgo;
-      });
-    } else if (dateFilter === 'older') {
-      const monthAgo = new Date(today);
-      monthAgo.setMonth(monthAgo.getMonth() - 1);
-      filtered = filtered.filter(n => {
-        const d = toDate(n.timestamp);
-        return d < monthAgo;
-      });
-    }
-
-    // Search
-    if (search) {
-      filtered = filtered.filter(n => {
-        return n.message.toLowerCase().includes(search) ||
-               n.from.name.toLowerCase().includes(search) ||
-               n.type.includes(search);
-      });
-    }
-
-    // Group similar
-    if (group) {
-      const grouped = {};
-      for (const n of filtered) {
-        const key = n.groupKey || n.id;
-        if (!grouped[key]) grouped[key] = [];
-        grouped[key].push(n);
-      }
-      const result = [];
-      for (const key of Object.keys(grouped)) {
-        const items = grouped[key];
-        if (items.length === 1) {
-          result.push(items[0]);
-        } else {
-          // Create a summary item
-          const first = items[0];
-          const count = items.length;
-          const names = items.map(n => n.from.name).filter((v,i,a) => a.indexOf(v) === i);
-          let summary = '';
-          if (names.length === 1) {
-            summary = `${names[0]} and ${count-1} others`;
-          } else if (names.length === 2) {
-            summary = `${names[0]} and ${names[1]}`;
-          } else {
-            summary = `${names[0]}, ${names[1]} and ${count-2} others`;
-          }
-          const latest = items.reduce((a,b) => toDate(a.timestamp) > toDate(b.timestamp) ? a : b);
-          const groupItem = {
-            id: `group_${key}`,
-            type: first.type,
-            subType: first.subType,
-            from: { name: summary, avatar: '' },
-            to: first.to,
-            target: first.target,
-            message: `${summary} ${getActionText(first.subType)}`,
-            timestamp: latest.timestamp,
-            read: items.every(n => n.read),
-            group: true,
-            originalCount: count,
-            groupKey: key,
-            children: items
-          };
-          result.push(groupItem);
+        // ============================================================
+        // CLEAR ALL (no redirect, stays on page)
+        // ============================================================
+        function clearAll() {
+            if (allNotifications.length === 0) {
+                showToast('No notifications to clear', 'warning');
+                return;
+            }
+            showConfirm({
+                type: 'danger',
+                icon: '🗑️',
+                title: 'Clear All Notifications?',
+                message: 'This will permanently remove all notifications from your feed.',
+                details: `You have <strong>${allNotifications.length}</strong> notifications that will be cleared.`,
+                confirmText: 'Clear All',
+                confirmType: 'danger',
+                cancelText: 'Cancel'
+            }).then(confirmed => {
+                if (confirmed) {
+                    allNotifications = [];
+                    readIds.clear();
+                    saveReadState();
+                    renderAll();
+                    updateBadge();
+                    showToast('All notifications cleared', 'success', 'Cleared');
+                }
+            });
         }
-      }
-      filtered = result;
-    }
 
-    // Sort again (grouped items may have different timestamp)
-    filtered.sort((a,b) => {
-      const ta = toDate(a.timestamp).getTime();
-      const tb = toDate(b.timestamp).getTime();
-      return tb - ta;
-    });
-
-    filteredNotifications = filtered;
-    renderNotifications(filtered);
-  }
-
-  function getActionText(subType) {
-    const map = {
-      like:'liked your post',
-      comment:'commented on your post',
-      repost:'reposted your post',
-      mention:'mentioned you',
-      message:'sent a message',
-      system:'sent a system message',
-      activity:'performed an action',
-      pending:'is pending review',
-      approved:'was approved',
-      rejected:'was rejected',
-      announcement:'posted an announcement'
-    };
-    return map[subType] || 'interacted';
-  }
-
-  window.applyFilters = applyFilters;
-
-  window.setDateFilter = function(filter) {
-    window._dateFilter = filter;
-    document.querySelectorAll('#dateFilters button').forEach(b => b.classList.toggle('active', b.dataset.date === filter));
-    applyFilters();
-  };
-
-  window.toggleSettings = function() {
-    document.getElementById('settingsPanel').classList.toggle('open');
-  };
-
-  // ===== RENDER =====
-  function renderNotifications(list) {
-    const container = document.getElementById('notifList');
-    if (!list || list.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <span class="sparkle"></span>
-          <span class="sparkle"></span>
-          <span class="sparkle"></span>
-          <span class="sparkle"></span>
-          <span class="sparkle"></span>
-          <span class="icon">🔔</span>
-          <div>No notifications match your filters</div>
-          <div class="tip">✨ Try adjusting your filters or search</div>
-        </div>
-      `;
-      return;
-    }
-
-    let html = '';
-    let lastDate = '';
-    for (const item of list) {
-      const dateLabel = formatDateGroup(item.timestamp);
-      if (dateLabel !== lastDate) {
-        lastDate = dateLabel;
-        html += `<div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);padding:8px 4px 4px;">${dateLabel}</div>`;
-      }
-
-      const avatarSrc = item.from.avatar || '';
-      const avatarHTML = avatarSrc ? `<img src="${avatarSrc}" alt="${escapeHTML(item.from.name)}">` : getInitials(item.from.name);
-      const iconMap = {
-        'like':'❤️','comment':'💬','repost':'🔁','mention':'@','system':'📢','message':'💬','activity':'📋',
-        'pending':'⏳','approved':'✅','rejected':'❌','announcement':'📢'
-      };
-      const actionIcon = iconMap[item.subType] || '🔔';
-      const badgeClass = item.type;
-      const unreadClass = item.read ? '' : 'unread';
-      const targetLink = getTargetLink(item);
-
-      let actionsHTML = '';
-      if (!item.group) {
-        actionsHTML = `
-          <div class="notif-actions">
-            ${!item.read ? `<button class="primary" onclick="event.stopPropagation(); markOneRead('${item.id}')">✓</button>` : ''}
-            <button onclick="event.stopPropagation(); navigateTo('${targetLink}')">🔗</button>
-          </div>
-        `;
-      } else {
-        actionsHTML = `
-          <div class="notif-actions">
-            <button onclick="event.stopPropagation(); navigateTo('${targetLink}')">🔗</button>
-          </div>
-        `;
-        if (item.originalCount > 1) {
-          html += `<div class="group-summary"><span>${item.originalCount} similar notifications</span></div>`;
+        // ============================================================
+        // HANDLERS
+        // ============================================================
+        function handleItemClick(id) {
+            const item = allNotifications.find(n => n.id === id);
+            if (!item) return;
+            if (!item.read) {
+                markRead(id);
+                renderAll();
+                updateBadge();
+            }
+            if (item.url) {
+                window.location.href = item.url;
+            }
         }
-      }
 
-      html += `
-        <div class="notif-item ${unreadClass}" onclick="navigateTo('${targetLink}')" data-id="${item.id}">
-          <div class="notif-avatar">${avatarHTML}</div>
-          <div class="notif-body">
-            <div class="notif-message">
-              <span class="action-icon">${actionIcon}</span>
-              ${escapeHTML(item.message)}
-            </div>
-            <div class="notif-meta">
-              <span class="badge ${badgeClass}">${item.type.charAt(0).toUpperCase()+item.type.slice(1)}</span>
-              <span class="notif-time">${formatTimeAgo(item.timestamp)}</span>
-              <span class="notif-read-dot"></span>
-            </div>
-          </div>
-          ${actionsHTML}
-        </div>
-      `;
-    }
-    container.innerHTML = html;
-  }
-
-  function getTargetLink(item) {
-    if (item.target.type === 'post') {
-      return `feed.html?postId=${item.target.id}`;
-    } else if (item.target.type === 'chat') {
-      return `chat_room.html?chatId=${item.target.id}`;
-    } else if (item.target.type === 'room') {
-      return `room.html?id=${item.target.id}`;
-    } else if (item.target.type === 'community') {
-      return `community_detail.html?id=${item.target.id}`;
-    } else if (item.target.type === 'community_post') {
-      return `community_detail.html?id=${item.target.communityId}&postId=${item.target.id}`;
-    } else if (item.target.type === 'verification') {
-      return 'verify_badge.html';
-    } else if (item.target.type === 'announcement') {
-      return 'feed.html#announcement';
-    }
-    return '#';
-  }
-
-  window.navigateTo = function(link) {
-    if (link && link !== '#') {
-      window.location.href = link;
-    }
-  };
-
-  // ===== MARK READ / CLEAR =====
-  window.markAllRead = function() {
-    allNotifications.forEach(n => {
-      n.read = true;
-      readIds.add(n.id);
-    });
-    saveReadState(readIds);
-    applyFilters();
-    updateUnreadBadge();
-    updateNotificationCount();
-    showToast('All marked as read', 'success', 'Done');
-  };
-
-  window.markOneRead = function(id) {
-    const item = allNotifications.find(n => n.id === id);
-    if (item) {
-      item.read = true;
-      readIds.add(id);
-      saveReadState(readIds);
-      applyFilters();
-      updateUnreadBadge();
-      updateNotificationCount();
-    }
-  };
-
-  window.clearAll = function() {
-    if (allNotifications.length === 0) {
-      showToast('No notifications to clear', 'warning');
-      return;
-    }
-
-    // Show premium confirmation modal
-    const overlay = document.getElementById('confirmModalOverlay');
-    const modal = document.getElementById('confirmModal');
-    const icon = document.getElementById('confirmModalIcon');
-    const title = document.getElementById('confirmModalTitle');
-    const message = document.getElementById('confirmModalMessage');
-    const details = document.getElementById('confirmModalDetails');
-
-    modal.className = 'confirm-modal danger';
-    icon.textContent = '🗑️';
-    title.textContent = 'Clear All Notifications?';
-    message.textContent = 'This will permanently remove all notifications from your feed.';
-    details.innerHTML = `You have <strong>${allNotifications.length}</strong> notifications that will be cleared.`;
-    details.style.display = 'block';
-
-    overlay.classList.add('active');
-  };
-
-  function handleConfirm() {
-    document.getElementById('confirmModalOverlay').classList.remove('active');
-    // Clear notifications
-    allNotifications = [];
-    readIds.clear();
-    saveReadState(readIds);
-    // Clear cache
-    try { localStorage.removeItem(CACHE_KEY); } catch(e) {}
-    applyFilters();
-    updateUnreadBadge();
-    updateNotificationCount();
-    showToast('All notifications cleared', 'success', 'Cleared');
-  }
-
-  function handleCancel() {
-    document.getElementById('confirmModalOverlay').classList.remove('active');
-  }
-
-  // Expose for inline onclick
-  window.handleConfirm = handleConfirm;
-  window.handleCancel = handleCancel;
-
-  // Close modal on overlay click
-  document.getElementById('confirmModalOverlay').addEventListener('click', function(e) {
-    if (e.target === this) handleCancel();
-  });
-  document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') handleCancel();
-  });
-
-  function updateNotificationCount() {
-    const count = allNotifications.length;
-    document.getElementById('notificationCount').textContent = count;
-    const btn = document.getElementById('clearAllBtn');
-    if (count === 0) {
-      btn.disabled = true;
-    } else {
-      btn.disabled = false;
-    }
-  }
-
-  function updateUnreadBadge() {
-    const unread = allNotifications.filter(n => !n.read).length;
-    const badge = document.getElementById('unreadBadge');
-    if (unread > 0) {
-      badge.textContent = unread > 99 ? '99+' : unread;
-      badge.style.display = 'flex';
-    } else {
-      badge.style.display = 'none';
-    }
-  }
-
-  // ===== SOUND =====
-  window.toggleSound = function() {
-    soundEnabled = !soundEnabled;
-    document.getElementById('soundEnabled').checked = soundEnabled;
-    document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
-    localStorage.setItem('notifSound', soundEnabled ? 'on' : 'off');
-  };
-
-  function saveSoundPref() {
-    soundEnabled = document.getElementById('soundEnabled').checked;
-    document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
-    localStorage.setItem('notifSound', soundEnabled ? 'on' : 'off');
-  }
-  window.saveSoundPref = saveSoundPref;
-
-  // ===== LISTENERS (real-time) =====
-  function setupListeners() {
-    unsubscribers.forEach(u => u());
-    unsubscribers = [];
-    if (!currentUser) return;
-    const myUid = currentUser.uid;
-
-    // 1. Posts I authored
-    const postQuery = query(collection(db, 'posts'), where('authorUid', '==', myUid));
-    unsubscribers.push(onSnapshot(postQuery, () => buildNotifications(false), err => console.warn(err)));
-
-    // 2. Reposts
-    const repostQuery = query(collection(db, 'posts'), where('isRepost', '==', true));
-    unsubscribers.push(onSnapshot(repostQuery, () => buildNotifications(false), err => console.warn(err)));
-
-    // 3. Direct chats
-    const chatQuery = query(collection(db, 'chats'), where('participants', 'array-contains', myUid));
-    unsubscribers.push(onSnapshot(chatQuery, () => buildNotifications(false), err => console.warn(err)));
-
-    // 4. Rooms
-    const roomQuery = query(collection(db, 'rooms'), where('participants', 'array-contains', myUid));
-    unsubscribers.push(onSnapshot(roomQuery, () => buildNotifications(false), err => console.warn(err)));
-
-    // 5. Communities – user doc changes (joinedCommunities)
-    const userRef = doc(db, 'users', myUid);
-    unsubscribers.push(onSnapshot(userRef, () => buildNotifications(false), err => console.warn(err)));
-
-    // 6. Announcement
-    const annRef = doc(db, 'settings', 'announcement');
-    unsubscribers.push(onSnapshot(annRef, () => buildNotifications(false), err => console.warn(err)));
-
-    // 7. Verification status
-    const verRef = doc(db, 'verification_requests', myUid);
-    unsubscribers.push(onSnapshot(verRef, () => buildNotifications(false), err => console.warn(err)));
-  }
-
-  // ===== INIT =====
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) { window.location.href = 'index.html'; return; }
-    currentUser = user;
-
-    // Load preferences
-    soundEnabled = localStorage.getItem('notifSound') !== 'off';
-    document.getElementById('soundEnabled').checked = soundEnabled;
-    document.getElementById('soundBtn').textContent = soundEnabled ? '🔊' : '🔇';
-
-    // Avatar
-    const avatarBtn = document.getElementById('notifAvatar');
-    try {
-      const docSnap = await getDoc(doc(db, 'users', user.uid));
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        const avatar = data.avatar || data.photoURL || '';
-        if (avatar) {
-          avatarBtn.innerHTML = `<img src="${avatar}" alt="Profile">`;
-        } else {
-          avatarBtn.textContent = getInitials(data.name || user.displayName || 'User');
+        function setDateFilter(filter) {
+            dateFilter = filter;
+            document.querySelectorAll('#dateFilters button').forEach(b => {
+                b.classList.toggle('active', b.dataset.date === filter);
+            });
+            renderAll();
         }
-        currentUser.spId = data.spId || '';
-        currentUser.displayName = data.name || user.displayName || 'User';
-      }
-    } catch(e) { console.warn(e); }
 
-    // Set default date filter
-    window._dateFilter = 'today';
-    document.querySelector('#dateFilters button[data-date="today"]')?.classList.add('active');
+        // ============================================================
+        // EXPOSE GLOBALS
+        // ============================================================
+        window.setDateFilter = setDateFilter;
+        window.toggleSettings = toggleSettings;
+        window.updateGroupSetting = updateGroupSetting;
+        window.toggleSound = toggleSound;
+        window.clearAll = clearAll;
+        window.markAllRead = markAllRead;
+        window.renderAll = renderAll;
+        window.handleItemClick = handleItemClick;
+        window.dismissToast = dismissToast;
+        window.handleConfirm = handleConfirm;
+        window.handleCancel = handleCancel;
 
-    // Build notifications with cache
-    await buildNotifications(true);
-    setupListeners();
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            loadReadState();
+            loadSettings();
 
-    console.log('🚀 Notifications 2.0 – Ultra-fast, premium UI, instant load');
-  });
+            auth.onAuthStateChanged(async (user) => {
+                if (!user) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+                currentUser = user;
+                currentUserUid = user.uid;
 
-  // Also load from cache immediately if available even before auth? We wait for auth.
-  // But we can show cached on first render if we stored earlier.
-  // Already handled in buildNotifications.
-</script>
+                const avatarBtn = document.getElementById('notifAvatar');
+                try {
+                    const userData = await fetchUserData(user.uid);
+                    if (userData.avatar) {
+                        avatarBtn.innerHTML = `<img src="${userData.avatar}" alt="Profile">`;
+                    } else {
+                        avatarBtn.textContent = getInitials(userData.name || user.displayName || 'User');
+                    }
+                } catch (e) {}
+
+                startListeners();
+
+                dateFilter = 'today';
+                document.querySelector('#dateFilters button[data-date="today"]')?.classList.add('active');
+
+                renderAll();
+                updateBadge();
+
+                console.log('🔔 Notifications page ready (enhanced detectors)');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            init();
+        }
+    </script>
 </body>
 </html>
