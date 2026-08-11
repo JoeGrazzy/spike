@@ -1380,7 +1380,7 @@
             margin-top: 4px;
         }
         .repost-preview-header {
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             color: var(--text-muted);
             margin-bottom: 4px;
         }
@@ -2469,7 +2469,7 @@
             color: var(--text-muted);
         }
         .profile-posts-preview .preview-header .view-all {
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             color: var(--primary);
             cursor: pointer;
             font-weight: 600;
@@ -2860,7 +2860,7 @@
             padding: 6px 16px;
             font-family: var(--font-main);
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.62rem;
             cursor: pointer;
             transition: var(--transition);
             min-height: 32px;
@@ -3484,6 +3484,737 @@
                 min-width: 44px;
             }
         }
+    
+        /* ============================================================
+           SPIKE STORIES — NEW FEATURE
+           ============================================================ */
+        .spike-stories-section {
+            width: 100%;
+            min-width: 0;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .spike-stories-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 0 2px;
+        }
+
+        .spike-stories-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+            font-size: 0.88rem;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+
+        .spike-stories-title-mark {
+            width: 22px;
+            height: 22px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), #a855f7, #0ea5e9);
+            box-shadow: 0 0 16px var(--primary-glow);
+            font-size: 0.72rem;
+        }
+
+        .spike-stories-subtitle {
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            font-weight: 600;
+        }
+
+        .spike-stories-row {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            display: flex;
+            align-items: stretch;
+            gap: 7px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 2px 2px 5px;
+            scroll-snap-type: x proximity;
+            overscroll-behavior-x: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x;
+            scrollbar-width: none;
+            contain: inline-size;
+        }
+
+        .spike-stories-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .spike-story-card {
+            position: relative;
+            flex: 0 0 clamp(76px, 20vw, 88px);
+            height: clamp(108px, 29vw, 126px);
+            border-radius: 13px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--bg-surface);
+            cursor: pointer;
+            scroll-snap-align: start;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .spike-story-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28), 0 0 20px rgba(0, 168, 132, 0.08);
+        }
+
+        .spike-story-card:active {
+            transform: scale(0.98);
+        }
+
+        .spike-story-card.is-unread {
+            border-color: transparent;
+            background:
+                linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+                linear-gradient(145deg, var(--primary), #a855f7, #0ea5e9, var(--primary)) border-box;
+            box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.14), 0 0 24px var(--primary-glow);
+        }
+
+        .spike-story-card.is-viewed {
+            border-color: rgba(148, 163, 184, 0.24);
+            opacity: 0.92;
+        }
+
+        .spike-story-preview {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, rgba(0, 168, 132, 0.18), rgba(168, 85, 247, 0.18), rgba(14, 165, 233, 0.18));
+        }
+
+        .spike-story-preview img,
+        .spike-story-preview video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: cover;
+            pointer-events: none;
+        }
+
+        .spike-story-preview::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(0, 0, 0, 0.06) 20%, rgba(0, 0, 0, 0.74) 100%),
+                linear-gradient(135deg, rgba(0, 168, 132, 0.08), rgba(168, 85, 247, 0.08));
+            pointer-events: none;
+        }
+
+        .spike-story-top {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+        }
+
+        .spike-story-avatar-ring {
+            width: 28px;
+            height: 28px;
+            padding: 2px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #a855f7, #0ea5e9);
+            box-shadow: 0 0 14px rgba(168, 85, 247, 0.32);
+        }
+
+        .spike-story-card.is-viewed .spike-story-avatar-ring {
+            background: linear-gradient(135deg, rgba(148, 163, 184, 0.72), rgba(100, 116, 139, 0.36));
+            box-shadow: none;
+        }
+
+        .spike-story-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #00796b, var(--primary));
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 800;
+            border: 2px solid var(--bg-deep);
+        }
+
+        .spike-story-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .spike-story-online {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--online-color);
+            border: 2px solid #071018;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+            display: none;
+            flex: 0 0 auto;
+        }
+
+        .spike-story-online.show {
+            display: block;
+        }
+
+        .spike-story-media-type {
+            min-width: 19px;
+            height: 19px;
+            padding: 0 5px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: rgba(7, 11, 16, 0.58);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            font-size: 0.5rem;
+            font-weight: 800;
+        }
+
+        .spike-story-bottom {
+            position: absolute;
+            left: 7px;
+            right: 7px;
+            bottom: 6px;
+            z-index: 2;
+            min-width: 0;
+        }
+
+        .spike-story-name {
+            color: #fff;
+            font-size: 0.62rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 8px rgba(0, 0, 0, 0.55);
+        }
+
+        .spike-story-caption {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.5rem;
+            line-height: 1.25;
+            margin-top: 2px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .spike-story-add-card {
+            background:
+                radial-gradient(circle at 20% 15%, rgba(14, 165, 233, 0.28), transparent 38%),
+                radial-gradient(circle at 85% 25%, rgba(168, 85, 247, 0.32), transparent 42%),
+                linear-gradient(145deg, rgba(0, 168, 132, 0.2), rgba(7, 11, 16, 0.9));
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .spike-story-add-card::before {
+            content: '';
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            left: -55px;
+            bottom: -65px;
+            background: var(--primary);
+            filter: blur(42px);
+            opacity: 0.22;
+        }
+
+        .spike-story-add-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 2;
+        }
+
+        .spike-story-add-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 0 24px var(--primary-glow);
+            font-size: 1.35rem;
+            font-weight: 500;
+        }
+
+        .spike-story-add-label {
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .spike-story-add-sub {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 0.5rem;
+            font-weight: 600;
+        }
+
+        .spike-story-composer,
+        .spike-story-viewer {
+            position: fixed;
+            inset: 0;
+            z-index: 12000;
+            display: none;
+        }
+
+        .spike-story-composer.active,
+        .spike-story-viewer.active {
+            display: flex;
+        }
+
+        .spike-story-composer {
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(2, 6, 12, 0.74);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .spike-story-composer-card {
+            width: min(100%, 440px);
+            max-height: min(720px, calc(100dvh - 32px));
+            overflow-y: auto;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 26px;
+            padding: 18px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7), 0 0 36px var(--primary-glow);
+        }
+
+        .spike-story-composer-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .spike-story-composer-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .spike-story-close,
+        .spike-story-viewer-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+            cursor: pointer;
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+
+        .spike-story-composer-preview {
+            width: 100%;
+            height: min(32dvh, 260px);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: linear-gradient(145deg, rgba(0, 168, 132, 0.08), rgba(168, 85, 247, 0.08));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .spike-story-composer-preview img,
+        .spike-story-composer-preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .spike-story-composer-empty {
+            color: var(--text-muted);
+            text-align: center;
+            padding: 24px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .spike-story-composer-input {
+            width: 100%;
+            min-height: 48px;
+            border-radius: 14px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-main);
+            padding: 12px 14px;
+            font-family: var(--font-main);
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .spike-story-composer-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 168, 132, 0.12);
+        }
+
+        .spike-story-music-box {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 9px 10px;
+            background: linear-gradient(135deg, rgba(0,168,132,.06), rgba(168,85,247,.07));
+            margin-bottom: 10px;
+        }
+        .spike-story-music-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 0;
+        }
+        .spike-story-music-icon {
+            width: 30px; height: 30px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            color: #fff; font-weight: 900;
+            box-shadow: 0 0 14px var(--primary-glow);
+            flex: 0 0 auto;
+        }
+        .spike-story-music-title { font-size: .72rem; font-weight: 800; color: var(--text-main); }
+        .spike-story-music-meta { font-size: .58rem; color: var(--text-muted); margin-top: 2px; }
+        .spike-story-music-actions { display:flex; align-items:center; gap:6px; margin-top:8px; }
+        .spike-story-music-picker { min-height: 38px; flex: 1; }
+        .spike-story-music-remove {
+            width: 38px; height: 38px; border-radius: 10px; border: 1px solid rgba(244,63,94,.22);
+            background: rgba(244,63,94,.08); color: var(--error); font-size: 1.05rem; font-weight: 800; cursor: pointer;
+        }
+
+        .spike-story-composer-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .spike-story-picker {
+            flex: 1 1 130px;
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            font-weight: 700;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+
+        .spike-story-publish {
+            flex: 1 1 130px;
+            min-height: 44px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            color: #fff;
+            font-family: var(--font-main);
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 0 18px var(--primary-glow);
+            touch-action: manipulation;
+        }
+
+        .spike-story-publish:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .spike-story-viewer {
+            align-items: center;
+            justify-content: center;
+            background: #02050a;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .spike-story-viewer-shell {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 720px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(0, 168, 132, 0.12), transparent 42%),
+                radial-gradient(circle at 80% 75%, rgba(168, 85, 247, 0.13), transparent 44%);
+        }
+
+        .spike-story-viewer-media {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            background: #02050a;
+        }
+
+        video.spike-story-viewer-media {
+            object-fit: contain;
+        }
+
+        .spike-story-viewer-scrim {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.58), transparent 28%, transparent 66%, rgba(0, 0, 0, 0.76));
+        }
+
+        .spike-story-progress {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top, 0px));
+            left: 12px;
+            right: 12px;
+            display: flex;
+            gap: 4px;
+            z-index: 4;
+        }
+
+        .spike-story-progress-segment {
+            flex: 1;
+            height: 3px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.28);
+            overflow: hidden;
+        }
+
+        .spike-story-progress-fill {
+            width: 0%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), #a855f7, #0ea5e9);
+        }
+
+        .spike-story-viewer-head {
+            position: absolute;
+            top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+            left: 14px;
+            right: 58px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .spike-story-viewer-avatar {
+            width: 28px;
+            height: 28px;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.82);
+            background: linear-gradient(135deg, var(--primary), #a855f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            font-weight: 800;
+        }
+
+        .spike-story-viewer-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .spike-story-viewer-meta {
+            min-width: 0;
+            text-shadow: 0 1px 10px rgba(0, 0, 0, 0.65);
+        }
+
+        .spike-story-viewer-name {
+            font-size: 0.84rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .spike-story-viewer-time {
+            margin-top: 1px;
+            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.5rem;
+            font-weight: 600;
+        }
+
+        .spike-story-viewer-close {
+            position: absolute;
+            top: max(24px, calc(env(safe-area-inset-top, 0px) + 12px));
+            right: 14px;
+            z-index: 7;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.34);
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .spike-story-viewer-caption {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            bottom: max(30px, calc(env(safe-area-inset-bottom, 0px) + 20px));
+            z-index: 5;
+            max-width: 680px;
+            margin: auto;
+            text-align: center;
+            color: #fff;
+            font-size: clamp(0.78rem, 2.4vw, 0.95rem);
+            line-height: 1.45;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.72);
+            pointer-events: none;
+        }
+
+        .spike-story-viewer-controls {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 100%;
+            z-index: 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .spike-story-nav-zone {
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            min-width: 0;
+            touch-action: manipulation;
+        }
+
+        .spike-story-nav-zone:focus-visible {
+            outline: 2px solid rgba(255, 255, 255, 0.65);
+            outline-offset: -4px;
+        }
+
+        .spike-story-owner-actions {
+            position: absolute;
+            right: 14px;
+            bottom: max(70px, calc(env(safe-area-inset-bottom, 0px) + 58px));
+            z-index: 8;
+            display: flex;
+            gap: 8px;
+        }
+
+        .spike-story-owner-btn {
+            min-height: 38px;
+            border-radius: 12px;
+            padding: 0 12px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(0, 0, 0, 0.42);
+            color: #fff;
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: 0.7rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            touch-action: manipulation;
+        }
+
+        .spike-story-owner-btn.danger {
+            color: #fecdd3;
+            border-color: rgba(244, 63, 94, 0.35);
+        }
+
+        .spike-story-pause-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.46);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+            z-index: 6;
+            font-size: 1.25rem;
+        }
+
+        .spike-story-viewer.is-paused .spike-story-pause-indicator {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        @media (min-width: 700px) {
+            .spike-story-card {
+                flex-basis: 118px;
+                height: 178px;
+            }
+
+            .spike-story-viewer-shell {
+                height: min(100%, 920px);
+                border-left: 1px solid rgba(255, 255, 255, 0.05);
+                border-right: 1px solid rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        @media (pointer: coarse) {
+            .spike-story-card:hover {
+                transform: none;
+            }
+
+            .spike-story-close,
+            .spike-story-viewer-close,
+            .spike-story-owner-btn {
+                min-height: 44px;
+                min-width: 44px;
+            }
+        }
+
     </style>
 
     <!-- ===== RINGTONES ===== -->
@@ -3555,6 +4286,26 @@
     <main class="feed-main">
         <div id="announcementContainer"></div>
 
+
+        <section class="spike-stories-section" id="spikeStoriesSection" aria-label="Spike Stories">
+            <div class="spike-stories-head">
+                <div class="spike-stories-title">
+                    <span class="spike-stories-title-mark">✦</span>
+                    <span>Spike Stories</span>
+                </div>
+                <span class="spike-stories-subtitle" id="spikeStoriesSubtitle">Fresh for 24h</span>
+            </div>
+            <div class="spike-stories-row" id="spikeStoriesRow" role="list" aria-label="Stories">
+                <button type="button" class="spike-story-card spike-story-add-card" id="spikeStoryAddCard" role="listitem" aria-label="Add to your story">
+                    <span class="spike-story-add-center">
+                        <span class="spike-story-add-btn">＋</span>
+                        <span class="spike-story-add-label">Your Story</span>
+                        <span class="spike-story-add-sub">Share a moment</span>
+                    </span>
+                </button>
+            </div>
+        </section>
+
         <div class="create-post-card">
             <textarea class="create-textarea" id="postInput" placeholder="What's happening on SPIKE?"></textarea>
 
@@ -3593,6 +4344,77 @@
             </div>
         </div>
     </main>
+
+
+    <!-- ===== SPIKE STORIES COMPOSER ===== -->
+    <div class="spike-story-composer" id="spikeStoryComposer" aria-hidden="true">
+        <div class="spike-story-composer-card" role="dialog" aria-modal="true" aria-labelledby="spikeStoryComposerTitle">
+            <div class="spike-story-composer-head">
+                <div>
+                    <div class="spike-story-composer-title" id="spikeStoryComposerTitle">Create a Spike Story</div>
+                    <div style="font-size:0.66rem;color:var(--text-muted);margin-top:2px;">Image or short video · expires in 24 hours</div>
+                </div>
+                <button type="button" class="spike-story-close" id="spikeStoryComposerClose" aria-label="Close">✕</button>
+            </div>
+            <div class="spike-story-composer-preview" id="spikeStoryComposerPreview">
+                <div class="spike-story-composer-empty" id="spikeStoryComposerEmpty">Choose a photo or a video to preview it here.</div>
+                <img id="spikeStoryImagePreview" alt="Story preview">
+                <video id="spikeStoryVideoPreview" playsinline muted controls></video>
+            </div>
+            <input type="text" class="spike-story-composer-input" id="spikeStoryCaptionInput" maxlength="180" placeholder="Add a caption (optional)">
+            <div class="spike-story-music-box" id="spikeStoryMusicBox">
+                <div class="spike-story-music-info">
+                    <span class="spike-story-music-icon">♫</span>
+                    <div>
+                        <div class="spike-story-music-title">Add music</div>
+                        <div class="spike-story-music-meta" id="spikeStoryMusicMeta">MP3 only · max 3 MB · optional</div>
+                    </div>
+                </div>
+                <div class="spike-story-music-actions">
+                    <button type="button" class="spike-story-picker spike-story-music-picker" id="spikeStoryMusicPicker">🎵 Choose MP3</button>
+                    <button type="button" class="spike-story-music-remove" id="spikeStoryMusicRemove" aria-label="Remove music" style="display:none;">×</button>
+                </div>
+                <audio id="spikeStoryMusicPreview" controls preload="none" style="display:none;width:100%;margin-top:8px;"></audio>
+            </div>
+            <div class="spike-story-composer-actions">
+                <button type="button" class="spike-story-picker" id="spikeStoryImagePicker">📷 Photo</button>
+                <button type="button" class="spike-story-picker" id="spikeStoryVideoPicker">🎥 Short video</button>
+                <button type="button" class="spike-story-publish" id="spikeStoryPublishBtn" disabled>Publish Story</button>
+            </div>
+            <input type="file" id="spikeStoryImageInput" accept="image/*" hidden>
+            <input type="file" id="spikeStoryVideoInput" accept="video/*" hidden>
+            <input type="file" id="spikeStoryMusicInput" accept="audio/mpeg,.mp3" hidden>
+        </div>
+    </div>
+
+    <!-- ===== SPIKE STORIES VIEWER ===== -->
+    <div class="spike-story-viewer" id="spikeStoryViewer" aria-hidden="true">
+        <div class="spike-story-viewer-shell" id="spikeStoryViewerShell" role="dialog" aria-modal="true" aria-label="Spike Story Viewer">
+            <img class="spike-story-viewer-media" id="spikeStoryViewerImage" alt="" style="display:none;">
+            <video class="spike-story-viewer-media" id="spikeStoryViewerVideo" playsinline preload="metadata" style="display:none;"></video>
+            <audio id="spikeStoryViewerMusic" preload="auto" style="display:none;"></audio>
+            <div class="spike-story-viewer-scrim"></div>
+            <div class="spike-story-progress" id="spikeStoryProgress" aria-hidden="true"></div>
+            <div class="spike-story-viewer-head">
+                <div class="spike-story-viewer-avatar" id="spikeStoryViewerAvatar"></div>
+                <div class="spike-story-viewer-meta">
+                    <div class="spike-story-viewer-name" id="spikeStoryViewerName">User</div>
+                    <div class="spike-story-viewer-time" id="spikeStoryViewerTime">Just now</div>
+                </div>
+            </div>
+            <button type="button" class="spike-story-viewer-close" id="spikeStoryViewerClose" aria-label="Close story">✕</button>
+            <div class="spike-story-viewer-controls">
+                <button type="button" class="spike-story-nav-zone" id="spikeStoryPrevZone" aria-label="Previous story"></button>
+                <button type="button" class="spike-story-nav-zone" id="spikeStoryNextZone" aria-label="Next story"></button>
+            </div>
+            <div class="spike-story-pause-indicator" id="spikeStoryPauseIndicator">Ⅱ</div>
+            <div class="spike-story-owner-actions" id="spikeStoryOwnerActions" style="display:none;">
+                <button type="button" class="spike-story-owner-btn" id="spikeStoryPauseBtn">Ⅱ Pause</button>
+                <button type="button" class="spike-story-owner-btn danger" id="spikeStoryDeleteBtn">🗑 Delete</button>
+            </div>
+            <div class="spike-story-viewer-caption" id="spikeStoryViewerCaption"></div>
+        </div>
+    </div>
 
     <!-- ===== FOOTER ===== -->
     <footer class="feed-footer">SPIKE Ultra &copy; 2026. All rights reserved.</footer>
@@ -3886,7 +4708,24 @@
         // ============================================================
         // CROSS‑TAB CALL FLAG
         // ============================================================
-        function setActiveCallFlag(callId) {
+        
+/* Spike Stories music: maximum playback window is 10 seconds per story. */
+let spikeStoryMusicTimer = null;
+function spikeStoryStopMusicAfter10s(audioEl) {
+    if (spikeStoryMusicTimer) {
+        clearTimeout(spikeStoryMusicTimer);
+        spikeStoryMusicTimer = null;
+    }
+    if (!audioEl) return;
+    spikeStoryMusicTimer = setTimeout(() => {
+        try {
+            audioEl.pause();
+            audioEl.currentTime = Math.min(10, audioEl.duration || 10);
+        } catch (_) {}
+    }, 10000);
+}
+
+function setActiveCallFlag(callId) {
             try { sessionStorage.setItem('spike_active_call', callId); } catch (e) {}
         }
         function getActiveCallFlag() {
@@ -3982,6 +4821,7 @@
                 if (audio) {
                     audio.currentTime = 0;
                     const playPromise = audio.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                     if (playPromise !== undefined) {
                         playPromise.catch(err => {
                             console.log('Notification sound autoplay blocked');
@@ -4441,6 +5281,1001 @@
                 btn.textContent = "Post";
             }
         };
+
+
+        // ============================================================
+        // SPIKE STORIES
+        // ============================================================
+        const spikeStoriesState = {
+            stories: [],
+            authors: new Map(),
+            groups: [],
+            currentGroupIndex: 0,
+            currentStoryIndex: 0,
+            currentStory: null,
+            unsubscribe: null,
+            viewerTimer: null,
+            viewerProgressTimer: null,
+            expiryTimer: null,
+            paused: false,
+            dragStartX: null,
+            dragStartScrollLeft: 0,
+            dragMoved: false,
+            selectedFile: null,
+            selectedMediaType: null,
+            selectedObjectUrl: null,
+            selectedMusicFile: null,
+            selectedMusicObjectUrl: null,
+            selectedMusicName: '',
+            viewWrites: new Set()
+        };
+
+        function spikeStoryDate(value) {
+            if (!value) return null;
+            if (value.toDate) return value.toDate();
+            const date = value instanceof Date ? value : new Date(value);
+            return Number.isNaN(date.getTime()) ? null : date;
+        }
+
+        function spikeStoryIsExpired(story) {
+            const expiresAt = spikeStoryDate(story?.expiresAt);
+            return !expiresAt || expiresAt.getTime() <= Date.now();
+        }
+
+        function spikeStorySafeMediaUrl(url) {
+            if (!url || typeof url !== 'string') return '';
+            try {
+                const parsed = new URL(url, window.location.href);
+                return /^https?:$/i.test(parsed.protocol) ? parsed.href : '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function spikeStoryInitial(name) {
+            const safeName = String(name || 'User').trim();
+            return escapeHTML((safeName.charAt(0) || 'U').toUpperCase());
+        }
+
+        function spikeStoryAvatarHTML(name, avatar) {
+            const safeAvatar = spikeStorySafeMediaUrl(avatar);
+            return safeAvatar
+                ? `<img src="${escapeHTML(safeAvatar)}" alt="${escapeHTML(name || 'User')}" loading="lazy">`
+                : spikeStoryInitial(name);
+        }
+
+        function spikeStoryGetAuthorData(uid) {
+            if (!uid) return null;
+            const cached = getCachedUser(uid);
+            if (cached) return cached;
+            return spikeStoriesState.authors.get(uid) || null;
+        }
+
+        function spikeStoryIsFollowing(uid) {
+            return Boolean(currentUser && uid && uid !== currentUser.uid && spikeStoriesState.authors.get(uid)?._spikeFollowing === true);
+        }
+
+        async function spikeStoryCheckViewerAccess(story, authorData) {
+            if (!currentUser || !story?.authorUid || story.authorUid === currentUser.uid) return Boolean(currentUser);
+            if (!authorData || authorData.suspended === true) return false;
+
+            const storyPrivacy = String(
+                story.visibility ??
+                authorData.storyPrivacy ??
+                authorData.storiesPrivacy ??
+                authorData.privacy?.stories ??
+                ''
+            ).toLowerCase();
+
+            const blockedRaw = (() => {
+                try { return JSON.parse(localStorage.getItem(CONFIG.storage.blockedUsersKey) || '[]'); } catch (e) { return []; }
+            })();
+            if (Array.isArray(blockedRaw) && blockedRaw.includes(story.authorUid)) return false;
+
+            const profileVisibility = String(authorData.profileVisibility ?? 'public').toLowerCase();
+            const following = spikeStoryIsFollowing(story.authorUid);
+
+            if (storyPrivacy === 'private' || storyPrivacy === 'nobody') return false;
+            if (storyPrivacy === 'followers' || storyPrivacy === 'following') return following;
+            if (storyPrivacy === 'friends' || storyPrivacy === 'friend') {
+                if (Array.isArray(authorData.friends) && authorData.friends.includes(currentUser.uid)) return true;
+                return following && Boolean(authorData._spikeFollowingMe);
+            }
+            if (profileVisibility === 'private') return following;
+            return true;
+        }
+
+        async function spikeStoryFetchAuthorData(uid) {
+            if (!uid) return null;
+            const cached = getCachedUser(uid);
+            if (cached) {
+                spikeStoriesState.authors.set(uid, cached);
+                if (uid !== currentUserUid) {
+                    try {
+                        const followingSnap = await getDoc(doc(db, 'users', currentUserUid, 'following', uid));
+                        cached._spikeFollowing = followingSnap.exists();
+                        if (cached._spikeFollowing) setCachedUser(uid, cached);
+                    } catch (e) {}
+                }
+                return cached;
+            }
+
+            try {
+                const snap = await getDoc(doc(db, 'users', uid));
+                if (!snap.exists()) return null;
+                const data = snap.data() || {};
+                const normalized = {
+                    ...data,
+                    name: data.name || data.displayName || 'User',
+                    avatar: data.avatar || data.photoURL || ''
+                };
+
+                if (currentUser && uid !== currentUser.uid) {
+                    try {
+                        const followingSnap = await getDoc(doc(db, 'users', currentUser.uid, 'following', uid));
+                        normalized._spikeFollowing = followingSnap.exists();
+                    } catch (e) {
+                        normalized._spikeFollowing = false;
+                    }
+
+                    if (normalized._spikeFollowing) {
+                        try {
+                            const followingMeSnap = await getDoc(doc(db, 'users', uid, 'following', currentUser.uid));
+                            normalized._spikeFollowingMe = followingMeSnap.exists();
+                        } catch (e) {
+                            normalized._spikeFollowingMe = false;
+                        }
+                    }
+                }
+
+                setCachedUser(uid, normalized);
+                if (normalized.avatar) setCachedAvatar(uid, normalized.avatar);
+                spikeStoriesState.authors.set(uid, normalized);
+                return normalized;
+            } catch (error) {
+                console.error('Spike Stories author lookup failed:', error);
+                return null;
+            }
+        }
+
+        function spikeStorySortStories(stories) {
+            return stories
+                .filter(story => story && story.id && !spikeStoryIsExpired(story))
+                .sort((a, b) => {
+                    const aDate = spikeStoryDate(a.createdAt)?.getTime() || 0;
+                    const bDate = spikeStoryDate(b.createdAt)?.getTime() || 0;
+                    return bDate - aDate;
+                });
+        }
+
+        function spikeStoryGroupStories(stories) {
+            const grouped = new Map();
+            for (const story of spikeStorySortStories(stories)) {
+                const authorUid = story.authorUid;
+                if (!authorUid) continue;
+                if (!grouped.has(authorUid)) grouped.set(authorUid, []);
+                grouped.get(authorUid).push(story);
+            }
+
+            return [...grouped.entries()].map(([authorUid, authorStories]) => ({
+                authorUid,
+                stories: authorStories.sort((a, b) => {
+                    const ad = spikeStoryDate(a.createdAt)?.getTime() || 0;
+                    const bd = spikeStoryDate(b.createdAt)?.getTime() || 0;
+                    return ad - bd;
+                })
+            }));
+        }
+
+        function spikeStoryHasUnread(group) {
+            return group.stories.some(story => !(story.viewedBy || []).includes(currentUserUid));
+        }
+
+        function spikeStoryRenderRow() {
+            const row = document.getElementById('spikeStoriesRow');
+            if (!row) return;
+
+            const addCard = document.getElementById('spikeStoryAddCard');
+            row.innerHTML = '';
+            if (addCard) row.appendChild(addCard);
+
+            for (const group of spikeStoriesState.groups) {
+                const story = group.stories[group.stories.length - 1];
+                const author = spikeStoryGetAuthorData(group.authorUid) || {};
+                const name = author.name || story.authorName || 'User';
+                const avatar = author.avatar || story.authorAvatar || '';
+                const unread = spikeStoryHasUnread(group);
+                const onlineAllowed = getSettings().onlineStatus !== false;
+                const online = onlineAllowed && getOnlineStatus(group.authorUid) && author.suspended !== true;
+                const mediaUrl = spikeStorySafeMediaUrl(story.mediaUrl);
+                if (!mediaUrl) continue;
+
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = `spike-story-card ${unread ? 'is-unread' : 'is-viewed'}`;
+                card.dataset.storyAuthor = group.authorUid;
+                card.setAttribute('role', 'listitem');
+                card.setAttribute('aria-label', `${name}'s story`);
+                card.innerHTML = `
+                    <span class="spike-story-preview">
+                        ${story.mediaType === 'video'
+                            ? `<video src="${escapeHTML(mediaUrl)}" muted playsinline preload="metadata"></video>`
+                            : `<img src="${escapeHTML(mediaUrl)}" alt="" loading="lazy">`}
+                    </span>
+                    <span class="spike-story-top">
+                        <span class="spike-story-avatar-ring">
+                            <span class="spike-story-avatar">${spikeStoryAvatarHTML(name, avatar)}</span>
+                        </span>
+                        <span style="display:flex;align-items:center;gap:5px;">
+                            <span class="spike-story-online ${online ? 'show' : ''}" aria-label="${online ? 'Online' : ''}"></span>
+                            <span class="spike-story-media-type">${story.mediaType === 'video' ? '▶' : '✦'}</span>
+                        </span>
+                    </span>
+                    <span class="spike-story-bottom">
+                        <span class="spike-story-name">${escapeHTML(name)}</span>
+                        ${story.caption ? `<span class="spike-story-caption">${escapeHTML(story.caption)}</span>` : ''}
+                    </span>
+                `;
+                row.appendChild(card);
+            }
+
+            const subtitle = document.getElementById('spikeStoriesSubtitle');
+            if (subtitle) subtitle.textContent = spikeStoriesState.groups.length ? `${spikeStoriesState.groups.length} active ${spikeStoriesState.groups.length === 1 ? 'story' : 'stories'}` : 'Fresh for 24h';
+        }
+
+        async function spikeStoryRefresh(rawStories = null) {
+            if (!currentUser) return;
+
+            let stories = rawStories;
+            if (!stories) {
+                try {
+                    const q = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(100));
+                    const snap = await getDocs(q);
+                    stories = snap.docs.map(snapDoc => ({ id: snapDoc.id, ...snapDoc.data() }));
+                } catch (error) {
+                    console.error('Spike Stories load failed:', error);
+                    const subtitle = document.getElementById('spikeStoriesSubtitle');
+                    if (subtitle) subtitle.textContent = 'Stories unavailable';
+                    return;
+                }
+            }
+
+            const active = spikeStorySortStories(stories);
+            const uniqueUids = [...new Set(active.map(story => story.authorUid).filter(Boolean))];
+
+            const authorResults = await Promise.all(uniqueUids.map(uid => spikeStoryFetchAuthorData(uid)));
+            const visible = [];
+            for (const story of active) {
+                const authorData = spikeStoriesState.authors.get(story.authorUid) || authorResults[uniqueUids.indexOf(story.authorUid)];
+                if (!authorData) {
+                    if (story.authorUid === currentUser.uid) visible.push(story);
+                    continue;
+                }
+                if (await spikeStoryCheckViewerAccess(story, authorData)) visible.push(story);
+            }
+
+            spikeStoriesState.stories = visible;
+            spikeStoriesState.groups = spikeStoryGroupStories(visible);
+            spikeStoryRenderRow();
+
+            if (spikeStoriesState.expiryTimer) clearTimeout(spikeStoriesState.expiryTimer);
+            const nextExpiry = active
+                .map(story => spikeStoryDate(story.expiresAt)?.getTime())
+                .filter(Boolean)
+                .sort((a, b) => a - b)[0];
+            if (nextExpiry) {
+                spikeStoriesState.expiryTimer = setTimeout(() => spikeStoryRefresh(), Math.max(1000, nextExpiry - Date.now() + 250));
+            }
+        }
+
+        function spikeStoryClearSelectedFile() {
+            const imageInput = document.getElementById('spikeStoryImageInput');
+            const videoInput = document.getElementById('spikeStoryVideoInput');
+            const imagePreview = document.getElementById('spikeStoryImagePreview');
+            const videoPreview = document.getElementById('spikeStoryVideoPreview');
+            const empty = document.getElementById('spikeStoryComposerEmpty');
+
+            if (spikeStoriesState.selectedObjectUrl) {
+                URL.revokeObjectURL(spikeStoriesState.selectedObjectUrl);
+                spikeStoriesState.selectedObjectUrl = null;
+            }
+            spikeStoriesState.selectedFile = null;
+            spikeStoriesState.selectedMediaType = null;
+            if (imageInput) imageInput.value = '';
+            if (videoInput) videoInput.value = '';
+            if (imagePreview) { imagePreview.src = ''; imagePreview.style.display = 'none'; }
+            if (videoPreview) { videoPreview.pause(); videoPreview.removeAttribute('src'); videoPreview.load(); videoPreview.style.display = 'none'; }
+            if (empty) empty.style.display = 'block';
+            const publish = document.getElementById('spikeStoryPublishBtn');
+            if (publish) publish.disabled = true;
+        }
+
+        function spikeStoryOpenComposer() {
+            if (!currentUser) {
+                window.showToast('Please sign in to add a story.', 'warning', 'Sign In Required');
+                return;
+            }
+            spikeStoryClearSelectedFile();
+            const caption = document.getElementById('spikeStoryCaptionInput');
+            if (caption) caption.value = '';
+            const composer = document.getElementById('spikeStoryComposer');
+            if (!composer) return;
+            composer.classList.add('active');
+            composer.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function spikeStoryCloseComposer() {
+            const composer = document.getElementById('spikeStoryComposer');
+            if (!composer) return;
+            composer.classList.remove('active');
+            composer.setAttribute('aria-hidden', 'true');
+            spikeStoryClearSelectedFile();
+            if (!document.getElementById('spikeStoryViewer')?.classList.contains('active')) document.body.style.overflow = '';
+        }
+
+        function spikeStorySelectFile(file, mediaType) {
+            if (!file) return;
+            const maxImageBytes = 15 * 1024 * 1024;
+            const maxVideoBytes = 50 * 1024 * 1024;
+            if (mediaType === 'image' && file.size > maxImageBytes) {
+                window.showToast('Please choose an image smaller than 15 MB.', 'warning', 'Story Media');
+                return;
+            }
+            if (mediaType === 'video' && file.size > maxVideoBytes) {
+                window.showToast('Please choose a video smaller than 50 MB.', 'warning', 'Story Media');
+                return;
+            }
+
+            if (spikeStoriesState.selectedObjectUrl) URL.revokeObjectURL(spikeStoriesState.selectedObjectUrl);
+            spikeStoriesState.selectedObjectUrl = URL.createObjectURL(file);
+            spikeStoriesState.selectedFile = file;
+            spikeStoriesState.selectedMediaType = mediaType;
+
+            const empty = document.getElementById('spikeStoryComposerEmpty');
+            const imagePreview = document.getElementById('spikeStoryImagePreview');
+            const videoPreview = document.getElementById('spikeStoryVideoPreview');
+
+            if (mediaType === 'image') {
+                if (videoPreview) { videoPreview.pause(); videoPreview.style.display = 'none'; }
+                if (imagePreview) {
+                    imagePreview.src = spikeStoriesState.selectedObjectUrl;
+                    imagePreview.style.display = 'block';
+                }
+                if (empty) empty.style.display = 'none';
+                const publish = document.getElementById('spikeStoryPublishBtn');
+                if (publish) publish.disabled = false;
+                return;
+            }
+
+            if (imagePreview) imagePreview.style.display = 'none';
+            if (videoPreview) {
+                videoPreview.src = spikeStoriesState.selectedObjectUrl;
+                videoPreview.style.display = 'block';
+                videoPreview.onloadedmetadata = () => {
+                    if (!Number.isFinite(videoPreview.duration) || videoPreview.duration <= 0) return;
+                    if (videoPreview.duration > 30) {
+                        spikeStoryClearSelectedFile();
+                        window.showToast('Story videos must be 30 seconds or shorter.', 'warning', 'Short Video');
+                        return;
+                    }
+                    const publish = document.getElementById('spikeStoryPublishBtn');
+                    if (publish) publish.disabled = false;
+                };
+                videoPreview.onerror = () => {
+                    spikeStoryClearSelectedFile();
+                    window.showToast('That video could not be previewed.', 'error', 'Story Media');
+                };
+            }
+            if (empty) empty.style.display = 'none';
+        }
+
+        function spikeStorySelectMusic(file) {
+            if (!file) return;
+            const maxMusicBytes = 3 * 1024 * 1024;
+            const isMp3 = file.type === 'audio/mpeg' || /\.mp3$/i.test(file.name);
+            if (!isMp3) {
+                window.showToast('Please choose an MP3 audio file.', 'warning', 'Story Music');
+                return;
+            }
+            if (file.size > maxMusicBytes) {
+                window.showToast('MP3 music must be 3 MB or smaller.', 'warning', 'Story Music');
+                return;
+            }
+            if (spikeStoriesState.selectedMusicObjectUrl) URL.revokeObjectURL(spikeStoriesState.selectedMusicObjectUrl);
+            spikeStoriesState.selectedMusicObjectUrl = URL.createObjectURL(file);
+            spikeStoriesState.selectedMusicFile = file;
+            spikeStoriesState.selectedMusicName = file.name;
+            const preview = document.getElementById('spikeStoryMusicPreview');
+            const meta = document.getElementById('spikeStoryMusicMeta');
+            const remove = document.getElementById('spikeStoryMusicRemove');
+            if (preview) { preview.src = spikeStoriesState.selectedMusicObjectUrl; preview.style.display = 'block'; preview.load(); }
+            if (meta) meta.textContent = `${file.name} · ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            if (remove) remove.style.display = 'block';
+        }
+
+        function spikeStoryRemoveMusic() {
+            if (spikeStoriesState.selectedMusicObjectUrl) URL.revokeObjectURL(spikeStoriesState.selectedMusicObjectUrl);
+            spikeStoriesState.selectedMusicObjectUrl = null;
+            spikeStoriesState.selectedMusicFile = null;
+            spikeStoriesState.selectedMusicName = '';
+            const preview = document.getElementById('spikeStoryMusicPreview');
+            const meta = document.getElementById('spikeStoryMusicMeta');
+            const remove = document.getElementById('spikeStoryMusicRemove');
+            const input = document.getElementById('spikeStoryMusicInput');
+            if (preview) { preview.pause(); preview.removeAttribute('src'); preview.load(); preview.style.display = 'none'; }
+            if (meta) meta.textContent = 'MP3 only · max 3 MB · optional';
+            if (remove) remove.style.display = 'none';
+            if (input) input.value = '';
+        }
+
+        async function spikeStoryPublish() {
+            if (!currentUser || !spikeStoriesState.selectedFile || !spikeStoriesState.selectedMediaType) return;
+            const publish = document.getElementById('spikeStoryPublishBtn');
+            const captionInput = document.getElementById('spikeStoryCaptionInput');
+            if (!publish) return;
+
+            publish.disabled = true;
+            const originalText = publish.textContent;
+            publish.textContent = 'Uploading…';
+
+            try {
+                if (spikeStoriesState.selectedMediaType === 'video') {
+                    const preview = document.getElementById('spikeStoryVideoPreview');
+                    if (preview && Number.isFinite(preview.duration) && preview.duration > 30) {
+                        throw new Error('Story videos must be 30 seconds or shorter.');
+                    }
+                }
+
+                const mediaUrl = await uploadToCloudinary(
+                    spikeStoriesState.selectedFile,
+                    spikeStoriesState.selectedMediaType === 'video' ? 'video' : 'image'
+                );
+                let musicUrl = '';
+                if (spikeStoriesState.selectedMusicFile) {
+                    musicUrl = await uploadToCloudinary(spikeStoriesState.selectedMusicFile, 'video');
+                }
+                const userObj = getCachedUser(currentUser.uid) || {};
+                const authorName = userObj.name || currentUser.displayName || 'User';
+                const authorAvatar = getCachedAvatar(currentUser.uid) || userObj.avatar || '';
+                const now = Date.now();
+
+                await addDoc(collection(db, 'stories'), {
+                    storyId: crypto.randomUUID ? crypto.randomUUID() : `story-${now}-${Math.random().toString(36).slice(2)}`,
+                    authorUid: currentUser.uid,
+                    authorName: authorName,
+                    authorAvatar: authorAvatar,
+                    mediaUrl: mediaUrl,
+                    mediaType: spikeStoriesState.selectedMediaType,
+                    musicUrl: musicUrl,
+                    musicName: spikeStoriesState.selectedMusicName || '',
+                    musicType: musicUrl ? 'audio/mpeg' : '',
+                    caption: String(captionInput?.value || '').trim().slice(0, 180),
+                    createdAt: serverTimestamp(),
+                    expiresAt: new Date(now + 24 * 60 * 60 * 1000),
+                    viewers: [],
+                    viewedBy: [],
+                    visibility: String(getSettings().profileVisibility || 'public').toLowerCase()
+                });
+
+                spikeStoryCloseComposer();
+                window.showToast('Your story is live for 24 hours.', 'success', 'Story Published');
+            } catch (error) {
+                console.error('Spike Story publish failed:', error);
+                window.showToast(error.message || 'Failed to publish story.', 'error', 'Story Failed');
+                publish.disabled = false;
+                publish.textContent = originalText;
+            } finally {
+                if (publish && publish.textContent === 'Uploading…') {
+                    publish.textContent = originalText;
+                }
+            }
+        }
+
+        async function spikeStoryRecordView(story) {
+            if (!currentUser || !story?.id || story.authorUid === currentUser.uid) return;
+            if (spikeStoriesState.viewWrites.has(story.id)) return;
+            spikeStoriesState.viewWrites.add(story.id);
+
+            try {
+                await updateDoc(doc(db, 'stories', story.id), {
+                    viewers: arrayUnion(currentUser.uid),
+                    viewedBy: arrayUnion(currentUser.uid)
+                });
+                const localStory = spikeStoriesState.stories.find(item => item.id === story.id);
+                if (localStory) {
+                    localStory.viewers = [...new Set([...(localStory.viewers || []), currentUser.uid])];
+                    localStory.viewedBy = [...new Set([...(localStory.viewedBy || []), currentUser.uid])];
+                }
+                spikeStoryRenderRow();
+            } catch (error) {
+                spikeStoriesState.viewWrites.delete(story.id);
+                console.error('Spike Story view update failed:', error);
+            }
+        }
+
+        function spikeStoryCurrentGroup() {
+            return spikeStoriesState.groups[spikeStoriesState.currentGroupIndex] || null;
+        }
+
+        function spikeStoryCurrentItems() {
+            return spikeStoryCurrentGroup()?.stories || [];
+        }
+
+        function spikeStoryRenderProgress() {
+            const progress = document.getElementById('spikeStoryProgress');
+            if (!progress) return;
+            const items = spikeStoryCurrentItems();
+            progress.innerHTML = items.map((_, index) => `
+                <span class="spike-story-progress-segment">
+                    <span class="spike-story-progress-fill" data-progress-index="${index}"></span>
+                </span>
+            `).join('');
+        }
+
+        function spikeStoryClearViewerTimers() {
+            if (spikeStoriesState.viewerTimer) {
+                clearTimeout(spikeStoriesState.viewerTimer);
+                spikeStoriesState.viewerTimer = null;
+            }
+            if (spikeStoriesState.viewerProgressTimer) {
+                cancelAnimationFrame(spikeStoriesState.viewerProgressTimer);
+                spikeStoriesState.viewerProgressTimer = null;
+            }
+        }
+
+        function spikeStorySetPaused(paused) {
+            spikeStoriesState.paused = paused;
+            const viewer = document.getElementById('spikeStoryViewer');
+            const video = document.getElementById('spikeStoryViewerVideo');
+            const music = document.getElementById('spikeStoryViewerMusic');
+            const pauseBtn = document.getElementById('spikeStoryPauseBtn');
+
+            if (video && !video.paused && paused) video.pause();
+            else if (video && !paused && video.src) video.play().catch(() => {});
+            if (music && music.src) {
+                if (paused) music.pause();
+                else music.play().catch(() => {});
+            }
+
+            if (viewer) viewer.classList.toggle('is-paused', paused);
+            if (pauseBtn) pauseBtn.textContent = paused ? '▶ Resume' : 'Ⅱ Pause';
+
+            if (paused) {
+                spikeStoryClearViewerTimers();
+            } else {
+                spikeStoryStartViewerTiming();
+            }
+        }
+
+        function spikeStoryStartViewerTiming() {
+            spikeStoryClearViewerTimers();
+            if (spikeStoriesState.paused) return;
+
+            const story = spikeStoriesState.currentStory;
+            if (!story) return;
+            const video = document.getElementById('spikeStoryViewerVideo');
+            const fill = document.querySelector(`[data-progress-index="${spikeStoriesState.currentStoryIndex}"]`);
+            const startedAt = performance.now();
+            const durationMs = 25000;
+
+            const tick = (now) => {
+                if (spikeStoriesState.paused) return;
+                const elapsed = Math.min(durationMs, now - startedAt);
+                if (fill) fill.style.width = `${(elapsed / durationMs) * 100}%`;
+                if (elapsed >= durationMs) {
+                    spikeStoriesState.viewerProgressTimer = null;
+                    spikeStoryNext();
+                    return;
+                }
+                spikeStoriesState.viewerProgressTimer = requestAnimationFrame(tick);
+            };
+            spikeStoriesState.viewerProgressTimer = requestAnimationFrame(tick);
+            spikeStoriesState.viewerTimer = setTimeout(() => {
+                spikeStoryNext();
+            }, durationMs + 80);
+        }
+
+        function spikeStoryUpdateViewer() {
+            spikeStoryClearViewerTimers();
+            const group = spikeStoryCurrentGroup();
+            const items = spikeStoryCurrentItems();
+            const story = items[spikeStoriesState.currentStoryIndex];
+            if (!group || !story || spikeStoryIsExpired(story)) {
+                spikeStoryCloseViewer();
+                spikeStoryRefresh();
+                return;
+            }
+
+            spikeStoriesState.currentStory = story;
+            spikeStoryRenderProgress();
+
+            const author = spikeStoryGetAuthorData(group.authorUid) || {};
+            const name = author.name || story.authorName || 'User';
+            const avatar = author.avatar || story.authorAvatar || '';
+            const image = document.getElementById('spikeStoryViewerImage');
+            const video = document.getElementById('spikeStoryViewerVideo');
+            const music = document.getElementById('spikeStoryViewerMusic');
+            const caption = document.getElementById('spikeStoryViewerCaption');
+            const viewerName = document.getElementById('spikeStoryViewerName');
+            const viewerTime = document.getElementById('spikeStoryViewerTime');
+            const viewerAvatar = document.getElementById('spikeStoryViewerAvatar');
+            const ownerActions = document.getElementById('spikeStoryOwnerActions');
+
+            if (viewerName) viewerName.textContent = name;
+            if (viewerTime) viewerTime.textContent = formatTimeAgo(story.createdAt);
+            if (viewerAvatar) viewerAvatar.innerHTML = spikeStoryAvatarHTML(name, avatar);
+            if (caption) caption.textContent = story.caption || '';
+
+            if (ownerActions) ownerActions.style.display = story.authorUid === currentUserUid ? 'flex' : 'none';
+
+            if (music) {
+                music.pause();
+                music.removeAttribute('src');
+                music.load();
+                const musicUrl = spikeStorySafeMediaUrl(story.musicUrl);
+                if (musicUrl) {
+                    music.src = musicUrl;
+                    music.volume = 0.8;
+                    music.onended = null;
+                    music.play().catch(() => {});
+                }
+            }
+
+            const mediaUrl = spikeStorySafeMediaUrl(story.mediaUrl);
+            if (!mediaUrl) {
+                spikeStoryNext();
+                return;
+            }
+
+            if (story.mediaType === 'video') {
+                if (image) {
+                    image.style.display = 'none';
+                    image.removeAttribute('src');
+                }
+                if (video) {
+                    video.style.display = 'block';
+                    video.src = mediaUrl;
+                    video.currentTime = 0;
+                    video.muted = false;
+                    video.onloadedmetadata = () => {
+                        if (!spikeStoriesState.paused) spikeStoryStartViewerTiming();
+                    };
+                    video.onended = () => spikeStoryNext();
+                    video.play().catch(() => {
+                        spikeStoriesState.paused = true;
+                        const viewer = document.getElementById('spikeStoryViewer');
+                        if (viewer) viewer.classList.add('is-paused');
+                    });
+                }
+            } else {
+                if (video) {
+                    video.pause();
+                    video.removeAttribute('src');
+                    video.load();
+                    video.style.display = 'none';
+                    video.onloadedmetadata = null;
+                    video.onended = null;
+                }
+                if (image) {
+                    image.src = mediaUrl;
+                    image.style.display = 'block';
+                }
+                spikeStoryStartViewerTiming();
+            }
+
+            spikeStoryRecordView(story);
+        }
+
+        function spikeStoryOpenViewer(groupIndex, storyIndex = 0) {
+            if (!currentUser || !spikeStoriesState.groups[groupIndex]) return;
+            spikeStoriesState.currentGroupIndex = groupIndex;
+            const group = spikeStoryCurrentGroup();
+            const unreadIndex = group.stories.findIndex(story => !(story.viewedBy || []).includes(currentUserUid));
+            spikeStoriesState.currentStoryIndex = storyIndex >= 0 ? storyIndex : (unreadIndex >= 0 ? unreadIndex : 0);
+            spikeStoriesState.paused = false;
+
+            const viewer = document.getElementById('spikeStoryViewer');
+            if (!viewer) return;
+            viewer.classList.add('active');
+            viewer.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+            spikeStoryUpdateViewer();
+        }
+
+        function spikeStoryNext() {
+            if (!document.getElementById('spikeStoryViewer')?.classList.contains('active')) return;
+            spikeStoryClearViewerTimers();
+            const items = spikeStoryCurrentItems();
+
+            if (spikeStoriesState.currentStoryIndex < items.length - 1) {
+                spikeStoriesState.currentStoryIndex += 1;
+                spikeStoriesState.paused = false;
+                spikeStoryUpdateViewer();
+                return;
+            }
+
+            if (spikeStoriesState.currentGroupIndex < spikeStoriesState.groups.length - 1) {
+                spikeStoriesState.currentGroupIndex += 1;
+                const nextGroup = spikeStoryCurrentGroup();
+                const unreadIndex = nextGroup.stories.findIndex(story => !(story.viewedBy || []).includes(currentUserUid));
+                spikeStoriesState.currentStoryIndex = unreadIndex >= 0 ? unreadIndex : 0;
+                spikeStoriesState.paused = false;
+                spikeStoryUpdateViewer();
+                return;
+            }
+
+            spikeStoryCloseViewer();
+        }
+
+        function spikeStoryPrevious() {
+            if (!document.getElementById('spikeStoryViewer')?.classList.contains('active')) return;
+            spikeStoryClearViewerTimers();
+            if (spikeStoriesState.currentStoryIndex > 0) {
+                spikeStoriesState.currentStoryIndex -= 1;
+                spikeStoriesState.paused = false;
+                spikeStoryUpdateViewer();
+                return;
+            }
+            if (spikeStoriesState.currentGroupIndex > 0) {
+                spikeStoriesState.currentGroupIndex -= 1;
+                const previousGroup = spikeStoryCurrentGroup();
+                spikeStoriesState.currentStoryIndex = Math.max(0, previousGroup.stories.length - 1);
+                spikeStoriesState.paused = false;
+                spikeStoryUpdateViewer();
+            }
+        }
+
+        function spikeStoryCloseViewer() {
+            spikeStoryClearViewerTimers();
+            const viewer = document.getElementById('spikeStoryViewer');
+            const video = document.getElementById('spikeStoryViewerVideo');
+            const image = document.getElementById('spikeStoryViewerImage');
+            const music = document.getElementById('spikeStoryViewerMusic');
+            if (video) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+                video.onended = null;
+                video.onloadedmetadata = null;
+            }
+            if (music) {
+                music.pause();
+                music.removeAttribute('src');
+                music.load();
+                music.onended = null;
+            }
+            if (image) {
+                image.removeAttribute('src');
+                image.style.display = 'none';
+            }
+            if (viewer) {
+                viewer.classList.remove('active', 'is-paused');
+                viewer.setAttribute('aria-hidden', 'true');
+            }
+            spikeStoriesState.currentStory = null;
+            spikeStoriesState.paused = false;
+            if (!document.getElementById('spikeStoryComposer')?.classList.contains('active')) document.body.style.overflow = '';
+        }
+
+        async function spikeStoryDeleteCurrent() {
+            const story = spikeStoriesState.currentStory;
+            if (!currentUser || !story || story.authorUid !== currentUser.uid) return;
+
+            const confirmed = await (window.showConfirmModal
+                ? window.showConfirmModal({
+                    type: 'danger',
+                    icon: '🗑️',
+                    title: 'Delete Story',
+                    message: 'Delete this story now?',
+                    details: 'This removes the story from SPIKE immediately.',
+                    confirmText: 'Delete',
+                    confirmType: 'danger',
+                    cancelText: 'Cancel'
+                })
+                : Promise.resolve(window.confirm('Delete this story?')));
+
+            if (!confirmed) return;
+
+            try {
+                await deleteDoc(doc(db, 'stories', story.id));
+                window.showToast('Story deleted.', 'success', 'Story Removed');
+                const group = spikeStoryCurrentGroup();
+                const itemIndex = group?.stories.findIndex(item => item.id === story.id) ?? -1;
+                if (itemIndex >= 0) group.stories.splice(itemIndex, 1);
+
+                if (!group || group.stories.length === 0) {
+                    spikeStoriesState.groups.splice(spikeStoriesState.currentGroupIndex, 1);
+                    if (spikeStoriesState.currentGroupIndex >= spikeStoriesState.groups.length) {
+                        spikeStoriesState.currentGroupIndex = Math.max(0, spikeStoriesState.groups.length - 1);
+                    }
+                    if (!spikeStoriesState.groups.length) {
+                        spikeStoryCloseViewer();
+                        spikeStoryRenderRow();
+                        return;
+                    }
+                    spikeStoriesState.currentStoryIndex = Math.min(spikeStoriesState.currentStoryIndex, spikeStoryCurrentItems().length - 1);
+                } else {
+                    spikeStoriesState.currentStoryIndex = Math.min(spikeStoriesState.currentStoryIndex, group.stories.length - 1);
+                }
+
+                spikeStoryRenderRow();
+                spikeStoryUpdateViewer();
+            } catch (error) {
+                console.error('Spike Story delete failed:', error);
+                window.showToast('Could not delete that story.', 'error', 'Delete Failed');
+            }
+        }
+
+        function spikeStoryAttachListeners() {
+            const row = document.getElementById('spikeStoriesRow');
+            if (!row || row.dataset.spikeBound === '1') return;
+            row.dataset.spikeBound = '1';
+
+            row.addEventListener('click', (event) => {
+                if (spikeStoriesState.dragMoved) return;
+                const addCard = event.target.closest('#spikeStoryAddCard');
+                if (addCard) {
+                    spikeStoryOpenComposer();
+                    return;
+                }
+                const card = event.target.closest('.spike-story-card[data-story-author]');
+                if (!card) return;
+                const groupIndex = spikeStoriesState.groups.findIndex(group => group.authorUid === card.dataset.storyAuthor);
+                if (groupIndex < 0) return;
+                spikeStoryOpenViewer(groupIndex);
+            });
+
+            row.addEventListener('wheel', (event) => {
+                if (Math.abs(event.deltaY) <= Math.abs(event.deltaX) || !row.scrollWidth || row.scrollWidth <= row.clientWidth) return;
+                if (event.deltaY !== 0) {
+                    row.scrollLeft += event.deltaY;
+                    event.preventDefault();
+                }
+            }, { passive: false });
+
+            row.addEventListener('pointerdown', (event) => {
+                if (event.pointerType !== 'mouse') return;
+                spikeStoriesState.dragStartX = event.clientX;
+                spikeStoriesState.dragStartScrollLeft = row.scrollLeft;
+                spikeStoriesState.dragMoved = false;
+                row.setPointerCapture?.(event.pointerId);
+            });
+
+            row.addEventListener('pointermove', (event) => {
+                if (event.pointerType !== 'mouse' || spikeStoriesState.dragStartX === null) return;
+                const distance = event.clientX - spikeStoriesState.dragStartX;
+                if (Math.abs(distance) > 5) spikeStoriesState.dragMoved = true;
+                row.scrollLeft = spikeStoriesState.dragStartScrollLeft - distance;
+            });
+
+            row.addEventListener('pointerup', () => {
+                spikeStoriesState.dragStartX = null;
+                setTimeout(() => { spikeStoriesState.dragMoved = false; }, 0);
+            });
+            row.addEventListener('pointercancel', () => {
+                spikeStoriesState.dragStartX = null;
+                spikeStoriesState.dragMoved = false;
+            });
+        }
+
+        function spikeStoryAttachGlobalListeners() {
+            const composer = document.getElementById('spikeStoryComposer');
+            const viewer = document.getElementById('spikeStoryViewer');
+            const imageInput = document.getElementById('spikeStoryImageInput');
+            const videoInput = document.getElementById('spikeStoryVideoInput');
+            const musicInput = document.getElementById('spikeStoryMusicInput');
+
+            document.getElementById('spikeStoryComposerClose')?.addEventListener('click', spikeStoryCloseComposer);
+            document.getElementById('spikeStoryImagePicker')?.addEventListener('click', () => imageInput?.click());
+            document.getElementById('spikeStoryVideoPicker')?.addEventListener('click', () => videoInput?.click());
+            document.getElementById('spikeStoryMusicPicker')?.addEventListener('click', () => musicInput?.click());
+            document.getElementById('spikeStoryMusicRemove')?.addEventListener('click', spikeStoryRemoveMusic);
+            document.getElementById('spikeStoryPublishBtn')?.addEventListener('click', spikeStoryPublish);
+            document.getElementById('spikeStoryViewerClose')?.addEventListener('click', spikeStoryCloseViewer);
+            document.getElementById('spikeStoryNextZone')?.addEventListener('click', spikeStoryNext);
+            document.getElementById('spikeStoryPrevZone')?.addEventListener('click', spikeStoryPrevious);
+            document.getElementById('spikeStoryPauseBtn')?.addEventListener('click', () => spikeStorySetPaused(!spikeStoriesState.paused));
+            document.getElementById('spikeStoryDeleteBtn')?.addEventListener('click', spikeStoryDeleteCurrent);
+
+            imageInput?.addEventListener('change', event => spikeStorySelectFile(event.target.files?.[0], 'image'));
+            videoInput?.addEventListener('change', event => spikeStorySelectFile(event.target.files?.[0], 'video'));
+            musicInput?.addEventListener('change', event => spikeStorySelectMusic(event.target.files?.[0]));
+
+            composer?.addEventListener('click', event => {
+                if (event.target === composer) spikeStoryCloseComposer();
+            });
+
+            viewer?.addEventListener('click', event => {
+                if (event.target === viewer) spikeStoryCloseViewer();
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    if (viewer?.classList.contains('active')) spikeStoryCloseViewer();
+                    else if (composer?.classList.contains('active')) spikeStoryCloseComposer();
+                }
+                if (!viewer?.classList.contains('active')) return;
+                if (event.key === 'ArrowRight') spikeStoryNext();
+                if (event.key === 'ArrowLeft') spikeStoryPrevious();
+                if (event.key === ' ') {
+                    event.preventDefault();
+                    spikeStorySetPaused(!spikeStoriesState.paused);
+                }
+            });
+
+            let touchStartX = 0;
+            let touchStartY = 0;
+            viewer?.addEventListener('touchstart', event => {
+                const touch = event.changedTouches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+            }, { passive: true });
+
+            viewer?.addEventListener('touchend', event => {
+                const touch = event.changedTouches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+                    if (dx < 0) spikeStoryNext();
+                    else spikeStoryPrevious();
+                }
+            }, { passive: true });
+
+            viewer?.addEventListener('dblclick', event => {
+                if (event.target.closest('.spike-story-owner-actions, .spike-story-viewer-close')) return;
+                spikeStorySetPaused(!spikeStoriesState.paused);
+            });
+        }
+
+        function spikeStoryInit() {
+            spikeStoryAttachListeners();
+            spikeStoryAttachGlobalListeners();
+
+            if (!currentUser) return;
+            if (spikeStoriesState.unsubscribe) spikeStoriesState.unsubscribe();
+
+            const storiesQuery = query(collection(db, 'stories'), orderBy('createdAt', 'desc'), limit(100));
+            spikeStoriesState.unsubscribe = onSnapshot(storiesQuery, snapshot => {
+                const stories = snapshot.docs.map(snapDoc => ({ id: snapDoc.id, ...snapDoc.data() }));
+                spikeStoryRefresh(stories);
+            }, error => {
+                console.error('Spike Stories listener error:', error);
+                const subtitle = document.getElementById('spikeStoriesSubtitle');
+                if (subtitle) subtitle.textContent = 'Stories unavailable';
+            });
+        }
+
+        function spikeStoryCleanup() {
+            if (spikeStoriesState.unsubscribe) {
+                spikeStoriesState.unsubscribe();
+                spikeStoriesState.unsubscribe = null;
+            }
+            spikeStoryClearViewerTimers();
+            if (spikeStoriesState.expiryTimer) {
+                clearTimeout(spikeStoriesState.expiryTimer);
+                spikeStoriesState.expiryTimer = null;
+            }
+            const video = document.getElementById('spikeStoryViewerVideo');
+            if (video) {
+                video.pause();
+                video.removeAttribute('src');
+                video.load();
+            }
+            spikeStoryClearSelectedFile();
+            spikeStoriesState.stories = [];
+            spikeStoriesState.groups = [];
+            spikeStoriesState.authors.clear();
+            spikeStoriesState.viewWrites.clear();
+            spikeStoryCloseViewer();
+            spikeStoryCloseComposer();
+            const row = document.getElementById('spikeStoriesRow');
+            if (row) {
+                const addCard = document.getElementById('spikeStoryAddCard');
+                row.innerHTML = '';
+                if (addCard) row.appendChild(addCard);
+            }
+        }
 
         // ============================================================
         // POST MENU — CENTERED OVERLAY
@@ -5157,6 +6992,7 @@
             }
             if (video.paused) {
                 const playPromise = video.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise !== undefined) {
                     playPromise.catch(err => {
                         console.warn(`[Video] Play failed for ${videoId}:`, err);
@@ -5680,6 +7516,7 @@
             try {
                 incomingRing.currentTime = 0;
                 const playPromise = incomingRing.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise) playPromise.catch(() => {});
             } catch (e) {}
         }
@@ -5691,6 +7528,7 @@
             try {
                 outgoingRing.currentTime = 0;
                 const playPromise = outgoingRing.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise) playPromise.catch(() => {});
             } catch (e) {}
         }
@@ -6491,6 +8329,7 @@
 
                 listenForMaintenance();
                 initFeedStream();
+                spikeStoryInit();
                 initChatBadge(); // REAL‑TIME CHAT BADGE IN HEADER
                 applySettings();
 
@@ -6528,6 +8367,7 @@
                     announcementUnsubscribe = null; }
                 if (chatBadgeUnsubscribe) { chatBadgeUnsubscribe();
                     chatBadgeUnsubscribe = null; }
+                spikeStoryCleanup();
                 const postsStream = document.getElementById("postsStream");
                 if (postsStream) postsStream.innerHTML =
                     `<div class="empty-state"><span class="icon">🔒</span>Please sign in to view the feed.</div>`;
@@ -6553,6 +8393,7 @@
             if (window.cleanupCall) {
                 try { window.cleanupCall(); } catch (e) {}
             }
+            try { spikeStoryCleanup(); } catch (e) {}
             clearActiveCallFlag();
         });
 
