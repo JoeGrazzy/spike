@@ -1707,7 +1707,38 @@
                 min-width: 44px;
             }
         }
-    </style>
+    
+        /* ============================================================
+           FULLSCREEN APK / FRONT-CAMERA SAFE AREA
+           ============================================================ */
+        html {
+            min-height: 100%;
+            background: var(--bg-deep, #070b10);
+        }
+
+        body {
+            min-height: 100dvh;
+            min-height: 100vh;
+        }
+
+        .apk-safe-header {
+            box-sizing: border-box;
+            padding-top: max(8px, env(safe-area-inset-top, 0px));
+        }
+
+        @supports (padding-top: constant(safe-area-inset-top)) {
+            .apk-safe-header {
+                padding-top: max(8px, constant(safe-area-inset-top, 0px));
+            }
+        }
+
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .apk-safe-header {
+                padding-top: max(8px, env(safe-area-inset-top, 0px));
+            }
+        }
+
+</style>
 
     <!-- ===== AUDIO RINGTONES ===== -->
     <audio id="incomingRingtone" preload="auto">
@@ -1720,7 +1751,7 @@
 </head>
 <body>
 
-    <header class="feed-header">
+    <header class="feed-header apk-safe-header">
         <a href="feed.html" class="logo">SPIKE</a>
         <div class="user-nav">
             <a href="administrator.html" class="nav-link admin-heart-link" id="adminNavLink" title="Admin Dashboard" onclick="goToAdmin()">
