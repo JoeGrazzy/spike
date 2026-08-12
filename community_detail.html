@@ -1447,6 +1447,7 @@
             orderBy,
             where,
             addDoc,
+            setDoc,
             serverTimestamp,
             arrayUnion,
             arrayRemove,
@@ -1460,7 +1461,7 @@
             if (!targetUid || !currentUser || targetUid === currentUser.uid) return;
             try {
                 const id = payload.id || `${payload.type}_${payload.sourceId || ''}_${currentUser.uid}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
-                await addDoc(collection(db, 'users', targetUid, 'notifications'), { id, ...payload, actorUid: currentUser.uid, createdAt: payload.createdAt || serverTimestamp(), read: false });
+                await setDoc(doc(db, 'users', targetUid, 'notifications', id), { id, ...payload, actorUid: currentUser.uid, createdAt: payload.createdAt || serverTimestamp(), read: false }, { merge: true });
             } catch (e) { console.warn('Notification write failed:', e); }
         }
 
