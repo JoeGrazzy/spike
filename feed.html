@@ -4443,7 +4443,7 @@
 
         <div class="header-right">
             <!-- Chat Button with Unread Badge -->
-            <button class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat_room.html'" title="Chat">
+            <button class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat.html'" title="Chat">
                 <span class="-icon">💬</span>
                 <span></span>
                 <span class="badge-count" id="headerChatBadge">0</span>
@@ -5296,7 +5296,7 @@ function setActiveCallFlag(callId) {
         }
 
         // ============================================================
-        // CHAT BADGE — REAL‑TIME UNREAD COUNT (same as chat_room.html)
+        // CHAT BADGE — REAL‑TIME UNREAD COUNT (same as chat.html)
         // ============================================================
         function updateChatBadge(count) {
             const badge = document.getElementById('headerChatBadge');
@@ -5731,7 +5731,7 @@ function setActiveCallFlag(callId) {
         // ============================================================
         window.goToFriends = function() { window.location.href = "friends.html"; };
         window.goToFeed = function() { window.location.href = "feed.html"; };
-        window.goToMessages = function() { window.location.href = "chat_room.html"; };
+        window.goToMessages = function() { window.location.href = "chat.html"; };
         window.goToProfile = function() { window.location.href = "profile.html"; };
         window.goToNotifications = function() { window.location.href = "notifications.html"; };
         window.goToAdmin = function() { window.location.href = "administrator.html"; };
@@ -8523,10 +8523,10 @@ function setActiveCallFlag(callId) {
                 let chatId = null;
                 chatsSnap.forEach(doc => { const data = doc.data(); if (data.participants && data.participants.includes(
                         uid)) { chatId = doc.id; } });
-                if (chatId) { window.location.href = `chat_room.html?chatId=${chatId}`; } else {
+                if (chatId) { window.location.href = `chat.html?chatId=${chatId}`; } else {
                     const newChatRef = await addDoc(collection(db, "chats"), { participants: [currentUser.uid, uid],
                         createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastMessage: "Start chatting!" });
-                    window.location.href = `chat_room.html?chatId=${newChatRef.id}`;
+                    window.location.href = `chat.html?chatId=${newChatRef.id}`;
                 }
             } catch (error) { console.error("Error opening chat:", error);
                 window.showToast("Failed to open chat.", "error"); }
@@ -9491,8 +9491,16 @@ function setActiveCallFlag(callId) {
         }
 
         function listenForIncomingCalls(userId) {
-            const q = query(collection(db, 'calls'), where('calleeId', '==', userId), where('status', '==', 'ringing'));
-            const unsub = onSnapshot(q, (snap) => {
+            // Receiver-only call listener. Supports both existing feed calls and chat_room callers.
+            // chat_room uses the "to" field while older feed calls use "calleeId".
+            const callsRef = collection(db, 'calls');
+            const queries = [
+                query(callsRef, where('calleeId', '==', userId), where('status', '==', 'ringing')),
+                query(callsRef, where('to', '==', userId), where('status', '==', 'ringing'))
+            ];
+            const unsubscribers = [];
+            queries.forEach((q) => {
+                const unsub = onSnapshot(q, (snap) => {
                 snap.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const data = change.doc.data();
@@ -9506,8 +9514,10 @@ function setActiveCallFlag(callId) {
                         joinCall(change.doc.id, data);
                     }
                 });
+                });
+                unsubscribers.push(unsub);
             });
-            callUnsubscribers.push(unsub);
+            callUnsubscribers.push(...unsubscribers);
         }
 
         // ============================================================
@@ -9681,7 +9691,7 @@ function setActiveCallFlag(callId) {
         console.log('📱 Feed initialized — Chat badge in header with real‑time unread count');
         console.log('✅ "Messages" removed from dropdown — Chat is now in header with badge');
         console.log('🔔 New message count appears on the Chat icon in real time');
-        console.log('💬 Badge updates when you receive new messages, same as chat_room.html');
+        console.log('💬 Badge updates when you receive new messages, same as chat.html');
     </script>
 </body>
 </html>
