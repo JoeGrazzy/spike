@@ -1373,7 +1373,7 @@
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
             getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, getDocs, 
-            query, where, deleteDoc, arrayRemove, setDoc, serverTimestamp
+            query, where, deleteDoc, arrayRemove, arrayUnion, setDoc, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1805,10 +1805,10 @@
         window.showProfileQR=function(){
             const overlay=document.getElementById('qrOverlay'); const img=document.getElementById('profileQrImage'); const link=document.getElementById('profileQrLink'); if(!overlay||!img)return;
             const url=window.location.href;
-            const encoded=encodeURIComponent(url);
+            const identity=userData.spId ? `SPIKE_FRIEND:SP-${userData.spId}` : url;
+            const encoded=encodeURIComponent(identity);
             img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
             img.onerror=()=>{ img.removeAttribute('src'); img.alt='QR service unavailable. Use Copy Profile Link below.'; };
-            if(link) link.textContent=url;
             if(link) link.textContent=url;
             overlay.classList.add('active'); profileActivity('Opened profile QR code');
         };
@@ -1855,11 +1855,11 @@
                 const friendUid=friendDoc.id;
                 const currentFriends=Array.isArray(userData.friends)?userData.friends:[];
                 if(currentFriends.includes(friendUid)){ showToast('Already friends.','info','Friends'); return; }
-                await updateDoc(doc(db,'users',currentUserUid),{friends:[...currentFriends,friendUid]});
+                await updateDoc(doc(db,'users',currentUserUid),{friends:arrayUnion(friendUid)});
                 const friendData=friendDoc.data()||{};
                 const friendFriends=Array.isArray(friendData.friends)?friendData.friends:[];
                 if(!friendFriends.includes(currentUserUid)){
-                    await updateDoc(doc(db,'users',friendUid),{friends:[...friendFriends,currentUserUid]});
+                    await updateDoc(doc(db,'users',friendUid),{friends:arrayUnion(currentUserUid)});
                 }
                 userData.friends=[...currentFriends,friendUid];
                 const count=document.getElementById('friendCount'); if(count) count.textContent=userData.friends.length;
