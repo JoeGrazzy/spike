@@ -412,8 +412,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, collection, doc, getDoc, getDocs, updateDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, writeBatch, query, limit, startAfter, orderBy, serverTimestamp
+            getFirestore, collection, doc, getDoc, getDocs, updateDoc, addDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, writeBatch, query, limit, startAfter, orderBy, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        async function createUserNotification(targetUid, payload) {
+            if (!targetUid || !currentUser || targetUid === currentUser.uid) return;
+            try {
+                const id = payload.id || `${payload.type}_${currentUser.uid}`;
+                await setDoc(doc(db, 'users', targetUid, 'notifications', id), { id, ...payload, actorUid: currentUser.uid, createdAt: payload.createdAt || serverTimestamp(), read: false }, { merge: true });
+            } catch (e) { console.warn('Notification write failed:', e); }
+        }
 
         const firebaseConfig = {
             apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
@@ -1106,6 +1114,7 @@
                 batch.update(doc(db, "users", targetUid), { friendRequests: arrayUnion(currentUser.uid) });
                 batch.update(myRef, { sentRequests: arrayUnion(targetUid) });
                 await batch.commit();
+                await createUserNotification(targetUid, { id: `friend_request_${currentUser.uid}`, category: 'friends', type: 'friend_request', icon: '👥', text: `${currentUser.displayName || 'Someone'} sent you a friend request`, actorName: currentUser.displayName || 'User', actorAvatar: myData.avatar || '', sourceId: currentUser.uid, url: '/friends?tab=requests', createdAt: serverTimestamp(), _groupKey: `friend_request_${currentUser.uid}` });
                 showToast("Friend request sent!", "success", "Request Sent");
                 await loadMembers(true);
                 renderMemberDirectory();
@@ -1141,6 +1150,7 @@
                     friends: arrayUnion(currentUser.uid), sentRequests: arrayRemove(currentUser.uid)
                 });
                 await batch.commit();
+                await createUserNotification(senderUid, { id: `friend_accepted_${currentUser.uid}`, category: 'friends', type: 'friend_accepted', icon: '✅', text: `${currentUser.displayName || 'Someone'} accepted your friend request`, actorName: currentUser.displayName || 'User', actorAvatar: (await getDoc(doc(db, 'users', currentUser.uid))).data()?.avatar || '', sourceId: currentUser.uid, url: '/friends', createdAt: serverTimestamp(), _groupKey: `friend_accepted_${currentUser.uid}` });
                 showToast("Friend request accepted!", "success", "Connected");
                 await loadMembers(true);
                 renderMemberDirectory();

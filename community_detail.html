@@ -1456,6 +1456,14 @@
             limit
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+        async function createUserNotification(targetUid, payload) {
+            if (!targetUid || !currentUser || targetUid === currentUser.uid) return;
+            try {
+                const id = payload.id || `${payload.type}_${payload.sourceId || ''}_${currentUser.uid}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+                await addDoc(collection(db, 'users', targetUid, 'notifications'), { id, ...payload, actorUid: currentUser.uid, createdAt: payload.createdAt || serverTimestamp(), read: false });
+            } catch (e) { console.warn('Notification write failed:', e); }
+        }
+
         const firebaseConfig = {
             apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
             authDomain: "grazzy-9e736.firebaseapp.com",
@@ -3547,6 +3555,7 @@
                     await updateDoc(postRef, { likes: arrayRemove(currentUser.uid) });
                 } else {
                     await updateDoc(postRef, { likes: arrayUnion(currentUser.uid) });
+                    await createUserNotification(post.authorUid, { id: `community_like_${communityId}_${postId}_${currentUser.uid}`, category: 'communities', type: 'like', icon: '❤️', text: `${currentUser.displayName || 'Someone'} liked your community post`, actorName: currentUser.displayName || 'User', actorAvatar: '', sourceId: postId, url: `/community?id=${encodeURIComponent(communityId)}&postId=${encodeURIComponent(postId)}`, createdAt: serverTimestamp(), _groupKey: `community_like_${postId}` });
                 }
             } catch (error) { console.error("Error toggling like:", error); }
         };
@@ -3571,6 +3580,7 @@
                     createdAt: new Date().toISOString()
                 });
                 await updateDoc(postRef, { comments: comments });
+                await createUserNotification(post.authorUid, { id: `community_comment_${communityId}_${postId}_${comments.length}_${currentUser.uid}`, category: 'communities', type: 'comment', icon: '💬', text: `${userName} commented: "${text.length > 60 ? text.slice(0, 60) + '…' : text}"`, actorName: userName, actorAvatar: userSnap.data()?.avatar || '', sourceId: postId, url: `/community?id=${encodeURIComponent(communityId)}&postId=${encodeURIComponent(postId)}`, createdAt: serverTimestamp(), _groupKey: `community_comment_${postId}` });
                 input.value = '';
             } catch (error) { console.error("Error adding comment:", error); }
         };

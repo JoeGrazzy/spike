@@ -1086,7 +1086,7 @@
                 <span style="font-size:0.9rem;">🔔</span>
                 <span class="badge-count" id="unreadBadge" style="display:none;">0</span>
             </button>
-            <button class="avatar-btn" id="notifAvatar" onclick="window.location.href='profile.html'">👤</button>
+            <button class="avatar-btn" id="notifAvatar" onclick="window.location.href='/profile'">👤</button>
         </div>
     </header>
 
@@ -1112,6 +1112,7 @@
                 </div>
             </div>
             <div class="settings-panel" id="settingsPanel">
+                <label><input type="checkbox" checked data-category="friends" onchange="renderAll()"> Friends</label>
                 <label><input type="checkbox" checked data-category="feed" onchange="renderAll()"> Feed</label>
                 <label><input type="checkbox" checked data-category="chats" onchange="renderAll()"> Chats</label>
                 <label><input type="checkbox" checked data-category="rooms" onchange="renderAll()"> Rooms</label>
@@ -1197,15 +1198,10 @@
         let currentUser = null;
         let currentUserUid = null;
         let allNotifications = [];
-        let dateFilter = 'today';
+        let dateFilter = 'all';
         let groupSimilar = true;
         let categoryFilters = {
-            feed: true,
-            chats: true,
-            rooms: true,
-            communities: true,
-            verification: true,
-            announcements: true
+            feed: true, friends: true, chats: true, rooms: true, communities: true, verification: true, announcements: true
         };
         let toastTimeout = null;
         let renderTimeout = null;
@@ -1303,26 +1299,28 @@
             return readIds.has(id);
         }
 
-        function markRead(id) {
-            if (!readIds.has(id)) {
-                readIds.add(id);
-                saveReadState();
-                const item = allNotifications.find(n => n.id === id);
-                if (item) item.read = true;
-            }
+        async function markRead(id) {
+            const item = allNotifications.find(n => n.id === id);
+            if (!item || item.read || !currentUserUid) return;
+            item.read = true;
+            try {
+                await db.collection('users').doc(currentUserUid).collection('notifications').doc(id).update({ read: true, readAt: firebase.firestore.FieldValue.serverTimestamp() });
+            } catch (e) { console.warn('Failed to persist read state:', e); item.read = false; }
+            renderAll(); updateBadge();
         }
 
-        function markAllRead() {
-            allNotifications.forEach(n => {
-                if (!n.read) {
-                    n.read = true;
-                    readIds.add(n.id);
+        async function markAllRead() {
+            if (!currentUserUid) return;
+            const unread = allNotifications.filter(n => !n.read);
+            if (!unread.length) { showToast('Everything is already read.', 'success', 'Done'); return; }
+            try {
+                for (let i = 0; i < unread.length; i += 400) {
+                    const batch = db.batch();
+                    unread.slice(i, i + 400).forEach(n => batch.update(db.collection('users').doc(currentUserUid).collection('notifications').doc(n.id), { read: true, readAt: firebase.firestore.FieldValue.serverTimestamp() }));
+                    await batch.commit();
                 }
-            });
-            saveReadState();
-            renderAll();
-            updateBadge();
-            showToast('All marked as read', 'success', 'Done');
+                showToast('All marked as read', 'success', 'Done');
+            } catch (e) { console.error(e); showToast('Some notifications could not be marked read.', 'error', 'Failed'); }
         }
 
         // ============================================================
@@ -1535,446 +1533,28 @@
         // ============================================================
         function startListeners() {
             if (!currentUserUid) return;
-            unsubscribers.forEach(u => u());
+            unsubscribers.forEach(u => { try { u(); } catch (e) {} });
             unsubscribers = [];
             allNotifications = [];
 
-            // ----- 1. Feed: Likes on your posts -----
-            const postsQuery = db.collection('posts').where('authorUid', '==', currentUserUid);
-            unsubscribers.push(postsQuery.onSnapshot(async (snapshot) => {
-                for (const docSnap of snapshot.docs) {
-                    const post = docSnap.data();
-                    const postId = docSnap.id;
-                    const likes = post.likes || [];
-                    for (const likerUid of likes) {
-                        if (likerUid === currentUserUid) continue;
-                        const userData = await fetchUserData(likerUid);
-                        const id = generateNotificationId('like', postId, likerUid);
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'feed',
-                            type: 'like',
-                            icon: '❤️',
-                            text: `${userData.name || 'Someone'} liked your post`,
-                            actorName: userData.name || 'User',
-                            actorAvatar: userData.avatar || '',
-                            url: `feed.html?postId=${postId}`,
-                            createdAt: post.createdAt ? post.createdAt.toDate() : new Date(),
-                            _groupKey: `like_${postId}`
-                        }));
-                    }
-                    const comments = post.comments || [];
-                    for (const comment of comments) {
-                        if (comment.authorUid === currentUserUid) continue;
-                        const userData = await fetchUserData(comment.authorUid);
-                        const id = generateNotificationId('comment', postId, comment.id || comment.authorUid, Date
-                            .now().toString());
-                        const preview = (comment.text || '').length > 30 ? comment.text.substring(0, 30) + '…' :
-                            comment.text;
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'feed',
-                            type: 'comment',
-                            icon: '💬',
-                            text: `${userData.name || 'Someone'} commented: "${preview}"`,
-                            actorName: userData.name || 'User',
-                            actorAvatar: userData.avatar || '',
-                            url: `feed.html?postId=${postId}`,
-                            createdAt: comment.createdAt ? new Date(comment.createdAt) : new Date(),
-                            _groupKey: `comment_${postId}`
-                        }));
-                    }
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 2. Reposts on your posts -----
-            const repostQuery = db.collection('posts').where('isRepost', '==', true);
-            unsubscribers.push(repostQuery.onSnapshot(async (snapshot) => {
-                for (const docSnap of snapshot.docs) {
-                    const repost = docSnap.data();
-                    const originalPostId = repost.repostData?.originalPostId;
-                    if (!originalPostId) continue;
-                    const authorDoc = await db.collection('posts').doc(originalPostId).get();
-                    if (!authorDoc.exists || authorDoc.data().authorUid !== currentUserUid) continue;
-                    const reposterUid = repost.authorUid;
-                    if (reposterUid === currentUserUid) continue;
-                    const userData = await fetchUserData(reposterUid);
-                    const id = generateNotificationId('repost', originalPostId, reposterUid);
-                    allNotifications.push(createNotificationItem({
-                        id,
-                        category: 'feed',
-                        type: 'repost',
-                        icon: '🔁',
-                        text: `${userData.name || 'Someone'} reposted your post`,
-                        actorName: userData.name || 'User',
-                        actorAvatar: userData.avatar || '',
-                        url: `feed.html?postId=${originalPostId}`,
-                        createdAt: repost.createdAt ? repost.createdAt.toDate() : new Date(),
-                        _groupKey: `repost_${originalPostId}`
-                    }));
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 3. Friend requests (incoming) -----
-            const usersQuery = db.collection('users').where('friendRequests', 'array-contains', currentUserUid);
-            unsubscribers.push(usersQuery.onSnapshot(async (snapshot) => {
-                for (const docSnap of snapshot.docs) {
-                    const user = docSnap.data();
-                    const senderUid = docSnap.id;
-                    if (senderUid === currentUserUid) continue;
-                    const id = generateNotificationId('friend_request', senderUid);
-                    allNotifications.push(createNotificationItem({
-                        id,
-                        category: 'communities',
-                        type: 'friend_request',
-                        icon: '👥',
-                        text: `${user.name || 'Someone'} sent you a friend request`,
-                        actorName: user.name || 'User',
-                        actorAvatar: user.avatar || '',
-                        url: 'friends.html?tab=requests',
-                        createdAt: user.createdAt ? new Date(user.createdAt) : new Date(),
-                        _groupKey: `friend_request_${senderUid}`
-                    }));
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 4. Friend request accepted (when your friends list gains a new user) -----
-            // Listen to the current user's friends list and detect additions.
-            let previousFriends = new Set();
-            const selfRef = db.collection('users').doc(currentUserUid);
-            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
-                if (!snap.exists) return;
-                const data = snap.data();
-                const friends = data.friends || [];
-                const currentFriends = new Set(friends);
-                // Find new friends
-                const newFriends = [];
-                for (const uid of currentFriends) {
-                    if (!previousFriends.has(uid)) {
-                        newFriends.push(uid);
-                    }
-                }
-                previousFriends = currentFriends;
-                for (const uid of newFriends) {
-                    // Check if we sent a request to this user (to avoid duplicate notifications)
-                    // We can check if this user is in our sentRequests (we can store that)
-                    // For simplicity, we'll just notify for any new friend.
-                    const userData = await fetchUserData(uid);
-                    const id = generateNotificationId('friend_accepted', uid);
-                    allNotifications.push(createNotificationItem({
-                        id,
-                        category: 'communities',
-                        type: 'friend_accepted',
-                        icon: '✅',
-                        text: `${userData.name || 'Someone'} accepted your friend request`,
-                        actorName: userData.name || 'User',
-                        actorAvatar: userData.avatar || '',
-                        url: 'friends.html',
-                        createdAt: new Date(),
-                        _groupKey: `friend_accepted_${uid}`
-                    }));
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 5. Room mentions (already implemented) -----
-            db.collection('rooms').where('participants', 'array-contains', currentUserUid).get().then((roomsSnap) => {
-                roomsSnap.forEach((roomDoc) => {
-                    const roomId = roomDoc.id;
-                    const msgQuery = db.collection('rooms').doc(roomId).collection('messages')
-                        .orderBy('timestamp', 'desc').limit(100);
-                    unsubscribers.push(msgQuery.onSnapshot(async (snapshot) => {
-                        const userData = await fetchUserData(currentUserUid);
-                        const spId = userData.spId || '';
-                        const displayName = userData.name || currentUser.displayName || '';
-                        for (const msgDoc of snapshot.docs) {
-                            const msg = msgDoc.data();
-                            if (msg.senderId === currentUserUid) continue;
-                            const text = msg.text || '';
-                            if (text.includes('@' + displayName) || text.includes('@' + spId) ||
-                                text.includes('@' + currentUserUid)) {
-                                const senderData = await fetchUserData(msg.senderId);
-                                const id = generateNotificationId('room_mention', roomId, msgDoc.id);
-                                const preview = text.length > 30 ? text.substring(0, 30) + '…' : text;
-                                allNotifications.push(createNotificationItem({
-                                    id,
-                                    category: 'rooms',
-                                    type: 'mention',
-                                    icon: '✏️',
-                                    text: `${senderData.name || 'Someone'} mentioned you: "${preview}"`,
-                                    actorName: senderData.name || 'User',
-                                    actorAvatar: senderData.avatar || '',
-                                    url: `room.html?id=${roomId}`,
-                                    createdAt: msg.timestamp ? msg.timestamp.toDate() : new Date(),
-                                    _groupKey: `room_mention_${roomId}`
-                                }));
-                            }
-                        }
-                        deduplicateAndSort();
-                        renderAll();
-                        updateBadge();
-                    }));
+            const ref = db.collection('users').doc(currentUserUid).collection('notifications').orderBy('createdAt', 'desc').limit(200);
+            const unsubscribe = ref.onSnapshot(snapshot => {
+                allNotifications = snapshot.docs.map(docSnap => {
+                    const d = docSnap.data() || {};
+                    return createNotificationItem({
+                        id: docSnap.id, category: d.category || 'announcements', type: d.type || 'system', icon: d.icon || '🔔',
+                        text: d.text || 'You have a new notification', actorName: d.actorName || '', actorAvatar: d.actorAvatar || '',
+                        url: d.url || '', createdAt: d.createdAt, read: d.read === true, _groupKey: d._groupKey || d.groupKey || docSnap.id
+                    });
                 });
+                allNotifications.sort((a,b) => toDate(b.createdAt) - toDate(a.createdAt));
+                renderAll();
+                updateBadge();
+            }, error => {
+                console.error('Notification listener failed:', error);
+                showToast('Unable to load live notifications.', 'error', 'Notifications');
             });
-
-            // ----- 6. Verification status -----
-            const verRef = db.collection('verification_requests').doc(currentUserUid);
-            unsubscribers.push(verRef.onSnapshot((snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    const status = data.status || 'none';
-                    const id = 'verification_' + status;
-                    let icon, text;
-                    if (status === 'pending') {
-                        icon = '⏳';
-                        text = 'Your verification request is pending review.';
-                    } else if (status === 'approved' || status === 'verified') {
-                        icon = '✅';
-                        text = 'Your verification was approved! You now have the badge.';
-                    } else if (status === 'rejected') {
-                        icon = '❌';
-                        text = 'Your verification was rejected. You may reapply after 5 minutes.';
-                    } else {
-                        return;
-                    }
-                    allNotifications.push(createNotificationItem({
-                        id,
-                        category: 'verification',
-                        type: status,
-                        icon,
-                        text,
-                        actorName: 'SPIKE',
-                        actorAvatar: '',
-                        url: 'profile.html',
-                        createdAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
-                        _groupKey: 'verification'
-                    }));
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 7. System announcements -----
-            const annRef = db.collection('settings').doc('announcement');
-            unsubscribers.push(annRef.onSnapshot((snap) => {
-                if (snap.exists()) {
-                    const data = snap.data();
-                    if (data.text && data.active) {
-                        const id = 'announcement_' + Date.now();
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'announcements',
-                            type: 'announcement',
-                            icon: '📢',
-                            text: data.text,
-                            actorName: 'Admin',
-                            actorAvatar: '',
-                            url: 'feed.html',
-                            createdAt: data.updatedAt ? data.updatedAt.toDate() : new Date(),
-                            _groupKey: 'announcement'
-                        }));
-                    }
-                }
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 8. Community mentions (already implemented) -----
-            db.collection('users').doc(currentUserUid).get().then((userSnap) => {
-                const userCommunities = userSnap.exists ? (userSnap.data().joinedCommunities || []) : [];
-                for (const communityId of userCommunities) {
-                    const postsQuery2 = db.collection('communities').doc(communityId).collection('posts')
-                        .orderBy('createdAt', 'desc').limit(100);
-                    unsubscribers.push(postsQuery2.onSnapshot(async (snapshot) => {
-                        for (const postDoc of snapshot.docs) {
-                            const post = postDoc.data();
-                            if (post.authorUid === currentUserUid) continue;
-                            const content = post.content || '';
-                            const userData2 = await fetchUserData(currentUserUid);
-                            const spId2 = userData2.spId || '';
-                            const displayName2 = userData2.name || currentUser.displayName || '';
-                            if (content.includes('@' + displayName2) || content.includes('@' + spId2) ||
-                                content.includes('@' + currentUserUid)) {
-                                const authorData = await fetchUserData(post.authorUid);
-                                const id = generateNotificationId('community_mention', communityId, postDoc
-                                    .id);
-                                const preview = content.length > 30 ? content.substring(0, 30) + '…' :
-                                    content;
-                                allNotifications.push(createNotificationItem({
-                                    id,
-                                    category: 'communities',
-                                    type: 'mention',
-                                    icon: '✏️',
-                                    text: `${authorData.name || 'Someone'} mentioned you in a community post: "${preview}"`,
-                                    actorName: authorData.name || 'User',
-                                    actorAvatar: authorData.avatar || '',
-                                    url: `community_detail.html?id=${communityId}&postId=${postDoc.id}`,
-                                    createdAt: post.createdAt ? post.createdAt.toDate() : new Date(),
-                                    _groupKey: `community_mention_${communityId}`
-                                }));
-                            }
-                            const comments2 = post.comments || [];
-                            for (const comment of comments2) {
-                                if (comment.authorUid === currentUserUid) continue;
-                                const commentText = comment.text || '';
-                                if (commentText.includes('@' + displayName2) || commentText.includes('@' +
-                                        spId2) ||
-                                    commentText.includes('@' + currentUserUid)) {
-                                    const authorData = await fetchUserData(comment.authorUid);
-                                    const id = generateNotificationId('community_comment_mention',
-                                        communityId, postDoc.id, comment.id || comment.authorUid);
-                                    const preview = commentText.length > 30 ? commentText.substring(0,
-                                        30) + '…' : commentText;
-                                    allNotifications.push(createNotificationItem({
-                                        id,
-                                        category: 'communities',
-                                        type: 'comment_mention',
-                                        icon: '💬',
-                                        text: `${authorData.name || 'Someone'} mentioned you in a comment: "${preview}"`,
-                                        actorName: authorData.name || 'User',
-                                        actorAvatar: authorData.avatar || '',
-                                        url: `community_detail.html?id=${communityId}&postId=${postDoc.id}`,
-                                        createdAt: comment.createdAt ? new Date(comment
-                                            .createdAt) : new Date(),
-                                        _groupKey: `community_comment_${communityId}`
-                                    }));
-                                }
-                            }
-                        }
-                        deduplicateAndSort();
-                        renderAll();
-                        updateBadge();
-                    }));
-                }
-            });
-
-            // ----- 9. Block/Unblock events (listen to current user's blocked list) -----
-            let previousBlocked = new Set();
-            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
-                if (!snap.exists) return;
-                const data = snap.data();
-                const blocked = data.blockedUsers || [];
-                const currentBlocked = new Set(blocked);
-                // Detect added (block) and removed (unblock)
-                for (const uid of currentBlocked) {
-                    if (!previousBlocked.has(uid)) {
-                        const userData = await fetchUserData(uid);
-                        const id = generateNotificationId('block', uid);
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'communities',
-                            type: 'block',
-                            icon: '🚫',
-                            text: `You blocked ${userData.name || 'someone'}`,
-                            actorName: userData.name || 'User',
-                            actorAvatar: userData.avatar || '',
-                            url: 'friends.html',
-                            createdAt: new Date(),
-                            _groupKey: `block_${uid}`
-                        }));
-                    }
-                }
-                for (const uid of previousBlocked) {
-                    if (!currentBlocked.has(uid)) {
-                        const userData = await fetchUserData(uid);
-                        const id = generateNotificationId('unblock', uid);
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'communities',
-                            type: 'unblock',
-                            icon: '🔓',
-                            text: `You unblocked ${userData.name || 'someone'}`,
-                            actorName: userData.name || 'User',
-                            actorAvatar: userData.avatar || '',
-                            url: 'friends.html',
-                            createdAt: new Date(),
-                            _groupKey: `unblock_${uid}`
-                        }));
-                    }
-                }
-                previousBlocked = currentBlocked;
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            // ----- 10. Community joins/leaves (listen to current user's joinedCommunities) -----
-            let previousCommunities = new Set();
-            unsubscribers.push(selfRef.onSnapshot(async (snap) => {
-                if (!snap.exists) return;
-                const data = snap.data();
-                const communities = data.joinedCommunities || [];
-                const currentCommunities = new Set(communities);
-                // Detect added (join) and removed (leave)
-                for (const cid of currentCommunities) {
-                    if (!previousCommunities.has(cid)) {
-                        const commDoc = await db.collection('communities').doc(cid).get();
-                        const commName = commDoc.exists ? commDoc.data().name || 'Community' : 'Community';
-                        const id = generateNotificationId('community_join', cid);
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'communities',
-                            type: 'join',
-                            icon: '👋',
-                            text: `You joined ${commName}`,
-                            actorName: '',
-                            actorAvatar: '',
-                            url: `community_detail.html?id=${cid}`,
-                            createdAt: new Date(),
-                            _groupKey: `community_join_${cid}`
-                        }));
-                    }
-                }
-                for (const cid of previousCommunities) {
-                    if (!currentCommunities.has(cid)) {
-                        const commDoc = await db.collection('communities').doc(cid).get();
-                        const commName = commDoc.exists ? commDoc.data().name || 'Community' : 'Community';
-                        const id = generateNotificationId('community_leave', cid);
-                        allNotifications.push(createNotificationItem({
-                            id,
-                            category: 'communities',
-                            type: 'leave',
-                            icon: '🚪',
-                            text: `You left ${commName}`,
-                            actorName: '',
-                            actorAvatar: '',
-                            url: 'community.html',
-                            createdAt: new Date(),
-                            _groupKey: `community_leave_${cid}`
-                        }));
-                    }
-                }
-                previousCommunities = currentCommunities;
-                deduplicateAndSort();
-                renderAll();
-                updateBadge();
-            }));
-
-            function deduplicateAndSort() {
-                const seen = new Set();
-                allNotifications = allNotifications.filter(n => {
-                    if (seen.has(n.id)) return false;
-                    seen.add(n.id);
-                    return true;
-                });
-                allNotifications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                if (allNotifications.length > 200) allNotifications = allNotifications.slice(0, 200);
-            }
-
-            deduplicateAndSort();
+            unsubscribers.push(unsubscribe);
             renderAll();
             updateBadge();
         }
@@ -2130,30 +1710,17 @@
         // ============================================================
         // CLEAR ALL (no redirect, stays on page)
         // ============================================================
-        function clearAll() {
-            if (allNotifications.length === 0) {
-                showToast('No notifications to clear', 'warning');
-                return;
-            }
-            showConfirm({
-                type: 'danger',
-                icon: '🗑️',
-                title: 'Clear All Notifications?',
-                message: 'This will permanently remove all notifications from your feed.',
-                details: `You have <strong>${allNotifications.length}</strong> notifications that will be cleared.`,
-                confirmText: 'Clear All',
-                confirmType: 'danger',
-                cancelText: 'Cancel'
-            }).then(confirmed => {
-                if (confirmed) {
-                    allNotifications = [];
-                    readIds.clear();
-                    saveReadState();
-                    renderAll();
-                    updateBadge();
-                    showToast('All notifications cleared', 'success', 'Cleared');
+        async function clearAll() {
+            if (!currentUserUid || allNotifications.length === 0) { showToast('No notifications to clear', 'warning'); return; }
+            const confirmed = await showConfirm({ type:'danger', icon:'🗑️', title:'Clear All Notifications?', message:'This will permanently remove all loaded notifications from your notification history.', details:`You have <strong>${allNotifications.length}</strong> loaded notifications.`, confirmText:'Clear All', confirmType:'danger', cancelText:'Cancel' });
+            if (!confirmed) return;
+            try {
+                const snap = await db.collection('users').doc(currentUserUid).collection('notifications').limit(200).get();
+                for (let i=0; i<snap.docs.length; i+=400) {
+                    const batch=db.batch(); snap.docs.slice(i,i+400).forEach(d=>batch.delete(d.ref)); await batch.commit();
                 }
-            });
+                readIds.clear(); saveReadState(); showToast('Notifications cleared', 'success', 'Cleared');
+            } catch(e) { console.error(e); showToast('Failed to clear notifications.', 'error', 'Clear Failed'); }
         }
 
         // ============================================================
@@ -2222,8 +1789,8 @@
 
                 startListeners();
 
-                dateFilter = 'today';
-                document.querySelector('#dateFilters button[data-date="today"]')?.classList.add('active');
+                dateFilter = 'all';
+                document.querySelector('#dateFilters button[data-date="all"]')?.classList.add('active');
 
                 renderAll();
                 updateBadge();

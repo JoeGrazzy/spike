@@ -491,34 +491,13 @@
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 8px 4px;
-            min-width: min(260px, calc(100vw - 24px));
-            max-width: min(320px, calc(100vw - 24px));
-            max-height: min(70vh, 560px);
+            min-width: 200px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
             display: none;
             flex-direction: column;
             z-index: 200;
             animation: dropdownSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            overflow-x: hidden;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: var(--border-color) transparent;
-            touch-action: pan-y;
-        }
-        .premium-dropdown::-webkit-scrollbar {
-            width: 5px;
-        }
-        .premium-dropdown::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .premium-dropdown::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 999px;
-        }
-        .premium-dropdown::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
+            overflow: hidden;
         }
         .premium-dropdown.active {
             display: flex;
@@ -4320,54 +4299,6 @@
   .repost-preview-image {
     content-visibility:auto;
   }
-
-        /* ============================================================
-           FEED FEATURE NAVIGATION / TOOLS
-           ============================================================ */
-        .feed-tools-card {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 0 14px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            background: var(--bg-glass);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-        }
-        .feed-tools-search-row { display:flex; gap:8px; align-items:center; }
-        .feed-tools-search {
-            flex:1; min-width:0; height:40px; padding:0 12px;
-            border:1px solid var(--border-color); border-radius:11px;
-            background:rgba(255,255,255,.03); color:var(--text-main);
-            font:600 .78rem var(--font-main); outline:none;
-        }
-        .feed-tools-search:focus { border-color:var(--primary); box-shadow:0 0 0 2px var(--primary-glow); }
-        .feed-tools-clear { min-height:40px; padding:0 12px; border-radius:11px; border:1px solid var(--border-color); background:rgba(255,255,255,.03); color:var(--text-muted); cursor:pointer; }
-        .feed-tools-tabs { display:flex; gap:7px; overflow-x:auto; padding:8px 1px 2px; scrollbar-width:none; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; }
-        .feed-tools-tabs::-webkit-scrollbar { display:none; }
-        .feed-tool-tab { flex:0 0 auto; min-height:34px; padding:0 12px; border:1px solid var(--border-color); border-radius:999px; background:rgba(255,255,255,.02); color:var(--text-muted); font:700 .68rem var(--font-main); cursor:pointer; white-space:nowrap; }
-        .feed-tool-tab.active { color:var(--text-main); border-color:var(--primary); background:rgba(0,168,132,.12); }
-        .feed-tools-status { margin-top:7px; font-size:.62rem; color:var(--text-muted); min-height:14px; }
-        .feed-feature-modal { position:fixed; inset:0; z-index:900; display:none; align-items:center; justify-content:center; padding:18px; background:rgba(0,0,0,.62); backdrop-filter:blur(5px); }
-        .feed-feature-modal.active { display:flex; }
-        .feed-feature-card { width:min(520px,100%); max-height:min(78vh,680px); overflow:auto; border:1px solid var(--border-color); border-radius:20px; background:var(--bg-glass); padding:16px; box-shadow:0 24px 80px rgba(0,0,0,.55); }
-        .feed-feature-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
-        .feed-feature-title { font-weight:800; color:var(--text-main); }
-        .feed-feature-close { border:1px solid var(--border-color); background:rgba(255,255,255,.03); color:var(--text-main); border-radius:10px; width:34px; height:34px; cursor:pointer; }
-        .feed-feature-list { display:flex; flex-direction:column; gap:8px; }
-        .feed-feature-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-color); border-radius:12px; }
-        .feed-feature-row-main { min-width:0; }
-        .feed-feature-row-title { font-weight:700; font-size:.76rem; color:var(--text-main); }
-        .feed-feature-row-meta { font-size:.62rem; color:var(--text-muted); margin-top:2px; }
-        .feed-feature-btn { border:1px solid var(--border-color); background:rgba(255,255,255,.03); color:var(--text-main); border-radius:9px; min-height:34px; padding:0 10px; cursor:pointer; font-weight:700; font-size:.65rem; }
-        .feed-feature-btn.primary { border-color:var(--primary); color:var(--primary); }
-        .feed-composer-extra { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-        .feed-composer-field { flex:1 1 180px; min-width:0; height:36px; padding:0 10px; border:1px solid var(--border-color); border-radius:10px; background:rgba(255,255,255,.03); color:var(--text-main); font:600 .68rem var(--font-main); }
-        .feed-schedule-note { font-size:.6rem; color:var(--text-muted); margin-top:4px; }
-        .post-location-tag { display:inline-flex; align-items:center; gap:4px; margin-top:6px; padding:3px 8px; border:1px solid var(--border-color); border-radius:999px; color:var(--text-muted); font-size:.6rem; }
-        .post-view-count { font-size:.58rem; color:var(--text-muted); margin-left:4px; }
-
 </style>
 
 </head>
@@ -4408,33 +4339,18 @@
                     <span class="badge-dot"></span>
                 </button>
 
-                <div class="premium-dropdown" id="premiumDropdown" role="menu" aria-label="SPIKE navigation menu">
+                <div class="premium-dropdown" id="premiumDropdown">
                     <div class="dropdown-section">
                         <div class="dropdown-label">Navigation</div>
-                        <button type="button" class="dropdown-item" onclick="navigateTo('feed')"><span class="icon">🏠</span><span>Feed</span><span class="badge primary">Live</span></button>
-                        <button type="button" class="dropdown-item" onclick="navigateTo('friends')"><span class="icon">👥</span><span>Friends</span></button>
-                        <button type="button" class="dropdown-item" onclick="navigateTo('community')"><span class="icon">👨‍👩‍👧‍👦</span><span>Community</span></button>
-                        <button type="button" class="dropdown-item" onclick="navigateTo('rooms')"><span class="icon">💞</span><span>Fun Rooms</span><span class="badge primary">Live</span></button>
-                        <!-- Messages remain in the header as Chat with its unread badge. -->
-                    </div>
-                    <div class="dropdown-section">
-                        <div class="dropdown-label">Feed</div>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('forYou')"><span class="icon">✨</span><span>For You</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('following')"><span class="icon">👥</span><span>Following</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('trending')"><span class="icon">🔥</span><span>Trending</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('search')"><span class="icon">🔍</span><span>Search</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('hashtags')"><span class="icon">#️⃣</span><span>Hashtags</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('saved')"><span class="icon">🔖</span><span>Saved Posts</span></button>
-                        <button type="button" class="dropdown-item" onclick="openFeedFeatureModal('collections')"><span class="icon">📂</span><span>Collections</span></button>
-                        <button type="button" class="dropdown-item" onclick="openFeedFeatureModal('muted')"><span class="icon">🚫</span><span>Not Interested</span></button>
-                        <button type="button" class="dropdown-item" onclick="openFeedFeatureModal('drafts')"><span class="icon">📝</span><span>Drafts</span></button>
-                        <button type="button" class="dropdown-item" onclick="openFeedFeatureModal('scheduled')"><span class="icon">⏰</span><span>Scheduled Posts</span></button>
-                        <button type="button" class="dropdown-item" onclick="selectFeedTool('locations')"><span class="icon">📍</span><span>Locations</span></button>
-                        <button type="button" class="dropdown-item" onclick="openFeedFeatureModal('analytics')"><span class="icon">📊</span><span>Post Analytics</span></button>
+                        <button class="dropdown-item" onclick="navigateTo('feed')"><span class="icon">🏠</span> Feed <span class="badge primary">Live</span></button>
+                        <button class="dropdown-item" onclick="navigateTo('friends')"><span class="icon">👥</span> Friends</button>
+                        <button class="dropdown-item" onclick="navigateTo('community')"><span class="icon">👨‍👩‍👧‍👦</span> Community</button>
+                        <button class="dropdown-item" onclick="navigateTo('rooms')"><span class="icon">💞</span> Fun Rooms <span class="badge primary">Live</span></button>
+                        <!-- Messages REMOVED from dropdown — now in header as Chat with badge -->
                     </div>
                     <div class="dropdown-section">
                         <div class="dropdown-label">Account</div>
-                        <button type="button" class="dropdown-item admin-heart" id="dropdownAdminBtn" onclick="navigateTo('admin')"><span class="icon">⚙️</span><span>Admin Panel</span><span class="badge danger">★</span></button>
+                        <button class="dropdown-item admin-heart" id="dropdownAdminBtn" onclick="navigateTo('admin')"><span class="icon">⚙️</span> Admin Panel <span class="badge danger">★</span></button>
                     </div>
                 </div>
 
@@ -4467,23 +4383,6 @@
             </div>
         </section>
 
-        <section class="feed-tools-card" id="feedToolsCard" aria-label="Feed tools">
-            <div class="feed-tools-search-row">
-                <input id="feedSearchInput" class="feed-tools-search" type="search" placeholder="Search posts, people or #hashtags..." autocomplete="off">
-                <button type="button" class="feed-tools-clear" onclick="clearFeedTool()">Clear</button>
-            </div>
-            <div class="feed-tools-tabs" id="feedToolsTabs" role="tablist" aria-label="Feed filters">
-                <button type="button" class="feed-tool-tab active" data-tool="all" onclick="selectFeedTool('all')">Latest</button>
-                <button type="button" class="feed-tool-tab" data-tool="forYou" onclick="selectFeedTool('forYou')">✨ For You</button>
-                <button type="button" class="feed-tool-tab" data-tool="following" onclick="selectFeedTool('following')">👥 Following</button>
-                <button type="button" class="feed-tool-tab" data-tool="trending" onclick="selectFeedTool('trending')">🔥 Trending</button>
-                <button type="button" class="feed-tool-tab" data-tool="saved" onclick="selectFeedTool('saved')">🔖 Saved</button>
-                <button type="button" class="feed-tool-tab" data-tool="hashtags" onclick="selectFeedTool('hashtags')"># Hashtags</button>
-                <button type="button" class="feed-tool-tab" data-tool="locations" onclick="selectFeedTool('locations')">📍 Locations</button>
-            </div>
-            <div class="feed-tools-status" id="feedToolsStatus">Showing the latest posts</div>
-        </section>
-
         <div class="create-post-card">
             <textarea class="create-textarea" id="postInput" placeholder="What's happening on SPIKE?"></textarea>
 
@@ -4511,21 +4410,12 @@
                 </div>
             </div>
 
-            <div class="feed-composer-extra">
-                <input id="postLocationInput" class="feed-composer-field" type="text" maxlength="80" placeholder="📍 Optional location">
-                <input id="postScheduleInput" class="feed-composer-field" type="datetime-local" aria-label="Schedule post">
-            </div>
-            <div class="feed-schedule-note">Scheduled posts are stored on this device and publish when this Feed is open.</div>
-
             <div class="create-actions-row">
                 <div style="display:flex; gap:8px;">
                     <label class="image-upload-btn">📷 Image <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="handleImageSelect(event)"></label>
                     <label class="video-upload-btn">🎥 Video <input type="file" id="videoInput" accept="video/*" style="display:none;" onchange="handleVideoSelect(event)"></label>
                 </div>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
-                    <button type="button" class="feed-feature-btn" onclick="saveFeedDraft()">Save Draft</button>
-                    <button class="btn-post" id="submitPostBtn" onclick="createPost()">Post</button>
-                </div>
+                <button class="btn-post" id="submitPostBtn" onclick="createPost()">Post</button>
             </div>
         </div>
 
@@ -4788,17 +4678,6 @@
         </div>
     </div>
 
-    <!-- ===== FEED FEATURE MODAL ===== -->
-    <div class="feed-feature-modal" id="feedFeatureModal" aria-hidden="true">
-        <div class="feed-feature-card" role="dialog" aria-modal="true" aria-labelledby="feedFeatureTitle">
-            <div class="feed-feature-head">
-                <div class="feed-feature-title" id="feedFeatureTitle">Feed</div>
-                <button type="button" class="feed-feature-close" onclick="closeFeedFeatureModal()" aria-label="Close">✕</button>
-            </div>
-            <div id="feedFeatureBody"></div>
-        </div>
-    </div>
-
     <!-- ===== SCRIPTS ===== -->
     <script type="module">
         // ============================================================
@@ -4810,8 +4689,22 @@
         import {
             getFirestore, collection, doc, getDoc, updateDoc, deleteDoc, onSnapshot,
             serverTimestamp, arrayUnion, arrayRemove, query, getDocs, orderBy, addDoc,
-            where, limit, increment, setDoc, runTransaction
+            where, limit, increment, setDoc
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // ============================================================
+        // PERSISTENT NOTIFICATIONS
+        // ============================================================
+        async function createUserNotification(targetUid, payload) {
+            if (!targetUid || !currentUser || targetUid === currentUser.uid) return;
+            try {
+                const notificationId = payload.id || `${payload.type}_${payload.sourceId || ''}_${currentUser.uid}`.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+                await setDoc(doc(db, 'users', targetUid, 'notifications', notificationId), {
+                    id: notificationId, ...payload, actorUid: currentUser.uid,
+                    createdAt: payload.createdAt || serverTimestamp(), read: false
+                }, { merge: true });
+            } catch (e) { console.warn('Notification write failed:', e); }
+        }
 
         // ============================================================
         // CONFIG
@@ -4875,12 +4768,6 @@
         let previousNotificationCount = 0;
         let isFirstNotificationCheck = true;
         let chatUnreadCount = 0;
-        const feedViewState = { mode: 'all', search: '', hashtag: '', location: '' };
-        let followingUidSet = null;
-        let feedViewObserver = null;
-        const scheduledPostsKey = 'spikeScheduledPosts_v1';
-        const draftPostKey = 'spikeFeedDraft_v1';
-        const mutedAuthorsKey = 'spikeFeedMutedAuthors_v1';
 
         // ============================================================
         // VIDEO MANAGER
@@ -5036,6 +4923,7 @@ function setActiveCallFlag(callId) {
                 if (audio) {
                     audio.currentTime = 0;
                     const playPromise = audio.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                     if (playPromise !== undefined) {
                         playPromise.catch(err => {
                             console.log('Notification sound autoplay blocked');
@@ -5059,38 +4947,18 @@ function setActiveCallFlag(callId) {
         // ============================================================
         // NOTIFICATION BADGE
         // ============================================================
-        function updateNotificationBadge() {
+        async function updateNotificationBadge() {
             const badge = document.getElementById('headerNotifBadge');
-            if (!badge) return;
+            if (!badge || !currentUser) return;
             try {
-                const cached = localStorage.getItem(CONFIG.storage.notifCacheKey);
-                const readStr = localStorage.getItem(CONFIG.storage.notifReadKey);
-                let notifs = [];
-                let readSet = new Set();
-                if (cached) { const parsed = JSON.parse(cached); if (Array.isArray(parsed)) notifs = parsed; }
-                if (readStr) { const parsed = JSON.parse(readStr); if (Array.isArray(parsed)) readSet = new Set(parsed); }
-                const unread = notifs.filter(n => !readSet.has(n.id)).length;
-
-                if (!isFirstNotificationCheck) {
-                    if (unread > previousNotificationCount) {
-                        playNotificationSound();
-                    }
-                } else {
-                    isFirstNotificationCheck = false;
-                }
-
+                const snap = await getDocs(query(collection(db, 'users', currentUser.uid, 'notifications'), where('read', '==', false), limit(100)));
+                const unread = snap.size;
+                if (!isFirstNotificationCheck && unread > previousNotificationCount) playNotificationSound();
+                isFirstNotificationCheck = false;
                 previousNotificationCount = unread;
-
-                if (unread > 0) {
-                    badge.textContent = unread > 99 ? '99+' : unread;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
-                }
-            } catch (e) {
-                badge.style.display = 'none';
-                previousNotificationCount = 0;
-            }
+                if (unread > 0) { badge.textContent = unread > 99 ? '99+' : unread; badge.style.display = 'flex'; }
+                else { badge.style.display = 'none'; }
+            } catch (e) { console.warn('Persistent notification badge unavailable:', e); }
         }
 
         // ============================================================
@@ -5285,172 +5153,6 @@ function setActiveCallFlag(callId) {
         }
 
         // ============================================================
-        // FEED FEATURES
-        // ============================================================
-        function readLocalJson(key, fallback) {
-            try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : fallback; } catch (_) { return fallback; }
-        }
-        function writeLocalJson(key, value) {
-            try { localStorage.setItem(key, JSON.stringify(value)); } catch (_) {}
-        }
-        function postDate(post) { const d = post?.createdAt?.toDate ? post.createdAt.toDate() : new Date(post?.createdAt || 0); return Number.isNaN(d.getTime()) ? new Date(0) : d; }
-        function postEngagementScore(post) {
-            const likes = Array.isArray(post?.likes) ? post.likes.length : 0;
-            const comments = Array.isArray(post?.comments) ? post.comments.length : 0;
-            const reactions = post?.reactions && typeof post.reactions === 'object' ? Object.keys(post.reactions).reduce((n, k) => k.endsWith('_users') ? n : n + (Number(post.reactions[k]) || 0), 0) : 0;
-            const ageHours = Math.max(1, (Date.now() - postDate(post).getTime()) / 3600000);
-            return ((likes * 3) + (comments * 4) + (reactions * 2) + (Number(post?.views) || 0) * 0.2) / Math.pow(ageHours, 0.35);
-        }
-        function getMutedAuthors() { return new Set(readLocalJson(mutedAuthorsKey, []).filter(Boolean)); }
-        function setMutedAuthors(set) { writeLocalJson(mutedAuthorsKey, [...set]); }
-        function isMutedAuthor(uid) { return Boolean(uid && getMutedAuthors().has(uid)); }
-        function extractHashtags(text) { return [...new Set((String(text || '').match(/#([\w]+)/g) || []).map(x => x.slice(1).toLowerCase()))]; }
-        function applyFeedView(postsArray) {
-            let posts = Array.isArray(postsArray) ? postsArray.filter(Boolean) : [];
-            posts = posts.filter(p => !isMutedAuthor(p.authorUid));
-            const search = feedViewState.search.trim().toLowerCase();
-            if (search) {
-                posts = posts.filter(p => {
-                    const author = getCachedUser(p.authorUid)?.name || p.authorName || '';
-                    const haystack = `${p.content || ''} ${author} ${p.locationLabel || ''}`.toLowerCase();
-                    return haystack.includes(search) || extractHashtags(p.content).some(h => `#${h}`.includes(search));
-                });
-            }
-            if (feedViewState.hashtag) posts = posts.filter(p => extractHashtags(p.content).includes(feedViewState.hashtag));
-            if (feedViewState.location) posts = posts.filter(p => String(p.locationLabel || '').toLowerCase().includes(feedViewState.location));
-            if (feedViewState.mode === 'following') {
-                if (followingUidSet) posts = posts.filter(p => followingUidSet.has(p.authorUid) || p.authorUid === currentUser?.uid);
-            } else if (feedViewState.mode === 'saved') {
-                const saved = new Set(feedSavedIds || []); posts = posts.filter(p => saved.has(p.id));
-            } else if (feedViewState.mode === 'trending' || feedViewState.mode === 'forYou') {
-                posts = posts.slice().sort((a, b) => postEngagementScore(b) - postEngagementScore(a));
-            }
-            return posts;
-        }
-        let feedSavedIds = [];
-        async function loadSavedIds() {
-            if (!currentUser) { feedSavedIds = []; return; }
-            try {
-                const snap = await getDocs(query(collection(db, 'users', currentUser.uid, 'savedPosts'), orderBy('savedAt', 'desc'), limit(100)));
-                feedSavedIds = snap.docs.map(d => d.id);
-            } catch (error) { console.error('Saved posts load failed:', error); feedSavedIds = []; }
-        }
-        async function loadFollowingIds() {
-            if (!currentUser) { followingUidSet = new Set(); return followingUidSet; }
-            try {
-                const snap = await getDocs(collection(db, 'users', currentUser.uid, 'following'));
-                followingUidSet = new Set(snap.docs.map(d => d.id));
-            } catch (error) { console.error('Following list load failed:', error); followingUidSet = new Set(); }
-            return followingUidSet;
-        }
-        async function toggleSavedPost(postId) {
-            if (!currentUser || !postId) { window.showToast('Please sign in to save posts.', 'warning'); return; }
-            const ref = doc(db, 'users', currentUser.uid, 'savedPosts', postId);
-            try {
-                const snap = await getDoc(ref);
-                if (snap.exists()) { await deleteDoc(ref); feedSavedIds = feedSavedIds.filter(id => id !== postId); window.showToast('Removed from Saved.', 'success'); }
-                else { await setDoc(ref, { postId, savedAt: serverTimestamp() }); feedSavedIds = [postId, ...feedSavedIds.filter(id => id !== postId)]; window.showToast('Saved to your posts.', 'success'); }
-                renderPosts(cachedPosts, { cache: false });
-            } catch (error) { console.error('Save post failed:', error); window.showToast('Could not update Saved posts.', 'error'); }
-        }
-        async function trackPostView(postId) {
-            if (!currentUser || !postId) return;
-            const viewRef = doc(db, 'posts', postId, 'views', currentUser.uid);
-            try {
-                const already = await getDoc(viewRef);
-                if (already.exists()) return;
-                await runTransaction(db, async tx => {
-                    const postRef = doc(db, 'posts', postId);
-                    const viewSnap = await tx.get(viewRef);
-                    if (viewSnap.exists()) return;
-                    tx.set(viewRef, { viewedAt: serverTimestamp() });
-                    tx.update(postRef, { views: increment(1) });
-                });
-            } catch (error) { console.warn('Post view tracking skipped:', error); }
-        }
-        function setupPostViewTracking() {
-            if (feedViewObserver) feedViewObserver.disconnect();
-            if (!('IntersectionObserver' in window)) return;
-            feedViewObserver = new IntersectionObserver(entries => {
-                entries.forEach(entry => { if (entry.isIntersecting && entry.intersectionRatio >= 0.55) { const id = entry.target.id?.replace('post-card-', ''); if (id) trackPostView(id); } });
-            }, { threshold: [0.55] });
-            document.querySelectorAll('.post-card[id^="post-card-"]').forEach(card => feedViewObserver.observe(card));
-        }
-        function updateFeedToolTabs() {
-            document.querySelectorAll('.feed-tool-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tool === feedViewState.mode));
-        }
-        function setFeedToolStatus(text) { const el = document.getElementById('feedToolsStatus'); if (el) el.textContent = text; }
-        async function selectFeedTool(tool) {
-            closePremiumMenu();
-            feedViewState.hashtag = '';
-            feedViewState.location = '';
-            if (tool === 'search') {
-                feedViewState.mode = 'all';
-                const input = document.getElementById('feedSearchInput'); if (input) { input.focus(); input.select(); }
-                setFeedToolStatus('Search the loaded Feed posts.');
-            } else if (tool === 'following') {
-                feedViewState.mode = 'following'; await loadFollowingIds(); setFeedToolStatus(`Showing posts from ${followingUidSet.size} followed account${followingUidSet.size === 1 ? '' : 's'}.`);
-            } else if (tool === 'saved') {
-                feedViewState.mode = 'saved'; await loadSavedIds(); setFeedToolStatus(`${feedSavedIds.length} saved post${feedSavedIds.length === 1 ? '' : 's'}.`);
-            } else if (tool === 'trending') { feedViewState.mode = 'trending'; setFeedToolStatus('Trending is ranked from existing Feed engagement and recency.'); }
-            else if (tool === 'forYou') { feedViewState.mode = 'forYou'; setFeedToolStatus('For You ranks the loaded posts using existing engagement and recency signals.'); }
-            else if (tool === 'hashtags') { feedViewState.mode = 'all'; const input = document.getElementById('feedSearchInput'); if (input) { input.placeholder = 'Search a #hashtag...'; input.focus(); } setFeedToolStatus('Enter a hashtag such as #music.'); }
-            else if (tool === 'locations') { feedViewState.mode = 'all'; const input = document.getElementById('feedSearchInput'); if (input) { input.placeholder = 'Search a post location...'; input.focus(); } setFeedToolStatus('Search locations attached to posts.'); }
-            else if (tool === 'notInterested') { setFeedToolStatus('Muted authors are hidden from your Feed on this device.'); }
-            else { feedViewState.mode = 'all'; setFeedToolStatus('Showing the latest posts.'); }
-            updateFeedToolTabs(); renderPosts(cachedPosts, { cache: false });
-        }
-        window.selectFeedTool = selectFeedTool;
-        window.clearFeedTool = function() { feedViewState.mode = 'all'; feedViewState.search = ''; feedViewState.hashtag = ''; feedViewState.location = ''; const input = document.getElementById('feedSearchInput'); if (input) { input.value = ''; input.placeholder = 'Search posts, people or #hashtags...'; } updateFeedToolTabs(); setFeedToolStatus('Showing the latest posts.'); renderPosts(cachedPosts, { cache: false }); };
-        window.searchHashtag = function(tag) { const input = document.getElementById('feedSearchInput'); feedViewState.search = ''; feedViewState.hashtag = String(tag || '').replace(/^#/, '').toLowerCase(); feedViewState.mode = 'all'; if (input) { input.value = `#${feedViewState.hashtag}`; input.placeholder = 'Search posts, people or #hashtags...'; } updateFeedToolTabs(); setFeedToolStatus(`Showing posts tagged #${feedViewState.hashtag}.`); document.getElementById('feedToolsCard')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); renderPosts(cachedPosts, { cache: false }); };
-        window.goToUser = function(uid) { if (uid) window.openProfileModal(uid); };
-        window.toggleSavedPost = toggleSavedPost;
-        window.mutePostAuthor = function(uid) { if (!uid || uid === currentUser?.uid) return; const muted = getMutedAuthors(); muted.add(uid); setMutedAuthors(muted); window.showToast('Posts from this author are now hidden on this device.', 'success'); renderPosts(cachedPosts, { cache: false }); };
-        window.unmuteAllFeedAuthors = function() { setMutedAuthors(new Set()); renderPosts(cachedPosts, { cache: false }); window.showToast('Muted authors restored.', 'success'); };
-        window.saveFeedDraft = function() { const input = document.getElementById('postInput'); const location = document.getElementById('postLocationInput'); if (!input) return; const draft = { content: input.value, locationLabel: location?.value || '', savedAt: Date.now() }; if (!draft.content.trim() && !draft.locationLabel.trim()) { localStorage.removeItem(draftPostKey); window.showToast('Draft cleared.', 'success'); return; } writeLocalJson(draftPostKey, draft); window.showToast('Draft saved on this device.', 'success'); };
-        window.restoreFeedDraft = function() { const draft = readLocalJson(draftPostKey, null); if (!draft) return; const input = document.getElementById('postInput'); const location = document.getElementById('postLocationInput'); if (input) input.value = draft.content || ''; if (location) location.value = draft.locationLabel || ''; closeFeedFeatureModal(); window.showToast('Draft restored.', 'success'); };
-        function getScheduledPosts() { return readLocalJson(scheduledPostsKey, []).filter(x => x && x.id && x.publishAt); }
-        function saveScheduledPosts(items) { writeLocalJson(scheduledPostsKey, items); }
-        async function publishScheduledPost(item) {
-            if (!currentUser || !item) return false;
-            try { await addDoc(collection(db, 'posts'), { authorUid: currentUser.uid, authorName: item.authorName || currentUser.displayName || 'User', authorAvatar: item.authorAvatar || '', content: item.content || '', imageUrl: '', videoUrl: '', videoThumbnailUrl: '', locationLabel: item.locationLabel || '', likes: [], comments: [], reactions: {}, createdAt: serverTimestamp() }); return true; } catch (error) { console.error('Scheduled post publish failed:', error); return false; }
-        }
-        async function processScheduledPosts() {
-            if (!currentUser) return;
-            const items = getScheduledPosts(); const pending = []; let published = 0;
-            for (const item of items) { if (new Date(item.publishAt).getTime() <= Date.now()) { if (await publishScheduledPost(item)) published++; else pending.push(item); } else pending.push(item); }
-            saveScheduledPosts(pending); if (published) window.showToast(`${published} scheduled post${published === 1 ? '' : 's'} published.`, 'success');
-        }
-        function openFeedFeatureModal(type) {
-            closePremiumMenu(); const modal = document.getElementById('feedFeatureModal'); const title = document.getElementById('feedFeatureTitle'); const body = document.getElementById('feedFeatureBody'); if (!modal || !title || !body) return;
-            let html = '';
-            if (type === 'collections') {
-                title.textContent = '📂 Collections';
-                html = `<div class="feed-feature-list"><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">Collections use your saved posts</div><div class="feed-feature-row-meta">Create a local collection and assign saved posts to it.</div></div><button type="button" class="feed-feature-btn primary" onclick="createFeedCollection()">New</button></div><div id="feedCollectionsList"></div></div>`;
-                body.innerHTML = html; renderFeedCollections();
-            } else if (type === 'drafts') {
-                title.textContent = '📝 Drafts'; const draft = readLocalJson(draftPostKey, null); html = draft ? `<div class="feed-feature-list"><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">Saved draft</div><div class="feed-feature-row-meta">${escapeHTML((draft.content || '').slice(0, 140) || 'Location only')} · ${new Date(draft.savedAt || Date.now()).toLocaleString()}</div></div><button type="button" class="feed-feature-btn primary" onclick="restoreFeedDraft()">Restore</button><button type="button" class="feed-feature-btn" onclick="localStorage.removeItem('${draftPostKey}'); openFeedFeatureModal('drafts')">Delete</button></div></div>` : '<div class="empty-state">No draft saved on this device.</div>';
-                body.innerHTML = html;
-            } else if (type === 'analytics') {
-                title.textContent = '📊 Post Analytics';
-                const own = cachedPosts.filter(p => currentUser && p.authorUid === currentUser.uid);
-                const totals = own.reduce((a,p) => { a.posts++; a.likes += Array.isArray(p.likes) ? p.likes.length : 0; a.comments += Array.isArray(p.comments) ? p.comments.length : 0; a.views += Number(p.views || 0); return a; }, { posts:0, likes:0, comments:0, views:0 });
-                body.innerHTML = `<div class="feed-feature-list"><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">Loaded posts</div><div class="feed-feature-row-meta">${totals.posts}</div></div></div><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">❤️ Likes</div><div class="feed-feature-row-meta">${totals.likes}</div></div></div><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">💬 Comments</div><div class="feed-feature-row-meta">${totals.comments}</div></div></div><div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">👁 Views</div><div class="feed-feature-row-meta">${totals.views}</div></div></div><div class="feed-schedule-note">Analytics are calculated from the posts currently loaded by this Feed. This file does not contain a separate analytics backend.</div></div>`;
-            } else if (type === 'scheduled') {
-                title.textContent = '⏰ Scheduled Posts'; const items = getScheduledPosts(); body.innerHTML = items.length ? `<div class="feed-feature-list">${items.map((x,i)=>`<div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">${escapeHTML((x.content || 'Scheduled post').slice(0,90))}</div><div class="feed-feature-row-meta">Publishes ${new Date(x.publishAt).toLocaleString()} · this device</div></div><button type="button" class="feed-feature-btn" onclick="cancelScheduledPost(${i})">Cancel</button></div>`).join('')}</div>` : '<div class="empty-state">No scheduled posts. Choose a future date in the composer before posting.</div><div class="feed-schedule-note">This device must have Feed open at the scheduled time. A backend scheduler is not present in this file.</div>';
-            } else if (type === 'muted') { title.textContent = '🚫 Muted Authors'; const muted = [...getMutedAuthors()]; body.innerHTML = muted.length ? `<div class="feed-feature-list">${muted.map(uid=>`<div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">${escapeHTML(getCachedUser(uid)?.name || uid)}</div></div><button type="button" class="feed-feature-btn" onclick="unmuteFeedAuthor('${uid}')">Unmute</button></div>`).join('')}</div>` : '<div class="empty-state">No muted authors.</div>'; }
-            modal.classList.add('active'); modal.setAttribute('aria-hidden','false');
-        }
-        window.openFeedFeatureModal = openFeedFeatureModal;
-        window.closeFeedFeatureModal = function() { const modal = document.getElementById('feedFeatureModal'); if (modal) { modal.classList.remove('active'); modal.setAttribute('aria-hidden','true'); } };
-        window.createFeedCollection = function() { const name = prompt('Collection name'); if (!name || !name.trim()) return; const collections = readLocalJson('spikeFeedCollections_v1', []); if (!collections.some(c => c.name.toLowerCase() === name.trim().toLowerCase())) collections.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), name: name.trim(), postIds: [] }); writeLocalJson('spikeFeedCollections_v1', collections); renderFeedCollections(); };
-        function renderFeedCollections() { const host = document.getElementById('feedCollectionsList'); if (!host) return; const collections = readLocalJson('spikeFeedCollections_v1', []); host.innerHTML = collections.length ? `<div class="feed-feature-list">${collections.map(c=>`<div class="feed-feature-row"><div class="feed-feature-row-main"><div class="feed-feature-row-title">📂 ${escapeHTML(c.name)}</div><div class="feed-feature-row-meta">${(c.postIds || []).length} saved post${(c.postIds || []).length === 1 ? '' : 's'}</div></div><button type="button" class="feed-feature-btn primary" onclick="syncSavedToFeedCollection('${c.id}')">Sync Saved</button><button type="button" class="feed-feature-btn" onclick="deleteFeedCollection('${c.id}')">Delete</button></div>`).join('')}</div>` : '<div class="empty-state">No collections yet.</div>'; }
-        window.syncSavedToFeedCollection = async function(id) { await loadSavedIds(); const collections = readLocalJson('spikeFeedCollections_v1', []); const collection = collections.find(c => c.id === id); if (!collection) return; collection.postIds = [...new Set([...(collection.postIds || []), ...feedSavedIds])]; writeLocalJson('spikeFeedCollections_v1', collections); renderFeedCollections(); window.showToast(`${feedSavedIds.length} saved post${feedSavedIds.length === 1 ? '' : 's'} synced to collection.`, 'success'); };
-        window.deleteFeedCollection = function(id) { writeLocalJson('spikeFeedCollections_v1', readLocalJson('spikeFeedCollections_v1', []).filter(c => c.id !== id)); renderFeedCollections(); };
-        window.unmuteFeedAuthor = function(uid) { const set = getMutedAuthors(); set.delete(uid); setMutedAuthors(set); openFeedFeatureModal('muted'); renderPosts(cachedPosts, { cache: false }); };
-        window.cancelScheduledPost = function(index) { const items = getScheduledPosts(); items.splice(index,1); saveScheduledPosts(items); openFeedFeatureModal('scheduled'); };
-
-        // ============================================================
         // PARSE POST CONTENT
         // ============================================================
         function parsePostContent(text) {
@@ -5476,32 +5178,7 @@ function setActiveCallFlag(callId) {
         }
         window.parsePostContent = parsePostContent;
 
-        // Feed tools event wiring and local scheduling.
-        document.addEventListener('DOMContentLoaded', () => {
-            const search = document.getElementById('feedSearchInput');
-            if (search) search.addEventListener('input', () => {
-                const value = search.value.trim();
-                feedViewState.search = value.toLowerCase();
-                feedViewState.hashtag = '';
-                feedViewState.location = '';
-                if (value.startsWith('#')) feedViewState.hashtag = value.slice(1).toLowerCase();
-                else if (feedViewState.mode === 'all' && value && !value.startsWith('#')) feedViewState.search = value.toLowerCase();
-                setFeedToolStatus(value ? `Filtering Feed for “${value}”.` : 'Showing the latest posts.');
-                renderPosts(cachedPosts, { cache: false });
-            });
-            const postInput = document.getElementById('postInput');
-            if (postInput) postInput.addEventListener('input', () => {
-                if (postInput.value.trim()) writeLocalJson(draftPostKey, { content: postInput.value, locationLabel: document.getElementById('postLocationInput')?.value || '', savedAt: Date.now() });
-            });
-            const locationInput = document.getElementById('postLocationInput');
-            if (locationInput) locationInput.addEventListener('input', () => {
-                if (postInput?.value.trim() || locationInput.value.trim()) writeLocalJson(draftPostKey, { content: postInput?.value || '', locationLabel: locationInput.value, savedAt: Date.now() });
-            });
-            processScheduledPosts();
-            window.setInterval(processScheduledPosts, 30000);
-        });
-
-                // ============================================================
+        // ============================================================
         // NAVIGATION
         // ============================================================
         window.goToFriends = function() { window.location.href = "friends.html"; };
@@ -5743,21 +5420,6 @@ function setActiveCallFlag(callId) {
                 return;
             }
 
-            const scheduleValue = document.getElementById('postScheduleInput')?.value || '';
-            const scheduleDate = scheduleValue ? new Date(scheduleValue) : null;
-            if (scheduleDate && Number.isNaN(scheduleDate.getTime())) {
-                window.showToast('Invalid schedule time.', 'warning', 'Schedule');
-                return;
-            }
-            if (scheduleDate && scheduleDate.getTime() <= Date.now() + 30000) {
-                window.showToast('Scheduled time must be at least 30 seconds in the future.', 'warning', 'Schedule');
-                return;
-            }
-            if (scheduleDate && (selectedPostImageFile || selectedPostVideoFile)) {
-                window.showToast('Scheduled posts currently support text and location only. Publish media now instead.', 'warning', 'Schedule');
-                return;
-            }
-
             btn.disabled = true;
             btn.textContent = "Posting...";
 
@@ -5780,40 +5442,25 @@ function setActiveCallFlag(callId) {
                 const authorName = userObj?.name || currentUser.displayName || "User";
                 const authorAvatar = getCachedAvatar(currentUser.uid) || userObj?.avatar || "";
 
-                const locationLabel = (document.getElementById('postLocationInput')?.value || '').trim().slice(0, 80);
-                if (scheduleDate) {
-                    const items = getScheduledPosts();
-                    items.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), publishAt: scheduleDate.toISOString(), content, locationLabel, authorName, authorAvatar });
-                    saveScheduledPosts(items);
-                    input.value = '';
-                    const locationInput = document.getElementById('postLocationInput'); if (locationInput) locationInput.value = '';
-                    const scheduleInput = document.getElementById('postScheduleInput'); if (scheduleInput) scheduleInput.value = '';
-                    window.removeSelectedMedia();
-                    localStorage.removeItem(draftPostKey);
-                    window.showToast('Post scheduled on this device.', 'success', 'Scheduled');
-                } else {
-                    const postData = {
-                        authorUid: currentUser.uid,
-                        authorName: authorName,
-                        authorAvatar: authorAvatar,
-                        content: content,
-                        imageUrl: imageUrl,
-                        videoUrl: videoUrl,
-                        videoThumbnailUrl: videoThumbnailUrl,
-                        locationLabel,
-                        likes: [],
-                        comments: [],
-                        reactions: {},
-                        createdAt: serverTimestamp()
-                    };
-                    await addDoc(collection(db, "posts"), postData);
-                    input.value = '';
-                    const locationInput = document.getElementById('postLocationInput'); if (locationInput) locationInput.value = '';
-                    const scheduleInput = document.getElementById('postScheduleInput'); if (scheduleInput) scheduleInput.value = '';
-                    window.removeSelectedMedia();
-                    localStorage.removeItem(draftPostKey);
-                    window.showToast("Post created successfully!", "success", "Published");
-                }
+                const postData = {
+                    authorUid: currentUser.uid,
+                    authorName: authorName,
+                    authorAvatar: authorAvatar,
+                    content: content,
+                    imageUrl: imageUrl,
+                    videoUrl: videoUrl,
+                    videoThumbnailUrl: videoThumbnailUrl,
+                    likes: [],
+                    comments: [],
+                    reactions: {},
+                    createdAt: serverTimestamp()
+                };
+
+                await addDoc(collection(db, "posts"), postData);
+
+                input.value = '';
+                window.removeSelectedMedia();
+                window.showToast("Post created successfully!", "success", "Published");
             } catch (err) {
                 console.error("Error creating post:", err);
                 window.showToast("Failed to create post.", "error", "Error");
@@ -7124,7 +6771,7 @@ function setActiveCallFlag(callId) {
                                             <span class="post-author">${escapeHTML(authorName)}</span>
                                             ${pinnedBadge}${hiddenBadge}${suspendedBadge}
                                         </div>
-                                        <span class="post-time">${timeAgo}<span class="post-view-count">${Number(post.views || 0) > 0 ? `👁 ${Number(post.views || 0)}` : ''}</span></span>
+                                        <span class="post-time">${timeAgo}</span>
                                     </div>
                                 </a>
                                 <div class="post-actions-right">
@@ -7133,7 +6780,6 @@ function setActiveCallFlag(callId) {
                                 </div>
                             </div>
                             <div class="post-content" id="content-${postId}">${parsedContent}</div>
-                            ${post.locationLabel ? `<div class="post-location-tag">📍 ${escapeHTML(post.locationLabel)}</div>` : ''}
                             ${repostCardHTML}
                             ${mediaHTML}
 
@@ -7159,8 +6805,6 @@ function setActiveCallFlag(callId) {
                                     <button class="action-panel-btn" onclick="document.getElementById('comments-section-${postId}').classList.toggle('active')">💬 Comment</button>
                                     <button class="action-panel-btn primary" onclick="window.openRepostModal('${postId}')">🔁 Repost</button>
                                     <button class="action-panel-btn primary" onclick="window.openShareModal('${postId}')">🔗 Share</button>
-                                    <button class="action-panel-btn" onclick="window.toggleSavedPost('${postId}')">🔖 ${feedSavedIds.includes(postId) ? 'Unsave' : 'Save'}</button>
-                                    ${!isOwner ? `<button class="action-panel-btn" onclick="window.mutePostAuthor('${post.authorUid}')">🚫 Not interested</button>` : ''}
                                     ${showReportInPanel ? `<button class="action-panel-btn" onclick="window.openReportModal('${postId}')" style="color:var(--error);">🚩 Report</button>` : ''}
                                 </div>
                             </div>
@@ -7176,12 +6820,10 @@ function setActiveCallFlag(callId) {
                     `;
         }
 
-        function renderPosts(postsArray, options = {}) {
+        function renderPosts(postsArray) {
             const postsStream = document.getElementById("postsStream");
-            const shouldCache = options.cache !== false;
-            const sourcePosts = Array.isArray(postsArray) ? postsArray : [];
 
-            const validPosts = applyFeedView(sourcePosts).filter(post => {
+            const validPosts = postsArray.filter(post => {
                 if (!post || !post.id) return false;
                 if (post.hidden === true) {
                     if (currentUser && (post.authorUid === currentUser.uid || isAdmin)) return true;
@@ -7231,9 +6873,8 @@ function setActiveCallFlag(callId) {
                 postsStream.innerHTML = feedHTML;
             }
 
-            if (shouldCache && sourcePosts.length > 0) setCachedPosts(sourcePosts);
+            if (validPosts.length > 0) setCachedPosts(validPosts);
             attachPostListeners();
-            setupPostViewTracking();
 
             document.querySelectorAll('.post-video-wrapper video').forEach(video => {
                 const vid = video;
@@ -7256,20 +6897,27 @@ function setActiveCallFlag(callId) {
             if (!currentUser) return;
             const btn = e.currentTarget;
             const postId = btn.getAttribute('data-id');
-            if (!postId) return;
             const postRef = doc(db, "posts", postId);
 
             try {
-                await runTransaction(db, async (transaction) => {
-                    const postSnap = await transaction.get(postRef);
-                    if (!postSnap.exists()) return;
-                    const likes = postSnap.data().likes || [];
-                    if (likes.includes(currentUser.uid)) {
-                        transaction.update(postRef, { likes: arrayRemove(currentUser.uid) });
-                    } else {
-                        transaction.update(postRef, { likes: arrayUnion(currentUser.uid) });
-                    }
-                });
+                const postSnap = await getDoc(postRef);
+                if (!postSnap.exists()) return;
+                const post = postSnap.data();
+                const likes = post.likes || [];
+                const isLiked = likes.includes(currentUser.uid);
+
+                if (isLiked) {
+                    await updateDoc(postRef, { likes: arrayRemove(currentUser.uid) });
+                } else {
+                    await updateDoc(postRef, { likes: arrayUnion(currentUser.uid) });
+                    const authorUid = post.authorUid;
+                    await createUserNotification(authorUid, {
+                        id: `like_${postId}_${currentUser.uid}`, category: 'feed', type: 'like', icon: '❤️',
+                        text: `${currentUser.displayName || 'Someone'} liked your post`, actorName: currentUser.displayName || 'User',
+                        actorAvatar: getCachedUser(currentUser.uid)?.avatar || '', sourceId: postId, url: `/feed?postId=${encodeURIComponent(postId)}`,
+                        createdAt: serverTimestamp(), _groupKey: `like_${postId}`
+                    });
+                }
             } catch (error) {
                 console.error("Error toggling like:", error);
             }
@@ -7279,32 +6927,39 @@ function setActiveCallFlag(callId) {
         // POST INTERACTIONS
         // ============================================================
         window.toggleReaction = async function(postId, emoji) {
-            if (!currentUser || !postId || !emoji) return;
+            if (!currentUser) return;
             try {
                 const postRef = doc(db, "posts", postId);
-                let newCount = 0;
-                await runTransaction(db, async (transaction) => {
-                    const postSnap = await transaction.get(postRef);
-                    if (!postSnap.exists()) return;
-                    const reactions = { ...(postSnap.data().reactions || {}) };
-                    const usersKey = `${emoji}_users`;
-                    const users = Array.isArray(reactions[usersKey]) ? reactions[usersKey] : [];
-                    const count = Number.isFinite(reactions[emoji]) ? reactions[emoji] : 0;
+                const postSnap = await getDoc(postRef);
+                if (!postSnap.exists()) return;
+                const post = postSnap.data();
+                const reactions = post.reactions || {};
+                const usersKey = `${emoji}_users`;
+                const users = reactions[usersKey] || [];
+                const count = reactions[emoji] || 0;
 
-                    if (users.includes(currentUser.uid)) {
-                        newCount = Math.max(0, count - 1);
-                        reactions[emoji] = newCount;
-                        reactions[usersKey] = users.filter(u => u !== currentUser.uid);
-                    } else {
-                        newCount = count + 1;
-                        reactions[emoji] = newCount;
-                        reactions[usersKey] = [...users, currentUser.uid];
-                    }
-                    transaction.update(postRef, { reactions });
-                });
+                if (users.includes(currentUser.uid)) {
+                    reactions[emoji] = count - 1;
+                    reactions[usersKey] = users.filter(u => u !== currentUser.uid);
+                } else {
+                    reactions[emoji] = count + 1;
+                    reactions[usersKey] = [...users, currentUser.uid];
+                }
+                await updateDoc(postRef, { reactions });
+                if (!users.includes(currentUser.uid)) {
+                    await createUserNotification(post.authorUid, {
+                        id: `reaction_${postId}_${currentUser.uid}_${emoji}`, category: 'feed', type: 'reaction', icon: emoji,
+                        text: `${currentUser.displayName || 'Someone'} reacted ${emoji} to your post`, actorName: currentUser.displayName || 'User',
+                        actorAvatar: getCachedUser(currentUser.uid)?.avatar || '', sourceId: postId, url: `/feed?postId=${encodeURIComponent(postId)}`,
+                        createdAt: serverTimestamp(), _groupKey: `reaction_${postId}`
+                    });
+                }
 
                 const countSpan = document.getElementById(`reaction-count-${postId}-${emoji}`);
-                if (countSpan) countSpan.textContent = newCount > 0 ? newCount : '';
+                if (countSpan) {
+                    const newCount = reactions[emoji];
+                    countSpan.textContent = newCount > 0 ? newCount : '';
+                }
             } catch (err) {
                 console.error("Error toggling reaction:", err);
             }
@@ -7712,6 +7367,12 @@ function setActiveCallFlag(callId) {
                     comments: [],
                     createdAt: serverTimestamp()
                 });
+                await createUserNotification(origData.authorUid, {
+                    id: `repost_${activePostToRepost}_${currentUser.uid}`, category: 'feed', type: 'repost', icon: '🔁',
+                    text: `${currentUser.displayName || 'Someone'} reposted your post`, actorName: currentUser.displayName || 'User',
+                    actorAvatar: getCachedUser(currentUser.uid)?.avatar || '', sourceId: activePostToRepost, url: `/feed?postId=${encodeURIComponent(activePostToRepost)}`,
+                    createdAt: serverTimestamp(), _groupKey: `repost_${activePostToRepost}`
+                });
                 window.closeRepostModal();
                 window.showToast("Reposted to your feed!", "success", "Repost Successful");
             } catch (err) { console.error("Error executing repost:", err);
@@ -7732,6 +7393,12 @@ function setActiveCallFlag(callId) {
                     authorUid: currentUser.uid, authorName: name, text: text, createdAt: new Date().toISOString(),
                     replies: [] };
                 await updateDoc(postRef, { comments: arrayUnion(newComment) });
+                await createUserNotification(post.authorUid, {
+                    id: `comment_${postId}_${newComment.id}`, category: 'feed', type: 'comment', icon: '💬',
+                    text: `${name} commented: "${text.length > 60 ? text.slice(0, 60) + '…' : text}"`, actorName: name,
+                    actorAvatar: userObj?.avatar || '', sourceId: postId, url: `/feed?postId=${encodeURIComponent(postId)}`,
+                    createdAt: newComment.createdAt, _groupKey: `comment_${postId}`
+                });
                 input.value = '';
             } catch (err) { console.error("Error posting comment:", err);
                 window.showToast("Failed to post comment", "error", "Comment Failed"); }
@@ -7756,6 +7423,7 @@ function setActiveCallFlag(callId) {
             }
             if (video.paused) {
                 const playPromise = video.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise !== undefined) {
                     playPromise.catch(err => {
                         console.warn(`[Video] Play failed for ${videoId}:`, err);
@@ -8047,57 +7715,41 @@ function setActiveCallFlag(callId) {
 
         window.followUser = async function(uid) {
             if (!currentUser) { window.showToast("Please sign in to follow users.", "warning"); return; }
-            if (!uid || uid === currentUser.uid) return;
             const btn = document.getElementById('followBtn');
-            if (btn) { btn.disabled = true; btn.textContent = '...'; }
+            if (btn) { btn.disabled = true;
+                btn.textContent = '...'; }
             try {
-                const followingRef = doc(db, "users", currentUser.uid, "following", uid);
-                const targetUserRef = doc(db, "users", uid);
-                await runTransaction(db, async (transaction) => {
-                    const [followingSnap, targetSnap] = await Promise.all([
-                        transaction.get(followingRef),
-                        transaction.get(targetUserRef)
-                    ]);
-                    if (followingSnap.exists()) return;
-                    if (!targetSnap.exists()) throw new Error('Target user does not exist.');
-                    transaction.set(followingRef, { followedAt: serverTimestamp() });
-                    transaction.update(targetUserRef, { followersCount: increment(1) });
-                });
+                await setDoc(doc(db, "users", currentUser.uid, "following", uid), { followedAt: serverTimestamp() });
+                await updateDoc(doc(db, "users", uid), { followersCount: increment(1) });
                 isFollowing = true;
-                if (btn) { btn.textContent = '✓ Following'; btn.classList.add('following'); btn.disabled = false; btn.onclick = function() { window.unfollowUser(uid); }; }
+                if (btn) { btn.textContent = '✓ Following';
+                    btn.classList.add('following');
+                    btn.disabled = false;
+                    btn.onclick = function() { window.unfollowUser(uid); }; }
                 window.showToast(`You are now following this user!`, "success");
-            } catch (error) {
-                console.error("Error following user:", error);
-                window.showToast("Failed to follow user.", "error");
-                if (btn) { btn.textContent = '+ Follow'; btn.disabled = false; }
-            }
+            } catch (error) { console.error("Error following user:", error);
+                window.showToast("Failed to follow user.", "error"); if (btn) { btn.textContent = '+ Follow';
+                    btn.disabled = false; } }
         };
 
         window.unfollowUser = async function(uid) {
-            if (!currentUser || !uid || uid === currentUser.uid) return;
+            if (!currentUser) return;
             const btn = document.getElementById('followBtn');
-            if (btn) { btn.disabled = true; btn.textContent = '...'; }
+            if (btn) { btn.disabled = true;
+                btn.textContent = '...'; }
             try {
-                const followingRef = doc(db, "users", currentUser.uid, "following", uid);
-                const targetUserRef = doc(db, "users", uid);
-                await runTransaction(db, async (transaction) => {
-                    const [followingSnap, targetSnap] = await Promise.all([
-                        transaction.get(followingRef),
-                        transaction.get(targetUserRef)
-                    ]);
-                    if (!followingSnap.exists()) return;
-                    if (!targetSnap.exists()) throw new Error('Target user does not exist.');
-                    transaction.delete(followingRef);
-                    transaction.update(targetUserRef, { followersCount: increment(-1) });
-                });
+                await deleteDoc(doc(db, "users", currentUser.uid, "following", uid));
+                await updateDoc(doc(db, "users", uid), { followersCount: increment(-1) });
                 isFollowing = false;
-                if (btn) { btn.textContent = '+ Follow'; btn.classList.remove('following'); btn.disabled = false; btn.onclick = function() { window.followUser(uid); }; }
+                if (btn) { btn.textContent = '+ Follow';
+                    btn.classList.remove('following');
+                    btn.disabled = false;
+                    btn.onclick = function() { window.followUser(uid); }; }
                 window.showToast("Unfollowed user.", "success");
-            } catch (error) {
-                console.error("Error unfollowing user:", error);
-                window.showToast("Failed to unfollow user.", "error");
-                if (btn) { btn.textContent = '✓ Following'; btn.classList.add('following'); btn.disabled = false; }
-            }
+            } catch (error) { console.error("Error unfollowing user:", error);
+                window.showToast("Failed to unfollow user.", "error"); if (btn) { btn.textContent = '✓ Following';
+                    btn.classList.add('following');
+                    btn.disabled = false; } }
         };
 
         window.openChatFromProfile = async function(uid) {
@@ -8150,17 +7802,11 @@ function setActiveCallFlag(callId) {
             }
         };
 
-        let profileEventListenersAttached = false;
         function attachProfileEventListeners() {
-            if (profileEventListenersAttached) return;
-            profileEventListenersAttached = true;
-            document.addEventListener('click', function(e) {
-                const menu = document.getElementById('profileMoreMenu');
-                if (menu && !e.target.closest('.profile-more-dropdown')) menu.classList.remove('active');
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && profileModalOpen) closeProfileModal();
-            });
+            document.addEventListener('click', function(e) { const menu = document.getElementById('profileMoreMenu'); if (
+                    menu && !e.target.closest('.profile-more-dropdown')) menu.classList.remove('active'); });
+            document.addEventListener('keydown', function(e) { if (e.key === 'Escape' && profileModalOpen)
+                closeProfileModal(); });
         }
 
         // ============================================================
@@ -8324,6 +7970,7 @@ function setActiveCallFlag(callId) {
             try {
                 incomingRing.currentTime = 0;
                 const playPromise = incomingRing.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise) playPromise.catch(() => {});
             } catch (e) {}
         }
@@ -8335,6 +7982,7 @@ function setActiveCallFlag(callId) {
             try {
                 outgoingRing.currentTime = 0;
                 const playPromise = outgoingRing.play();
+            if (typeof spikeStoryStopMusicAfter10s === 'function' && typeof audioEl !== 'undefined') spikeStoryStopMusicAfter10s(audioEl);
                 if (playPromise) playPromise.catch(() => {});
             } catch (e) {}
         }
@@ -9104,9 +8752,6 @@ function setActiveCallFlag(callId) {
             currentUser = user;
             if (user) {
                 currentUserUid = user.uid;
-            loadSavedIds().catch(() => {});
-            loadFollowingIds().catch(() => {});
-            processScheduledPosts().catch(() => {});
                 isAdmin = isCurrentUserAdmin();
                 const adminBtn = document.getElementById("dropdownAdminBtn");
                 if (adminBtn) adminBtn.classList.toggle("visible", isAdmin);
@@ -9117,6 +8762,8 @@ function setActiveCallFlag(callId) {
                 if (cachedAvatar) updateDropdownAvatar(cachedAvatar);
                 listenForAvatarUpdates(user.uid);
                 listenToOnlineStatus(user.uid);
+
+                listenForAnnouncement();
 
                 // TURBO: start the visible feed immediately. Maintenance is checked
                 // from the last-known local state first and refreshed in parallel.
