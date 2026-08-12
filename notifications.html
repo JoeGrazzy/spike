@@ -1287,7 +1287,7 @@
         // ============================================================
         async function markRead(id) {
             const item = allNotifications.find(n => n.id === id);
-            if (!item || item.read || !currentUserUid) return;
+            if (!item || normalizeReadState(item.read) || !currentUserUid) return;
 
             item.read = true;
             renderAll();
@@ -1312,7 +1312,7 @@
         async function markAllRead() {
             if (!currentUserUid) return;
 
-            const unread = allNotifications.filter(n => !n.read);
+            const unread = allNotifications.filter(n => !normalizeReadState(n.read));
             if (!unread.length) {
                 showToast('Everything is already read.', 'success', 'Done');
                 return;
@@ -1566,7 +1566,12 @@
         // Firestore is the source of truth. This fallback keeps the UI
         // compatible if older local-read code references isRead().
         function isRead(id) {
-            return false;
+            const item = allNotifications.find(n => n.id === id);
+            return !!(item && item.read === true);
+        }
+
+        function normalizeReadState(value) {
+            return value === true || value === 'true' || value === 1 || value === '1';
         }
 
         // ============================================================
@@ -1618,7 +1623,7 @@
                     return createNotificationItem({
                         id: docSnap.id, category: d.category || 'announcements', type: d.type || 'system', icon: d.icon || '🔔',
                         text: d.text || 'You have a new notification', actorName: d.actorName || '', actorAvatar: d.actorAvatar || '',
-                        url: d.url || '', createdAt: d.createdAt, read: d.read === true, _groupKey: d._groupKey || d.groupKey || docSnap.id
+                        url: d.url || '', createdAt: d.createdAt, read: normalizeReadState(d.read), _groupKey: d._groupKey || d.groupKey || docSnap.id
                     });
                 });
                 allNotifications.sort((a,b) => toDate(b.createdAt) - toDate(a.createdAt));
@@ -1726,7 +1731,7 @@
         }
 
         function buildNotificationItem(item) {
-            const isUnread = !item.read;
+            const isUnread = !normalizeReadState(item.read);
             const avatarHTML = item.actorAvatar ?
                 `<img src="${escapeHTML(item.actorAvatar)}" alt="${escapeHTML(item.actorName || 'User')}">` :
                 escapeHTML((item.actorName || 'U').charAt(0).toUpperCase());
@@ -1775,7 +1780,7 @@
         // BADGE UPDATE
         // ============================================================
         function updateBadge() {
-            const unread = allNotifications.filter(n => !n.read).length;
+            const unread = allNotifications.filter(n => !normalizeReadState(n.read)).length;
             const badge = document.getElementById('unreadBadge');
             if (unread > 0) {
                 badge.textContent = unread > 99 ? '99+' : unread;
@@ -1843,7 +1848,7 @@
         function handleItemClick(id) {
             const item = allNotifications.find(n => n.id === id);
             if (!item) return;
-            if (!item.read) {
+            if (!normalizeReadState(item.read)) {
                 markRead(id);
                 renderAll();
                 updateBadge();
