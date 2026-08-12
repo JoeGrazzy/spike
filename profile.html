@@ -464,26 +464,7 @@
         .welcome-popup .popup-close:hover { color: var(--text-main); }
         .welcome-popup .popup-close:active { transform: scale(0.9); }
 
-        /* ============================================================
-           PROFILE FULLSCREEN CAMERA SAFE AREA
-           Keep the sticky header below the Android front-camera/cutout.
-           ============================================================ */
-        :root {
-            --profile-safe-top: env(safe-area-inset-top, 0px);
-        }
-
-        @supports (padding-top: constant(safe-area-inset-top)) {
-            :root {
-                --profile-safe-top: constant(safe-area-inset-top);
-            }
-        }
-
         .profile-header {
-            padding-top: max(8px, var(--profile-safe-top));
-        }
-
-        @supports (padding-top: env(safe-area-inset-top)) {
-            .profile-header {
                 padding-top: max(8px, env(safe-area-inset-top, 0px));
             }
         }
@@ -495,7 +476,8 @@
         }
 
         .profile-header {
-            width: 100%; max-width: 800px; padding: 10px 16px;
+            width: 100%; max-width: 800px;
+            padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px;
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid var(--border-color);
             background: var(--bg-glass); backdrop-filter: blur(16px);
@@ -503,6 +485,19 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             gap: 12px; min-height: 56px;
         }
+
+        @supports (padding-top: constant(safe-area-inset-top)) {
+            .profile-header {
+                padding-top: calc(10px + constant(safe-area-inset-top));
+            }
+        }
+
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .profile-header {
+                padding-top: calc(10px + env(safe-area-inset-top, 0px));
+            }
+        }
+
         .header-left { display: flex; align-items: center; gap: 12px; }
         .header-right { display: flex; align-items: center; gap: 4px; }
         .back-btn {
@@ -1284,7 +1279,16 @@
         }
 
         @media (max-width: 480px) {
-            .profile-header { padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
+            .profile-header {
+                padding: calc(8px + env(safe-area-inset-top, 0px)) 12px 8px;
+                flex-wrap: wrap; gap: 6px;
+            }
+            @supports (padding-top: constant(safe-area-inset-top)) {
+                .profile-header {
+                    padding-top: calc(8px + constant(safe-area-inset-top));
+                }
+            }
+
             .profile-card { padding: 20px 14px; }
             .avatar-wrapper { width: 80px; height: 80px; }
             .avatar { font-size: 1.8rem; }
