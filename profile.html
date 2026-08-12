@@ -1372,7 +1372,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { 
-            getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, getDocs, 
+            getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, getDocs, runTransaction, 
             query, where, deleteDoc, arrayRemove, arrayUnion, setDoc, serverTimestamp
         } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -1855,12 +1855,21 @@
                 const friendUid=friendDoc.id;
                 const currentFriends=Array.isArray(userData.friends)?userData.friends:[];
                 if(currentFriends.includes(friendUid)){ showToast('Already friends.','info','Friends'); return; }
-                await updateDoc(doc(db,'users',currentUserUid),{friends:arrayUnion(friendUid)});
-                const friendData=friendDoc.data()||{};
-                const friendFriends=Array.isArray(friendData.friends)?friendData.friends:[];
-                if(!friendFriends.includes(currentUserUid)){
-                    await updateDoc(doc(db,'users',friendUid),{friends:arrayUnion(currentUserUid)});
-                }
+                await runTransaction(db, async (transaction)=>{
+                    const currentRef=doc(db,'users',currentUserUid);
+                    const friendRef=doc(db,'users',friendUid);
+                    const currentSnap=await transaction.get(currentRef);
+                    const friendSnap=await transaction.get(friendRef);
+                    if(!currentSnap.exists() || !friendSnap.exists()) throw new Error('User record unavailable');
+                    const currentData=currentSnap.data()||{};
+                    const friendData=friendSnap.data()||{};
+                    const currentList=Array.isArray(currentData.friends)?currentData.friends:[];
+                    const friendList=Array.isArray(friendData.friends)?friendData.friends:[];
+                    if(!currentList.includes(friendUid)) currentList.push(friendUid);
+                    if(!friendList.includes(currentUserUid)) friendList.push(currentUserUid);
+                    transaction.update(currentRef,{friends:currentList});
+                    transaction.update(friendRef,{friends:friendList});
+                });
                 userData.friends=[...currentFriends,friendUid];
                 const count=document.getElementById('friendCount'); if(count) count.textContent=userData.friends.length;
                 showToast('Friend added successfully.','success','Friends');
