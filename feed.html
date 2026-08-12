@@ -5244,7 +5244,11 @@ function setActiveCallFlag(callId) {
                         const data = docSnap.data() || {};
                         const id = docSnap.id;
 
-                        if (data.read !== true) unreadCount += 1;
+                        // Count only notifications that are actually unread.
+                        // Handles existing records that may store read as a boolean
+                        // or as a string value from older writes.
+                        const isRead = data.read === true || data.read === 'true';
+                        if (!isRead) unreadCount += 1;
 
                         // Do not ring for the initial snapshot. Only genuinely
                         // newly-added notification documents ring.
