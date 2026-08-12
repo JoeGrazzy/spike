@@ -1814,6 +1814,59 @@
         };
         window.closeProfileQR=function(){ document.getElementById('qrOverlay')?.classList.remove('active'); };
 
+        let spikeQrStream = null;
+        window.startFriendQrScanner = async function(){
+            const overlay=document.getElementById('friendQrScannerOverlay');
+            const video=document.getElementById('friendQrVideo');
+            if(!overlay||!video) return;
+            if(!('BarcodeDetector' in window)){ showToast('QR scanning is not supported on this browser.','error','QR Scanner'); return; }
+            try{
+                spikeQrStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+                video.srcObject = spikeQrStream;
+                await video.play();
+                overlay.classList.add('active');
+                const detector = new BarcodeDetector({formats:['qr_code']});
+                const scan = async()=>{
+                    if(!overlay.classList.contains('active')) return;
+                    try{
+                        const codes = await detector.detect(video);
+                        if(codes.length){ await handleFriendQr(codes[0].rawValue); closeFriendQrScanner(); return; }
+                    }catch(e){}
+                    requestAnimationFrame(scan);
+                };
+                scan();
+            }catch(e){ showToast('Camera permission was denied or unavailable.','error','QR Scanner'); }
+        };
+        window.closeFriendQrScanner=function(){
+            document.getElementById('friendQrScannerOverlay')?.classList.remove('active');
+            if(spikeQrStream){ spikeQrStream.getTracks().forEach(t=>t.stop()); spikeQrStream=null; }
+        };
+        window.handleFriendQr=async function(value){
+            if(!currentUserUid){ showToast('You must be signed in.','error','Friends'); return; }
+            const match=String(value||'').match(/SP-?(\d{3,})/i);
+            if(!match){ showToast('Invalid SPIKE friend QR.','error','Friends'); return; }
+            const scannedId=match[1];
+            if(String(userData.spId||'')===scannedId){ showToast('You cannot add yourself.','warning','Friends'); return; }
+            try{
+                const q=query(collection(db,'users'),where('spId','==',scannedId));
+                const result=await getDocs(q);
+                if(result.empty){ showToast('Friend profile not found.','error','Friends'); return; }
+                const friendDoc=result.docs[0];
+                const friendUid=friendDoc.id;
+                const currentFriends=Array.isArray(userData.friends)?userData.friends:[];
+                if(currentFriends.includes(friendUid)){ showToast('Already friends.','info','Friends'); return; }
+                await updateDoc(doc(db,'users',currentUserUid),{friends:[...currentFriends,friendUid]});
+                const friendData=friendDoc.data()||{};
+                const friendFriends=Array.isArray(friendData.friends)?friendData.friends:[];
+                if(!friendFriends.includes(currentUserUid)){
+                    await updateDoc(doc(db,'users',friendUid),{friends:[...friendFriends,currentUserUid]});
+                }
+                userData.friends=[...currentFriends,friendUid];
+                const count=document.getElementById('friendCount'); if(count) count.textContent=userData.friends.length;
+                showToast('Friend added successfully.','success','Friends');
+                profileActivity('Added friend through QR scan');
+            }catch(e){ console.error(e); showToast('Unable to add friend from QR.','error','Friends'); }
+        };
 
         window.showConnections=function(type){
             const overlay=document.getElementById('connectionsOverlay'); const body=document.getElementById('connectionsBody'); const title=document.getElementById('connectionsTitle');
@@ -2807,6 +2860,15 @@
         </div>
     </div>
 
+    <!-- ===== FRIEND QR SCANNER ===== -->
+    <div id="friendQrScannerOverlay" class="qr-overlay">
+        <div class="qr-card" role="dialog" aria-modal="true">
+            <div class="qr-head"><strong>Scan Friend QR</strong><button class="qr-close" type="button" onclick="closeFriendQrScanner()">✕</button></div>
+            <video id="friendQrVideo" style="width:100%;border-radius:12px" playsinline></video>
+            <div class="qr-note">Point the camera at another SPIKE QR code to add the friend automatically.</div>
+        </div>
+    </div>
+
     <!-- ===== PROFILE QR ===== -->
     <div id="qrOverlay" class="qr-overlay" onclick="if(event.target===this)closeProfileQR()">
         <div class="qr-card" role="dialog" aria-modal="true" aria-labelledby="profileQrTitle">
@@ -2815,6 +2877,7 @@
             <div class="qr-note">This QR opens the canonical SPIKE /profile route for this SP ID. If QR rendering is unavailable, use Copy Profile Link instead.</div>
             <div class="activity-item" id="profileQrLink" style="margin-top:10px;word-break:break-all;text-align:center"></div>
             <button class="btn-profile primary" type="button" style="width:100%;margin-top:10px" onclick="copyProfileLink();closeProfileQR()">📋 Copy Profile Link</button>
+            <button class="btn-profile settings" type="button" style="width:100%;margin-top:10px" onclick="closeProfileQR();startFriendQrScanner()">📷 Scan Friend QR</button>
         </div>
     </div>
 
