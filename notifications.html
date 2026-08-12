@@ -1561,6 +1561,15 @@
         }
 
         // ============================================================
+        // LOCAL READ STATE FALLBACK
+        // ============================================================
+        // Firestore is the source of truth. This fallback keeps the UI
+        // compatible if older local-read code references isRead().
+        function isRead(id) {
+            return false;
+        }
+
+        // ============================================================
         // NOTIFICATION BUILDERS
         // ============================================================
         function createNotificationItem({
