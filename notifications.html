@@ -82,7 +82,7 @@
         .notif-header {
             width: 100%;
             max-width: 800px;
-            padding: clamp(8px, 2vw, 12px) clamp(12px, 3vw, 20px);
+            padding: calc(clamp(8px, 2vw, 12px) + env(safe-area-inset-top)) clamp(12px, 3vw, 20px) clamp(8px, 2vw, 12px);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1028,7 +1028,7 @@
 
         @media (max-width: 480px) {
             .notif-header {
-                padding: 6px 10px;
+                padding: calc(6px + env(safe-area-inset-top)) 10px 6px;
             }
             .header-left .back-btn {
                 width: 34px;
