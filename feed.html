@@ -4425,8 +4425,8 @@
         <div class="header-right">
             <!-- Chat Button with Unread Badge -->
             <button class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat.html'" title="Chat">
-                <span class="chat-icon">💬</span>
-                <span>Chat</span>
+                <span class="-icon">💬</span>
+                <span></span>
                 <span class="badge-count" id="headerChatBadge">0</span>
             </button>
 
@@ -8252,7 +8252,7 @@ function setActiveCallFlag(callId) {
                             <div class="profile-modal-actions">
                                 ${currentUser && uid !== currentUser.uid ? `
                                     <button class="btn-action btn-follow ${isFollowing ? 'following' : ''}" onclick="${isFollowing ? 'window.unfollowUser' : 'window.followUser'}('${uid}')" id="followBtn">${isFollowing ? '✓ Following' : '+ Follow'}</button>
-                                    <button class="btn-action btn-message" onclick="window.openChatFromProfile('${uid}')">💬 Message</button>
+                                    <button class="btn-action btn-message" onclick="window.openChatFromProfile('${uid}')">💬 </button>
                                     <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', false)">📞 Voice</button>
                                     <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', true)">📹 Video</button>
                                 ` : `<button class="btn-action btn-follow" onclick="window.location.href='profile.html'">View Full Profile</button>`}
