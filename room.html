@@ -389,18 +389,7 @@
         .level-badge .level-icon {
             font-size: 18px;
             line-height: 1;
-        }
-
-        .level-badge .level-name {
-            font-size: 10px;
-            font-weight: 800;
-            color: var(--text-secondary);
-            max-width: 72px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .level-badge .level-progress {
+        }.level-badge .level-progress {
             width: 56px;
             height: 5px;
             background: rgba(255, 255, 255, 0.08);
@@ -597,10 +586,7 @@
                 flex-basis: 54%;
                 max-width: 54%;
                 gap: 4px;
-            }
-
-            .level-badge .level-name,
-            .level-badge .level-progress {
+            }            .level-badge .level-progress {
                 display: none;
             }
 
@@ -1183,13 +1169,7 @@
         .stats-panel .level-display .level-icon {
             font-size: 2.4rem;
             display: block;
-        }
-        .stats-panel .level-display .level-name {
-            font-size: 1.2rem;
-            font-weight: 800;
-            margin: 4px 0 2px;
-        }
-        .stats-panel .level-display .level-number {
+        }.stats-panel .level-display .level-number {
             font-size: 0.8rem;
             color: var(--text-muted);
         }
@@ -1679,6 +1659,9 @@
             border-radius: 10px;
             border: 1px solid rgba(255, 215, 0, 0.08);
         }
+        .msg .sender .level-tag .message-level-icon { width: 14px; height: 14px; object-fit: contain; vertical-align: middle; flex: 0 0 14px; }
+        .msg .sender .level-tag { display: inline-flex; align-items: center; gap: 3px; }
+
         .msg .sender .vip-tag {
             font-size: 8px;
             font-weight: 700;
@@ -2432,6 +2415,30 @@
         .participants-panel .participant:hover {
             background: rgba(255, 215, 0, 0.04);
         }
+        .participants-panel .participant .member-list-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #0d1520;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .participants-panel .participant .member-list-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .participants-panel .participant .info {
+            min-width: 0;
+            flex: 1;
+        }
         .participants-panel .participant .info .name {
             font-size: 12px;
             font-weight: 600;
@@ -2440,14 +2447,26 @@
             text-overflow: ellipsis;
         }
         .participants-panel .participant .info .level-tag-participant {
-            font-size: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            width: fit-content;
+            max-width: 100%;
+            margin-top: 3px;
+            font-size: 9px;
+            line-height: 1.25;
+            font-weight: 600;
             color: var(--text-secondary);
             background: rgba(255, 255, 255, 0.04);
-            padding: 0 5px;
+            padding: 2px 6px;
             border-radius: 10px;
-            margin-left: 4px;
         }
-        .participants-panel .participant .info .vip-tag-participant {
+        .participants-panel .participant .info .level-tag-participant .participant-level-icon {
+            width: 16px;
+            height: 16px;
+            object-fit: contain;
+            flex: 0 0 16px;
+        }.participants-panel .participant .info .vip-tag-participant {
             font-size: 8px;
             color: var(--gold);
             background: rgba(251, 191, 36, 0.10);
@@ -2464,18 +2483,41 @@
         }
 
         .participants-panel .participant .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
+            width: 14px;
+            height: 14px;
             flex-shrink: 0;
             margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            line-height: 1;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--text-muted);
+            transition: color .2s ease, filter .2s ease, transform .2s ease;
+        }
+        .participants-panel .participant .status-dot::before {
+            content: '♥';
+            display: block;
+            transform-origin: center;
         }
         .participants-panel .participant .status-dot.online {
-            background: var(--success);
-            box-shadow: 0 0 6px rgba(52, 211, 153, 0.4);
+            color: #22c55e;
+            filter: drop-shadow(0 0 5px rgba(34, 197, 94, .8));
+            animation: presenceHeartBeat 1.15s ease-in-out infinite;
         }
         .participants-panel .participant .status-dot.offline {
-            background: var(--text-muted);
+            color: #ef4444;
+            filter: drop-shadow(0 0 4px rgba(239, 68, 68, .55));
+            animation: presenceHeartBeat 1.65s ease-in-out infinite;
+        }
+        @keyframes presenceHeartBeat {
+            0%, 100% { transform: scale(1); }
+            12% { transform: scale(1.18); }
+            24% { transform: scale(1); }
+            36% { transform: scale(1.14); }
+            52% { transform: scale(1); }
         }
         .participants-overlay {
             position: fixed;
@@ -3659,7 +3701,7 @@
                 padding: 2px 6px 2px 4px;
                 min-height: 26px;
             }
-            .level-badge .level-name {
+
                 font-size: 8px;
                 max-width: 40px;
             }
@@ -3694,7 +3736,7 @@
                 min-width: 34px;
                 width: 34px;
             }
-            .level-badge .level-name {
+
                 max-width: 30px;
             }
             .level-badge .level-progress {
@@ -3801,7 +3843,7 @@
         }
 
 
-        /* ===== PREMIUM 100-LEVEL ICONS: luminous tier colors ===== */
+        /* ===== LEVEL ICONS: luminous tier colors ===== */
         .level-badge .level-icon {
             width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;
             position:relative;border-radius:10px;
@@ -3859,7 +3901,7 @@
                     drop-shadow(0 0 9px var(--level-glow))
                     drop-shadow(0 0 22px var(--level-glow));
         }
-        .level-display .level-name,.level-display .level-number {position:relative;z-index:1}
+        .level-display .level-number {position:relative;z-index:1}
         @media (prefers-reduced-motion:no-preference) {
             .level-display .level-icon::after {
                 content:"";position:absolute;inset:-2px;border-radius:inherit;
@@ -3979,7 +4021,7 @@
 }
 </style>
 
-<style id="bunny-slippers-hidden">img[src*="bunny-slippers.png"],img[data-src*="bunny-slippers.png"]{display:none!important;visibility:hidden!important;width:0!important;height:0!important;opacity:0!important;pointer-events:none!important}</style><style id="levels-navigation-style">.levels-page-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:8px 0;padding:7px 11px;border-radius:12px;text-decoration:none;font-size:11px;font-weight:800;color:var(--text-primary,#fff);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);box-shadow:0 0 14px rgba(255,215,0,.08)}.levels-page-link:hover{background:rgba(255,255,255,.11);box-shadow:0 0 22px rgba(255,215,0,.18)}</style><style id="level-icon-no-flash">#levelIcon img{visibility:hidden}#levelIcon img.level-icon-ready{visibility:visible!important}</style>
+<style id="levels-navigation-style">.levels-page-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:8px 0;padding:7px 11px;border-radius:12px;text-decoration:none;font-size:11px;font-weight:800;color:var(--text-primary,#fff);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);box-shadow:0 0 14px rgba(255,215,0,.08)}.levels-page-link:hover{background:rgba(255,255,255,.11);box-shadow:0 0 22px rgba(255,215,0,.18)}</style><style id="level-icon-no-flash">#levelIcon img{visibility:hidden}#levelIcon img.level-icon-ready{visibility:visible!important}</style>
 <style id="levels-nav-icon-style">
 .levels-nav-icon {
   display:inline-flex;
@@ -4080,10 +4122,68 @@ header [class*="stats" i],
 }
 </style>
 
-</head>
-<body>
 
-    <!-- ===== HEADER ===== -->
+<style id="progression-unlocks-css">
+#progressionUnlocksPanel{margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.025)}
+.progression-unlocks-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+.progression-unlocks-head b{font-size:.78rem}.progression-unlocks-head span{font-size:.58rem;opacity:.65}
+.progression-unlocks-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.progression-unlock{padding:8px;border-radius:11px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.025);min-width:0}
+.progression-unlock.reached{border-color:rgba(251,191,36,.24);background:rgba(251,191,36,.045)}
+.progression-unlock.locked{opacity:.62}
+.progression-unlock .icon{font-size:1rem}.progression-unlock b{display:block;font-size:.62rem;margin-top:3px}.progression-unlock small{display:block;font-size:.52rem;opacity:.65;margin-top:2px;line-height:1.3}
+.progression-unlock .req{display:block;font-size:.49rem;color:var(--gold);margin-top:5px;font-weight:800}
+.progression-unlocks-toggle{margin-top:8px;width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);color:var(--text-primary);font-size:.6rem;font-weight:800;cursor:pointer}
+@media(max-width:520px){.progression-unlocks-grid{grid-template-columns:1fr}}
+</style>
+<style id="phase2-achievements-css">
+#achievementsPanel{margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.025)}
+.achievements-title{display:flex;justify-content:space-between;align-items:center;font-weight:800;font-size:.78rem;margin-bottom:9px}
+.achievements-title span{font-size:.62rem;opacity:.6;font-weight:600}
+.achievements-grid{display:grid;gap:7px}
+.achievement-card{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;padding:8px;border-radius:10px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.05)}
+.achievement-card.unlocked{border-color:rgba(255,255,255,.14)}
+.achievement-icon{font-size:1.15rem;text-align:center}
+.achievement-copy{min-width:0}.achievement-copy b{display:block;font-size:.68rem}.achievement-copy small{display:block;font-size:.57rem;opacity:.62;margin-top:2px}
+.achievement-copy i{display:block;height:4px;margin-top:5px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.achievement-copy i span{display:block;height:100%;background:var(--accent,#fbbf24)}
+.achievement-copy em{display:block;font-size:.52rem;opacity:.55;margin-top:3px;font-style:normal}.achievement-card>strong{font-size:.58rem;white-space:nowrap}
+</style>
+
+
+<style id="phase3-level-benefits-css">
+#levelBenefitsPanel{margin-top:12px;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.025)}
+.level-benefits-title{font-weight:800;font-size:.78rem;margin-bottom:8px}
+.level-benefit-current{font-size:.68rem;opacity:.8}
+</style>
+
+<style id="phase3-level-benefits-style">
+.level-benefits-grid{display:none;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.level-benefits-grid.open{display:grid}
+.level-benefit-card{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.045)}
+.level-benefit-card.current{border-color:rgba(255,215,0,.45)}
+.level-benefit-card.locked{opacity:.6}
+.level-benefit-icon{width:42px;height:42px;object-fit:contain}
+.level-benefit-copy{min-width:0}
+.level-benefit-current{display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:14px;background:rgba(255,255,255,.035)}
+.level-benefits-toggle{margin-top:10px;border:1px solid rgba(255,215,0,.25);background:rgba(255,215,0,.08);color:inherit;padding:10px 14px;border-radius:12px;font-weight:700}
+</style>
+
+
+<style id="scroll-fix-stats-modal">
+.stats-panel-overlay{overflow:hidden;touch-action:none}
+.stats-panel{display:flex;flex-direction:column;min-height:0;max-height:calc(100dvh - 32px);overflow:hidden}
+.stats-panel .panel-head{flex:0 0 auto}
+#statsPanelBody{min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin;padding-right:2px;padding-bottom:24px}
+#achievementsPanel,#levelBenefitsPanel{margin-top:12px}
+#levelBenefitsPanel .level-benefits-grid.open{max-height:min(52dvh,520px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:thin}
+@media (max-width:600px){
+  .stats-panel-overlay{align-items:stretch;padding:8px}
+  .stats-panel{width:100%;max-height:calc(100dvh - 16px);border-radius:18px}
+}
+</style>
+
+</head>
+<body><!-- ===== HEADER ===== -->
     <header class="room-header">
         <div class="left">
             <button class="back-btn" onclick="window.location.href='rooms.html'">‹</button>
@@ -4100,8 +4200,7 @@ header [class*="stats" i],
                 🪙 <span id="headerEarnings">0</span>
             </span>
             <div class="level-badge" id="levelBadge" onclick="openStatsPanel()" role="button" tabindex="0" aria-label="View leveling dashboard" title="View leveling dashboard">
-                <span class="level-icon" id="levelIcon"><img class="level-icon-img" src="assets/levels/bunny-slippers.png" alt="Cozy Newcomer" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="0"></span>
-                <span class="level-name" id="levelName">Sprout</span>
+                <span class="level-icon" id="levelIcon"><img class="level-icon-img" src="assets/levels/01-freshman.png" alt="Level 1 — Freshman" title="Level 1 — Freshman" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="0"></span>
                 <span class="level-progress" id="levelProgress"><span class="fill" id="levelProgressFill" style="width:0%"></span></span>
             </div>
 <a class="levels-nav-icon" href="levels.html" aria-label="Open Levels" title="Levels">🏆</a>
@@ -4183,6 +4282,9 @@ header [class*="stats" i],
                 <button class="close-btn" onclick="closeStatsPanel()">✕</button>
             </div>
             <div id="statsPanelBody"><a class="levels-page-link" href="levels.html" aria-label="Open full leveling system">🏆 Levels</a>
+                <div id="achievementsPanel"></div>
+                <div id="levelBenefitsPanel"></div>
+                <div id="progressionUnlocksPanel"></div>
                 <!-- dynamically rendered -->
             </div>
         </div>
@@ -4314,7 +4416,7 @@ header [class*="stats" i],
                         <div class="m-status">
                             <span class="dot-online online" id="memberActionStatusDot"></span>
                             <span id="memberActionStatusText">online</span>
-                            <span class="m-level" id="memberActionLevel">🌱 Sprout</span>
+                            <span class="m-level" id="memberActionLevel">Level 1</span>
                             <span class="m-vip-badge" id="memberActionVipBadge" style="display:none;">👑 VIP</span>
                         </div>
                     </div>
@@ -4470,12 +4572,15 @@ header [class*="stats" i],
     <!-- ============================================================
     MAIN SCRIPT
     ============================================================ -->
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="//www.gstatic.com">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js">
     <link rel="modulepreload" href="https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js">
+    <script id="room-level-data">
+        // ===== LEVEL SYSTEM — 24 LEVELS, INLINE IN THIS HTML =====
+        // This is the single catalog used by the room for names, icons, SP and calculations.
+        window.LEVEL_DATA = Object.freeze([{"level":1,"name":"Freshman","icon":"01-freshman.png","sp":0},{"level":2,"name":"Rising","icon":"02-rising.png","sp":500},{"level":3,"name":"Promising","icon":"03-promising.png","sp":1000},{"level":4,"name":"Refined","icon":"04-refined.png","sp":1500},{"level":5,"name":"Polished","icon":"05-polished.png","sp":3000},{"level":6,"name":"Radiant","icon":"06-radiant.png","sp":6000},{"level":7,"name":"Distinguished","icon":"07-distinguished.png","sp":10000},{"level":8,"name":"Elegant","icon":"08-elegant.png","sp":16000},{"level":9,"name":"Exquisite","icon":"09-exquisite.png","sp":24000},{"level":10,"name":"Prestige","icon":"10-prestige.png","sp":35000},{"level":11,"name":"Sublime","icon":"11-sublime.png","sp":50000},{"level":12,"name":"Brilliant","icon":"12-brilliant.png","sp":70000},{"level":13,"name":"Majestic","icon":"13-majestic.png","sp":95000},{"level":14,"name":"Regal","icon":"14-regal.png","sp":125000},{"level":15,"name":"Imperial","icon":"15-imperial.png","sp":160000},{"level":16,"name":"Noble","icon":"16-noble.png","sp":200000},{"level":17,"name":"Magnificent","icon":"17-magnificent.png","sp":245000},{"level":18,"name":"Grand","icon":"18-grand.png","sp":295000},{"level":19,"name":"Ethereal","icon":"19-ethereal.png","sp":350000},{"level":20,"name":"Celestial","icon":"20-celestial.png","sp":400000},{"level":21,"name":"Sovereign","icon":"21-sovereign.png","sp":440000},{"level":22,"name":"Glorious","icon":"22-glorious.png","sp":465000},{"level":23,"name":"Legendary","icon":"23-legendary.png","sp":485000},{"level":24,"name":"Iconic","icon":"24-iconic.png","sp":500000}]);
+</script>
     <script type="module">
         // ============================================================
         // FIREBASE IMPORTS & CONFIG
@@ -4514,41 +4619,54 @@ header [class*="stats" i],
         const DEVELOPER_WHATSAPP = '2349159096952';
         const NORMAL_FILE_LIMIT = 5 * 1024 * 1024;
         const PREMIUM_FILE_LIMIT = 20 * 1024 * 1024;
-
-        // ===== 100 LEVEL NAMES =====
-        const LEVEL_DATA = [{"level":1,"name":"Cozy Newcomer","icon":"bunny-slippers.png","sp":0},{"level":2,"name":"Boba Buddy","icon":"boba.png","sp":100},{"level":3,"name":"Gentle Chatter","icon":"windchimes.png","sp":225},{"level":4,"name":"Chat Performer","icon":"accordion.png","sp":400},{"level":5,"name":"Chill Regular","icon":"sloth.png","sp":625},{"level":6,"name":"Curious Companion","icon":"axolotl.png","sp":900},{"level":7,"name":"Clever Conversationalist","icon":"fox.png","sp":1225},{"level":8,"name":"Friendly Neighbor","icon":"hedgehog.png","sp":1600},{"level":9,"name":"Social Explorer","icon":"capybara.png","sp":2025},{"level":10,"name":"Familiar Face","icon":"dodo.png","sp":2500},{"level":11,"name":"Daily Connector","icon":"canadian-goose.png","sp":3025},{"level":12,"name":"Warm Presence","icon":"deer.png","sp":3600},{"level":13,"name":"Room Participant","icon":"badger.png","sp":4225},{"level":14,"name":"Chat Companion","icon":"barn-owl.png","sp":4900},{"level":15,"name":"Community Friend","icon":"heron.png","sp":5625},{"level":16,"name":"Porcupine Pal","icon":"porcupine.png","sp":6400},{"level":17,"name":"Pangolin Partner","icon":"pangolin.png","sp":7225},{"level":18,"name":"Anteater Ally","icon":"anteater.png","sp":8100},{"level":19,"name":"Boar Buddy","icon":"boar.png","sp":9025},{"level":20,"name":"Hyena Socialite","icon":"hyena-head.png","sp":10000},{"level":21,"name":"Paper Crane Messenger","icon":"paper-crane.png","sp":11025},{"level":22,"name":"Paper Frog Friend","icon":"paper-frog.png","sp":12100},{"level":23,"name":"Creative Foldmaster","icon":"cootie-catcher.png","sp":13225},{"level":24,"name":"Prankster","icon":"prank-glasses.png","sp":14400},{"level":25,"name":"Sound Seeker","icon":"earbuds.png","sp":15625},{"level":26,"name":"Soda Socializer","icon":"soda-bottle.png","sp":16900},{"level":27,"name":"Mason Jar Mixer","icon":"mason-jar.png","sp":18225},{"level":28,"name":"Rice Bowl Regular","icon":"bowl-of-rice.png","sp":19600},{"level":29,"name":"Dumpling Friend","icon":"dumpling.png","sp":21025},{"level":30,"name":"Bao Companion","icon":"dumpling-bao.png","sp":22500},{"level":31,"name":"Bok Choy Buddy","icon":"bok-choy.png","sp":24025},{"level":32,"name":"Artichoke Adventurer","icon":"artichoke.png","sp":25600},{"level":33,"name":"Charcuterie Host","icon":"charcuterie.png","sp":27225},{"level":34,"name":"Traveling Regular","icon":"rolling-suitcase.png","sp":28900},{"level":35,"name":"Boarding Pass Explorer","icon":"boarding-pass.png","sp":30625},{"level":36,"name":"Transit Companion","icon":"subway-pass.png","sp":32400},{"level":37,"name":"Subway Regular","icon":"bus-stop.png","sp":34225},{"level":38,"name":"Phone Call Veteran","icon":"subway-train.png","sp":36100},{"level":39,"name":"Retro Chatter","icon":"rotary-phone.png","sp":38025},{"level":40,"name":"Clarinet Conversationalist","icon":"vhs.png","sp":40000},{"level":41,"name":"Bassoon Virtuoso","icon":"clarinet.png","sp":42025},{"level":42,"name":"French Horn Voice","icon":"bassoon.png","sp":44100},{"level":43,"name":"Trombone Performer","icon":"french-horn.png","sp":46225},{"level":44,"name":"Tuba Powerhouse","icon":"trombone.png","sp":48400},{"level":45,"name":"Drumbeat Leader","icon":"tuba.png","sp":50625},{"level":46,"name":"Grand Piano Maestro","icon":"drum-kit.png","sp":52900},{"level":47,"name":"Piano Virtuoso","icon":"grand-piano.png","sp":55225},{"level":48,"name":"Organ Master","icon":"pianist.png","sp":57600},{"level":49,"name":"Creative Artist","icon":"pipe-organ.png","sp":60025},{"level":50,"name":"Crafting Specialist","icon":"easel.png","sp":62500},{"level":51,"name":"Spinning Wheel Artisan","icon":"sewing-machine.png","sp":65025},{"level":52,"name":"Soldering Specialist","icon":"spinning-wheel.png","sp":67600},{"level":53,"name":"Master Craftsman","icon":"soldering-iron.png","sp":70225},{"level":54,"name":"Forge Expert","icon":"froe-and-mallet.png","sp":72900},{"level":55,"name":"Kitchen Maestro","icon":"saucepan.png","sp":75625},{"level":56,"name":"Wok Master","icon":"wok.png","sp":78400},{"level":57,"name":"Rice Cooker Pro","icon":"rice-cooker.png","sp":81225},{"level":58,"name":"Pressure Cooker Pro","icon":"pressure-cooker.png","sp":84100},{"level":59,"name":"Blend Master","icon":"blender.png","sp":87025},{"level":60,"name":"Heavy Duty Connector","icon":"stapler-heavy-duty.png","sp":90000},{"level":61,"name":"Pneumatic Powerhouse","icon":"stapler-pneumatic.png","sp":93025},{"level":62,"name":"Momentum Master","icon":"steamroller.png","sp":96100},{"level":63,"name":"Excavator Elite","icon":"bucket-wheel-excavator.png","sp":99225},{"level":64,"name":"Water Mill Keeper","icon":"water-mill.png","sp":102400},{"level":65,"name":"Treehouse Guardian","icon":"treehouse.png","sp":105625},{"level":66,"name":"Village Elder","icon":"medieval-village-01.png","sp":108900},{"level":67,"name":"Clock Tower Keeper","icon":"clock-tower.png","sp":112225},{"level":68,"name":"Mountain Climber","icon":"mountain-climbing.png","sp":115600},{"level":69,"name":"Skateboard Rider","icon":"skateboarding-01.png","sp":119025},{"level":70,"name":"Skateboard Ace","icon":"skateboarding-02.png","sp":122500},{"level":71,"name":"Coinflip Strategist","icon":"coinflip.png","sp":126025},{"level":72,"name":"Ricochet Expert","icon":"ricochet.png","sp":129600},{"level":73,"name":"Lucky Challenger","icon":"slot-machine.png","sp":133225},{"level":74,"name":"Precision Brusher","icon":"toothbrush.png","sp":136900},{"level":75,"name":"Paper Foldmaster","icon":"paper-bag-folded.png","sp":140625},{"level":76,"name":"Paper Craftmaster","icon":"paper-bag-open.png","sp":144400},{"level":77,"name":"Paper Crumple Artist","icon":"paper-bag-crumpled.png","sp":148225},{"level":78,"name":"Flytrap Tactician","icon":"venus-flytrap.png","sp":152100},{"level":79,"name":"Mole Pathfinder","icon":"mole.png","sp":156025},{"level":80,"name":"Goblin Trickster","icon":"goblin.png","sp":160000},{"level":81,"name":"Potion Alchemist","icon":"round-potion.png","sp":164025},{"level":82,"name":"Birch Grove Keeper","icon":"birch-trees.png","sp":168100},{"level":83,"name":"Lab Explorer","icon":"test-tube-held.png","sp":172225},{"level":84,"name":"Lab Master","icon":"test-tube-rack.png","sp":176400},{"level":85,"name":"Quantum Thinker","icon":"schrodingers-cat-alive.png","sp":180625},{"level":86,"name":"Quantum Survivor","icon":"schrodingers-cat-dead.png","sp":184900},{"level":87,"name":"Astrolabe Navigator","icon":"astrolabe.png","sp":189225},{"level":88,"name":"Gyroscope Master","icon":"gyroscope.png","sp":193600},{"level":89,"name":"Orrery Astronomer","icon":"orrery.png","sp":198025},{"level":90,"name":"Deer Guardian","icon":"deer-head.png","sp":202500},{"level":91,"name":"Fossil Scholar","icon":"archaeopteryx-fossil.png","sp":207025},{"level":92,"name":"Dinosaur Keeper","icon":"sauropod-skeleton.png","sp":211600},{"level":93,"name":"Cloaked Wanderer","icon":"cloaked-figure-on-horseback.png","sp":216225},{"level":94,"name":"Helm Guardian","icon":"frog-mouth-helm.png","sp":220900},{"level":95,"name":"Warlord Champion","icon":"warlord-helmet.png","sp":225625},{"level":96,"name":"Philosopher Sage","icon":"philosopher-bust.png","sp":230400},{"level":97,"name":"Heraldic Sunbearer","icon":"heraldic-sun.png","sp":235225},{"level":98,"name":"Star Ascendant","icon":"tarot-17-the-star.png","sp":240100},{"level":99,"name":"Tesla Master","icon":"tesla-coil.png","sp":245025},{"level":100,"name":"Ophanim Legend","icon":"ophanim.png","sp":250000}];
-
-        function getLevelRecord(level) { return LEVEL_DATA[Math.max(0, Math.min(99, Number(level) - 1))] || LEVEL_DATA[0]; }
-        function getSPForLevel(level) { if (level <= 1) return 0; return 25 * level * level; }
-        function getLevelFromSP(sp) { if (sp < 0) return 1; let level = 1; while (level < 100 && sp >= getSPForLevel(level + 1)) level++; return level; }
-        function getLevelName(level) { return getLevelRecord(level).name; }
-        function getLevelIcon(level) { return getLevelRecord(level).icon; }
-        function getLevelTier(level) { return Math.min(9, Math.floor((Math.max(1, Number(level)) - 1) / 10)); }
+        // ===== LEVEL SYSTEM (24 levels; catalog is defined once in inline level catalog) =====
+        // Progression target: Level 24 = 500,000 SP.
+        // Baseline target: roughly five years of sustained daily participation.
+        // Optional achievement rewards are excluded from this baseline calculation.
+        const LEVEL_ASSET_DIR = 'assets/levels/';
+        function getLevelIconSrc(filename) {
+            return LEVEL_ASSET_DIR + encodeURIComponent(filename).replace(/%2F/g, '/');
+        }
+        function getLevelRecord(level) {
+            const n = Math.max(1, Math.min(window.LEVEL_DATA.length, Number(level) || 1));
+            return window.LEVEL_DATA[n - 1] || window.LEVEL_DATA[0];
+        }
+        function getSPForLevel(level) { return getLevelRecord(level).sp; }
+        function getLevelFromSP(sp) {
+            const value = Math.max(0, Number(sp) || 0);
+            let level = 1;
+            while (level < window.LEVEL_DATA.length && value >= getSPForLevel(level + 1)) level++;
+            return level;
+        }
+        function getLevelTier(level) {
+            return Math.min(9, Math.floor((Math.max(1, Number(level)) - 1) / 10));
+        }
         function getLevelProgress(sp, level) {
-            level = Math.max(1, Math.min(100, Number(level) || 1));
-            if (level >= 100) return 1;
+            level = Math.max(1, Math.min(window.LEVEL_DATA.length, Number(level) || 1));
+            if (level >= window.LEVEL_DATA.length) return 1;
             const prev = getSPForLevel(level), next = getSPForLevel(level + 1);
             return Math.max(0, Math.min(1, (Number(sp) - prev) / Math.max(1, next - prev)));
         }
         function getLevelIconHTML(level, extraClass = '') {
             const r = getLevelRecord(level);
-            const tier = getLevelTier(level);
-            return `<img class="level-icon-img ${extraClass}" src="assets/levels/${r.icon}" alt="${sanitizeHTML(r.name)}" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="${tier}">`;
+            const tier = getLevelTier(r.level);
+            const label = `Level ${r.level} — ${r.name}`;
+            return `<img class="level-icon-img ${extraClass}" src="${getLevelIconSrc(r.icon)}" alt="${label}" title="${label}" draggable="false" loading="eager" decoding="async" fetchpriority="high" data-tier="${tier}">`;
         }
 
         // ===== FEATURE CATALOG =====
         const PREMIUM_FEATURES = {
-            voice_note: { id: 'voice_note', name: 'Premium Voice Notes', description: 'Send crystal-clear voice notes with a beautiful recording studio, waveform preview, and quick playback.', category: 'Communication', icon: '🎤', price_usd: 1.50 },
-            room_badge: { id: 'room_badge', name: 'Premium Room Badge', description: 'Give the room a premium identity badge. Stand out.', category: 'Branding', icon: '🏆', price_usd: 2.00 },
-            custom_theme: { id: 'custom_theme', name: 'Custom Room Theme', description: 'Unlock premium room customization. Change colors and look.', category: 'Appearance', icon: '🎨', price_usd: 5.00 },
-            colorful_chat: { id: 'colorful_chat', name: 'Colorful Chat', description: 'Customize chat colors: sender, background, accent, and more.', category: 'Appearance', icon: '🌈', price_usd: 2.00 },
-            custom_emojis: { id: 'custom_emojis', name: 'Custom Emojis', description: 'Upload and use custom emojis in the room.', category: 'Appearance', icon: '😎', price_usd: 4.00 },
-            vip_roles: { id: 'vip_roles', name: 'VIP Roles', description: 'Assign VIP roles to selected members with special badges.', category: 'Management', icon: '👑', price_usd: 6.00 },
-            announcements: { id: 'announcements', name: 'Room Announcements', description: 'Post pinned announcements visible to all members.', category: 'Management', icon: '📢', price_usd: 3.00 },
-            polls: { id: 'polls', name: 'Polls', description: 'Create polls and let members vote.', category: 'Interaction', icon: '📊', price_usd: 4.00 },
-            file_size: { id: 'file_size', name: 'Increased File Size', description: 'Allow larger image and file uploads (up to 20 MB).', category: 'Utility', icon: '📁', price_usd: 2.00 },
-            pin_limit: { id: 'pin_limit', name: 'Unlimited Pinned Messages', description: 'Pin unlimited messages (instead of the default 5).', category: 'Management', icon: '📌', price_usd: 3.00 },
-            member_limit: { id: 'member_limit', name: 'Member Limit Boost', description: 'Increase member capacity by 50.', category: 'Management', icon: '👥', price_usd: 5.00 },
+            voice_note: { id: 'voice_note', requiredLevel: 4, name: 'Premium Voice Notes', description: 'Send crystal-clear voice notes with a beautiful recording studio, waveform preview, and quick playback.', category: 'Communication', icon: '🎤', price_usd: 1.50 },
+            room_badge: { id: 'room_badge', requiredLevel: 10, requiredAchievement: 'first_message', name: 'Premium Room Badge', description: 'Give the room a premium identity badge. Stand out.', category: 'Branding', icon: '🏆', price_usd: 2.00 },
+            custom_theme: { id: 'custom_theme', requiredLevel: 10, requiredAchievement: 'reactions_100', name: 'Custom Room Theme', description: 'Unlock premium room customization. Change colors and look.', category: 'Appearance', icon: '🎨', price_usd: 5.00 },
+            colorful_chat: { id: 'colorful_chat', requiredLevel: 10, requiredAchievement: 'first_reaction', name: 'Colorful Chat', description: 'Customize chat colors: sender, background, accent, and more.', category: 'Appearance', icon: '🌈', price_usd: 2.00 },
+            custom_emojis: { id: 'custom_emojis', requiredLevel: 11, requiredAchievement: 'stickers_100', name: 'Custom Emojis', description: 'Upload and use custom emojis in the room.', category: 'Appearance', icon: '😎', price_usd: 4.00 },
+            vip_roles: { id: 'vip_roles', requiredLevel: 15, requiredAchievement: 'messages_1000', name: 'VIP Roles', description: 'Assign VIP roles to selected members with special badges.', category: 'Management', icon: '👑', price_usd: 6.00 },
+            announcements: { id: 'announcements', requiredLevel: 14, requiredAchievement: 'messages_1000', name: 'Room Announcements', description: 'Post pinned announcements visible to all members.', category: 'Management', icon: '📢', price_usd: 3.00 },
+            polls: { id: 'polls', requiredLevel: 5, requiredAchievement: 'messages_100', name: 'Polls', description: 'Create polls and let members vote.', category: 'Interaction', icon: '📊', price_usd: 4.00 },
+            file_size: { id: 'file_size', requiredLevel: 9, requiredAchievement: 'shares_100', name: 'Increased File Size', description: 'Allow larger image and file uploads (up to 20 MB).', category: 'Utility', icon: '📁', price_usd: 2.00 },
+            pin_limit: { id: 'pin_limit', requiredLevel: 8, requiredAchievement: 'messages_100', name: 'Unlimited Pinned Messages', description: 'Pin unlimited messages (instead of the default 5).', category: 'Management', icon: '📌', price_usd: 3.00 },
+            member_limit: { id: 'member_limit', requiredLevel: 20, requiredAchievement: 'daily_complete_30', name: 'Member Limit Boost', description: 'Increase member capacity by 50.', category: 'Management', icon: '👥', price_usd: 5.00 },
             // ===== THEMES =====
             theme_pink_blue: {
                 id: 'theme_pink_blue',
@@ -4556,7 +4674,7 @@ header [class*="stats" i],
                 description: 'Luxury neon glow with a soft premium chat finish.',
                 category: 'Themes',
                 icon: '💗💙',
-                price_usd: 2.00
+                price_usd: 2.00, requiredLevel: 6, requiredAchievement: 'messages_100'
             },
             theme_luxury_gold: {
                 id: 'theme_luxury_gold',
@@ -4564,7 +4682,7 @@ header [class*="stats" i],
                 description: 'Elegant gold room with a rich VIP‑style finish.',
                 category: 'Themes',
                 icon: '👑✨',
-                price_usd: 2.00
+                price_usd: 2.00, requiredLevel: 10, requiredAchievement: 'daily_complete_7'
             },
             theme_orange_pink: {
                 id: 'theme_orange_pink',
@@ -4572,7 +4690,7 @@ header [class*="stats" i],
                 description: 'Warm energetic orange blended with premium pink.',
                 category: 'Themes',
                 icon: '🧡💗',
-                price_usd: 2.00
+                price_usd: 2.00, requiredLevel: 14, requiredAchievement: 'reactions_100'
             },
             theme_royal_blue_violet: {
                 id: 'theme_royal_blue_violet',
@@ -4580,7 +4698,7 @@ header [class*="stats" i],
                 description: 'Deep royal tones with a modern glowing accent.',
                 category: 'Themes',
                 icon: '💙💜',
-                price_usd: 2.00
+                price_usd: 2.00, requiredLevel: 18, requiredAchievement: 'daily_complete_30'
             },
             theme_emerald_cyan: {
                 id: 'theme_emerald_cyan',
@@ -4640,6 +4758,10 @@ header [class*="stats" i],
         // SP / Level
         let currentSP = 0;
         let currentLevel = 1;
+        // Read-only bridges for the later non-module UI extensions.
+        // The source of truth remains the module-scoped state above.
+        window.getCurrentRoomSP = () => currentSP;
+        window.getCurrentRoomLevel = () => currentLevel;
         let spFeed = [];
         let dailyChallengeState = { date: '', counts: {}, completed: {}, streak: 0, lastCompletedDate: '', completionRewarded: false };
 
@@ -4815,17 +4937,18 @@ header [class*="stats" i],
             }
         });
         const levelIcon = document.getElementById('levelIcon');
-        const levelName = document.getElementById('levelName');
         const levelProgressFill = document.getElementById('levelProgressFill');
 
         // ============================================================
         // ONLINE STATUS
         // ============================================================
         // Presence: heartbeat keeps online status and lastSeen fresh.
-        const PRESENCE_HEARTBEAT_MS = 20000;
-        const PRESENCE_STALE_MS = 45000;
+        const PRESENCE_HEARTBEAT_MS = 10000;
+        const PRESENCE_STALE_MS = 30000;
         let presenceHeartbeat = null;
         let presenceWriteInFlight = false;
+        let presenceRefreshTimer = null;
+        let creatorPresenceUnsub = null;
 
         function updateUserOnlineStatus(status) {
             if (!currentUserUid || presenceWriteInFlight) return;
@@ -4847,8 +4970,11 @@ header [class*="stats" i],
         }
         function getPresenceState(data) {
             const lastSeen = data?.lastSeen?.toDate?.() || null;
-            const fresh = !!lastSeen && (Date.now() - lastSeen.getTime()) <= PRESENCE_STALE_MS;
-            return { online: data?.onlineStatus === true && fresh, lastSeen };
+            const roomUpdated = data?.presenceUpdatedAt?.toDate?.() || null;
+            const freshest = [lastSeen, roomUpdated].filter(Boolean).sort((a, b) => b.getTime() - a.getTime())[0] || null;
+            const roomFresh = data?.roomPresence === true && !!roomUpdated && (Date.now() - roomUpdated.getTime()) <= PRESENCE_STALE_MS;
+            const userFresh = data?.onlineStatus === true && !!lastSeen && (Date.now() - lastSeen.getTime()) <= PRESENCE_STALE_MS;
+            return { online: roomFresh || userFresh, lastSeen: freshest };
         }
         function formatLastSeen(date, online = false) {
             if (online) return 'online now';
@@ -4963,40 +5089,66 @@ header [class*="stats" i],
                         transferBtn.textContent = `Need ${500 - amount} more`; } } } else { earningsBadge.style.display = 'none'; }
         }
 
-        async function deductCoinsIfPossible(amount, reason) {
-            if (amount <= 0) return true;
-            if (coinBalance < amount) { showToast(`Insufficient coins! Need ${amount} 🪙`, 'error'); return false; }
-
-            // Firestore can reject a transaction when another activity updates the
-            // same user document at nearly the same time. Retry briefly instead of
-            // exposing a raw failed-precondition error to the member.
-            let lastError = null;
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    await updateCoins(currentUser.uid, -amount, reason);
-                    coinBalance = await getCoins(currentUser.uid);
-                    coinEl.textContent = coinBalance;
-                    const sendBalance = document.getElementById('sendCoinsBalance');
-                    if (sendBalance) sendBalance.textContent = coinBalance;
-                    await creditAdminEarnings(amount, currentUser.uid);
-                    return true;
-                } catch (e) {
-                    lastError = e;
-                    if (e?.code !== 'failed-precondition') break;
-                    await new Promise(resolve => setTimeout(resolve, 80 * (attempt + 1)));
-                }
-            }
-            console.error('Coin transaction failed after retries:', lastError);
-            showToast('Coin transaction could not be completed. Please try again.', 'error');
-            return false;
-        }
-
         // ============================================================
         // CENTRAL ENTITLEMENT CHECK
         // ============================================================
-        function isRoomFeatureUnlocked(featureId) {
-            return roomFeatureEntitlements[featureId] === true;
+        // Existing paid/approved room entitlements remain authoritative.
+        // These rules are for real existing features that can also be earned
+        // through the progression system; they do not create a second
+        // entitlement store.
+        const PROGRESSION_FEATURE_RULES = Object.freeze({
+            image_sharing: { requiredLevel: 3 },
+            message_pins: { requiredLevel: 8, requiredAchievement: 'messages_100' }
+        });
+
+        function getProgressionFeatureRule(featureId) {
+            return PROGRESSION_FEATURE_RULES[featureId] || null;
         }
+
+        function isAchievementUnlocked(id) {
+            if (!id || typeof getAchievementState !== 'function') return false;
+            try { return !!getAchievementState()?.unlocked?.[id]; } catch (_) { return false; }
+        }
+
+        function isProgressionRuleUnlocked(featureId) {
+            const rule = getProgressionFeatureRule(featureId);
+            if (!rule) return false;
+            if (Number(rule.requiredLevel || 0) > Number(currentLevel || 1)) return false;
+            if (rule.requiredAchievement && !isAchievementUnlocked(rule.requiredAchievement)) return false;
+            return true;
+        }
+
+        function explainProgressionLock(featureId) {
+            const rule = getProgressionFeatureRule(featureId);
+            if (!rule) return '';
+            const parts = [];
+            if (Number(rule.requiredLevel || 0) > Number(currentLevel || 1)) parts.push(`Level ${rule.requiredLevel}`);
+            if (rule.requiredAchievement && !isAchievementUnlocked(rule.requiredAchievement)) {
+                const a = typeof ACHIEVEMENT_DEFINITIONS !== 'undefined' ? ACHIEVEMENT_DEFINITIONS.find(x => x.id === rule.requiredAchievement) : null;
+                parts.push(`Achievement: ${a?.name || rule.requiredAchievement}`);
+            }
+            return parts.join(' + ');
+        }
+
+        function isRoomFeatureUnlocked(featureId) {
+            // Existing approved room entitlements remain valid. Progression can
+            // unlock the same existing feature without creating another
+            // entitlement store.
+            if (roomFeatureEntitlements[featureId] === true) return true;
+            if (isProgressionRuleUnlocked(featureId)) return true;
+            const feature = PREMIUM_FEATURES[featureId];
+            if (!feature) return false;
+            const requiredLevel = Number(feature.requiredLevel || 0);
+            if (requiredLevel > 0 && currentLevel < requiredLevel) return false;
+            const requiredAchievement = feature.requiredAchievement;
+            if (requiredAchievement && typeof getAchievementState === 'function') {
+                const achievementState = getAchievementState();
+                if (!achievementState.unlocked?.[requiredAchievement]) return false;
+            }
+            return requiredLevel > 0 || !!requiredAchievement;
+        }
+
+        window.isRoomFeatureUnlocked = isRoomFeatureUnlocked;
 
         // ============================================================
         // EARNINGS PANEL FUNCTIONS
@@ -5625,134 +5777,313 @@ header [class*="stats" i],
         }
 
         // ============================================================
-        // DAILY MEMBER STREAKS
-        // Every activity owns an independent streak.
-        // Only actions available to ordinary paid room members count.
+        // UNIFIED DAILY ACTIVITY ENGINE
+        // Every qualifying action uses this single progression pipeline.
         // ============================================================
         const DAILY_CHALLENGES = [
-            { id: 'messages', icon: '💬', name: 'Message Streak', target: 5, unit: 'messages', reward: 8 },
-            { id: 'reactions', icon: '❤️', name: 'Reaction Streak', target: 3, unit: 'reactions', reward: 7 },
-            { id: 'minutes', icon: '⏱️', name: 'Active Room Streak', target: 10, unit: 'active minutes', reward: 10 },
-            { id: 'voiceNotes', icon: '🎙️', name: 'Voice Note Streak', target: 1, unit: 'voice note', reward: 7 }
+            // Authoritative daily-task catalogue. minLevel controls when a task can
+            // enter a member's daily pool; targets are scaled by the member's level.
+            { id:'messages',   icon:'💬', name:'Messages',       target:20, unit:'messages',       reward:12, base:1, minLevel:1 },
+            { id:'reactions',  icon:'❤️', name:'Reactions',      target:10, unit:'reactions',      reward:8, base:1, minLevel:1 },
+            { id:'minutes',    icon:'⏱️', name:'Room Activity',  target:45, unit:'active minutes', reward:5,  base:1, minLevel:1 },
+            { id:'stickers',   icon:'✨', name:'Sticker Shares', target:5,  unit:'stickers',       reward:6, base:2, minLevel:2 },
+            { id:'replies',    icon:'↩️', name:'Replies',        target:5,  unit:'replies',        reward:9, base:2, minLevel:2 },
+            { id:'images',     icon:'🖼️', name:'Image Shares',   target:3,  unit:'images',         reward:10, base:5, minLevel:3 },
+            { id:'voiceNotes', icon:'🎙️', name:'Voice Notes',    target:2,  unit:'voice notes',    reward:10, base:3, minLevel:4 },
+            { id:'pollVotes',  icon:'📊', name:'Poll Votes',     target:3,  unit:'votes',          reward:6, base:1, minLevel:5 }
         ];
+        const DAILY_COMPLETION_BONUS = 50;
+        // Base activity SP is intentionally capped per local day so unlimited
+        // message/reaction activity cannot bypass the 5-year level curve.
+        const DAILY_BASE_SP_CAP = 25;
+
+        /*
+         * Streak rewards are milestone bonuses, separate from daily-task rewards.
+         * The longer the streak, the larger the one-time milestone bonus.
+         */
+        const STREAK_REWARDS = Object.freeze({
+            3: 10,
+            7: 25,
+            14: 50,
+            21: 100,
+            30: 150,
+            45: 250,
+            60: 400,
+            90: 700,
+            120: 1000,
+            180: 1800,
+            365: 3500
+        });
+
+        function getStreakReward(streak){
+            return STREAK_REWARDS[Number(streak)] || 0;
+        }
+
+        function getDailyPoolLevel(){
+            const stateLevel = Number(currentLevel);
+            if(Number.isFinite(stateLevel) && stateLevel >= 1) return Math.max(1, Math.floor(stateLevel));
+            return typeof getLevelFromSP === 'function' ? Math.max(1, getLevelFromSP(Number(currentSP)||0)) : 1;
+        }
+
+        function getDailyPoolSize(level=getDailyPoolLevel()){
+            // New levels add opportunities rather than making the streak harder by
+            // forcing every newly unlocked task into the day immediately.
+            return Math.min(8, 3 + Math.max(0, Math.floor(Number(level)||1) - 1));
+        }
+
+        function buildDailyChallengePool(level=getDailyPoolLevel(), existingIds=[]){
+            const eligible=DAILY_CHALLENGES.filter(c => Number(level) >= Math.max(1, Number(c.minLevel)||1));
+            const desired=getDailyPoolSize(level);
+            const existing=Array.isArray(existingIds) ? existingIds.filter(id => eligible.some(c => c.id===id)) : [];
+            const ordered=eligible.filter(c => !existing.includes(c.id));
+            return existing.concat(ordered.slice(0, Math.max(0, desired-existing.length)).map(c => c.id)).slice(0, desired);
+        }
+
+        function getScaledDailyChallenge(challenge, level=getDailyPoolLevel()){
+            if(!challenge) return null;
+            const minLevel=Math.max(1, Number(challenge.minLevel)||1);
+            const levelDelta=Math.max(0, Math.floor(Number(level)||1)-minLevel);
+            // Targets rise modestly every five levels after a task unlocks; this
+            // avoids spam-oriented requirements while still rewarding progression.
+            const scaleSteps=Math.floor(levelDelta/5);
+            const scale=1+(Math.min(4, scaleSteps)*0.2);
+            const rawTarget=Math.max(1, Number(challenge.target)||1);
+            const target=Number.isInteger(rawTarget) ? Math.max(1, Math.round(rawTarget*scale)) : rawTarget*scale;
+            return {...challenge, target};
+        }
 
         function getLocalDayKey(date = new Date()) {
-            const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+            const y = date.getFullYear();
+            const m = String(date.getMonth()+1).padStart(2,'0');
+            const d = String(date.getDate()).padStart(2,'0');
             return `${y}-${m}-${d}`;
         }
-
-        function daysBetween(a, b) {
-            const x = new Date(a + 'T00:00:00'), y = new Date(b + 'T00:00:00');
-            return Math.round((y - x) / 86400000);
+        function daysBetween(a,b) {
+            const x=new Date(`${a}T00:00:00`), y=new Date(`${b}T00:00:00`);
+            return Math.round((y-x)/86400000);
         }
-
-        function normalizeDailyState(data = {}) {
-            const today = getLocalDayKey();
-            const saved = data.dailyChallenges || {};
-            const savedStreaks = saved.streaks || {};
-            const savedLastDates = saved.lastCompletedDates || {};
-
+        function normalizeDailyState(data={}) {
+            const today=getLocalDayKey();
+            const saved=data.dailyChallenges||{};
+            const sameDay=saved.date===today;
+            const level=getDailyPoolLevel();
+            const activeChallengeIds=sameDay
+                ? buildDailyChallengePool(level, saved.activeChallengeIds)
+                : buildDailyChallengePool(level);
             return {
-                date: today,
-                counts: saved.date === today ? (saved.counts || {}) : {},
-                completed: saved.date === today ? (saved.completed || {}) : {},
-                streaks: { ...savedStreaks },
-                lastCompletedDates: { ...savedLastDates },
-                completionRewarded: saved.date === today && saved.completionRewarded && typeof saved.completionRewarded === 'object'
-                    ? { ...saved.completionRewarded } : {}
+                date:today,
+                counts:sameDay?{...(saved.counts||{})}:{},
+                completed:sameDay?{...(saved.completed||{})}:{},
+                streaks:{...(saved.streaks||{})},
+                lastCompletedDates:{...(saved.lastCompletedDates||{})},
+                baseRewardSP:sameDay?Math.max(0,Number(saved.baseRewardSP)||0):0,
+                activeChallengeIds,
+                completionRewarded:sameDay && saved.completionRewarded===true
             };
         }
-
+        let dailyStateWriteQueue = Promise.resolve();
         async function persistDailyState() {
-            if (!currentUserUid || !roomId) return;
-            await saveUserRoomData(currentUserUid, { dailyChallenges: dailyChallengeState });
+            if(!currentUserUid||!roomId)return;
+            // Serialize daily-state writes in this page so two rapid activities
+            // cannot interleave their read/modify/write operations.
+            const snapshot = JSON.parse(JSON.stringify(dailyChallengeState));
+            delete snapshot.poolDirty;
+            dailyStateWriteQueue = dailyStateWriteQueue.then(() =>
+                saveUserRoomData(currentUserUid,{dailyChallenges:snapshot})
+            );
+            return dailyStateWriteQueue;
+        }
+        function getDailyChallenge(id){return DAILY_CHALLENGES.find(c=>c.id===id)||null;}
+        function getCurrentProgressionLevel(){
+            const levelFromState = Number(currentLevel);
+            if(Number.isFinite(levelFromState) && levelFromState >= 1) return Math.max(1, levelFromState);
+            return typeof getLevelFromSP === 'function' ? getLevelFromSP(Number(currentSP)||0) : 1;
+        }
+        function isDailyChallengeEligible(challenge, level=getCurrentProgressionLevel()){
+            return !!challenge && Number(level) >= Math.max(1, Number(challenge.minLevel)||1);
+        }
+        function getEligibleDailyChallenges(level=getCurrentProgressionLevel()){
+            const safeLevel=Math.max(1,Math.floor(Number(level)||1));
+            const previous=Array.isArray(dailyChallengeState.activeChallengeIds)
+                ? dailyChallengeState.activeChallengeIds.slice() : [];
+            const pool=buildDailyChallengePool(safeLevel,previous);
+            // Never allow a stale/empty persisted pool to make the dashboard show 0/0.
+            // Rebuild from the authoritative catalogue whenever no valid task survives.
+            const nextPool=pool.length ? pool : DAILY_CHALLENGES
+                .filter(c=>isDailyChallengeEligible(c,safeLevel))
+                .slice(0,Math.min(getDailyPoolSize(safeLevel),DAILY_CHALLENGES.length))
+                .map(c=>c.id);
+            dailyChallengeState.activeChallengeIds=nextPool;
+            dailyChallengeState.poolDirty=JSON.stringify(previous)!==JSON.stringify(nextPool);
+            return nextPool
+                .map(id=>getDailyChallenge(id))
+                .filter(c=>isDailyChallengeEligible(c,safeLevel))
+                .map(c=>getScaledDailyChallenge(c,safeLevel));
+        }
+        async function ensureDailyChallengePoolPersisted(){
+            if(!dailyChallengeState.poolDirty)return;
+            dailyChallengeState.poolDirty=false;
+            await persistDailyState();
+        }
+        function getDailyCompletedCount(){
+            return getEligibleDailyChallenges().reduce((n,c)=>n+(dailyChallengeState.completed?.[c.id]?1:0),0);
         }
 
-        async function trackDailyActivity(type, amount = 1) {
-            if (!currentUserUid || !roomId || !hasPaid || !amount) return;
-            const challenge = DAILY_CHALLENGES.find(c => c.id === type);
-            if (!challenge) return;
+        async function trackDailyChallenge(type,amount=1){
+            if(!currentUserUid||!roomId||!hasPaid||!Number.isFinite(Number(amount))||Number(amount)<=0)return {counted:false,completed:false};
+            const baseChallenge=getDailyChallenge(type);
+            if(!baseChallenge)return {counted:false,completed:false};
+            const level=getCurrentProgressionLevel();
+            if(!isDailyChallengeEligible(baseChallenge, level)){
+                return {counted:false,completed:false,locked:true,requiredLevel:Math.max(1,Number(baseChallenge.minLevel)||1),currentLevel:level};
+            }
+            const challenge=getScaledDailyChallenge(baseChallenge, level);
+            dailyChallengeState=normalizeDailyState({dailyChallenges:dailyChallengeState});
+            const activePool=getEligibleDailyChallenges(level);
+            await ensureDailyChallengePoolPersisted();
+            const isActiveToday=activePool.some(c=>c.id===type);
+            if(!isActiveToday){
+                // The activity itself may still earn its normal base SP, but it
+                // must not progress a daily task that was not selected for today.
+                return {counted:false,completed:false,notInDailyPool:true,currentLevel:level};
+            }
+            if(dailyChallengeState.completed[type])return {counted:false,completed:true,alreadyComplete:true};
 
-            dailyChallengeState = normalizeDailyState({ dailyChallenges: dailyChallengeState });
-            if (dailyChallengeState.completed[type]) return;
+            const before=Number(dailyChallengeState.counts[type]||0);
+            const after=Math.min(challenge.target,before+Number(amount));
+            dailyChallengeState.counts[type]=after;
 
-            dailyChallengeState.counts[type] = Math.min(
-                challenge.target,
-                (dailyChallengeState.counts[type] || 0) + amount
-            );
-
-            if (dailyChallengeState.counts[type] < challenge.target) {
+            if(after<challenge.target){
                 await persistDailyState();
-                return;
+                if(statsPanelOverlay?.classList.contains('open'))renderStatsPanel();
+                return {counted:true,completed:false};
             }
 
-            // Complete ONLY this activity for today.
-            dailyChallengeState.completed[type] = true;
+            dailyChallengeState.completed[type]=true;
+            const today=dailyChallengeState.date;
+            const last=dailyChallengeState.lastCompletedDates[type]||'';
+            const gap=last?daysBetween(last,today):999;
+            dailyChallengeState.streaks[type]=gap===1?Number(dailyChallengeState.streaks[type]||0)+1:1;
+            dailyChallengeState.lastCompletedDates[type]=today;
 
-            const today = dailyChallengeState.date;
-            const last = dailyChallengeState.lastCompletedDates[type] || '';
-            const gap = last ? daysBetween(last, today) : 999;
+            await addSP(challenge.reward,`Daily challenge: ${challenge.name}`);
 
-            // Each activity has its own independent streak.
-            dailyChallengeState.streaks[type] =
-                gap === 1 ? (dailyChallengeState.streaks[type] || 0) + 1 : 1;
-
-            dailyChallengeState.lastCompletedDates[type] = today;
-            dailyChallengeState.completionRewarded[type] = true;
-
-            const streak = dailyChallengeState.streaks[type];
-            const streakBonus = Math.min(30, streak * 3);
-
-            await addSP(challenge.reward, `Daily activity: ${challenge.name}`);
-            await addSP(streakBonus, `${challenge.name} ${streak} day streak`);
-
-            showToast(
-                `🔥 ${challenge.name}: ${streak} day streak! +${challenge.reward + streakBonus} SP`,
-                'gold',
-                'Daily Streak'
-            );
-            addNotification(
-                `${challenge.name} reached a ${streak} day streak`,
-                'gold',
-                'Daily Streak'
-            );
+            const latestLevel=getCurrentProgressionLevel();
+            const eligibleChallenges=getEligibleDailyChallenges(latestLevel);
+            await ensureDailyChallengePoolPersisted();
+            if(getDailyCompletedCount()===eligibleChallenges.length&&eligibleChallenges.length>0&&!dailyChallengeState.completionRewarded){
+                dailyChallengeState.completionRewarded=true;
+                await addSP(DAILY_COMPLETION_BONUS,'Completed all daily activities');
+                if (typeof window.recordDailyCompletionAchievement === 'function') {
+                    await window.recordDailyCompletionAchievement();
+                }
+                showToast(`🔥 All daily activities complete! +${DAILY_COMPLETION_BONUS} SP`,'gold','Daily Complete');
+                addNotification('All daily activities completed','gold','Daily Complete');
+            }
 
             await persistDailyState();
-            if (statsPanelOverlay?.classList.contains('open')) renderStatsPanel();
+            if(statsPanelOverlay?.classList.contains('open'))renderStatsPanel();
+
+            const streak=Number(dailyChallengeState.streaks[type]||1);
+            const streakReward=getStreakReward(streak);
+            if(streakReward>0){
+                await addSP(streakReward,`🔥 ${streak} day ${challenge.name} streak reward`);
+                showToast(`🔥 ${streak} day streak bonus +${streakReward} SP`,'gold','Streak Reward');
+            }
+            showToast(`✓ ${challenge.name} complete • +${challenge.reward} SP • ${streak} day streak`,'gold','Daily Activity');
+            return {counted:true,completed:true,streak};
         }
 
+        async function completeActivity(type,amount=1,options={}){
+            const challenge=getDailyChallenge(type);
+            if(!challenge)return {counted:false,completed:false};
+            const result=options.track===false
+                ? {counted:false,completed:false}
+                : await trackDailyChallenge(type,amount);
+
+            // Connect achievement progress directly to the existing activity pipeline.
+            // This avoids relying on a later script to monkey-patch completeActivity.
+            const achievementMetricMap = {
+                messages:'messages', reactions:'reactions', minutes:'minutes',
+                voiceNotes:'voiceNotes', images:'images', stickers:'stickers',
+                replies:'replies', pollVotes:'pollVotes'
+            };
+            try {
+                const metric = achievementMetricMap[type];
+                if (metric && result && result.counted !== false &&
+                    typeof window.recordAchievementActivity === 'function') {
+                    await window.recordAchievementActivity(metric, amount);
+                }
+            } catch (_) {}
+
+            const baseAmount=Number(options.baseAmount ?? challenge.base ?? 0);
+            const trackSucceeded = options.track===false || result.counted===true || result.notInDailyPool===true;
+            if(trackSucceeded && options.awardBase!==false&&baseAmount>0&&(!result.alreadyComplete||options.forceBase)){
+                dailyChallengeState=normalizeDailyState({dailyChallenges:dailyChallengeState});
+                const usedBase=Number(dailyChallengeState.baseRewardSP)||0;
+                const remainingBase=Math.max(0,DAILY_BASE_SP_CAP-usedBase);
+                const grantedBase=Math.min(baseAmount,remainingBase);
+                if(grantedBase>0){
+                    dailyChallengeState.baseRewardSP=usedBase+grantedBase;
+                    await addSP(grantedBase,options.reason||`${challenge.name} activity`);
+                    await persistDailyState();
+                }
+            }
+            return result;
+        }
+        window.completeActivity=completeActivity;
+        window.trackDailyChallenge=trackDailyChallenge;
+
         async function addSP(amount, reason) {
-            if (!currentUserUid || !roomId) return;
-            if (amount <= 0) return;
-            const data = await getUserRoomData(currentUserUid);
-            let sp = data.sp || 0;
-            let level = data.level || 1;
-            let feed = data.spFeed || [];
-            sp += amount;
-            const newLevel = getLevelFromSP(sp);
-            if (newLevel > level) {
-                const newName = getLevelName(newLevel);
-                showToast(`🎉 Level Up! You are now ${newName} (Level ${newLevel})`, 'gold', 'Level Up!');
-                addNotification(`Reached Level ${newLevel}: ${newName}`, 'gold', 'Level Up');
+            if (!currentUserUid || !roomId) return false;
+            const safeAmount = Number(amount);
+            if (!Number.isFinite(safeAmount) || safeAmount <= 0) return false;
+
+            const userRoomRef = doc(db, 'rooms', roomId, 'users', currentUserUid);
+            let result = null;
+
+            // SP is user progression data. Read/modify/write must happen in one
+            // transaction so simultaneous activities cannot overwrite each other.
+            await runTransaction(db, async (tx) => {
+                const snap = await tx.get(userRoomRef);
+                const data = snap.exists() ? (snap.data() || {}) : {};
+                const oldSP = Math.max(0, Number(data.sp) || 0);
+                const oldLevel = getLevelFromSP(oldSP);
+                const sp = oldSP + safeAmount;
+                const newLevel = getLevelFromSP(sp);
+                const feed = Array.isArray(data.spFeed) ? data.spFeed.slice(-20) : [];
+                feed.push({
+                    amount: safeAmount,
+                    reason,
+                    time: Date.now(),
+                    memberName: currentUser?.displayName || 'You',
+                    memberId: currentUserUid
+                });
+
+                tx.set(userRoomRef, { sp, level: newLevel, spFeed: feed.slice(-20) }, { merge: true });
+                result = { sp, level: newLevel, leveledUp: newLevel > oldLevel };
+            });
+
+            currentSP = result.sp;
+            currentLevel = result.level;
+            writeCachedLevelData(currentUserUid, currentLevel, currentSP);
+            preloadLevelIcon(currentLevel);
+            updateHeaderLevel();
+
+            if (result.leveledUp) {
+                showToast(`🎉 Level Up! You reached Level ${result.level}`, 'gold', 'Level Up!');
+                addNotification(`Reached Level ${result.level}`, 'gold', 'Level Up');
                 try {
                     await addDoc(collection(db, 'rooms', roomId, 'messages'), {
                         senderId: 'system',
                         senderName: 'FunRoom',
-                        text: `🎊 ${currentUser.displayName || 'User'} has reached ${newName} (Level ${newLevel})!`,
+                        text: `🎊 ${currentUser.displayName || 'User'} has reached ${getLevelRecord(result.level).name} (Level ${result.level})!`,
                         type: 'system',
                         timestamp: serverTimestamp()
                     });
                 } catch (e) { console.error('Failed to send level-up system message:', e); }
-                level = newLevel;
             }
-            feed.push({ amount, reason, time: Date.now(), memberName: currentUser?.displayName || 'You', memberId: currentUserUid });
-            if (feed.length > 20) feed = feed.slice(-20);
-            await saveUserRoomData(currentUserUid, { sp, level, spFeed: feed });
-            currentSP = sp;
-            currentLevel = level;
-            writeCachedLevelData(currentUserUid, currentLevel, currentSP);
-            preloadLevelIcon(currentLevel);
-            updateHeaderLevel();
+            return true;
         }
 
         // ============================================================
@@ -5766,11 +6097,11 @@ header [class*="stats" i],
                 if (!raw) return null;
                 const data = JSON.parse(raw);
                 if (!data || !Number.isFinite(Number(data.level))) return null;
-                return { level: Math.max(1, Math.min(100, Number(data.level))), sp: Math.max(0, Number(data.sp) || 0) };
+                return { level: Math.max(1, Math.min(window.LEVEL_DATA.length, Number(data.level))), sp: Math.max(0, Number(data.sp) || 0) };
             } catch (_) { return null; }
         }
         function writeCachedLevelData(uid, level, sp) {
-            try { localStorage.setItem(getLevelCacheKey(uid), JSON.stringify({ level: Math.max(1, Math.min(100, Number(level) || 1)), sp: Math.max(0, Number(sp) || 0), t: Date.now() })); } catch (_) {}
+            try { const safeLevel = Math.max(1, Math.min(window.LEVEL_DATA.length, Number(level) || 1)); const safeSP = Math.max(0, Number(sp) || 0); localStorage.setItem(getLevelCacheKey(uid), JSON.stringify({ level: safeLevel, sp: safeSP, t: Date.now() })); localStorage.setItem('funroom:level:last', JSON.stringify({ level: safeLevel, sp: safeSP, t: Date.now() })); } catch (_) {}
         }
         function preloadLevelIcon(level) {
             const record = getLevelRecord(level);
@@ -5793,9 +6124,11 @@ header [class*="stats" i],
         async function loadUserRoomData(uid) {
             const data = await getUserRoomData(uid);
             currentSP = data.sp || 0;
-            currentLevel = data.level || 1;
+            currentLevel = getLevelFromSP(currentSP);
             spFeed = data.spFeed || [];
             dailyChallengeState = normalizeDailyState(data);
+            getEligibleDailyChallenges(currentLevel);
+            await ensureDailyChallengePoolPersisted();
             writeCachedLevelData(uid, currentLevel, currentSP);
             preloadLevelIcon(currentLevel);
             updateHeaderLevel();
@@ -5804,15 +6137,17 @@ header [class*="stats" i],
 
         function updateHeaderLevel() {
             const level = currentLevel;
-            const sp = currentSP;
             const record = getLevelRecord(level);
+            levelBadge.title = `Level ${record.level} — ${record.name}`;
+            levelBadge.setAttribute('aria-label', `Level ${record.level} — ${record.name}. View leveling dashboard.`);
+            const sp = currentSP;
             const progress = getLevelProgress(sp, level);
             preloadLevelIcon(level);
-            const nextSrc = `assets/levels/${getLevelRecord(level).icon}`;
+            const nextSrc = getLevelIconSrc(getLevelRecord(level).icon);
             const existing = levelIcon.querySelector('.level-icon-img');
             if (!existing || !existing.src.endsWith(nextSrc)) levelIcon.innerHTML = getLevelIconHTML(level);
             levelIcon.dataset.tier = getLevelTier(level);
-            levelName.textContent = record.name;
+            try { refreshProgressionUI(); } catch (_) {}
             levelProgressFill.style.width = Math.round(progress * 100) + '%';
             levelProgressFill.dataset.tier = getLevelTier(level);
         }
@@ -5823,8 +6158,7 @@ header [class*="stats" i],
             if (timeInterval) return;
             timeInterval = setInterval(async () => {
                 if (!currentUserUid || !hasPaid) return;
-                await addSP(1, 'Time spent in room (5 min)');
-                 await trackDailyActivity('minutes', 5);
+                await completeActivity('minutes', 5, {baseAmount:1, reason:'Time spent in room (5 min)'});
             }, 5 * 60 * 1000);
         }
 
@@ -5854,10 +6188,7 @@ header [class*="stats" i],
             const body = statsPanelBody;
             const level = currentLevel;
             const sp = currentSP;
-            const record = getLevelRecord(level);
-            const name = record.name;
-            const nextSP = level >= 100 ? getSPForLevel(100) : getSPForLevel(level + 1);
-            const prevSP = getSPForLevel(level);
+            const nextSP = level >= window.LEVEL_DATA.length ? getSPForLevel(window.LEVEL_DATA.length) : getSPForLevel(level + 1);
             const progress = getLevelProgress(sp, level);
 
             let feedHTML = '';
@@ -5874,20 +6205,39 @@ header [class*="stats" i],
             body.innerHTML = `
             <div class="level-display">
               <span class="level-icon" data-tier="${getLevelTier(level)}">${getLevelIconHTML(level)}</span>
-              <div class="level-name">${name}</div>
-              <div class="level-number">Level ${level}</div>
+              <div class="level-number">Level ${level} · ${getLevelRecord(level).name}</div>
             </div>
             <div class="progress-section">
               <div class="sp-stats">
                 <span>SP: ${sp}</span>
-                <span>${level >= 100 ? 'MAX LEVEL' : `Next: ${nextSP.toLocaleString()} SP`}</span>
+                <span>${level >= window.LEVEL_DATA.length ? 'MAX LEVEL' : `Next: ${nextSP.toLocaleString()} SP`}</span>
               </div>
               <div class="progress-bar-big"><div class="fill" style="width:${Math.min(100, Math.round(progress*100))}%"></div></div>
-              <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${level >= 100 ? '100% · Maximum Level' : `${Math.round(progress*100)}% to next level`}</div>
+              <div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${level >= window.LEVEL_DATA.length ? '100% · Maximum Level' : `${Math.round(progress*100)}% to next level`}</div>
             </div>
-            <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Recent Activity</div>
+            <div style="margin-top:12px;font-size:0.75rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;">🔥 Daily Activities</div>
+            <div style="font-size:0.62rem;color:var(--text-muted);margin:4px 0 7px;">${getDailyCompletedCount()}/${getEligibleDailyChallenges(level).length} available activities completed today${dailyChallengeState.completionRewarded ? ' • +100 SP bonus claimed' : ''}</div>
+            <div class="daily-activity-list">
+              ${getEligibleDailyChallenges(level).map(c => {
+                  const count=Math.min(c.target,Number(dailyChallengeState.counts?.[c.id]||0));
+                  const pct=Math.round((count/c.target)*100);
+                  const done=!!dailyChallengeState.completed?.[c.id];
+                  const streak=Number(dailyChallengeState.streaks?.[c.id]||0);
+                  return `<div style="display:grid;grid-template-columns:24px 1fr auto;gap:7px;align-items:center;padding:6px 0;border-top:1px solid rgba(255,255,255,.05);">
+                    <span>${c.icon}</span>
+                    <div><div style="font-size:.67rem;font-weight:700;">${sanitizeHTML(c.name)} ${done?'✓':''}</div>
+                    <div style="font-size:.57rem;color:var(--text-muted);">${count}/${c.target} ${sanitizeHTML(c.unit)}${streak?` • ${streak} day streak`:''}</div>
+                    <div style="height:4px;margin-top:4px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;"><div style="height:100%;width:${pct}%;background:var(--gold);border-radius:99px;"></div></div></div>
+                    <strong style="font-size:.6rem;color:var(--gold);">+${c.reward}</strong>
+                  </div>`;
+              }).join('')}
+            </div>
+                        <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;">Recent Activity</div>
             <div class="recent-feed">${feedHTML}</div>
           `;
+
+          try { renderAchievementsPanel(); } catch (_) {}
+          try { renderLevelBenefits(); } catch (_) {}
         }
 
         // ============================================================
@@ -6181,7 +6531,7 @@ header [class*="stats" i],
                     pinned: true
                 });
 
-                await trackDailyActivity('voiceNotes', 1);
+                await completeActivity('voiceNotes', 1, {baseAmount:3, reason:'Voice note sent to member'});
 
                 await addDoc(collection(db, 'rooms', roomId, 'messages'), {
                     senderId: 'system',
@@ -6191,7 +6541,6 @@ header [class*="stats" i],
                     timestamp: serverTimestamp()
                 });
 
-                await addSP(3, 'Voice note sent to member');
                 
                 showToast('✅ Voice note sent! +3 SP', 'success');
                 addNotification('Voice note sent', 'info', 'Voice Note');
@@ -6247,6 +6596,11 @@ header [class*="stats" i],
         window.handleImageUpload = async function(event) {
             const file = event.target.files[0];
             if (!file) return;
+            if (!isProgressionRuleUnlocked('image_sharing')) {
+                showToast(`🔒 Image sharing unlocks at Level 3. ${explainProgressionLock('image_sharing') || 'Keep earning SP/Gas to unlock it.'}`, 'warning', 'Feature Locked');
+                document.getElementById('imageInput').value = '';
+                return;
+            }
             if (!file.type.startsWith('image/')) { showToast('Not an image.', 'error'); return; }
             const maxSize = isRoomFeatureUnlocked('file_size') ? PREMIUM_FILE_LIMIT : NORMAL_FILE_LIMIT;
             if (file.size > maxSize) {
@@ -6264,7 +6618,7 @@ header [class*="stats" i],
                 await uploadBytes(storageRef, file);
                 const downloadURL = await getDownloadURL(storageRef);
                 await sendMessageWithType('image', downloadURL, COSTS.image);
-                await addSP(5, 'Image shared');
+                await completeActivity('images',1,{baseAmount:5,reason:'Image shared'});
                 showToast('Image sent -5🪙 +5 SP', 'success');
                 addNotification('Image shared +5 SP', 'info', 'Image');
             } catch (e) { showToast('Upload failed: ' + e.message, 'error'); }
@@ -6290,9 +6644,9 @@ header [class*="stats" i],
             }
             grid.innerHTML = emojis.map(e => `<button onclick="sendSticker('${e}')">${e}</button>`).join('');
         }
-        window.sendSticker = function(emoji) { closeStickerPicker();
-            sendMessageWithType('sticker', emoji, COSTS.sticker);
-            addSP(2, 'Sticker sent'); };
+        window.sendSticker = async function(emoji) { closeStickerPicker();
+            await sendMessageWithType('sticker', emoji, COSTS.sticker);
+            await completeActivity('stickers',1,{baseAmount:2,reason:'Sticker sent'}); };
 
         // ============================================================
         // REACTIONS
@@ -6302,23 +6656,30 @@ header [class*="stats" i],
             document.getElementById('reactionPickerOverlay').classList.add('open'); };
         window.closeReactionPicker = function() { document.getElementById('reactionPickerOverlay').classList.remove('open');
             reactionTargetId = null; };
-        window.addReaction = async function(emoji) {
-            if (!reactionTargetId || !currentUser) return;
-            const ref = doc(db, 'rooms', roomId, 'messages', reactionTargetId);
-            try {
-                const snap = await getDoc(ref);
-                if (!snap.exists()) return;
-                const data = snap.data();
-                const reactions = data.reactions || {};
-                const users = reactions[emoji] || [];
+        async function toggleMessageReaction(messageId, emoji) {
+            if (!messageId || !currentUser) return false;
+            const ref = doc(db, 'rooms', roomId, 'messages', messageId);
+            await runTransaction(db, async (tx) => {
+                const snap = await tx.get(ref);
+                if (!snap.exists()) throw new Error('Message not found');
+                const data = snap.data() || {};
+                const reactions = data.reactions && typeof data.reactions === 'object' ? { ...data.reactions } : {};
+                const users = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : [];
                 const idx = users.indexOf(currentUser.uid);
                 if (idx > -1) users.splice(idx, 1);
                 else users.push(currentUser.uid);
                 reactions[emoji] = users;
-                await updateDoc(ref, { reactions });
+                tx.update(ref, { reactions });
+            });
+            return true;
+        }
+
+        window.addReaction = async function(emoji) {
+            if (!reactionTargetId || !currentUser) return;
+            try {
+                await toggleMessageReaction(reactionTargetId, emoji);
                 closeReactionPicker();
-                await addSP(1, 'Reacted to a message');
-                await trackDailyActivity('reactions', 1);
+                await completeActivity('reactions',1,{baseAmount:1,reason:'Reacted to a message'});
             } catch (e) { console.error(e); }
         };
 
@@ -6415,8 +6776,8 @@ header [class*="stats" i],
                 msgInput.value = '';
                 msgInput.focus();
                 lastActivity = Date.now();
-                await addSP(1, 'Sent a text message');
-                if (msgData.replyTo) await addSP(1, 'Reply to message');
+                await completeActivity('messages',1,{baseAmount:1,reason:'Sent a text message'});
+                if (msgData.replyTo) await completeActivity('replies',1,{baseAmount:2,reason:'Reply to message'});
             } catch (err) { showToast('Failed to send', 'error'); }
             sendBtn.disabled = false;
         };
@@ -6440,7 +6801,6 @@ header [class*="stats" i],
                 if (replyingTo) { msgData.replyTo = replyingTo;
                     replyingTo = null; }
                 await sendPaidMessageAtomically(msgData, cost, `${type} message`);
-                await trackDailyActivity('messages', 1);
                 if (type !== 'text') 
                 lastActivity = Date.now();
             } catch (err) { showToast('Failed to send', 'error'); }
@@ -6491,6 +6851,10 @@ header [class*="stats" i],
         window.cancelReply = function() { replyingTo = null;
             msgInput.placeholder = 'Type a message… (1🪙)'; };
         window.pinMessage = async function(id) {
+            if (!isProgressionRuleUnlocked('message_pins') && !isRoomFeatureUnlocked('pin_limit')) {
+                showToast(`🔒 Message pinning unlocks at Level 8 + 100-message achievement. ${explainProgressionLock('message_pins')}`, 'warning', 'Feature Locked');
+                return;
+            }
             if (!isModerator && !isRoomOwner) { showToast('Only moderators can pin.', 'warning'); return; }
             const ref = doc(db, 'rooms', roomId, 'messages', id);
             const snap = await getDoc(ref);
@@ -6499,6 +6863,10 @@ header [class*="stats" i],
             showToast('Pinned!', 'success');
         };
         window.unpinMessage = async function(id) {
+            if (!isProgressionRuleUnlocked('message_pins') && !isRoomFeatureUnlocked('pin_limit')) {
+                showToast(`🔒 Message pinning unlocks at Level 8 + 100-message achievement. ${explainProgressionLock('message_pins')}`, 'warning', 'Feature Locked');
+                return;
+            }
             if (!isModerator && !isRoomOwner) { showToast('Not allowed.', 'error'); return; }
             await updateDoc(doc(db, 'rooms', roomId, 'messages', id), { pinned: false });
             showToast('Unpinned', 'success');
@@ -6526,9 +6894,7 @@ header [class*="stats" i],
             let senderName = data.senderName || 'User';
             let levelTag = '';
             if (data.level && data.level >= 1) {
-                const lvlName = getLevelName(data.level);
-                const icon = getLevelIcon(data.level);
-                levelTag = `<span class="level-tag">${icon} ${lvlName}</span>`;
+                levelTag = `<span class="level-tag">${getLevelIconHTML(data.level, 'message-level-icon')}<span>Level ${Number(data.level)}</span></span>`;
             }
             let vipTag = data.isVip ? '<span class="vip-tag">👑 VIP</span>' : '';
             let modTag = data.isMod ?
@@ -6597,9 +6963,7 @@ header [class*="stats" i],
             let senderName = data.senderName || 'User';
             let levelTag = '';
             if (data.level && data.level >= 1) {
-                const lvlName = getLevelName(data.level);
-                const icon = getLevelIcon(data.level);
-                levelTag = `<span class="level-tag">${icon} ${lvlName}</span>`;
+                levelTag = `<span class="level-tag">${getLevelIconHTML(data.level, 'message-level-icon')}<span>Level ${Number(data.level)}</span></span>`;
             }
             let vipTag = data.isVip ? '<span class="vip-tag">👑 VIP</span>' : '';
             let modTag = data.isMod ?
@@ -6622,41 +6986,35 @@ header [class*="stats" i],
             if (!currentUser || !hasPaid) { showToast('Join the room first.', 'warning'); return; }
             const ref = doc(db, 'rooms', roomId, 'messages', messageId);
             try {
-                const snap = await getDoc(ref);
-                if (!snap.exists()) return;
-                const data = snap.data();
-                if (data.type !== 'poll') return;
-                const pollData = data.pollData || {};
-                const votedBy = pollData.votedBy || [];
-                if (votedBy.includes(currentUser.uid)) {
-                    showToast('You already voted in this poll.', 'warning');
-                    return;
-                }
-                const votes = pollData.votes || {};
-                votes[optionIndex] = (votes[optionIndex] || 0) + 1;
-                votedBy.push(currentUser.uid);
-                await updateDoc(ref, { pollData: { ...pollData, votes, votedBy } });
-                await addSP(1, 'Voted in a poll');
-                
+                await runTransaction(db, async (tx) => {
+                    const snap = await tx.get(ref);
+                    if (!snap.exists()) throw new Error('Poll not found');
+                    const data = snap.data() || {};
+                    if (data.type !== 'poll') throw new Error('Not a poll');
+                    const pollData = data.pollData && typeof data.pollData === 'object' ? data.pollData : {};
+                    const options = Array.isArray(pollData.options) ? pollData.options : [];
+                    const index = Number(optionIndex);
+                    if (!Number.isInteger(index) || index < 0 || index >= options.length) throw new Error('Invalid poll option');
+                    const votedBy = Array.isArray(pollData.votedBy) ? [...pollData.votedBy] : [];
+                    if (votedBy.includes(currentUser.uid)) throw new Error('You already voted in this poll.');
+                    const votes = { ...(pollData.votes || {}) };
+                    votes[index] = (Number(votes[index]) || 0) + 1;
+                    votedBy.push(currentUser.uid);
+                    tx.update(ref, { pollData: { ...pollData, votes, votedBy } });
+                });
+                await completeActivity('pollVotes',1,{baseAmount:1,reason:'Voted in a poll'});
                 showToast('Vote recorded! +1 SP', 'success');
-            } catch (e) { showToast('Failed to vote: ' + e.message, 'error'); }
+            } catch (e) {
+                if (e.message === 'You already voted in this poll.') showToast(e.message, 'warning');
+                else showToast('Failed to vote: ' + e.message, 'error');
+            }
         };
 
         window.addReactionToMessage = async function(messageId, emoji) {
             if (!currentUser) return;
-            const ref = doc(db, 'rooms', roomId, 'messages', messageId);
             try {
-                const snap = await getDoc(ref);
-                if (!snap.exists()) return;
-                const data = snap.data();
-                const reactions = data.reactions || {};
-                const users = reactions[emoji] || [];
-                const idx = users.indexOf(currentUser.uid);
-                if (idx > -1) users.splice(idx, 1);
-                else users.push(currentUser.uid);
-                reactions[emoji] = users;
-                await updateDoc(ref, { reactions });
-                await addSP(1, 'Reacted to a message');
+                await toggleMessageReaction(messageId, emoji);
+                await completeActivity('reactions',1,{baseAmount:1,reason:'Reacted to a message'});
             } catch (e) { console.error(e); }
         };
 
@@ -6821,11 +7179,18 @@ const MESSAGE_CACHE_MAX = 200;
                 const q = query(messagesRef, orderBy('timestamp', 'asc'));
                 const snap = await getDocs(q);
                 if (snap.empty) { showToast('No messages to clear.', 'info'); return; }
-                const batch = writeBatch(db);
+                // Firestore write batches are limited to 500 writes. Keep a safety
+                // margin so Clear Chat remains reliable for larger rooms.
+                const refs = snap.docs.map(messageDoc => messageDoc.ref);
+                const BATCH_SIZE = 450;
                 let count = 0;
-                snap.forEach(doc => { batch.delete(doc.ref);
-                    count++; });
-                await batch.commit();
+                for (let i = 0; i < refs.length; i += BATCH_SIZE) {
+                    const batch = writeBatch(db);
+                    const chunk = refs.slice(i, i + BATCH_SIZE);
+                    chunk.forEach(messageRef => batch.delete(messageRef));
+                    await batch.commit();
+                    count += chunk.length;
+                }
                 allMessages = [];
                 renderAllMessages();
                 showToast(`Cleared ${count} messages.`, 'success');
@@ -6873,28 +7238,51 @@ const MESSAGE_CACHE_MAX = 200;
             smartPresenceTimer = setTimeout(() => el.classList.remove('show'), 2200);
         }
 
+        function refreshParticipantPresenceUI() {
+            const list = document.getElementById('participantsList');
+            if (!list) return;
+            list.querySelectorAll('.participant[data-uid]').forEach(row => {
+                const uid = row.dataset.uid;
+                const state = memberPresenceState.get(uid);
+                if (!state) return;
+                const online = state.online === true && state.updatedAt && (Date.now() - state.updatedAt.getTime()) <= PRESENCE_STALE_MS;
+                const dot = row.querySelector('.status-dot');
+                const time = row.querySelector('.presence-time');
+                const presenceText = formatLastSeen(state.updatedAt, online);
+                if (dot) {
+                    dot.className = `status-dot ${online ? 'online' : 'offline'}`;
+                    dot.title = presenceText;
+                    dot.setAttribute('aria-label', online ? 'Online' : 'Offline');
+                }
+                if (time) time.textContent = presenceText;
+            });
+        }
+
+        function startPresenceRefreshTimer() {
+            if (presenceRefreshTimer) clearInterval(presenceRefreshTimer);
+            presenceRefreshTimer = setInterval(refreshParticipantPresenceUI, 5000);
+        }
+
         function watchRoomMemberPresence() {
             if (!roomId || memberPresenceUnsub) return;
             memberPresenceUnsub = onSnapshot(collection(db, 'rooms', roomId, 'participants'), async (snap) => {
                 const next = new Map();
                 snap.forEach(d => {
                     const data = d.data() || {};
-                    next.set(d.id, data.roomPresence === true);
+                    const updatedAt = data.presenceUpdatedAt?.toDate?.() || data.lastSeen?.toDate?.() || null;
+                    next.set(d.id, { online: data.roomPresence === true, updatedAt });
                 });
-
-                if (!memberPresenceReady) {
-                    next.forEach((online, uid) => memberPresenceState.set(uid, online));
-                    memberPresenceReady = true;
-                    return;
-                }
 
                 const changes = [];
-                next.forEach((online, uid) => {
+                next.forEach((state, uid) => {
                     const previous = memberPresenceState.get(uid);
-                    if (previous !== undefined && previous !== online && uid !== currentUserUid) changes.push({ uid, online });
+                    const previousOnline = previous?.online;
+                    if (previous && previousOnline !== state.online && uid !== currentUserUid) changes.push({ uid, online: state.online });
                 });
                 memberPresenceState.clear();
-                next.forEach((online, uid) => memberPresenceState.set(uid, online));
+                next.forEach((state, uid) => memberPresenceState.set(uid, state));
+                memberPresenceReady = true;
+                refreshParticipantPresenceUI();
 
                 for (const change of changes) {
                     try {
@@ -6906,6 +7294,28 @@ const MESSAGE_CACHE_MAX = 200;
                     }
                 }
             }, (err) => console.warn('Member presence listener:', err));
+
+            startPresenceRefreshTimer();
+
+            if (roomData?.createdBy) {
+                watchCreatorPresence(roomData.createdBy);
+            }
+        }
+
+        function watchCreatorPresence(uid) {
+            if (!uid || creatorPresenceUnsub) return;
+            creatorPresenceUnsub = onSnapshot(doc(db, 'users', uid), (snap) => {
+                if (!snap.exists()) return;
+                const data = snap.data() || {};
+                const lastSeen = data.lastSeen?.toDate?.() || null;
+                const previous = memberPresenceState.get(uid);
+                const online = getPresenceState(data).online;
+                memberPresenceState.set(uid, { online, updatedAt: lastSeen });
+                refreshParticipantPresenceUI();
+                if (previous && previous.online !== online && uid !== currentUserUid) {
+                    showSmartPresenceToast(data.name || data.displayName || 'Creator', online);
+                }
+            }, (err) => console.warn('Creator presence listener:', err));
         }
 
         async function loadParticipants() {
@@ -6915,6 +7325,18 @@ const MESSAGE_CACHE_MAX = 200;
                 list.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:16px 0;font-size:12px;">Loading members…</div>';
                 const snap = await getDocs(collection(db, 'rooms', roomId, 'participants'));
                 const participants = snap.docs.map(d => ({ uid: d.id, data: d.data() }));
+
+                // The room creator is the room owner, not a participant document.
+                // Include the creator in the member list so participants can see and interact with them.
+                if (roomData?.createdBy && !participants.some(p => p.uid === roomData.createdBy)) {
+                    let creatorData = {};
+                    try {
+                        const creatorSnap = await getDoc(doc(db, 'users', roomData.createdBy));
+                        if (creatorSnap.exists()) creatorData = creatorSnap.data();
+                    } catch (_) {}
+                    participants.unshift({ uid: roomData.createdBy, data: { ...creatorData, roomCreator: true } });
+                }
+
                 const total = participants.length;
                 if (countEl) countEl.textContent = total;
                 if (!total) {
@@ -6925,14 +7347,21 @@ const MESSAGE_CACHE_MAX = 200;
                 // Paint immediately from participant documents. Profile/level hydration is secondary.
                 const renderRow = (uid, data = {}) => {
                     const name = data.name || data.displayName || 'User';
-                    const lastSeen = data.lastSeen?.toDate?.() || null;
-                    const online = data.roomPresence === true || getPresenceState(data).online;
-                    const level = Number(data.level) || 1;
+                    const avatar = data.avatar || '';
+                    const avatarMarkup = avatar
+                        ? `<img src="${avatar}" alt="${name}" loading="lazy" />`
+                        : name.charAt(0).toUpperCase();
+                    const presence = getPresenceState(data);
+                    const lastSeen = presence.lastSeen;
+                    const online = presence.online;
+                    memberPresenceState.set(uid, { online, updatedAt: lastSeen });
+                    const level = getLevelFromSP(Number(data.sp) || 0);
                     const isSelf = uid === currentUser?.uid;
                     const isVip = roomVips[uid] === true;
                     const presenceText = formatLastSeen(lastSeen, online);
                     const vipTag = isVip ? '<span class="vip-tag-participant">👑 VIP</span>' : '';
-                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant">${getLevelIcon(level)} ${getLevelName(level)}</span>${vipTag}</div><div class="presence-time">${presenceText}</div></div><span class="status-dot ${online ? 'online' : 'offline'}" title="${presenceText}"></span></div>`;
+                    const creatorTag = data.roomCreator ? '<span class="vip-tag-participant">👑 Creator</span>' : '';
+                    return `<div class="participant" data-uid="${uid}" onclick="openMemberActionPanel('${uid}')"><div class="member-list-avatar" aria-hidden="true">${avatarMarkup}</div><div class="info"><div class="name">${name}${isSelf ? ' (you)' : ''}<span class="level-tag-participant" title="Level ${level}">${getLevelIconHTML(level, 'participant-level-icon')}<span>Level ${level}</span></span>${vipTag}${creatorTag}</div><div class="presence-time">${presenceText}</div></div><span class="status-dot ${online ? 'online' : 'offline'}" title="${presenceText}"></span></div>`;
                 };
                 list.innerHTML = participants.map(p => renderRow(p.uid, p.data)).join('');
 
@@ -6945,7 +7374,8 @@ const MESSAGE_CACHE_MAX = 200;
                                 const roomUserData = await getUserRoomData(uid);
                                 const merged = { ...data };
                                 if (userSnap.exists()) Object.assign(merged, userSnap.data());
-                                if (roomUserData?.level) merged.level = roomUserData.level;
+                                if (roomUserData?.sp != null) merged.sp = Number(roomUserData.sp) || 0;
+                                 merged.level = getLevelFromSP(Number(merged.sp) || 0);
                                 const row = list.querySelector(`[data-uid="${CSS.escape(uid)}"]`);
                                 if (row) row.outerHTML = renderRow(uid, merged);
                             } catch (_) {}
@@ -6980,7 +7410,8 @@ const MESSAGE_CACHE_MAX = 200;
             const avatar = memberActionTargetData.avatar || '';
             const presence = getPresenceState(memberActionTargetData);
             const online = presence.online;
-            const level = (await getUserRoomData(uid)).level || 1;
+            const memberRoomData = await getUserRoomData(uid);
+            const level = getLevelFromSP(Number(memberRoomData?.sp) || 0);
             const isVip = roomVips[uid] === true;
 
             memberActionName.textContent = name;
@@ -6993,9 +7424,7 @@ const MESSAGE_CACHE_MAX = 200;
             }
             memberActionStatusDot.className = 'dot-online ' + (online ? 'online' : 'offline');
             memberActionStatusText.textContent = formatLastSeen(presence.lastSeen, online);
-            const lvlName = getLevelName(level);
-            const icon = getLevelIcon(level);
-            memberActionLevel.textContent = `${icon} ${lvlName}`;
+            memberActionLevel.textContent = `Level ${level}`;
             if (isVip) { memberActionVipBadge.style.display = 'inline-block'; } else { memberActionVipBadge.style
                     .display = 'none'; }
 
@@ -7544,6 +7973,16 @@ const MESSAGE_CACHE_MAX = 200;
         };
 
         window.createPoll = async function() {
+            // Re-check the real feature gate at the write boundary; opening the
+            // creator is not sufficient because this function is globally callable.
+            if (!isRoomFeatureUnlocked('polls')) {
+                showToast('🔒 Polls are locked for this room. Reach the required level/achievement or use the existing approved entitlement.', 'warning', 'Feature Locked');
+                return;
+            }
+            if (!isRoomOwner && !isModerator) {
+                showToast('Only the room owner or moderator can create polls.', 'warning');
+                return;
+            }
             const question = document.getElementById('pollQuestionInput')?.value.trim();
             if (!question) { showToast('Enter a question.', 'warning'); return; }
             const optionInputs = document.querySelectorAll('.poll-option-input');
@@ -7591,7 +8030,6 @@ const MESSAGE_CACHE_MAX = 200;
             roomFeaturesOverlay.classList.add('open');
         };
         window.closeRoomFeaturesPanel = function() { roomFeaturesOverlay.classList.remove('open'); };
-        roomFeaturesOverlay.addEventListener('click', function(e) { if (e.target === this) closeRoomFeaturesPanel(); });
 
         async function renderRoomFeaturesPanel() {
             const body = roomFeaturesBody;
@@ -7654,6 +8092,7 @@ const MESSAGE_CACHE_MAX = 200;
                 </div>
                 <div class="f-desc">${feature.description}</div>
                 <div class="f-price">💰 ${priceDisplay}</div>
+                ${(feature.requiredLevel || feature.requiredAchievement) ? `<div class="f-desc" style="color:var(--gold);font-weight:800;">🔓 ${feature.requiredLevel ? `Level ${feature.requiredLevel}` : ''}${feature.requiredLevel && feature.requiredAchievement ? ' + ' : ''}${feature.requiredAchievement ? `Achievement: ${feature.requiredAchievement}` : ''}</div>` : ''}
                 <div class="f-status">
                   <span class="status-badge ${statusClass}">${statusLabel}</span>
                 </div>
@@ -7847,6 +8286,17 @@ const MESSAGE_CACHE_MAX = 200;
             if (!isRoomOwner) { showToast('Only the room owner can request features.', 'warning'); return; }
             const feature = PREMIUM_FEATURES[featureId];
             if (!feature) { showToast('Feature not found.', 'error'); return; }
+            const requiredLevel = Number(feature.requiredLevel || 0);
+            if (requiredLevel > 0 && currentLevel < requiredLevel && roomFeatureEntitlements[featureId] !== true) {
+                showToast(`🔒 ${feature.name} unlocks at Level ${requiredLevel}. Keep earning SP/Gas to unlock it.`, 'warning', 'Feature Locked');
+                return;
+            }
+            if (feature.requiredAchievement && roomFeatureEntitlements[featureId] !== true &&
+                typeof getAchievementState === 'function' && !getAchievementState().unlocked?.[feature.requiredAchievement]) {
+                const achievement = ACHIEVEMENT_DEFINITIONS?.find?.(a => a.id === feature.requiredAchievement);
+                showToast(`🏆 Complete ${achievement?.name || feature.requiredAchievement} to unlock ${feature.name}.`, 'warning', 'Achievement Required');
+                return;
+            }
 
             await loadRoomFeatureEntitlements();
             if (isRoomFeatureUnlocked(featureId)) { showToast('✅ Feature already unlocked!', 'info'); return; }
@@ -8140,7 +8590,7 @@ const MESSAGE_CACHE_MAX = 200;
                 .room-header, .room-info-bar, .announcement-bar, .search-bar, footer {
                     color: var(--theme-header-text) !important;
                 }
-                .room-header .brand-title, .room-header .room-name, .room-header .level-name,
+                .room-header .brand-title, .room-header .room-name,
                 .room-header .coins-badge, .room-header .earnings-badge, .room-header .header-btn,
                 .room-header .more-btn, .room-header .back-btn, .announcement-bar .announce-text,
                 .announcement-bar button { color: var(--theme-header-text) !important; }
@@ -8320,7 +8770,6 @@ const MESSAGE_CACHE_MAX = 200;
                     roomFeeEl.textContent = `🪙 ${fee} (free)`;
                     msgInput.disabled = false;
                     sendBtn.disabled = false;
-                    showToast('👑 Owner mode', 'gold');
                     await loadUserEarnings(uid);
                     awardDailyLogin();
                     startTimeSpAward();
@@ -8533,6 +8982,7 @@ const MESSAGE_CACHE_MAX = 200;
 
                 startPresenceHeartbeat();
                 const joined = await joinRoom(user.uid, roomId);
+                if (joined) updateUserOnlineStatus(true);
                 if (!joined) { setTimeout(() => window.location.href = 'rooms.html', 2000); return; }
                 const profilePromise = getDoc(doc(db, 'users', user.uid)).catch(() => null);
                 const messagesPromise = loadMessages(true, false);
@@ -8554,9 +9004,12 @@ const MESSAGE_CACHE_MAX = 200;
                 messagesPromise.finally(() => listenForNewMessages());
                 listenForIncomingGifts();
                 participantUnsub = onSnapshot(doc(db, 'rooms', roomId), (snap) => {
-                    if (snap.exists()) { const data = snap.data();
-
-                        roomData = data; }
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        const creatorChanged = data.createdBy && data.createdBy !== roomData?.createdBy;
+                        roomData = data;
+                        if (creatorChanged) watchCreatorPresence(data.createdBy);
+                    }
                 });
                 watchRoomMemberPresence();
                 const typingRef = doc(db, 'rooms', roomId, 'typing', 'state');
@@ -8609,12 +9062,6 @@ const MESSAGE_CACHE_MAX = 200;
                 // Level data is already loading in parallel; never block first paint on it.
                 void userRoomPromise;
 
-                if (isRoomOwner) {
-                    setTimeout(() => {
-                        showToast('🏠 Manage room features and shop with the "Features" button.', 'info',
-                        'Tip');
-                    }, 2000);
-                }
             });
         }
 
@@ -8625,6 +9072,8 @@ const MESSAGE_CACHE_MAX = 200;
             stopPresenceHeartbeat();
             if (currentUserUid) updateUserOnlineStatus(false);
             if (memberPresenceUnsub) { memberPresenceUnsub(); memberPresenceUnsub = null; }
+            if (creatorPresenceUnsub) { creatorPresenceUnsub(); creatorPresenceUnsub = null; }
+            if (presenceRefreshTimer) { clearInterval(presenceRefreshTimer); presenceRefreshTimer = null; }
             if (messageUnsub) { messageUnsub(); messageUnsub = null; }
             if (incomingGiftUnsub) { incomingGiftUnsub(); incomingGiftUnsub = null; incomingGiftListenerReady = false; }
             if (participantUnsub) { participantUnsub(); participantUnsub = null; }
@@ -8684,131 +9133,6 @@ const MESSAGE_CACHE_MAX = 200;
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') { e.preventDefault();
                 toggleSearch(); }
         });
-
-        // Click outside to close panels
-        statsPanelOverlay.addEventListener('click', function(e) { if (e.target === this) closeStatsPanel(); });
-        roomFeaturesOverlay.addEventListener('click', function(e) { if (e.target === this) closeRoomFeaturesPanel(); });
-        document.getElementById('contactModalOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeContactModal(); });
-        profileModalOverlay.addEventListener('click', function(e) { if (e.target === this) closeProfileModal(); });
-        document.getElementById('giftSendOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeGiftSendModal(); });
-        document.getElementById('giftsPanelOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeGiftsPanel(); });
-        document.getElementById('sendCoinsOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeSendCoinsModal(); });
-        document.getElementById('stickerPickerOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeStickerPicker(); });
-        document.getElementById('reactionPickerOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeReactionPicker(); });
-        document.getElementById('emojiManagerOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeEmojiManager(); });
-        document.getElementById('vipManagementOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeVipManagement(); });
-        document.getElementById('pollCreatorOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closePollCreator(); });
-        document.getElementById('announcementEditorOverlay').addEventListener('click', function(e) { if (e.target === this)
-                closeAnnouncementEditor(); });
-        memberActionOverlay.addEventListener('click', function(e) { if (e.target === this) closeMemberActionPanel(); });
-
-        // Attach all global functions
-        window.openSendCoinsModal = window.openSendCoinsModal;
-        window.closeSendCoinsModal = window.closeSendCoinsModal;
-        window.sendCoinsFromModal = window.sendCoinsFromModal;
-        window.openGiftsPanel = window.openGiftsPanel;
-        window.openGiftSendModal = window.openGiftSendModal;
-        window.closeGiftSendModal = window.closeGiftSendModal;
-        window.sendGiftToUser = window.sendGiftToUser;
-        window.convertGift = window.convertGift;
-        window.selectGiftEmoji = window.selectGiftEmoji;
-        window.findGiftRecipient = window.findGiftRecipient;
-        window.sendWhatsAppMessage = window.sendWhatsAppMessage;
-        window.selectCoinPackage = window.selectCoinPackage;
-        window.openContactModal = window.openContactModal;
-        window.closeContactModal = window.closeContactModal;
-        window.openStatsPanel = window.openStatsPanel;
-        window.closeStatsPanel = window.closeStatsPanel;
-        window.openRoomFeaturesPanel = window.openRoomFeaturesPanel;
-        window.closeRoomFeaturesPanel = window.closeRoomFeaturesPanel;
-        window.requestFeature = window.requestFeature;
-        window.requestCoinPack = window.requestCoinPack;
-        window.contactDeveloperForFeature = window.contactDeveloperForFeature;
-        window.contactDeveloperForCoinPack = window.contactDeveloperForCoinPack;
-        window.contactDeveloperGeneral = window.contactDeveloperGeneral;
-        window.applyCustomTheme = window.applyCustomTheme;
-        window.clearChat = window.clearChat;
-        window.toggleSearch = window.toggleSearch;
-        window.performSearch = window.performSearch;
-        window.toggleParticipants = window.toggleParticipants;
-        window.openProfileModal = window.openProfileModal;
-        window.closeProfileModal = window.closeProfileModal;
-        window.sendSignalCoins = window.sendSignalCoins;
-        window.sendCoinsViaSP = window.sendCoinsViaSP;
-        window.sendEarningsToFriend = window.sendEarningsToFriend;
-        window.sendEarningsToMember = window.sendEarningsToMember;
-        window.transferEarningsToMain = window.transferEarningsToMain;
-        window.openEarningsPanel = window.openEarningsPanel;
-        window.closeEarningsPanel = window.closeEarningsPanel;
-        window.sendMessage = window.sendMessage;
-        window.editMessage = window.editMessage;
-        window.deleteMessage = window.deleteMessage;
-        window.replyToMessage = window.replyToMessage;
-        window.cancelReply = window.cancelReply;
-        window.pinMessage = window.pinMessage;
-        window.unpinMessage = window.unpinMessage;
-        window.addReaction = window.addReaction;
-        window.addReactionToMessage = window.addReactionToMessage;
-        window.openReactionPicker = window.openReactionPicker;
-        window.closeReactionPicker = window.closeReactionPicker;
-        window.toggleStickerPicker = window.toggleStickerPicker;
-        window.closeStickerPicker = window.closeStickerPicker;
-        window.sendSticker = window.sendSticker;
-        window.playVoiceNote = window.playVoiceNote;
-        window.triggerImageUpload = window.triggerImageUpload;
-        window.handleImageUpload = window.handleImageUpload;
-        window.insertMention = window.insertMention;
-        window.toggleMoreDropdown = window.toggleMoreDropdown;
-        window.closeMoreDropdown = window.closeMoreDropdown;
-        window.sendMessageFromOverlay = window.sendMessageFromOverlay;
-        window.closeTypingOverlay = window.closeTypingOverlay;
-        window.insertMentionOverlay = window.insertMentionOverlay;
-        window.loadMoreMessages = window.loadMoreMessages;
-        window.openEmojiManager = window.openEmojiManager;
-        window.closeEmojiManager = window.closeEmojiManager;
-        window.addCustomEmoji = window.addCustomEmoji;
-        window.removeCustomEmoji = window.removeCustomEmoji;
-        window.openVipManagement = window.openVipManagement;
-        window.closeVipManagement = window.closeVipManagement;
-        window.assignVipRole = window.assignVipRole;
-        window.removeVipRole = window.removeVipRole;
-        window.assignVipFromManagement = window.assignVipFromManagement;
-        window.openAnnouncementManager = window.openAnnouncementManager;
-        window.deleteAnnouncement = window.deleteAnnouncement;
-        window.openAnnouncementEditor = window.openAnnouncementEditor;
-        window.closeAnnouncementEditor = window.closeAnnouncementEditor;
-        window.saveAnnouncementFromEditor = window.saveAnnouncementFromEditor;
-        window.deleteAnnouncementFromEditor = window.deleteAnnouncementFromEditor;
-        window.openPollCreator = window.openPollCreator;
-        window.closePollCreator = window.closePollCreator;
-        window.addPollOption = window.addPollOption;
-        window.createPoll = window.createPoll;
-        window.votePoll = window.votePoll;
-        window.openMemberActionPanel = window.openMemberActionPanel;
-        window.closeMemberActionPanel = window.closeMemberActionPanel;
-        window.memberActionVoiceNote = window.memberActionVoiceNote;
-        window.memberActionProfile = window.memberActionProfile;
-        window.memberActionGift = window.memberActionGift;
-        window.memberActionCoins = window.memberActionCoins;
-        window.memberActionMessage = window.memberActionMessage;
-        window.memberActionKick = window.memberActionKick;
-        window.memberActionMute = window.memberActionMute;
-        window.memberActionAssignVip = window.memberActionAssignVip;
-        window.memberActionRemoveVip = window.memberActionRemoveVip;
-        window.memberActionReport = window.memberActionReport;
-        window.toggleVoiceNotePreview = window.toggleVoiceNotePreview;
-        window.retryVoiceNote = window.retryVoiceNote;
-        window.cancelVoiceNote = window.cancelVoiceNote;
-        window.sendVoiceNoteFromPreview = window.sendVoiceNoteFromPreview;
 
         performance.mark('room-init-start');
         init().finally(() => performance.mark('room-init-ready'));
@@ -9021,10 +9345,6 @@ const MESSAGE_CACHE_MAX = 200;
     const THEME_METADATA = {
         theme_pink_blue: {
             icon: '💗💙', name: 'Pink & Blue Glow', desc: 'Ultra neon romance with electric blue glass and hot-pink energy.',
-            nameColor: '#60a5fa', selfNameColor: '#ffd1e8', tagColor: '#d9c7ff', tagBg: 'rgba(168,85,247,.16)', tagBorder: 'rgba(96,165,250,.30)', feedAccent: '#ec4899', feedName: '#60a5fa', headerText: '#fbf7ff', iconAccent: '#60a5fa',
-            nameColor: '#fbbf24', selfNameColor: '#2a1904', tagColor: '#e8d6a5', tagBg: 'rgba(251,191,36,.15)', tagBorder: 'rgba(251,191,36,.34)', feedAccent: '#f59e0b', feedName: '#fbbf24', headerText: '#fff9e8', iconAccent: '#fbbf24',
-            nameColor: '#fb7185', selfNameColor: '#3b0712', tagColor: '#ffd0dc', tagBg: 'rgba(236,72,153,.16)', tagBorder: 'rgba(251,113,133,.34)', feedAccent: '#f97316', feedName: '#fb7185', headerText: '#fff7fa', iconAccent: '#fb7185',
-            nameColor: '#a78bfa', selfNameColor: '#0d1030', tagColor: '#d4d0ff', tagBg: 'rgba(99,102,241,.17)', tagBorder: 'rgba(167,139,250,.34)', feedAccent: '#3b82f6', feedName: '#a78bfa', headerText: '#f8f7ff', iconAccent: '#a78bfa',
             nameColor: '#22d3ee', selfNameColor: '#03201b', tagColor: '#bdebe3', tagBg: 'rgba(16,185,129,.16)', tagBorder: 'rgba(34,211,238,.34)', feedAccent: '#10b981', feedName: '#22d3ee', headerText: '#effffc', iconAccent: '#22d3ee',
             bg: '#08051a', secondary: '#160b35', card: 'rgba(32,14,70,.72)', input: 'rgba(96,165,250,.09)', header: 'rgba(8,5,26,.94)', footer: 'rgba(12,5,31,.97)',
             other: '#f8f4ff', self: '#ec4899', text: '#fbf7ff', textSecondary: '#d9c7ff', textMuted: '#9f8fc4', accent: '#60a5fa', secondaryAccent: '#ec4899',
@@ -9195,5 +9515,339 @@ const MESSAGE_CACHE_MAX = 200;
 })();
 </script>
 
+
+<script id="phase2-achievements">
+/* ============================================================
+   PHASE 2 — PERMANENT ACHIEVEMENTS
+   Achievements are independent of daily reset/challenge state.
+   ============================================================ */
+const ACHIEVEMENT_DEFINITIONS = [
+    { id:'first_message',   icon:'💬', name:'First Message',        desc:'Send your first message.',       metric:'messages', target:1,    reward:25 },
+    { id:'messages_100',    icon:'💬', name:'Century Messenger',    desc:'Send 100 messages.',              metric:'messages', target:100,  reward:100 },
+    { id:'messages_1000',   icon:'🔥', name:'Message Master',       desc:'Send 1,000 messages.',            metric:'messages', target:1000, reward:500 },
+    { id:'first_reaction',  icon:'❤️', name:'First Reaction',       desc:'Give your first reaction.',        metric:'reactions', target:1,    reward:25 },
+    { id:'reactions_100',   icon:'❤️', name:'Reaction Pro',         desc:'Give 100 reactions.',              metric:'reactions', target:100,  reward:100 },
+    { id:'first_voice',     icon:'🎙️', name:'First Voice Note',     desc:'Send your first voice note.',     metric:'voiceNotes', target:1,   reward:50 },
+    { id:'voice_50',        icon:'🎙️', name:'Voice Regular',        desc:'Send 50 voice notes.',             metric:'voiceNotes', target:50,  reward:250 },
+    { id:'active_60',       icon:'⏱️', name:'One Hour Active',       desc:'Accumulate 60 active minutes.',    metric:'minutes', target:60,    reward:100 },
+    { id:'active_600',      icon:'⏱️', name:'Ten Hours Active',      desc:'Accumulate 600 active minutes.',   metric:'minutes', target:600,   reward:500 },
+    { id:'first_share',     icon:'🖼️', name:'First Share',          desc:'Share your first image.',          metric:'images', target:1,     reward:50 },
+    { id:'shares_100',      icon:'🖼️', name:'Community Sharer',      desc:'Share 100 images.',               metric:'images', target:100,   reward:250 },
+    { id:'first_sticker',   icon:'✨', name:'First Sticker',         desc:'Send your first sticker.',         metric:'stickers', target:1,   reward:25 },
+    { id:'stickers_100',    icon:'✨', name:'Sticker Fan',           desc:'Send 100 stickers.',               metric:'stickers', target:100, reward:200 },
+    { id:'first_reply',     icon:'↩️', name:'First Reply',           desc:'Send your first reply.',           metric:'replies', target:1,     reward:25 },
+    { id:'replies_100',     icon:'↩️', name:'Conversation Builder',   desc:'Send 100 replies.',               metric:'replies', target:100,   reward:250 },
+    { id:'first_poll',      icon:'📊', name:'First Poll',            desc:'Take part in your first poll.',   metric:'pollVotes', target:1,   reward:25 },
+    { id:'polls_50',        icon:'📊', name:'Community Voice',       desc:'Vote in 50 polls.',               metric:'pollVotes', target:50,  reward:200 },
+    { id:'daily_complete_7',icon:'🏆', name:'Seven-Day Dedication',  desc:'Complete all daily activities on 7 days.', metric:'dailyCompletions', target:7, reward:300 },
+    { id:'daily_complete_30',icon:'🏆',name:'Thirty-Day Dedication', desc:'Complete all daily activities on 30 days.',metric:'dailyCompletions',target:30,reward:1000 }
+];
+
+function getAchievementState() {
+    const fallback = { totals:{}, unlocked:{}, dailyCompletions:0 };
+    try {
+        const raw = localStorage.getItem('funroomAchievementsV2');
+        if (!raw) return fallback;
+        const parsed = JSON.parse(raw);
+        return {
+            totals: parsed && parsed.totals && typeof parsed.totals === 'object' ? parsed.totals : {},
+            unlocked: parsed && parsed.unlocked && typeof parsed.unlocked === 'object' ? parsed.unlocked : {},
+            dailyCompletions: Math.max(0, Number(parsed?.dailyCompletions || 0))
+        };
+    } catch (_) { return fallback; }
+}
+
+function saveAchievementState(state) {
+    try { localStorage.setItem('funroomAchievementsV2', JSON.stringify(state)); } catch (_) {}
+}
+
+function getAchievementMetricValue(state, metric) {
+    if (metric === 'dailyCompletions') return state.dailyCompletions || 0;
+    return Math.max(0, Number(state.totals?.[metric] || 0));
+}
+
+async function awardAchievementReward(amount, achievement) {
+    const reward = Math.max(0, Number(amount) || 0);
+    if (!reward) return false;
+    // Use the existing SP reward path; there is no second local reward ledger.
+    if (typeof addSP === 'function') {
+        await addSP(reward, `Achievement: ${achievement.name}`);
+        return true;
+    }
+    return false;
+}
+
+async function unlockAchievement(id) {
+    const state = getAchievementState();
+    if (state.unlocked[id]) return false;
+    const achievement = ACHIEVEMENT_DEFINITIONS.find(a => a.id === id);
+    if (!achievement) return false;
+
+    try {
+        const rewarded = await awardAchievementReward(achievement.reward, achievement);
+        if (!rewarded) return false;
+    } catch (e) {
+        console.error('Failed to award achievement reward:', e);
+        return false;
+    }
+
+    state.unlocked[id] = { unlockedAt: new Date().toISOString(), reward: achievement.reward };
+    saveAchievementState(state);
+
+    try {
+        if (typeof showToast === 'function') showToast(`🏆 Achievement unlocked: ${achievement.name} +${achievement.reward} SP/Gas`);
+    } catch (_) {}
+    return true;
+}
+
+async function recordAchievementActivity(metric, amount = 1) {
+    const value = Math.max(0, Number(amount) || 0);
+    if (!value) return false;
+    const state = getAchievementState();
+    state.totals[metric] = Math.max(0, Number(state.totals[metric] || 0)) + value;
+
+    saveAchievementState(state);
+    for (const achievement of ACHIEVEMENT_DEFINITIONS) {
+        if (achievement.metric !== metric || state.unlocked[achievement.id]) continue;
+        if (getAchievementMetricValue(state, metric) >= achievement.target) {
+            await unlockAchievement(achievement.id);
+        }
+    }
+    saveAchievementState(state);
+    renderAchievementsPanel();
+    return true;
+}
+
+async function recordDailyCompletionAchievement() {
+    const state = getAchievementState();
+    state.dailyCompletions = Math.max(0, Number(state.dailyCompletions || 0)) + 1;
+    saveAchievementState(state);
+    for (const achievement of ACHIEVEMENT_DEFINITIONS) {
+        if (achievement.metric === 'dailyCompletions' && !state.unlocked[achievement.id] &&
+            state.dailyCompletions >= achievement.target) {
+            await unlockAchievement(achievement.id);
+        }
+    }
+    renderAchievementsPanel();
+    return true;
+}
+
+function renderAchievementsPanel() {
+    const host = document.getElementById('achievementsPanel');
+    if (!host) return;
+    const state = getAchievementState();
+    const unlockedCount = Object.keys(state.unlocked).length;
+
+    host.innerHTML = `
+      <div class="achievements-title">🏆 Achievements <span>${unlockedCount}/${ACHIEVEMENT_DEFINITIONS.length}</span></div>
+      <div class="achievements-grid">
+        ${ACHIEVEMENT_DEFINITIONS.map(a => {
+          const current = getAchievementMetricValue(state, a.metric);
+          const done = !!state.unlocked[a.id];
+          const pct = Math.min(100, Math.round((current / Math.max(1, a.target)) * 100));
+          return `<div class="achievement-card ${done ? 'unlocked' : ''}">
+            <div class="achievement-icon">${a.icon}</div>
+            <div class="achievement-copy">
+              <b>${a.name}</b>
+              <small>${a.desc}</small>
+              <i><span style="width:${pct}%"></span></i>
+              <em>${done ? 'Unlocked' : `${Math.min(current,a.target).toLocaleString()} / ${a.target.toLocaleString()}`}</em>
+            </div>
+            <strong>+${a.reward}</strong>
+          </div>`;
+        }).join('')}
+      </div>`;
+}
+
+/* Safe bridge: Phase 1's activity engine can call this without requiring
+   achievement code to know how each activity is implemented. */
+window.recordAchievementActivity = recordAchievementActivity;
+window.recordDailyCompletionAchievement = recordDailyCompletionAchievement;
+window.renderAchievementsPanel = renderAchievementsPanel;
+
+document.addEventListener('DOMContentLoaded', () => {
+    try { renderAchievementsPanel(); } catch (_) {}
+});
+</script>
+
+
+
+
+
+<script id="phase4-progression-unlocks">
+/* ============================================================
+   PROGRESSION UNLOCKS
+   One catalog: 24 levels × 4 unlockable perks. The catalog is UI/progression
+   metadata; existing room features still use PREMIUM_FEATURES and the central
+   isRoomFeatureUnlocked() gate above. No new server entitlement collection is
+   created here.
+   ============================================================ */
+const LEVEL_UNLOCKS = Object.freeze([
+  {level:1, items:[['💬','Core Messaging','Send and receive room messages'],['👤','Member Profiles','View member profiles'],['❤️','Basic Reactions','Use the existing reaction picker'],['📋','Progress Dashboard','View your level and achievements']]},
+  {level:2, items:[['🏆','Rising Badge','Level 2 identity badge'],['✨','Sticker Starter','Expanded sticker access'],['😊','Reaction Plus','Expanded reaction access'],['🎖️','Profile Accent','Rising profile accent']]},
+  {level:3, items:[['🖼️','Image Sharing','Share images in the room'],['⭐','Favorite Style','Unlock a profile style slot'],['📝','Status Line','Show a progression status'],['🔖','Message Highlight','Highlight selected messages locally']]},
+  {level:4, items:[['🎙️','Voice Preview','Prepare voice-note recording'],['🔊','Audio Polish','Voice-note presentation upgrade'],['🔖','Saved Moments','Keep selected room moments locally'],['📈','Activity History','Expanded personal activity view']]},
+  {level:5, items:[['📊','Poll Access','Create and vote in polls'],['🎨','Profile Decoration','Unlock a profile decoration slot'],['❤️','Reaction Themes','Additional reaction presentation'],['🔥','Streak Display','Show your active streak prominently']]},
+  {level:6, items:[['👥','Private Groups','Progression eligibility for group tools'],['📨','Group Invites','Expanded invitation controls'],['📣','Group Notice','Group notice presentation'],['🖼️','Group Identity','Group icon/custom identity slot']]},
+  {level:7, items:[['📅','Room Events','Event feature eligibility'],['⏰','Event Reminders','Reminder presentation'],['🎟️','Event Badge','Event participation badge'],['🌟','Profile Highlight','Highlighted profile treatment']]},
+  {level:8, items:[['📌','Message Pins','Expanded pin capability'],['🗂️','Collections','Organize saved moments'],['🔔','Smart Notifications','Notification presentation upgrade'],['🏅','Achievement Showcase','Show unlocked achievements']]},
+  {level:9, items:[['🔎','Profile Insights','Expanded personal insights'],['🖼️','Featured Frame','Featured profile frame slot'],['✍️','Custom Signature','Signature preference slot'],['📊','Visitor Insights','Profile-stat presentation']]},
+  {level:10, items:[['🎨','Advanced Customization','Advanced room appearance eligibility'],['🌈','Premium Chat Style','Colorful chat eligibility'],['🏅','Elite Badge','Elite identity badge'],['✨','Elite Showcase','Expanded profile showcase']]},
+  {level:11, items:[['🖼️','Custom Chat Background','Background preference slot'],['✨','Animated Frame','Animated frame slot'],['😎','Custom Emoji Access','Custom emoji eligibility'],['❤️','Special Reactions','Special reaction presentation']]},
+  {level:12, items:[['🎙️','Voice Upgrade','Voice-note enhancement eligibility'],['🎚️','Audio Effects','Audio effect preference slot'],['📚','Voice History','Voice activity presentation'],['⭐','Favorite Voice','Voice preference slot']]},
+  {level:13, items:[['🏆','Leaderboard','Leaderboard presentation'],['📊','Rank Display','Rank presentation'],['📈','Contribution Stats','Contribution statistics'],['⚖️','Achievement Compare','Achievement comparison view']]},
+  {level:14, items:[['🛠️','Creator Tools','Creator feature eligibility'],['🏠','Room Decoration','Room decoration slot'],['🎨','Room Theme Pack','Theme-pack eligibility'],['📢','Room Notice Style','Announcement presentation']]},
+  {level:15, items:[['👑','VIP Identity','Premium identity badge'],['✨','Elite Animation','Elite animation slot'],['🪪','Premium Profile','Premium profile layout'],['🏆','Elite Status','Elite status display']]},
+  {level:16, items:[['🛡️','Community Helper','Helper eligibility'],['🚩','Report Priority','Priority-report presentation'],['🤝','Helper Badge','Helper identity badge'],['📋','Helper Dashboard','Helper dashboard slot']]},
+  {level:17, items:[['🎉','Room Effects','Celebration-effect slot'],['🎊','Celebration Animations','Celebration presentation'],['🚪','Entrance Effect','Entrance-effect slot'],['✨','Profile Glow','Profile glow slot']]},
+  {level:18, items:[['📊','Advanced Analytics','Advanced personal analytics'],['📈','Activity Charts','Chart presentation'],['🎯','Milestones','Milestone display'],['🕰️','Growth History','Progress history']]},
+  {level:19, items:[['🧑‍🏫','Mentor Tools','Mentor eligibility'],['👋','New Member Guide','Guidance presentation'],['🏅','Mentor Badge','Mentor identity badge'],['🎁','Mentor Rewards','Mentor reward presentation']]},
+  {level:20, items:[['👑','Leader Status','Community leader status'],['🛡️','Advanced Community','Advanced community eligibility'],['🏠','Room Privileges','Additional room privilege slot'],['🏆','Leadership Badge','Leadership identity badge']]},
+  {level:21, items:[['💎','Legendary Frame','Legendary profile frame'],['🏆','Legendary Badge','Legendary identity badge'],['✨','Rare Reactions','Rare reaction presentation'],['🎨','Rare Themes','Rare theme eligibility']]},
+  {level:22, items:[['👑','Founder Style','Founder-style cosmetic slot'],['🎬','Special Animation','Special animation slot'],['✨','Profile Effects','Profile-effect slot'],['🏅','Premium Showcase','Premium showcase slot']]},
+  {level:23, items:[['🏛️','Hall of Fame','Hall-of-fame eligibility'],['📜','Legacy Badge','Legacy identity badge'],['🌟','Community Recognition','Recognition display'],['📣','Influence Display','Community influence presentation']]},
+  {level:24, items:[['🌟','Iconic Member','Final identity status'],['💎','Legendary Identity','Ultimate profile identity slot'],['🎨','Iconic Theme','Final theme eligibility'],['🏆','Ultimate Showcase','Maximum achievement showcase']]}
+]);
+window.LEVEL_UNLOCKS = LEVEL_UNLOCKS;
+
+const ACHIEVEMENT_UNLOCKS = Object.freeze([
+  {achievement:'first_message', feature:'achievement_first_message', icon:'💬', name:'Conversation Starter', desc:'Achievement unlock: conversation starter perk.'},
+  {achievement:'messages_100', feature:'achievement_message_100', icon:'🔥', name:'Active Voice', desc:'Achievement unlock: active voice badge.'},
+  {achievement:'messages_1000', feature:'achievement_message_1000', icon:'👑', name:'Message Mastery', desc:'Achievement unlock: message mastery status.'},
+  {achievement:'first_reaction', feature:'achievement_first_reaction', icon:'❤️', name:'Reaction Ready', desc:'Achievement unlock: reaction-ready status.'},
+  {achievement:'reactions_100', feature:'achievement_reaction_100', icon:'💖', name:'Reaction Pro', desc:'Achievement unlock: reaction-pro status.'},
+  {achievement:'first_voice', feature:'achievement_first_voice', icon:'🎙️', name:'Voice Pioneer', desc:'Achievement unlock: voice pioneer status.'},
+  {achievement:'voice_50', feature:'achievement_voice_50', icon:'🎧', name:'Voice Regular', desc:'Achievement unlock: voice regular status.'},
+  {achievement:'active_60', feature:'achievement_active_60', icon:'⏱️', name:'Dedicated Member', desc:'Achievement unlock: dedicated-member status.'},
+  {achievement:'shares_100', feature:'achievement_shares_100', icon:'🖼️', name:'Community Sharer', desc:'Achievement unlock: community-sharer status.'},
+  {achievement:'stickers_100', feature:'achievement_stickers_100', icon:'✨', name:'Sticker Fan', desc:'Achievement unlock: sticker-fan status.'},
+  {achievement:'polls_50', feature:'achievement_polls_50', icon:'📊', name:'Community Voice', desc:'Achievement unlock: community-voice status.'},
+  {achievement:'daily_complete_30', feature:'achievement_daily_30', icon:'🏆', name:'Thirty-Day Dedication', desc:'Achievement unlock: dedication status.'}
+]);
+
+function getCurrentAchievementUnlocks(){
+  let state={};
+  try{state=JSON.parse(localStorage.getItem('funroomAchievementsV2')||'{}')||{};}catch(_){state={};}
+  const unlocked=state.unlocked||{};
+  return ACHIEVEMENT_UNLOCKS.filter(x=>!!unlocked[x.achievement]);
+}
+function getLevelUnlocks(level){return LEVEL_UNLOCKS.filter(x=>x.level<=Number(level||1)).flatMap(x=>x.items.map(i=>({level:x.level,icon:i[0],name:i[1],desc:i[2],feature:`level_${x.level}_${i[1].toLowerCase().replace(/[^a-z0-9]+/g,'_')}`})));}
+function hasProgressionFeature(featureId){
+  const level=Number(currentLevel||1);
+  const all=getLevelUnlocks(level);
+  if(all.some(x=>x.feature===featureId)) return true;
+  return getCurrentAchievementUnlocks().some(x=>x.feature===featureId);
+}
+window.hasProgressionFeature=hasProgressionFeature;
+window.getLevelUnlocks=getLevelUnlocks;
+
+function renderProgressionUnlocksPanel(){
+  const host=document.getElementById('progressionUnlocksPanel');
+  if(!host)return;
+  const level=Math.max(1,Number(currentLevel)||1);
+  const all=LEVEL_UNLOCKS.flatMap(x=>x.items.map(i=>({level:x.level,icon:i[0],name:i[1],desc:i[2],feature:`level_${x.level}_${i[1].toLowerCase().replace(/[^a-z0-9]+/g,'_')}`})));
+  const visible=all.filter(x=>x.level<=level || x.level<=Math.min(24,level+2));
+  const achievementItems=getCurrentAchievementUnlocks();
+  host.innerHTML=`<div class="progression-unlocks-head"><b>🔓 Feature Progression</b><span>${all.filter(x=>x.level<=level).length}/96 level perks unlocked</span></div>
+  <div class="progression-unlocks-grid">${visible.map(x=>`<div class="progression-unlock ${x.level<=level?'reached':'locked'}"><div class="icon">${x.icon}</div><b>${x.name}</b><small>${x.desc}</small><span class="req">${x.level<=level?'✓ UNLOCKED':`🔒 LEVEL ${x.level}`}</span></div>`).join('')}</div>
+  <button class="progression-unlocks-toggle" type="button" onclick="renderAllProgressionUnlocks()">View all 24 levels</button>
+  ${achievementItems.length?`<div style="margin-top:10px;font-size:.62rem;font-weight:900">🏆 Achievement Unlocks</div><div class="progression-unlocks-grid" style="margin-top:6px">${achievementItems.map(x=>`<div class="progression-unlock reached"><div class="icon">${x.icon}</div><b>${x.name}</b><small>${x.desc}</small><span class="req">✓ ACHIEVEMENT</span></div>`).join('')}</div>`:''}`;
+}
+function renderAllProgressionUnlocks(){
+  const host=document.getElementById('progressionUnlocksPanel'); if(!host)return;
+  const level=Math.max(1,Number(currentLevel)||1);
+  const all=LEVEL_UNLOCKS.flatMap(x=>x.items.map(i=>({level:x.level,icon:i[0],name:i[1],desc:i[2]})));
+  host.innerHTML=`<div class="progression-unlocks-head"><b>🔓 All 24 Levels</b><span>${all.filter(x=>x.level<=level).length}/96 unlocked</span></div><div class="progression-unlocks-grid">${all.map(x=>`<div class="progression-unlock ${x.level<=level?'reached':'locked'}"><div class="icon">${x.icon}</div><b>${x.name}</b><small>${x.desc}</small><span class="req">${x.level<=level?'✓ UNLOCKED':`🔒 LEVEL ${x.level}`}</span></div>`).join('')}</div><button class="progression-unlocks-toggle" type="button" onclick="renderProgressionUnlocksPanel()">Show nearby unlocks</button>`;
+}
+window.renderProgressionUnlocksPanel=renderProgressionUnlocksPanel;
+window.renderAllProgressionUnlocks=renderAllProgressionUnlocks;
+
+function refreshProgressionUI(){
+  try{renderProgressionUnlocksPanel();}catch(_){}
+  try{if(typeof renderLevelBenefits==='function')renderLevelBenefits();}catch(_){}
+}
+window.refreshProgressionUI=refreshProgressionUI;
+
+document.addEventListener('DOMContentLoaded',()=>{try{renderProgressionUnlocksPanel();}catch(_){}},{once:true});
+</script>
+<script id="phase3-level-benefits">
+/*
+ * 24-LEVEL BENEFITS
+ * The authoritative progression catalogue above contains four unlock entries
+ * for every level. Legacy named benefits are retained as fallback metadata.
+ */
+const LEVEL_BENEFITS = Object.freeze({
+  2: "Rising Member Badge",
+  5: "Profile Decoration Unlock",
+  10: "Elite Member Features",
+  15: "Premium Identity Badge",
+  20: "Community Leader Status",
+  24: "Iconic Member Status"
+});
+
+function getLevelBenefit(level) {
+  const n = Math.max(1, Math.min(
+    Array.isArray(window.LEVEL_DATA) ? window.LEVEL_DATA.length : 24,
+    Number(level) || 1
+  ));
+  const legacy = Object.prototype.hasOwnProperty.call(LEVEL_BENEFITS, n) ? LEVEL_BENEFITS[n] : null;
+  const progression = Array.isArray(window.LEVEL_UNLOCKS)
+    ? window.LEVEL_UNLOCKS.find(x => x.level === n)
+    : null;
+  const names = progression?.items?.map(item => item[1]).filter(Boolean) || [];
+  return names.length ? names.join(' • ') : legacy;
+}
+
+function renderLevelBenefits() {
+  const host=document.getElementById("levelBenefitsPanel");
+  if(!host)return;
+
+  const maxLevel=Array.isArray(window.LEVEL_DATA)?window.LEVEL_DATA.length:24;
+  const currentSP = typeof window.getCurrentRoomSP === "function"
+    ? Number(window.getCurrentRoomSP()) || 0
+    : 0;
+  const currentLevel=typeof getLevelFromSP==="function"
+    ? Math.max(1,Math.min(maxLevel,getLevelFromSP(currentSP)))
+    : 1;
+
+  const current=window.LEVEL_DATA?.[currentLevel-1];
+  const next=window.LEVEL_DATA?.[Math.min(maxLevel,currentLevel+1)-1];
+
+  const cards=window.LEVEL_DATA.map(record=>{
+    const benefit=getLevelBenefit(record.level);
+    const state=record.level===currentLevel?"CURRENT":record.level<currentLevel?"REACHED":"LOCKED";
+    return `<article class="level-benefit-card ${state.toLowerCase()}">
+      <img class="level-benefit-icon" src="assets/levels/${encodeURIComponent(record.icon)}" alt="${record.name}">
+      <div>
+        <strong>Level ${record.level} · ${record.name}</strong><br>
+        <small>${state}</small><br>
+        <span>${benefit || "Progressing toward future unlocks"}</span>
+      </div>
+    </article>`;
+  }).join("");
+
+  host.innerHTML=`
+  <div class="level-benefit-current">
+    <strong>⭐ Level ${currentLevel} · ${current?.name || ""}</strong>
+    <span>${getLevelBenefit(currentLevel)||"No special benefit defined yet."}</span>
+    <span>Next: Level ${next?.level || currentLevel} · ${next?.name || ""}</span>
+    <button class="level-benefits-toggle">View all 24 levels</button>
+  </div>
+  <div class="level-benefits-grid">${cards}</div>`;
+
+  const button=host.querySelector(".level-benefits-toggle");
+  const grid=host.querySelector(".level-benefits-grid");
+  button.onclick=()=>{
+    grid.classList.toggle("open");
+    button.textContent=grid.classList.contains("open")?"Hide all levels":"View all 24 levels";
+  };
+}
+
+window.renderLevelBenefits = renderLevelBenefits;
+
+document.addEventListener("DOMContentLoaded", () => {
+  try { renderLevelBenefits(); } catch (_) {}
+});
+</script>
 </body>
 </html>

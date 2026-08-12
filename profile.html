@@ -540,6 +540,51 @@
         .admin-heart-link .heart-icon { display: inline-block; font-size: clamp(1rem, 3vw, 1.2rem); }
         @keyframes pulse-heart { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
+        /* ===== PROFILE REDESIGN / RESPONSIVE LAYOUT ===== */
+        .profile-menu-wrap { position: relative; }
+        .profile-menu-btn { cursor:pointer; border:1px solid var(--border-color); background:rgba(255,255,255,.04); color:var(--text-main); }
+        .profile-menu { position:absolute; top:calc(100% + 10px); right:0; width:min(290px, calc(100vw - 24px)); max-height:min(70vh, 520px); overflow-y:auto; overscroll-behavior:contain; background:var(--bg-glass); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px); border:1px solid var(--border-color); border-radius:16px; padding:8px; box-shadow:0 20px 60px rgba(0,0,0,.45); display:none; z-index:1000; }
+        .profile-menu.open { display:block; animation:slideDown .2s ease-out; }
+        .profile-menu::-webkit-scrollbar { width:4px; }
+        .profile-menu::-webkit-scrollbar-thumb { background:rgba(255,255,255,.18); border-radius:10px; }
+        .profile-menu-title { padding:9px 10px 5px; color:var(--text-muted); font-size:.62rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+        .profile-menu-item { width:100%; min-height:42px; display:flex; align-items:center; gap:10px; border:0; background:transparent; color:var(--text-main); padding:9px 10px; border-radius:10px; font:600 .78rem var(--font-main); cursor:pointer; text-align:left; text-decoration:none; }
+        .profile-menu-item:hover { background:rgba(255,255,255,.06); }
+        .profile-menu-item.danger { color:#fb7185; }
+        .profile-menu-divider { height:1px; background:var(--border-color); margin:6px 4px; }
+        .profile-hero { width:100%; display:flex; flex-direction:column; align-items:center; gap:10px; }
+        .profile-status-row { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+        .status-chip { padding:5px 9px; border-radius:999px; background:rgba(255,255,255,.05); border:1px solid var(--border-color); color:var(--text-muted); font-size:.62rem; font-weight:700; }
+        .status-chip.online { color:var(--online-color); }
+        .status-chip.verified { color:var(--gold); }
+        .profile-primary-actions { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:4px; }
+        .profile-primary-actions .btn-profile { min-width:0; }
+        .profile-section { width:100%; border:1px solid var(--border-color); border-radius:16px; background:rgba(255,255,255,.025); overflow:hidden; }
+        .profile-section-header { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; }
+        .profile-section-title { font-size:.72rem; font-weight:800; letter-spacing:.04em; text-transform:uppercase; color:var(--text-main); }
+        .profile-section-subtitle { font-size:.62rem; color:var(--text-muted); margin-top:2px; }
+        .profile-section-body { padding:0 12px 12px; }
+        .profile-completeness { height:6px; background:rgba(255,255,255,.07); border-radius:999px; overflow:hidden; margin-top:8px; }
+        .profile-completeness > span { display:block; height:100%; width:0; background:var(--primary); border-radius:inherit; transition:width .3s ease; }
+        .profile-section-toggle { width:100%; display:flex; align-items:center; justify-content:space-between; border:0; background:transparent; color:var(--text-main); padding:12px 14px; cursor:pointer; font:800 .72rem var(--font-main); text-transform:uppercase; letter-spacing:.04em; }
+        .profile-section-toggle .chevron { transition:transform .2s ease; }
+        .profile-section.collapsed .profile-section-body { display:none; }
+        .profile-section.collapsed .chevron { transform:rotate(-90deg); }
+        .profile-posts-placeholder { padding:16px; text-align:center; color:var(--text-muted); font-size:.75rem; }
+        .profile-danger-zone { width:100%; }
+        @media (min-width: 800px) {
+            .profile-main { max-width:960px; align-items:stretch; }
+            .profile-card { display:grid; grid-template-columns:minmax(300px, .9fr) minmax(360px, 1.1fr); align-items:start; column-gap:20px; padding:28px; }
+            .profile-card > .profile-hero, .profile-card > .profile-primary-actions, .profile-card > .stats-row, .profile-card > .profile-bio, .profile-card > .profile-section.posts-section { grid-column:1; }
+            .profile-card > .profile-details-column { grid-column:2; grid-row:1 / span 6; display:flex; flex-direction:column; gap:12px; width:100%; }
+            .profile-hero { grid-column:1; }
+            .profile-primary-actions { grid-column:1; }
+        }
+        @media (max-width: 520px) {
+            .profile-primary-actions { grid-template-columns:1fr; }
+            .profile-menu { right:-4px; }
+        }
+
         .profile-main {
             flex: 1; display: flex; flex-direction: column; align-items: center;
             padding: clamp(16px, 4vw, 24px) 12px;
@@ -1231,6 +1276,11 @@
             .congrats-popup h2 { font-size: 1.4rem; }
         }
 
+        body.public-profile-view .profile-primary-actions .settings, body.public-profile-view [data-owner-only] { display:none !important; }
+        body.public-profile-view #notifBadge, body.public-profile-view header a[href*="notifications"] { display:none !important; }
+        body.public-profile-view .avatar-wrapper { cursor:default; }
+        body.public-profile-view .avatar-upload-hint, body.public-profile-view #editAvatarInput { display:none !important; }
+        body.public-profile-view .profile-bio { cursor:default; }
         @media (pointer: coarse) {
             .back-btn, .nav-link, .btn-profile, .btn-confirm,
             .sp-id-container, .toast-close-btn, .popup-btn, .popup-close,
@@ -1240,6 +1290,45 @@
             }
             .avatar-wrapper { cursor: default; }
         }
+
+        /* ===== FULL PROFILE FEATURE LAYER ===== */
+        .profile-feature-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:10px; }
+        .feature-card { background:rgba(255,255,255,.025); border:1px solid var(--border-color); border-radius:14px; padding:12px; min-width:0; }
+        .feature-card h4 { font-size:.72rem; font-weight:800; margin-bottom:6px; color:var(--text-main); }
+        .feature-card p { font-size:.68rem; color:var(--text-muted); line-height:1.45; }
+        .feature-card .feature-action { margin-top:9px; width:100%; min-height:36px; }
+        .profile-post-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin-top:10px; }
+        .profile-post-tile { aspect-ratio:1; border-radius:10px; overflow:hidden; background:rgba(255,255,255,.03); border:1px solid var(--border-color); cursor:pointer; position:relative; }
+        .profile-post-tile img,.profile-post-tile video { width:100%; height:100%; object-fit:cover; display:block; }
+        .profile-post-tile .tile-label { position:absolute; left:5px; bottom:5px; right:5px; padding:4px 5px; border-radius:6px; background:rgba(0,0,0,.58); color:#fff; font-size:.52rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .profile-social-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; margin-top:8px; }
+        .social-preview { display:flex; align-items:center; gap:8px; padding:9px; border:1px solid var(--border-color); border-radius:10px; text-decoration:none; color:var(--text-main); background:rgba(255,255,255,.02); min-width:0; }
+        .social-preview span:last-child { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.68rem; }
+        .profile-activity-list { display:flex; flex-direction:column; gap:7px; margin-top:8px; max-height:220px; overflow:auto; }
+        .activity-item { padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-size:.66rem; color:var(--text-muted); background:rgba(255,255,255,.02); }
+        .activity-item strong { color:var(--text-main); }
+        .featured-post { border:1px solid rgba(255,215,0,.18); background:rgba(255,215,0,.04); border-radius:12px; padding:10px; margin-top:9px; }
+        .featured-post .featured-media { width:100%; max-height:260px; object-fit:cover; border-radius:9px; margin-top:8px; }
+        .preview-overlay,.qr-overlay { position:fixed; inset:0; background:rgba(3,7,13,.86); backdrop-filter:blur(18px); z-index:12000; display:none; align-items:center; justify-content:center; padding:16px; }
+        .preview-overlay.active,.qr-overlay.active { display:flex; }
+        .preview-card,.qr-card { width:min(520px,100%); max-height:90vh; overflow:auto; background:var(--bg-surface); border:1px solid var(--border-color); border-radius:20px; padding:20px; box-shadow:0 30px 80px rgba(0,0,0,.75); }
+        .preview-head,.qr-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+        .preview-close,.qr-close { border:1px solid var(--border-color); background:rgba(255,255,255,.04); color:var(--text-muted); width:36px; height:36px; border-radius:50%; cursor:pointer; }
+        .public-preview-hero { text-align:center; padding:8px 0 14px; }
+        .public-preview-avatar { width:88px; height:88px; border-radius:50%; object-fit:cover; display:block; margin:0 auto 10px; border:2px solid var(--border-color); }
+        .public-preview-name { font-size:1.15rem; font-weight:800; }
+        .public-preview-username { color:var(--text-muted); font-size:.75rem; margin-top:2px; }
+        .public-preview-bio { color:var(--text-muted); font-size:.78rem; line-height:1.5; margin-top:9px; }
+        .qr-card canvas,.qr-card img { display:block; width:220px; height:220px; margin:12px auto; border-radius:12px; background:#fff; }
+        .qr-note { font-size:.68rem; color:var(--text-muted); text-align:center; line-height:1.45; }
+        @media (min-width:760px) {
+            .profile-card { max-width:900px; display:grid; grid-template-columns:minmax(280px,.85fr) minmax(420px,1.15fr); align-items:start; column-gap:22px; }
+            .profile-hero,.profile-primary-actions,.stats-row { grid-column:1; }
+            .profile-details-column { grid-column:2; grid-row:1 / span 4; }
+            .profile-feature-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+        }
+        @media (max-width:520px) { .profile-feature-grid,.profile-social-grid { grid-template-columns:1fr; } .profile-post-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
     </style>
 
     <link rel="preload" as="style" onload="this.onload=null;this.rel='stylesheet'" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
@@ -1283,6 +1372,8 @@
 
         let currentUser = null;
         let currentUserUid = null;
+        let targetProfileUid = null;
+        let isPublicProfile = false;
         let userData = {};
         let postsCount = 0;
         let likesCount = 0;
@@ -1297,6 +1388,15 @@
         let maintenanceMode = false;
         let showAllFields = false;
         let previousVerificationStatus = null;
+        let hiddenOfflineTimer = null;
+        let userPosts = [];
+        let featuredPostId = null;
+        const PROFILE_ACTIVITY_KEY = () => currentUserUid ? `spike_profile_activity_${currentUserUid}` : null;
+        const PROFILE_ROUTE = `${window.location.origin}/profile`;
+        function canonicalProfileUrl(spIdValue) {
+            const clean = String(spIdValue || spId || "").trim();
+            return clean ? `${PROFILE_ROUTE}?sp=${encodeURIComponent(clean)}` : PROFILE_ROUTE;
+        }
 
         // ===== ONLINE STATUS MANAGEMENT (unified) =====
         function updateUserOnlineStatus(status) {
@@ -1503,8 +1603,202 @@
         window.goToFriends = function() { window.location.href = "friends.html"; };
         window.goToVerify = function() { window.location.href = "verify_badge.html"; };
         window.goToMessages = function() { window.location.href = "chat.html"; };
-        window.goToEditProfile = function() { window.location.href = "edit_profile.html"; };
+        window.goToEditProfile = function() { if (isPublicProfile) { showToast("This is a public profile view.", "info", "Profile"); return; } window.location.href = "edit_profile.html"; };
         window.goToGuide = function() { window.location.href = "guide.html"; };
+        window.toggleProfileMenu = function() {
+            const menu = document.getElementById('profileMenu');
+            const button = document.querySelector('.profile-menu-btn');
+            if (!menu) return;
+            const open = !menu.classList.contains('open');
+            menu.classList.toggle('open', open);
+            if (button) button.setAttribute('aria-expanded', String(open));
+        };
+
+        window.closeProfileMenu = function() {
+            const menu = document.getElementById('profileMenu');
+            const button = document.querySelector('.profile-menu-btn');
+            if (menu) menu.classList.remove('open');
+            if (button) button.setAttribute('aria-expanded', 'false');
+        };
+
+        window.shareProfile = async function() {
+            const name = userData.name || currentUser?.displayName || 'SPIKE Profile';
+            const url = canonicalProfileUrl(userData.spId || spId);
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: `${name} — SPIKE`, text: `View ${name}'s SPIKE profile`, url });
+                    profileActivity('Shared profile');
+                } else if (navigator.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(url);
+                    showToast('Profile link copied.', 'success', 'Profile Shared');
+                    profileActivity('Copied profile link');
+                } else {
+                    fallbackCopy(url);
+                }
+            } catch (err) {
+                if (err?.name !== 'AbortError') {
+                    console.error('Profile share failed:', err);
+                    showToast('Unable to share the profile right now.', 'error', 'Share Failed');
+                }
+            }
+        };
+
+        window.copyProfileLink = function() {
+            const url = canonicalProfileUrl(userData.spId || spId);
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(url).then(() => { showToast('Profile link copied.', 'success', 'Profile Link'); profileActivity('Copied profile link'); })
+                    .catch(() => fallbackCopy(url));
+            } else fallbackCopy(url);
+        };
+
+        window.toggleProfileSection = function(id) {
+            const section = document.getElementById(id);
+            if (!section) return;
+            section.classList.toggle('collapsed');
+            const btn = section.querySelector('.profile-section-toggle');
+            if (btn) btn.setAttribute('aria-expanded', String(!section.classList.contains('collapsed')));
+        };
+
+        function updateProfileCompleteness() {
+            const tracked = ['bio','avatar','username','dob','gender','pronouns','relationship','languages','occupation','education','industry','website','interests','skills'];
+            const complete = tracked.filter(key => {
+                const value = userData[key];
+                return Array.isArray(value) ? value.length > 0 : String(value || '').trim() !== '';
+            }).length;
+            const percent = Math.round((complete / tracked.length) * 100);
+            const bar = document.getElementById('profileCompletenessBar');
+            const value = document.getElementById('profileCompletenessValue');
+            if (bar) bar.style.width = `${percent}%`;
+            if (value) value.textContent = `${percent}% complete`;
+        }
+
+
+
+        function profileActivity(label, detail='') {
+            const key = PROFILE_ACTIVITY_KEY();
+            if (!key) return;
+            try {
+                const items = JSON.parse(localStorage.getItem(key) || '[]');
+                items.unshift({ label, detail, at: Date.now() });
+                localStorage.setItem(key, JSON.stringify(items.slice(0, 30)));
+                renderProfileActivity();
+            } catch (e) { console.warn('Profile activity log unavailable:', e); }
+        }
+
+        function renderProfileActivity() {
+            const el = document.getElementById('profileActivityList');
+            if (!el) return;
+            let items=[];
+            try { items=JSON.parse(localStorage.getItem(PROFILE_ACTIVITY_KEY()) || '[]'); } catch(e) {}
+            if (!items.length) { el.innerHTML='<div class="activity-item">No profile activity recorded on this device yet.</div>'; return; }
+            el.innerHTML=items.slice(0,12).map(item=>`<div class="activity-item"><strong>${escapeHTML(item.label)}</strong>${item.detail ? ` — ${escapeHTML(item.detail)}`:''}<br><span>${new Date(item.at).toLocaleString()}</span></div>`).join('');
+        }
+
+        function normalizeSocialUrl(value, platform) {
+            if (!value) return '';
+            let v=String(value).trim();
+            if (/^https?:\/\//i.test(v)) return v;
+            const bases={instagram:'https://instagram.com/',twitter:'https://twitter.com/',youtube:'https://youtube.com/',tiktok:'https://tiktok.com/@',github:'https://github.com/',linkedin:'https://linkedin.com/in/'};
+            return bases[platform] ? bases[platform]+v.replace(/^@/,'') : '';
+        }
+
+        function renderSocialPreviews() {
+            const el=document.getElementById('socialPreviewGrid'); if(!el) return;
+            const defs=[['instagram','📷','Instagram'],['twitter','🐦','Twitter'],['youtube','▶️','YouTube'],['tiktok','♪','TikTok'],['github','💻','GitHub'],['linkedin','🔗','LinkedIn'],['website','🌐','Website']];
+            const showKeys={instagram:'showInstagram',twitter:'showTwitter',youtube:'showYouTube',tiktok:'showTikTok',github:'showGitHub',linkedin:'showLinkedIn',website:'showWebsite'};
+            const links=defs.map(([key,icon,label])=>({key,icon,label,url:normalizeSocialUrl(userData[key],key)})).filter(x=>x.url && userData[showKeys[x.key]] !== false);
+            el.innerHTML=links.length ? links.map(x=>`<a class="social-preview" href="${escapeHTML(x.url)}" target="_blank" rel="noopener noreferrer"><span>${x.icon}</span><span>${escapeHTML(x.label)} · ${escapeHTML(x.url.replace(/^https?:\/\//,'').replace(/\/$/,''))}</span></a>`).join('') : '<div class="activity-item">No public social links are available.</div>';
+        }
+
+        function renderProfileGallery() {
+            const el=document.getElementById('profilePostGrid'); const extra=document.getElementById('galleryFeatureGrid'); if(!el && !extra) return;
+            const media=userPosts.filter(p=>p.image || p.imageUrl || p.video || p.videoUrl || p.mediaUrl).slice(0,12);
+            if(!media.length){ if(el) el.innerHTML='<div class="activity-item" style="grid-column:1/-1">No media posts available yet.</div>'; if(extra) extra.innerHTML='<div class="activity-item" style="grid-column:1/-1">No media posts available yet.</div>'; return; }
+            const html=media.map((p,i)=>{
+                const src=p.image || p.imageUrl || p.video || p.videoUrl || p.mediaUrl;
+                const isVideo=!!(p.video || p.videoUrl || (p.mediaType && String(p.mediaType).toLowerCase().includes('video')));
+                const mediaHtml=isVideo?`<video src="${escapeHTML(src)}" muted playsinline preload="metadata"></video>`:`<img src="${escapeHTML(src)}" alt="Profile post media ${i+1}" loading="lazy">`;
+                return `<div class="profile-post-tile" title="Open post in Feed" onclick="openPostFromProfile('${escapeHTML(p.id||'')}')">${mediaHtml}<span class="tile-label">${escapeHTML(String(p.text||p.caption||'Post').slice(0,42))}</span></div>`;
+            }).join('');
+            if(el) el.innerHTML=html;
+            if(extra) extra.innerHTML=html;
+        }
+
+        window.openPostFromProfile=function(postId){
+            if(!postId){ goToFeed(); return; }
+            window.location.href=`feed.html?post=${encodeURIComponent(postId)}`;
+        };
+
+        function renderFeaturedPost() {
+            const el=document.getElementById('featuredPost'); if(!el) return;
+            const post=userPosts.find(p=>p.id===featuredPostId);
+            if(!post){ el.innerHTML='<div class="activity-item">No featured post selected.</div>'; return; }
+            const src=post.image||post.imageUrl||post.video||post.videoUrl||post.mediaUrl;
+            const media=src?`<${(post.video||post.videoUrl)?'video':'img'} class="featured-media" src="${escapeHTML(src)}" ${post.video||post.videoUrl?'controls muted playsinline':''} alt="Featured post media"></${(post.video||post.videoUrl)?'video':'img'}>`:'';
+            el.innerHTML=`<strong>📌 Featured Post</strong><div style="margin-top:5px;font-size:.72rem;color:var(--text-muted)">${escapeHTML(String(post.text||post.caption||'Featured post').slice(0,220))}</div>${media}<button class="btn-profile settings feature-action" type="button" onclick="openPostFromProfile('${escapeHTML(post.id||'')}')">Open in Feed →</button>`;
+        }
+
+        window.chooseFeaturedPost=async function(){
+            if(!currentUserUid || !userPosts.length){ showToast('You need at least one post before featuring one.','warning','Featured Post'); return; }
+            const options=userPosts.slice(0,8).map((p,i)=>`${i+1}. ${String(p.text||p.caption||'Post').slice(0,55).replace(/\n/g,' ')}`).join('\n');
+            const answer=window.prompt(`Choose a post number to feature:\n\n${options}`,'1');
+            const index=Number(answer)-1;
+            if(!Number.isInteger(index) || index<0 || index>=Math.min(8,userPosts.length)) return;
+            const selected=userPosts[index];
+            try { await updateDoc(doc(db,'users',currentUserUid),{featuredPostId:selected.id}); featuredPostId=selected.id; renderFeaturedPost(); profileActivity('Featured post updated'); showToast('Featured post updated.','success','Profile'); }
+            catch(e){ console.error(e); showToast('Unable to update the featured post.','error','Profile'); }
+        };
+
+        window.clearFeaturedPost=async function(){
+            if(!currentUserUid) return;
+            try { await updateDoc(doc(db,'users',currentUserUid),{featuredPostId:null}); featuredPostId=null; renderFeaturedPost(); profileActivity('Featured post removed'); showToast('Featured post removed.','success','Profile'); }
+            catch(e){ console.error(e); showToast('Unable to remove the featured post.','error','Profile'); }
+        };
+
+        window.showPublicPreview=function(){
+            const overlay=document.getElementById('publicPreviewOverlay'); const body=document.getElementById('publicPreviewBody'); if(!overlay||!body)return;
+            const avatar=userData.avatar?`<img class="public-preview-avatar" src="${escapeHTML(userData.avatar)}" alt="Profile">`:`<div class="public-preview-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--primary);color:#fff;font-size:2rem;font-weight:800">${escapeHTML(getInitials(userData.name||'User'))}</div>`;
+            const fields=[];
+            if(userData.showBio!==false && userData.bio) fields.push(`<div class="activity-item"><strong>Bio</strong><br>${escapeHTML(userData.bio)}</div>`);
+            if(userData.showLanguages!==false && Array.isArray(userData.languages)&&userData.languages.length) fields.push(`<div class="activity-item"><strong>Languages</strong><br>${escapeHTML(userData.languages.join(', '))}</div>`);
+            if(userData.showOccupation!==false && (userData.occupation||userData.company)) fields.push(`<div class="activity-item"><strong>Work</strong><br>${escapeHTML([userData.occupation,userData.company].filter(Boolean).join(' at '))}</div>`);
+            if(userData.showEducation!==false && userData.education) fields.push(`<div class="activity-item"><strong>Education</strong><br>${escapeHTML(userData.education)}</div>`);
+            body.innerHTML=`<div class="public-preview-hero">${avatar}<div class="public-preview-name">${escapeHTML(userData.name||'User')} ${userData.verified?'💎':''}</div><div class="public-preview-username">@${escapeHTML(userData.username||'username')}</div>${userData.spId?`<div class="public-preview-username">SP-${escapeHTML(userData.spId)}</div>`:''}<div class="public-preview-bio">${escapeHTML(userData.bio||'No public bio.')}</div></div>${fields.join('')||'<div class="activity-item">No additional public profile details are available.</div>'}`;
+            overlay.classList.add('active'); profileActivity('Viewed public profile preview');
+        };
+        window.closePublicPreview=function(){ document.getElementById('publicPreviewOverlay')?.classList.remove('active'); };
+
+        window.showProfileQR=function(){
+            const overlay=document.getElementById('qrOverlay'); const img=document.getElementById('profileQrImage'); const link=document.getElementById('profileQrLink'); if(!overlay||!img)return;
+            const url=window.location.href;
+            const encoded=encodeURIComponent(url);
+            img.src=`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encoded}`;
+            img.onerror=()=>{ img.removeAttribute('src'); img.alt='QR service unavailable. Use Copy Profile Link below.'; };
+            if(link) link.textContent=url;
+            if(link) link.textContent=url;
+            overlay.classList.add('active'); profileActivity('Opened profile QR code');
+        };
+        window.closeProfileQR=function(){ document.getElementById('qrOverlay')?.classList.remove('active'); };
+
+
+        window.showConnections=function(type){
+            const overlay=document.getElementById('connectionsOverlay'); const body=document.getElementById('connectionsBody'); const title=document.getElementById('connectionsTitle');
+            if(!overlay||!body||!title)return;
+            const key=type==='following'?'following':'followers';
+            const list=Array.isArray(userData[key])?userData[key]:[];
+            title.textContent=type==='following'?'Following':'Followers';
+            if(!list.length){ body.innerHTML='<div class="activity-item">No '+type+' data is available in this profile record yet. The existing Friends page remains the source for connection management.</div>'; }
+            else { body.innerHTML=list.slice(0,100).map((item,i)=>{ const value=typeof item==='string'?item:(item?.name||item?.username||item?.uid||`Connection ${i+1}`); return `<div class="activity-item"><strong>${escapeHTML(String(value))}</strong></div>`; }).join(''); }
+            overlay.classList.add('active'); profileActivity(`Viewed ${type}`);
+        };
+        window.closeConnections=function(){ document.getElementById('connectionsOverlay')?.classList.remove('active'); };
+
+        window.renderProfileAdvancedFeatures=function(){
+            renderSocialPreviews(); renderProfileGallery(); renderFeaturedPost(); renderProfileActivity();
+            const following=(userData.following||[]).length, followers=(userData.followers||[]).length;
+            const f=document.getElementById('followingCount'); if(f) f.textContent=following;
+            const r=document.getElementById('followersCount'); if(r) r.textContent=followers;
+        };
 
         window.copySpId = function() {
             if (!spId) return;
@@ -1533,27 +1827,34 @@
         }
 
         async function ensureSPId(uid) {
+            if (isPublicProfile) return;
             try {
                 const userRef = doc(db, "users", uid);
                 const userSnap = await getDoc(userRef);
                 if (userSnap.exists()) {
                     const data = userSnap.data();
                     if (data.spId) {
-                        spId = data.spId;
+                        spId = String(data.spId);
                         localStorage.setItem('spikeSpId', spId);
                         return spId;
                     }
                 }
 
-                let newId = generateSPId();
-                let attempts = 0;
-                let isUnique = false;
-                
-                while (!isUnique && attempts < 5) {
-                    const q = query(collection(db, "users"), where("spId", "==", newId));
+                let newId = null;
+                for (let attempts = 0; attempts < 10; attempts++) {
+                    const candidate = generateSPId();
+                    const q = query(collection(db, "users"), where("spId", "==", candidate));
                     const snapshot = await getDocs(q);
-                    if (snapshot.empty) { isUnique = true; } 
-                    else { newId = generateSPId(); attempts++; }
+                    if (snapshot.empty) {
+                        newId = candidate;
+                        break;
+                    }
+                }
+
+                if (!newId) {
+                    console.error('Unable to establish a unique SPIKE ID after multiple attempts.');
+                    showToast('We could not create a unique SPIKE ID yet. Please try again later.', 'error', 'SPIKE ID');
+                    return null;
                 }
 
                 await updateDoc(userRef, { spId: newId });
@@ -1562,9 +1863,7 @@
                 localStorage.setItem('spikeSpId', newId);
 
                 const welcomeShown = localStorage.getItem(`spike_welcome_${uid}`);
-                if (!welcomeShown) {
-                    setTimeout(() => showWelcomePopup(newId), 800);
-                }
+                if (!welcomeShown) setTimeout(() => showWelcomePopup(newId), 800);
                 return newId;
             } catch (error) {
                 console.error("Error ensuring SP ID:", error);
@@ -1585,17 +1884,24 @@
         }
 
         function listenToUserPosts() {
-            if (!currentUser || unsubscribePosts) return;
+            const profileUid = targetProfileUid || currentUser?.uid;
+            if (!profileUid || unsubscribePosts) return;
             
             const postsQuery = query(
                 collection(db, "posts"),
-                where("authorUid", "==", currentUser.uid)
+                where("authorUid", "==", profileUid)
             );
             
             unsubscribePosts = onSnapshot(postsQuery, (snapshot) => {
                 postsCount = snapshot.size;
                 let totalLikes = 0;
                 let totalReposts = 0;
+                userPosts = snapshot.docs.map(postDoc => ({ id: postDoc.id, ...postDoc.data() }));
+                userPosts.sort((a,b) => {
+                    const at = a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.createdAt ? new Date(a.createdAt).getTime() : 0);
+                    const bt = b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.createdAt ? new Date(b.createdAt).getTime() : 0);
+                    return bt-at;
+                });
                 snapshot.forEach(doc => {
                     const data = doc.data();
                     const likes = data.likes || [];
@@ -1619,15 +1925,17 @@
                 if (repostEl) repostEl.textContent = repostsCount;
                 
                 renderVerificationProgress();
+                renderProfileAdvancedFeatures();
             }, (error) => {
                 console.error("Error listening to posts:", error);
             });
         }
 
         function listenToUserData() {
-            if (!currentUser || unsubscribeUser) return;
+            const profileUid = targetProfileUid || currentUser?.uid;
+            if (!profileUid || unsubscribeUser) return;
             
-            const userRef = doc(db, "users", currentUser.uid);
+            const userRef = doc(db, "users", profileUid);
             
             unsubscribeUser = onSnapshot(userRef, (docSnap) => {
                 if (docSnap.exists()) {
@@ -1636,6 +1944,7 @@
                     
                     isSuspended = userData.suspended === true;
                     
+                    featuredPostId = userData.featuredPostId || null;
                     if (userData.spId) {
                         spId = userData.spId;
                         localStorage.setItem('spikeSpId', spId);
@@ -1647,6 +1956,7 @@
                     
                     renderProfile();
                     renderVerificationProgress();
+                    renderProfileAdvancedFeatures();
                     updateSuspendedOverlay();
                 }
             }, (error) => {
@@ -1693,7 +2003,8 @@
 
         async function loadUserData() {
             try {
-                const docSnap = await getDoc(doc(db, "users", currentUser.uid));
+                const profileUid = targetProfileUid || currentUser.uid;
+                const docSnap = await getDoc(doc(db, "users", profileUid));
                 if (docSnap.exists()) {
                     userData = docSnap.data();
                     isSuspended = userData.suspended === true;
@@ -1738,6 +2049,7 @@
                         showMood: true,
                         showBio: true
                     };
+                    if (profileUid !== currentUser.uid) throw new Error("Public profile record not found");
                     await setDoc(doc(db, "users", currentUser.uid), newUserData);
                     userData = newUserData;
                 }
@@ -1962,6 +2274,15 @@
                 const isOnline = userData.onlineStatus === true && !isSuspendedUser;
                 dot.classList.toggle('show', settings.onlineStatus !== false && isOnline);
             }
+            const onlineChip = document.getElementById('profileOnlineChip');
+            if (onlineChip) {
+                const isOnline = userData.onlineStatus === true && !isSuspendedUser;
+                onlineChip.textContent = isOnline ? '● Online' : '○ Offline';
+                onlineChip.classList.toggle('online', isOnline);
+            }
+            const verifiedChip = document.getElementById('profileVerifiedChip');
+            if (verifiedChip) verifiedChip.style.display = isVerified ? 'inline-flex' : 'none';
+            updateProfileCompleteness();
             
             const card = document.getElementById('profileCard');
             if (card) {
@@ -2148,65 +2469,109 @@
 
         // Close Data dropdown when clicking outside
         document.addEventListener('click', function(e) {
-            const wrapper = document.querySelector('.Data-toggle-wrapper');
-            if (wrapper && !wrapper.contains(e.target)) {
-                document.getElementById('DataDropdown').classList.remove('open');
+            const dataWrapper = document.querySelector('.Data-toggle-wrapper');
+            if (dataWrapper && !dataWrapper.contains(e.target)) {
+                document.getElementById('DataDropdown')?.classList.remove('open');
+            }
+            const menuWrap = document.querySelector('.profile-menu-wrap');
+            const menu = document.getElementById('profileMenu');
+            if (menuWrap && menu && !menuWrap.contains(e.target)) {
+                closeProfileMenu();
             }
         });
 
-        // ===== ONLINE STATUS: beforeunload & visibility =====
+        // ===== ONLINE STATUS: lifecycle-aware =====
         window.addEventListener('beforeunload', () => {
+            // Best-effort only: async Firestore writes are not guaranteed to finish during unload.
             if (currentUserUid) updateUserOnlineStatus(false);
         });
 
         document.addEventListener('visibilitychange', () => {
+            if (!currentUserUid) return;
+            if (hiddenOfflineTimer) {
+                clearTimeout(hiddenOfflineTimer);
+                hiddenOfflineTimer = null;
+            }
             if (document.hidden) {
-                if (currentUserUid) updateUserOnlineStatus(false);
+                // Do not mark a user offline for a brief app/tab switch.
+                hiddenOfflineTimer = setTimeout(() => {
+                    if (document.hidden && currentUserUid) updateUserOnlineStatus(false);
+                    hiddenOfflineTimer = null;
+                }, 60000);
             } else {
-                if (currentUserUid) updateUserOnlineStatus(true);
+                updateUserOnlineStatus(true);
             }
         });
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) {
+            currentUser = user || null;
+            const requestedSp = new URLSearchParams(window.location.search).get('sp')?.trim();
+            isPublicProfile = !!requestedSp;
+
+            if (!user && !requestedSp) {
                 window.location.href = "index.html";
                 return;
             }
-            currentUser = user;
-            currentUserUid = user.uid;
-            // Set online on load
-            updateUserOnlineStatus(true);
-            
-            isAdmin = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
-            
-            applySettings();
-            
-            const cachedAvatar = localStorage.getItem("userAvatar");
-            if (cachedAvatar) {
-                updateNavAvatar(cachedAvatar);
+
+            if (user) {
+                currentUserUid = user.uid;
+                if (!requestedSp) {
+                    targetProfileUid = user.uid;
+                    profileActivity('Opened profile');
+                    updateUserOnlineStatus(true);
+                    isAdmin = user.email && ADMIN_EMAILS.includes(user.email.toLowerCase());
+                    applySettings();
+                    const cachedAvatar = localStorage.getItem("userAvatar");
+                    if (cachedAvatar) updateNavAvatar(cachedAvatar);
+                    const adminLink = document.getElementById('adminNavLink');
+                    if (isAdmin) {
+                        if (adminLink) adminLink.classList.add('visible');
+                        const adminMenuLink = document.getElementById('adminMenuLink');
+                        if (adminMenuLink) adminMenuLink.style.display = 'flex';
+                    }
+                }
             }
 
-            const adminLink = document.getElementById('adminNavLink');
-            if (isAdmin) {
-                adminLink.classList.add('visible');
+            if (requestedSp) {
+                const normalized = requestedSp.toUpperCase().replace(/^SP-?/, '');
+                try {
+                    const snap = await getDocs(query(collection(db, 'users'), where('spId', '==', normalized)));
+                    if (snap.empty) {
+                        showToast('That SPIKE profile could not be found.', 'error', 'Profile Not Found');
+                        if (user) { window.history.replaceState({}, '', '/profile'); targetProfileUid = user.uid; isPublicProfile = false; }
+                        else { window.location.href = '/'; return; }
+                    } else {
+                        targetProfileUid = snap.docs[0].id;
+                        isPublicProfile = !user || targetProfileUid !== user.uid;
+                    }
+                } catch (e) {
+                    console.error('Profile lookup failed:', e);
+                    if (!user) { window.location.href = '/'; return; }
+                    targetProfileUid = user.uid;
+                    isPublicProfile = false;
+                }
             }
 
-            checkMaintenanceMode();
-            updateMaintenanceOverlay();
+            if (isPublicProfile) {
+                document.body.classList.add('public-profile-view');
+                document.querySelectorAll('[data-owner-only]').forEach(el => el.style.display='none');
+                const adminLink = document.getElementById('adminNavLink'); if (adminLink) adminLink.classList.remove('visible');
+            } else if (user) {
+                checkMaintenanceMode();
+                updateMaintenanceOverlay();
+            }
 
-            await Promise.all([
-                loadUserData(),
-                ensureSPId(currentUser.uid),
-                Promise.resolve().then(() => { listenToUserData(); }),
-                Promise.resolve().then(() => { listenToUserPosts(); })
-            ]);
-            
-            // Initialize notification listener
-            initNotificationListener();
-            
+            await loadUserData();
+            listenToUserData();
+            listenToUserPosts();
+            if (!isPublicProfile && user) {
+                await ensureSPId(user.uid);
+                initNotificationListener();
+            }
             renderProfile();
             renderVerificationProgress();
             updateSuspendedOverlay();
+            renderProfileAdvancedFeatures();
         });
 
         document.getElementById('welcomePopup').addEventListener('click', function(e) {
@@ -2215,7 +2580,7 @@
 
         console.log("🚀 SPIKE Profile loaded");
         console.log("📋 All profile fields moved inside Data toggle!");
-        console.log("💎 Verification requirements: 1 year, 500 friends, 1k posts, 200 reactions, 200 reposts");
+        console.log("💎 Verification requirements: 1 year, 500 friends, 1k posts, 200 reactions, 100 reposts");
         console.log("✅ Unified online status enabled.");
     </script>
 </head>
@@ -2240,19 +2605,35 @@
     <!-- ===== HEADER ===== -->
     <header class="profile-header">
         <div class="header-left">
-            <button class="back-btn" onclick="goToFeed()">← Back</button>
+            <button class="back-btn" type="button" onclick="goToFeed()">← Back</button>
             <a href="feed.html" class="logo">SPIKE</a>
         </div>
         <div class="header-right">
-            <a href="administrator.html" class="nav-link admin-heart-link" id="adminNavLink" title="Admin Dashboard">
-                <span class="heart-icon">🎴</span>
-            </a>
-            <a href="settings.html" class="nav-link" title="Settings">⚙️</a>
             <a href="notifications.html" class="nav-link" title="Notifications" style="position:relative;">
-                🔔
-                <span class="nav-badge" id="notifBadge">0</span>
+                🔔<span class="nav-badge" id="notifBadge">0</span>
             </a>
-            <a href="profile.html" class="nav-link active" id="profileNavLink" title="Profile">👤</a>
+            <div class="profile-menu-wrap">
+                <button class="nav-link profile-menu-btn" type="button" title="Profile Menu" aria-label="Open profile menu" aria-expanded="false" onclick="toggleProfileMenu()">☰</button>
+                <div class="profile-menu" id="profileMenu" role="menu">
+                    <div class="profile-menu-title">Profile</div>
+                    <button class="profile-menu-item" type="button" onclick="shareProfile();closeProfileMenu()">🔗 Share Profile</button>
+                    <button class="profile-menu-item" type="button" onclick="copyProfileLink();closeProfileMenu()">📋 Copy Profile Link</button>
+                    <button class="profile-menu-item" type="button" onclick="copySpId();closeProfileMenu()">🆔 Copy SPIKE ID</button>
+                    <button class="profile-menu-item" type="button" onclick="showPublicPreview();closeProfileMenu()">👁️ Public Preview</button>
+                    <button class="profile-menu-item" type="button" onclick="showProfileQR();closeProfileMenu()">▦ Profile QR</button>
+                    <button class="profile-menu-item" type="button" data-owner-only onclick="chooseFeaturedPost();closeProfileMenu()">📌 Feature a Post</button>
+                    <div class="profile-menu-divider"></div>
+                    <div class="profile-menu-title">Account</div>
+                    <button class="profile-menu-item" type="button" onclick="goToFriends()">👥 Friends</button>
+                    <button class="profile-menu-item" type="button" onclick="goToMessages()">💬 Messages</button>
+                    <button class="profile-menu-item" type="button" onclick="goToNotifications()">🔔 Notifications</button>
+                    <button class="profile-menu-item" type="button" data-owner-only onclick="goToSettings()">⚙️ Edit Profile</button>
+                    <button class="profile-menu-item" type="button" id="adminMenuLink" style="display:none;" onclick="goToAdmin()">🛡️ Admin Dashboard</button>
+                    <div class="profile-menu-divider"></div>
+                    <button class="profile-menu-item danger" type="button" data-owner-only onclick="signOutUser()">🚪 Sign Out</button>
+                </div>
+            </div>
+            <a href="/profile" class="nav-link active" id="profileNavLink" title="Profile">👤</a>
         </div>
     </header>
 
@@ -2278,84 +2659,130 @@
         </div>
 
         <div id="profileCard" class="profile-card" style="display:none;">
-            <div class="avatar-wrapper" onclick="triggerAvatarUpload()" title="Tap to change avatar">
-                <div class="avatar" id="profileAvatar">
-                    <span class="initials">U</span>
-                    <span class="online-dot" id="onlineStatusDot"></span>
-                    <span class="avatar-verified-badge" id="avatarVerifiedBadge" style="display:none;" title="Verified User">💎</span>
+            <section class="profile-hero" aria-label="Profile overview">
+                <div class="avatar-wrapper" data-owner-only onclick="triggerAvatarUpload()" title="Tap to change avatar">
+                    <div class="avatar" id="profileAvatar">
+                        <span class="initials">U</span>
+                        <span class="online-dot" id="onlineStatusDot"></span>
+                        <span class="avatar-verified-badge" id="avatarVerifiedBadge" style="display:none;" title="Verified User">💎</span>
+                    </div>
+                    <div class="avatar-upload-hint">📷 Tap to change</div>
+                    <input type="file" id="editAvatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
                 </div>
-                <div class="avatar-upload-hint">📷 Tap to change</div>
-                <input type="file" id="editAvatarInput" accept="image/*" style="display:none;" onchange="uploadAvatar(event)">
-            </div>
-
-            <div class="profile-name-wrapper">
-                <span class="profile-name" id="profileName">User</span>
-                <span class="verified-badge" id="verifiedBadge" style="display:none;" title="Verified User">💎</span>
-                <span class="suspended-badge" id="suspendedBadge" style="display:none;" title="Account Suspended">🚫 Suspended</span>
-            </div>
-            <div class="profile-username" id="profileUsername">@username</div>
-
-            <div class="sp-id-container" id="spIdDisplay" onclick="copySpId()" style="display:none;">
-                <div class="sp-id-glow"></div>
-                <span class="sp-id-label">SPIKE ID</span>
-                <span class="sp-id-number" id="spIdNumber">SP-000000</span>
-                <span class="sp-id-copy">📋</span>
-            </div>
+                <div class="profile-name-wrapper">
+                    <span class="profile-name" id="profileName">User</span>
+                    <span class="verified-badge" id="verifiedBadge" style="display:none;" title="Verified User">💎</span>
+                    <span class="suspended-badge" id="suspendedBadge" style="display:none;" title="Account Suspended">🚫 Suspended</span>
+                </div>
+                <div class="profile-username" id="profileUsername">@username</div>
+                <div class="sp-id-container" id="spIdDisplay" onclick="copySpId()" style="display:none;">
+                    <div class="sp-id-glow"></div><span class="sp-id-label">SPIKE ID</span>
+                    <span class="sp-id-number" id="spIdNumber">SP-000000</span><span class="sp-id-copy">📋</span>
+                </div>
+                <div class="profile-status-row">
+                    <span class="status-chip online" id="profileOnlineChip">● Online</span>
+                    <span class="status-chip verified" id="profileVerifiedChip" style="display:none;">💎 Verified</span>
+                </div>
+                <div class="profile-bio" id="profileBio" onclick="goToEditProfile()" title="Tap to edit bio">No bio yet.</div>
+            </section>
 
             <div class="stats-row">
-                <div class="stat-item" onclick="goToFeed()" title="View Posts">
-                    <div class="stat-number" id="postCount">0</div>
-                    <div class="stat-label">Posts</div>
-                </div>
-                <div class="stat-item" onclick="goToFriends()" title="View Friends">
-                    <div class="stat-number" id="friendCount">0</div>
-                    <div class="stat-label">Friends</div>
-                </div>
-                <div class="stat-item" title="Total Likes">
-                    <div class="stat-number" id="likeCount">0</div>
-                    <div class="stat-label">Reactions</div>
-                </div>
-                <div class="stat-item" title="Total Reposts">
-                    <div class="stat-number" id="repostCount">0</div>
-                    <div class="stat-label">Reposts</div>
-                </div>
+                <div class="stat-item" onclick="goToFeed()" title="View Posts"><div class="stat-number" id="postCount">0</div><div class="stat-label">Posts</div></div>
+                <div class="stat-item" onclick="goToFriends()" title="View Friends"><div class="stat-number" id="friendCount">0</div><div class="stat-label">Friends</div></div>
+                <div class="stat-item" title="Total Reactions"><div class="stat-number" id="likeCount">0</div><div class="stat-label">Reactions</div></div>
+                <div class="stat-item" title="Total Reposts"><div class="stat-number" id="repostCount">0</div><div class="stat-label">Reposts</div></div>
             </div>
 
-            <div class="profile-bio" id="profileBio" onclick="goToEditProfile()" title="Tap to edit bio">No bio yet.</div>
-
-            <!-- ===== VERIFICATION PROGRESS ===== -->
-            <div id="verificationProgressContainer"></div>
-
-            <!-- ===== Data TOGGLE ===== -->
-            <div class="Data-toggle-wrapper">
-                <button class="Data-toggle-btn" onclick="toggleData()">
-                    <span>✦</span> Data <span class="badge-dot"></span>
-                </button>
-                
-                <div class="Data-dropdown" id="DataDropdown">
-                    <div class="section-title">📋 Profile Details</div>
-                    
-                    <!-- Fields rendered here -->
-                    <div class="profile-fields-panel" id="fieldsPanel">
-                        <!-- Dynamically rendered -->
-                    </div>
-
-                    <!-- Adapter controls inside Data -->
-                    <div class="adapter-toggle-inline">
-                        <button class="toggle-btn" id="toggleFieldsBtn" onclick="toggleAllFields()">👁️ Show all fields</button>
-                        <button class="toggle-btn" onclick="goToEditProfile()">✏️ Edit Profile</button>
-                    </div>
-                </div>
+            <div class="profile-primary-actions" data-owner-only>
+                <button class="btn-profile settings" type="button" onclick="goToEditProfile()">✏️ Edit Profile</button>
+                <button class="btn-profile primary" type="button" onclick="shareProfile()">🔗 Share</button>
+                <button class="btn-profile primary" id="verifyBtn" data-owner-only style="display:none;" type="button" onclick="goToVerify()">💎 Get Verified</button>
             </div>
 
-            <div class="profile-actions">
-                <button class="btn-profile primary" id="verifyBtn" style="display:none;" onclick="goToVerify()">💎 Get Verified</button>
-                <button class="btn-profile settings" onclick="goToSettings()">🛠 Edit-Profile</button>
-                <button class="btn-profile danger" onclick="signOutUser()">🚪 Sign Out</button>
+            <div class="profile-details-column">
+                <section class="profile-section" id="aboutSection">
+                    <button class="profile-section-toggle" type="button" aria-expanded="true" onclick="toggleProfileSection('aboutSection')"><span>👤 About</span><span class="chevron">⌄</span></button>
+                    <div class="profile-section-body">
+                        <div class="profile-section-subtitle">Profile completeness</div>
+                        <div class="profile-completeness"><span id="profileCompletenessBar"></span></div>
+                        <div class="profile-section-subtitle" id="profileCompletenessValue">0% complete</div>
+                        <div class="Data-toggle-wrapper">
+                            <button class="Data-toggle-btn" type="button" onclick="toggleData()"><span>✦</span> Profile Details <span class="badge-dot"></span></button>
+                            <div class="Data-dropdown" id="DataDropdown">
+                                <div class="section-title">📋 Profile Details</div>
+                                <div class="profile-fields-panel" id="fieldsPanel"></div>
+                                <div class="adapter-toggle-inline">
+                                    <button class="toggle-btn" id="toggleFieldsBtn" type="button" onclick="toggleAllFields()">👁️ Show all fields</button>
+                                    <button class="toggle-btn" type="button" onclick="goToEditProfile()">✏️ Edit Profile</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-section" id="profileToolsSection">
+                    <button class="profile-section-toggle" type="button" aria-expanded="true" onclick="toggleProfileSection('profileToolsSection')"><span>✨ Profile Tools</span><span class="chevron">⌄</span></button>
+                    <div class="profile-section-body">
+                        <div class="profile-feature-grid">
+                            <div class="feature-card"><h4>📌 Featured Post</h4><p>Highlight one of your existing posts.</p><div id="featuredPost"></div><button class="btn-profile settings feature-action" type="button" data-owner-only onclick="chooseFeaturedPost()">Choose Post</button><button class="btn-profile settings feature-action" type="button" data-owner-only onclick="clearFeaturedPost()">Remove Feature</button></div>
+                            <div class="feature-card"><h4>👁️ Public Preview</h4><p>See the profile using the current public visibility settings.</p><button class="btn-profile settings feature-action" type="button" onclick="showPublicPreview()">Preview Profile</button></div>
+                            <div class="feature-card"><h4>▦ QR Code</h4><p>Open a QR code for the current profile URL.</p><button class="btn-profile settings feature-action" type="button" onclick="showProfileQR()">Show QR</button></div>
+                            <div class="feature-card"><h4>📷 Media Gallery</h4><p>Browse media from posts already loaded for this profile.</p><div id="galleryFeatureGrid" class="profile-post-grid"></div></div>
+                            <div class="feature-card" style="grid-column:1/-1"><h4>🔗 Social Links</h4><p>Public social links are shown using the profile's existing visibility flags.</p><div id="socialPreviewGrid" class="profile-social-grid"></div></div>
+                            <div class="feature-card" style="grid-column:1/-1"><h4>🕘 Profile Activity</h4><p>Recent profile actions recorded on this device.</p><div id="profileActivityList" class="profile-activity-list"></div></div>
+                            <div class="feature-card"><h4>👥 Following</h4><p>Existing following count, when the user document provides it.</p><div class="stat-number" id="followingCount">0</div><button class="btn-profile settings feature-action" type="button" onclick="showConnections('following')">View Following</button></div>
+                            <div class="feature-card"><h4>👤 Followers</h4><p>Existing followers count, when the user document provides it.</p><div class="stat-number" id="followersCount">0</div><button class="btn-profile settings feature-action" type="button" onclick="showConnections('followers')">View Followers</button></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-section" id="verificationSection">
+                    <button class="profile-section-toggle" type="button" aria-expanded="true" onclick="toggleProfileSection('verificationSection')"><span>💎 Verification</span><span class="chevron">⌄</span></button>
+                    <div class="profile-section-body"><div id="verificationProgressContainer"></div></div>
+                </section>
+
+                <section class="profile-section posts-section" id="postsSection">
+                    <button class="profile-section-toggle" type="button" aria-expanded="true" onclick="toggleProfileSection('postsSection')"><span>📝 Posts</span><span class="chevron">⌄</span></button>
+                    <div class="profile-section-body">
+                        <div class="profile-section-subtitle">Recent media</div>
+                        <div id="profilePostGrid" class="profile-post-grid"></div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+                            <button class="btn-profile settings" type="button" onclick="goToFeed()">View All Posts in Feed →</button>
+                            <button class="btn-profile settings" type="button" onclick="chooseFeaturedPost()">📌 Feature a Post</button>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
 
     </main>
+
+    <!-- ===== CONNECTIONS ===== -->
+    <div id="connectionsOverlay" class="preview-overlay" onclick="if(event.target===this)closeConnections()">
+        <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="connectionsTitle">
+            <div class="preview-head"><strong id="connectionsTitle">Connections</strong><button class="preview-close" type="button" onclick="closeConnections()">✕</button></div>
+            <div id="connectionsBody" class="profile-activity-list"></div>
+        </div>
+    </div>
+
+    <!-- ===== PUBLIC PROFILE PREVIEW ===== -->
+    <div id="publicPreviewOverlay" class="preview-overlay" onclick="if(event.target===this)closePublicPreview()">
+        <div class="preview-card" role="dialog" aria-modal="true" aria-labelledby="publicPreviewTitle">
+            <div class="preview-head"><strong id="publicPreviewTitle">Public Profile Preview</strong><button class="preview-close" type="button" onclick="closePublicPreview()">✕</button></div>
+            <div id="publicPreviewBody"></div>
+        </div>
+    </div>
+
+    <!-- ===== PROFILE QR ===== -->
+    <div id="qrOverlay" class="qr-overlay" onclick="if(event.target===this)closeProfileQR()">
+        <div class="qr-card" role="dialog" aria-modal="true" aria-labelledby="profileQrTitle">
+            <div class="qr-head"><strong id="profileQrTitle">Profile QR Code</strong><button class="qr-close" type="button" onclick="closeProfileQR()">✕</button></div>
+            <img id="profileQrImage" src="" alt="Profile QR code">
+            <div class="qr-note">This QR opens the canonical SPIKE /profile route for this SP ID. If QR rendering is unavailable, use Copy Profile Link instead.</div>
+            <div class="activity-item" id="profileQrLink" style="margin-top:10px;word-break:break-all;text-align:center"></div>
+            <button class="btn-profile primary" type="button" style="width:100%;margin-top:10px" onclick="copyProfileLink();closeProfileQR()">📋 Copy Profile Link</button>
+        </div>
+    </div>
 
     <!-- ===== CONGRATULATIONS MODAL ===== -->
     <div id="congratsOverlay" class="congrats-overlay">
