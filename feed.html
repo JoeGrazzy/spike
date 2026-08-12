@@ -5090,6 +5090,7 @@ function setActiveCallFlag(callId) {
             const audio = document.getElementById('notificationSound');
             if (!audio) {
                 notificationSoundQueue = 0;
+                previousChatUnreadCount = null;
                 return;
             }
 
@@ -5196,6 +5197,32 @@ function setActiveCallFlag(callId) {
                     updateNotificationBadge(0);
                 }
             );
+        }
+
+        // ============================================================
+        // CHAT NOTIFICATION TONE
+        // Uses the same notification.mp3 as the notification bell.
+        // One tone is queued for each newly detected unread chat event.
+        // ============================================================
+        let previousChatUnreadCount = null;
+
+        function playChatNotificationTone() {
+            const audio = document.getElementById('notificationSound');
+            if (!audio) return;
+
+            // Reuse the same notification audio queue used by notifications.
+            if (typeof notificationSoundQueue === 'number') {
+                notificationSoundQueue += 1;
+                if (typeof drainNotificationSoundQueue === 'function') {
+                    drainNotificationSoundQueue();
+                }
+            } else {
+                try {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.play().catch(() => {});
+                } catch (_) {}
+            }
         }
 
         // ============================================================
@@ -5460,18 +5487,41 @@ function setActiveCallFlag(callId) {
         }
         async function trackPostView(postId) {
             if (!currentUser || !postId) return;
+
             const viewRef = doc(db, 'posts', postId, 'views', currentUser.uid);
+            const postRef = doc(db, 'posts', postId);
+
             try {
-                const already = await getDoc(viewRef);
-                if (already.exists()) return;
+                // The transaction is the single source of truth for the
+                // "one view per user per post" operation. Do not perform a
+                // separate getDoc() first: two feed observers/tabs can both
+                // see "missing" and race to create the same view document.
                 await runTransaction(db, async tx => {
-                    const postRef = doc(db, 'posts', postId);
                     const viewSnap = await tx.get(viewRef);
-                    if (viewSnap.exists()) return;
-                    tx.set(viewRef, { viewedAt: serverTimestamp() });
-                    tx.update(postRef, { views: increment(1) });
+
+                    if (viewSnap.exists()) {
+                        return;
+                    }
+
+                    tx.set(viewRef, {
+                        viewedAt: serverTimestamp()
+                    });
+
+                    tx.update(postRef, {
+                        views: increment(1)
+                    });
                 });
-            } catch (error) { console.warn('Post view tracking skipped:', error); }
+            } catch (error) {
+                // already-exists can be produced by an older/racing client
+                // attempting the same view write. It is safe to ignore because
+                // the view document already represents this user's view.
+                if (error?.code === 'already-exists') {
+                    console.debug('Post view already recorded:', postId);
+                    return;
+                }
+
+                console.warn('Post view tracking skipped:', error);
+            }
         }
         function setupPostViewTracking() {
             if (feedViewObserver) feedViewObserver.disconnect();
