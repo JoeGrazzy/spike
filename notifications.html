@@ -784,18 +784,18 @@
         .toast-container.warning {
             --toast-glow-color: rgba(245, 158, 11, 0.6);
         }
+        .toast-container.info {
+            --toast-glow-color: rgba(14, 165, 233, 0.6);
+        }
+        .toast-container.info .toast-icon-wrapper {
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(14, 165, 233, 0.2);
+            color: var(--accent);
+        }
         .toast-container.warning .toast-icon-wrapper {
             background: rgba(245, 158, 11, 0.12);
             border: 1px solid rgba(245, 158, 11, 0.2);
             color: var(--warning);
-        }
-        .toast-container.info {
-            --toast-glow-color: rgba(59, 130, 246, 0.6);
-        }
-        .toast-container.info .toast-icon-wrapper {
-            background: rgba(59, 130, 246, 0.12);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
         }
 
         .toast-text-group {
@@ -1098,6 +1098,8 @@
         </div>
     </header>
 
+    <audio id="notificationSound" src="/storage/emulated/0/Download/APPLICATION/assets/levels/notifications.mp3" preload="auto"></audio>
+
     <!-- ===== MAIN ===== -->
     <main style="width:100%;max-width:620px;padding:12px;display:flex;flex-direction:column;gap:8px;">
 
@@ -1215,12 +1217,18 @@
         let renderTimeout = null;
         let unsubscribers = [];
 
+
         let soundEnabled = true;
-        let audioCtx = null;
+        let notificationSoundQueue = 0;
+        let notificationSoundPlaying = false;
+        let notificationSoundRetryAttached = false;
 
         // ============================================================
         // HELPERS
         // ============================================================
+        function generateNotificationId(prefix, ...parts) {
+            return prefix + '_' + parts.filter(Boolean).join('_');
+        }
 
         function toDate(timestamp) {
             if (!timestamp) return new Date(0);
@@ -1275,49 +1283,70 @@
         }
 
         // ============================================================
-        // READ STATE
-        // Firestore is the single source of truth for notification read state.
+        // READ STATE — FIRESTORE IS THE SOURCE OF TRUTH
         // ============================================================
         async function markRead(id) {
             const item = allNotifications.find(n => n.id === id);
             if (!item || item.read || !currentUserUid) return;
+
             item.read = true;
             renderAll();
             updateBadge();
+
             try {
-                await db.collection('users').doc(currentUserUid).collection('notifications').doc(id).update({
-                    read: true,
-                    readAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                await db.collection('users').doc(currentUserUid)
+                    .collection('notifications').doc(id)
+                    .update({
+                        read: true,
+                        readAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
             } catch (e) {
                 item.read = false;
                 renderAll();
                 updateBadge();
                 console.warn('Failed to persist read state:', e);
+                showToast('Could not mark notification as read.', 'error', 'Failed');
             }
         }
 
         async function markAllRead() {
             if (!currentUserUid) return;
+
             const unread = allNotifications.filter(n => !n.read);
-            if (!unread.length) { showToast('Everything is already read.', 'success', 'Done'); return; }
+            if (!unread.length) {
+                showToast('Everything is already read.', 'success', 'Done');
+                return;
+            }
+
+            // Update the local state immediately so the UI does not wait for
+            // the Firestore snapshot to repaint.
             unread.forEach(n => { n.read = true; });
             renderAll();
             updateBadge();
+
             try {
                 for (let i = 0; i < unread.length; i += 400) {
                     const batch = db.batch();
-                    unread.slice(i, i + 400).forEach(n => batch.update(
-                        db.collection('users').doc(currentUserUid).collection('notifications').doc(n.id),
-                        { read: true, readAt: firebase.firestore.FieldValue.serverTimestamp() }
-                    ));
+                    unread.slice(i, i + 400).forEach(n => {
+                        batch.update(
+                            db.collection('users').doc(currentUserUid)
+                                .collection('notifications').doc(n.id),
+                            {
+                                read: true,
+                                readAt: firebase.firestore.FieldValue.serverTimestamp()
+                            }
+                        );
+                    });
                     await batch.commit();
                 }
                 showToast('All marked as read', 'success', 'Done');
             } catch (e) {
                 console.error(e);
-                showToast('Some notifications could not be marked read.', 'error', 'Failed');
+                // Snapshot will reconcile persisted state. Force a listener
+                // refresh by restarting it so failed writes cannot remain
+                // falsely marked locally.
                 startListeners();
+                showToast('Some notifications could not be marked read.', 'error', 'Failed');
             }
         }
 
@@ -1412,22 +1441,60 @@
         // ============================================================
         // SOUND
         // ============================================================
-        function playChime() {
+        function playNotificationSoundOnce() {
             if (!soundEnabled) return;
+
+            const audio = document.getElementById('notificationSound');
+            if (!audio) return;
+
+            notificationSoundQueue += 1;
+            drainNotificationSoundQueue();
+        }
+
+        async function drainNotificationSoundQueue() {
+            if (notificationSoundPlaying || notificationSoundQueue <= 0) return;
+
+            const audio = document.getElementById('notificationSound');
+            if (!audio) {
+                notificationSoundQueue = 0;
+                return;
+            }
+
+            notificationSoundPlaying = true;
+            notificationSoundQueue -= 1;
+
             try {
-                if (!audioCtx) {
-                    audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                audio.pause();
+                audio.currentTime = 0;
+                await audio.play();
+
+                await new Promise(resolve => {
+                    let finished = false;
+                    const finish = () => {
+                        if (finished) return;
+                        finished = true;
+                        audio.removeEventListener('ended', finish);
+                        resolve();
+                    };
+                    audio.addEventListener('ended', finish, { once: true });
+                    setTimeout(finish, Math.max(1500, ((audio.duration || 1) * 1000) + 500));
+                });
+            } catch (e) {
+                notificationSoundQueue += 1;
+
+                if (!notificationSoundRetryAttached) {
+                    notificationSoundRetryAttached = true;
+                    const retry = () => {
+                        notificationSoundRetryAttached = false;
+                        drainNotificationSoundQueue();
+                    };
+                    document.addEventListener('click', retry, { once: true });
+                    document.addEventListener('touchstart', retry, { once: true, passive: true });
                 }
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.frequency.value = 800;
-                osc.type = 'sine';
-                gain.gain.value = 0.15;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.12);
-            } catch (e) {}
+            } finally {
+                notificationSoundPlaying = false;
+                if (notificationSoundQueue > 0) drainNotificationSoundQueue();
+            }
         }
 
         function toggleSound() {
@@ -1520,7 +1587,7 @@
                 url,
                 createdAt: createdAt instanceof Date ? createdAt.toISOString() : (typeof createdAt === 'string' ?
                     createdAt : new Date().toISOString()),
-                read: read === true,
+                read: read || isRead(id),
                 _groupKey: _groupKey || id,
                 _count: 1
             };
@@ -1606,7 +1673,6 @@
                             const count = items.length;
                             displayItems.push({
                                 ...latest,
-                                read: items.every(item => item.read),
                                 _groupCount: count,
                                 _groupItems: items
                             });
@@ -1653,7 +1719,7 @@
         function buildNotificationItem(item) {
             const isUnread = !item.read;
             const avatarHTML = item.actorAvatar ?
-                `<img src="${escapeHTML(item.actorAvatar)}" alt="${escapeHTML(item.actorName || 'User')}" loading="lazy" referrerpolicy="no-referrer">` :
+                `<img src="${escapeHTML(item.actorAvatar)}" alt="${escapeHTML(item.actorName || 'User')}">` :
                 escapeHTML((item.actorName || 'U').charAt(0).toUpperCase());
 
             const countBadge = item._groupCount && item._groupCount > 1 ?
@@ -1661,18 +1727,18 @@
                 '';
 
             const categoryMap = {
+                friends: 'Friends',
                 feed: 'Feed',
                 chats: 'Chats',
                 rooms: 'Rooms',
                 communities: 'Communities',
                 verification: 'Verification',
-                announcements: 'Announcements',
-                friends: 'Friends'
+                announcements: 'Announcements'
             };
             const badgeLabel = categoryMap[item.category] || item.category;
 
             return `
-                <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${escapeHTML(item.id)}" role="button" tabindex="0">
+                <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${escapeHTML(item.id)}">
                     <div class="notif-avatar">${avatarHTML}</div>
                     <div class="notif-body">
                         <div class="notif-message">
@@ -1689,6 +1755,12 @@
                 </div>
             `;
         }
+
+        document.getElementById('notifList').addEventListener('click', (event) => {
+            const itemEl = event.target.closest('.notif-item[data-id]');
+            if (!itemEl) return;
+            handleItemClick(itemEl.dataset.id);
+        });
 
         // ============================================================
         // BADGE UPDATE
@@ -1715,29 +1787,41 @@
                 showToast('No notifications to clear', 'warning');
                 return;
             }
+
             const confirmed = await showConfirm({
-                type: 'danger', icon: '🗑️', title: 'Clear All Notifications?',
+                type: 'danger',
+                icon: '🗑️',
+                title: 'Clear All Notifications?',
                 message: 'This will permanently remove all notifications from your notification history.',
-                details: `You have <strong>${allNotifications.length}</strong> loaded notifications.`,
-                confirmText: 'Clear All', confirmType: 'danger', cancelText: 'Cancel'
+                details: `You have <strong>${allNotifications.length}</strong> currently loaded notifications.`,
+                confirmText: 'Clear All',
+                confirmType: 'danger',
+                cancelText: 'Cancel'
             });
             if (!confirmed) return;
+
             try {
                 const collectionRef = db.collection('users').doc(currentUserUid).collection('notifications');
-                let deleted = 0;
+
+                // Delete in bounded batches and continue until the collection
+                // is empty. This removes the previous 200-document cap.
                 while (true) {
                     const snap = await collectionRef.limit(400).get();
                     if (snap.empty) break;
-                    const batch = db.batch();
-                    snap.docs.forEach(d => batch.delete(d.ref));
-                    await batch.commit();
-                    deleted += snap.docs.length;
-                    if (snap.docs.length < 400) break;
+
+                    for (let i = 0; i < snap.docs.length; i += 400) {
+                        const batch = db.batch();
+                        snap.docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+                        await batch.commit();
+                    }
+
+                    if (snap.size < 400) break;
                 }
+
                 allNotifications = [];
                 renderAll();
                 updateBadge();
-                showToast(deleted ? 'Notifications cleared' : 'No notifications to clear', 'success', 'Cleared');
+                showToast('Notifications cleared', 'success', 'Cleared');
             } catch (e) {
                 console.error(e);
                 showToast('Failed to clear notifications.', 'error', 'Clear Failed');
@@ -1751,8 +1835,9 @@
             const item = allNotifications.find(n => n.id === id);
             if (!item) return;
             if (!item.read) {
-                const ids = Array.isArray(item._groupItems) ? item._groupItems.map(n => n.id) : [id];
-                ids.forEach(notificationId => markRead(notificationId));
+                markRead(id);
+                renderAll();
+                updateBadge();
             }
             if (item.url) {
                 window.location.href = item.url;
@@ -1766,19 +1851,6 @@
             });
             renderAll();
         }
-
-        const notifList = document.getElementById('notifList');
-        notifList.addEventListener('click', (event) => {
-            const item = event.target.closest('.notif-item');
-            if (item) handleItemClick(item.dataset.id);
-        });
-        notifList.addEventListener('keydown', (event) => {
-            if (event.key !== 'Enter' && event.key !== ' ') return;
-            const item = event.target.closest('.notif-item');
-            if (!item) return;
-            event.preventDefault();
-            handleItemClick(item.dataset.id);
-        });
 
         // ============================================================
         // EXPOSE GLOBALS
@@ -1798,10 +1870,9 @@
         // ============================================================
         // INIT
         // ============================================================
-        let initialized = false;
+        let authInitialized = false;
+
         function init() {
-            if (initialized) return;
-            initialized = true;
             loadSettings();
 
             auth.onAuthStateChanged(async (user) => {
@@ -1816,7 +1887,7 @@
                 try {
                     const userData = await fetchUserData(user.uid);
                     if (userData.avatar) {
-                        avatarBtn.innerHTML = `<img src="${escapeHTML(userData.avatar)}" alt="Profile" referrerpolicy="no-referrer">`;
+                        avatarBtn.innerHTML = `<img src="${userData.avatar}" alt="Profile">`;
                     } else {
                         avatarBtn.textContent = getInitials(userData.name || user.displayName || 'User');
                     }
@@ -1836,8 +1907,10 @@
             });
         }
 
-        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
-        else init();
+        document.addEventListener('DOMContentLoaded', init);
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            init();
+        }
     </script>
 </body>
 </html>
