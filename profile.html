@@ -464,6 +464,36 @@
         .welcome-popup .popup-close:hover { color: var(--text-main); }
         .welcome-popup .popup-close:active { transform: scale(0.9); }
 
+        /* ============================================================
+           PROFILE FULLSCREEN CAMERA SAFE AREA
+           Keep the sticky header below the Android front-camera/cutout.
+           ============================================================ */
+        :root {
+            --profile-safe-top: env(safe-area-inset-top, 0px);
+        }
+
+        @supports (padding-top: constant(safe-area-inset-top)) {
+            :root {
+                --profile-safe-top: constant(safe-area-inset-top);
+            }
+        }
+
+        .profile-header {
+            padding-top: max(8px, var(--profile-safe-top));
+        }
+
+        @supports (padding-top: env(safe-area-inset-top)) {
+            .profile-header {
+                padding-top: max(8px, env(safe-area-inset-top, 0px));
+            }
+        }
+
+        @media (display-mode: fullscreen) {
+            .profile-header {
+                padding-top: max(10px, var(--profile-safe-top));
+            }
+        }
+
         .profile-header {
             width: 100%; max-width: 800px; padding: 10px 16px;
             display: flex; justify-content: space-between; align-items: center;

@@ -3917,6 +3917,45 @@
             .level-badge .level-icon{width:30px;height:30px;flex-basis:30px}
             .level-display .level-icon{width:84px;height:84px}
         }
+
+        /* ============================================================
+           ROOM FULLSCREEN CAMERA SAFE AREA
+           Keep the room header below Android's front-camera/cutout.
+           ============================================================ */
+        :root {
+            --room-safe-top: env(safe-area-inset-top, 0px);
+            --room-safe-right: env(safe-area-inset-right, 0px);
+            --room-safe-left: env(safe-area-inset-left, 0px);
+        }
+
+        @supports (padding-top: constant(safe-area-inset-top)) {
+            :root {
+                --room-safe-top: constant(safe-area-inset-top);
+                --room-safe-right: constant(safe-area-inset-right);
+                --room-safe-left: constant(safe-area-inset-left);
+            }
+        }
+
+        .room-header,
+        .chat-header,
+        .room-topbar,
+        .top-header,
+        header {
+            box-sizing: border-box;
+            padding-top: max(8px, var(--room-safe-top));
+        }
+
+        @media (display-mode: fullscreen) {
+            .room-header,
+            .chat-header,
+            .room-topbar,
+            .top-header,
+            header {
+                padding-top: max(10px, var(--room-safe-top));
+            }
+        }
+
+.room-camera-safe-header { padding-top: max(8px, var(--room-safe-top)); }
 </style>
 
 <style id="gift-price-glow-extra">
@@ -4184,7 +4223,7 @@ header [class*="stats" i],
 
 </head>
 <body><!-- ===== HEADER ===== -->
-    <header class="room-header">
+    <header class="room-header room-camera-safe-header">
         <div class="left">
             <button class="back-btn" onclick="window.location.href='rooms.html'">‹</button>
             <span class="brand-title">FunRoom</span>
