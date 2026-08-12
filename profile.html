@@ -1821,8 +1821,31 @@
             if(!overlay||!video) return;
             if(!('BarcodeDetector' in window)){ showToast('QR scanning is not supported on this browser.','error','QR Scanner'); return; }
             try{
-                spikeQrStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+                spikeQrStream = await navigator.mediaDevices.getUserMedia({
+                    audio:false,
+                    video:{
+                        facingMode:{ideal:'environment'},
+                        width:{ideal:1920},
+                        height:{ideal:1080},
+                        aspectRatio:{ideal:16/9},
+                        frameRate:{ideal:30, max:60}
+                    }
+                });
                 video.srcObject = spikeQrStream;
+                video.setAttribute('autofocus','true');
+                video.style.objectFit='cover';
+                video.style.imageRendering='auto';
+                const track = spikeQrStream.getVideoTracks()[0];
+                if(track){
+                    const caps = track.getCapabilities ? track.getCapabilities() : {};
+                    const settings = track.getSettings ? track.getSettings() : {};
+                    if(caps.focusMode && caps.focusMode.includes('continuous')){
+                        try{ await track.applyConstraints({advanced:[{focusMode:'continuous'}]}); }catch(e){}
+                    }
+                    if(caps.zoom){
+                        try{ await track.applyConstraints({advanced:[{zoom:Math.min(caps.zoom.max || 1, 2)}]}); }catch(e){}
+                    }
+                }
                 await video.play();
                 overlay.classList.add('active');
                 const detector = new BarcodeDetector({formats:['qr_code']});
@@ -2873,7 +2896,7 @@
     <div id="friendQrScannerOverlay" class="qr-overlay">
         <div class="qr-card" role="dialog" aria-modal="true">
             <div class="qr-head"><strong>Scan Friend QR</strong><button class="qr-close" type="button" onclick="closeFriendQrScanner()">✕</button></div>
-            <video id="friendQrVideo" style="width:100%;border-radius:12px" playsinline></video>
+            <video id="friendQrVideo" style="width:100%;min-height:320px;border-radius:12px;object-fit:cover;background:#000" playsinline autoplay muted></video>
             <div class="qr-note">Point the camera at another SPIKE QR code to add the friend automatically.</div>
         </div>
     </div>
