@@ -1620,7 +1620,7 @@
                         text: d.text || 'You have a new notification', actorName: d.actorName || '', actorAvatar: d.actorAvatar || '',
                         url: d.url || '', createdAt: d.createdAt, read: d.read === true, _groupKey: d._groupKey || d.groupKey || docSnap.id
                     });
-                });
+                }).filter(item => item.category !== 'feed');
                 allNotifications.sort((a,b) => toDate(b.createdAt) - toDate(a.createdAt));
                 renderAll();
                 updateBadge();
