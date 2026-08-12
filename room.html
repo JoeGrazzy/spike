@@ -9175,8 +9175,100 @@ const MESSAGE_CACHE_MAX = 200;
 
         performance.mark('room-init-start');
         init().finally(() => performance.mark('room-init-ready'));
+        listenForChatRoomCalls();
         console.log('🔥 FunRoom — Premium Voice Notes + Full Feature Enforcement');
-    </script>
+    
+        // CHAT_ROOM CALL RECEIVER BRIDGE
+        let roomIncomingCall = null;
+        let roomPeerConnection = null;
+        let roomCallId = null;
+
+        function ensureRoomCallUI() {
+            let box = document.getElementById('roomIncomingCallBox');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'roomIncomingCallBox';
+                box.style.cssText = 'position:fixed;z-index:99999;left:20px;right:20px;top:20px;padding:16px;border-radius:16px;background:#111;color:#fff;display:none;text-align:center';
+                box.innerHTML = '<div id="roomIncomingCallText">Incoming call</div><button id="roomAcceptCall">Accept</button> <button id="roomDeclineCall">Decline</button>';
+                document.body.appendChild(box);
+            }
+            return box;
+        }
+
+        async function roomAcceptIncomingCall() {
+            if (!roomIncomingCall) return;
+            try {
+                const callRef = doc(db, "calls", roomCallId);
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                    video: !!roomIncomingCall.isVideo
+                });
+
+                roomPeerConnection = new RTCPeerConnection({
+                    iceServers: [{urls:"stun:stun.l.google.com:19302"}]
+                });
+
+                stream.getTracks().forEach(track => roomPeerConnection.addTrack(track, stream));
+
+                roomPeerConnection.onicecandidate = event => {
+                    if (event.candidate) {
+                        updateDoc(callRef, {
+                            iceCandidates: arrayUnion({
+                                candidate: event.candidate,
+                                id: `room_${Date.now()}`
+                            })
+                        }).catch(()=>{});
+                    }
+                };
+
+                await roomPeerConnection.setRemoteDescription(
+                    new RTCSessionDescription(roomIncomingCall.offer)
+                );
+
+                const answer = await roomPeerConnection.createAnswer();
+                await roomPeerConnection.setLocalDescription(answer);
+
+                await updateDoc(callRef, {
+                    answer,
+                    status: "connected"
+                });
+
+                ensureRoomCallUI().style.display = "none";
+            } catch (err) {
+                console.error("Room call accept failed", err);
+            }
+        }
+
+        function listenForChatRoomCalls() {
+            if (!currentUser) return;
+
+            const q = query(
+                collection(db, "calls"),
+                where("to", "==", currentUser.uid),
+                where("status", "==", "ringing")
+            );
+
+            onSnapshot(q, snapshot => {
+                snapshot.docChanges().forEach(change => {
+                    if (change.type !== "added") return;
+
+                    roomCallId = change.doc.id;
+                    roomIncomingCall = change.doc.data();
+
+                    const box = ensureRoomCallUI();
+                    document.getElementById("roomIncomingCallText").textContent =
+                        `${roomIncomingCall.fromName || "User"} is calling`;
+                    box.style.display = "block";
+
+                    document.getElementById("roomAcceptCall").onclick = roomAcceptIncomingCall;
+                    document.getElementById("roomDeclineCall").onclick = () => {
+                        updateDoc(doc(db,"calls",roomCallId), {status:"declined"}).catch(()=>{});
+                        box.style.display = "none";
+                    };
+                });
+            });
+        }
+</script>
 
 
 

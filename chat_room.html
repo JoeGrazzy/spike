@@ -1186,12 +1186,12 @@
             justify-content: center;
             flex-direction: column;
             padding: 24px;
-            animation: fadeIn 0.4s ease;
+            animation: callFadeIn 0.4s ease;
         }
         .call-overlay.active {
             display: flex;
         }
-        @keyframes fadeIn {
+        @keyframes callFadeIn {
             from {
                 opacity: 0;
                 transform: scale(0.95);
@@ -1294,7 +1294,7 @@
             justify-content: center;
             flex-direction: column;
             padding: 24px;
-            animation: fadeIn 0.4s ease;
+            animation: callFadeIn 0.4s ease;
         }
         .ringing-overlay.active {
             display: flex;
@@ -2588,7 +2588,7 @@
             <button class="back-btn" onclick="goBack()">←</button>
             <div class="chat-avatar" id="chatUserAvatar" onclick="goToProfile()">
                 U
-                <span class="online-dot" id="onlineDot"></span>
+                <span class="online-dot" data-online-dot></span>
             </div>
             <div class="chat-user-info">
                 <div class="chat-user-name" id="chatUserName">User</div>
@@ -3192,7 +3192,7 @@
                     }
 
                     const statusEl = document.getElementById('chatUserStatus');
-                    const onlineDot = document.getElementById('onlineDot');
+                    const onlineDot = document.querySelector('[data-online-dot]');
 
                     if (isOnline) {
                         statusEl.textContent = 'Online';
@@ -5019,10 +5019,10 @@
                     const avatarContainer = document.getElementById('chatUserAvatar');
                     if (avatar) {
                         avatarContainer.innerHTML =
-                            `<img src="${avatar}" alt="${escapeHTML(otherUserName)}"> <span class="online-dot" id="onlineDot"></span>`;
+                            `<img src="${avatar}" alt="${escapeHTML(otherUserName)}"> <span class="online-dot" data-online-dot></span>`;
                     } else {
                         avatarContainer.innerHTML =
-                            `${getInitials(otherUserName)} <span class="online-dot" id="onlineDot"></span>`;
+                            `${getInitials(otherUserName)} <span class="online-dot" data-online-dot></span>`;
                     }
                     listenToUserStatus(otherUserId);
                 }
