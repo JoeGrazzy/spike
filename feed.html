@@ -4326,6 +4326,25 @@
             }
         }
 
+    
+        /* Feed interaction hardening: prevent buttons from stealing or leaking scroll gestures */
+        .action-btn,
+        .action-panel-btn,
+        .reaction-panel-btn,
+        .btn-comment-submit,
+        .like-trigger,
+        .comment-input,
+        .comments-section button {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: contain;
+        }
+
+        .post-card {
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+
     </style>
 
     <!-- ===== RINGTONES ===== -->
@@ -5065,6 +5084,53 @@ function setActiveCallFlag(callId) {
         document.getElementById('confirmModalOverlay').addEventListener('click', function(e) { if (e.target === this) window
                 .handleCancel(); });
         document.addEventListener('keydown', function(e) { if (e.key === 'Escape') window.handleCancel(); });
+
+        // ============================================================
+        // FEED ACTIVITY NOTIFICATIONS
+        // Keep notification records in the existing users/{uid}/notifications
+        // collection so notifications.html remains the single reader.
+        // ============================================================
+        async function writeFeedNotification({
+            recipientUid,
+            id,
+            type,
+            text,
+            actorName,
+            actorAvatar,
+            postId,
+            icon = '🔔',
+            groupKey = id
+        }) {
+            if (!recipientUid || !currentUserUid || recipientUid === currentUserUid || !id) return;
+            try {
+                await setDoc(doc(db, 'users', recipientUid, 'notifications', id), {
+                    id,
+                    category: 'feed',
+                    type,
+                    icon,
+                    text,
+                    actorUid: currentUserUid,
+                    actorName: actorName || currentUser?.displayName || 'Someone',
+                    actorAvatar: actorAvatar || '',
+                    postId: postId || '',
+                    url: postId ? `feed.html?post=${encodeURIComponent(postId)}` : 'feed.html',
+                    _groupKey: groupKey,
+                    createdAt: serverTimestamp(),
+                    read: false
+                }, { merge: true });
+            } catch (err) {
+                console.warn('Feed notification write failed:', err);
+            }
+        }
+
+        async function removeFeedNotification(recipientUid, id) {
+            if (!recipientUid || !currentUserUid || recipientUid === currentUserUid || !id) return;
+            try {
+                await deleteDoc(doc(db, 'users', recipientUid, 'notifications', id));
+            } catch (err) {
+                console.warn('Feed notification cleanup failed:', err);
+            }
+        }
 
         // ============================================================
         // NOTIFICATIONS — REAL-TIME BADGE + ONE SOUND PER NEW NOTIFICATION
@@ -7481,6 +7547,7 @@ function setActiveCallFlag(callId) {
             if (shouldCache && sourcePosts.length > 0) setCachedPosts(sourcePosts);
             attachPostListeners();
             setupPostViewTracking();
+            protectFeedTouchControls();
 
             document.querySelectorAll('.post-video-wrapper video').forEach(video => {
                 const vid = video;
@@ -7490,6 +7557,19 @@ function setActiveCallFlag(callId) {
                 }
             });
         }
+
+        
+        // Prevent interaction controls from creating ghost scroll/tap behaviour on mobile
+        function protectFeedTouchControls() {
+            document.querySelectorAll('.action-btn, .action-panel-btn, .reaction-panel-btn, .btn-comment-submit, .comment-input').forEach(el => {
+                if (el.dataset.touchProtected) return;
+                el.dataset.touchProtected = 'true';
+                el.addEventListener('pointerdown', (e) => {
+                    e.stopPropagation();
+                }, { passive: true });
+            });
+        }
+
 
         function attachPostListeners() {
             document.querySelectorAll('.like-trigger').forEach(btn => {
@@ -7505,18 +7585,42 @@ function setActiveCallFlag(callId) {
             const postId = btn.getAttribute('data-id');
             if (!postId) return;
             const postRef = doc(db, "posts", postId);
+            let ownerUid = null;
+            let addingLike = false;
 
             try {
                 await runTransaction(db, async (transaction) => {
                     const postSnap = await transaction.get(postRef);
                     if (!postSnap.exists()) return;
-                    const likes = postSnap.data().likes || [];
-                    if (likes.includes(currentUser.uid)) {
-                        transaction.update(postRef, { likes: arrayRemove(currentUser.uid) });
-                    } else {
-                        transaction.update(postRef, { likes: arrayUnion(currentUser.uid) });
-                    }
+                    const data = postSnap.data();
+                    ownerUid = data.authorUid || null;
+                    const likes = Array.isArray(data.likes) ? data.likes : [];
+                    addingLike = !likes.includes(currentUser.uid);
+                    transaction.update(postRef, {
+                        likes: addingLike ? arrayUnion(currentUser.uid) : arrayRemove(currentUser.uid)
+                    });
                 });
+
+                if (!ownerUid || ownerUid === currentUser.uid) return;
+                const actor = getCachedUser(currentUser.uid);
+                const actorName = actor?.name || currentUser.displayName || 'Someone';
+                const actorAvatar = getCachedAvatar(currentUser.uid) || actor?.avatar || '';
+                const notificationId = `feed_like_${postId}_${currentUser.uid}`;
+                if (addingLike) {
+                    await writeFeedNotification({
+                        recipientUid: ownerUid,
+                        id: notificationId,
+                        type: 'like',
+                        icon: '❤️',
+                        text: `${actorName} liked your post`,
+                        actorName,
+                        actorAvatar,
+                        postId,
+                        groupKey: `feed_like_${postId}`
+                    });
+                } else {
+                    await removeFeedNotification(ownerUid, notificationId);
+                }
             } catch (error) {
                 console.error("Error toggling like:", error);
             }
@@ -7530,15 +7634,20 @@ function setActiveCallFlag(callId) {
             try {
                 const postRef = doc(db, "posts", postId);
                 let newCount = 0;
+                let ownerUid = null;
+                let addingReaction = false;
                 await runTransaction(db, async (transaction) => {
                     const postSnap = await transaction.get(postRef);
                     if (!postSnap.exists()) return;
-                    const reactions = { ...(postSnap.data().reactions || {}) };
+                    const data = postSnap.data();
+                    ownerUid = data.authorUid || null;
+                    const reactions = { ...(data.reactions || {}) };
                     const usersKey = `${emoji}_users`;
                     const users = Array.isArray(reactions[usersKey]) ? reactions[usersKey] : [];
                     const count = Number.isFinite(reactions[emoji]) ? reactions[emoji] : 0;
+                    addingReaction = !users.includes(currentUser.uid);
 
-                    if (users.includes(currentUser.uid)) {
+                    if (!addingReaction) {
                         newCount = Math.max(0, count - 1);
                         reactions[emoji] = newCount;
                         reactions[usersKey] = users.filter(u => u !== currentUser.uid);
@@ -7552,6 +7661,28 @@ function setActiveCallFlag(callId) {
 
                 const countSpan = document.getElementById(`reaction-count-${postId}-${emoji}`);
                 if (countSpan) countSpan.textContent = newCount > 0 ? newCount : '';
+
+                if (!ownerUid || ownerUid === currentUser.uid) return;
+                const actor = getCachedUser(currentUser.uid);
+                const actorName = actor?.name || currentUser.displayName || 'Someone';
+                const actorAvatar = getCachedAvatar(currentUser.uid) || actor?.avatar || '';
+                const safeEmoji = encodeURIComponent(emoji);
+                const notificationId = `feed_reaction_${postId}_${currentUser.uid}_${safeEmoji}`;
+                if (addingReaction) {
+                    await writeFeedNotification({
+                        recipientUid: ownerUid,
+                        id: notificationId,
+                        type: 'reaction',
+                        icon: emoji,
+                        text: `${actorName} reacted ${emoji} to your post`,
+                        actorName,
+                        actorAvatar,
+                        postId,
+                        groupKey: `feed_reaction_${postId}_${currentUser.uid}`
+                    });
+                } else {
+                    await removeFeedNotification(ownerUid, notificationId);
+                }
             } catch (err) {
                 console.error("Error toggling reaction:", err);
             }
@@ -7942,7 +8073,7 @@ function setActiveCallFlag(callId) {
                 const authorUser = getCachedUser(currentUser.uid);
                 const authorName = authorUser?.name || currentUser.displayName || "User";
                 const authorAvatar = getCachedAvatar(currentUser.uid) || authorUser?.avatar || "";
-                await addDoc(collection(db, "posts"), {
+                const repostRef = await addDoc(collection(db, "posts"), {
                     authorUid: currentUser.uid,
                     authorName: authorName,
                     authorAvatar: authorAvatar,
@@ -7957,8 +8088,22 @@ function setActiveCallFlag(callId) {
                     },
                     likes: [],
                     comments: [],
+                    reactions: {},
                     createdAt: serverTimestamp()
                 });
+                if (origData.authorUid && origData.authorUid !== currentUser.uid) {
+                    await writeFeedNotification({
+                        recipientUid: origData.authorUid,
+                        id: `feed_repost_${activePostToRepost}_${repostRef.id}`,
+                        type: 'repost',
+                        icon: '🔁',
+                        text: `${authorName} reposted your post`,
+                        actorName: authorName,
+                        actorAvatar: authorAvatar,
+                        postId: activePostToRepost,
+                        groupKey: `feed_repost_${activePostToRepost}`
+                    });
+                }
                 window.closeRepostModal();
                 window.showToast("Reposted to your feed!", "success", "Repost Successful");
             } catch (err) { console.error("Error executing repost:", err);
@@ -7973,12 +8118,29 @@ function setActiveCallFlag(callId) {
             if (!text) return;
             try {
                 const postRef = doc(db, "posts", postId);
+                const postSnap = await getDoc(postRef);
+                if (!postSnap.exists()) return;
+                const postData = postSnap.data();
                 const userObj = getCachedUser(currentUser.uid);
                 const name = userObj?.name || currentUser.displayName || "User";
+                const avatar = getCachedAvatar(currentUser.uid) || userObj?.avatar || "";
                 const newComment = { id: 'c_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
                     authorUid: currentUser.uid, authorName: name, text: text, createdAt: new Date().toISOString(),
                     replies: [] };
                 await updateDoc(postRef, { comments: arrayUnion(newComment) });
+                if (postData.authorUid && postData.authorUid !== currentUser.uid) {
+                    await writeFeedNotification({
+                        recipientUid: postData.authorUid,
+                        id: `feed_comment_${postId}_${newComment.id}`,
+                        type: 'comment',
+                        icon: '💬',
+                        text: `${name} commented on your post: ${text.slice(0, 90)}`,
+                        actorName: name,
+                        actorAvatar: avatar,
+                        postId,
+                        groupKey: `feed_comment_${postId}`
+                    });
+                }
                 input.value = '';
             } catch (err) { console.error("Error posting comment:", err);
                 window.showToast("Failed to post comment", "error", "Comment Failed"); }
