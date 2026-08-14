@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Feed — SPIKE Ultra</title>
 
     <!-- ===== FAVICON ===== -->
@@ -229,6 +229,15 @@
         }
         body.light-mode .post-menu-header .title {
             color: #0f1824;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
         }
 
         /* ============================================================
@@ -4428,39 +4437,48 @@
 
 </style>
 
+<style>
+.like-vibrate { animation: likeVibrate .18s ease-in-out; }
+@keyframes likeVibrate {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.18); }
+  70% { transform: scale(.94); }
+  100% { transform: scale(1); }
+}
+</style>
 </head>
 <body>
 
     <!-- ===== HIDDEN AUDIO FOR NOTIFICATIONS ===== -->
-    <audio id="notificationSound" src="assets/notifications.mp3" preload="auto" src="assets/notifications.mp3"></audio>
+    <audio id="notificationSound" src="assets/notifications.mp3" preload="auto"></audio>
 
     <!-- ===== HEADER ===== -->
     <header class="feed-header">
-        <a onclick="goToFeed()" class="logo-wrapper">
+        <a href="feed.html" onclick="goToFeed(); return false;" class="logo-wrapper" aria-label="SPIKE Feed">
             <span class="logo-icon">💫</span>
             <span class="logo-text">SPIKE</span>
         </a>
 
         <div class="header-right">
             <!-- Chat Button with Unread Badge -->
-            <button class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat.html'" title="Chat">
+            <button type="button" class="header-btn chat-link" id="chatHeaderBtn" onclick="window.location.href='chat.html'" title="Chat">
                 <span class="-icon">💬</span>
                 <span></span>
                 <span class="badge-count" id="headerChatBadge">0</span>
             </button>
 
             <!-- Notifications Button -->
-            <button class="header-btn" id="notifHeaderBtn" onclick="window.location.href='notifications.html'" title="Notifications">
+            <button type="button" class="header-btn" id="notifHeaderBtn" onclick="window.location.href='notifications.html'" title="Notifications">
                 🔔
                 <span class="badge-count" id="headerNotifBadge" style="display:none;">0</span>
             </button>
 
             <!-- Profile Avatar -->
-            <button class="avatar-btn" id="headerProfileBtn" onclick="window.location.href='profile.html'">👤</button>
+            <button type="button" class="avatar-btn" id="headerProfileBtn" onclick="window.location.href='profile.html'">👤</button>
 
             <!-- Menu Toggle -->
             <div class="premium-toggle-wrapper">
-                <button class="premium-toggle-btn" id="premiumToggleBtn" onclick="togglePremiumMenu()">
+                <button type="button" class="premium-toggle-btn" id="premiumToggleBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="premiumDropdown" onclick="togglePremiumMenu()">
                     <span class="menu-icon">✦</span>
                     <span>Menu</span>
                     <span class="badge-dot"></span>
@@ -4527,50 +4545,50 @@
 
         <section class="feed-tools-card" id="feedToolsCard" aria-label="Feed tools">
             <div class="feed-tools-search-row">
-                <input id="feedSearchInput" class="feed-tools-search" type="search" placeholder="Search posts, people or #hashtags..." autocomplete="off">
+                <input id="feedSearchInput" class="feed-tools-search" type="search" aria-label="Search posts, people or hashtags" placeholder="Search posts, people or #hashtags..." autocomplete="off">
                 <button type="button" class="feed-tools-clear" onclick="clearFeedTool()">Clear</button>
             </div>
             <div class="feed-tools-tabs" id="feedToolsTabs" role="tablist" aria-label="Feed filters">
-                <button type="button" class="feed-tool-tab active" data-tool="all" onclick="selectFeedTool('all')">Latest</button>
-                <button type="button" class="feed-tool-tab" data-tool="forYou" onclick="selectFeedTool('forYou')">✨ For You</button>
-                <button type="button" class="feed-tool-tab" data-tool="following" onclick="selectFeedTool('following')">👥 Following</button>
-                <button type="button" class="feed-tool-tab" data-tool="trending" onclick="selectFeedTool('trending')">🔥 Trending</button>
-                <button type="button" class="feed-tool-tab" data-tool="saved" onclick="selectFeedTool('saved')">🔖 Saved</button>
-                <button type="button" class="feed-tool-tab" data-tool="hashtags" onclick="selectFeedTool('hashtags')"># Hashtags</button>
-                <button type="button" class="feed-tool-tab" data-tool="locations" onclick="selectFeedTool('locations')">📍 Locations</button>
+                <button type="button" class="feed-tool-tab active" role="tab" aria-selected="true" data-tool="all" onclick="selectFeedTool('all')">Latest</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="forYou" onclick="selectFeedTool('forYou')">✨ For You</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="following" onclick="selectFeedTool('following')">👥 Following</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="trending" onclick="selectFeedTool('trending')">🔥 Trending</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="saved" onclick="selectFeedTool('saved')">🔖 Saved</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="hashtags" onclick="selectFeedTool('hashtags')"># Hashtags</button>
+                <button type="button" class="feed-tool-tab" role="tab" aria-selected="false" data-tool="locations" onclick="selectFeedTool('locations')">📍 Locations</button>
             </div>
             <div class="feed-tools-status" id="feedToolsStatus">Showing the latest posts</div>
         </section>
 
         <div class="create-post-card">
-            <textarea class="create-textarea room-style-text-input" id="postInput" placeholder="What's happening on SPIKE?"></textarea>
+            <textarea class="create-textarea room-style-text-input" id="postInput" aria-label="Create a post" placeholder="What's happening on SPIKE?"></textarea>
 
             <div class="link-preview-container" id="linkPreviewContainer">
                 <div class="link-preview-image-wrapper" id="linkPreviewImageWrapper">
-                    <img id="linkPreviewImage" src="" alt="Preview" style="display:none;">
+                    <img id="linkPreviewImage" alt="Link preview" style="display:none;">
                     <div class="fallback-icon" id="linkPreviewFallback" style="display:flex;">🔗</div>
                 </div>
                 <div class="link-preview-content">
                     <div class="link-preview-title" id="linkPreviewTitle">Loading link preview...</div>
                     <div class="link-preview-desc" id="linkPreviewDesc">Please wait while we fetch the details.</div>
-                    <div class="link-preview-domain" id="linkPreviewDomain">example.com</div>
+                    <div class="link-preview-domain" id="linkPreviewDomain">Link preview</div>
                 </div>
             </div>
 
             <div class="preview-container" id="previewContainer">
-                <span class="remove-media-btn" onclick="removeSelectedMedia()">×</span>
-                <img id="imagePreview" src="" alt="Preview" style="display:none;">
-                <video id="videoPreview" src="" controls style="display:none;"></video>
+                <button type="button" class="remove-media-btn" onclick="removeSelectedMedia()" aria-label="Remove selected media">×</button>
+                <img id="imagePreview" alt="Selected image preview" style="display:none;">
+                <video id="videoPreview" controls style="display:none;"></video>
                 <div class="video-thumbnail-tools" id="videoThumbnailTools">
                     <button type="button" id="captureVideoThumbnailBtn" onclick="captureVideoThumbnail()">📸 Use current frame</button>
-                    <label>🖼 Choose thumbnail <input type="file" id="videoThumbnailInput" accept="image/*" style="display:none;" onchange="handleVideoThumbnailSelect(event)"></label>
+                    <label>🖼 Choose thumbnail <input type="file" id="videoThumbnailInput" accept="image/*" aria-label="Choose video thumbnail" style="display:none;" onchange="handleVideoThumbnailSelect(event)"></label>
                     <img id="videoThumbnailPreview" class="video-thumbnail-preview" alt="Video thumbnail preview">
                     <span id="videoThumbnailStatus" class="video-thumbnail-status">No custom thumbnail selected</span>
                 </div>
             </div>
 
             <div class="feed-composer-extra">
-                <input id="postLocationInput" class="feed-composer-field" type="text" maxlength="80" placeholder="📍 Optional location">
+                <input id="postLocationInput" class="feed-composer-field" type="text" maxlength="80" aria-label="Optional post location" placeholder="📍 Optional location">
                 <input id="postScheduleInput" class="feed-composer-field" type="datetime-local" aria-label="Schedule post">
             </div>
             <div class="feed-schedule-note">Scheduled posts are stored on this device and publish when this Feed is open.</div>
@@ -4582,7 +4600,7 @@
                 </div>
                 <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
                     <button type="button" class="feed-feature-btn" onclick="saveFeedDraft()">Save Draft</button>
-                    <button class="btn-post" id="submitPostBtn" onclick="createPost()">Post</button>
+                    <button type="button" class="btn-post" id="submitPostBtn" onclick="createPost()">Post</button>
                 </div>
             </div>
         </div>
@@ -4678,7 +4696,7 @@
                 <div class="toast-title" id="toastTitle">Notification</div>
                 <div class="toast-message" id="toastMessage">Action completed successfully.</div>
             </div>
-            <button class="toast-close-btn" onclick="dismissToast()">✕</button>
+            <button type="button" class="toast-close-btn" onclick="dismissToast()">✕</button>
             <div class="toast-progress"></div>
         </div>
     </div>
@@ -4691,8 +4709,8 @@
             <div class="confirm-modal-message" id="confirmModalMessage">This action cannot be undone.</div>
             <div class="confirm-modal-details" id="confirmModalDetails" style="display:none;"></div>
             <div class="confirm-modal-actions">
-                <button class="btn-confirm secondary" id="confirmModalCancel" onclick="handleCancel()">Cancel</button>
-                <button class="btn-confirm danger" id="confirmModalConfirm" onclick="handleConfirm()">Confirm</button>
+                <button type="button" class="btn-confirm secondary" id="confirmModalCancel" onclick="handleCancel()">Cancel</button>
+                <button type="button" class="btn-confirm danger" id="confirmModalConfirm" onclick="handleConfirm()">Confirm</button>
             </div>
         </div>
     </div>
@@ -4700,7 +4718,7 @@
     <!-- ===== LIGHTBOX ===== -->
     <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox()">
         <span class="lightbox-close">&times;</span>
-        <img class="lightbox-img" id="lightboxImage" src="" alt="Enlarged view">
+        <img class="lightbox-img" id="lightboxImage" alt="Enlarged view">
     </div>
 
     <!-- ===== REPORT MODAL ===== -->
@@ -4712,8 +4730,8 @@
             </div>
             <textarea id="reportReasonInput" class="create-textarea room-style-text-input" style="min-height:80px;" placeholder="Reason for reporting..."></textarea>
             <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="closeReportModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="submitReport()">Submit Report</button>
+                <button type="button" class="modal-btn cancel" onclick="closeReportModal()">Cancel</button>
+                <button type="button" class="modal-btn primary" onclick="submitReport()">Submit Report</button>
             </div>
         </div>
     </div>
@@ -4723,7 +4741,7 @@
         <div class="share-modal-card">
             <div class="share-modal-header">
                 <div class="share-modal-title">Share Post</div>
-                <button class="share-modal-close" onclick="closeShareModal()">✕</button>
+                <button type="button" class="share-modal-close" onclick="closeShareModal()">✕</button>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
                 <button class="modal-btn primary" type="button" onclick="window.sharePostExternally()">📤 Share to Apps</button>
@@ -4742,8 +4760,8 @@
             </div>
             <textarea id="repostTextInput" class="create-textarea room-style-text-input" style="min-height:70px;" placeholder="Add a comment..."></textarea>
             <div class="modal-actions">
-                <button class="modal-btn cancel" onclick="closeRepostModal()">Cancel</button>
-                <button class="modal-btn primary" onclick="executeRepost()">Repost</button>
+                <button type="button" class="modal-btn cancel" onclick="closeRepostModal()">Cancel</button>
+                <button type="button" class="modal-btn primary" onclick="executeRepost()">Repost</button>
             </div>
         </div>
     </div>
@@ -4753,7 +4771,7 @@
         <div class="profile-modal" id="profileModal" onclick="event.stopPropagation()">
             <div class="profile-modal-header">
                 <span style="font-weight:700;color:var(--text-main);">Profile</span>
-                <button class="profile-modal-close" onclick="closeProfileModal()">✕</button>
+                <button type="button" class="profile-modal-close" onclick="closeProfileModal()">✕</button>
             </div>
             <div class="profile-modal-body" id="profileModalBody">
                 <div class="profile-loader"><div class="spinner-small"></div><span style="color:var(--text-muted);font-size:0.85rem;">Loading profile...</span></div>
@@ -4766,20 +4784,20 @@
         <div class="post-menu-modal" onclick="event.stopPropagation()">
             <div class="post-menu-header">
                 <span class="title">Post Options</span>
-                <button class="post-menu-close" onclick="closePostMenu()">✕</button>
+                <button type="button" class="post-menu-close" onclick="closePostMenu()">✕</button>
             </div>
-            <button class="post-menu-item" id="menuPinBtn" onclick="handleMenuAction('pin')">
+            <button type="button" class="post-menu-item" id="menuPinBtn" onclick="handleMenuAction('pin')">
                 <span class="icon">📌</span> <span id="menuPinText">Pin to top</span>
                 <span class="badge-text" id="menuPinBadge">Pin</span>
             </button>
-            <button class="post-menu-item" id="menuEditBtn" onclick="handleMenuAction('edit')">
+            <button type="button" class="post-menu-item" id="menuEditBtn" onclick="handleMenuAction('edit')">
                 <span class="icon">✏️</span> Edit post
             </button>
-            <button class="post-menu-item" id="menuHideBtn" onclick="handleMenuAction('hide')">
+            <button type="button" class="post-menu-item" id="menuHideBtn" onclick="handleMenuAction('hide')">
                 <span class="icon" id="menuHideIcon">🔒</span> <span id="menuHideText">Hide from public</span>
                 <span class="badge-text" id="menuHideBadge">Hide</span>
             </button>
-            <button class="post-menu-item danger" id="menuDeleteBtn" onclick="handleMenuAction('delete')">
+            <button type="button" class="post-menu-item danger" id="menuDeleteBtn" onclick="handleMenuAction('delete')">
                 <span class="icon">🗑️</span> Delete post
             </button>
         </div>
@@ -4794,8 +4812,8 @@
             <div id="incomingName" class="call-name">Caller</div>
             <div id="incomingSub" class="call-sub">Incoming call…</div>
             <div class="call-actions">
-                <button id="declineBtn" class="call-btn decline">✕</button>
-                <button id="acceptBtn" class="call-btn accept">✓</button>
+                <button type="button" id="declineBtn" class="call-btn decline">✕</button>
+                <button type="button" id="acceptBtn" class="call-btn accept">✓</button>
             </div>
         </div>
     </div>
@@ -4805,7 +4823,7 @@
             <div id="ringingAvatar" class="ringing-avatar"></div>
             <div id="ringingName" class="ringing-name">Calling...</div>
             <div id="ringingStatus" class="ringing-status">Ringing…</div>
-            <button id="cancelCallBtn" class="cancel-btn">Cancel</button>
+            <button type="button" id="cancelCallBtn" class="cancel-btn">Cancel</button>
         </div>
     </div>
 
@@ -4830,11 +4848,11 @@
             <div id="activeCallerName" class="caller-name">User</div>
         </div>
         <div class="call-controls">
-            <button id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
-            <button id="callVideoBtn" class="ctrl-btn" title="Camera">📷</button>
-            <button id="callEndBtn" class="ctrl-btn end-call" title="End Call">📞</button>
-            <button id="callSpeakerBtn" class="ctrl-btn" title="Speaker">🔊</button>
-            <button id="callFlipBtn" class="ctrl-btn" title="Flip Camera">🔄</button>
+            <button type="button" id="callMuteBtn" class="ctrl-btn" title="Mute">🔇</button>
+            <button type="button" id="callVideoBtn" class="ctrl-btn" title="Camera">📷</button>
+            <button type="button" id="callEndBtn" class="ctrl-btn end-call" title="End Call">📞</button>
+            <button type="button" id="callSpeakerBtn" class="ctrl-btn" title="Speaker">🔊</button>
+            <button type="button" id="callFlipBtn" class="ctrl-btn" title="Flip Camera">🔄</button>
         </div>
     </div>
 
@@ -4842,7 +4860,7 @@
         <div class="permission-card">
             <h2 id="permTitle">🎤 Microphone Access</h2>
             <p id="permDesc">This call requires microphone access. Please grant permission.</p>
-            <button id="retryPermissionBtn" class="permission-btn">Allow Access</button>
+            <button type="button" id="retryPermissionBtn" class="permission-btn">Allow Access</button>
         </div>
     </div>
 
@@ -5602,7 +5620,11 @@ function setActiveCallFlag(callId) {
             document.querySelectorAll('.post-card[id^="post-card-"]').forEach(card => feedViewObserver.observe(card));
         }
         function updateFeedToolTabs() {
-            document.querySelectorAll('.feed-tool-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.tool === feedViewState.mode));
+            document.querySelectorAll('.feed-tool-tab').forEach(tab => {
+                const selected = tab.dataset.tool === feedViewState.mode;
+                tab.classList.toggle('active', selected);
+                tab.setAttribute('aria-selected', selected ? 'true' : 'false');
+            });
         }
         function setFeedToolStatus(text) { const el = document.getElementById('feedToolsStatus'); if (el) el.textContent = text; }
         async function selectFeedTool(tool) {
@@ -5742,12 +5764,15 @@ function setActiveCallFlag(callId) {
         window.togglePremiumMenu = function() {
             const dropdown = document.getElementById('premiumDropdown');
             const overlay = document.getElementById('dropdownOverlay');
-            dropdown.classList.toggle('active');
-            overlay.classList.toggle('active');
+            const toggle = document.getElementById('premiumToggleBtn');
+            const isOpen = dropdown.classList.toggle('active');
+            overlay.classList.toggle('active', isOpen);
+            toggle?.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
         };
         window.closePremiumMenu = function() {
             document.getElementById('premiumDropdown').classList.remove('active');
             document.getElementById('dropdownOverlay').classList.remove('active');
+            document.getElementById('premiumToggleBtn')?.setAttribute('aria-expanded', 'false');
         };
         window.navigateTo = function(dest) {
             closePremiumMenu();
@@ -7311,10 +7336,10 @@ function setActiveCallFlag(callId) {
                                 <div class="video-error-overlay" id="error-${videoId}">
                                     <div class="error-icon">⚠️</div>
                                     <div class="error-msg">Unable to play video</div>
-                                    <button class="retry-btn" onclick="window.retryVideo('${videoId}')">↻ Retry</button>
+                                    <button type="button" class="retry-btn" onclick="window.retryVideo('${videoId}')">↻ Retry</button>
                                 </div>
                                 <div class="video-controls">
-                                    <button class="play-btn" id="play-btn-${videoId}" onclick="window.toggleVideoPlay('${videoId}')">▶</button>
+                                    <button type="button" class="play-btn" id="play-btn-${videoId}" onclick="window.toggleVideoPlay('${videoId}')">▶</button>
                                     <div class="progress-bar" id="progress-bar-${videoId}"
                                         onclick="window.seekVideo('${videoId}', event)"
                                         ontouchstart="window.seekVideo('${videoId}', event)"
@@ -7322,7 +7347,7 @@ function setActiveCallFlag(callId) {
                                         <div class="progress-fill" id="progress-${videoId}"></div>
                                     </div>
                                     <span class="time-display" id="time-${videoId}">0:00</span>
-                                    <button class="volume-btn" id="volume-btn-${videoId}" onclick="window.toggleVideoMute('${videoId}')">🔇</button>
+                                    <button type="button" class="volume-btn" id="volume-btn-${videoId}" onclick="window.toggleVideoMute('${videoId}')">🔇</button>
                                 </div>
                             </div>
                         `;
@@ -7346,7 +7371,7 @@ function setActiveCallFlag(callId) {
             if (isOwner || isAdmin) {
                 postMenuHTML = `
                             <div class="post-menu-container">
-                                <button class="menu-trigger-btn" onclick="window.openPostMenu('${postId}', ${isPinned}, ${isHidden})">⋮</button>
+                                <button type="button" class="menu-trigger-btn" onclick="window.openPostMenu('${postId}', ${isPinned}, ${isHidden})">⋮</button>
                             </div>
                         `;
             }
@@ -7356,7 +7381,7 @@ function setActiveCallFlag(callId) {
             let reportButtonHTML = "";
             if (showReportButton) {
                 reportButtonHTML =
-                    `<button class="menu-trigger-btn" onclick="window.openReportModal('${postId}')" title="Report Post" style="font-size:0.8rem;">🚩</button>`;
+                    `<button type="button" class="menu-trigger-btn" onclick="window.openReportModal('${postId}')" title="Report Post" style="font-size:0.8rem;">🚩</button>`;
             }
 
             let hiddenBadge = isHidden ?
@@ -7401,7 +7426,7 @@ function setActiveCallFlag(callId) {
                                     </div>
                                     <span class="comment-text">${escapeHTML(c.text)}</span>
                                     <div class="comment-actions">
-                                        <button onclick="window.replyToComment('${postId}', '${commentId}', '${escapeHTML(c.authorName || 'User')}')">Reply</button>
+                                        <button type="button" onclick="window.replyToComment('${postId}', '${commentId}', '${escapeHTML(c.authorName || 'User')}')">Reply</button>
                                     </div>
                                     ${repliesHTML}
                                 </div>
@@ -7419,7 +7444,7 @@ function setActiveCallFlag(callId) {
                 const users = reactions[usersKey] || [];
                 const isActive = currentUser && users.includes(currentUser.uid);
                 reactionButtonsHTML += `
-                            <button class="reaction-panel-btn ${isActive ? 'active' : ''}" onclick="window.toggleReaction('${postId}', '${emoji}')">
+                            <button type="button" class="reaction-panel-btn ${isActive ? 'active' : ''}" onclick="window.toggleReaction('${postId}', '${emoji}')">
                                 ${emoji} <span class="r-count" id="reaction-count-${postId}-${emoji}">${count > 0 ? count : ''}</span>
                             </button>
                         `;
@@ -7455,13 +7480,13 @@ function setActiveCallFlag(callId) {
                             ${mediaHTML}
 
                             <div class="action-bar">
-                                <button class="action-btn like-trigger ${isLiked ? 'liked' : ''}" data-id="${postId}">
+                                <button type="button" class="action-btn like-trigger ${isLiked ? 'liked' : ''}" data-id="${postId}">
                                     ❤️ <span class="count like-count">${likes.length}</span>
                                 </button>
-                                <button class="action-btn" onclick="document.getElementById('comments-section-${postId}').classList.toggle('active')">
+                                <button type="button" class="action-btn" onclick="document.getElementById('comments-section-${postId}').classList.toggle('active')">
                                     💬 <span class="count">${comments.length}</span>
                                 </button>
-                                <button class="action-panel-toggle" onclick="window.toggleActionPanel('${postId}')">
+                                <button type="button" class="action-panel-toggle" onclick="window.toggleActionPanel('${postId}')">
                                     ⋯ <span class="arrow" id="arrow-${postId}">▼</span>
                                 </button>
                             </div>
@@ -7473,12 +7498,12 @@ function setActiveCallFlag(callId) {
                                 </div>
                                 <div class="action-panel-divider"></div>
                                 <div class="action-panel-row">
-                                    <button class="action-panel-btn" onclick="document.getElementById('comments-section-${postId}').classList.toggle('active')">💬 Comment</button>
-                                    <button class="action-panel-btn primary" onclick="window.openRepostModal('${postId}')">🔁 Repost</button>
-                                    <button class="action-panel-btn primary" onclick="window.openShareModal('${postId}')">🔗 Share</button>
-                                    <button class="action-panel-btn" onclick="window.toggleSavedPost('${postId}')">🔖 ${feedSavedIds.includes(postId) ? 'Unsave' : 'Save'}</button>
-                                    ${!isOwner ? `<button class="action-panel-btn" onclick="window.mutePostAuthor('${post.authorUid}')">🚫 Not interested</button>` : ''}
-                                    ${showReportInPanel ? `<button class="action-panel-btn" onclick="window.openReportModal('${postId}')" style="color:var(--error);">🚩 Report</button>` : ''}
+                                    <button type="button" class="action-panel-btn" onclick="document.getElementById('comments-section-${postId}').classList.toggle('active')">💬 Comment</button>
+                                    <button type="button" class="action-panel-btn primary" onclick="window.openRepostModal('${postId}')">🔁 Repost</button>
+                                    <button type="button" class="action-panel-btn primary" onclick="window.openShareModal('${postId}')">🔗 Share</button>
+                                    <button type="button" class="action-panel-btn" onclick="window.toggleSavedPost('${postId}')">🔖 ${feedSavedIds.includes(postId) ? 'Unsave' : 'Save'}</button>
+                                    ${!isOwner ? `<button type="button" class="action-panel-btn" onclick="window.mutePostAuthor('${post.authorUid}')">🚫 Not interested</button>` : ''}
+                                    ${showReportInPanel ? `<button type="button" class="action-panel-btn" onclick="window.openReportModal('${postId}')" style="color:var(--error);">🚩 Report</button>` : ''}
                                 </div>
                             </div>
 
@@ -7486,7 +7511,7 @@ function setActiveCallFlag(callId) {
                                 <div class="comments-list" id="comments-list-${postId}">${commentsListHTML}</div>
                                 <div class="comment-input-row">
                                     <textarea class="comment-input room-style-text-input" id="comment-input-${postId}" rows="1" placeholder="Write a comment..." onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); window.submitComment('${postId}')}"></textarea>
-                                    <button class="btn-comment-submit" onclick="window.submitComment('${postId}')">Post</button>
+                                    <button type="button" class="btn-comment-submit" onclick="window.submitComment('${postId}')">Post</button>
                                 </div>
                             </div>
                         </div>
@@ -7582,10 +7607,24 @@ function setActiveCallFlag(callId) {
             });
         }
 
+        function vibrateLikeButton(button) {
+            try {
+                if (navigator.vibrate) navigator.vibrate(45);
+            } catch (_) {}
+
+            if (button) {
+                button.classList.remove('like-vibrate');
+                void button.offsetWidth;
+                button.classList.add('like-vibrate');
+                setTimeout(() => button.classList.remove('like-vibrate'), 180);
+            }
+        }
+
         async function handleLikeClick(e) {
             e.stopPropagation();
             if (!currentUser) return;
             const btn = e.currentTarget;
+            vibrateLikeButton(btn);
             const postId = btn.getAttribute('data-id');
             if (!postId) return;
             const postRef = doc(db, "posts", postId);
@@ -7713,8 +7752,8 @@ function setActiveCallFlag(callId) {
             contentDiv.innerHTML = `
                         <textarea id="edit-text-${postId}" class="edit-post-textarea room-style-text-input">${escapeHTML(currentText)}</textarea>
                         <div class="edit-actions-row">
-                            <button class="btn-mini cancel" onclick="window.cancelEditPost('${postId}')">Cancel</button>
-                            <button class="btn-mini save" onclick="window.saveEditPost('${postId}')">Save</button>
+                            <button type="button" class="btn-mini cancel" onclick="window.cancelEditPost('${postId}')">Cancel</button>
+                            <button type="button" class="btn-mini save" onclick="window.saveEditPost('${postId}')">Save</button>
                         </div>
                     `;
             const textarea = document.getElementById(`edit-text-${postId}`);
@@ -7830,7 +7869,7 @@ function setActiveCallFlag(callId) {
                                         <div class="friend-mini-avatar">${avatarHTML}</div>
                                         <span class="friend-name">${escapeHTML(name)}</span>
                                     </div>
-                                    <button class="btn-send-share" id="share-btn-${chatDoc.id}" onclick="window.sendPostToChat('${chatDoc.id}')">Send</button>
+                                    <button type="button" class="btn-send-share" id="share-btn-${chatDoc.id}" onclick="window.sendPostToChat('${chatDoc.id}')">Send</button>
                                 </div>
                             `;
                 }
@@ -8417,25 +8456,25 @@ function setActiveCallFlag(callId) {
                             </div>
                             <div class="profile-modal-actions">
                                 ${currentUser && uid !== currentUser.uid ? `
-                                    <button class="btn-action btn-follow ${isFollowing ? 'following' : ''}" onclick="${isFollowing ? 'window.unfollowUser' : 'window.followUser'}('${uid}')" id="followBtn">${isFollowing ? '✓ Following' : '+ Follow'}</button>
-                                    <button class="btn-action btn-message" onclick="window.openChatFromProfile('${uid}')">💬 </button>
-                                    <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', false)">📞 Voice</button>
-                                    <button class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', true)">📹 Video</button>
-                                ` : `<button class="btn-action btn-follow" onclick="window.location.href='profile.html'">View Full Profile</button>`}
+                                    <button type="button" class="btn-action btn-follow ${isFollowing ? 'following' : ''}" onclick="${isFollowing ? 'window.unfollowUser' : 'window.followUser'}('${uid}')" id="followBtn">${isFollowing ? '✓ Following' : '+ Follow'}</button>
+                                    <button type="button" class="btn-action btn-message" onclick="window.openChatFromProfile('${uid}')">💬 </button>
+                                    <button type="button" class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', false)">📞 Voice</button>
+                                    <button type="button" class="btn-action btn-call" onclick="window.startCall('${uid}', '${escapeHTML(name)}', true)">📹 Video</button>
+                                ` : `<button type="button" class="btn-action btn-follow" onclick="window.location.href='profile.html'">View Full Profile</button>`}
                                 ${currentUser && uid !== currentUser.uid ? `
                                     <div class="profile-more-dropdown">
-                                        <button class="btn-action btn-more" onclick="window.toggleProfileMoreMenu(event)">⋯</button>
+                                        <button type="button" class="btn-action btn-more" onclick="window.toggleProfileMoreMenu(event)">⋯</button>
                                         <div class="dropdown-menu" id="profileMoreMenu">
-                                            <button onclick="window.closeProfileModal(); window.location.href='profile.html?uid=${uid}'">👤 View Full Profile</button>
-                                            <button class="danger" onclick="window.reportUser('${uid}')">🚩 Report User</button>
-                                            ${isAdmin ? `<button class="danger" onclick="window.suspendUser('${uid}')">⛔ Suspend User</button>` : ''}
+                                            <button type="button" onclick="window.closeProfileModal(); window.location.href='profile.html?uid=${uid}'">👤 View Full Profile</button>
+                                            <button type="button" class="danger" onclick="window.reportUser('${uid}')">🚩 Report User</button>
+                                            ${isAdmin ? `<button type="button" class="danger" onclick="window.suspendUser('${uid}')">⛔ Suspend User</button>` : ''}
                                         </div>
                                     </div>
                                 ` : ''}
                             </div>
                             <div class="profile-modal-divider"></div>
                             <div class="profile-posts-preview">
-                                <div class="preview-header"><h4>Recent Posts</h4><button class="view-all" onclick="window.closeProfileModal(); window.location.href='profile.html?uid=${uid}'">View All →</button></div>
+                                <div class="preview-header"><h4>Recent Posts</h4><button type="button" class="view-all" onclick="window.closeProfileModal(); window.location.href='profile.html?uid=${uid}'">View All →</button></div>
                                 ${postsHTML}
                             </div>
                         `;
@@ -8621,7 +8660,7 @@ function setActiveCallFlag(callId) {
                                     <span class="ticker-item">${repeated}</span>
                                 </div>
                             </div>
-                            <button class="close-btn" onclick="dismissAnnouncement()">✕</button>
+                            <button type="button" class="close-btn" onclick="dismissAnnouncement()">✕</button>
                         </div>
                     `;
         }
@@ -8656,6 +8695,74 @@ function setActiveCallFlag(callId) {
         // ============================================================
         // FEED STREAM
         // ============================================================
+
+        // ============================================================
+        // LIVE ACTIVITY PATCHER
+        // After the first feed paint, Firestore activity changes update
+        // individual cards instead of rebuilding the whole feed.
+        // ============================================================
+        function patchSinglePostCard(post) {
+            const oldCard = document.getElementById(`post-card-${post.id}`);
+            if (!oldCard) return false;
+
+            const holder = document.createElement('div');
+            holder.innerHTML = buildPostHTML(post).trim();
+            const newCard = holder.firstElementChild;
+            if (!newCard) return false;
+
+            oldCard.replaceWith(newCard);
+            attachPostListeners();
+            setupPostViewTracking();
+            return true;
+        }
+
+        function reconcileFeedSnapshot(snapshot) {
+            if (!cachedPosts || cachedPosts.length === 0) return false;
+
+            const previous = new Map(cachedPosts.map(post => [post.id, post]));
+            const next = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+
+            for (const change of snapshot.docChanges()) {
+                const post = { id: change.doc.id, ...change.doc.data() };
+
+                if (change.type === 'removed') {
+                    document.getElementById(`post-card-${post.id}`)?.remove();
+                    continue;
+                }
+
+                if (change.type === 'added') {
+                    // New posts are inserted by a lightweight refresh only if
+                    // the card does not already exist.
+                    if (!document.getElementById(`post-card-${post.id}`)) {
+                        const holder = document.createElement('div');
+                        holder.innerHTML = buildPostHTML(post).trim();
+                        const card = holder.firstElementChild;
+                        if (card) document.getElementById('postsStream')?.prepend(card);
+                    }
+                    continue;
+                }
+
+                const old = previous.get(post.id);
+                if (old && JSON.stringify({
+                    likes: old.likes,
+                    comments: old.comments,
+                    reactions: old.reactions
+                }) !== JSON.stringify({
+                    likes: post.likes,
+                    comments: post.comments,
+                    reactions: post.reactions
+                })) {
+                    patchSinglePostCard(post);
+                } else {
+                    patchSinglePostCard(post);
+                }
+            }
+
+            cachedPosts = next.filter(p => p && p.id);
+            setCachedPosts(cachedPosts);
+            return true;
+        }
+
         function initFeedStream() {
             const cached = getCachedPosts();
             if (cached && cached.length > 0) {
@@ -8676,12 +8783,20 @@ function setActiveCallFlag(callId) {
                 if (posts.length === 0) { cachedPosts = [];
                     setCachedPosts([]);
                     renderPosts([]); return; }
+                // After initial render, reconcile only changed cards.
+                // Do not rebuild the entire feed for likes/comments/reactions.
+                if (reconcileFeedSnapshot(snapshot)) {
+                    const changedUids = snapshot.docChanges()
+                        .map(change => change.doc.data()?.authorUid)
+                        .filter(Boolean);
+                    if (changedUids.length) batchFetchAvatars(changedUids).catch(() => {});
+                    return;
+                }
+
                 const uidsToFetch = posts.map(p => p.authorUid).filter(Boolean);
                 cachedPosts = posts.filter(p => p && p.id);
 
-                // TURBO: paint the feed immediately from Firestore/cache.
-                // Avatar/profile hydration continues in the background and updates
-                // already-rendered cards when it completes.
+                // Initial paint only.
                 renderPosts(posts);
                 openPostFromShareHash();
 

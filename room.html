@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
     <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" /></noscript>
     <style>
-        /* ===== PREMIUM ULTRA THEME ===== */
+        /* ===== ROOM DESIGN TOKENS ===== */
         :root {
             --bg-primary: #080c14;
             --bg-secondary: #0f1624;
@@ -3265,152 +3265,29 @@
             transform: scale(0.98);
         }
 
-        /* ===== CUSTOM EMOJI MANAGER ===== */
-        .emoji-manager-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            z-index: 3800;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 16px;
+        /* ===== POLL CREATOR ===== */
+        .poll-creator-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.85);
+            backdrop-filter: blur(16px); z-index: 3800; display:none;
+            align-items:center; justify-content:center; padding:16px;
         }
-        .emoji-manager-overlay.open {
-            display: flex;
+        .poll-creator-overlay.open { display:flex; }
+        .poll-creator-panel {
+            background:var(--bg-secondary); border:1px solid var(--border-color);
+            border-radius:var(--radius); max-width:520px; width:100%; max-height:85vh;
+            overflow-y:auto; padding:20px; box-shadow:0 24px 80px rgba(0,0,0,.9);
         }
-        .emoji-manager-panel {
-            background: var(--bg-secondary);
-            border: 1px solid rgba(255, 215, 0, 0.15);
-            border-radius: var(--radius);
-            max-width: 520px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            padding: 20px;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.9);
+        .poll-creator-panel .panel-head {
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid var(--border-color); padding-bottom:10px; margin-bottom:12px;
         }
-        .emoji-manager-panel .panel-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-            margin-bottom: 12px;
+        .poll-creator-panel .panel-head .title { font-weight:800; font-size:1.1rem; }
+        .poll-creator-panel .panel-head .close-btn {
+            background:rgba(255,255,255,.04); border:1px solid var(--border-color);
+            border-radius:50%; width:34px; height:34px; display:flex; align-items:center;
+            justify-content:center; color:var(--text-muted); cursor:pointer; font-size:16px; transition:.15s;
         }
-        .emoji-manager-panel .panel-head .title {
-            font-weight: 800;
-            font-size: 1.1rem;
-        }
-        .emoji-manager-panel .panel-head .close-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-color);
-            border-radius: 50%;
-            width: 34px;
-            height: 34px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.15s;
-        }
-        .emoji-manager-panel .panel-head .close-btn:hover {
-            color: var(--gold);
-            border-color: rgba(255, 215, 0, 0.2);
-        }
-        .emoji-manager-panel .upload-area {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .emoji-manager-panel .upload-area input[type="file"] {
-            flex: 1;
-            min-width: 120px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 4px 8px;
-            color: var(--text-primary);
-            font-family: var(--font);
-            font-size: 0.7rem;
-            min-height: 36px;
-        }
-        .emoji-manager-panel .upload-area button {
-            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
-            border: none;
-            border-radius: 8px;
-            padding: 6px 16px;
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: #0d1520;
-            cursor: pointer;
-            min-height: 36px;
-            transition: 0.15s;
-        }
-        .emoji-manager-panel .upload-area button:hover {
-            transform: scale(1.02);
-        }
-        .emoji-manager-panel .emoji-grid-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-            gap: 6px;
-            max-height: 260px;
-            overflow-y: auto;
-        }
-        .emoji-manager-panel .emoji-grid-list .emoji-item {
-            position: relative;
-            font-size: 28px;
-            text-align: center;
-            padding: 6px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            cursor: default;
-            transition: 0.15s;
-        }
-        .emoji-manager-panel .emoji-grid-list .emoji-item:hover {
-            border-color: rgba(255, 215, 0, 0.2);
-        }
-        .emoji-manager-panel .emoji-grid-list .emoji-item .remove-emoji {
-            position: absolute;
-            top: -4px;
-            right: -4px;
-            background: var(--error);
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 8px;
-            cursor: pointer;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            line-height: 1;
-        }
-        .emoji-manager-panel .emoji-grid-list .emoji-item:hover .remove-emoji {
-            display: flex;
-        }
-        .emoji-manager-panel .empty-emoji-state {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            padding: 20px 0;
-        }
-        .emoji-manager-panel .locked-overlay {
-            text-align: center;
-            padding: 24px 0;
-            color: var(--text-muted);
-        }
-        .emoji-manager-panel .locked-overlay .lock-icon {
-            font-size: 2rem;
-            display: block;
-            margin-bottom: 8px;
-        }
+        .poll-creator-panel .panel-head .close-btn:hover { color:var(--gold); border-color:rgba(255,215,0,.2); }
 
         /* ===== VIP MANAGEMENT ===== */
         .vip-management-overlay {
@@ -3780,8 +3657,6 @@
             .room-features-panel .panel-head .close-btn,
             .feature-card .f-actions button,
             .contact-developer-section .cd-actions button,
-            .emoji-manager-panel .upload-area button,
-            .emoji-manager-panel .panel-head .close-btn,
             .vip-management-panel .assign-area button,
             .vip-management-panel .panel-head .close-btn,
             .announcement-editor-panel .editor-actions button,
@@ -4018,47 +3893,7 @@
 }
 </style>
 
-<style id="rebuilt-theme-market">
-/* ===== REBUILT ROOM THEME MARKET ===== */
-.theme-market{
-    margin-top:16px;
-    padding:16px;
-    border:1px solid rgba(255,255,255,.10);
-    border-radius:22px;
-    background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
-    box-shadow:0 14px 38px rgba(0,0,0,.20);
-}
-.theme-market-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
-.theme-market-title{font-weight:900;font-size:1rem}
-.theme-market-subtitle{font-size:.72rem;color:var(--text-muted);margin-top:3px}
-.theme-market-badge{padding:5px 9px;border-radius:999px;font-size:.65rem;font-weight:900;color:#fff;background:linear-gradient(135deg,#ec4899,#60a5fa);box-shadow:0 0 15px rgba(236,72,153,.22)}
-.theme-market-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
-.theme-market-card{
-    position:relative;overflow:hidden;text-align:left;cursor:pointer;color:#fff;
-    min-height:126px;padding:14px;border-radius:18px;border:1px solid rgba(255,255,255,.12);
-    background:var(--tm-bg);box-shadow:inset 0 0 25px rgba(255,255,255,.04),0 8px 22px rgba(0,0,0,.16);
-    transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease;
-}
-.theme-market-card::before{
-    content:"";position:absolute;width:150px;height:150px;right:-45px;top:-60px;border-radius:50%;
-    background:var(--tm-glow);filter:blur(12px);opacity:.34;
-}
-.theme-market-card:hover,.theme-market-card.active{
-    transform:translateY(-2px);border-color:var(--tm-accent);
-    box-shadow:0 0 25px var(--tm-glow),inset 0 0 28px rgba(255,255,255,.05);
-}
-.theme-market-card > *{position:relative;z-index:1}
-.theme-market-icon{font-size:1.45rem;margin-bottom:8px}
-.theme-market-name{font-weight:900;font-size:.82rem}
-.theme-market-desc{font-size:.66rem;opacity:.72;margin-top:4px;line-height:1.35}
-.theme-market-swatches{display:flex;gap:5px;margin-top:10px}
-.theme-market-swatch{width:22px;height:8px;border-radius:999px;box-shadow:0 0 8px rgba(255,255,255,.08)}
-.theme-market-action{margin-top:11px;font-size:.65rem;font-weight:900;letter-spacing:.2px;color:#fff}
-@media(max-width:520px){
-    .theme-market-grid{grid-template-columns:1fr}
-    .theme-market-colors{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-</style>
+
 
 <style id="levels-navigation-style">.levels-page-link{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin:8px 0;padding:7px 11px;border-radius:12px;text-decoration:none;font-size:11px;font-weight:800;color:var(--text-primary,#fff);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);box-shadow:0 0 14px rgba(255,215,0,.08)}.levels-page-link:hover{background:rgba(255,255,255,.11);box-shadow:0 0 22px rgba(255,215,0,.18)}</style><style id="level-icon-no-flash">#levelIcon img{visibility:hidden}#levelIcon img.level-icon-ready{visibility:visible!important}</style>
 <style id="levels-nav-icon-style">
@@ -4091,44 +3926,7 @@
 </style>
 
 
-<style id="theme-safe-text-v2">
-/* Theme-safe typography: every surface follows the active theme variables. */
-body, button, input, textarea, select { color: var(--text-primary); }
-.room-header, .room-footer, .modal, .overlay, .panel, .stats-panel,
-.member-panel, .features-panel, .theme-panel, .gift-panel, .vip-panel,
-.level-panel, .announcement-panel {
-  color: var(--text-primary);
-}
-.text-secondary, .secondary, .muted, .hint, small { color: var(--text-secondary); }
-.text-muted, .muted-text, .subtitle, .description { color: var(--text-muted); }
-input, textarea, select {
-  background: var(--bg-input);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-input::placeholder, textarea::placeholder { color: var(--text-muted); opacity: 1; }
-button { color: var(--text-primary); }
-a { color: var(--accent); }
-a:hover { color: var(--gold); }
-.toast, .toast * {
-  color: var(--text-primary);
-}
-.toast {
-  background: var(--bg-card);
-  border-color: var(--border-color);
-  box-shadow: 0 8px 28px var(--accent-glow);
-}
-.levels-nav-icon, .levels-page-link {
-  color: var(--text-primary);
-  background: var(--bg-card);
-  border-color: var(--border-color);
-  box-shadow: 0 0 18px var(--accent-glow);
-}
-.levels-nav-icon:hover, .levels-page-link:hover {
-  color: var(--accent);
-  background: var(--bg-input);
-}
-</style>
+
 
 
 <style id="clean-header-stats-vip">
@@ -4219,8 +4017,67 @@ header [class*="stats" i],
   .stats-panel-overlay{align-items:stretch;padding:8px}
   .stats-panel{width:100%;max-height:calc(100dvh - 16px);border-radius:18px}
 }
+
+        .msg { align-items: flex-start; }
+        .msg-avatar { width: 24px; height: 24px; min-width: 24px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-right: 6px; background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #0d1520; font-size: 9px; font-weight: 800; align-self: flex-start; }
+        .msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .msg-body { min-width: 0; flex: 1; }
+        .msg.self .msg-avatar { order: 2; margin-right: 0; margin-left: 6px; }
+        .msg.self .msg-body { order: 1; }
+        /* Compact room message feed */
+        .messages-container .msg {
+            max-width: 86%;
+            padding: 5px 10px;
+            margin-bottom: 1px;
+            font-size: 12px;
+        }
+        .messages-container .msg .sender { font-size: 9px; gap: 3px; }
+        .messages-container .msg .text { font-size: 12px; line-height: 1.28; }
+        .messages-container .msg .time { font-size: 7px; }
+        .messages-container .msg-avatar { width: 22px; height: 22px; min-width: 22px; }
+        .messages-container .level-tag,
+        .messages-container .vip-tag { font-size: 7px !important; }
+        .messages-container .reactions { gap: 2px; margin-top: 2px; }
+        .messages-container .reaction { font-size: 10px; padding: 1px 3px; }
+        .messages-container .msg-actions button { font-size: 10px; padding: 2px 4px; }
 </style>
 
+<style>#messageComposer.doubletap-hidden{display:none!important;}</style>
+
+<style id="initial-feed-positioning">
+.messages-container.initial-positioning{visibility:hidden!important;overflow-anchor:none!important}
+.messages-container.initial-positioning.initial-positioned{visibility:visible!important;overflow-anchor:auto!important}
+</style>
+
+<style id="professional-room-call-ui">
+#roomIncomingCallBox{position:fixed;inset:0;z-index:2147482000;display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+#roomIncomingCallBox[aria-hidden="false"]{display:flex!important}
+#roomIncomingCallBox .room-call-backdrop{position:absolute;inset:0;background:rgba(2,6,12,.74);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+#roomIncomingCallBox .room-call-card{position:relative;width:min(92vw,390px);max-height:min(88vh,620px);overflow:auto;box-sizing:border-box;padding:30px 22px 22px;border:1px solid rgba(255,255,255,.10);border-radius:26px;background:var(--bg-secondary,#111722);color:var(--text-primary,#f5f7fa);text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.55)}
+#roomIncomingCallBox .room-call-close{position:absolute;top:10px;right:10px;width:38px;height:38px;border:1px solid var(--border-color,rgba(255,255,255,.1));border-radius:50%;background:rgba(255,255,255,.06);color:inherit;font-size:25px;line-height:1;cursor:pointer}
+#roomIncomingCallBox .room-call-icon{width:66px;height:66px;margin:0 auto 15px;display:grid;place-items:center;border-radius:50%;background:color-mix(in srgb,var(--accent,#f5b018) 12%,transparent);border:1px solid color-mix(in srgb,var(--accent,#f5b018) 35%,transparent);font-size:27px;color:var(--accent,#f5b018)}
+#roomIncomingCallBox .room-call-kicker{margin-bottom:7px;color:var(--accent,#f5b018);font-size:10px;font-weight:800;letter-spacing:.16em}
+#roomIncomingCallBox .room-call-title{margin:0;font-size:21px;line-height:1.25;font-weight:750}
+#roomIncomingCallBox .room-call-text{margin:7px 0 22px;color:var(--text-muted,#aeb7c5);font-size:14px;line-height:1.45}
+#roomIncomingCallBox .room-call-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#roomIncomingCallBox .room-call-btn{min-height:48px;border:0;border-radius:14px;padding:0 14px;display:flex;align-items:center;justify-content:center;gap:8px;font:inherit;font-size:14px;font-weight:750;cursor:pointer;touch-action:manipulation}
+#roomIncomingCallBox .room-call-btn-decline{background:#252a33;color:#f2f4f7;border:1px solid rgba(255,255,255,.09)}
+#roomIncomingCallBox .room-call-btn-accept{background:var(--accent,#f5b018);color:#11151b}
+#roomIncomingCallBox .room-call-btn-end{width:100%;margin-top:12px;background:#b4232e;color:#fff}
+#roomIncomingCallBox .room-active-call-media{margin-top:12px}
+#roomIncomingCallBox #roomRemoteVideo{width:100%;max-height:45vh;border-radius:16px;background:#05070a;object-fit:cover}
+#roomIncomingCallBox .room-call-state{margin:12px 0 2px;color:var(--text-muted,#b9c2cf);font-size:13px}
+#roomIncomingCallBox .room-call-btn:focus-visible,#roomIncomingCallBox .room-call-close:focus-visible{outline:2px solid var(--accent,#f5b018);outline-offset:3px}
+@media(max-width:520px){#roomIncomingCallBox{padding:16px}#roomIncomingCallBox .room-call-card{width:min(94vw,390px);padding:28px 18px 18px;border-radius:22px}}
+</style>
+
+<style id="system-appearance-variables">
+:root{color-scheme:light dark}
+@media (prefers-color-scheme: light){
+ :root{--bg-primary:#f4f6f8;--bg-secondary:#ffffff;--bg-card:rgba(255,255,255,.94);--bg-input:rgba(15,23,42,.06);--bg-bubble-other:#eef1f5;--bg-bubble-self:linear-gradient(135deg,#fbbf24,#f59e0b);--bg-header:rgba(255,255,255,.94);--bg-footer:rgba(255,255,255,.96);--text-primary:#17202d;--text-secondary:#4b5563;--text-muted:#6b7280;--text-bubble-self:#17202d;--border-color:rgba(15,23,42,.12);--accent:#b77900;--accent-glow:rgba(183,121,0,.22);--gold:#b77900;--gold-dark:#8a5b00;--shadow:0 8px 32px rgba(15,23,42,.14)}
+ body{background-image:none}
+}
+</style>
 </head>
 <body><!-- ===== HEADER ===== -->
     <header class="room-header room-camera-safe-header">
@@ -4261,7 +4118,6 @@ header [class*="stats" i],
                 <button class="item" onclick="toggleParticipants();closeMoreDropdown()">👥 Members</button>
                 <button class="item" onclick="openRoomFeaturesPanel();closeMoreDropdown()" id="roomFeaturesDropdownItem" style="display:none;">🏠 Room Features</button>
                 <div class="divider"></div>
-                <button class="item" onclick="openEmojiManager();closeMoreDropdown()" id="emojiManagerDropdownItem" style="display:none;">😎 Custom Emojis</button>
                 <button class="item" onclick="openVipManagement();closeMoreDropdown()" id="vipManagerDropdownItem" style="display:none;">👑 VIP Management</button>
                 <button class="item" onclick="openAnnouncementManager();closeMoreDropdown()" id="announcementManagerDropdownItem" style="display:none;">📢 Announcements</button>
                 <button class="item" onclick="openPollCreator();closeMoreDropdown()" id="pollCreatorDropdownItem" style="display:none;">📊 Create Poll</button>
@@ -4383,7 +4239,7 @@ header [class*="stats" i],
     </div>
 
     <!-- ===== MESSAGES ===== -->
-    <div class="messages-container" id="messagesContainer">
+    <div class="messages-container initial-positioning" id="messagesContainer">
         <div class="load-more-btn" id="loadMoreBtn" style="display:none;" onclick="loadMoreMessages()">⬆ Load older messages</div>
         <div class="empty-state"><span class="icon">💬</span>No messages yet.<br />Say hello!</div>
     </div>
@@ -4563,19 +4419,6 @@ header [class*="stats" i],
         </div>
     </div>
 
-    <!-- ===== CUSTOM EMOJI MANAGER ===== -->
-    <div class="emoji-manager-overlay" id="emojiManagerOverlay" onclick="closeEmojiManager()">
-        <div class="emoji-manager-panel" onclick="event.stopPropagation()">
-            <div class="panel-head">
-                <span class="title">😎 Custom Emojis</span>
-                <button class="close-btn" onclick="closeEmojiManager()">✕</button>
-            </div>
-            <div id="emojiManagerBody">
-                <!-- dynamic -->
-            </div>
-        </div>
-    </div>
-
     <!-- ===== VIP MANAGEMENT ===== -->
     <div class="vip-management-overlay" id="vipManagementOverlay" onclick="closeVipManagement()">
         <div class="vip-management-panel" onclick="event.stopPropagation()">
@@ -4590,8 +4433,8 @@ header [class*="stats" i],
     </div>
 
     <!-- ===== POLL CREATOR ===== -->
-    <div class="emoji-manager-overlay" id="pollCreatorOverlay" onclick="closePollCreator()">
-        <div class="emoji-manager-panel" onclick="event.stopPropagation()">
+    <div class="poll-creator-overlay" id="pollCreatorOverlay" onclick="closePollCreator()">
+        <div class="poll-creator-panel" onclick="event.stopPropagation()">
             <div class="panel-head">
                 <span class="title">📊 Create Poll</span>
                 <button class="close-btn" onclick="closePollCreator()">✕</button>
@@ -4626,7 +4469,7 @@ header [class*="stats" i],
         // ============================================================
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, getDocs, query, orderBy, limit, onSnapshot, runTransaction, serverTimestamp, increment, where, startAfter, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, getDoc, setDoc, updateDoc, deleteDoc, addDoc, getDocs, query, orderBy, limit, onSnapshot, runTransaction, serverTimestamp, increment, arrayUnion, where, startAfter, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const CONFIG = { apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4", authDomain: "grazzy-9e736.firebaseapp.com", projectId: "grazzy-9e736", storageBucket: "grazzy-9e736.firebasestorage.app", messagingSenderId: "750326949170", appId: "1:750326949170:web:5d19744aafc8675918632b" };
@@ -4697,56 +4540,12 @@ header [class*="stats" i],
         const PREMIUM_FEATURES = {
             voice_note: { id: 'voice_note', requiredLevel: 4, name: 'Premium Voice Notes', description: 'Send crystal-clear voice notes with a beautiful recording studio, waveform preview, and quick playback.', category: 'Communication', icon: '🎤', price_usd: 1.50 },
             room_badge: { id: 'room_badge', requiredLevel: 10, requiredAchievement: 'first_message', name: 'Premium Room Badge', description: 'Give the room a premium identity badge. Stand out.', category: 'Branding', icon: '🏆', price_usd: 2.00 },
-            custom_theme: { id: 'custom_theme', requiredLevel: 10, requiredAchievement: 'reactions_100', name: 'Custom Room Theme', description: 'Unlock premium room customization. Change colors and look.', category: 'Appearance', icon: '🎨', price_usd: 5.00 },
-            colorful_chat: { id: 'colorful_chat', requiredLevel: 10, requiredAchievement: 'first_reaction', name: 'Colorful Chat', description: 'Customize chat colors: sender, background, accent, and more.', category: 'Appearance', icon: '🌈', price_usd: 2.00 },
-            custom_emojis: { id: 'custom_emojis', requiredLevel: 11, requiredAchievement: 'stickers_100', name: 'Custom Emojis', description: 'Upload and use custom emojis in the room.', category: 'Appearance', icon: '😎', price_usd: 4.00 },
             vip_roles: { id: 'vip_roles', requiredLevel: 15, requiredAchievement: 'messages_1000', name: 'VIP Roles', description: 'Assign VIP roles to selected members with special badges.', category: 'Management', icon: '👑', price_usd: 6.00 },
             announcements: { id: 'announcements', requiredLevel: 14, requiredAchievement: 'messages_1000', name: 'Room Announcements', description: 'Post pinned announcements visible to all members.', category: 'Management', icon: '📢', price_usd: 3.00 },
             polls: { id: 'polls', requiredLevel: 5, requiredAchievement: 'messages_100', name: 'Polls', description: 'Create polls and let members vote.', category: 'Interaction', icon: '📊', price_usd: 4.00 },
             file_size: { id: 'file_size', requiredLevel: 9, requiredAchievement: 'shares_100', name: 'Increased File Size', description: 'Allow larger image and file uploads (up to 20 MB).', category: 'Utility', icon: '📁', price_usd: 2.00 },
             pin_limit: { id: 'pin_limit', requiredLevel: 8, requiredAchievement: 'messages_100', name: 'Unlimited Pinned Messages', description: 'Pin unlimited messages (instead of the default 5).', category: 'Management', icon: '📌', price_usd: 3.00 },
             member_limit: { id: 'member_limit', requiredLevel: 20, requiredAchievement: 'daily_complete_30', name: 'Member Limit Boost', description: 'Increase member capacity by 50.', category: 'Management', icon: '👥', price_usd: 5.00 },
-            // ===== THEMES =====
-            theme_pink_blue: {
-                id: 'theme_pink_blue',
-                name: 'Pink & Blue Glow Theme',
-                description: 'Luxury neon glow with a soft premium chat finish.',
-                category: 'Themes',
-                icon: '💗💙',
-                price_usd: 2.00, requiredLevel: 6, requiredAchievement: 'messages_100'
-            },
-            theme_luxury_gold: {
-                id: 'theme_luxury_gold',
-                name: 'Luxury Gold Theme',
-                description: 'Elegant gold room with a rich VIP‑style finish.',
-                category: 'Themes',
-                icon: '👑✨',
-                price_usd: 2.00, requiredLevel: 10, requiredAchievement: 'daily_complete_7'
-            },
-            theme_orange_pink: {
-                id: 'theme_orange_pink',
-                name: 'Orange & Pink Theme',
-                description: 'Warm energetic orange blended with premium pink.',
-                category: 'Themes',
-                icon: '🧡💗',
-                price_usd: 2.00, requiredLevel: 14, requiredAchievement: 'reactions_100'
-            },
-            theme_royal_blue_violet: {
-                id: 'theme_royal_blue_violet',
-                name: 'Royal Blue & Violet Theme',
-                description: 'Deep royal tones with a modern glowing accent.',
-                category: 'Themes',
-                icon: '💙💜',
-                price_usd: 2.00, requiredLevel: 18, requiredAchievement: 'daily_complete_30'
-            },
-            theme_emerald_cyan: {
-                id: 'theme_emerald_cyan',
-                name: 'Emerald & Cyan Theme',
-                description: 'Fresh emerald energy with a bright cyan glow.',
-                category: 'Themes',
-                icon: '💚🩵',
-                price_usd: 2.00
-            },
         };
 
         const COIN_PACKS = [{ amount: 100, price_usd: 0.99 }, { amount: 250, price_usd: 1.99 }, { amount: 500, price_usd: 3.99 }, { amount: 1000, price_usd: 5.99 }, { amount: 2500, price_usd: 12.99 }, { amount: 5000, price_usd: 19.99 }];
@@ -4790,7 +4589,6 @@ header [class*="stats" i],
         let roomFeaturesUnsub = null;
         let roomRequestsUnsub = null;
         let roomFeatureEntitlements = {};
-        let customEmojis = [];
         let roomVips = {};
         let currentAnnouncement = null;
 
@@ -4803,9 +4601,6 @@ header [class*="stats" i],
         window.getCurrentRoomLevel = () => currentLevel;
         let spFeed = [];
         let dailyChallengeState = { date: '', counts: {}, completed: {}, streak: 0, lastCompletedDate: '', completionRewarded: false };
-
-        // Custom theme
-        let customTheme = { bg: '#080c14', bubbleOther: 'rgba(255,255,255,0.06)', bubbleSelf: 'linear-gradient(135deg, #fbbf24, #f59e0b)', text: '#f0f4ff', accent: '#fbbf24' };
 
         // Voice note state
         let voiceNoteState = {
@@ -4950,7 +4745,6 @@ header [class*="stats" i],
         const announcementBar = document.getElementById('announcementBar');
         const announcementText = document.getElementById('announcementText');
         const announcementActions = document.getElementById('announcementActions');
-        const emojiManagerDropdownItem = document.getElementById('emojiManagerDropdownItem');
         const vipManagerDropdownItem = document.getElementById('vipManagerDropdownItem');
         const announcementManagerDropdownItem = document.getElementById('announcementManagerDropdownItem');
         const pollCreatorDropdownItem = document.getElementById('pollCreatorDropdownItem');
@@ -6678,9 +6472,6 @@ header [class*="stats" i],
             const grid = document.getElementById('stickerGrid');
             let emojis = category === 'happy' ? stickers.happy : category === 'sad' ? stickers.sad : category === 'angry' ? stickers
                 .angry : category === 'animals' ? stickers.animals : allStickers;
-            if (isRoomFeatureUnlocked('custom_emojis') && customEmojis.length) {
-                emojis = [...emojis, ...customEmojis];
-            }
             grid.innerHTML = emojis.map(e => `<button onclick="sendSticker('${e}')">${e}</button>`).join('');
         }
         window.sendSticker = async function(emoji) { closeStickerPicker();
@@ -6914,7 +6705,7 @@ header [class*="stats" i],
         // ============================================================
         // BUILD MESSAGE HTML
         // ============================================================
-        function buildMessageHTML(data, isSelf) {
+                function buildMessageHTML(data, isSelf) {
             // Private voice-note visibility:
             // - only the intended target receiver can see it
             // - sender/other room members never see the voice-note message
@@ -6931,14 +6722,12 @@ header [class*="stats" i],
             if (data.type === 'poll') return buildPollMessageHTML(data, isSelf);
 
             let senderName = data.senderName || 'User';
+            const senderInitial = String(senderName).trim().charAt(0).toUpperCase() || 'U';
             let levelTag = '';
             if (data.level && data.level >= 1) {
                 levelTag = `<span class="level-tag">${getLevelIconHTML(data.level, 'message-level-icon')}<span>Level ${Number(data.level)}</span></span>`;
             }
             let vipTag = data.isVip ? '<span class="vip-tag">👑 VIP</span>' : '';
-            let modTag = data.isMod ?
-                '<span class="mod-tag">MOD</span>' :
-                '';
             let content = '';
             if (data.type === 'sticker') {
                 content = `<div class="sticker">${sanitizeHTML(data.text)}</div>`;
@@ -6974,7 +6763,7 @@ header [class*="stats" i],
             }
             actionsHTML += `</div>`;
             const msgClass = isSelf ? 'msg self' : 'msg other';
-            return `<div class="${msgClass}" id="msg-${data.id}">\n<div class="sender">${sanitizeHTML(senderName)} ${levelTag} ${vipTag} ${modTag}</div>\n${content}${reactionsHTML}\n<div class="time">${timeStr} ${data.edited ? '✎' : ''} ${actionsHTML}</div>\n</div>`;
+            return `<div class="${msgClass}" id="msg-${data.id}" data-sender-id="${sanitizeHTML(data.senderId || '')}"><div class="msg-avatar" data-avatar-for="${sanitizeHTML(data.senderId || '')}" aria-hidden="true">${senderInitial}</div><div class="msg-body"><div class="sender">${sanitizeHTML(senderName)} ${levelTag} ${vipTag}</div>${content}${reactionsHTML}<div class="time">${timeStr} ${data.edited ? '✎' : ''} ${actionsHTML}</div></div></div>`;
         }
 
         function buildPollMessageHTML(data, isSelf) {
@@ -7005,19 +6794,16 @@ header [class*="stats" i],
                 levelTag = `<span class="level-tag">${getLevelIconHTML(data.level, 'message-level-icon')}<span>Level ${Number(data.level)}</span></span>`;
             }
             let vipTag = data.isVip ? '<span class="vip-tag">👑 VIP</span>' : '';
-            let modTag = data.isMod ?
-                '<span class="mod-tag" style="font-size:8px;font-weight:700;color:var(--premium);background:rgba(124,58,237,0.12);padding:0 5px;border-radius:10px;">MOD</span>' :
-                '';
-
             const msgClass = isSelf ? 'msg self' : 'msg other';
-            return `<div class="${msgClass}" id="msg-${data.id}" style="background: ${isSelf ? customTheme.bubbleSelf : customTheme.bubbleOther}; color: ${isSelf ? '#0d1520' : customTheme.text}; border-color: ${customTheme.accent}40;">
-            <div class="sender" style="color: ${customTheme.accent};">${sanitizeHTML(senderName)} ${levelTag} ${vipTag} ${modTag}</div>
+            const senderInitial = String(senderName).trim().charAt(0).toUpperCase() || 'U';
+            return `<div class="${msgClass}" id="msg-${data.id}" data-sender-id="${sanitizeHTML(data.senderId || '')}"><div class="msg-avatar" data-avatar-for="${sanitizeHTML(data.senderId || '')}" aria-hidden="true">${senderInitial}</div><div class="msg-body">
+            <div class="sender">${sanitizeHTML(senderName)} ${levelTag} ${vipTag}</div>
             <div class="poll-container">
               <div class="poll-question">📊 ${sanitizeHTML(question)}</div>
               ${optionsHTML}
               <div class="poll-voted">${totalVotes} vote${totalVotes !== 1 ? 's' : ''} ${hasVoted ? '· You voted' : ''}</div>
             </div>
-            <div class="time">${timeStr} ${data.edited ? '✎' : ''}</div>
+            <div class="time">${timeStr} ${data.edited ? '✎' : ''}</div></div></div>
           </div>`;
         }
 
@@ -7065,7 +6851,7 @@ header [class*="stats" i],
         // reconcile it with Firestore in the background.
         // ============================================================
         const MESSAGE_CACHE_VERSION = 1;
-const MESSAGE_CACHE_MAX = 200;
+const MESSAGE_CACHE_MAX = 500;
         function messageCacheKey() {
             return `room_feed_v${MESSAGE_CACHE_VERSION}_${roomId}`;
         }
@@ -7131,36 +6917,104 @@ const MESSAGE_CACHE_MAX = 200;
                 if (reset) {
                     allMessages = msgs;
                     writeMessageCache(allMessages);
-                    renderAllMessages();
-                    const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
+                    renderAllMessages({ stickToBottom: true });
                 } else {
-                    allMessages = [...msgs, ...allMessages];
+                    const existingIds = new Set(allMessages.map(m => m.id));
+                    const uniqueOlder = msgs.filter(m => !existingIds.has(m.id));
+                    allMessages = [...uniqueOlder, ...allMessages];
                     writeMessageCache(allMessages);
-                    renderAllMessages();
-                    const btn = getLoadMoreButton(); if (btn) btn.style.display = hasMoreMessages ? 'block' : 'none';
+                    renderAllMessages({ preserveScroll: true });
+                }
+                const btn = getLoadMoreButton();
+                if (btn) {
+                    btn.style.display = hasMoreMessages ? 'block' : 'none';
+                    btn.textContent = hasMoreMessages ? '⬆ Load older messages' : '';
                 }
             } catch (e) { console.error(e);
                 showToast('Failed to load messages', 'error'); }
             isLoadingMore = false;
         }
 
-        function renderAllMessages() {
+        const profileAvatarCache = new Map();
+        const profileAvatarPending = new Map();
+
+        async function hydrateMessageAvatars(root = container) {
+            const avatarNodes = [...root.querySelectorAll('.msg-avatar[data-avatar-for]')];
+            const uids = [...new Set(avatarNodes.map(node => node.getAttribute('data-avatar-for')).filter(uid => uid && uid !== 'system'))];
+            await Promise.all(uids.map(async uid => {
+                if (!profileAvatarCache.has(uid) && !profileAvatarPending.has(uid)) {
+                    const pending = getDoc(doc(db, 'users', uid)).then(snap => {
+                        const data = snap.exists() ? snap.data() : {};
+                        const url = data.avatar || data.photoURL || data.photoUrl || '';
+                        profileAvatarCache.set(uid, /^https?:\/\//i.test(url) ? url : '');
+                    }).catch(() => profileAvatarCache.set(uid, ''));
+                    profileAvatarPending.set(uid, pending);
+                }
+                if (profileAvatarPending.has(uid)) await profileAvatarPending.get(uid);
+            }));
+            avatarNodes.forEach(node => {
+                const uid = node.getAttribute('data-avatar-for');
+                const url = profileAvatarCache.get(uid);
+                if (!url || node.querySelector('img')) return;
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = '';
+                img.loading = 'lazy';
+                img.referrerPolicy = 'no-referrer';
+                img.onerror = () => { img.remove(); };
+                node.replaceChildren(img);
+            });
+        }
+
+        function renderAllMessages(options = {}) {
+            const preserveScroll = options.preserveScroll === true;
+            const stickToBottom = options.stickToBottom === true;
+            const initialRender = isFirstLoad === true;
+            const previousHeight = container.scrollHeight;
+            const previousTop = container.scrollTop;
+
             if (!allMessages.length) {
                 container.innerHTML = '<div class="empty-state"><span class="icon">💬</span>No messages yet.<br />Say hello!</div>';
+                isFirstLoad = false;
+                container.classList.remove('initial-positioning');
+                container.classList.add('initial-positioned');
                 return;
             }
-            let html = '';
-            if (hasMoreMessages) {
-                html += `<div class="load-more-btn" data-role="load-more" onclick="loadMoreMessages()">⬆ Load older messages</div>`;
-            } else {
-                html += `<div class="load-more-btn" style="display:none;" data-role="load-more">⬆ Load older messages</div>`;
-            }
+
+            let html = hasMoreMessages
+                ? '<div class="load-more-btn" data-role="load-more" aria-live="polite">⬆ Load older messages</div>'
+                : '<div class="load-more-btn" style="display:none;" data-role="load-more" aria-hidden="true">⬆ Load older messages</div>';
+
             for (const data of allMessages) {
-                const isSelf = data.senderId === currentUser?.uid;
+                const isSelf = data.senderId === (currentUser && currentUser.uid);
                 html += buildMessageHTML(data, isSelf);
             }
+
             container.innerHTML = html;
-            if (!isFirstLoad) container.scrollTop = container.scrollHeight;
+            hydrateMessageAvatars(container);
+
+            if (initialRender || stickToBottom) {
+                container.scrollTop = container.scrollHeight;
+            } else if (preserveScroll) {
+                container.scrollTop = Math.max(0, previousTop + (container.scrollHeight - previousHeight));
+            }
+
+            requestAnimationFrame(() => {
+                if (preserveScroll) {
+                    container.scrollTop = Math.max(0, previousTop + (container.scrollHeight - previousHeight));
+                } else if (initialRender || stickToBottom) {
+                    container.scrollTop = container.scrollHeight;
+                }
+
+                if (initialRender) {
+                    requestAnimationFrame(() => {
+                        if (stickToBottom || !preserveScroll) container.scrollTop = container.scrollHeight;
+                        container.classList.remove('initial-positioning');
+                        container.classList.add('initial-positioned');
+                    });
+                }
+            });
+
             isFirstLoad = false;
         }
 
@@ -7168,35 +7022,67 @@ const MESSAGE_CACHE_MAX = 200;
 
         window.loadMoreMessages = function() { loadMessages(false, true); };
 
+        let infiniteMessageScrollReady = false;
+        function enableInfiniteMessageScroll() {
+            if (infiniteMessageScrollReady || !container) return;
+            infiniteMessageScrollReady = true;
+            let scrollTick = false;
+            container.addEventListener('scroll', () => {
+                if (scrollTick) return;
+                scrollTick = true;
+                requestAnimationFrame(() => {
+                    scrollTick = false;
+                    if (container.scrollTop <= 120 && hasMoreMessages && !isLoadingMore) {
+                        loadMessages(false, true);
+                    }
+                });
+            }, { passive: true });
+        }
+        enableInfiniteMessageScroll();
+
         function listenForNewMessages() {
             if (messageUnsub) return;
             const q = query(collection(db, 'rooms', roomId, 'messages'), orderBy('timestamp', 'desc'), limit(1));
             messageUnsub = onSnapshot(q, (snap) => {
-                let added = false;
+                const addedMessages = [];
+
                 snap.docChanges().forEach(change => {
                     if (change.type !== 'added') return;
                     const newMsg = { id: change.doc.id, ...change.doc.data() };
                     if (allMessages.some(m => m.id === newMsg.id)) return;
                     allMessages.push(newMsg);
-                    if (allMessages.length > MESSAGE_CACHE_MAX) allMessages = allMessages.slice(-MESSAGE_CACHE_MAX);
-                    writeMessageCache(allMessages);
-                    added = true;
+                    addedMessages.push(newMsg);
                 });
-                if (!added) return;
-                // Avoid rebuilding the entire chat DOM for every incoming message.
-                const atBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 80;
-                const last = allMessages[allMessages.length - 1];
-                if (last && typeof buildMessageHTML === 'function') {
-                    const empty = container.querySelector('.empty-state');
-                    if (empty) empty.remove();
-                    const loadMore = container.querySelector('[data-role="load-more"]');
-                    const html = buildMessageHTML(last, last.senderId === currentUser?.uid);
-                    if (loadMore) loadMore.insertAdjacentHTML('afterend', html);
-                    else container.insertAdjacentHTML('beforeend', html);
-                } else {
-                    renderAllMessages();
+
+                if (!addedMessages.length) return;
+
+                if (allMessages.length > MESSAGE_CACHE_MAX) {
+                    allMessages = allMessages.slice(-MESSAGE_CACHE_MAX);
                 }
-                if (atBottom) requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
+                writeMessageCache(allMessages);
+
+                const atBottom =
+                    container.scrollHeight - container.scrollTop - container.clientHeight < 80;
+
+                const empty = container.querySelector('.empty-state');
+                if (empty) empty.remove();
+
+                const loadMore = container.querySelector('[data-role="load-more"]');
+                for (const message of addedMessages) {
+                    const messageHTML = buildMessageHTML(
+                        message,
+                        message.senderId === currentUser?.uid
+                    );
+                    if (loadMore) loadMore.insertAdjacentHTML('afterend', messageHTML);
+                    else container.insertAdjacentHTML('beforeend', messageHTML);
+                }
+                hydrateMessageAvatars(container);
+
+                if (atBottom) {
+                    requestAnimationFrame(() => {
+                        container.scrollTop = container.scrollHeight;
+                    });
+                }
             }, err => console.error('Message listener error:', err));
         }
 
@@ -7799,83 +7685,6 @@ const MESSAGE_CACHE_MAX = 200;
         };
 
         // ============================================================
-        // CUSTOM EMOJI MANAGER
-        // ============================================================
-        window.openEmojiManager = function() {
-            if (!isRoomOwner) { showToast('Only the room owner can manage custom emojis.', 'warning'); return; }
-            if (!isRoomFeatureUnlocked('custom_emojis')) {
-                showToast('🔒 Custom Emojis feature is not unlocked for this room. Request it from the Features panel.',
-                    'warning');
-                return;
-            }
-            renderEmojiManager();
-            document.getElementById('emojiManagerOverlay').classList.add('open');
-        };
-        window.closeEmojiManager = function() { document.getElementById('emojiManagerOverlay').classList.remove('open'); };
-
-        async function loadCustomEmojis() {
-            try {
-                const snap = await getDocs(collection(db, 'rooms', roomId, 'customEmojis'));
-                customEmojis = [];
-                snap.forEach(d => { const data = d.data(); if (data.emoji) customEmojis.push(data.emoji); });
-            } catch (e) { customEmojis = []; }
-        }
-
-        async function renderEmojiManager() {
-            const body = document.getElementById('emojiManagerBody');
-            await loadCustomEmojis();
-
-            let html = `
-            <div class="upload-area">
-              <input type="text" id="customEmojiInput" placeholder="Enter emoji (e.g. 🚀)" maxlength="2" style="flex:1;min-width:80px;background:var(--bg-input);border:1px solid var(--border-color);border-radius:8px;padding:4px 8px;color:var(--text-primary);font-size:1.2rem;min-height:36px;" />
-              <button onclick="addCustomEmoji()">➕ Add</button>
-            </div>
-            <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:6px;">${customEmojis.length} custom emojis</div>
-            <div class="emoji-grid-list" id="emojiGridList">
-          `;
-
-            if (customEmojis.length === 0) {
-                html += `<div class="empty-emoji-state">No custom emojis yet. Add one above!</div>`;
-            } else {
-                for (const emoji of customEmojis) {
-                    html +=
-                        `<div class="emoji-item">${emoji}<button class="remove-emoji" onclick="removeCustomEmoji('${emoji}')">✕</button></div>`;
-                }
-            }
-
-            html += `</div>`;
-            body.innerHTML = html;
-        }
-
-        window.addCustomEmoji = async function() {
-            const input = document.getElementById('customEmojiInput');
-            const emoji = input.value.trim();
-            if (!emoji) { showToast('Enter an emoji.', 'warning'); return; }
-            if (customEmojis.includes(emoji)) { showToast('Emoji already exists.', 'warning'); return; }
-            try {
-                const ref = doc(collection(db, 'rooms', roomId, 'customEmojis'));
-                await setDoc(ref, { emoji, addedBy: currentUserUid, addedAt: serverTimestamp() });
-                showToast('✅ Custom emoji added!', 'success');
-                input.value = '';
-                renderEmojiManager();
-                if (document.getElementById('stickerPickerOverlay').classList.contains('open')) { renderStickers('happy'); }
-            } catch (e) { showToast('Failed to add emoji: ' + e.message, 'error'); }
-        };
-
-        window.removeCustomEmoji = async function(emoji) {
-            const ok = await showConfirm({ icon: '🗑️', title: 'Remove Emoji?', message: `Remove "${emoji}"?`,
-                confirmText: 'Remove', confirmType: 'danger' });
-            if (!ok) return;
-            try {
-                const q = query(collection(db, 'rooms', roomId, 'customEmojis'), where('emoji', '==', emoji));
-                const snap = await getDocs(q);
-                if (!snap.empty) { for (const d of snap.docs) { await deleteDoc(d.ref); } }
-                showToast('Emoji removed.', 'success');
-                renderEmojiManager();
-                if (document.getElementById('stickerPickerOverlay').classList.contains('open')) { renderStickers('happy'); }
-            } catch (e) { showToast('Failed to remove: ' + e.message, 'error'); }
-        };
-
         // ============================================================
         // ANNOUNCEMENT SYSTEM
         // ============================================================
@@ -8084,11 +7893,6 @@ const MESSAGE_CACHE_MAX = 200;
             html += `<div class="feature-catalog-grid">`;
 
             for (const [key, feature] of Object.entries(PREMIUM_FEATURES)) {
-                // Theme products have their own dedicated Theme Market below.
-                // Keep them in PREMIUM_FEATURES for request/entitlement compatibility,
-                // but do not render them a second time in the generic feature catalog.
-                if (key.startsWith('theme_')) continue;
-
                 const isUnlocked = isRoomFeatureUnlocked(key);
                 const pendingRequest = roomFeatureRequests.find(r => r.featureId === key && (r.status === 'pending' || r
                     .status === 'payment_pending'));
@@ -8191,20 +7995,6 @@ const MESSAGE_CACHE_MAX = 200;
 
             html += `</div>`;
 
-            // === Theme Market (always visible to room owner) ===
-            html += `
-                <div class="theme-market">
-                    <div class="theme-market-head">
-                        <div>
-                            <div class="theme-market-title">🎨 Theme Market</div>
-                            <div class="theme-market-subtitle">Choose a complete room look with one tap.</div>
-                        </div>
-                        <span class="theme-market-badge">5 PREMIUM</span>
-                    </div>
-                    <div id="themeMarketBody"></div>
-                </div>
-            `;
-
             // Request history
             html += `<div class="request-history-section">`;
             html += `<div class="rh-title">📜 Request History</div>`;
@@ -8254,10 +8044,6 @@ const MESSAGE_CACHE_MAX = 200;
           `;
 
             body.innerHTML = html;
-            // Render the theme market with current entitlements
-            if (typeof window.renderThemeMarket === 'function') {
-                window.renderThemeMarket();
-            }
         }
 
         // ===== FEATURE REQUESTS =====
@@ -8270,26 +8056,6 @@ const MESSAGE_CACHE_MAX = 200;
                     if (data.enabled === true) roomFeatureEntitlements[d.id] = true;
                 });
 
-                // The room shop records approved purchases in premiumFeatureRequests.
-                // Treat an approved premium theme request as purchased as well, so a
-                // developer-approved theme is immediately usable even if its entitlement
-                // document has not been mirrored yet.
-                const requestSnap = await getDocs(query(
-                    collection(db, 'premiumFeatureRequests'),
-                    where('roomId', '==', roomId)
-                ));
-                requestSnap.forEach(d => {
-                    const data = d.data() || {};
-                    if (data.type === 'feature' &&
-                        typeof data.featureId === 'string' &&
-                        data.featureId.startsWith('theme_') &&
-                        data.status === 'approved') {
-                        roomFeatureEntitlements[data.featureId] = true;
-                    }
-                });
-
-                // The standalone Theme Market script reads entitlements from window.
-                window.roomFeatureEntitlements = roomFeatureEntitlements;
             } catch (e) { console.error('Failed to load entitlements:', e); }
         }
 
@@ -8492,12 +8258,6 @@ const MESSAGE_CACHE_MAX = 200;
         function applyFeatureUnlocks() {
             const composerVoiceBtn = document.getElementById('voiceNoteComposerBtn');
             if (composerVoiceBtn) composerVoiceBtn.title = isRoomFeatureUnlocked('voice_note') ? 'Premium Voice Note' : '🔒 Premium Voice Note';
-            if (isRoomFeatureUnlocked('custom_emojis')) {
-                emojiManagerDropdownItem.style.display = 'flex';
-            } else {
-                emojiManagerDropdownItem.style.display = 'none';
-            }
-
             if (isRoomFeatureUnlocked('vip_roles')) {
                 vipManagerDropdownItem.style.display = 'flex';
             } else {
@@ -8518,266 +8278,10 @@ const MESSAGE_CACHE_MAX = 200;
 
             updateAnnouncementUI();
 
-            if (isRoomFeatureUnlocked('custom_theme') ||
-                isRoomFeatureUnlocked('colorful_chat') ||
-                ['theme_pink_blue', 'theme_luxury_gold', 'theme_orange_pink', 'theme_royal_blue_violet', 'theme_emerald_cyan']
-                    .some(themeId => isRoomFeatureUnlocked(themeId))) {
-                loadSavedTheme();
-            }
-
             if (isRoomOwner) {
                 roomFeaturesBtn.style.display = 'inline-block';
                 roomFeaturesDropdownItem.style.display = 'flex';
             }
-        }
-
-        // ===== THEME SYSTEM =====
-        async function loadSavedTheme() {
-            try {
-                const docRef = doc(db, 'rooms', roomId, 'theme', 'settings');
-                const snap = await getDoc(docRef);
-                if (snap.exists()) { const data = snap.data();
-                    customTheme = { ...customTheme, ...data };
-                    window.currentRoomThemeId = data.themeId || '';
-                    if (data.themeVisuals) window.activePremiumTheme = data.themeVisuals;
-                    applyCustomThemeToUI(); }
-            } catch (e) { console.error('Failed to load theme:', e); }
-        }
-
-        function applyCustomThemeToUI() {
-            const container = document.getElementById('messagesContainer');
-            container.style.background = customTheme.bg || '#080c14';
-            container.style.color = customTheme.text || '#f0f4ff';
-
-            // Premium Ultra theme engine: every room surface inherits the active theme.
-            const root = document.documentElement;
-            const set = (name, value) => root.style.setProperty(name, value);
-            const theme = window.activePremiumTheme || {};
-            const accent = customTheme.accent || theme.accent || '#fbbf24';
-            const bg = customTheme.bg || theme.bg || '#080c14';
-            const text = customTheme.text || theme.text || '#f0f4ff';
-            const secondary = theme.secondary || darkenColor(bg, 0.22);
-            const withAlpha = (hex, alpha) => {
-                const h = String(hex || '').replace('#','');
-                if (h.length !== 6) return `rgba(255,255,255,${alpha})`;
-                const r = parseInt(h.slice(0,2),16), g = parseInt(h.slice(2,4),16), b = parseInt(h.slice(4,6),16);
-                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-            };
-
-            set('--bg-primary', bg);
-            set('--bg-secondary', secondary);
-            set('--bg-card', theme.card || withAlpha(accent, .10));
-            set('--bg-input', theme.input || withAlpha(accent, .07));
-            set('--bg-bubble-other', customTheme.bubbleOther || withAlpha(theme.other || '#ffffff', .08));
-            set('--bg-bubble-self', customTheme.bubbleSelf || theme.selfGradient || `linear-gradient(135deg, ${theme.self || accent}, ${darkenColor(theme.self || accent, .20)})`);
-            set('--bg-header', theme.header || withAlpha(bg, .94));
-            set('--bg-footer', theme.footer || withAlpha(bg, .96));
-            set('--text-primary', text);
-            set('--text-secondary', theme.textSecondary || withAlpha(text, .78));
-            set('--text-muted', theme.textMuted || withAlpha(text, .54));
-            set('--text-bubble-self', theme.bubbleText || darkenColor(theme.self || accent, .72));
-            set('--border-color', theme.border || withAlpha(accent, .28));
-            set('--accent', accent);
-            set('--accent-glow', theme.glow || withAlpha(accent, .42));
-            set('--gold', theme.gold || accent);
-            set('--gold-dark', theme.goldDark || darkenColor(accent, .22));
-            set('--premium', theme.premium || accent);
-            set('--elite', theme.elite || accent);
-            set('--success', theme.success || '#34d399');
-            set('--error', theme.error || '#f43f5e');
-            set('--shadow', theme.shadow || `0 10px 36px ${withAlpha('#000000', .52)}, 0 0 28px ${withAlpha(accent, .10)}`);
-            set('--radius', theme.radius || '18px');
-
-            document.body.style.backgroundImage = theme.bodyGradient || `radial-gradient(circle at 12% 18%, ${withAlpha(accent,.16)} 0%, transparent 42%), radial-gradient(circle at 88% 78%, ${withAlpha(theme.secondaryAccent || accent,.12)} 0%, transparent 46%)`;
-            document.body.style.color = text;
-
-            // Full Premium Ultra room skin: names, tags, feed, header text, icons, panels and controls.
-            const nameColor = theme.nameColor || accent;
-            const selfNameColor = theme.selfNameColor || theme.bubbleText || darkenColor(theme.self || accent, .72);
-            const tagColor = theme.tagColor || theme.textSecondary || text;
-            const tagBg = theme.tagBg || withAlpha(accent, .14);
-            const tagBorder = theme.tagBorder || withAlpha(accent, .30);
-            const feedAccent = theme.feedAccent || theme.secondaryAccent || accent;
-            const feedName = theme.feedName || nameColor;
-            const headerText = theme.headerText || text;
-            const iconAccent = theme.iconAccent || accent;
-            set('--theme-name-color', nameColor);
-            set('--theme-self-name', selfNameColor);
-            set('--theme-tag-color', tagColor);
-            set('--theme-tag-bg', tagBg);
-            set('--theme-tag-border', tagBorder);
-            set('--theme-feed-accent', feedAccent);
-            set('--theme-feed-name', feedName);
-            set('--theme-header-text', headerText);
-            set('--theme-icon-accent', iconAccent);
-
-            document.querySelectorAll('.msg.other').forEach(el => {
-                el.style.background = 'var(--bg-bubble-other)';
-                el.style.color = text;
-                el.style.borderColor = 'var(--theme-tag-border)';
-                el.style.boxShadow = `0 5px 18px ${withAlpha(accent,.10)}`;
-            });
-            document.querySelectorAll('.msg.self').forEach(el => {
-                el.style.background = 'var(--bg-bubble-self)';
-                el.style.color = 'var(--text-bubble-self)';
-                el.style.boxShadow = `0 6px 22px ${withAlpha(theme.self || accent,.24)}`;
-            });
-
-            let runtime = document.getElementById('premiumThemeRuntime');
-            if (!runtime) { runtime = document.createElement('style'); runtime.id = 'premiumThemeRuntime'; document.head.appendChild(runtime); }
-            runtime.textContent = `
-                .room-header, .room-info-bar, .announcement-bar, .search-bar, footer {
-                    color: var(--theme-header-text) !important;
-                }
-                .room-header .brand-title, .room-header .room-name,
-                .room-header .coins-badge, .room-header .earnings-badge, .room-header .header-btn,
-                .room-header .more-btn, .room-header .back-btn, .announcement-bar .announce-text,
-                .announcement-bar button { color: var(--theme-header-text) !important; }
-                .room-header svg, .room-header .icon, .room-header button svg, .room-info-bar svg,
-                .send-btn svg, .msg-actions svg, .feature-card .icon, .theme-market-icon,
-                .announce-icon, .level-badge .level-icon {
-                    color: var(--theme-icon-accent) !important;
-                    filter: drop-shadow(0 0 7px var(--accent-glow));
-                }
-                .msg .sender {
-                    color: var(--theme-name-color) !important;
-                    text-shadow: 0 0 9px var(--accent-glow);
-                    letter-spacing: .05px;
-                }
-                .msg.self .sender { color: var(--theme-self-name) !important; text-shadow: none; }
-                .msg .sender .level-tag, .msg .sender .vip-tag, .msg .sender .mod-tag {
-                    color: var(--theme-tag-color) !important;
-                    background: var(--theme-tag-bg) !important;
-                    border: 1px solid var(--theme-tag-border) !important;
-                    box-shadow: 0 0 10px var(--accent-glow);
-                }
-                .msg .text .mention { color: var(--theme-feed-accent) !important; background: var(--theme-tag-bg) !important; }
-                .msg .time { color: var(--text-muted) !important; }
-                .msg-actions button, .reaction, .load-more-btn {
-                    color: var(--theme-icon-accent) !important;
-                    border-color: var(--theme-tag-border) !important;
-                }
-                .stats-panel .recent-feed .feed-item {
-                    color: var(--text-secondary) !important;
-                    border-left-color: var(--theme-feed-accent) !important;
-                    background: var(--bg-card) !important;
-                    box-shadow: inset 0 0 18px var(--theme-tag-bg);
-                }
-                .stats-panel .recent-feed .feed-item .feed-member-name {
-                    color: var(--theme-feed-name) !important; font-weight: 800;
-                }
-                .stats-panel .recent-feed .feed-item .sp-gain { color: var(--theme-feed-accent) !important; }
-                .level-badge .level-progress .fill, .progress-bar-big .fill {
-                    background: linear-gradient(90deg, var(--theme-feed-accent), var(--theme-icon-accent)) !important;
-                    box-shadow: 0 0 10px var(--accent-glow);
-                }
-                .room-header .room-features-btn {
-                    background: linear-gradient(135deg, var(--premium), var(--theme-feed-accent)) !important;
-                    box-shadow: 0 6px 22px var(--accent-glow) !important;
-                }
-                .panel-head, .member-action-panel .panel-head { border-color: var(--border-color) !important; }
-                .feature-card, .coin-pack-card, .theme-market-card, .member-action-panel,
-                .stats-panel, .earnings-panel, .room-features-panel { border-color: var(--border-color) !important; }
-                .header-more-dropdown { background: var(--bg-secondary) !important; border-color: var(--border-color) !important; }
-                .header-more-dropdown .item:hover { background: var(--theme-tag-bg) !important; color: var(--theme-header-text) !important; }
-            `;
-        }
-
-        window.applyCustomTheme = async function(themeId = '') {
-            const isPremiumThemePreset = typeof themeId === 'string' &&
-                themeId.startsWith('theme_') &&
-                isRoomFeatureUnlocked(themeId);
-            if (!isPremiumThemePreset && !isRoomFeatureUnlocked('custom_theme') && !isRoomFeatureUnlocked('colorful_chat')) {
-                showToast('🔒 Theme customization is not unlocked for this room.', 'warning');
-                return;
-            }
-            const bg = document.getElementById('themeBg')?.value || '#080c14';
-            const bubbleOther = document.getElementById('themeBubbleOther')?.value || '#ffffff';
-            const bubbleSelf = document.getElementById('themeBubbleSelf')?.value || '#fbbf24';
-            const text = document.getElementById('themeText')?.value || '#f0f4ff';
-            const accent = document.getElementById('themeAccent')?.value || '#fbbf24';
-            const hexToRgba = (hex, alpha = 0.06) => { const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16); return `rgba(${r},${g},${b},${alpha})`; };
-            const bubbleOtherRgba = hexToRgba(bubbleOther);
-            const bubbleSelfGradient = `linear-gradient(135deg, ${bubbleSelf}, ${darkenColor(bubbleSelf, 0.2)})`;
-
-            customTheme.bg = bg;
-            customTheme.bubbleOther = bubbleOtherRgba;
-            customTheme.bubbleSelf = bubbleSelfGradient;
-            customTheme.text = text;
-            customTheme.accent = accent;
-
-            // Apply the activated theme to the entire room shell, not only the message list.
-            const root = document.documentElement;
-            const withAlpha = (hex, alpha) => {
-                const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16);
-                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-            };
-            const secondaryBg = darkenColor(bg, 0.22);
-            const cardBg = withAlpha(accent, 0.10);
-            const inputBg = withAlpha(accent, 0.06);
-            const headerBg = withAlpha(bg, 0.92);
-            const borderColor = withAlpha(accent, 0.22);
-            const accentGlow = withAlpha(accent, 0.35);
-            const bubbleSelfText = darkenColor(bubbleSelf, 0.72);
-
-            root.style.setProperty('--bg-primary', bg);
-            root.style.setProperty('--bg-secondary', secondaryBg);
-            root.style.setProperty('--bg-card', cardBg);
-            root.style.setProperty('--bg-input', inputBg);
-            root.style.setProperty('--bg-bubble-other', bubbleOtherRgba);
-            root.style.setProperty('--bg-bubble-self', bubbleSelfGradient);
-            root.style.setProperty('--bg-header', headerBg);
-            root.style.setProperty('--bg-footer', headerBg);
-            root.style.setProperty('--text-primary', text);
-            root.style.setProperty('--text-secondary', text);
-            root.style.setProperty('--text-muted', withAlpha(text, 0.58));
-            root.style.setProperty('--text-bubble-self', bubbleSelfText);
-            root.style.setProperty('--border-color', borderColor);
-            root.style.setProperty('--accent', accent);
-            root.style.setProperty('--accent-glow', accentGlow);
-            root.style.setProperty('--gold', accent);
-            root.style.setProperty('--gold-dark', darkenColor(accent, 0.22));
-
-            applyCustomThemeToUI();
-
-            if (isRoomOwner && (isPremiumThemePreset || isRoomFeatureUnlocked('custom_theme') || isRoomFeatureUnlocked('colorful_chat'))) {
-                const docRef = doc(db, 'rooms', roomId, 'theme', 'settings');
-                try {
-                    await setDoc(docRef, {
-                        bg: bg,
-                        bubbleOther: bubbleOtherRgba,
-                        bubbleSelf: bubbleSelfGradient,
-                        text: text,
-                        accent: accent,
-                        ...(isPremiumThemePreset ? { themeId, themeVisuals: { ...window.activePremiumTheme } } : {}),
-                        updatedAt: serverTimestamp(),
-                        updatedBy: currentUserUid,
-                    });
-                    if (isPremiumThemePreset) window.currentRoomThemeId = themeId;
-                    showToast(isPremiumThemePreset ? 'Theme activated and saved!' : 'Theme saved!', 'success');
-                    return true;
-                } catch (err) {
-                    showToast('Failed to save theme: ' + err.message, 'error');
-                    return false;
-                }
-            } else {
-                showToast('Theme applied locally.', 'info');
-                return true;
-            }
-        };
-
-        function darkenColor(hex, frac) {
-            let r = parseInt(hex.slice(1, 3), 16);
-            let g = parseInt(hex.slice(3, 5), 16);
-            let b = parseInt(hex.slice(5, 7), 16);
-            r = Math.floor(r * (1 - frac));
-            g = Math.floor(g * (1 - frac));
-            b = Math.floor(b * (1 - frac));
-            return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
         }
 
         // ============================================================
@@ -9013,6 +8517,7 @@ const MESSAGE_CACHE_MAX = 200;
                 if (!user) { window.location.href = 'index.html'; return; }
                 currentUser = user;
                 currentUserUid = user.uid;
+                listenForChatRoomCalls();
                 hydrateCachedLevel(user.uid);
 
                 // Paint the last known feed NOW — before joinRoom, Firestore reads,
@@ -9089,9 +8594,7 @@ const MESSAGE_CACHE_MAX = 200;
                         loadPendingVoiceNotes(),
                         loadRoomFeatureEntitlements(),
                         loadVipList(),
-                        loadCustomEmojis(),
-                        loadAnnouncement(),
-                        loadSavedTheme()
+                        loadAnnouncement()
                     ]).then(() => {
                         applyFeatureUnlocks();
                         listenRoomFeatureUpdates();
@@ -9156,8 +8659,6 @@ const MESSAGE_CACHE_MAX = 200;
                 else if (document.getElementById('sendCoinsOverlay').classList.contains('open'))
                     closeSendCoinsModal();
                 else if (moreDropdown.classList.contains('open')) closeMoreDropdown();
-                else if (document.getElementById('emojiManagerOverlay').classList.contains('open'))
-                    closeEmojiManager();
                 else if (document.getElementById('vipManagementOverlay').classList.contains('open'))
                     closeVipManagement();
                 else if (document.getElementById('pollCreatorOverlay').classList.contains('open'))
@@ -9175,99 +8676,70 @@ const MESSAGE_CACHE_MAX = 200;
 
         performance.mark('room-init-start');
         init().finally(() => performance.mark('room-init-ready'));
-        listenForChatRoomCalls();
         console.log('🔥 FunRoom — Premium Voice Notes + Full Feature Enforcement');
     
         // CHAT_ROOM CALL RECEIVER BRIDGE
-        let roomIncomingCall = null;
-        let roomPeerConnection = null;
-        let roomCallId = null;
+let roomIncomingCall=null,roomPeerConnection=null,roomCallId=null,roomLocalStream=null,roomRemoteStream=null,roomCallCandidatesUnsubscribe=null,roomCallUnsubscribe=null,roomRemoteDescriptionSet=false;
+const roomPendingCandidates=new Map();
 
-        function ensureRoomCallUI() {
-            let box = document.getElementById('roomIncomingCallBox');
-            if (!box) {
-                box = document.createElement('div');
-                box.id = 'roomIncomingCallBox';
-                box.style.cssText = 'position:fixed;z-index:99999;left:20px;right:20px;top:20px;padding:16px;border-radius:16px;background:#111;color:#fff;display:none;text-align:center';
-                box.innerHTML = '<div id="roomIncomingCallText">Incoming call</div><button id="roomAcceptCall">Accept</button> <button id="roomDeclineCall">Decline</button>';
-                document.body.appendChild(box);
-            }
-            return box;
-        }
-
-        async function roomAcceptIncomingCall() {
-            if (!roomIncomingCall) return;
-            try {
-                const callRef = doc(db, "calls", roomCallId);
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: true,
-                    video: !!roomIncomingCall.isVideo
-                });
-
-                roomPeerConnection = new RTCPeerConnection({
-                    iceServers: [{urls:"stun:stun.l.google.com:19302"}]
-                });
-
-                stream.getTracks().forEach(track => roomPeerConnection.addTrack(track, stream));
-
-                roomPeerConnection.onicecandidate = event => {
-                    if (event.candidate) {
-                        updateDoc(callRef, {
-                            iceCandidates: arrayUnion({
-                                candidate: event.candidate,
-                                id: `room_${Date.now()}`
-                            })
-                        }).catch(()=>{});
-                    }
-                };
-
-                await roomPeerConnection.setRemoteDescription(
-                    new RTCSessionDescription(roomIncomingCall.offer)
-                );
-
-                const answer = await roomPeerConnection.createAnswer();
-                await roomPeerConnection.setLocalDescription(answer);
-
-                await updateDoc(callRef, {
-                    answer,
-                    status: "connected"
-                });
-
-                ensureRoomCallUI().style.display = "none";
-            } catch (err) {
-                console.error("Room call accept failed", err);
-            }
-        }
-
-        function listenForChatRoomCalls() {
-            if (!currentUser) return;
-
-            const q = query(
-                collection(db, "calls"),
-                where("to", "==", currentUser.uid),
-                where("status", "==", "ringing")
-            );
-
-            onSnapshot(q, snapshot => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type !== "added") return;
-
-                    roomCallId = change.doc.id;
-                    roomIncomingCall = change.doc.data();
-
-                    const box = ensureRoomCallUI();
-                    document.getElementById("roomIncomingCallText").textContent =
-                        `${roomIncomingCall.fromName || "User"} is calling`;
-                    box.style.display = "block";
-
-                    document.getElementById("roomAcceptCall").onclick = roomAcceptIncomingCall;
-                    document.getElementById("roomDeclineCall").onclick = () => {
-                        updateDoc(doc(db,"calls",roomCallId), {status:"declined"}).catch(()=>{});
-                        box.style.display = "none";
-                    };
-                });
-            });
-        }
+function roomEnsureCallUI(){
+ let box=document.getElementById('roomIncomingCallBox');
+ if(!box){
+  box=document.createElement('div');
+  box.id='roomIncomingCallBox';
+  box.setAttribute('role','dialog');
+  box.setAttribute('aria-modal','true');
+  box.setAttribute('aria-labelledby','roomIncomingCallTitle');
+  box.setAttribute('aria-describedby','roomIncomingCallText');
+  box.setAttribute('aria-hidden','true');
+  box.innerHTML=`
+   <div class="room-call-backdrop" data-room-call-close></div>
+   <section class="room-call-card" role="document">
+    <button class="room-call-close" id="roomCallDismiss" type="button" aria-label="Close incoming call">×</button>
+    <div class="room-call-icon" aria-hidden="true">☎</div>
+    <div class="room-call-kicker">INCOMING CALL</div>
+    <h2 id="roomIncomingCallTitle" class="room-call-title">Incoming call</h2>
+    <p id="roomIncomingCallText" class="room-call-text">Someone is calling you</p>
+    <div id="roomActiveCallMedia" class="room-active-call-media" style="display:none">
+     <video id="roomRemoteVideo" autoplay playsinline></video>
+     <audio id="roomRemoteAudio" autoplay></audio>
+     <div id="roomCallState" class="room-call-state">Connecting…</div>
+     <button id="roomEndCall" class="room-call-btn room-call-btn-end" type="button">End call</button>
+    </div>
+    <div id="roomIncomingCallActions" class="room-call-actions">
+     <button id="roomDeclineCall" class="room-call-btn room-call-btn-decline" type="button">✕ <span>Decline</span></button>
+     <button id="roomAcceptCall" class="room-call-btn room-call-btn-accept" type="button">✓ <span>Accept</span></button>
+    </div>
+   </section>`;
+  document.body.appendChild(box);
+  document.getElementById('roomEndCall').onclick=()=>roomFinishCall(true);
+  const dismiss=()=>{if(typeof roomFinishCall==='function') roomFinishCall(true);else roomHideCallUI()};
+  document.getElementById('roomCallDismiss').onclick=dismiss;
+  box.querySelector('[data-room-call-close]').onclick=dismiss;
+ }
+ return box;
+}
+function roomShowActiveMedia(video){const b=roomEnsureCallUI();b.style.display='flex';b.setAttribute('aria-hidden','false');document.getElementById('roomActiveCallMedia').style.display='block';document.getElementById('roomIncomingCallActions').style.display='none';document.getElementById('roomRemoteVideo').style.display=video?'block':'none';document.getElementById('roomRemoteAudio').style.display=video?'none':'block';}
+function roomHideCallUI(){const b=document.getElementById('roomIncomingCallBox');if(b){b.style.display='none';b.setAttribute('aria-hidden','true');}for(const id of ['roomRemoteVideo','roomRemoteAudio']){const e=document.getElementById(id);if(e){try{e.pause()}catch(_){}e.srcObject=null}}}
+function roomStopStream(s){s?.getTracks().forEach(t=>{try{t.stop()}catch(_){}})}
+function roomCandidateKey(c){return[c?.candidate||'',c?.sdpMid??'',c?.sdpMLineIndex??''].join('|')}
+async function roomAddCandidate(c){if(!c||!roomPeerConnection)return;const k=roomCandidateKey(c);if(roomPendingCandidates.has(k))return;if(!roomRemoteDescriptionSet){roomPendingCandidates.set(k,c);return}try{await roomPeerConnection.addIceCandidate(c)}catch(e){console.warn('Room call ICE candidate failed',e)}}
+async function roomFlushCandidates(){if(!roomPeerConnection||!roomRemoteDescriptionSet)return;for(const[k,c]of roomPendingCandidates){try{await roomPeerConnection.addIceCandidate(c);roomPendingCandidates.delete(k)}catch(e){console.warn('Queued room call ICE candidate failed',e)}}}
+function roomListenToCallDoc(id){roomCallCandidatesUnsubscribe?.();roomCallCandidatesUnsubscribe=onSnapshot(doc(db,'calls',id),s=>{if(!s.exists())return;const d=s.data()||{};(Array.isArray(d.iceCandidates)?d.iceCandidates:[]).forEach(e=>{if(e?.from!==currentUser?.uid&&e?.candidate)roomAddCandidate(e.candidate)});if(roomPeerConnection&&['ended','declined','cancelled','failed'].includes(d.status))roomFinishCall(false)},e=>console.warn('Room call signaling listener failed',e))}
+async function roomCreatePeer(id,isVideo){
+ if(roomPeerConnection)return roomPeerConnection;roomPeerConnection=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});roomRemoteStream=new MediaStream();
+ const v=document.getElementById('roomRemoteVideo'),a=document.getElementById('roomRemoteAudio');v.srcObject=roomRemoteStream;a.srcObject=roomRemoteStream;
+ roomPeerConnection.ontrack=e=>{const ss=e.streams?.length?e.streams:[roomRemoteStream];ss.forEach(s=>s.getTracks().forEach(t=>{if(!roomRemoteStream.getTracks().some(x=>x.id===t.id))roomRemoteStream.addTrack(t)}));const target=isVideo?v:a;target.srcObject=roomRemoteStream;target.play?.().catch(()=>{})};
+ roomPeerConnection.onicecandidate=async e=>{if(!e.candidate)return;try{await updateDoc(doc(db,'calls',id),{iceCandidates:arrayUnion({from:currentUser.uid,candidate:e.candidate.toJSON()})})}catch(err){console.warn('Room call ICE publish failed',err)}};
+ roomPeerConnection.onconnectionstatechange=async()=>{const s=roomPeerConnection?.connectionState,l=document.getElementById('roomCallState');if(l)l.textContent=s==='connected'?'Connected':s==='failed'?'Connection failed':s==='disconnected'?'Disconnected':'Connecting…';if(s==='failed')await roomFinishCall(true)};
+ return roomPeerConnection;
+}
+async function roomFinishCall(updateFirestore=true){const id=roomCallId;roomCallId=null;roomIncomingCall=null;roomRemoteDescriptionSet=false;roomPendingCandidates.clear();roomCallCandidatesUnsubscribe?.();roomCallCandidatesUnsubscribe=null;if(roomPeerConnection){try{roomPeerConnection.close()}catch(_){}roomPeerConnection=null}roomStopStream(roomLocalStream);roomLocalStream=null;roomRemoteStream=null;roomHideCallUI();if(updateFirestore&&id){try{await updateDoc(doc(db,'calls',id),{status:'ended',endedAt:serverTimestamp()})}catch(e){console.warn('Room call cleanup update failed',e)}}}
+async function roomAcceptIncomingCall(){
+ if(!roomIncomingCall||!roomCallId||!currentUser)return;const id=roomCallId,call=roomIncomingCall,isVideo=call.isVideo===true||call.type==='video'||call.callType==='video';
+ try{const ref=doc(db,'calls',id),snap=await getDoc(ref);if(!snap.exists())throw Error('Call no longer exists');const d=snap.data()||{};if(d.status!=='ringing')return;if(!d.offer)throw Error('Incoming call has no WebRTC offer');roomLocalStream=await navigator.mediaDevices.getUserMedia({audio:true,video:isVideo});const pc=await roomCreatePeer(id,isVideo);roomLocalStream.getTracks().forEach(t=>pc.addTrack(t,roomLocalStream));await pc.setRemoteDescription(new RTCSessionDescription(d.offer));roomRemoteDescriptionSet=true;await roomFlushCandidates();const answer=await pc.createAnswer();await pc.setLocalDescription(answer);await updateDoc(ref,{answer:{type:answer.type,sdp:answer.sdp},status:'answering'});roomListenToCallDoc(id);roomShowActiveMedia(isVideo);roomIncomingCall=null}catch(e){console.error('Room call accept failed',e);await roomFinishCall(true)}}
+function listenForChatRoomCalls(){
+ if(!currentUser||!db)return;roomCallUnsubscribe?.();const q=query(collection(db,'calls'),where('to','==',currentUser.uid),where('status','==','ringing'));roomCallUnsubscribe=onSnapshot(q,s=>{s.docChanges().forEach(ch=>{if(ch.type!=='added')return;roomCallId=ch.doc.id;roomIncomingCall=ch.doc.data()||{};const b=roomEnsureCallUI();document.getElementById('roomIncomingCallText').textContent=`${roomIncomingCall.fromName||roomIncomingCall.callerName||'User'} is calling`;b.style.display='flex';b.setAttribute('aria-hidden','false');document.getElementById('roomAcceptCall').onclick=roomAcceptIncomingCall;document.getElementById('roomDeclineCall').onclick=()=>roomFinishCall(true)})},e=>console.warn('Incoming room call listener failed',e))}
 </script>
 
 
@@ -9463,162 +8935,7 @@ const MESSAGE_CACHE_MAX = 200;
 })();
 </script>
 
-<script id="rebuilt-theme-market-js">
-(function(){
-    const THEME_FEATURE_IDS = [
-        'theme_pink_blue',
-        'theme_luxury_gold',
-        'theme_orange_pink',
-        'theme_royal_blue_violet',
-        'theme_emerald_cyan'
-    ];
 
-    const THEME_METADATA = {
-        theme_pink_blue: {
-            icon: '💗💙', name: 'Pink & Blue Glow', desc: 'Ultra neon romance with electric blue glass and hot-pink energy.',
-            nameColor: '#22d3ee', selfNameColor: '#03201b', tagColor: '#bdebe3', tagBg: 'rgba(16,185,129,.16)', tagBorder: 'rgba(34,211,238,.34)', feedAccent: '#10b981', feedName: '#22d3ee', headerText: '#effffc', iconAccent: '#22d3ee',
-            bg: '#08051a', secondary: '#160b35', card: 'rgba(32,14,70,.72)', input: 'rgba(96,165,250,.09)', header: 'rgba(8,5,26,.94)', footer: 'rgba(12,5,31,.97)',
-            other: '#f8f4ff', self: '#ec4899', text: '#fbf7ff', textSecondary: '#d9c7ff', textMuted: '#9f8fc4', accent: '#60a5fa', secondaryAccent: '#ec4899',
-            gold: '#60a5fa', goldDark: '#2563eb', premium: '#ec4899', elite: '#f472b6', success: '#2dd4bf', error: '#fb7185',
-            border: 'rgba(96,165,250,.30)', glow: 'rgba(236,72,153,.42)', radius: '20px',
-            swatches: ['#08051a','#ec4899','#60a5fa','#a855f7']
-        },
-        theme_luxury_gold: {
-            icon: '👑✨', name: 'Luxury Gold', desc: 'Black-gold VIP ambience with molten gold glass, royal highlights and prestige.',
-            bg: '#090704', secondary: '#1b1205', card: 'rgba(45,29,7,.76)', input: 'rgba(251,191,36,.08)', header: 'rgba(9,7,4,.95)', footer: 'rgba(15,9,3,.98)',
-            other: '#fff7d6', self: '#f59e0b', text: '#fff9e8', textSecondary: '#e8d6a5', textMuted: '#aa9466', accent: '#fbbf24', secondaryAccent: '#f97316',
-            gold: '#fbbf24', goldDark: '#b45309', premium: '#d4af37', elite: '#f97316', success: '#84cc16', error: '#fb7185',
-            border: 'rgba(251,191,36,.34)', glow: 'rgba(251,191,36,.42)', radius: '18px',
-            swatches: ['#090704','#f59e0b','#fbbf24','#fff0a8']
-        },
-        theme_orange_pink: {
-            icon: '🧡💗', name: 'Orange & Pink', desc: 'High-energy sunset room with vivid coral, hot pink and fiery orange everywhere.',
-            bg: '#17050b', secondary: '#2a0a13', card: 'rgba(58,12,25,.76)', input: 'rgba(251,113,133,.09)', header: 'rgba(23,5,11,.95)', footer: 'rgba(31,6,14,.98)',
-            other: '#fff1f5', self: '#f97316', text: '#fff7fa', textSecondary: '#ffd0dc', textMuted: '#bd8496', accent: '#fb7185', secondaryAccent: '#f97316',
-            gold: '#fb7185', goldDark: '#be123c', premium: '#ec4899', elite: '#f97316', success: '#34d399', error: '#ef4444',
-            border: 'rgba(251,113,133,.34)', glow: 'rgba(249,115,22,.42)', radius: '21px',
-            swatches: ['#17050b','#f97316','#fb7185','#ec4899']
-        },
-        theme_royal_blue_violet: {
-            icon: '💙💜', name: 'Royal Blue & Violet', desc: 'Majestic midnight glass with sapphire, violet and electric-indigo highlights.',
-            bg: '#05071a', secondary: '#0e1030', card: 'rgba(18,18,62,.78)', input: 'rgba(167,139,250,.09)', header: 'rgba(5,7,26,.95)', footer: 'rgba(8,8,30,.98)',
-            other: '#f1f3ff', self: '#6366f1', text: '#f8f7ff', textSecondary: '#d4d0ff', textMuted: '#918bb8', accent: '#a78bfa', secondaryAccent: '#3b82f6',
-            gold: '#a78bfa', goldDark: '#6d28d9', premium: '#7c3aed', elite: '#3b82f6', success: '#22d3ee', error: '#fb7185',
-            border: 'rgba(167,139,250,.34)', glow: 'rgba(99,102,241,.44)', radius: '19px',
-            swatches: ['#05071a','#6366f1','#a78bfa','#3b82f6']
-        },
-        theme_emerald_cyan: {
-            icon: '💚🩵', name: 'Emerald & Cyan', desc: 'Futuristic aqua sanctuary with emerald glass, cyan neon and deep ocean contrast.',
-            bg: '#03110f', secondary: '#06231f', card: 'rgba(7,47,42,.76)', input: 'rgba(34,211,238,.09)', header: 'rgba(3,17,15,.95)', footer: 'rgba(3,22,19,.98)',
-            other: '#eafffb', self: '#10b981', text: '#effffc', textSecondary: '#bdebe3', textMuted: '#75aaa1', accent: '#22d3ee', secondaryAccent: '#10b981',
-            gold: '#22d3ee', goldDark: '#0e7490', premium: '#10b981', elite: '#06b6d4', success: '#a3e635', error: '#fb7185',
-            border: 'rgba(34,211,238,.34)', glow: 'rgba(16,185,129,.44)', radius: '20px',
-            swatches: ['#03110f','#10b981','#22d3ee','#67e8f9']
-        }
-    };
-
-    // Helper to apply a theme (saves to Firestore and updates UI)
-    async function applyTheme(themeId) {
-        const meta = THEME_METADATA[themeId];
-        if (!meta) return;
-
-        // Check if the theme is unlocked
-        const entitlements = window.roomFeatureEntitlements || {};
-        if (entitlements[themeId] !== true) {
-            showToast('🔒 This theme is not purchased yet. Buy it first.', 'warning');
-            return;
-        }
-
-        // Set the color pickers (they exist in the panel)
-        const setColor = (id, val) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val;
-        };
-        setColor('themeBg', meta.bg);
-        setColor('themeBubbleOther', meta.other);
-        setColor('themeBubbleSelf', meta.self);
-        setColor('themeText', meta.text);
-        setColor('themeAccent', meta.accent);
-        window.activePremiumTheme = meta;
-
-        // Call the existing theme‑apply function (which saves to Firestore)
-        // The existing theme engine owns Firestore persistence and UI updates.
-        // Pass the purchased theme id so it is authorized by its own entitlement.
-        if (typeof window.applyCustomTheme === 'function') {
-            const saved = await window.applyCustomTheme(themeId);
-            if (saved === false) return;
-        } else {
-            showToast('Theme apply system not available.', 'error');
-            return;
-        }
-
-        // Highlight only the theme that was actually activated.
-        document.querySelectorAll('.theme-market-card').forEach(card => {
-            card.classList.toggle('active', card.dataset.theme === themeId);
-        });
-        const activeLabel = document.querySelector(`[data-theme="${themeId}"] .theme-market-apply`);
-        if (activeLabel) activeLabel.textContent = '✓ Active';
-        window.renderThemeMarket();
-    }
-
-    // Render the theme market with buy/apply buttons
-    window.renderThemeMarket = function() {
-        const host = document.getElementById('themeMarketBody');
-        if (!host) return;
-
-        const entitlements = window.roomFeatureEntitlements || {};
-        const activeThemeId = window.currentRoomThemeId || '';
-
-        let html = '<div class="theme-market-grid">';
-        for (const themeId of THEME_FEATURE_IDS) {
-            const meta = THEME_METADATA[themeId];
-            if (!meta) continue;
-
-            const isUnlocked = entitlements[themeId] === true;
-            const isActive = isUnlocked && activeThemeId === themeId;
-            const buttonHtml = isUnlocked
-                ? `<button class="theme-market-apply" ${isActive ? 'disabled' : ''} onclick="applyMarketTheme('${themeId}')">${isActive ? '✓ Active' : '✨ Activate'}</button>`
-                : `<button class="theme-market-buy" onclick="buyTheme('${themeId}')">💰 Buy $2.00</button>`;
-
-            html += `
-                <div class="theme-market-card" data-theme="${themeId}"
-                     style="--tm-bg:${meta.bg};--tm-accent:${meta.accent};--tm-glow:${meta.accent}66">
-                    <div class="theme-market-icon">${meta.icon}</div>
-                    <div class="theme-market-name">${meta.name}</div>
-                    <div class="theme-market-desc">${meta.desc}</div>
-                    <div class="theme-market-swatches">
-                        ${meta.swatches.map(c => `<span class="theme-market-swatch" style="background:${c}"></span>`).join('')}
-                    </div>
-                    <div class="theme-market-action">${buttonHtml}</div>
-                </div>
-            `;
-        }
-        html += '</div>';
-        host.innerHTML = html;
-    };
-
-    // Buy handler – triggers a feature request for the theme
-    window.buyTheme = function(themeId) {
-        if (typeof window.requestFeature === 'function') {
-            window.requestFeature(themeId);
-        } else {
-            showToast('Feature request system not available.', 'error');
-        }
-    };
-
-    // Override the global applyMarketTheme to use the new applyTheme
-    window.applyMarketTheme = function(themeId) {
-        applyTheme(themeId);
-    };
-
-    // Initial render when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', window.renderThemeMarket);
-    } else {
-        window.renderThemeMarket();
-    }
-})();
-</script>
 
 <script id="level-icon-no-flash-runtime" type="text/javascript">(()=>{const ready=()=>{document.querySelectorAll("#levelIcon img").forEach(img=>{if(img.dataset.flashGuard)return;img.dataset.flashGuard="1";img.addEventListener("load",()=>img.classList.add("level-icon-ready"));if(img.complete&&img.naturalWidth>0)img.classList.add("level-icon-ready")})};document.readyState==="loading"?document.addEventListener("DOMContentLoaded",ready,{once:true}):ready();new MutationObserver(ready).observe(document.documentElement,{childList:true,subtree:true})})();</script>
 <script id="vip-toast-suppressor">
@@ -9818,26 +9135,26 @@ const LEVEL_UNLOCKS = Object.freeze([
   {level:2, items:[['🏆','Rising Badge','Level 2 identity badge'],['✨','Sticker Starter','Expanded sticker access'],['😊','Reaction Plus','Expanded reaction access'],['🎖️','Profile Accent','Rising profile accent']]},
   {level:3, items:[['🖼️','Image Sharing','Share images in the room'],['⭐','Favorite Style','Unlock a profile style slot'],['📝','Status Line','Show a progression status'],['🔖','Message Highlight','Highlight selected messages locally']]},
   {level:4, items:[['🎙️','Voice Preview','Prepare voice-note recording'],['🔊','Audio Polish','Voice-note presentation upgrade'],['🔖','Saved Moments','Keep selected room moments locally'],['📈','Activity History','Expanded personal activity view']]},
-  {level:5, items:[['📊','Poll Access','Create and vote in polls'],['🎨','Profile Decoration','Unlock a profile decoration slot'],['❤️','Reaction Themes','Additional reaction presentation'],['🔥','Streak Display','Show your active streak prominently']]},
+  {level:5, items:[['📊','Poll Access','Create and vote in polls'],['🎨','Profile Decoration','Unlock a profile decoration slot'],['❤️','Reaction Styles','Additional reaction presentation'],['🔥','Streak Display','Show your active streak prominently']]},
   {level:6, items:[['👥','Private Groups','Progression eligibility for group tools'],['📨','Group Invites','Expanded invitation controls'],['📣','Group Notice','Group notice presentation'],['🖼️','Group Identity','Group icon/custom identity slot']]},
   {level:7, items:[['📅','Room Events','Event feature eligibility'],['⏰','Event Reminders','Reminder presentation'],['🎟️','Event Badge','Event participation badge'],['🌟','Profile Highlight','Highlighted profile treatment']]},
   {level:8, items:[['📌','Message Pins','Expanded pin capability'],['🗂️','Collections','Organize saved moments'],['🔔','Smart Notifications','Notification presentation upgrade'],['🏅','Achievement Showcase','Show unlocked achievements']]},
   {level:9, items:[['🔎','Profile Insights','Expanded personal insights'],['🖼️','Featured Frame','Featured profile frame slot'],['✍️','Custom Signature','Signature preference slot'],['📊','Visitor Insights','Profile-stat presentation']]},
-  {level:10, items:[['🎨','Advanced Customization','Advanced room appearance eligibility'],['🌈','Premium Chat Style','Colorful chat eligibility'],['🏅','Elite Badge','Elite identity badge'],['✨','Elite Showcase','Expanded profile showcase']]},
-  {level:11, items:[['🖼️','Custom Chat Background','Background preference slot'],['✨','Animated Frame','Animated frame slot'],['😎','Custom Emoji Access','Custom emoji eligibility'],['❤️','Special Reactions','Special reaction presentation']]},
+  {level:10, items:[['🛠️','Advanced Room Tools','Expanded room-management eligibility'],['💬','Premium Chat Tools','Expanded chat controls'],['🏅','Elite Badge','Elite identity badge'],['✨','Elite Showcase','Expanded profile showcase']]},
+  {level:11, items:[['🖼️','Image Sharing Plus','Expanded image-sharing presentation'],['✨','Animated Frame','Animated frame slot'],['⭐','Profile Highlight','Highlighted profile treatment'],['❤️','Special Reactions','Special reaction presentation']]},
   {level:12, items:[['🎙️','Voice Upgrade','Voice-note enhancement eligibility'],['🎚️','Audio Effects','Audio effect preference slot'],['📚','Voice History','Voice activity presentation'],['⭐','Favorite Voice','Voice preference slot']]},
   {level:13, items:[['🏆','Leaderboard','Leaderboard presentation'],['📊','Rank Display','Rank presentation'],['📈','Contribution Stats','Contribution statistics'],['⚖️','Achievement Compare','Achievement comparison view']]},
-  {level:14, items:[['🛠️','Creator Tools','Creator feature eligibility'],['🏠','Room Decoration','Room decoration slot'],['🎨','Room Theme Pack','Theme-pack eligibility'],['📢','Room Notice Style','Announcement presentation']]},
+  {level:14, items:[['🛠️','Creator Tools','Creator feature eligibility'],['👥','Member Controls','Expanded member-management eligibility'],['📢','Room Notices','Announcement presentation'],['📋','Room Management','Room-management tools']]},
   {level:15, items:[['👑','VIP Identity','Premium identity badge'],['✨','Elite Animation','Elite animation slot'],['🪪','Premium Profile','Premium profile layout'],['🏆','Elite Status','Elite status display']]},
   {level:16, items:[['🛡️','Community Helper','Helper eligibility'],['🚩','Report Priority','Priority-report presentation'],['🤝','Helper Badge','Helper identity badge'],['📋','Helper Dashboard','Helper dashboard slot']]},
   {level:17, items:[['🎉','Room Effects','Celebration-effect slot'],['🎊','Celebration Animations','Celebration presentation'],['🚪','Entrance Effect','Entrance-effect slot'],['✨','Profile Glow','Profile glow slot']]},
   {level:18, items:[['📊','Advanced Analytics','Advanced personal analytics'],['📈','Activity Charts','Chart presentation'],['🎯','Milestones','Milestone display'],['🕰️','Growth History','Progress history']]},
   {level:19, items:[['🧑‍🏫','Mentor Tools','Mentor eligibility'],['👋','New Member Guide','Guidance presentation'],['🏅','Mentor Badge','Mentor identity badge'],['🎁','Mentor Rewards','Mentor reward presentation']]},
   {level:20, items:[['👑','Leader Status','Community leader status'],['🛡️','Advanced Community','Advanced community eligibility'],['🏠','Room Privileges','Additional room privilege slot'],['🏆','Leadership Badge','Leadership identity badge']]},
-  {level:21, items:[['💎','Legendary Frame','Legendary profile frame'],['🏆','Legendary Badge','Legendary identity badge'],['✨','Rare Reactions','Rare reaction presentation'],['🎨','Rare Themes','Rare theme eligibility']]},
+  {level:21, items:[['💎','Legendary Frame','Legendary profile frame'],['🏆','Legendary Badge','Legendary identity badge'],['✨','Rare Reactions','Rare reaction presentation'],['🌟','Rare Showcase','Rare showcase presentation']]},
   {level:22, items:[['👑','Founder Style','Founder-style cosmetic slot'],['🎬','Special Animation','Special animation slot'],['✨','Profile Effects','Profile-effect slot'],['🏅','Premium Showcase','Premium showcase slot']]},
   {level:23, items:[['🏛️','Hall of Fame','Hall-of-fame eligibility'],['📜','Legacy Badge','Legacy identity badge'],['🌟','Community Recognition','Recognition display'],['📣','Influence Display','Community influence presentation']]},
-  {level:24, items:[['🌟','Iconic Member','Final identity status'],['💎','Legendary Identity','Ultimate profile identity slot'],['🎨','Iconic Theme','Final theme eligibility'],['🏆','Ultimate Showcase','Maximum achievement showcase']]}
+  {level:24, items:[['🌟','Iconic Member','Final identity status'],['💎','Legendary Identity','Ultimate profile identity slot'],['🏆','Ultimate Showcase','Maximum achievement showcase'],['📣','Community Recognition','Final community-recognition status']]}
 ]);
 window.LEVEL_UNLOCKS = LEVEL_UNLOCKS;
 
@@ -9979,6 +9296,87 @@ window.renderLevelBenefits = renderLevelBenefits;
 document.addEventListener("DOMContentLoaded", () => {
   try { renderLevelBenefits(); } catch (_) {}
 });
+</script>
+
+<style id="double-tap-message-composer">
+/* Hidden by default; double-tapping the room feed toggles the composer. */
+#bottomInputArea { display: none !important; }
+#bottomInputArea.room-composer-open { display: flex !important; }
+</style>
+
+<script id="double-tap-message-composer-js">
+(function () {
+  function setupComposer() {
+    const composer = document.getElementById('bottomInputArea');
+    const input = document.getElementById('msgInput');
+    const feed = document.getElementById('messagesContainer');
+    if (!composer || !feed) return;
+
+    let lastTap = 0;
+    let tapTimer = null;
+
+    function isInteractive(target) {
+      return !!(target && target.closest && target.closest('button, a, input, textarea, select, video, audio, img, [contenteditable="true"]'));
+    }
+
+    function showComposer() {
+      composer.classList.add('room-composer-open');
+      composer.setAttribute('aria-hidden', 'false');
+      if (input) requestAnimationFrame(function () {
+        try { input.focus({ preventScroll: true }); } catch (_) { input.focus(); }
+      });
+    }
+
+    function hideComposer() {
+      composer.classList.remove('room-composer-open');
+      composer.setAttribute('aria-hidden', 'true');
+      if (input) input.blur();
+    }
+
+    function toggleComposer() {
+      if (composer.classList.contains('room-composer-open')) hideComposer();
+      else showComposer();
+    }
+
+    window.hideRoomComposer = hideComposer;
+    window.toggleRoomComposer = toggleComposer;
+
+    // Native double-click support for desktop browsers.
+    feed.addEventListener('dblclick', function (event) {
+      if (isInteractive(event.target)) return;
+      event.preventDefault();
+      toggleComposer();
+    });
+
+    // Touch fallback for phones that do not reliably emit dblclick.
+    feed.addEventListener('touchend', function (event) {
+      if (isInteractive(event.target)) return;
+      const now = Date.now();
+      if (now - lastTap < 350) {
+        event.preventDefault();
+        clearTimeout(tapTimer);
+        lastTap = 0;
+        toggleComposer();
+      } else {
+        lastTap = now;
+        clearTimeout(tapTimer);
+        tapTimer = setTimeout(function () { lastTap = 0; }, 400);
+      }
+    }, { passive: false });
+
+    if (input) {
+      input.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') hideComposer();
+      });
+    }
+
+    // Start hidden every time the page initializes.
+    hideComposer();
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupComposer);
+  else setupComposer();
+})();
 </script>
 </body>
 </html>
