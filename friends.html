@@ -54,21 +54,22 @@
         body::after { bottom: -100px; right: -100px; background: var(--accent); }
 
         .feed-header {
-            width: 100%; max-width: none; padding: calc(clamp(8px, 2vw, 14px) + env(safe-area-inset-top, 0px)) calc(clamp(12px, 3vw, 24px) + env(safe-area-inset-right, 0px)) clamp(8px, 2vw, 14px) calc(clamp(12px, 3vw, 24px) + env(safe-area-inset-left, 0px)); 
+            width: 100%; max-width: none;
+            padding: calc(4px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) 4px calc(10px + env(safe-area-inset-left, 0px));
             display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
-            border-bottom: 1px solid var(--border-color); background: var(--bg-glass); backdrop-filter: blur(16px); 
-            -webkit-backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            gap: 8px;
+            border-bottom: 1px solid var(--border-color); background: var(--bg-glass); backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.24); gap: 6px;
         }
-        .logo { 
-            font-size: clamp(1rem, 4vw, 1.4rem); font-weight: 800; letter-spacing: 1px; text-decoration: none; 
-            background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 100%); 
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer; 
+        .logo {
+            font-size: clamp(0.95rem, 3.5vw, 1.2rem); font-weight: 800; letter-spacing: 0.8px; text-decoration: none;
+            background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer;
         }
         .user-nav { display: flex; align-items: center; gap: clamp(4px, 2vw, 12px); flex-wrap: wrap; }
-        .nav-link { 
-            color: var(--text-muted); text-decoration: none; font-size: clamp(0.75rem, 2.5vw, 0.88rem); font-weight: 600; 
-            transition: var(--transition); cursor: pointer; padding: 6px 10px; border-radius: 8px; min-height: 36px; display: flex; align-items: center;
+        .nav-link {
+            color: var(--text-muted); text-decoration: none; font-size: clamp(0.7rem, 2.2vw, 0.82rem); font-weight: 600;
+            transition: var(--transition); cursor: pointer; padding: 4px 8px; border-radius: 8px; min-height: 32px; display: flex; align-items: center;
         }
         .nav-link:hover, .nav-link.active { color: var(--primary); background: rgba(0, 168, 132, 0.08); }
 
@@ -373,9 +374,9 @@
         .confirm-modal-actions .btn-confirm.secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main); }
 
         @media (max-width: 480px) {
-            .feed-header { padding: 8px 12px; flex-wrap: wrap; gap: 6px; }
-            .user-nav { gap: 4px; }
-            .nav-link { font-size: 0.7rem; padding: 4px 8px; }
+            .feed-header { padding: calc(3px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px)) 3px calc(8px + env(safe-area-inset-left, 0px)); flex-wrap: nowrap; gap: 4px; }
+            .user-nav { gap: 2px; flex-wrap: nowrap; }
+            .nav-link { font-size: 0.66rem; padding: 3px 6px; min-height: 30px; }
             .action-group { flex-wrap: wrap; }
             .btn-sm { font-size: 0.65rem; padding: 3px 8px; }
             .user-item { flex-direction: column; align-items: stretch; text-align: center; }
@@ -402,6 +403,7 @@
                 min-height: 44px;
                 min-width: 44px;
             }
+            .nav-link { min-height: 30px; min-width: 0; }
             .tab-btn { min-height: 36px; }
             .btn-sm { min-height: 36px; }
         }
