@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#090b10">
 <title>Profile — SPIKE</title><meta name="theme-color" content="#00a884">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -126,10 +126,25 @@ body.light .card{background:rgba(255,255,255,.9)}
 footer{padding:18px;text-align:center;color:var(--muted);font-size:.65rem;border-top:1px solid var(--line);margin-top:auto}
 
 @media(max-width:480px){.header{height:64px}.brand{font-size:1.5rem}.icon{width:37px;height:37px}.main{padding:10px 8px 25px}.profile-cover{height:165px}.profile-head{margin-top:-42px}.profile-avatar-large{width:84px;height:84px}.profile-stats{gap:14px}}
-</style>
-</head>
+</style><style>
+/* SPIKE safe-area + premium Back button */
+html{padding-top:env(safe-area-inset-top,0px)}
+body{padding-top:0!important}
+.spi-safe-back{position:relative;display:inline-grid;place-items:center;width:46px;height:46px;flex:0 0 46px;border:1px solid rgba(255,255,255,.16);border-radius:15px;background:linear-gradient(135deg,rgba(255,62,165,.20),rgba(255,126,48,.14) 48%,rgba(32,232,137,.18));color:#fff;box-shadow:0 8px 26px rgba(0,0,0,.28),0 0 18px rgba(255,62,165,.16),0 0 18px rgba(32,232,137,.12);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:25px;font-weight:800;line-height:1;cursor:pointer;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.spi-safe-back::before{content:"";position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.48) 50%,transparent 60%);transform:translateX(-70%) rotate(8deg);animation:spikeBackSweep 3.2s ease-in-out infinite}
+.spi-safe-back::after{content:"";position:absolute;inset:1px;border-radius:14px;border:1px solid rgba(255,255,255,.08);pointer-events:none}
+.spi-safe-back span{position:relative;z-index:1;transform:translateX(-1px);text-shadow:0 0 10px rgba(255,105,180,.7),0 0 12px rgba(32,232,137,.35)}
+.spi-safe-back:hover{transform:translateY(-1px) scale(1.03);border-color:rgba(255,255,255,.28);box-shadow:0 10px 30px rgba(0,0,0,.32),0 0 24px rgba(255,62,165,.28),0 0 22px rgba(32,232,137,.2)}
+.spi-safe-back:active{transform:scale(.94)}
+.spi-safe-back:focus-visible{outline:2px solid #ff70c7;outline-offset:3px}
+@keyframes spikeBackSweep{0%,62%{transform:translateX(-70%) rotate(8deg);opacity:0}72%{opacity:1}88%,100%{transform:translateX(70%) rotate(8deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.spi-safe-back::before{animation:none}}
+@media(max-width:600px){.spi-safe-back{width:44px;height:44px;flex-basis:44px;border-radius:14px}}
+
+</style></head>
 <body>
 <header class="header">
+<button class="spi-safe-back" id="spikeBack" aria-label="Back to feed" title="Back to feed"><span>‹</span></button>
 <a class="brand" href="feed.html"><span class="brand-title">SPIKE</span></a>
 <div class="header-actions">
 <button class="icon" id="themeBtn" title="Theme">◐</button>
@@ -192,6 +207,79 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 const SUPABASE_URL = "https://bkrrewagsbjqgmxaaqyt.supabase.co";
 const SUPABASE_KEY = "sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+
+// ─── SPIKE shared user settings ─────────────────────────────────────
+window.SPIKE_SETTINGS = window.SPIKE_SETTINGS || { theme:"dark" };
+window.SPIKE_PRIVACY = window.SPIKE_PRIVACY || {};
+
+window.spikeApplyTheme = function(theme){
+  const t = theme === "light" ? "light" :
+            theme === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") :
+            "dark";
+  document.documentElement.dataset.theme = t;
+  document.body.classList.toggle("light", t === "light");
+  document.documentElement.style.colorScheme = t;
+  localStorage.setItem("spike-theme", t);
+};
+
+window.spikeLoadSettings = async function(){
+  try{
+    const {data:{user}} = await supabase.auth.getUser();
+    if(!user) return null;
+    const [{data:settings},{data:privacy}] = await Promise.all([
+      supabase.from("user_settings").select("*").eq("user_id",user.id).maybeSingle(),
+      supabase.from("user_privacy_settings").select("*").eq("user_id",user.id).maybeSingle()
+    ]);
+    window.SPIKE_SETTINGS = {...(settings||{}), theme:settings?.theme||"dark"};
+    window.SPIKE_PRIVACY = privacy||{};
+    window.spikeApplyTheme(window.SPIKE_SETTINGS.theme);
+    window.dispatchEvent(new CustomEvent("spike-settings-changed",{detail:{settings:window.SPIKE_SETTINGS,privacy:window.SPIKE_PRIVACY}}));
+    return {user,settings:window.SPIKE_SETTINGS,privacy:window.SPIKE_PRIVACY};
+  }catch(e){
+    console.warn("SPIKE settings load:",e);
+    window.spikeApplyTheme(localStorage.getItem("spike-theme")==="light" ? "light" : "dark");
+    return null;
+  }
+};
+
+window.spikeSetTheme = async function(theme){
+  window.SPIKE_SETTINGS = {...window.SPIKE_SETTINGS,theme};
+  window.spikeApplyTheme(theme);
+  try{
+    const {data:{user}} = await supabase.auth.getUser();
+    if(user){
+      const {error}=await supabase.from("user_settings").upsert(
+        {user_id:user.id,theme,updated_at:new Date().toISOString()},
+        {onConflict:"user_id"}
+      );
+      if(error) throw error;
+    }
+  }catch(e){ console.warn("Could not save theme:",e); }
+};
+
+window.spikeListenSettings = async function(){
+  try{
+    const {data:{user}} = await supabase.auth.getUser();
+    if(!user) return;
+    const channel=supabase.channel("spike-settings-"+user.id)
+      .on("postgres_changes",{event:"*",schema:"public",table:"user_settings",filter:"user_id=eq."+user.id},
+        payload=>{
+          window.SPIKE_SETTINGS={...window.SPIKE_SETTINGS,...(payload.new||{})};
+          window.spikeApplyTheme(window.SPIKE_SETTINGS.theme||"dark");
+          window.dispatchEvent(new CustomEvent("spike-settings-changed",{detail:{settings:window.SPIKE_SETTINGS,privacy:window.SPIKE_PRIVACY}}));
+        })
+      .on("postgres_changes",{event:"*",schema:"public",table:"user_privacy_settings",filter:"user_id=eq."+user.id},
+        payload=>{
+          window.SPIKE_PRIVACY={...window.SPIKE_PRIVACY,...(payload.new||{})};
+          window.dispatchEvent(new CustomEvent("spike-settings-changed",{detail:{settings:window.SPIKE_SETTINGS,privacy:window.SPIKE_PRIVACY}}));
+        })
+      .subscribe();
+    window.__spikeSettingsChannel=channel;
+    addEventListener("visibilitychange",()=>{if(!document.hidden)window.spikeLoadSettings();});
+    addEventListener("focus",()=>window.spikeLoadSettings());
+  }catch(e){ console.warn("SPIKE settings realtime:",e); }
+};
+
 
 const CLOUDINARY = { cloudName: "dxld01rcp", uploadPreset: "Storage_preset" };
 
@@ -640,15 +728,16 @@ $("audioCall").onclick = () => !isSelf() && (location.href = `chat.html?uid=${en
 $("videoCall").onclick = () => !isSelf() && (location.href = `chat.html?uid=${encodeURIComponent(targetId)}&call=video`);
 
 // ─── Theme ─────────────────────────────────────────────────────────
-$("themeBtn").onclick = () => {
-  document.body.classList.toggle("light");
-  localStorage.setItem("spike-theme", document.body.classList.contains("light") ? "light" : "dark");
+$("themeBtn").onclick = async () => {
+  const current=window.SPIKE_SETTINGS?.theme||"dark";
+  await window.spikeSetTheme(current==="light"?"dark":"light");
 };
-if (localStorage.getItem("spike-theme") === "light") document.body.classList.add("light");
 
 // ─── Init ──────────────────────────────────────────────────────────
 async function init() {
   try {
+    await window.spikeLoadSettings();
+    window.spikeListenSettings();
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
     if (!user) return location.href = "index.html";
@@ -684,5 +773,7 @@ async function init() {
 
 init();
 </script>
+
+<script>document.getElementById("spikeBack")?.addEventListener("click",()=>{location.href="feed.html"});</script>
 </body>
 </html>

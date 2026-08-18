@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPIKE Live</title>
+<style>
+:root{--bg:#070b14;--card:#111827;--text:#f8fafc;--muted:#94a3b8;--line:#243044;--pink:#ec4899;--orange:#f97316}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{width:min(1050px,100%);margin:auto;padding:10px}.video{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center}
+video{width:100%;height:100%;object-fit:contain}.badge{position:absolute;left:10px;top:10px;background:#ef4444;color:#fff;padding:6px 9px;border-radius:9px;font-size:12px;font-weight:800}.viewers{position:absolute;right:10px;top:10px;background:#0009;padding:6px 9px;border-radius:9px;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#182235;color:var(--text);border-radius:10px;padding:9px 12px;font-weight:700}.btn.primary{background:linear-gradient(135deg,var(--pink),var(--orange));border:0}.btn.danger{background:#7f1d1d}.status{color:var(--muted);font-size:13px}.chat{max-height:360px;display:flex;flex-direction:column}.chat-list{overflow:auto;min-height:80px;max-height:230px}.msg{padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.msg small{color:var(--muted);font-size:10px}.chat-send{display:flex;gap:7px;margin-top:8px}.chat-send input{min-width:0;flex:1;background:#0b1220;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px}.guest-card{display:none}.guest-preview{display:none;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}.guest-preview video{object-fit:cover}.reaction-row{display:flex;gap:7px;flex-wrap:wrap}.hidden{display:none!important}
+</style></head><body><main class="wrap">
+<div class="video"><video id="remote" autoplay playsinline controls></video><span class="badge" id="liveBadge">● LIVE</span><span class="viewers">👁 <span id="viewerCount">0</span></span></div>
+<div class="card"><h3 id="title" style="margin:0 0 5px">Live</h3><div class="status" id="host"></div><div class="status" id="status">Connecting…</div><div class="row" style="margin-top:9px">
+<button class="btn primary" id="connect">▶ Connect</button><button class="btn" id="reconnect">🔄 Reconnect</button><button class="btn" id="follow">➕ Follow</button><button class="btn" id="share">🔗 Share</button><button class="btn danger" id="report">🚩 Report</button>
+</div></div>
+<div class="card"><div class="row"><button class="btn primary" id="requestGuest">👥 Request to join</button><button class="btn" id="leaveGuest" style="display:none">Leave guest</button><span class="status" id="guestStatus"></span></div><div class="guest-preview" id="guestPreview"><video id="guestLocal" autoplay muted playsinline></video></div></div>
+<div class="card"><b>✨ Reactions</b><div class="reaction-row" style="margin-top:8px"><button class="btn" data-reaction="❤️">❤️</button><button class="btn" data-reaction="🔥">🔥</button><button class="btn" data-reaction="👏">👏</button><button class="btn" data-reaction="😂">😂</button></div></div>
+<div class="card chat"><b>💬 Live Chat</b><div class="chat-list" id="chatList"><div class="status">Connect to view chat.</div></div><div class="chat-send"><input id="chatInput" maxlength="1000" placeholder="Say something…" disabled><button class="btn" id="send" disabled>Send</button></div></div>
+</main>
+<script type="module">
+import {createClient} from "https://esm.sh/@supabase/supabase-js@2.57.0";
+const SUPABASE_URL="https://bkrrewagsbjqgmxaaqyt.supabase.co";
+const SUPABASE_KEY="sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O";
+const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id), sessionId=new URLSearchParams(location.search).get("session");
+const rtcConfig={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun.cloudflare.com:3478"}]};
+let user=null,session=null,channel=null,pc=null,guestPc=null,guestStream=null,guestRequestId=null,connected=false,chatCount=0;
+
+function status(x){$("status").textContent=x}
+async function send(payload){if(channel)await channel.send({type:"broadcast",event:"signal",payload})}
+async function connect(){
+  if(!sessionId){status("Missing live session link");return}
+  const {data:{session:auth}}=await supabase.auth.getSession();
+  if(!auth?.user){status("Please sign in to watch this live");return}
+  user=auth.user;
+  const {data:live,error}=await supabase.from("feed_live_sessions").select("id,status,title,host_id,viewer_count,visibility,allow_chat,guest_limit,metadata").eq("id",sessionId).maybeSingle();
+  if(error||!live){status("Live session not found");return}
+  session=live;
+  if(live.status!=="live"){status("This live has ended");$("liveBadge").style.display="none";return}
+  $("title").textContent=live.title||"Live";$("viewerCount").textContent=live.viewer_count||0;$("host").textContent="SPIKE Live";
+  await supabase.rpc("feed_live_join",{p_session_id:session.id});
+  if(channel)await supabase.removeChannel(channel);
+  channel=supabase.channel(`live-video:${session.id}`,{config:{private:true,broadcast:{ack:true}}});
+  channel.on("broadcast",{event:"signal"},async({payload})=>{
+    if(!payload||payload.to&&payload.to!==user.id||payload.from===user.id)return;
+    if(payload.type==="offer"){
+      if(pc)pc.close();pc=new RTCPeerConnection(rtcConfig);
+      pc.ontrack=e=>{$("remote").srcObject=e.streams[0];status("🔴 Live now");connected=true};
+      pc.onicecandidate=e=>{if(e.candidate)send({type:"ice",from:user.id,to:payload.from,data:e.candidate,session_id:session.id})};
+      pc.onconnectionstatechange=()=>{if(["failed","disconnected"].includes(pc.connectionState)){status("Connection interrupted — tap Reconnect");connected=false}};
+      await pc.setRemoteDescription(payload.data);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
+      await send({type:"answer",from:user.id,to:payload.from,data:pc.localDescription,session_id:session.id});
+    }else if(payload.type==="ice"&&pc&&payload.data){await pc.addIceCandidate(payload.data).catch(()=>{})}
+    else if(payload.type==="guest-accepted"&&payload.to===user.id){await startGuest(payload.from)}
+    else if(payload.type==="guest-rejected"&&payload.to===user.id){$("guestStatus").textContent="Host declined your request";$("requestGuest").disabled=false}
+    else if(payload.type==="guest-answer"&&payload.to===user.id&&guestPc){await guestPc.setRemoteDescription(payload.data)}
+    else if(payload.type==="guest-ice"&&payload.to===user.id&&guestPc){await guestPc.addIceCandidate(payload.data).catch(()=>{})}
+    else if(payload.type==="guest-kick"&&payload.to===user.id){stopGuest();$("guestStatus").textContent="Host removed you from the live";}
+  });
+  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_messages",filter:"session_id=eq."+session.id},p=>appendMessage(p.new));
+  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_reactions",filter:"session_id=eq."+session.id},p=>status((p.new.emoji||"✨")+" reaction"));
+  channel.on("postgres_changes",{event:"UPDATE",schema:"public",table:"feed_live_sessions",filter:"id=eq."+session.id},p=>{session=p.new;$("viewerCount").textContent=p.new.viewer_count||0;if(p.new.status!=="live")status("Live ended")});
+  await channel.subscribe();
+  await send({type:"viewer-join",from:user.id,to:null,session_id:session.id});
+  await loadChat();
+  $("chatInput").disabled=false;$("send").disabled=false;status("Waiting for host video…");
+}
+async function loadChat(){const {data}=await supabase.from("feed_live_messages").select("id,user_id,body,created_at").eq("session_id",session.id).order("created_at",{ascending:true}).limit(100);$("chatList").innerHTML="";(data||[]).forEach(appendMessage)}
+function appendMessage(m){const el=document.createElement("div");el.className="msg";el.innerHTML="<b>Viewer</b> "+escapeHtml(m.body)+`<small> · ${new Date(m.created_at||Date.now()).toLocaleTimeString()}</small>`;$("chatList").appendChild(el);$("chatList").scrollTop=$("chatList").scrollHeight}
+function escapeHtml(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+async function sendChat(){const body=$("chatInput").value.trim();if(!body||!session)return;$("chatInput").value="";const {error}=await supabase.rpc("feed_live_send_message",{p_session_id:session.id,p_body:body});if(error)status(error.message)}
+async function requestGuest(){if(!session)return;const {data,error}=await supabase.from("feed_live_guest_requests").insert({session_id:session.id,user_id:user.id,status:"pending"}).select("id").single();if(error){status(error.message);return}guestRequestId=data.id;$("requestGuest").disabled=true;$("guestStatus").textContent="Request sent — waiting for host"}
+async function startGuest(hostId){
+  try{
+    const ms=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:720},height:{ideal:720}},audio:true});guestStream=ms;
+    $("guestLocal").srcObject=ms;$("guestPreview").style.display="block";$("leaveGuest").style.display="inline-block";$("guestStatus").textContent="You are joining as a guest";
+    guestPc=new RTCPeerConnection(rtcConfig);ms.getTracks().forEach(t=>guestPc.addTrack(t,ms));
+    guestPc.onicecandidate=e=>{if(e.candidate)send({type:"guest-ice",from:user.id,to:hostId,data:e.candidate,session_id:session.id})};
+    guestPc.onconnectionstatechange=()=>{if(["failed","disconnected"].includes(guestPc.connectionState))$("guestStatus").textContent="Guest connection interrupted"};
+    const offer=await guestPc.createOffer();await guestPc.setLocalDescription(offer);
+    await send({type:"guest-offer",from:user.id,to:hostId,data:guestPc.localDescription,session_id:session.id});
+  }catch(e){$("guestStatus").textContent="Camera/microphone permission is required";status(e.message||"Guest access failed")}
+}
+async function stopGuest(){if(guestPc)try{guestPc.close()}catch{};guestPc=null;if(guestStream)guestStream.getTracks().forEach(t=>t.stop());guestStream=null;$("guestPreview").style.display="none";$("leaveGuest").style.display="none";if(session&&channel)await send({type:"guest-leave",from:user.id,to:null,session_id:session.id})}
+async function follow(){if(!session)return;const {data:ex}=await supabase.from("feed_live_follows").select("session_id").eq("session_id",session.id).eq("follower_id",user.id).maybeSingle();if(ex){await supabase.from("feed_live_follows").delete().eq("session_id",session.id).eq("follower_id",user.id);$("follow").textContent="➕ Follow"}else{await supabase.from("feed_live_follows").insert({session_id:session.id,follower_id:user.id,host_id:session.host_id});$("follow").textContent="✓ Following"}}
+async function react(e){if(session)await supabase.rpc("feed_live_send_reaction",{p_session_id:session.id,p_emoji:e})}
+async function share(){const u=new URL(location.href);if(navigator.share){try{await navigator.share({title:session?.title||"SPIKE Live",url:u.href})}catch{}}else{await navigator.clipboard?.writeText(u.href);status("Live link copied")}}
+async function report(){if(!session)return;const {error}=await supabase.rpc("feed_live_moderate",{p_session_id:session.id,p_target_user_id:session.host_id,p_action:"report",p_message_id:null});status(error?error.message:"Report sent")}
+async function disconnect(){if(channel&&user)await send({type:"viewer-leave",from:user.id,to:null,session_id:sessionId});try{await supabase.rpc("feed_live_leave",{p_session_id:sessionId})}catch{};if(channel)await supabase.removeChannel(channel);channel=null;if(pc)pc.close();pc=null;connected=false;$("remote").srcObject=null;await stopGuest()}
+$("connect").onclick=connect;$("reconnect").onclick=async()=>{await disconnect();await connect()};$("requestGuest").onclick=requestGuest;$("leaveGuest").onclick=stopGuest;$("follow").onclick=follow;$("share").onclick=share;$("report").onclick=report;$("send").onclick=sendChat;$("chatInput").onkeydown=e=>{if(e.key==="Enter")sendChat()};document.querySelectorAll("[data-reaction]").forEach(b=>b.onclick=()=>react(b.dataset.reaction));
+window.addEventListener("pagehide",()=>{try{navigator.sendBeacon?.(`${SUPABASE_URL}/rest/v1/rpc/feed_live_leave`,JSON.stringify({p_session_id:sessionId}))}catch{};try{pc?.close();guestPc?.close()}catch{}});
+(async()=>{const {data:{session:s}}=await supabase.auth.getSession();if(!s?.user){status("Please sign in to watch this live");return}await connect()})();
+</script></body></html>

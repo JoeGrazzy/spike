@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SPIKE Room</title>
+    <!-- Font & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* -------------------- CSS Variables (Cyberpunk Theme) -------------------- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #0B0C10;
+            --bg-secondary: #14161D;
+            --bg-card: #1A1D27;
+            --border-glow: #2C2F3A;
+            --violet: #8A2BE2;
+            --lime: #39FF14;
+            --cyan: #00F0FF;
+            --text-primary: #EDEDED;
+            --text-muted: #8A8F9E;
+            --shadow-neon: 0 0 15px rgba(138, 43, 226, 0.3);
+            --radius: 16px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Main Phone Frame */
+        #app {
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 820px;
+            background: var(--bg-secondary);
+            border-radius: 32px;
+            border: 1px solid var(--border-glow);
+            box-shadow: var(--shadow-neon), 0 20px 60px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 10px; }
+
+        /* -------------------- HEADER -------------------- */
+        header {
+            padding: 16px 20px 10px 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-glow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--violet), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .brand .live-badge {
+            font-size: 9px;
+            font-weight: 700;
+            background: var(--lime);
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            animation: pulse-dot 1.5s infinite;
+            -webkit-text-fill-color: #000;
+        }
+
+        @keyframes pulse-dot {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .user-mini {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-card);
+            padding: 4px 12px 4px 4px;
+            border-radius: 40px;
+            border: 1px solid var(--border-glow);
+        }
+
+        .avatar-morph {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--violet), var(--cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 12px rgba(138, 43, 226, 0.5);
+            transition: var(--transition);
+        }
+
+        .level-badge {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--lime);
+            background: rgba(57, 255, 20, 0.15);
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(57, 255, 20, 0.3);
+        }
+
+        /* -------------------- ROOM INFO & SPARK TOPIC -------------------- */
+        .room-header {
+            padding: 12px 20px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-glow);
+            flex-shrink: 0;
+        }
+
+        .room-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .room-btn {
+            background: transparent;
+            border: 1px solid var(--border-glow);
+            color: var(--text-muted);
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .room-btn.active {
+            background: var(--violet);
+            color: #fff;
+            border-color: var(--violet);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+        }
+
+        .room-btn:hover { opacity: 0.8; }
+
+        .spark-topic {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 240, 255, 0.05);
+            padding: 6px 12px;
+            border-radius: 40px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .spark-topic i { color: var(--cyan); font-size: 14px; }
+        .spark-topic span { font-size: 13px; font-weight: 400; color: var(--text-primary); }
+        .spark-topic .ai-tag { font-size: 8px; font-weight: 700; color: var(--cyan); background: rgba(0,240,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+
+        /* -------------------- ENERGY BAR -------------------- */
+        .energy-section {
+            padding: 8px 20px;
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .energy-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .energy-track {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .energy-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, var(--lime), var(--cyan));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .energy-fill.danger { background: linear-gradient(90deg, #FF4D4D, #FF9D4D); }
+
+        .coins-display {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFD700;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 2px 10px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        /* -------------------- CHAT MESSAGES -------------------- */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: var(--bg-primary);
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+            animation: slide-up 0.2s ease-out;
+        }
+
+        @keyframes slide-up {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.self { align-self: flex-end; align-items: flex-end; }
+        .message.other { align-self: flex-start; align-items: flex-start; }
+
+        .msg-bubble {
+            background: var(--bg-card);
+            padding: 10px 14px;
+            border-radius: 14px;
+            border-bottom-left-radius: 4px;
+            border: 1px solid var(--border-glow);
+            position: relative;
+        }
+
+        .message.self .msg-bubble {
+            background: var(--violet);
+            border-color: var(--violet);
+            border-bottom-right-radius: 4px;
+            border-bottom-left-radius: 14px;
+        }
+
+        .msg-user {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--cyan);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .message.self .msg-user { color: #fff; }
+
+        .msg-text {
+            font-size: 14px;
+            line-height: 1.4;
+            word-break: break-word;
+            color: var(--text-primary);
+        }
+
+        .msg-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .pulse-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: var(--transition);
+            font-family: 'Space Grotesk', sans-serif;
+            padding: 2px 6px;
+            border-radius: 20px;
+        }
+
+        .pulse-btn:hover { color: var(--lime); }
+        .pulse-btn.pulsed { color: var(--lime); }
+        .pulse-btn i { font-size: 14px; }
+
+        .msg-time {
+            font-size: 9px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* -------------------- INPUT AREA -------------------- */
+        .input-area {
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-glow);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .input-area input {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            padding: 10px 16px;
+            border-radius: 40px;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .input-area input:focus { border-color: var(--violet); box-shadow: 0 0 15px rgba(138, 43, 226, 0.2); }
+        .input-area input::placeholder { color: var(--text-muted); }
+
+        .input-area button {
+            background: var(--violet);
+            border: none;
+            color: #fff;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+        }
+
+        .input-area button:hover { transform: scale(1.05); background: #7A1BD6; }
+        .input-area button:active { transform: scale(0.95); }
+
+        .crate-btn {
+            background: transparent;
+            border: 1px solid var(--border-glow);
+            color: #FFD700;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .crate-btn:hover { background: rgba(255, 215, 0, 0.1); border-color: #FFD700; }
+
+        /* -------------------- BOTTOM NAV -------------------- */
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0 12px 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-glow);
+            flex-shrink: 0;
+        }
+
+        .nav-item {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 4px 16px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .nav-item span {
+            font-size: 8px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item.active { color: var(--violet); }
+        .nav-item:hover { color: #fff; }
+
+        /* -------------------- CRATE MODAL (Simple Toast) -------------------- */
+        .toast {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            border: 1px solid var(--lime);
+            padding: 12px 24px;
+            border-radius: 40px;
+            color: #fff;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 0 40px rgba(57, 255, 20, 0.3);
+            backdrop-filter: blur(10px);
+            animation: toast-in 0.4s ease-out;
+            z-index: 99;
+            white-space: nowrap;
+        }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 440px) {
+            #app { max-height: 100vh; border-radius: 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- HEADER -->
+    <header>
+        <div class="brand">
+            <h1>⚡ SPIKE Room</h1>
+            <span class="live-badge">● Live</span>
+        </div>
+        <div class="user-mini">
+            <div class="avatar-morph" id="avatarDisplay">S</div>
+            <span class="level-badge" id="levelBadge">Lv.3</span>
+        </div>
+    </header>
+
+    <!-- ROOM SELECTOR + AI SPARK -->
+    <div class="room-header">
+        <div class="room-selector">
+            <button class="room-btn active" data-room="arena">🏟️ Arena</button>
+            <button class="room-btn" data-room="squad">🤝 Squad</button>
+            <button class="room-btn" data-room="eph">💥 Eph</button>
+        </div>
+        <div class="spark-topic">
+            <i class="fas fa-bolt"></i>
+            <span id="sparkTopic">"Is cereal a soup?"</span>
+            <span class="ai-tag">AI SPARK</span>
+        </div>
+    </div>
+
+    <!-- ENERGY + COINS -->
+    <div class="energy-section">
+        <div class="energy-label"><i class="fas fa-bolt" style="color: var(--lime);"></i> <span id="energyText">100</span>%</div>
+        <div class="energy-track"><div class="energy-fill" id="energyFill" style="width: 100%;"></div></div>
+        <div class="coins-display"><i class="fas fa-coins"></i> <span id="coinText">120</span></div>
+    </div>
+
+    <!-- CHAT MESSAGES -->
+    <div id="chat-container"></div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+        <button class="crate-btn" id="crateBtn" title="Open Mystery Crate!"><i class="fas fa-gift"></i></button>
+        <input type="text" id="msgInput" placeholder="Type your vibe..." maxlength="140">
+        <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <!-- BOTTOM NAV -->
+    <div class="bottom-nav">
+        <button class="nav-item active"><i class="fas fa-comment-dots"></i><span>Rooms</span></button>
+        <button class="nav-item"><i class="fas fa-fire"></i><span>Feed</span></button>
+        <button class="nav-item"><i class="fas fa-inbox"></i><span>Inbox</span></button>
+        <button class="nav-item"><i class="fas fa-user"></i><span>Profile</span></button>
+    </div>
+</div>
+
+<script>
+    // ============================
+    //  SPIKE ROOM - FULL LOGIC
+    // ============================
+
+    // -------- STATE --------
+    const state = {
+        currentRoom: 'arena',
+        energy: 100,
+        coins: 120,
+        level: 3,
+        messages: {
+            arena: [
+                { id: 'm1', user: 'Ghost_42', text: 'Anyone watching the game tonight?', pulse: 5, time: '2m', self: false },
+                { id: 'm2', user: 'Nyx', text: 'The AI topic today is wild 😂', pulse: 12, time: '5m', self: false },
+                { id: 'm3', user: 'You', text: 'Pineapple on pizza is elite!', pulse: 3, time: '8m', self: true },
+            ],
+            squad: [
+                { id: 's1', user: 'Alpha', text: 'Squad meeting at 8pm sharp.', pulse: 2, time: '1h', self: false },
+                { id: 's2', user: 'Beta_99', text: 'I will bring the memes.', pulse: 7, time: '1h', self: false },
+            ],
+            eph: [
+                { id: 'e1', user: 'Vortex', text: 'This room dies in 23h. Drop your hot takes!', pulse: 15, time: '10m', self: false },
+                { id: 'e2', user: 'You', text: 'SPIKE > 2go forever.', pulse: 9, time: '12m', self: true },
+            ]
+        },
+        msgCounter: 10,
+        energyInterval: null,
+        toastTimer: null,
+    };
+
+    // -------- DOM REFS --------
+    const chatContainer = document.getElementById('chat-container');
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const crateBtn = document.getElementById('crateBtn');
+    const energyFill = document.getElementById('energyFill');
+    const energyText = document.getElementById('energyText');
+    const coinText = document.getElementById('coinText');
+    const levelBadge = document.getElementById('levelBadge');
+    const sparkTopic = document.getElementById('sparkTopic');
+    const roomBtns = document.querySelectorAll('.room-btn');
+
+    const topics = [
+        '"Is cereal a soup?"', '"Which animal would rule the world?"',
+        '"Is water wet?"', '"AI will take over in 2050."',
+        '"Would you rather fight 1 horse-sized duck?"', '"Pineapple on pizza?"'
+    ];
+
+    // -------- RENDER CHAT --------
+    function renderMessages() {
+        const msgs = state.messages[state.currentRoom] || [];
+        chatContainer.innerHTML = '';
+        msgs.forEach(msg => {
+            const div = document.createElement('div');
+            div.className = `message ${msg.self ? 'self' : 'other'}`;
+            div.dataset.id = msg.id;
+            div.innerHTML = `
+                <div class="msg-bubble">
+                    <div class="msg-user">
+                        ${!msg.self ? `<i class="fas fa-user-circle"></i> ${msg.user}` : 'You'}
+                        ${!msg.self ? `<span style="color:var(--text-muted);font-weight:400;font-size:9px;">• ${msg.time}</span>` : ''}
+                    </div>
+                    <div class="msg-text">${msg.text}</div>
+                </div>
+                <div class="msg-actions">
+                    <button class="pulse-btn ${msg.pulse > 5 ? 'pulsed' : ''}" onclick="pulseMessage('${msg.id}')">
+                        <i class="fas fa-bolt"></i> <span class="pulse-count">${msg.pulse}</span>
+                    </button>
+                    ${!msg.self ? `<span class="msg-time">${msg.time}</span>` : `<span class="msg-time">Just now</span>`}
+                </div>
+            `;
+            chatContainer.appendChild(div);
+        });
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+        updateUI();
+    }
+
+    // -------- SEND MESSAGE --------
+    function sendMessage() {
+        const text = msgInput.value.trim();
+        if (!text) return;
+        if (state.energy < 2) {
+            showToast('⚠️ Low Energy! Open a crate or wait.');
+            return;
+        }
+
+        // Deduct energy for sending
+        state.energy = Math.max(0, state.energy - 2);
+        state.coins += 10; // Earning coins
+
+        const newMsg = {
+            id: 'm' + (state.msgCounter++),
+            user: 'You',
+            text: text,
+            pulse: 0,
+            time: 'Now',
+            self: true,
+        };
+
+        state.messages[state.currentRoom].push(newMsg);
+        msgInput.value = '';
+        renderMessages();
+
+        // Random AI Reply (Simulate engagement)
+        setTimeout(() => {
+            if (Math.random() > 0.5) {
+                const aiReplies = ['🔥 Facts!', 'Lol, ok.', 'Spicy take!', 'I disagree but respect.', '💀'];
+                const aiMsg = {
+                    id: 'm' + (state.msgCounter++),
+                    user: 'AI_Spark',
+                    text: aiReplies[Math.floor(Math.random() * aiReplies.length)],
+                    pulse: Math.floor(Math.random() * 8) + 1,
+                    time: 'Just now',
+                    self: false,
+                };
+                state.messages[state.currentRoom].push(aiMsg);
+                renderMessages();
+            }
+        }, 800 + Math.random() * 1000);
+
+        updateUI();
+    }
+
+    // -------- PULSE MESSAGE --------
+    function pulseMessage(id) {
+        const room = state.currentRoom;
+        const msg = state.messages[room].find(m => m.id === id);
+        if (!msg) return;
+        if (msg.self) {
+            showToast('You cannot pulse your own message.');
+            return;
+        }
+        msg.pulse += 1;
+        // Morph level increases on pulsing others
+        if (msg.pulse % 3 === 0) {
+            state.level = Math.min(10, state.level + 1);
+        }
+        renderMessages();
+        updateUI();
+    }
+
+    // -------- OPEN CRATE --------
+    function openCrate() {
+        const rewards = [
+            { type: 'Energy', value: 20, icon: '⚡' },
+            { type: 'Coins', value: 30, icon: '🪙' },
+            { type: 'Energy', value: 50, icon: '💪' },
+            { type: 'Coins', value: 15, icon: '💰' },
+            { type: 'Sticker', value: 'Rare Ghost', icon: '👻' },
+        ];
+        const reward = rewards[Math.floor(Math.random() * rewards.length)];
+        let msg = '';
+        if (reward.type === 'Energy') {
+            state.energy = Math.min(100, state.energy + reward.value);
+            msg = `✨ +${reward.value} Energy!`;
+        } else if (reward.type === 'Coins') {
+            state.coins += reward.value;
+            msg = `🪙 +${reward.value} Coins!`;
+        } else {
+            msg = `🎨 Sticker: ${reward.value}!`;
+        }
+        showToast(msg);
+        updateUI();
+        renderMessages(); // for UI refresh
+    }
+
+    // -------- SWITCH ROOMS --------
+    function switchRoom(room) {
+        if (state.currentRoom === room) return;
+        state.currentRoom = room;
+        roomBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.room === room);
+        });
+        // Update spark topic per room
+        sparkTopic.textContent = topics[Math.floor(Math.random() * topics.length)];
+        renderMessages();
+    }
+
+    // -------- UPDATE UI (Energy, Coins, Level) --------
+    function updateUI() {
+        const pct = Math.max(0, state.energy);
+        energyFill.style.width = pct + '%';
+        energyFill.classList.toggle('danger', pct < 25);
+        energyText.textContent = Math.floor(pct);
+        coinText.textContent = state.coins;
+        levelBadge.textContent = `Lv.${state.level}`;
+        // Morph avatar changes with level
+        const avatar = document.getElementById('avatarDisplay');
+        const chars = ['S', '⚡', '🔥', '💀', '👾', '🚀', '🌟', '⚡', '🔥', '💎', '👑'];
+        avatar.textContent = chars[Math.min(state.level, 10)];
+        avatar.style.boxShadow = `0 0 ${12 + state.level * 2}px rgba(138, 43, 226, 0.6)`;
+    }
+
+    // -------- TOAST SYSTEM --------
+    function showToast(text) {
+        const old = document.querySelector('.toast');
+        if (old) old.remove();
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = text;
+        document.getElementById('app').appendChild(toast);
+        clearTimeout(state.toastTimer);
+        state.toastTimer = setTimeout(() => toast.remove(), 2200);
+    }
+
+    // -------- ENERGY DECAY (Addiction Loop) --------
+    function startEnergyDecay() {
+        state.energyInterval = setInterval(() => {
+            if (state.energy > 0) {
+                state.energy = Math.max(0, state.energy - 1.5);
+                updateUI();
+                // If energy hits 0, send a notification-style toast
+                if (state.energy < 2 && state.energy > 0) {
+                    showToast('⚠️ Energy critically low! Open a crate!');
+                }
+                if (state.energy === 0) {
+                    showToast('💤 Energy depleted! Send a message to recharge slowly.');
+                }
+            }
+        }, 4000); // Decay every 4 seconds for demo
+    }
+
+    // -------- EVENT LISTENERS --------
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+    crateBtn.addEventListener('click', openCrate);
+
+    roomBtns.forEach(btn => {
+        btn.addEventListener('click', () => switchRoom(btn.dataset.room));
+    });
+
+    // -------- INIT --------
+    function init() {
+        renderMessages();
+        updateUI();
+        startEnergyDecay();
+        // Random initial spark
+        sparkTopic.textContent = topics[Math.floor(Math.random() * topics.length)];
+        // Auto welcome message from system after 2s
+        setTimeout(() => {
+            const welcome = {
+                id: 'm' + (state.msgCounter++),
+                user: 'System',
+                text: '👋 Welcome to SPIKE Room! Pulse messages, open crates, and level up!',
+                pulse: 99,
+                time: 'Now',
+                self: false,
+            };
+            state.messages[state.currentRoom].push(welcome);
+            renderMessages();
+        }, 500);
+    }
+
+    init();
+</script>
+
+</body>
+</html>
