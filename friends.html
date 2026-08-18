@@ -1,1390 +1,1464 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Find Friends — SPIKE Ultra</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --bg-deep: #070b10;
-            --bg-surface: #0d1520;
-            --bg-card: rgba(20, 32, 48, 0.7);
-            --bg-glass: rgba(13, 21, 32, 0.85);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --border-glow: rgba(0, 168, 132, 0.3);
-            --primary: #00a884;
-            --primary-hover: #00c29a;
-            --primary-glow: rgba(0, 168, 132, 0.4);
-            --accent: #0ea5e9;
-            --error: #f43f5e;
-            --error-glow: rgba(244, 63, 94, 0.4);
-            --success: #00a884;
-            --success-glow: rgba(0, 168, 132, 0.4);
-            --warning: #f59e0b;
-            --warning-glow: rgba(245, 158, 11, 0.4);
-            --text-main: #f1f5f9;
-            --text-muted: #94a3b8;
-            --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body.light-mode {
-            --bg-deep: #f0f4fa;
-            --bg-surface: #e8edf4;
-            --bg-card: rgba(255, 255, 255, 0.85);
-            --bg-glass: rgba(255, 255, 255, 0.92);
-            --border-color: rgba(0, 0, 0, 0.08);
-            --text-main: #0f1824;
-            --text-muted: #5a6e8a;
-            --border-glow: rgba(0, 168, 132, 0.2);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; height: 100%; overflow-x: hidden; background-color: var(--bg-deep); color: var(--text-main); font-family: var(--font-main); }
-        body { display: flex; flex-direction: column; justify-content: space-between; align-items: center; position: relative; min-height: 100dvh; }
-
-        body::before, body::after {
-            content: ''; position: fixed; width: 400px; height: 400px; border-radius: 50%; filter: blur(100px); z-index: -1; opacity: 0.1; pointer-events: none;
-        }
-        body::before { top: -100px; left: -100px; background: var(--primary); }
-        body::after { bottom: -100px; right: -100px; background: var(--accent); }
-
-        .feed-header {
-            width: 100%; max-width: none;
-            padding: calc(4px + env(safe-area-inset-top, 0px)) calc(10px + env(safe-area-inset-right, 0px)) 4px calc(10px + env(safe-area-inset-left, 0px));
-            display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
-            border-bottom: 1px solid var(--border-color); background: var(--bg-glass); backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.24); gap: 6px;
-        }
-        .logo {
-            font-size: clamp(0.95rem, 3.5vw, 1.2rem); font-weight: 800; letter-spacing: 0.8px; text-decoration: none;
-            background: linear-gradient(135deg, var(--text-main) 30%, var(--primary) 100%);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent; cursor: pointer;
-        }
-        .user-nav { display: flex; align-items: center; gap: clamp(4px, 2vw, 12px); flex-wrap: wrap; }
-        .nav-link {
-            color: var(--text-muted); text-decoration: none; font-size: clamp(0.7rem, 2.2vw, 0.82rem); font-weight: 600;
-            transition: var(--transition); cursor: pointer; padding: 4px 8px; border-radius: 8px; min-height: 32px; display: flex; align-items: center;
-        }
-        .nav-link:hover, .nav-link.active { color: var(--primary); background: rgba(0, 168, 132, 0.08); }
-
-        .admin-heart-link {
-            display: none !important;
-            border-color: rgba(244, 63, 94, 0.3);
-            background: rgba(244, 63, 94, 0.08);
-            animation: pulse-heart 1.5s infinite ease-in-out;
-        }
-        .admin-heart-link.visible { display: flex !important; }
-        .admin-heart-link:hover { border-color: rgba(244, 63, 94, 0.6); background: rgba(244, 63, 94, 0.2); }
-        .admin-heart-link .heart-icon { display: inline-block; font-size: clamp(1rem, 3vw, 1.2rem); }
-        @keyframes pulse-heart { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
-
-        .friends-main {
-            flex: 1; display: flex; flex-direction: column; align-items: center; padding: clamp(16px, 4vw, 24px) 12px; 
-            width: 100%; max-width: 620px; margin: auto; gap: clamp(16px, 4vw, 24px);
-        }
-
-        .section-card {
-            background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
-            border: 1px solid var(--border-color); border-radius: clamp(18px, 4vw, 20px); 
-            padding: clamp(16px, 3vw, 20px); width: 100%;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; gap: 16px;
-        }
-
-        .section-title { 
-            font-size: clamp(0.95rem, 3vw, 1.05rem); font-weight: 800; color: var(--text-main); 
-            padding-bottom: 8px; border-bottom: 1px solid var(--border-color); 
-            display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;
-        }
-        .section-title .badge { 
-            font-size: 0.7rem; background: var(--primary); color: white; padding: 2px 10px; border-radius: 20px; font-weight: 700; 
-        }
-        
-        .search-box {
-            display: flex; gap: 10px; width: 100%; flex-wrap: wrap;
-        }
-        .search-input {
-            flex: 1; min-width: 120px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); 
-            border-radius: 14px; padding: clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 16px);
-            color: var(--text-main); font-family: var(--font-main); font-size: clamp(0.85rem, 2.5vw, 0.9rem); 
-            outline: none; transition: var(--transition); min-height: 44px;
-        }
-        .search-input:focus { border-color: var(--primary); background: rgba(255, 255, 255, 0.05); box-shadow: 0 0 15px var(--primary-glow); }
-        .btn-action {
-            background: var(--primary); color: white; border: none; border-radius: 14px; 
-            padding: 0 clamp(16px, 4vw, 20px); font-weight: 700; font-size: clamp(0.85rem, 2.5vw, 0.9rem); 
-            cursor: pointer; transition: var(--transition); flex-shrink: 0; box-shadow: 0 0 15px var(--primary-glow);
-            min-height: 44px; touch-action: manipulation;
-        }
-        .btn-action:active { transform: scale(0.95); }
-        .btn-action:hover { background: var(--primary-hover); }
-
-        .tabs-container {
-            display: flex; gap: 4px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: none; border: none; color: var(--text-muted); padding: clamp(6px, 1.5vw, 8px) clamp(10px, 2.5vw, 16px); 
-            font-family: var(--font-main); font-weight: 700; font-size: clamp(0.75rem, 2.2vw, 0.85rem); 
-            cursor: pointer; transition: var(--transition); border-radius: 10px; touch-action: manipulation;
-            min-height: 36px;
-        }
-        .tab-btn:active { transform: scale(0.95); }
-        .tab-btn.active { color: var(--primary); background: rgba(0, 168, 132, 0.1); }
-        .tab-btn:hover { color: var(--text-main); }
-
-        /* ===== LOADING SHIMMER ===== */
-        .user-list-shimmer {
-            display: flex; flex-direction: column; gap: 10px; width: 100%;
-        }
-        .user-list-shimmer .shimmer-item {
-            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-            background: var(--bg-card); border-radius: 14px;
-            animation: shimmer 1.5s infinite;
-        }
-        @keyframes shimmer {
-            0% { opacity: 0.6; }
-            50% { opacity: 1; }
-            100% { opacity: 0.6; }
-        }
-        .user-list-shimmer .shimmer-avatar {
-            width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-        .user-list-shimmer .shimmer-line {
-            height: 12px; background: rgba(255,255,255,0.05); border-radius: 6px; flex: 1;
-        }
-        .user-list-shimmer .shimmer-line.short { width: 80px; flex: none; }
-
-        .user-list { display: flex; flex-direction: column; gap: 10px; max-height: 600px; overflow-y: auto; padding-right: 4px; }
-        .user-list::-webkit-scrollbar { width: 4px; }
-        .user-list::-webkit-scrollbar-track { background: transparent; }
-        .user-list::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
-
-        .user-item {
-            background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 14px; 
-            padding: clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 16px);
-            display: flex; justify-content: space-between; align-items: center; transition: var(--transition);
-            gap: 8px; flex-wrap: wrap;
-            animation: fadeInItem 0.2s ease-out;
-        }
-        @keyframes fadeInItem {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .user-item:hover { border-color: rgba(0, 168, 132, 0.3); background: rgba(255, 255, 255, 0.04); }
-        .user-item.blocked { opacity: 0.5; border-color: rgba(244, 63, 94, 0.3); background: rgba(244, 63, 94, 0.05); }
-        .user-item.blocked .username { color: var(--text-muted); }
-
-        .user-info-group { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-        
-        .avatar-wrapper {
-            position: relative;
-            width: clamp(36px, 9vw, 44px);
-            height: clamp(36px, 9vw, 44px);
-            flex-shrink: 0;
-        }
-        .avatar {
-            width: 100%; height: 100%; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #005c4b);
-            display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; overflow: hidden; 
-            font-size: clamp(0.8rem, 2.5vw, 1rem);
-            border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 0 10px var(--primary-glow);
-        }
-        .avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .blocked .avatar { background: linear-gradient(135deg, #444, #222); box-shadow: none; }
-
-        .online-indicator {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid var(--bg-deep);
-            background: var(--text-muted);
-        }
-        .online-indicator.online {
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success-glow);
-        }
-        .online-indicator.offline {
-            background: var(--text-muted);
-        }
-
-        .user-meta-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-        .username { font-weight: 700; font-size: clamp(0.85rem, 2.5vw, 0.95rem); color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-handle { font-size: clamp(0.65rem, 2vw, 0.78rem); color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 4px; }
-        .mutual-friends { font-size: 0.6rem; color: var(--primary); background: rgba(0,168,132,0.1); padding: 1px 8px; border-radius: 12px; }
-
-        .action-group { display: flex; align-items: center; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
-
-        .btn-sm {
-            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: clamp(4px, 1.5vw, 6px) clamp(8px, 2.5vw, 12px);
-            border-radius: 10px; font-size: clamp(0.65rem, 2vw, 0.75rem); font-weight: 700; 
-            cursor: pointer; transition: var(--transition); text-decoration: none; flex-shrink: 0;
-            min-height: 32px; touch-action: manipulation;
-        }
-        .btn-sm:active { transform: scale(0.95); }
-        .btn-sm:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: var(--text-main); }
-        .btn-sm.primary { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 0 10px var(--primary-glow); }
-        .btn-sm.primary:hover { background: var(--primary-hover); }
-        .btn-sm.danger { background: rgba(244, 63, 94, 0.15); border-color: rgba(244, 63, 94, 0.3); color: var(--error); }
-        .btn-sm.danger:hover { background: rgba(244, 63, 94, 0.25); }
-        .btn-sm.warning { background: rgba(245, 158, 11, 0.15); border-color: rgba(245, 158, 11, 0.3); color: var(--warning); }
-        .btn-sm.warning:hover { background: rgba(245, 158, 11, 0.25); }
-        .btn-sm.success { background: rgba(0, 168, 132, 0.15); border-color: rgba(0, 168, 132, 0.3); color: var(--success); }
-        .btn-sm.success:hover { background: rgba(0, 168, 132, 0.25); }
-        .btn-sm:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-
-        .empty-state { text-align: center; color: var(--text-muted); font-size: clamp(0.8rem, 2.5vw, 0.88rem); padding: 30px 20px; }
-        .empty-state .icon { font-size: clamp(2rem, 5vw, 2.5rem); margin-bottom: 10px; display: block; }
-
-        .load-more-btn {
-            background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); color: var(--text-muted);
-            padding: 10px 20px; border-radius: 12px; width: 100%; font-family: var(--font-main);
-            font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: var(--transition);
-            min-height: 44px;
-        }
-        .load-more-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-main); }
-
-        .feed-footer { 
-            width: 100%; max-width: none; padding: clamp(12px, 2.5vw, 20px) clamp(12px, 3vw, 24px); 
-            text-align: center; font-size: clamp(0.7rem, 2vw, 0.8rem); color: var(--text-muted); padding-bottom: calc(clamp(12px, 2.5vw, 20px) + env(safe-area-inset-bottom, 0px)); 
-            border-top: 1px solid var(--border-color); flex-shrink: 0; background: var(--bg-glass); backdrop-filter: blur(16px);
-        }
-
-        /* === TOAST === */
-        .toast-container {
-            position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%) translateY(-30px); z-index: 9999;
-            width: calc(100% - 32px); max-width: 420px; opacity: 0; visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
-        }
-        .toast-container.active { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); pointer-events: auto; }
-        .toast-content {
-            background: var(--bg-glass); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--border-color);
-            border-radius: 20px; padding: clamp(12px, 3vw, 16px) clamp(14px, 4vw, 20px); display: flex; align-items: center; gap: clamp(10px, 3vw, 16px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), 0 0 40px rgba(0, 168, 132, 0.05); position: relative; overflow: hidden;
-            animation: toastSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes toastSlideIn { 0% { opacity: 0; transform: translateY(-20px) scale(0.95); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-        @keyframes toastSlideOut { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-20px) scale(0.95); } }
-        .toast-container.removing .toast-content { animation: toastSlideOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .toast-content::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 30% 30%, var(--toast-glow-color) 0%, transparent 70%); opacity: 0.3; pointer-events: none; z-index: 0;
-        }
-        .toast-content > * { position: relative; z-index: 1; }
-        .toast-icon-wrapper {
-            width: clamp(36px, 10vw, 44px); height: clamp(36px, 10vw, 44px); min-width: clamp(36px, 10vw, 44px); border-radius: 14px; 
-            display: flex; align-items: center; justify-content: center; font-size: clamp(1rem, 3.5vw, 1.3rem); font-weight: 800; 
-            flex-shrink: 0; position: relative;
-        }
-        .toast-icon-wrapper::before {
-            content: ''; position: absolute; inset: -2px; border-radius: 16px; background: var(--toast-glow-color); opacity: 0.15; filter: blur(8px);
-        }
-        .toast-icon-wrapper .icon { position: relative; z-index: 1; }
-
-        .toast-container.success { --toast-glow-color: rgba(0, 168, 132, 0.6); }
-        .toast-container.success .toast-icon-wrapper { background: rgba(0, 168, 132, 0.15); border: 1px solid rgba(0, 168, 132, 0.3); color: var(--success); box-shadow: 0 0 30px rgba(0, 168, 132, 0.15); }
-        .toast-container.success .toast-content { border-color: rgba(0, 168, 132, 0.25); }
-        .toast-container.error { --toast-glow-color: rgba(244, 63, 94, 0.6); }
-        .toast-container.error .toast-icon-wrapper { background: rgba(244, 63, 94, 0.15); border: 1px solid rgba(244, 63, 94, 0.3); color: var(--error); box-shadow: 0 0 30px rgba(244, 63, 94, 0.15); }
-        .toast-container.error .toast-content { border-color: rgba(244, 63, 94, 0.25); }
-        .toast-container.warning { --toast-glow-color: rgba(245, 158, 11, 0.6); }
-        .toast-container.warning .toast-icon-wrapper { background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: var(--warning); box-shadow: 0 0 30px rgba(245, 158, 11, 0.15); }
-        .toast-container.warning .toast-content { border-color: rgba(245, 158, 11, 0.25); }
-
-        .toast-text-group { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-        .toast-title { font-size: clamp(0.75rem, 2.5vw, 0.85rem); font-weight: 800; color: var(--text-main); letter-spacing: -0.2px; line-height: 1.3; }
-        .toast-message { font-size: clamp(0.7rem, 2.2vw, 0.78rem); font-weight: 500; color: var(--text-muted); line-height: 1.4; opacity: 0.9; }
-        .toast-close-btn {
-            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); color: var(--text-muted);
-            width: clamp(24px, 6vw, 28px); height: clamp(24px, 6vw, 28px); min-width: clamp(24px, 6vw, 28px); border-radius: 50%; 
-            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; transition: var(--transition); 
-            flex-shrink: 0; touch-action: manipulation;
-        }
-        .toast-close-btn:active { transform: scale(0.9); }
-        .toast-close-btn:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border-color: rgba(255, 255, 255, 0.2); }
-        .toast-progress {
-            position: absolute; bottom: 0; left: 0; height: 2px; background: var(--toast-glow-color); border-radius: 0 0 20px 20px;
-            width: 100%; animation: toastProgress 3s linear forwards;
-        }
-        @keyframes toastProgress { 0% { width: 100%; } 100% { width: 0%; } }
-        .toast-container.success .toast-progress { background: var(--success); box-shadow: 0 0 20px var(--success-glow); }
-        .toast-container.error .toast-progress { background: var(--error); box-shadow: 0 0 20px var(--error-glow); }
-        .toast-container.warning .toast-progress { background: var(--warning); box-shadow: 0 0 20px var(--warning-glow); }
-
-        /* === CONFIRMATION MODAL === */
-        .confirm-modal-overlay {
-            position: fixed; inset: 0; background: rgba(3, 7, 13, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .confirm-modal-overlay.active { display: flex; opacity: 1; animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        @keyframes modalFadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
-        @keyframes modalSlideUp { 0% { opacity: 0; transform: translateY(30px) scale(0.96); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
-
-        .confirm-modal {
-            background: var(--bg-surface); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--border-color);
-            border-radius: clamp(20px, 5vw, 28px); padding: clamp(20px, 5vw, 32px) clamp(16px, 4vw, 28px); max-width: 440px; width: 100%;
-            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), 0 0 60px var(--toast-glow-color);
-            animation: modalSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); position: relative; overflow: hidden;
-        }
-        .confirm-modal::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle at 50% 0%, var(--toast-glow-color) 0%, transparent 60%); opacity: 0.1; pointer-events: none; z-index: 0;
-        }
-        .confirm-modal > * { position: relative; z-index: 1; }
-
-        .confirm-modal-icon {
-            width: clamp(56px, 15vw, 72px); height: clamp(56px, 15vw, 72px); border-radius: 50%; display: flex; align-items: center; justify-content: center; 
-            font-size: clamp(1.8rem, 5vw, 2.2rem); margin: 0 auto 16px auto; position: relative;
-        }
-        .confirm-modal-icon::before {
-            content: ''; position: absolute; inset: -3px; border-radius: 50%; background: var(--toast-glow-color); opacity: 0.15; filter: blur(12px);
-        }
-        .confirm-modal-icon .icon { position: relative; z-index: 1; }
-
-        .confirm-modal.danger { --toast-glow-color: rgba(244, 63, 94, 0.5); }
-        .confirm-modal.danger .confirm-modal-icon { background: rgba(244, 63, 94, 0.12); border: 2px solid rgba(244, 63, 94, 0.25); color: var(--error); box-shadow: 0 0 40px rgba(244, 63, 94, 0.1); }
-        .confirm-modal.warning { --toast-glow-color: rgba(245, 158, 11, 0.5); }
-        .confirm-modal.warning .confirm-modal-icon { background: rgba(245, 158, 11, 0.12); border: 2px solid rgba(245, 158, 11, 0.25); color: var(--warning); box-shadow: 0 0 40px rgba(245, 158, 11, 0.1); }
-        .confirm-modal.success { --toast-glow-color: rgba(0, 168, 132, 0.5); }
-        .confirm-modal.success .confirm-modal-icon { background: rgba(0, 168, 132, 0.12); border: 2px solid rgba(0, 168, 132, 0.25); color: var(--success); box-shadow: 0 0 40px rgba(0, 168, 132, 0.1); }
-
-        .confirm-modal-title { font-size: clamp(1.1rem, 3.5vw, 1.3rem); font-weight: 800; color: var(--text-main); text-align: center; letter-spacing: -0.3px; line-height: 1.3; }
-        .confirm-modal-message { font-size: clamp(0.8rem, 2.5vw, 0.92rem); color: var(--text-muted); text-align: center; line-height: 1.6; margin: 8px 0 4px 0; padding: 0 4px; }
-        .confirm-modal-details { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 16px; margin: 8px 0 12px 0; font-size: clamp(0.75rem, 2.2vw, 0.82rem); color: var(--text-muted); line-height: 1.5; }
-
-        .confirm-modal-actions { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
-        .confirm-modal-actions .btn-confirm {
-            flex: 1; min-width: 100px; padding: clamp(10px, 3vw, 14px); border-radius: 14px; border: none; font-family: var(--font-main); 
-            font-weight: 700; font-size: clamp(0.8rem, 2.5vw, 0.92rem); cursor: pointer; transition: var(--transition); touch-action: manipulation;
-        }
-        .confirm-modal-actions .btn-confirm:active { transform: scale(0.95); }
-        .confirm-modal-actions .btn-confirm.primary { background: var(--primary); color: white; box-shadow: 0 0 20px var(--primary-glow); }
-        .confirm-modal-actions .btn-confirm.primary:hover { background: var(--primary-hover); }
-        .confirm-modal-actions .btn-confirm.danger { background: var(--error); color: white; box-shadow: 0 0 20px var(--error-glow); }
-        .confirm-modal-actions .btn-confirm.danger:hover { background: #e11d48; }
-        .confirm-modal-actions .btn-confirm.secondary { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid var(--border-color); }
-        .confirm-modal-actions .btn-confirm.secondary:hover { background: rgba(255, 255, 255, 0.08); color: var(--text-main); }
-
-        @media (max-width: 480px) {
-            .feed-header { padding: calc(3px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px)) 3px calc(8px + env(safe-area-inset-left, 0px)); flex-wrap: nowrap; gap: 4px; }
-            .user-nav { gap: 2px; flex-wrap: nowrap; }
-            .nav-link { font-size: 0.66rem; padding: 3px 6px; min-height: 30px; }
-            .action-group { flex-wrap: wrap; }
-            .btn-sm { font-size: 0.65rem; padding: 3px 8px; }
-            .user-item { flex-direction: column; align-items: stretch; text-align: center; }
-            .user-info-group { justify-content: center; }
-            .action-group { justify-content: center; }
-            .toast-content { padding: 12px 14px; border-radius: 14px; }
-            .toast-icon-wrapper { width: 36px; height: 36px; min-width: 36px; font-size: 1rem; }
-            .toast-title { font-size: 0.8rem; }
-            .toast-message { font-size: 0.72rem; }
-            .confirm-modal { padding: 20px 16px; border-radius: 20px; }
-            .confirm-modal-title { font-size: 1.1rem; }
-            .confirm-modal-message { font-size: 0.85rem; }
-            .confirm-modal-actions { flex-direction: column; }
-            .confirm-modal-actions .btn-confirm { padding: 12px; }
-        }
-
-        @media (max-width: 380px) {
-            .nav-link { font-size: 0.6rem; padding: 3px 6px; }
-            .btn-sm { font-size: 0.6rem; padding: 2px 6px; }
-        }
-
-        @media (pointer: coarse) {
-            .nav-link, .btn-action, .tab-btn, .btn-sm, .toast-close-btn, .btn-confirm {
-                min-height: 44px;
-                min-width: 44px;
-            }
-            .nav-link { min-height: 30px; min-width: 0; }
-            .tab-btn { min-height: 36px; }
-            .btn-sm { min-height: 36px; }
-        }
-    </style>
-
-    <script type="module">
-        // ===== 🚀 ENHANCED FRIENDS PAGE =====
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { 
-            getFirestore, collection, doc, getDoc, getDocs, updateDoc, addDoc, arrayUnion, arrayRemove, onSnapshot, setDoc, writeBatch, query, limit, startAfter, orderBy, serverTimestamp
-        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        async function createUserNotification(targetUid, payload) {
-            if (!targetUid || !currentUser || targetUid === currentUser.uid) return;
-            try {
-                const id = payload.id || `${payload.type}_${currentUser.uid}`;
-                await setDoc(doc(db, 'users', targetUid, 'notifications', id), { id, ...payload, actorUid: currentUser.uid, createdAt: payload.createdAt || serverTimestamp(), read: false }, { merge: true });
-            } catch (e) { console.warn('Notification write failed:', e); }
-        }
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAm8ghbQ_lwJdNXEhWGos0eyi5wtvGuRR4",
-            authDomain: "grazzy-9e736.firebaseapp.com",
-            projectId: "grazzy-9e736",
-            storageBucket: "grazzy-9e736.firebasestorage.app",
-            messagingSenderId: "750326949170",
-            appId: "1:750326949170:web:5d19744aafc8675918632b"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const ADMIN_EMAILS = ["eletexjoeytex@gmail.com"];
-
-        // ===== STATE =====
-        const CACHE_VERSION = 'v3';
-        let currentUser = null;
-        let currentUserUid = null;
-        let allMembersCache = [];
-        let currentTab = 'all';
-        let toastTimeout = null;
-        let pendingAction = null;
-        let userDataCache = {};
-        let friendUids = [];
-        let onlineStatuses = {}; // uid: boolean
-        let lastSeen = {}; // uid: timestamp
-        const friendStatusUnsubs = new Map();
-        let selfStatusHeartbeat = null;
-        let presenceWriteInFlight = false;
-        const PRESENCE_INTERVAL_MS = 20000;
-        const PRESENCE_STALE_MS = 45000;
-
-        // ===== ONLINE STATUS MANAGEMENT (unified) =====
-        async function updateUserOnlineStatus(status) {
-            if (!currentUserUid || presenceWriteInFlight) return false;
-            presenceWriteInFlight = true;
-            try {
-                await updateDoc(doc(db, "users", currentUserUid), {
-                    onlineStatus: status === true,
-                    lastSeen: serverTimestamp()
-                });
-                return true;
-            } catch (err) {
-                console.error("Error updating online status:", err);
-                return false;
-            } finally {
-                presenceWriteInFlight = false;
-            }
-        }
-
-        function startPresenceHeartbeat() {
-            if (selfStatusHeartbeat) clearInterval(selfStatusHeartbeat);
-            updateUserOnlineStatus(true);
-            selfStatusHeartbeat = setInterval(() => {
-                if (!document.hidden && currentUserUid) updateUserOnlineStatus(true);
-            }, PRESENCE_INTERVAL_MS);
-        }
-
-        function stopPresenceHeartbeat() {
-            if (selfStatusHeartbeat) {
-                clearInterval(selfStatusHeartbeat);
-                selfStatusHeartbeat = null;
-            }
-        }
-
-        // ===== TOAST =====
-        window.showToast = function(message, type = 'success', title = '') {
-            const toast = document.getElementById('globalToast');
-            const toastTitle = document.getElementById('toastTitle');
-            const toastMessage = document.getElementById('toastMessage');
-            const toastIcon = document.getElementById('toastIcon');
-            
-            if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
-
-            toast.className = 'toast-container';
-            const titles = { success: '✓ Success', error: '✕ Error', warning: '⚠️ Warning' };
-            const icons = { success: '✓', error: '✕', warning: '⚠️' };
-
-            toastTitle.textContent = title || titles[type] || 'Notification';
-            toastMessage.textContent = message;
-            toastIcon.textContent = icons[type] || '✓';
-
-            void toast.offsetWidth;
-            toast.classList.add(type, 'active');
-
-            toastTimeout = setTimeout(() => { dismissToast(); }, 3500);
-        };
-
-        window.dismissToast = function() {
-            const toast = document.getElementById('globalToast');
-            if (!toast.classList.contains('active')) return;
-            toast.classList.add('removing');
-            setTimeout(() => {
-                toast.className = 'toast-container';
-                toast.classList.remove('removing');
-                if (toastTimeout) { clearTimeout(toastTimeout); toastTimeout = null; }
-            }, 400);
-        };
-
-        // === CONFIRMATION MODAL ===
-        window.showConfirmModal = function(options) {
-            return new Promise((resolve) => {
-                const overlay = document.getElementById('confirmModalOverlay');
-                const modal = document.getElementById('confirmModal');
-                const icon = document.getElementById('confirmModalIcon');
-                const title = document.getElementById('confirmModalTitle');
-                const message = document.getElementById('confirmModalMessage');
-                const details = document.getElementById('confirmModalDetails');
-                const confirmBtn = document.getElementById('confirmModalConfirm');
-                const cancelBtn = document.getElementById('confirmModalCancel');
-
-                modal.className = 'confirm-modal ' + (options.type || 'warning');
-                icon.textContent = options.icon || '⚠️';
-                title.textContent = options.title || 'Are you sure?';
-                message.textContent = options.message || 'This action cannot be undone.';
-                
-                if (options.details) {
-                    details.innerHTML = options.details;
-                    details.style.display = 'block';
-                } else {
-                    details.style.display = 'none';
-                }
-
-                confirmBtn.textContent = options.confirmText || 'Confirm';
-                confirmBtn.className = 'btn-confirm ' + (options.confirmType || 'danger');
-                cancelBtn.textContent = options.cancelText || 'Cancel';
-
-                pendingAction = { resolve };
-                overlay.classList.add('active');
-            });
-        };
-
-        window.closeConfirmModal = function() {
-            document.getElementById('confirmModalOverlay').classList.remove('active');
-        };
-
-        window.handleConfirm = function() {
-            if (pendingAction) {
-                pendingAction.resolve(true);
-                pendingAction = null;
-            }
-            closeConfirmModal();
-        };
-
-        window.handleCancel = function() {
-            if (pendingAction) {
-                pendingAction.resolve(false);
-                pendingAction = null;
-            }
-            closeConfirmModal();
-        };
-
-        document.getElementById('confirmModalOverlay').addEventListener('click', function(e) {
-            if (e.target === this) handleCancel();
-        });
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') handleCancel();
-        });
-
-        // === HELPERS ===
-        function escapeHTML(str) {
-            return String(str || '').replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
-        }
-
-        function getInitials(name) {
-            if (!name) return 'U';
-            const parts = name.trim().split(' ');
-            if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-            return name.substring(0, 2).toUpperCase();
-        }
-
-        function formatTimeAgo(timestamp) {
-            if (!timestamp) return '';
-            let date;
-            if (timestamp?.toDate) {
-                date = timestamp.toDate();
-            } else {
-                date = new Date(timestamp);
-            }
-            if (isNaN(date.getTime())) return '';
-            const now = new Date();
-            const diff = Math.floor((now - date) / 1000);
-            if (diff < 5) return 'Just now';
-            if (diff < 60) return `${diff}s ago`;
-            const minutes = Math.floor(diff / 60);
-            if (minutes < 60) return `${minutes}m ago`;
-            const hours = Math.floor(minutes / 60);
-            if (hours < 24) return `${hours}h ago`;
-            const days = Math.floor(hours / 24);
-            if (days < 7) return `${days}d ago`;
-            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-        }
-
-        function getAvatarHTML(data, uid) {
-            const avatarUrl = data.avatar || data.photoURL || data.profilePic || '';
-            if (avatarUrl) {
-                return `<img src="${escapeHTML(avatarUrl)}" alt="${escapeHTML(data.name || 'User')}">`;
-            }
-            return getInitials(data.name || 'User');
-        }
-
-        // === APPLY THEME ===
-        function applyTheme() {
-            try {
-                const settings = JSON.parse(localStorage.getItem('spikeSettings') || '{}');
-                const primary = settings.accentColor || '#00a884';
-                document.documentElement.style.setProperty('--primary', primary);
-                document.documentElement.style.setProperty('--primary-glow', primary + '40');
-                document.documentElement.style.setProperty('--primary-hover', primary);
-                if (settings.darkMode === false) {
-                    document.body.classList.add('light-mode');
-                } else {
-                    document.body.classList.remove('light-mode');
-                }
-            } catch (e) {}
-        }
-        applyTheme();
-
-        // === NAVIGATION ===
-        window.goToFeed = function() { window.location.href = "feed.html"; };
-        window.goToMessages = function() { window.location.href = "chat.html"; };
-        window.goToFriends = function() { window.location.href = "friends.html"; };
-        window.goToProfile = function() { window.location.href = "profile.html"; };
-        window.goToAdmin = function() { window.location.href = "administrator.html"; };
-        window.goToGroups = function() { window.location.href = "community.html"; };
-
-        // === AUTH ===
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) {
-                stopPresenceHeartbeat();
-                if (currentUserUid) await updateUserOnlineStatus(false);
-                window.location.href = "index.html";
-                return;
-            }
-            currentUser = user;
-            currentUserUid = user.uid;
-            // Set online and keep presence fresh while the APK/page is active.
-            startPresenceHeartbeat();
-            
-            const adminLink = document.getElementById('adminNavLink');
-            if (user.email && ADMIN_EMAILS.includes(user.email.toLowerCase())) {
-                adminLink.classList.add('visible');
-            }
-
-            // Ensure user document exists
-            await ensureUserDocument(currentUser.uid);
-
-            // Listen for online status of friends
-            listenToFriendStatuses();
-
-            // Load members
-            await loadMembers();
-            renderMemberDirectory();
-
-            // Listen only for relationship changes. Presence heartbeats change
-            // onlineStatus/lastSeen and must not reload the entire directory.
-            let relationshipSignature = '';
-            onSnapshot(doc(db, "users", currentUser.uid), async (snap) => {
-                if (!snap.exists()) return;
-
-                const data = snap.data();
-                const signature = JSON.stringify({
-                    friends: Array.isArray(data.friends) ? data.friends : [],
-                    friendRequests: Array.isArray(data.friendRequests) ? data.friendRequests : [],
-                    sentRequests: Array.isArray(data.sentRequests) ? data.sentRequests : [],
-                    blockedUsers: Array.isArray(data.blockedUsers) ? data.blockedUsers : []
-                });
-
-                // Initial callback: the directory was already loaded above.
-                if (!relationshipSignature) {
-                    relationshipSignature = signature;
-                    return;
-                }
-
-                // Ignore presence-only updates.
-                if (signature === relationshipSignature) return;
-                relationshipSignature = signature;
-
-                friendUids = Array.isArray(data.friends) ? data.friends : [];
-                syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
-                await loadMembers(true);
-                renderMemberDirectory();
-            });
-
-            console.log('👥 Friends page loaded');
-        });
-
-        // ===== ONLINE STATUS: lifecycle + heartbeat =====
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopPresenceHeartbeat();
-                updateUserOnlineStatus(false);
-            } else if (currentUserUid) {
-                startPresenceHeartbeat();
-            }
-        });
-
-        window.addEventListener('pagehide', () => {
-            stopPresenceHeartbeat();
-            if (currentUserUid) updateUserOnlineStatus(false);
-        });
-
-        window.addEventListener('beforeunload', () => {
-            stopPresenceHeartbeat();
-            if (currentUserUid) updateUserOnlineStatus(false);
-        });
-
-        async function ensureUserDocument(uid) {
-            try {
-                const userRef = doc(db, "users", uid);
-                const userSnap = await getDoc(userRef);
-                if (!userSnap.exists()) {
-                    const newData = {
-                        name: 'User',
-                        email: '',
-                        avatar: '',
-                        bio: '',
-                        friends: [],
-                        friendRequests: [],
-                        sentRequests: [],
-                        blockedUsers: [],
-                        joinedGroups: [],
-                        createdAt: new Date().toISOString(),
-                        onlineStatus: false,
-                        lastSeen: serverTimestamp()
-                    };
-                    await setDoc(userRef, newData);
-                }
-            } catch (err) {
-                console.error("Error ensuring user document:", err);
-            }
-        }
-
-        function listenToFriendStatuses() {
-            if (!currentUser) return;
-            const userRef = doc(db, "users", currentUser.uid);
-            onSnapshot(userRef, (docSnap) => {
-                if (!docSnap.exists()) return;
-                const data = docSnap.data();
-                friendUids = Array.isArray(data.friends) ? data.friends : [];
-                syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
-            }, (err) => console.error("Friend list listener error:", err));
-        }
-
-        function syncStatusListeners(uids) {
-            const wanted = new Set(uids);
-
-            for (const [uid, unsubscribe] of friendStatusUnsubs) {
-                if (!wanted.has(uid)) {
-                    unsubscribe();
-                    friendStatusUnsubs.delete(uid);
-                    delete onlineStatuses[uid];
-                    delete lastSeen[uid];
-                }
-            }
-
-            wanted.forEach(uid => {
-                if (friendStatusUnsubs.has(uid)) return;
-                const unsubscribe = onSnapshot(doc(db, "users", uid), (friendSnap) => {
-                    if (!friendSnap.exists()) {
-                        onlineStatuses[uid] = false;
-                        lastSeen[uid] = null;
-                    } else {
-                        const fData = friendSnap.data();
-                        onlineStatuses[uid] = fData.onlineStatus === true;
-                        lastSeen[uid] = fData.lastSeen || null;
-                    }
-                    if (currentTab === 'friends' || currentTab === 'all') renderMemberDirectory();
-                }, (err) => console.error(`Status listener error for ${uid}:`, err));
-                friendStatusUnsubs.set(uid, unsubscribe);
-            });
-        }
-        // === LOAD MEMBERS with pagination ===
-        let lastDoc = null;
-        let hasMore = true;
-        const PAGE_SIZE = 20;
-        let membersLoadPromise = null;
-
-        async function loadMembers(reset = true) {
-            // Prevent overlapping reads. Auth initialization and the user snapshot
-            // can fire together; overlapping reads used to append the same users twice.
-            if (membersLoadPromise) {
-                await membersLoadPromise;
-                return;
-            }
-
-            membersLoadPromise = (async () => {
-                if (reset) {
-                    allMembersCache = [];
-                    lastDoc = null;
-                    hasMore = true;
-                }
-                if (!hasMore) return;
-
-                try {
-                    let q = query(collection(db, "users"), orderBy("name"), limit(PAGE_SIZE));
-                    if (lastDoc) {
-                        q = query(collection(db, "users"), orderBy("name"), startAfter(lastDoc), limit(PAGE_SIZE));
-                    }
-
-                    const snapshot = await getDocs(q);
-                    if (snapshot.empty) {
-                        hasMore = false;
-                        return;
-                    }
-
-                    lastDoc = snapshot.docs[snapshot.docs.length - 1];
-
-                    // Upsert by UID so every Firestore user can exist only once.
-                    const membersById = new Map(allMembersCache.map(member => [member.id, member]));
-                    snapshot.forEach(docSnap => {
-                        if (docSnap.id === currentUser.uid) return;
-                        membersById.set(docSnap.id, { id: docSnap.id, ...docSnap.data() });
-                    });
-                    allMembersCache = Array.from(membersById.values());
-
-                    syncStatusListeners([...friendUids, ...allMembersCache.map(member => member.id)]);
-
-                    if (snapshot.docs.length < PAGE_SIZE) {
-                        hasMore = false;
-                    }
-
-                    localStorage.setItem(
-                        `members_${currentUser.uid}_${CACHE_VERSION}`,
-                        JSON.stringify(allMembersCache)
-                    );
-                } catch (err) {
-                    console.error("Error loading members:", err);
-                    showToast("Failed to load members. Please refresh.", "error", "Connection Error");
-                }
-            })();
-
-            try {
-                await membersLoadPromise;
-            } finally {
-                membersLoadPromise = null;
-            }
-        }
-
-        window.loadMoreMembers = async function() {
-            await loadMembers(false);
-            renderMemberDirectory();
-        };
-
-        // === RENDER ===
-        window.switchTab = function(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-            renderMemberDirectory();
-        };
-
-        window.renderMemberDirectory = async function() {
-            const queryText = document.getElementById("searchInput").value.trim().toLowerCase();
-            const searchResultsEl = document.getElementById("searchResults");
-
-            try {
-                const mySnap = await getDoc(doc(db, "users", currentUser.uid));
-                const myData = mySnap.exists() ? mySnap.data() : {};
-                const myFriends = myData.friends || [];
-                const sentRequests = myData.sentRequests || [];
-                const incomingRequests = myData.friendRequests || [];
-                const blockedUsers = myData.blockedUsers || [];
-
-                // Final defensive de-duplication by Firestore UID.
-                allMembersCache = Array.from(
-                    new Map(allMembersCache.map(member => [member.id, member])).values()
-                );
-
-                let filteredMembers = allMembersCache;
-
-                // Apply filters
-                if (currentTab === 'friends') {
-                    filteredMembers = allMembersCache.filter(u => myFriends.includes(u.id));
-                } else if (currentTab === 'requests') {
-                    filteredMembers = allMembersCache.filter(u => incomingRequests.includes(u.id) || sentRequests.includes(u.id));
-                } else if (currentTab === 'blocked') {
-                    filteredMembers = allMembersCache.filter(u => blockedUsers.includes(u.id));
-                } else {
-                    filteredMembers = allMembersCache.filter(u => !blockedUsers.includes(u.id));
-                }
-
-                if (queryText) {
-                    filteredMembers = filteredMembers.filter(u => {
-                        const name = u.name || u.displayName || u.username || 'User';
-                        return name.toLowerCase().includes(queryText);
-                    });
-                }
-
-                // Sort: incoming first, then friends
-                filteredMembers.sort((a, b) => {
-                    const aIncoming = incomingRequests.includes(a.id);
-                    const bIncoming = incomingRequests.includes(b.id);
-                    if (aIncoming && !bIncoming) return -1;
-                    if (!aIncoming && bIncoming) return 1;
-                    const aFriend = myFriends.includes(a.id);
-                    const bFriend = myFriends.includes(b.id);
-                    if (aFriend && !bFriend) return -1;
-                    if (!aFriend && bFriend) return 1;
-                    return 0;
-                });
-
-                document.getElementById('friendCount').textContent = myFriends.length;
-
-                if (filteredMembers.length === 0) {
-                    let message = 'No members found.';
-                    if (currentTab === 'friends') message = 'You have no friends yet. Search for people to connect!';
-                    else if (currentTab === 'requests') message = 'No pending friend requests.';
-                    else if (currentTab === 'blocked') message = 'You haven\'t blocked anyone.';
-                    else if (queryText) message = `No members found matching "${escapeHTML(queryText)}".`;
-                    searchResultsEl.innerHTML = `<div class="empty-state"><span class="icon">👤</span>${message}</div>`;
-                    return;
-                }
-
-                let html = "";
-                for (const uData of filteredMembers) {
-                    const name = uData.name || uData.displayName || uData.username || 'User';
-                    const isFriend = myFriends.includes(uData.id);
-                    const isRequested = sentRequests.includes(uData.id);
-                    const isIncoming = incomingRequests.includes(uData.id);
-                    const isBlocked = blockedUsers.includes(uData.id);
-                    const avatarHTML = getAvatarHTML(uData, uData.id);
-                    
-                    // Presence is considered online only while the heartbeat is fresh.
-                    const lastSeenTime = lastSeen[uData.id] || null;
-                    const lastSeenDate = lastSeenTime?.toDate ? lastSeenTime.toDate() : (lastSeenTime ? new Date(lastSeenTime) : null);
-                    const heartbeatFresh = lastSeenDate && !Number.isNaN(lastSeenDate.getTime()) && (Date.now() - lastSeenDate.getTime()) <= PRESENCE_STALE_MS;
-                    const isOnline = onlineStatuses[uData.id] === true && heartbeatFresh;
-                    const statusText = isOnline ? '🟢 Online' : (lastSeenTime ? `Last seen ${formatTimeAgo(lastSeenTime)}` : 'Offline');
-
-                    // Mutual friends
-                    const mutualFriends = myFriends.filter(fid => {
-                        const friendData = allMembersCache.find(u => u.id === fid);
-                        return friendData && (friendData.friends || []).includes(uData.id);
-                    });
-                    const mutualCount = mutualFriends.length;
-
-                    let actionHtml = '';
-                    let itemClass = '';
-
-                    if (isBlocked) {
-                        itemClass = 'blocked';
-                        actionHtml = `
-                            <button class="btn-sm success" onclick="unblockUser('${uData.id}')">🔓 Unblock</button>
-                        `;
-                    } else if (isFriend) {
-                        actionHtml = `
-                            <div class="action-group">
-                                <button class="btn-sm primary" onclick="openChatRoom('${uData.id}', '${String(name).replace(/'/g, "\\'")}')">💬 Chat</button>
-                                <button class="btn-sm warning" onclick="unfriendUser('${uData.id}')">Unfriend</button>
-                                <button class="btn-sm danger" onclick="blockUser('${uData.id}')">🚫 Block</button>
-                            </div>
-                        `;
-                    } else if (isRequested) {
-                        actionHtml = `
-                            <div class="action-group">
-                                <button class="btn-sm danger" onclick="cancelRequest('${uData.id}')">Cancel Request</button>
-                                <button class="btn-sm danger" onclick="blockUser('${uData.id}')">🚫 Block</button>
-                            </div>
-                        `;
-                    } else if (isIncoming) {
-                        actionHtml = `
-                            <div class="action-group">
-                                <button class="btn-sm primary" onclick="acceptRequest('${uData.id}')">Accept</button>
-                                <button class="btn-sm danger" onclick="declineRequest('${uData.id}')">Decline</button>
-                                <button class="btn-sm danger" onclick="blockUser('${uData.id}')">🚫 Block</button>
-                            </div>
-                        `;
-                    } else {
-                        actionHtml = `
-                            <div class="action-group">
-                                <button class="btn-sm primary" onclick="sendRequest('${uData.id}')">Add Friend</button>
-                                <button class="btn-sm danger" onclick="blockUser('${uData.id}')">🚫 Block</button>
-                            </div>
-                        `;
-                    }
-
-                    const statusLabel = isBlocked ? '🚫 Blocked' : 
-                                      isIncoming ? '📩 Incoming Request' : 
-                                      isRequested ? '⏳ Pending' : 
-                                      isFriend ? '✅ Friend' : '';
-
-                    const onlineDot = isOnline ? 'online' : 'offline';
-
-                    html += `
-                        <div class="user-item ${itemClass}">
-                            <div class="user-info-group">
-                                <div class="avatar-wrapper">
-                                    <div class="avatar">${avatarHTML}</div>
-                                    <span class="online-indicator ${onlineDot}"></span>
-                                </div>
-                                <div class="user-meta-info">
-                                    <span class="username">${escapeHTML(name)}</span>
-                                    <span class="user-handle">
-                                        ${statusLabel}
-                                        ${mutualCount > 0 ? `<span class="mutual-friends">${mutualCount} mutual</span>` : ''}
-                                        <span style="font-size:0.6rem;color:var(--text-muted);">${escapeHTML(statusText)}</span>
-                                    </span>
-                                </div>
-                            </div>
-                            ${actionHtml}
-                        </div>
-                    `;
-                }
-
-                searchResultsEl.innerHTML = html;
-
-                // Show load more button if there are more members
-                if (hasMore && currentTab === 'all' && !queryText) {
-                    const loadMoreHTML = `<button class="load-more-btn" onclick="loadMoreMembers()">Load More</button>`;
-                    // Append to results
-                    searchResultsEl.innerHTML += loadMoreHTML;
-                }
-
-            } catch (err) {
-                console.error("Render error:", err);
-                searchResultsEl.innerHTML = `<div class="empty-state"><span class="icon">⚠️</span>Error loading members. Please refresh.</div>`;
-                showToast("Failed to render members.", "error", "Error");
-            }
-        };
-
-        // === CHAT ROOM NAVIGATION ===
-        // chat_room.html requires BOTH chatId and userId. Use the same deterministic
-        // room ID format already used by chat_room.html when creating forwarded chats:
-        // [currentUser.uid, otherUserId].sort().join('_').
-        window.openChatRoom = async function(otherUserId, otherUserName) {
-            if (!currentUser?.uid || !otherUserId || currentUser.uid === otherUserId) {
-                showToast("Unable to open this chat.", "error", "Chat Error");
-                return;
-            }
-
-            const chatId = [currentUser.uid, otherUserId].sort().join('_');
-            const chatRef = doc(db, "chats", chatId);
-
-            try {
-                const chatSnap = await getDoc(chatRef);
-
-                // Create the room if it does not exist yet. This prevents
-                // chat_room.html from receiving a non-existent/invalid room ID.
-                if (!chatSnap.exists()) {
-                    await setDoc(chatRef, {
-                        participants: [currentUser.uid, otherUserId],
-                        createdAt: serverTimestamp(),
-                        lastMessage: '',
-                        lastMessageTime: null,
-                        unreadCount: {
-                            [currentUser.uid]: 0,
-                            [otherUserId]: 0
-                        }
-                    });
-                }
-
-                const params = new URLSearchParams({
-                    chatId,
-                    userId: otherUserId,
-                    name: otherUserName || 'User'
-                });
-
-                window.location.href = `chat_room.html?${params.toString()}`;
-            } catch (err) {
-                console.error("Error opening chat room:", err);
-                showToast("Failed to open chat.", "error", "Chat Error");
-            }
-        };
-
-        // === FRIEND ACTIONS ===
-        window.sendRequest = async function(targetUid) {
-            const btn = document.querySelector(`[onclick*="sendRequest('${targetUid}')"]`);
-            if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
-
-            try {
-                await ensureUserDocument(targetUid);
-                const myRef = doc(db, "users", currentUser.uid);
-                const mySnap = await getDoc(myRef);
-                const myData = mySnap.exists() ? mySnap.data() : {};
-                if ((myData.friends || []).includes(targetUid)) {
-                    showToast("You are already friends.", "warning");
-                    if (btn) { btn.disabled = false; btn.textContent = 'Add Friend'; }
-                    return;
-                }
-                if ((myData.sentRequests || []).includes(targetUid)) {
-                    showToast("Request already sent.", "warning");
-                    if (btn) { btn.disabled = false; btn.textContent = 'Add Friend'; }
-                    return;
-                }
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", targetUid), { friendRequests: arrayUnion(currentUser.uid) });
-                batch.update(myRef, { sentRequests: arrayUnion(targetUid) });
-                await batch.commit();
-                await createUserNotification(targetUid, { id: `friend_request_${currentUser.uid}`, category: 'friends', type: 'friend_request', icon: '👥', text: `${currentUser.displayName || 'Someone'} sent you a friend request`, actorName: currentUser.displayName || 'User', actorAvatar: myData.avatar || '', sourceId: currentUser.uid, url: '/friends?tab=requests', createdAt: serverTimestamp(), _groupKey: `friend_request_${currentUser.uid}` });
-                showToast("Friend request sent!", "success", "Request Sent");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error sending request:", err);
-                showToast("Failed to send request.", "error", "Request Failed");
-            }
-            if (btn) { btn.disabled = false; btn.textContent = 'Add Friend'; }
-        };
-
-        window.cancelRequest = async function(targetUid) {
-            try {
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", targetUid), { friendRequests: arrayRemove(currentUser.uid) });
-                batch.update(doc(db, "users", currentUser.uid), { sentRequests: arrayRemove(targetUid) });
-                await batch.commit();
-                showToast("Request cancelled.", "warning", "Cancelled");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error cancelling request:", err);
-                showToast("Failed to cancel request.", "error", "Action Failed");
-            }
-        };
-
-        window.acceptRequest = async function(senderUid) {
-            try {
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", currentUser.uid), {
-                    friends: arrayUnion(senderUid), friendRequests: arrayRemove(senderUid)
-                });
-                batch.update(doc(db, "users", senderUid), {
-                    friends: arrayUnion(currentUser.uid), sentRequests: arrayRemove(currentUser.uid)
-                });
-                await batch.commit();
-                await createUserNotification(senderUid, { id: `friend_accepted_${currentUser.uid}`, category: 'friends', type: 'friend_accepted', icon: '✅', text: `${currentUser.displayName || 'Someone'} accepted your friend request`, actorName: currentUser.displayName || 'User', actorAvatar: (await getDoc(doc(db, 'users', currentUser.uid))).data()?.avatar || '', sourceId: currentUser.uid, url: '/friends', createdAt: serverTimestamp(), _groupKey: `friend_accepted_${currentUser.uid}` });
-                showToast("Friend request accepted!", "success", "Connected");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error accepting request:", err);
-                showToast("Failed to accept request.", "error", "Action Failed");
-            }
-        };
-
-        window.declineRequest = async function(senderUid) {
-            try {
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", currentUser.uid), { friendRequests: arrayRemove(senderUid) });
-                batch.update(doc(db, "users", senderUid), { sentRequests: arrayRemove(currentUser.uid) });
-                await batch.commit();
-                showToast("Request declined.", "warning", "Declined");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error declining request:", err);
-                showToast("Failed to decline request.", "error", "Action Failed");
-            }
-        };
-
-        window.unfriendUser = async function(targetUid) {
-            const user = allMembersCache.find(u => u.id === targetUid);
-            const userName = user ? (user.name || user.displayName || 'this user') : 'this user';
-            const confirmed = await showConfirmModal({
-                type: 'warning',
-                icon: '💔',
-                title: 'Unfriend',
-                message: `Remove ${escapeHTML(userName)} from your friends?`,
-                details: `They will be able to send you a new friend request in the future.`,
-                confirmText: 'Unfriend',
-                confirmType: 'warning',
-                cancelText: 'Cancel'
-            });
-            if (!confirmed) return;
-            try {
-                const batch = writeBatch(db);
-                batch.update(doc(db, "users", currentUser.uid), { friends: arrayRemove(targetUid) });
-                batch.update(doc(db, "users", targetUid), { friends: arrayRemove(currentUser.uid) });
-                await batch.commit();
-                showToast("Unfriended.", "warning", "Unfriended");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error unfriending:", err);
-                showToast("Failed to unfriend.", "error", "Action Failed");
-            }
-        };
-
-        window.blockUser = async function(targetUid) {
-            const user = allMembersCache.find(u => u.id === targetUid);
-            const userName = user ? (user.name || user.displayName || 'this user') : 'this user';
-            const confirmed = await showConfirmModal({
-                type: 'danger',
-                icon: '🚫',
-                title: 'Block User',
-                message: `Block ${escapeHTML(userName)}?`,
-                details: `They won't see your profile, posts, or messages. They will be removed from your friends list.`,
-                confirmText: 'Block',
-                confirmType: 'danger',
-                cancelText: 'Cancel'
-            });
-            if (!confirmed) return;
-            try {
-                const myRef = doc(db, "users", currentUser.uid);
-                const targetRef = doc(db, "users", targetUid);
-                const batch = writeBatch(db);
-                batch.update(myRef, {
-                    blockedUsers: arrayUnion(targetUid),
-                    friends: arrayRemove(targetUid),
-                    friendRequests: arrayRemove(targetUid),
-                    sentRequests: arrayRemove(targetUid)
-                });
-                batch.update(targetRef, {
-                    friends: arrayRemove(currentUser.uid),
-                    friendRequests: arrayRemove(currentUser.uid),
-                    sentRequests: arrayRemove(currentUser.uid)
-                });
-                await batch.commit();
-                showToast("User blocked.", "error", "Blocked");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error blocking user:", err);
-                showToast("Failed to block user.", "error", "Action Failed");
-            }
-        };
-
-        window.unblockUser = async function(targetUid) {
-            const user = allMembersCache.find(u => u.id === targetUid);
-            const userName = user ? (user.name || user.displayName || 'this user') : 'this user';
-            const confirmed = await showConfirmModal({
-                type: 'success',
-                icon: '🔓',
-                title: 'Unblock User',
-                message: `Unblock ${escapeHTML(userName)}?`,
-                details: `They will be able to see your profile and send you friend requests again.`,
-                confirmText: 'Unblock',
-                confirmType: 'primary',
-                cancelText: 'Cancel'
-            });
-            if (!confirmed) return;
-            try {
-                await updateDoc(doc(db, "users", currentUser.uid), {
-                    blockedUsers: arrayRemove(targetUid)
-                });
-                showToast("User unblocked.", "success", "Unblocked");
-                await loadMembers(true);
-                renderMemberDirectory();
-            } catch (err) {
-                console.error("Error unblocking user:", err);
-                showToast("Failed to unblock user.", "error", "Action Failed");
-            }
-        };
-
-        // === KEYBOARD SHORTCUTS ===
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                e.preventDefault();
-                document.getElementById('searchInput').focus();
-            }
-        });
-
-        console.log("🔥 🚀 SPIKE Friends page loaded with enhanced features + unified online status!");
-        console.log("📦 Cache Version:", CACHE_VERSION);
-        console.log("⌨️ Shortcut: Ctrl+F to focus search");
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SPIKE · Friends</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script type="importmap">
+    {
+      "imports": {
+        "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+      }
+    }
+  </script>
+
+  <style>
+    /* --- reset & base --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg1: #fdf2f8;
+      --bg2: #fef3c7;
+      --bg3: #ecfdf5;
+
+      --card: rgba(255, 255, 255, 0.78);
+      --border: rgba(255, 255, 255, 0.65);
+
+      --text: #1f2937;
+      --muted: #6b7280;
+      --light: #9ca3af;
+
+      --input: #ffffff;
+      --input-border: #e5e7eb;
+
+      --pink: #f472b6;
+      --orange: #fb923c;
+      --green: #22c55e;
+      --blue: #3b82f6;
+      --red: #ef4444;
+    }
+
+    body.dark {
+      --bg1: #111827;
+      --bg2: #1f2937;
+      --bg3: #111827;
+
+      --card: rgba(17, 24, 39, 0.88);
+      --border: rgba(255, 255, 255, 0.1);
+
+      --text: #f3f4f6;
+      --muted: #9ca3af;
+      --light: #6b7280;
+
+      --input: #111827;
+      --input-border: #374151;
+    }
+
+    body {
+      min-height: 100vh;
+      padding: 24px;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+
+      background: linear-gradient(145deg, var(--bg1), var(--bg2) 45%, var(--bg3));
+      transition: background 0.3s;
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+
+    /* --- profile modal --- */
+    .profile-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(17, 24, 39, 0.58);
+      backdrop-filter: blur(8px);
+    }
+
+    .profile-modal.show { display: flex; }
+
+    .profile-card {
+      width: min(100%, 460px);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: var(--card);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+    }
+
+    .profile-cover {
+      height: 150px;
+      background: linear-gradient(135deg, #f472b6, #fb923c, #34d399);
+      background-size: cover;
+      background-position: center;
+    }
+
+    .profile-body { padding: 0 22px 22px; }
+
+    .profile-avatar-wrap {
+      margin-top: -54px;
+      width: 108px;
+      height: 108px;
+      padding: 4px;
+      border-radius: 50%;
+      background: var(--card);
+    }
+
+    .profile-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 36px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+    }
+
+    .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .profile-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .profile-name { font-size: 22px; font-weight: 700; }
+    .profile-username { margin-top: 3px; color: var(--muted); font-size: 13px; }
+    .profile-bio { margin-top: 16px; color: var(--text); line-height: 1.55; font-size: 14px; white-space: pre-wrap; }
+    .profile-meta { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 14px; }
+    .profile-chip { padding: 6px 10px; border-radius: 999px; background: var(--input-border); color: var(--muted); font-size: 11px; font-weight: 600; }
+    .profile-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+    .profile-close { min-width: 38px; padding: 8px 12px; }
+
+    .person-clickable { cursor: pointer; }
+    .person-clickable:hover .person-name { text-decoration: underline; }
+
+    .presence-line { display:flex; align-items:center; gap:6px; margin-top:5px; font-size:11px; color:var(--muted); }
+    .presence-dot { width:8px; height:8px; border-radius:50%; background:#9ca3af; flex:0 0 auto; }
+    .presence-dot.online { background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.12); }
+    .suggested-badge { display:inline-flex; align-items:center; gap:4px; margin-left:6px; padding:3px 7px; border-radius:999px; background:rgba(244,114,182,.12); color:#db2777; font-size:9px; font-weight:700; vertical-align:middle; }
+    body.dark .suggested-badge { color:#f9a8d4; background:rgba(244,114,182,.14); }
+    .person-meta { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
+    .profile-presence { display:flex; align-items:center; gap:7px; margin-top:8px; color:var(--muted); font-size:12px; font-weight:600; }
+    .profile-message { margin-left:auto; }
+
+    @media (max-width: 520px) {
+      .profile-modal { padding: 12px; }
+      .profile-cover { height: 125px; }
+    }
+
+    /* --- header --- */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+
+      padding: 14px 18px;
+      margin-bottom: 18px;
+
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-name {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f472b6, #fb923c, #34d399);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .brand-sub {
+      color: var(--light);
+      font-size: 13px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px 4px 4px;
+      border: 1px solid var(--input-border);
+      border-radius: 30px;
+    }
+
+    .small-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+    }
+
+    .small-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .user-name {
+      max-width: 130px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* --- buttons --- */
+    .btn {
+      display: inline-flex !important;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 16px;
+      border: 0;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn:disabled {
+      opacity: 0.55 !important;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      color: white;
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+    }
+
+    .btn-outline {
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--input-border);
+    }
+
+    .btn-add {
+      color: white !important;
+      background: #3b82f6 !important;
+      border: 0 !important;
+    }
+
+    .btn-accept {
+      color: white !important;
+      background: #22c55e !important;
+      border: 0 !important;
+    }
+
+    .btn-cancel {
+      color: #ef4444 !important;
+      background: transparent !important;
+      border: 1px solid #ef4444 !important;
+    }
+
+    .btn-remove {
+      color: #ef4444 !important;
+      background: transparent !important;
+      border: 1px solid #ef4444 !important;
+    }
+
+    .btn-friends {
+      color: white !important;
+      background: #22c55e !important;
+      border: 0 !important;
+      opacity: 0.7 !important;
+      cursor: default;
+    }
+
+    /* --- premium notifications --- */
+    .status { display: none; }
+    .toast-stack {
+      position: fixed;
+      top: 22px;
+      right: 22px;
+      z-index: 5000;
+      width: min(390px, calc(100vw - 28px));
+      display: grid;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .toast {
+      pointer-events: auto;
+      display: grid;
+      grid-template-columns: 42px 1fr 28px;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 14px 14px 15px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      backdrop-filter: blur(22px) saturate(150%);
+      box-shadow: 0 20px 55px rgba(15,23,42,.18), 0 3px 12px rgba(15,23,42,.08);
+      transform: translateX(115%) scale(.96);
+      opacity: 0;
+      transition: transform .32s cubic-bezier(.22,1,.36,1), opacity .25s ease;
+    }
+    .toast.show { transform: translateX(0) scale(1); opacity: 1; }
+    .toast-icon {
+      width: 42px; height: 42px; border-radius: 14px;
+      display: grid; place-items: center; font-size: 19px;
+    }
+    .toast.success .toast-icon { background: #dcfce7; color: #15803d; }
+    .toast.error .toast-icon { background: #fee2e2; color: #b91c1c; }
+    .toast.warning .toast-icon { background: #fef3c7; color: #b45309; }
+    .toast.info .toast-icon { background: #dbeafe; color: #1d4ed8; }
+    .toast-title { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+    .toast-message { font-size: 12px; line-height: 1.45; color: var(--muted); }
+    .toast-close {
+      border: 0; background: transparent; color: var(--muted); cursor: pointer;
+      width: 28px; height: 28px; border-radius: 9px; font-size: 18px;
+    }
+    .toast-close:hover { background: var(--input); }
+    .confirm-backdrop {
+      position: fixed; inset: 0; z-index: 5100; display: none; place-items: center;
+      padding: 20px; background: rgba(15,23,42,.42); backdrop-filter: blur(9px);
+    }
+    .confirm-backdrop.show { display: grid; }
+    .confirm-panel {
+      width: min(430px, 100%); padding: 25px; border: 1px solid var(--border);
+      border-radius: 28px; background: var(--card); backdrop-filter: blur(24px);
+      box-shadow: 0 30px 90px rgba(15,23,42,.25);
+      animation: panelIn .25s cubic-bezier(.22,1,.36,1);
+    }
+    @keyframes panelIn { from { opacity:0; transform:translateY(12px) scale(.97); } to { opacity:1; transform:none; } }
+    .confirm-icon { width:50px; height:50px; border-radius:16px; display:grid; place-items:center; background:#fef3c7; color:#b45309; font-size:23px; margin-bottom:16px; }
+    .confirm-title { font-size:18px; font-weight:850; margin-bottom:7px; }
+    .confirm-text { color:var(--muted); font-size:13px; line-height:1.55; margin-bottom:20px; }
+    .confirm-actions { display:flex; justify-content:flex-end; gap:9px; }
+    .confirm-actions .btn-danger { color:white; background:#ef4444; border:0; }
+    body.dark .toast-success .toast-icon, body.dark .toast.success .toast-icon { background:rgba(34,197,94,.14); color:#86efac; }
+    body.dark .toast.error .toast-icon { background:rgba(239,68,68,.14); color:#fca5a5; }
+    body.dark .toast.warning .toast-icon { background:rgba(245,158,11,.14); color:#fcd34d; }
+    body.dark .toast.info .toast-icon { background:rgba(59,130,246,.14); color:#93c5fd; }
+    @media (max-width: 560px) { .toast-stack { top: 12px; right: 12px; left: 12px; width: auto; } .toast { border-radius: 18px; } }
+
+    /* --- main card --- */
+    .card {
+      padding: 24px;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: var(--card);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+    }
+
+    /* --- tabs --- */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid var(--input-border);
+      border-radius: 18px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px;
+      border: 0;
+      border-radius: 14px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .tab.active {
+      color: #ec4899;
+      background: rgba(244, 114, 182, 0.12);
+    }
+
+    .tab-count {
+      margin-left: 3px;
+      opacity: 0.7;
+    }
+
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* --- search --- */
+    .search-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .search {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid var(--input-border);
+      border-radius: 18px;
+      outline: none;
+      color: var(--text);
+      background: var(--input);
+      transition: border-color 0.2s;
+    }
+
+    .search:focus {
+      border-color: #f472b6;
+    }
+
+    /* --- list --- */
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .person {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px;
+      border: 1px solid var(--input-border);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.25);
+    }
+
+    body.dark .person {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .person-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .avatar {
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 50%;
+      color: white;
+      font-weight: 700;
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .person-text {
+      min-width: 0;
+    }
+
+    .person-name {
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .person-username {
+      margin-top: 3px;
+      color: var(--light);
+      font-size: 11px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      flex-shrink: 0;
+      min-width: 90px;
+    }
+
+    .empty {
+      padding: 35px 15px;
+      text-align: center;
+      color: var(--light);
+      font-size: 13px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .section-title strong {
+      font-size: 15px;
+    }
+
+    .section-title span {
+      color: var(--light);
+      font-size: 12px;
+    }
+
+    /* --- responsive --- */
+    @media (max-width: 650px) {
+      body {
+        padding: 12px;
+      }
+      .card {
+        padding: 15px;
+      }
+      .header {
+        border-radius: 20px;
+      }
+      .user-name {
+        display: none;
+      }
+      .tabs {
+        flex-wrap: wrap;
+      }
+      .tab {
+        flex: 1 0 45%;
+      }
+      .search-row {
+        flex-direction: column;
+      }
+      .person {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .person-info {
+        width: 100%;
+      }
+      .actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .btn {
+        min-height: 36px;
+      }
+    }
+  </style>
 </head>
-<body>
 
-    <header class="feed-header">
-        <a href="feed.html" class="logo">SPIKE</a>
-        <div class="user-nav">
-            <a href="administrator.html" class="nav-link admin-heart-link" id="adminNavLink" title="Admin Dashboard" onclick="goToAdmin()">
-                <span class="heart-icon">❤️</span>
-            </a>
-            <a href="community.html" class="nav-link" onclick="goToGroups()" title="Groups">🏠</a>
-            <a href="feed.html" class="nav-link" onclick="goToFeed()">📱 Feed</a>
-            <a href="chat.html" class="nav-link" onclick="goToMessages()">💬 Chat</a>
-            <a href="friends.html" class="nav-link active">👥 Friends</a>
-            <a href="profile.html" class="nav-link" onclick="goToProfile()">👤 Profile</a>
+<body>
+  <div class="container">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div class="brand">
+        <span class="brand-name">SPIKE</span>
+        <span class="brand-sub">· friends</span>
+      </div>
+      <div class="header-actions">
+        <div class="user-badge">
+          <div id="headerAvatar" class="small-avatar">👤</div>
+          <span id="headerName" class="user-name">—</span>
         </div>
+        <button id="logoutBtn" class="btn btn-outline">Sign out</button>
+        <button id="darkToggle" class="btn btn-outline" title="Toggle dark mode">🌙</button>
+      </div>
     </header>
 
-    <main class="friends-main">
-        
-        <div class="section-card">
-            <div class="section-title">
-                Find Friends
-                <span class="badge" id="friendCount">0</span>
-            </div>
-            
-            <div class="tabs-container">
-                <button class="tab-btn active" data-tab="all" onclick="switchTab('all')">🌐 All</button>
-                <button class="tab-btn" data-tab="friends" onclick="switchTab('friends')">👥 Friends</button>
-                <button class="tab-btn" data-tab="requests" onclick="switchTab('requests')">📩 Requests</button>
-                <button class="tab-btn" data-tab="blocked" onclick="switchTab('blocked')">🚫 Blocked</button>
-            </div>
-
-            <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search members by name... (Ctrl+F)" oninput="renderMemberDirectory()">
-                <button class="btn-action" onclick="renderMemberDirectory()">Search</button>
-            </div>
-            <div id="searchResults" class="user-list">
-                <div class="user-list-shimmer">
-                    <div class="shimmer-item">
-                        <div class="shimmer-avatar"></div>
-                        <div>
-                            <div class="shimmer-line" style="width:100px;margin-bottom:6px;"></div>
-                            <div class="shimmer-line" style="width:160px;"></div>
-                        </div>
-                        <div class="shimmer-line short"></div>
-                    </div>
-                    <div class="shimmer-item">
-                        <div class="shimmer-avatar"></div>
-                        <div>
-                            <div class="shimmer-line" style="width:120px;margin-bottom:6px;"></div>
-                            <div class="shimmer-line" style="width:140px;"></div>
-                        </div>
-                        <div class="shimmer-line short"></div>
-                    </div>
-                    <div class="shimmer-item">
-                        <div class="shimmer-avatar"></div>
-                        <div>
-                            <div class="shimmer-line" style="width:90px;margin-bottom:6px;"></div>
-                            <div class="shimmer-line" style="width:180px;"></div>
-                        </div>
-                        <div class="shimmer-line short"></div>
-                    </div>
-                </div>
-            </div>
+    <!-- STATUS -->
+    <div id="status" class="status" aria-live="polite"></div>
+    <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="false"></div>
+    <div id="confirmBackdrop" class="confirm-backdrop" aria-hidden="true">
+      <div class="confirm-panel" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+        <div id="confirmIcon" class="confirm-icon">⚠</div>
+        <div id="confirmTitle" class="confirm-title">Are you sure?</div>
+        <div id="confirmText" class="confirm-text"></div>
+        <div class="confirm-actions">
+          <button id="confirmCancel" class="btn btn-outline" type="button">Cancel</button>
+          <button id="confirmOk" class="btn btn-danger" type="button">Continue</button>
         </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="card">
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab active" data-tab="discover">Discover <span class="tab-count" id="discoverCount">0</span></button>
+        <button class="tab" data-tab="friends">Friends <span class="tab-count" id="friendsTabCount">0</span></button>
+        <button class="tab" data-tab="incoming">Incoming <span class="tab-count" id="incomingTabCount">0</span></button>
+        <button class="tab" data-tab="outgoing">Outgoing <span class="tab-count" id="outgoingTabCount">0</span></button>
+      </div>
+
+      <!-- DISCOVER -->
+      <section id="tab-discover" class="tab-content active">
+        <div class="search-row">
+          <input id="peopleSearch" class="search" type="search" placeholder="Search people..." autocomplete="off" />
+          <button id="refreshBtn" class="btn btn-primary">Refresh</button>
+        </div>
+        <div id="peopleList" class="list"><div class="empty">Loading people...</div></div>
+      </section>
+
+      <!-- FRIENDS -->
+      <section id="tab-friends" class="tab-content">
+        <div class="section-title"><strong>Your Friends</strong> <span id="friendsCount">0</span></div>
+        <div id="friendsList" class="list"><div class="empty">No friends yet.</div></div>
+      </section>
+
+      <!-- INCOMING -->
+      <section id="tab-incoming" class="tab-content">
+        <div class="section-title"><strong>Incoming Requests</strong> <span id="incomingCount">0</span></div>
+        <div id="incomingList" class="list"><div class="empty">No incoming requests.</div></div>
+      </section>
+
+      <!-- OUTGOING -->
+      <section id="tab-outgoing" class="tab-content">
+        <div class="section-title"><strong>Outgoing Requests</strong> <span id="outgoingCount">0</span></div>
+        <div id="outgoingList" class="list"><div class="empty">No outgoing requests.</div></div>
+      </section>
 
     </main>
 
-    <!-- === CONFIRMATION MODAL === -->
-    <div id="confirmModalOverlay" class="confirm-modal-overlay">
-        <div id="confirmModal" class="confirm-modal warning">
-            <div class="confirm-modal-icon">
-                <span class="icon" id="confirmModalIcon">⚠️</span>
-            </div>
-            <div class="confirm-modal-title" id="confirmModalTitle">Are you sure?</div>
-            <div class="confirm-modal-message" id="confirmModalMessage">This action cannot be undone.</div>
-            <div class="confirm-modal-details" id="confirmModalDetails" style="display: none;"></div>
-            <div class="confirm-modal-actions">
-                <button class="btn-confirm secondary" id="confirmModalCancel" onclick="handleCancel()">Cancel</button>
-                <button class="btn-confirm danger" id="confirmModalConfirm" onclick="handleConfirm()">Confirm</button>
-            </div>
+  </div>
+
+
+  <div id="profileModal" class="profile-modal" aria-hidden="true">
+    <div class="profile-card" role="dialog" aria-modal="true" aria-labelledby="profileModalName">
+      <div id="profileCover" class="profile-cover"></div>
+      <div class="profile-body">
+        <div class="profile-avatar-wrap">
+          <div id="profileAvatar" class="profile-avatar">U</div>
         </div>
-    </div>
-
-    <!-- === TOAST === -->
-    <div id="globalToast" class="toast-container">
-        <div class="toast-content">
-            <div class="toast-icon-wrapper">
-                <span class="icon" id="toastIcon">✓</span>
-            </div>
-            <div class="toast-text-group">
-                <div class="toast-title" id="toastTitle">Success</div>
-                <div class="toast-message" id="toastMessage">Action completed successfully.</div>
-            </div>
-            <button class="toast-close-btn" onclick="dismissToast()">✕</button>
-            <div class="toast-progress"></div>
+        <div class="profile-head">
+          <div>
+            <div id="profileModalName" class="profile-name">User</div>
+            <div id="profileModalUsername" class="profile-username"></div>
+          </div>
+          <button id="profileClose" class="btn btn-cancel profile-close" type="button">Close</button>
         </div>
+        <div id="profileBio" class="profile-bio"></div>
+        <div id="profileMeta" class="profile-meta"></div>
+        <div id="profileActions" class="profile-actions"></div>
+      </div>
     </div>
+  </div>
 
-    <footer class="feed-footer">
-        <p>&copy; 2026 SPIKE Ultra. All rights reserved.</p>
-    </footer>
+  <script type="module">
+import { createClient } from '@supabase/supabase-js';
 
+const SUPABASE_URL = 'https://bkrrewagsbjqgmxaaqyt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O';
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const $ = (id) => document.getElementById(id);
+const statusEl = $('status');
+const toastStack = $('toastStack');
+const confirmBackdrop = $('confirmBackdrop');
+const confirmTitle = $('confirmTitle');
+const confirmText = $('confirmText');
+const confirmOk = $('confirmOk');
+const confirmCancel = $('confirmCancel');
+const peopleSearch = $('peopleSearch');
+const peopleList = $('peopleList');
+const friendsList = $('friendsList');
+const incomingList = $('incomingList');
+const outgoingList = $('outgoingList');
+const friendsCount = $('friendsCount');
+const incomingCount = $('incomingCount');
+const outgoingCount = $('outgoingCount');
+const discoverCount = $('discoverCount');
+const friendsTabCount = $('friendsTabCount');
+const incomingTabCount = $('incomingTabCount');
+const outgoingTabCount = $('outgoingTabCount');
+const headerAvatar = $('headerAvatar');
+const headerName = $('headerName');
+const refreshBtn = $('refreshBtn');
+const logoutBtn = $('logoutBtn');
+const darkToggle = $('darkToggle');
+const profileModal = $('profileModal');
+const profileCover = $('profileCover');
+const profileAvatar = $('profileAvatar');
+const profileModalName = $('profileModalName');
+const profileModalUsername = $('profileModalUsername');
+const profileBio = $('profileBio');
+const profileMeta = $('profileMeta');
+const profileActions = $('profileActions');
+const profileClose = $('profileClose');
+let openProfileId = null;
+let presenceChannel = null;
+let presenceUsers = new Set();
+
+let currentUser = null;
+let currentProfile = null;
+let allProfiles = [];
+let relationshipMap = new Map();
+let statusTimer = null;
+const busyActions = new Set();
+
+function showStatus(message, type = 'info') {
+  if (!message) return;
+  const config = {
+    success: { icon: '✓', title: 'Done' },
+    error: { icon: '!', title: 'Something went wrong' },
+    warning: { icon: '⚠', title: 'Please check' },
+    info: { icon: 'i', title: 'SPIKE' }
+  }[type] || { icon: 'i', title: 'SPIKE' };
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `
+    <div class="toast-icon" aria-hidden="true">${config.icon}</div>
+    <div><div class="toast-title">${config.title}</div><div class="toast-message">${escapeHtml(message)}</div></div>
+    <button class="toast-close" type="button" aria-label="Dismiss notification">×</button>`;
+  toastStack.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  const remove = () => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 260);
+  };
+  toast.querySelector('.toast-close').addEventListener('click', remove);
+  setTimeout(remove, type === 'error' ? 7000 : type === 'warning' ? 6000 : 4500);
+}
+
+function showConfirm({ title = 'Are you sure?', message = '', confirmLabel = 'Continue', danger = false } = {}) {
+  return new Promise(resolve => {
+    confirmTitle.textContent = title;
+    confirmText.textContent = message;
+    confirmOk.textContent = confirmLabel;
+    confirmOk.classList.toggle('btn-danger', danger);
+    confirmBackdrop.classList.add('show');
+    confirmBackdrop.setAttribute('aria-hidden', 'false');
+
+    const finish = value => {
+      confirmBackdrop.classList.remove('show');
+      confirmBackdrop.setAttribute('aria-hidden', 'true');
+      confirmOk.onclick = null;
+      confirmCancel.onclick = null;
+      resolve(value);
+    };
+    confirmOk.onclick = () => finish(true);
+    confirmCancel.onclick = () => finish(false);
+  });
+}
+
+confirmBackdrop.addEventListener('click', event => {
+  if (event.target === confirmBackdrop) confirmCancel.click();
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && confirmBackdrop.classList.contains('show')) confirmCancel.click();
+});
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function displayName(profile) {
+  return profile?.display_name || profile?.username || 'User';
+}
+
+function avatarHtml(profile) {
+  const name = displayName(profile);
+  const initial = escapeHtml(name.charAt(0).toUpperCase() || 'U');
+  const online = presenceUsers.has(profile?.id);
+  const avatar = profile?.avatar_url
+    ? `<div class="avatar"><img src="${escapeHtml(profile.avatar_url)}" alt="${escapeHtml(name)}"></div>`
+    : `<div class="avatar">${initial}</div>`;
+  return `<div style="position:relative;display:inline-flex">${avatar}<span class="presence-dot ${online ? 'online' : ''}" style="position:absolute;right:-1px;bottom:0;border:2px solid var(--card);width:10px;height:10px"></span></div>`;
+}
+
+function profileActionHtml(profileId) {
+  const rel = relationshipMap.get(profileId);
+  if (!rel) return `<button class="btn btn-primary" data-action="add" data-user-id="${escapeHtml(profileId)}">Add Friend</button>`;
+  if (rel.status === 'accepted') return `<button class="btn btn-primary profile-message" data-action="message" data-user-id="${escapeHtml(profileId)}">Message</button><button class="btn btn-remove" data-action="remove" data-user-id="${escapeHtml(profileId)}">Remove Friend</button>`;
+  if (rel.status === 'pending' && rel.direction === 'incoming') {
+    const row = rel.row;
+    return `<button class="btn btn-accept" data-action="accept" data-user-id="${escapeHtml(row.user_id)}" data-friend-id="${escapeHtml(row.friend_id)}">Accept</button>
+            <button class="btn btn-cancel" data-action="decline" data-user-id="${escapeHtml(row.user_id)}" data-friend-id="${escapeHtml(row.friend_id)}">Decline</button>`;
+  }
+  if (rel.status === 'pending' && rel.direction === 'outgoing') {
+    const row = rel.row;
+    return `<button class="btn btn-cancel" data-action="cancel" data-user-id="${escapeHtml(row.user_id)}" data-friend-id="${escapeHtml(row.friend_id)}">Cancel Request</button>`;
+  }
+  return '';
+}
+
+function openProfile(profileId) {
+  const profile = allProfiles.find(p => p.id === profileId);
+  if (!profile) return;
+  openProfileId = profileId;
+  const name = displayName(profile);
+  profileCover.style.backgroundImage = profile.cover_url ? `url("${String(profile.cover_url).replace(/"/g, '%22')}")` : '';
+  profileAvatar.innerHTML = profile.avatar_url
+    ? `<img src="${escapeHtml(profile.avatar_url)}" alt="${escapeHtml(name)}">`
+    : escapeHtml(name.charAt(0).toUpperCase() || 'U');
+  profileModalName.textContent = name;
+  profileModalUsername.textContent = profile.username ? '@' + profile.username : '';
+  profileBio.textContent = profile.bio || 'No bio yet.';
+  const online = presenceUsers.has(profileId);
+  profileMeta.innerHTML = `<div class="profile-presence"><span class="presence-dot ${online ? 'online' : ''}"></span>${online ? 'Online now' : 'Offline'}</div>`;
+  const chips = [];
+  if (profile.sp_id) chips.push(`<span class="profile-chip">SPIKE ID: ${escapeHtml(profile.sp_id)}</span>`);
+  if (profile.activated) chips.push(`<span class="profile-chip">Activated</span>`);
+  profileMeta.insertAdjacentHTML('beforeend', chips.join(''));
+  profileActions.innerHTML = profileActionHtml(profileId);
+  profileModal.classList.add('show');
+  profileModal.setAttribute('aria-hidden', 'false');
+}
+
+function closeProfile() {
+  openProfileId = null;
+  profileModal.classList.remove('show');
+  profileModal.setAttribute('aria-hidden', 'true');
+}
+
+function renderHeader() {
+  if (!currentUser) return;
+  const name = displayName(currentProfile);
+  headerName.textContent = name;
+  if (currentProfile?.avatar_url) {
+    headerAvatar.innerHTML = `<img src="${escapeHtml(currentProfile.avatar_url)}" alt="">`;
+  } else {
+    headerAvatar.textContent = name.charAt(0).toUpperCase() || 'U';
+  }
+}
+
+/*
+  IMPORTANT:
+  friendships.user_id, friendships.friend_id and requested_by all reference
+  profiles.id. Therefore every authenticated user must have a profile before
+  a friendship can be inserted. The database was repaired, but this guard
+  also protects older accounts and any account created before the trigger.
+*/
+async function ensureCurrentProfile() {
+  if (!currentUser) throw new Error('You are not signed in.');
+
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id,username,display_name,avatar_url,bio,cover_url,sp_id,activated')
+    .eq('id', currentUser.id)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  if (data) {
+    currentProfile = data;
+    renderHeader();
+    return;
+  }
+
+  const fallbackName =
+    currentUser.user_metadata?.full_name ||
+    currentUser.user_metadata?.name ||
+    (currentUser.email || '').split('@')[0] ||
+    'Spike User';
+
+  const { error: insertError } = await supabase
+    .from('profiles')
+    .insert({
+      id: currentUser.id,
+      display_name: fallbackName
+    });
+
+  if (insertError && insertError.code !== '23505') throw insertError;
+
+  const { data: repaired, error: readError } = await supabase
+    .from('profiles')
+    .select('id,username,display_name,avatar_url,bio,cover_url,sp_id,activated')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (readError) throw readError;
+  currentProfile = repaired;
+  renderHeader();
+}
+
+async function loadProfiles() {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('id,username,display_name,avatar_url,bio,cover_url,sp_id,activated')
+    .order('display_name', { ascending: true });
+
+  if (error) throw error;
+  allProfiles = (data || []).filter(p => p.id !== currentUser.id);
+}
+
+async function loadFriendships() {
+  const me = currentUser.id;
+  const { data, error } = await supabase
+    .from('friendships')
+    .select('user_id,friend_id,status,requested_by,created_at,updated_at')
+    .or(`user_id.eq.${me},friend_id.eq.${me}`);
+
+  if (error) throw error;
+
+  relationshipMap = new Map();
+
+  for (const row of data || []) {
+    const otherId = row.user_id === me ? row.friend_id : row.user_id;
+    if (!otherId) continue;
+
+    const direction = row.requested_by === me ? 'outgoing' : 'incoming';
+
+    relationshipMap.set(otherId, {
+      status: row.status,
+      direction,
+      row
+    });
+  }
+}
+
+async function loadEverything() {
+  if (!currentUser) return;
+
+  try {
+    await ensureCurrentProfile();
+    await loadProfiles();
+    await loadFriendships();
+    if (!presenceChannel) await startPresence();
+    renderAll();
+    showStatus(null);
+  } catch (error) {
+    console.error('Friends load error:', error);
+    showStatus('Could not load friends: ' + friendlyError(error), 'error');
+    peopleList.innerHTML = `<div class="empty">Could not load people. Tap Refresh to try again.</div>`;
+  }
+}
+
+function friendlyError(error) {
+  const message = error?.message || String(error);
+  if (message.includes('foreign key constraint') && message.includes('friendships_user_id_fkey')) {
+    return 'Your profile was missing. It has now been repaired. Please tap Refresh once.';
+  }
+  if (error?.code === '23505') return 'That friendship already exists.';
+  if (error?.code === '42501') return 'You do not have permission to perform that action.';
+  if (error?.code === 'PGRST116') return 'Your profile could not be found.';
+  return message;
+}
+
+function renderAll() {
+  renderDiscover(peopleSearch.value);
+  renderFriends();
+  renderIncoming();
+  renderOutgoing();
+}
+
+function renderDiscover(search = '') {
+  const q = search.trim().toLowerCase();
+
+  const people = allProfiles
+    .filter(p => {
+      const rel = relationshipMap.get(p.id);
+      if (rel?.status === 'accepted') return false;
+      if (!q) return true;
+      return (p.display_name || '').toLowerCase().includes(q) ||
+             (p.username || '').toLowerCase().includes(q);
+    })
+    .sort((a,b) => {
+      const ao = presenceUsers.has(a.id) ? 0 : 1;
+      const bo = presenceUsers.has(b.id) ? 0 : 1;
+      if (ao !== bo) return ao - bo;
+      return displayName(a).localeCompare(displayName(b));
+    });
+
+  discoverCount.textContent = people.length;
+
+  if (!people.length) {
+    peopleList.innerHTML = `<div class="empty">No other users found.</div>`;
+    return;
+  }
+
+  peopleList.innerHTML = people.map(p => {
+    const rel = relationshipMap.get(p.id);
+    let buttons = '';
+
+    if (!rel) {
+      buttons = `<button class="btn btn-add" data-action="add" data-user-id="${escapeHtml(p.id)}">Add Friend</button>`;
+    } else if (rel.status === 'accepted') {
+      buttons = `<button class="btn btn-friends" disabled>Friends</button>`;
+    } else if (rel.status === 'pending') {
+      if (rel.direction === 'outgoing') {
+        buttons = `<button class="btn btn-cancel" data-action="cancel"
+          data-user-id="${escapeHtml(rel.row.user_id)}"
+          data-friend-id="${escapeHtml(rel.row.friend_id)}">Cancel Request</button>`;
+      } else {
+        buttons = `
+          <button class="btn btn-accept" data-action="accept"
+            data-user-id="${escapeHtml(rel.row.user_id)}"
+            data-friend-id="${escapeHtml(rel.row.friend_id)}">Accept</button>
+          <button class="btn btn-cancel" data-action="decline"
+            data-user-id="${escapeHtml(rel.row.user_id)}"
+            data-friend-id="${escapeHtml(rel.row.friend_id)}">Decline</button>`;
+      }
+    } else {
+      buttons = `<button class="btn btn-add" data-action="add" data-user-id="${escapeHtml(p.id)}">Add Friend</button>`;
+    }
+
+    return `
+      <div class="person">
+        <div class="person-info person-clickable" data-profile-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="View profile">
+          ${avatarHtml(p)}
+          <div class="person-text">
+            <div class="person-name">${escapeHtml(displayName(p))}${!relationshipMap.get(p.id) ? '<span class="suggested-badge">✦ Suggested</span>' : ''}</div>
+            <div class="person-username">${p.username ? '@' + escapeHtml(p.username) : ''}</div>
+            <div class="presence-line"><span class="presence-dot ${presenceUsers.has(p.id) ? 'online' : ''}"></span>${presenceUsers.has(p.id) ? 'Online now' : 'Offline'}</div>
+          </div>
+        </div>
+        <div class="actions">${buttons}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderFriends() {
+  const friends = allProfiles.filter(p => relationshipMap.get(p.id)?.status === 'accepted');
+  friendsCount.textContent = friends.length;
+  friendsTabCount.textContent = friends.length;
+
+  if (!friends.length) {
+    friendsList.innerHTML = `<div class="empty">You don't have any friends yet.</div>`;
+    return;
+  }
+
+  friendsList.innerHTML = friends.map(p => `
+    <div class="person">
+      <div class="person-info person-clickable" data-profile-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="View profile">
+        ${avatarHtml(p)}
+        <div class="person-text">
+          <div class="person-name">${escapeHtml(displayName(p))}</div>
+          <div class="person-username">${p.username ? '@' + escapeHtml(p.username) : ''}</div>
+          <div class="presence-line"><span class="presence-dot ${presenceUsers.has(p.id) ? 'online' : ''}"></span>${presenceUsers.has(p.id) ? 'Online now' : 'Offline'}</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" data-action="message" data-user-id="${escapeHtml(p.id)}">Message</button>
+        <button class="btn btn-remove" data-action="remove" data-user-id="${escapeHtml(p.id)}">Remove</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderIncoming() {
+  const incoming = allProfiles.filter(p => {
+    const rel = relationshipMap.get(p.id);
+    return rel?.status === 'pending' && rel.direction === 'incoming';
+  });
+
+  incomingCount.textContent = incoming.length;
+  incomingTabCount.textContent = incoming.length;
+
+  if (!incoming.length) {
+    incomingList.innerHTML = `<div class="empty">No incoming requests.</div>`;
+    return;
+  }
+
+  incomingList.innerHTML = incoming.map(p => {
+    const row = relationshipMap.get(p.id).row;
+    return `
+      <div class="person">
+        <div class="person-info person-clickable" data-profile-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="View profile">
+          ${avatarHtml(p)}
+          <div class="person-text">
+            <div class="person-name">${escapeHtml(displayName(p))}</div>
+            <div class="person-username">${p.username ? '@' + escapeHtml(p.username) : ''}</div>
+            <div class="presence-line"><span class="presence-dot ${presenceUsers.has(p.id) ? 'online' : ''}"></span>${presenceUsers.has(p.id) ? 'Online now' : 'Offline'}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-accept" data-action="accept"
+            data-user-id="${escapeHtml(row.user_id)}"
+            data-friend-id="${escapeHtml(row.friend_id)}">Accept</button>
+          <button class="btn btn-cancel" data-action="decline"
+            data-user-id="${escapeHtml(row.user_id)}"
+            data-friend-id="${escapeHtml(row.friend_id)}">Decline</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderOutgoing() {
+  const outgoing = allProfiles.filter(p => {
+    const rel = relationshipMap.get(p.id);
+    return rel?.status === 'pending' && rel.direction === 'outgoing';
+  });
+
+  outgoingCount.textContent = outgoing.length;
+  outgoingTabCount.textContent = outgoing.length;
+
+  if (!outgoing.length) {
+    outgoingList.innerHTML = `<div class="empty">No outgoing requests.</div>`;
+    return;
+  }
+
+  outgoingList.innerHTML = outgoing.map(p => {
+    const row = relationshipMap.get(p.id).row;
+    return `
+      <div class="person">
+        <div class="person-info person-clickable" data-profile-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="View profile">
+          ${avatarHtml(p)}
+          <div class="person-text">
+            <div class="person-name">${escapeHtml(displayName(p))}</div>
+            <div class="person-username">${p.username ? '@' + escapeHtml(p.username) : ''}</div>
+            <div class="presence-line"><span class="presence-dot ${presenceUsers.has(p.id) ? 'online' : ''}"></span>${presenceUsers.has(p.id) ? 'Online now' : 'Offline'}</div>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-cancel" data-action="cancel"
+            data-user-id="${escapeHtml(row.user_id)}"
+            data-friend-id="${escapeHtml(row.friend_id)}">Cancel Request</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openMessage(profileId) {
+  if (!profileId) return;
+  window.location.href = `messages.html?user=${encodeURIComponent(profileId)}`;
+}
+
+async function startPresence() {
+  if (!currentUser) return;
+  if (presenceChannel) await supabase.removeChannel(presenceChannel);
+  presenceUsers = new Set();
+  presenceChannel = supabase.channel('spike-presence', { config: { presence: { key: currentUser.id } } });
+  presenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = presenceChannel.presenceState();
+      presenceUsers = new Set(Object.keys(state).filter(id => id !== currentUser.id));
+      renderAll();
+      if (openProfileId) openProfile(openProfileId);
+    })
+    .on('presence', { event: 'join' }, () => {})
+    .on('presence', { event: 'leave' }, () => {})
+    .subscribe(async status => {
+      if (status === 'SUBSCRIBED') {
+        await presenceChannel.track({ online_at: new Date().toISOString() });
+      }
+    });
+}
+
+async function stopPresence() {
+  if (!presenceChannel) return;
+  await presenceChannel.untrack().catch(() => {});
+  await supabase.removeChannel(presenceChannel);
+  presenceChannel = null;
+  presenceUsers = new Set();
+}
+
+async function addFriend(targetId) {
+  if (!currentUser || !currentProfile) throw new Error('Your profile is not ready yet.');
+  if (!targetId || targetId === currentUser.id) throw new Error('You cannot add yourself.');
+
+  const existing = relationshipMap.get(targetId);
+  if (existing) {
+    if (existing.status === 'accepted') showStatus('Already friends.', 'info');
+    else if (existing.status === 'pending') showStatus(
+      existing.direction === 'incoming' ? 'You already have an incoming request from this person.' : 'A friend request is already pending.',
+      'info'
+    );
+    else showStatus('This friendship cannot be created.', 'error');
+    return;
+  }
+
+  const target = allProfiles.find(p => p.id === targetId);
+  if (!target) throw new Error('That user no longer exists. Refresh and try again.');
+
+  const { error } = await supabase
+    .from('friendships')
+    .insert({
+      user_id: currentUser.id,
+      friend_id: targetId,
+      status: 'pending',
+      requested_by: currentUser.id
+    });
+
+  if (error) {
+    if (error.code === '23505') {
+      await loadEverything();
+      showStatus('A request or friendship already exists with this person.', 'info');
+      return;
+    }
+    throw error;
+  }
+
+  await loadFriendships();
+  renderAll();
+  showStatus('Friend request sent!', 'success');
+}
+
+async function acceptRequest(userId, friendId) {
+  if (friendId !== currentUser.id) throw new Error('Only the recipient can accept this request.');
+
+  const { data, error } = await supabase
+    .from('friendships')
+    .update({ status: 'accepted' })
+    .eq('user_id', userId)
+    .eq('friend_id', friendId)
+    .eq('status', 'pending')
+    .select('user_id,friend_id,status,requested_by')
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) throw new Error('This request is no longer pending.');
+
+  await loadFriendships();
+  renderAll();
+  showStatus('Friend request accepted!', 'success');
+}
+
+async function deleteRequest(userId, friendId, action) {
+  const { data, error } = await supabase
+    .from('friendships')
+    .delete()
+    .eq('user_id', userId)
+    .eq('friend_id', friendId)
+    .eq('status', 'pending')
+    .select('user_id,friend_id');
+
+  if (error) throw error;
+  if (!data?.length) throw new Error('This request is already gone.');
+
+  await loadFriendships();
+  renderAll();
+  showStatus(action === 'cancel' ? 'Request cancelled.' : 'Request declined.', 'success');
+}
+
+async function removeFriend(friendId) {
+  const confirmed = await showConfirm({
+    title: 'Remove friend?',
+    message: 'This will remove the friendship. You can send a new request later if you change your mind.',
+    confirmLabel: 'Remove friend',
+    danger: true
+  });
+  if (!confirmed) return;
+
+  const me = currentUser.id;
+  const { data, error } = await supabase
+    .from('friendships')
+    .delete()
+    .or(`and(user_id.eq.${me},friend_id.eq.${friendId}),and(user_id.eq.${friendId},friend_id.eq.${me})`)
+    .eq('status', 'accepted')
+    .select('user_id,friend_id');
+
+  if (error) throw error;
+  if (!data?.length) throw new Error('This friendship no longer exists.');
+
+  await loadFriendships();
+  renderAll();
+  showStatus('Friend removed.', 'success');
+}
+
+document.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-action]');
+  if (!button || button.disabled) return;
+
+  const action = button.dataset.action;
+  const userId = button.dataset.userId;
+  const friendId = button.dataset.friendId;
+  const key = `${action}:${userId || ''}:${friendId || ''}`;
+
+  if (busyActions.has(key)) return;
+  busyActions.add(key);
+  button.disabled = true;
+
+  try {
+    if (action === 'add') await addFriend(userId);
+    else if (action === 'accept') await acceptRequest(userId, friendId);
+    else if (action === 'cancel') await deleteRequest(userId, friendId, 'cancel');
+    else if (action === 'decline') await deleteRequest(userId, friendId, 'decline');
+    else if (action === 'remove') await removeFriend(userId);
+    else if (action === 'message') { openMessage(userId); return; }
+    if (openProfileId && (openProfileId === userId || openProfileId === friendId)) {
+      const profile = allProfiles.find(p => p.id === openProfileId);
+      if (profile) profileActions.innerHTML = profileActionHtml(openProfileId);
+    }
+  } catch (error) {
+    console.error(`Friend action ${action} failed:`, error);
+    showStatus(`Could not ${action} friend request: ${friendlyError(error)}`, 'error');
+    await loadEverything();
+  } finally {
+    busyActions.delete(key);
+    if (button.isConnected) button.disabled = false;
+  }
+});
+
+profileClose.addEventListener('click', closeProfile);
+profileModal.addEventListener('click', (event) => {
+  if (event.target === profileModal) closeProfile();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && profileModal.classList.contains('show')) closeProfile();
+  if (event.key === 'Enter') {
+    const target = event.target.closest('[data-profile-id]');
+    if (target && !event.target.closest('[data-action]')) openProfile(target.dataset.profileId);
+  }
+});
+document.addEventListener('click', (event) => {
+  const target = event.target.closest('[data-profile-id]');
+  if (target && !event.target.closest('[data-action]')) openProfile(target.dataset.profileId);
+});
+
+peopleSearch.addEventListener('input', e => renderDiscover(e.target.value));
+
+refreshBtn.addEventListener('click', async () => {
+  if (refreshBtn.disabled) return;
+  refreshBtn.disabled = true;
+  refreshBtn.textContent = 'Refreshing...';
+  try {
+    await loadEverything();
+  } finally {
+    refreshBtn.disabled = false;
+    refreshBtn.textContent = 'Refresh';
+  }
+});
+
+document.querySelectorAll('.tab').forEach(button => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === button));
+    document.querySelectorAll('.tab-content').forEach(section => {
+      section.classList.toggle('active', section.id === `tab-${button.dataset.tab}`);
+    });
+  });
+});
+
+const savedDark = localStorage.getItem('spike-dark-mode') === 'true';
+if (savedDark) {
+  document.body.classList.add('dark');
+  darkToggle.textContent = '☀️';
+}
+darkToggle.addEventListener('click', () => {
+  const dark = document.body.classList.toggle('dark');
+  localStorage.setItem('spike-dark-mode', String(dark));
+  darkToggle.textContent = dark ? '☀️' : '🌙';
+});
+
+logoutBtn.addEventListener('click', async () => {
+  logoutBtn.disabled = true;
+  logoutBtn.textContent = 'Signing out...';
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    currentUser = null;
+    currentProfile = null;
+    allProfiles = [];
+    relationshipMap.clear();
+    peopleList.innerHTML = `<div class="empty">Please sign in.</div>`;
+    friendsList.innerHTML = `<div class="empty">Please sign in.</div>`;
+    incomingList.innerHTML = `<div class="empty">Please sign in.</div>`;
+    outgoingList.innerHTML = `<div class="empty">Please sign in.</div>`;
+    headerName.textContent = '—';
+    headerAvatar.textContent = '👤';
+    showStatus('Signed out.', 'info');
+  } catch (error) {
+    showStatus('Sign out failed: ' + friendlyError(error), 'error');
+  } finally {
+    logoutBtn.disabled = false;
+    logoutBtn.textContent = 'Sign out';
+  }
+});
+
+/*
+  Do not await database calls directly inside onAuthStateChange.
+  Schedule the load after the auth callback returns to avoid auth-lock races.
+*/
+supabase.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') {
+    currentUser = session?.user || null;
+    if (currentUser) queueMicrotask(() => loadEverything());
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null;
+    currentProfile = null;
+    allProfiles = [];
+    relationshipMap.clear();
+    stopPresence().catch(() => {});
+  }
+});
+
+async function init() {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+
+    currentUser = data?.session?.user || null;
+
+    if (!currentUser) {
+      showStatus('Please sign in first.', 'error');
+      peopleList.innerHTML = `<div class="empty">Please sign in to see people.</div>`;
+      return;
+    }
+
+    await loadEverything();
+  } catch (error) {
+    console.error('Initialization error:', error);
+    showStatus('Authentication error: ' + friendlyError(error), 'error');
+  }
+}
+
+init();
+window.addEventListener('beforeunload', () => { if (presenceChannel) presenceChannel.untrack().catch(() => {}); });
+console.log('SPIKE friends — rebuilt and secured.');
+</script>
 </body>
 </html>

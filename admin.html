@@ -1,0 +1,238 @@
+<!doctype 
+html
+>
+
+<
+html
+ 
+lang
+=
+"en"
+>
+
+  
+<
+head
+>
+
+    
+<
+meta
+ 
+charset
+=
+"UTF-8"
+ />
+
+    
+<
+meta
+ 
+name
+=
+"viewport"
+ 
+content
+=
+"width=device-width, initial-scale=1.0"
+ />
+
+    
+<
+title
+>
+Spike Admin
+</
+title
+>
+
+    
+<
+style
+>
+
+      body { font-family: system-ui, Arial, sans-serif; padding: 24px; }
+      .box { max-width: 900px; margin: 0 auto; }
+      .muted { color: #666; }
+      pre { background: #111; color: #0f0; padding: 12px; overflow: auto; }
+      button { padding: 10px 14px; cursor: pointer; }
+    
+</
+style
+>
+
+  
+</
+head
+>
+
+  
+<
+body
+>
+
+    
+<
+div
+ 
+class
+=
+"box"
+>
+
+      
+<
+h1
+>
+Spike Admin
+</
+h1
+>
+
+      
+<
+p
+ 
+id
+=
+"status"
+ 
+class
+=
+"muted"
+>
+Checking access…
+</
+p
+>
+
+      
+<
+div
+ 
+id
+=
+"adminArea"
+ 
+style
+=
+"display:none;"
+>
+
+        
+<
+button
+ 
+id
+=
+"refreshBtn"
+>
+Refresh
+</
+button
+>
+
+        
+<
+h3
+>
+Sample admin data
+</
+h3
+>
+
+        
+<
+pre
+ 
+id
+=
+"out"
+>
+</
+pre
+>
+
+      
+</
+div
+>
+
+    
+</
+div
+>
+
+    
+<
+script
+ 
+type
+=
+"module"
+>
+
+      // ✅ Replace these with your project's values
+      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+      const supabaseUrl = "<YOUR_SUPABASE_URL>";
+      const supabaseAnonKey = "<YOUR_SUPABASE_ANON_KEY>";
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+      const statusEl = document.getElementById("status");
+      const adminArea = document.getElementById("adminArea");
+      const outEl = document.getElementById("out");
+      const refreshBtn = document.getElementById("refreshBtn");
+      async function isAdmin() {
+        const { data: { session }, error: sessionErr } = await supabase.auth.getSession();
+        if (sessionErr) throw sessionErr;
+        if (!session) return false;
+        const { data, error } = await supabase.rpc("is_spike_admin");
+        if (error) throw error;
+        return Boolean(data);
+      }
+      async function loadData() {
+        // Pick whatever admin tables you want to view in the UI
+        const [profiles, friendships, rooms] = await Promise.all([
+          supabase.from("profiles").select("*").limit(50),
+          supabase.from("friendships").select("*").limit(50),
+          supabase.from("rooms").select("*").limit(50),
+        ]);
+        if (profiles.error) throw profiles.error;
+        if (friendships.error) throw friendships.error;
+        if (rooms.error) throw rooms.error;
+        return { profiles: profiles.data, friendships: friendships.data, rooms: rooms.data };
+      }
+      async function main() {
+        try {
+          const ok = await isAdmin();
+          if (!ok) {
+            statusEl.textContent = "Access denied. Admins only.";
+            return;
+          }
+          statusEl.textContent = "Access granted ✅";
+          adminArea.style.display = "block";
+          async function render() {
+            outEl.textContent = "Loading…";
+            const data = await loadData();
+            outEl.textContent = JSON.stringify(data, null, 2);
+          }
+          refreshBtn.onclick = render;
+          await render();
+        } catch (e) {
+          statusEl.textContent = "Error: " + (e?.message || String(e));
+          console.error(e);
+        }
+      }
+      main();
+    
+</
+script
+>
+
+  
+</
+body
+>
+
+</
+html
+>
