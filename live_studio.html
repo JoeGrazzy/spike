@@ -305,7 +305,7 @@ video#preview {
 .setting-toggle input{width:auto}
 .settings-foot{display:flex;justify-content:flex-end;gap:8px;padding:11px;border-top:1px solid var(--border)}
 @media(max-width:520px){.settings-panel{width:calc(100% - 12px);max-height:95vh;border-radius:16px}.settings-body{padding:11px}.setting-row input,.setting-row select{width:52%}}
-.guest-stage-active #preview{width:50%;margin-right:auto}.mirror-preview{transform:scaleX(-1)}</style>
+.guest-stage-active #preview{width:50%;margin-right:auto}.mirror-preview{transform:scaleX(-1)}.moderated{opacity:.55;text-decoration:line-through}.msg{cursor:pointer}</style>
 
 
 </style>
@@ -446,7 +446,23 @@ video#preview {
   </div>
 </main>
 
-<div class="toast" id="toast"></div>
+<div id="studioSettingsModal" class="settings-modal hidden" aria-hidden="true">
+      <div class="settings-backdrop" data-close-settings></div>
+      <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="studioSettingsTitle">
+        <div class="settings-head"><div><b id="studioSettingsTitle">⚙️ Studio Settings</b><small>Configure your live before or during a broadcast.</small></div>
+          <button class="btn" type="button" id="closeStudioSettings">✕</button></div>
+        <div class="settings-body">
+          <div class="setting-row"><span>Live title</span><input id="settingsTitle" maxlength="200"></div>
+          <div class="setting-row"><span>Description</span><input id="settingsDescription" maxlength="2000"></div>
+          <div class="setting-row"><span>Category</span><select id="settingsCategory"><option>Just Chatting</option><option>Music</option><option>Gaming</option><option>Education</option><option>Sports</option><option>Entertainment</option><option>News</option></select></div>
+          <div class="setting-row"><span>Visibility</span><select id="settingsVisibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
+          <label class="setting-toggle"><span>Allow chat</span><input type="checkbox" id="settingsAllowChat"></label>
+          <label class="setting-toggle"><span>Allow guests</span><input type="checkbox" id="settingsAllowGuests"></label>
+          <label class="setting-toggle"><span>Automatic replay recording</span><input type="checkbox" id="settingsReplay"></label>
+        </div>
+        <div class="settings-foot"><button class="btn" type="button" id="cancelStudioSettings">Cancel</button><button class="btn primary" type="button" id="saveStudioSettings">Save Settings</button></div>
+      </section>
+    </div><div class="toast" id="toast"></div>
 <div class="loader" id="loader">Loading SPIKE Live Studio…</div>
 
 <script type="module">
@@ -1177,7 +1193,95 @@ async function safeEndLive(){
   await endLive();
 }
 
+
+function syncSettingsFromForm(){
+  const map={title:"settingsTitle",description:"settingsDescription",category:"settingsCategory",visibility:"settingsVisibility",allowChat:"settingsAllowChat",allowGuests:"settingsAllowGuests"};
+  for(const [src,dst] of Object.entries(map)){
+    const a=$(src),b=$(dst); if(!a||!b)continue;
+    if(a.type==="checkbox")b.checked=a.checked; else b.value=a.value||"";
+  }
+  $("settingsReplay").checked=studioSettings.replay!==false;
+}
+function openStudioSettings(){
+  syncSettingsFromForm();
+  $("studioSettingsModal")?.classList.remove("hidden");
+  $("studioSettingsModal")?.setAttribute("aria-hidden","false");
+}
+function closeStudioSettings(){
+  $("studioSettingsModal")?.classList.add("hidden");
+  $("studioSettingsModal")?.setAttribute("aria-hidden","true");
+}
+async function saveStudioSettings(){
+  const values={
+    title:$("settingsTitle").value.trim(),
+    description:$("settingsDescription").value.trim(),
+    category:$("settingsCategory").value,
+    visibility:$("settingsVisibility").value,
+    allowChat:$("settingsAllowChat").checked,
+    allowGuests:$("settingsAllowGuests").checked,
+    replay:$("settingsReplay").checked
+  };
+  if(values.title.length>200){toast("Title is too long.");return}
+  studioSettings={...studioSettings,replay:values.replay};
+  localStorage.setItem("spike_live_studio_settings",JSON.stringify(studioSettings));
+  $("title").value=values.title;
+  $("description").value=values.description;
+  $("category").value=values.category;
+  $("visibility").value=values.visibility;
+  $("allowChat").checked=values.allowChat;
+  $("allowGuests").checked=values.allowGuests;
+
+  if(session?.status==="live"){
+    const {data,error}=await supabase.from("feed_live_sessions").update({
+      title:values.title||session.title,
+      description:values.description||null,
+      category:values.category,
+      visibility:values.visibility,
+      allow_chat:values.allowChat,
+      guest_limit:values.allowGuests?4:0,
+      metadata:{...(session.metadata||{}),studio:"spike-live-studio",replay:values.replay}
+    }).eq("id",session.id).eq("host_id",user.id).select("*").maybeSingle();
+    if(error){toast(error.message);return}
+    if(data)session=data;
+    $("chatInput").disabled=!values.allowChat;
+    $("sendBtn").disabled=!values.allowChat;
+  }
+  closeStudioSettings();toast("Studio settings saved.");
+}
+async function moderateSelected(action){
+  if(!session?.id){toast("Start a live first.");return}
+  if(!selectedTarget){toast("Select a viewer from chat first.");return}
+  const {error}=await supabase.rpc("feed_live_moderate",{
+    p_session_id:session.id,p_target_user_id:selectedTarget,p_action:action,p_message_id:null
+  });
+  if(error){console.error(error);toast(error.message);return}
+  toast(`${action.charAt(0).toUpperCase()+action.slice(1)} applied.`);
+  if(["mute","block","ban","remove"].includes(action)){
+    document.querySelectorAll(`[data-user-id="${selectedTarget}"]`).forEach(el=>el.classList.add("moderated"));
+  }
+}
+function toggleModerationPanel(){
+  const panel=$("moderationPanel");
+  if(!panel){toast("Moderation panel is missing.");return}
+  panel.style.display=panel.style.display==="none"?"block":"none";
+  if(panel.style.display==="block"&&!selectedTarget)toast("Select a viewer from chat to moderate them.");
+}
+
 async function initStudio(){
+  $("settingsBtn").onclick=openStudioSettings;
+  $("closeStudioSettings").onclick=closeStudioSettings;
+  $("cancelStudioSettings").onclick=closeStudioSettings;
+  $("saveStudioSettings").onclick=saveStudioSettings;
+  document.querySelectorAll("[data-close-settings]").forEach(el=>el.onclick=closeStudioSettings);
+  $("moderateBtn").onclick=toggleModerationPanel;
+  $("muteSelected").onclick=()=>moderateSelected("mute");
+  $("removeSelected").onclick=()=>moderateSelected("remove");
+  $("banSelected").onclick=()=>moderateSelected("ban");
+  $("pinSelected").onclick=()=>moderateSelected("pin");
+  $("reportSelected").onclick=()=>moderateSelected("report");
+  $("blockSelected").onclick=()=>moderateSelected("block");
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closeStudioSettings()});
+
   const ok=await protect();
   if(!ok)return;
   attachCameraRecovery();
@@ -1230,5 +1334,73 @@ initStudio().catch(e=>{
   $("loader").classList.add("hide");
   toast("Studio could not initialize. Refresh and try again.");
 });
+
+
+/* Reliable Studio button router: one delegated handler prevents lost bindings. */
+document.addEventListener("click", async (event)=>{
+  const button=event.target.closest("button,[role='button']");
+  if(!button || button.disabled)return;
+  const id=button.id;
+  try{
+    if(id==="startLive" || id==="goLive"){
+      if(typeof startLive==="function") await startLive();
+      else if(typeof goLive==="function") await goLive();
+    }else if(id==="stopLive" || id==="endLive"){
+      if(typeof endLive==="function") await endLive();
+    }else if(id==="resetStudio"){
+      if(typeof resetStudio==="function") await resetStudio();
+    }else if(id==="connectCamera" || id==="camera"){
+      if(typeof initCamera==="function") await initCamera();
+      else if(typeof startCamera==="function") await startCamera();
+    }else if(id==="mic" || id==="toggleMic"){
+      if(typeof toggleMic==="function") await toggleMic();
+    }else if(id==="flipCamera"){
+      if(typeof flipCamera==="function") await flipCamera();
+    }else if(id==="shareLive" || id==="copyLiveLink"){
+      if(typeof shareLive==="function") await shareLive();
+      else if(typeof copyLiveLink==="function") await copyLiveLink();
+    }
+  }catch(e){
+    console.error("Studio button error:",id,e);
+    setStudioDiagnostics(e?.message || `${id} failed`);
+  }
+});
+
+
+/* Permanent lifecycle recovery for Studio media. */
+(function installStudioLifecycleRecovery(){
+  let mediaRecoveryTimer=null;
+  const recover=async()=>{
+    try{
+      if(typeof recoverCamera==="function") await recoverCamera();
+      else if(typeof initCamera==="function" && !window.__studioCameraStream?.active) await initCamera();
+      if(typeof recoverLiveState==="function") await recoverLiveState();
+    }catch(e){console.warn("Studio lifecycle recovery:",e)}
+  };
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible"){
+      clearTimeout(mediaRecoveryTimer);
+      mediaRecoveryTimer=setTimeout(recover,250);
+    }
+  });
+  window.addEventListener("online",()=>setTimeout(recover,300));
+  if(navigator.mediaDevices?.addEventListener)
+    navigator.mediaDevices.addEventListener("devicechange",()=>setTimeout(recover,300));
+})();
+
+
+(function studioButtonAudit(){
+  const ids=["startLive","goLive","stopLive","endLive","resetStudio","connectCamera","camera","mic","toggleMic","flipCamera","shareLive","copyLiveLink"];
+  const present=ids.filter(id=>document.getElementById(id));
+  if(present.length){
+    const missing=present.filter(id=>{
+      const map={startLive:"startLive",goLive:"startLive",stopLive:"endLive",endLive:"endLive",
+        resetStudio:"resetStudio",connectCamera:"initCamera",camera:"initCamera",mic:"toggleMic",
+        toggleMic:"toggleMic",flipCamera:"flipCamera",shareLive:"shareLive",copyLiveLink:"copyLiveLink"};
+      return typeof window[map[id]]!=="function";
+    });
+    if(missing.length) console.warn("Studio buttons missing functions:",missing);
+  }
+})();
 
 </script>
