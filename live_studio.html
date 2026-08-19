@@ -309,51 +309,6 @@ video#preview {
 
 
 </style>
-
-<style id="premium-loader">
-  .loader{
-    position:fixed;inset:0;z-index:9999;display:grid;place-items:center;overflow:hidden;
-    background:
-      radial-gradient(circle at 20% 15%,rgba(236,72,153,.20),transparent 30%),
-      radial-gradient(circle at 85% 80%,rgba(249,115,22,.16),transparent 32%),
-      linear-gradient(135deg,#070914,#0c1020 55%,#090b15);
-    transition:opacity .45s ease,visibility .45s ease;
-  }
-  .loader.hide{opacity:0;visibility:hidden;pointer-events:none}
-  .loader-card{
-    position:relative;width:min(360px,calc(100% - 34px));padding:30px 28px 25px;text-align:center;
-    border:1px solid rgba(255,255,255,.12);border-radius:28px;
-    background:rgba(15,18,32,.68);backdrop-filter:blur(24px);
-    box-shadow:0 30px 90px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.08);
-    animation:loaderCardIn .7s cubic-bezier(.2,.8,.2,1) both;
-  }
-  .loader-logo{
-    width:64px;height:64px;margin:0 auto 14px;display:grid;place-items:center;border-radius:20px;
-    color:#fff;font-size:1.65rem;font-weight:900;
-    background:linear-gradient(135deg,#ec4899,#f97316,#22c55e);
-    box-shadow:0 12px 35px rgba(236,72,153,.28);animation:loaderPulse 1.8s ease-in-out infinite;
-  }
-  .loader-title{font-size:1.25rem;font-weight:900;letter-spacing:.14em;color:#fff}
-  .loader-title span{background:linear-gradient(90deg,#f472b6,#fb923c,#4ade80);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .loader-subtitle{margin-top:7px;color:#aab3c8;font-size:.72rem;min-height:18px}
-  .loader-bar{height:5px;margin:20px 0 13px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
-  .loader-bar i{display:block;width:38%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#ec4899,#fb923c,#22c55e);animation:loaderBar 1.45s ease-in-out infinite}
-  .loader-status{display:flex;justify-content:center;align-items:center;gap:7px;color:#7f8aa3;font-size:.6rem}
-  .loader-dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 5px rgba(34,197,94,.10);animation:loaderDot 1.2s ease-in-out infinite}
-  .loader-retry{margin-top:16px;border:0;border-radius:11px;padding:9px 15px;background:#fff;color:#111827;font-weight:800;font-size:.68rem}
-  .loader-orb{position:absolute;border-radius:50%;filter:blur(50px);pointer-events:none;opacity:.35}
-  .loader-orb-a{width:180px;height:180px;left:-70px;top:15%;background:#ec4899}
-  .loader-orb-b{width:220px;height:220px;right:-90px;bottom:8%;background:#f97316}
-  @keyframes loaderCardIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
-  @keyframes loaderPulse{50%{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 45px rgba(236,72,153,.38)}}
-  @keyframes loaderBar{0%{transform:translateX(-130%)}50%{transform:translateX(100%)}100%{transform:translateX(310%)}}
-  @keyframes loaderDot{50%{opacity:.45;transform:scale(.8)}}
-  @media(prefers-reduced-motion:reduce){
-    .loader-card,.loader-logo,.loader-bar i,.loader-dot{animation:none}
-    .loader-bar i{width:100%}
-  }
-</style>
-
 </head>
 <body>
 <header class="header">
@@ -390,6 +345,7 @@ video#preview {
           <button class="btn" id="guestBtn" disabled>👥 Guests</button>
           <button class="btn" id="moderateBtn" disabled>🛡️ Moderate</button>
           <button class="btn danger" id="endBtn" disabled>End Live</button>
+          <button class="btn" id="resetStudioBtn">♻️ Reset Studio</button>
           <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Ready</span></div>
         </div>
       </div>
@@ -491,18 +447,7 @@ video#preview {
 </main>
 
 <div class="toast" id="toast"></div>
-<div class="loader" id="loader" role="status" aria-live="polite">
-  <div class="loader-orb loader-orb-a"></div>
-  <div class="loader-orb loader-orb-b"></div>
-  <div class="loader-card">
-    <div class="loader-logo">⚡</div>
-    <div class="loader-title">SPIKE <span>LIVE</span></div>
-    <div class="loader-subtitle" id="loaderText">Preparing your studio…</div>
-    <div class="loader-bar"><i id="loaderBar"></i></div>
-    <div class="loader-status"><span class="loader-dot"></span><span>Secure studio connection</span></div>
-    <button class="loader-retry hidden" id="loaderRetry" type="button">↻ Retry</button>
-  </div>
-</div>
+<div class="loader" id="loader">Loading SPIKE Live Studio…</div>
 
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2.57.0";
@@ -516,9 +461,73 @@ const now=()=>new Date().toISOString();
 let user=null, profile=null, stream=null, facingMode="user", session=null;
 let liveChannel=null, viewerChannel=null, chatMuted=false, chatCount=0, peak=0;
 let guestPeers=new Map(), guestStreams=new Map(), selectedGuestId=null, screenStream=null;
+const rtcConfig={iceServers:[{urls:"stun:stun.l.google.com:19302"}]};
 let rtcSignalChannel=null;
-let rtcConfig={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun.cloudflare.com:3478"}]};
-let studioSettings={replay:true};
+let guestPollTimer=null;
+let studioSettings={replay:false};
+
+async function loadStudioSettings(){
+  try{
+    const raw=localStorage.getItem("spike_live_studio_settings");
+    studioSettings=raw?{...studioSettings,...JSON.parse(raw)}:studioSettings;
+  }catch{}
+}
+function refreshLiveAnalytics(){
+  if(!session)return;
+  const n=Number(session.viewer_count||0);
+  $("statViewers").textContent=n;
+  $("statPeak").textContent=Number(session.peak_viewers||peak||0);
+}
+function stopLocalMedia(){
+  if(screenStream){try{screenStream.getTracks().forEach(t=>t.stop())}catch{}}
+  screenStream=null;
+  if(stream){try{stream.getTracks().forEach(t=>t.stop())}catch{}}
+  stream=null;
+  if($("preview"))$("preview").srcObject=null;
+  $("placeholder")?.classList.remove("hidden");
+  if($("cameraBtn"))$("cameraBtn").textContent="🎥 Camera";
+}
+async function removeLiveChannels(){
+  try{if(liveChannel)await supabase.removeChannel(liveChannel)}catch{}
+  try{if(viewerChannel)await supabase.removeChannel(viewerChannel)}catch{}
+  try{if(rtcSignalChannel)await supabase.removeChannel(rtcSignalChannel)}catch{}
+  liveChannel=null;viewerChannel=null;rtcSignalChannel=null;
+}
+async function resetStudio(){
+  try{
+    await stopRecordingIfNeeded().catch(()=>{});
+    await stopHostRtc().catch(()=>{});
+    if(user){
+      const {data:active,error}=await supabase.from("feed_live_sessions")
+        .select("id,status,host_id")
+        .eq("host_id",user.id)
+        .eq("status","live");
+      if(!error && active?.length){
+        for(const row of active){
+          const {error:endError}=await supabase.rpc("feed_live_end",{p_session_id:row.id});
+          if(endError) console.warn("Could not end live session",row.id,endError);
+        }
+      }
+    }
+  }catch(e){console.warn("Studio reset",e)}
+  await removeLiveChannels();
+  stopLocalMedia();
+  session=null;
+  peak=0;chatCount=0;
+  $("liveBadge")?.classList.remove("show");
+  if($("goLiveBtn"))$("goLiveBtn").disabled=false;
+  if($("endBtn"))$("endBtn").disabled=true;
+  if($("recordBtn"))$("recordBtn").disabled=true;
+  if($("guestBtn"))$("guestBtn").disabled=true;
+  if($("moderateBtn"))$("moderateBtn").disabled=true;
+  if($("liveTools"))$("liveTools").style.display="none";
+  if($("chatInput"))$("chatInput").disabled=true;
+  if($("sendBtn"))$("sendBtn").disabled=true;
+  if($("chatState"))$("chatState").textContent="Offline";
+  if($("viewerCount"))$("viewerCount").textContent="0";
+  setStatus("Studio reset");
+  toast("Studio reset. Camera and live session were released.");
+}
 
 
 function toast(msg){
@@ -542,25 +551,6 @@ async function protect(){
   return true;
 }
 
-
-async function loadStudioSettings(){
-  // Keep startup independent of optional settings tables/functions.
-  studioSettings={replay:true};
-  return studioSettings;
-}
-async function refreshLiveAnalytics(){
-  if(!session)return;
-  try{
-    const {data,error}=await supabase.from("feed_live_sessions")
-      .select("viewer_count,peak_viewers").eq("id",session.id).maybeSingle();
-    if(error||!data)return;
-    $("viewerCount").textContent=data.viewer_count||0;
-    $("statViewers").textContent=data.viewer_count||0;
-    peak=Math.max(peak,data.peak_viewers||0);
-    $("statPeak").textContent=peak;
-  }catch(e){console.warn("Analytics refresh:",e)}
-}
-
 async function openCamera(){
   if(!window.isSecureContext){
     toast("Camera needs HTTPS (or localhost).");
@@ -575,35 +565,50 @@ async function openCamera(){
 
   const oldStream=stream;
   try{
-    // Request permission first. Do not destroy the working camera if a flip/retry is denied.
-    const nextStream=await navigator.mediaDevices.getUserMedia({
-      video:{facingMode, width:{ideal:1280}, height:{ideal:720}},
-      audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}
+    // Ask for the camera separately so a busy/blocked microphone does not prevent video.
+    const videoStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode, width:{ideal:1280}, height:{ideal:720}}
     });
+
+    let audioTrack=null;
+    try{
+      const audioStream=await navigator.mediaDevices.getUserMedia({
+        audio:{echoCancellation:true, noiseSuppression:true, autoGainControl:true}
+      });
+      audioTrack=audioStream.getAudioTracks()[0]||null;
+    }catch(audioError){
+      console.warn("Microphone unavailable; continuing with camera only:",audioError);
+    }
+
+    const tracks=[...videoStream.getVideoTracks()];
+    if(audioTrack) tracks.push(audioTrack);
+    const nextStream=new MediaStream(tracks);
 
     if(oldStream) oldStream.getTracks().forEach(t=>t.stop());
     stream=nextStream;
     $("preview").srcObject=stream;
     $("placeholder").classList.add("hidden");
-    setStatus("Camera ready");
+    $("cameraBtn").textContent="📷 Camera On";
+    $("micBtn").disabled=!audioTrack;
+    setStatus(audioTrack?"Camera + mic ready":"Camera ready (mic unavailable)");
     return true;
   }catch(e){
     console.error("Camera permission/error:",e);
     const name=e?.name||"";
     if(name==="NotAllowedError" || name==="PermissionDeniedError"){
-      toast("Camera/mic permission was denied. Allow Camera and Microphone for this site, then tap Camera again.");
-      setStatus("Permission denied");
+      toast("Camera permission is blocked. Allow Camera for this site, then try again.");
+      setStatus("Camera permission denied");
     }else if(name==="NotFoundError"){
-      toast("No camera or microphone was found.");
+      toast("No camera was found on this device.");
       setStatus("No camera found");
-    }else if(name==="NotReadableError"){
-      toast("Camera is busy in another app.");
+    }else if(name==="NotReadableError" || name==="AbortError"){
+      toast("Camera is busy. Close Camera, WhatsApp, Instagram, Chrome tabs, or another app using it, then tap Camera again.");
       setStatus("Camera busy");
     }else if(name==="SecurityError"){
       toast("Camera access is blocked by the browser.");
       setStatus("Camera blocked");
     }else{
-      toast("Could not open the camera.");
+      toast("Could not open the camera: "+(e?.message||name||"unknown error"));
       setStatus("Camera unavailable");
     }
     return false;
@@ -673,7 +678,10 @@ async function createLive(status="live"){
 async function goLive(){
   if(session?.status==="live")return;
   await loadStudioSettings();
-  if(!stream)await openCamera();
+  if(!stream){
+    const cameraReady=await openCamera();
+    if(!cameraReady){toast("Open the camera before going live.");return}
+  }
   session=await createLive("live");
   if(!session)return;
   $("liveBadge").classList.add("show");
@@ -697,13 +705,21 @@ async function scheduleLive(){
 }
 
 async function endLive(){
-  if(!session)return;
-  await stopRecordingIfNeeded();
-  const {error}=await supabase.rpc("feed_live_end",{p_session_id:session.id});
-  if(error){console.error(error);toast(error.message);return}
-  await stopHostRtc();
-  if(liveChannel)await supabase.removeChannel(liveChannel);
+  if(!session){
+    await resetStudio();
+    return;
+  }
+  const endingId=session.id;
+  await stopRecordingIfNeeded().catch(()=>{});
+  const {error}=await supabase.rpc("feed_live_end",{p_session_id:endingId});
+  if(error){
+    console.error(error);
+    toast(error.message);
+  }
+  await stopHostRtc().catch(()=>{});
+  await removeLiveChannels();
   if(guestPollTimer){clearInterval(guestPollTimer);guestPollTimer=null}
+  stopLocalMedia();
   session=null;
   $("liveBadge").classList.remove("show");
   $("goLiveBtn").disabled=false;$("endBtn").disabled=true;
@@ -711,8 +727,8 @@ async function endLive(){
   $("liveTools").style.display="none";
   $("chatInput").disabled=true;$("sendBtn").disabled=true;
   $("chatState").textContent="Offline";
-  setStatus("Live ended");
-  toast("Live ended");
+  setStatus(error?"Studio reset after live error":"Live ended");
+  toast(error?"Studio reset.":"Live ended");
 }
 
 async function joinSession(){
@@ -783,7 +799,6 @@ function escapeHtml(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;",
 
 
 let mediaRecorder=null, recordingChunks=[], recordingStartedAt=0, selectedTarget=null;
-let guestPollTimer=null;
 
 function recordingMime(){
   const options=["video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"];
@@ -961,100 +976,259 @@ async function removeGuestFromLive(){
   toast("Guest removed");
 }
 
+/* ===== Permanent camera + stale-live recovery ===== */
+let heartbeatTimer=null;
+let cameraRecoveryTimer=null;
+let cameraRecoveryAttempts=0;
+let intentionalStudioShutdown=false;
+let lastHeartbeatAt=0;
 
-function loaderMessage(text){
-  const el=$("loaderText"); if(el)el.textContent=text;
+function isCameraTrackAlive(){
+  const track=stream?.getVideoTracks?.()[0];
+  return !!track && track.readyState === "live";
 }
-function hideLoader(){
-  $("loader")?.classList.add("hide");
-}
-function showLoaderError(message){
-  loaderMessage(message);
-  const bar=$("loaderBar"); if(bar){bar.style.animation="none";bar.style.width="100%"}
-  const retry=$("loaderRetry");
-  if(retry)retry.classList.remove("hidden");
-}
-async function withTimeout(promise,ms){
-  let timer;
+
+async function sendLiveHeartbeat(){
+  if(!session || session.status !== "live" || !user) return false;
   try{
-    return await Promise.race([
-      promise,
-      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("Startup timed out")),ms)})
-    ]);
-  }finally{clearTimeout(timer)}
-}
-async function bootStudio(){
-  try{
-    loaderMessage("Connecting to your secure studio…");
-    $("loaderRetry")?.classList.add("hidden");
-    const ok=await withTimeout(protect(),12000);
-    if(!ok)return;
-    await loadStudioSettings();
-    setStatus("Ready");
-    loaderMessage("Studio ready");
-    setTimeout(hideLoader,350);
+    const {data,error}=await supabase.rpc("feed_live_heartbeat",{p_session_id:session.id});
+    if(error) throw error;
+    session=data||session;
+    lastHeartbeatAt=Date.now();
+    return true;
   }catch(e){
-    console.error("SPIKE Live Studio startup:",e);
-    setStatus("Connection problem");
-    showLoaderError("Studio took too long to connect. Check your connection and retry.");
+    console.warn("Live heartbeat failed",e);
+    if(/no longer active|not found|expired/i.test(String(e?.message||""))){
+      await recoverFromStaleLive();
+    }
+    return false;
   }
 }
 
-function bindStudioEvents(){
-  $("cameraBtn").onclick=()=>openCamera();
-  $("micBtn").onclick=()=>toggleMic();
-  $("flipBtn").onclick=()=>flipCamera();
-  $("screenBtn").onclick=()=>screenShare();
-  $("goLiveBtn").onclick=()=>goLive().catch(e=>{console.error(e);toast("Could not start the live.");});
-  $("endBtn").onclick=()=>endLive().catch(e=>{console.error(e);toast("Could not end the live.");});
-  $("scheduleBtn").onclick=async()=>{
-    const field=$("scheduleAt");
-    if(field.style.display==="none"){
-      field.style.display="block"; field.focus(); toast("Choose a schedule time, then tap Schedule again.");
-    }else{
-      await scheduleLive();
-    }
-  };
-  $("recordBtn").onclick=async()=>{
-    if(mediaRecorder?.state==="recording")await stopRecordingIfNeeded();
-    else await startRecording();
-  };
-  $("guestBtn").onclick=()=>{
-    const panel=$("guestPanel"); if(panel)panel.style.display=panel.style.display==="none"?"block":"none";
-    if(session)loadGuestRequests();
-  };
-  $("moderateBtn").onclick=()=>{
-    const panel=$("moderationPanel"); if(panel)panel.style.display=panel.style.display==="none"?"block":"none";
-  };
-  $("sendBtn").onclick=()=>sendChat();
-  $("chatInput").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat()}};
-  $("shareBtn").onclick=()=>shareLive();
-  $("copyBtn").onclick=()=>copyLive();
-  $("copyLiveLinkBtn").onclick=()=>copyLive();
-  $("reconnectRtcBtn").onclick=async()=>{
-    if(!session||!stream){toast("Start your camera and go live first.");return}
-    try{await startHostRtc();$("webrtcStatus").textContent="Video signaling connected.";toast("Video reconnected");}
-    catch(e){console.error(e);$("webrtcStatus").textContent="Video reconnect failed.";toast("Could not reconnect video")}
-  };
-  $("muteChatBtn").onclick=()=>{
-    chatMuted=!chatMuted;
-    $("muteChatBtn").textContent=chatMuted?"🔊 Unmute chat":"🔇 Mute chat";
-    $("chatState").textContent=chatMuted?"Muted":"Live";
-  };
-  $("followHostBtn").onclick=()=>toggleFollow();
-  document.querySelectorAll("[data-gift]").forEach(b=>b.onclick=()=>sendGift(b.dataset.gift));
-  document.querySelectorAll("[data-reaction]").forEach(b=>b.onclick=()=>react(b.dataset.reaction));
-  $("removeGuestVideoBtn").onclick=()=>removeGuestFromLive();
-  $("settingsBtn").onclick=()=>toast("Studio settings are ready for your live session.");
-  $("loaderRetry").onclick=()=>location.reload();
-
-  // Allow the camera to be opened explicitly without forcing permissions at page load.
-  setStatus("Ready");
+function startHeartbeat(){
+  clearInterval(heartbeatTimer);
+  if(!session) return;
+  sendLiveHeartbeat();
+  heartbeatTimer=setInterval(sendLiveHeartbeat,15000);
 }
 
-bindStudioEvents();
-bootStudio();
+function stopHeartbeat(){
+  clearInterval(heartbeatTimer);
+  heartbeatTimer=null;
+}
+
+async function recoverFromStaleLive(){
+  stopHeartbeat();
+  await stopHostRtc().catch(()=>{});
+  await removeLiveChannels().catch(()=>{});
+  if(guestPollTimer){clearInterval(guestPollTimer);guestPollTimer=null}
+  stopLocalMedia();
+  session=null;
+  $("liveBadge")?.classList.remove("show");
+  $("goLiveBtn").disabled=false;
+  $("endBtn").disabled=true;
+  $("recordBtn").disabled=true;
+  $("guestBtn").disabled=true;
+  $("moderateBtn").disabled=true;
+  $("liveTools").style.display="none";
+  $("chatInput").disabled=true;
+  $("sendBtn").disabled=true;
+  $("chatState").textContent="Offline";
+  setStatus("Previous live session recovered");
+  toast("Previous live session was stale and has been closed. You can go live again.");
+}
+
+async function recoverHostLiveSession(){
+  if(!user) return null;
+  const {data,error}=await supabase.from("feed_live_sessions")
+    .select("*").eq("host_id",user.id).eq("status","live")
+    .order("started_at",{ascending:false}).limit(1).maybeSingle();
+  if(error){console.warn("Live recovery lookup",error);return null}
+  if(!data) return null;
+
+  const heartbeat=Date.parse(data.last_heartbeat_at||data.started_at||data.created_at||0);
+  if(!heartbeat || Date.now()-heartbeat>75000){
+    await supabase.rpc("feed_live_end",{p_session_id:data.id}).catch(async()=>{
+      await supabase.from("feed_live_sessions").update({status:"ended",ended_at:new Date().toISOString(),viewer_count:0}).eq("id",data.id).eq("status","live");
+    });
+    setStatus("Stale live session recovered");
+    toast("A stale live session was found and closed automatically.");
+    return null;
+  }
+
+  // The browser may have reloaded while the live session is still healthy.
+  // Restore its controls, but never attempt camera permission without user intent.
+  session=data;
+  $("liveBadge").classList.add("show");
+  $("goLiveBtn").disabled=true;
+  $("endBtn").disabled=false;
+  $("recordBtn").disabled=false;
+  $("guestBtn").disabled=false;
+  $("moderateBtn").disabled=false;
+  $("chatInput").disabled=false;
+  $("sendBtn").disabled=false;
+  $("liveTools").style.display="flex";
+  $("chatState").textContent="Live";
+  setStatus("Live session recovered",true);
+  startHeartbeat();
+  try{await joinSession();}catch(e){console.warn("Recovered live channel",e)}
+  toast("Your active live session was restored.");
+  return session;
+}
+
+function scheduleCameraRecovery(reason="camera disconnected"){
+  if(cameraRecoveryTimer || intentionalStudioShutdown) return;
+  cameraRecoveryAttempts=0;
+  const attempt=async()=>{
+    cameraRecoveryTimer=null;
+    if(intentionalStudioShutdown || isCameraTrackAlive()) return;
+    cameraRecoveryAttempts++;
+    setStatus("Recovering camera…");
+    const ok=await openCamera({automatic:true});
+    if(ok){
+      cameraRecoveryAttempts=0;
+      if(session?.status==="live"){
+        try{await startHostRtc()}catch(e){console.warn("RTC camera recovery",e)}
+      }
+      toast("Camera recovered.");
+      return;
+    }
+    if(cameraRecoveryAttempts<5){
+      const delay=Math.min(8000,1000*Math.pow(2,cameraRecoveryAttempts-1));
+      cameraRecoveryTimer=setTimeout(attempt,delay);
+    }else{
+      setStatus("Camera needs permission or is busy");
+      toast("Camera could not recover automatically. Close other camera apps and tap Camera.");
+    }
+  };
+  cameraRecoveryTimer=setTimeout(attempt, reason==="devicechange"?500:1000);
+}
+
+// Replace the camera opener with an option that distinguishes automatic recovery.
+const manualOpenCamera=openCamera;
+openCamera=async function(options={}){
+  const automatic=!!options.automatic;
+  try{
+    return await manualOpenCamera();
+  }catch(e){
+    if(automatic) console.warn("Automatic camera recovery",e);
+    return false;
+  }
+};
+
+function attachCameraRecovery(){
+  if(!navigator.mediaDevices) return;
+  navigator.mediaDevices.addEventListener?.("devicechange",()=>scheduleCameraRecovery("devicechange"));
+  document.addEventListener("visibilitychange",()=>{
+    if(document.visibilityState==="visible" && !isCameraTrackAlive() && !intentionalStudioShutdown){
+      if(session?.status==="live" || $("cameraBtn")) scheduleCameraRecovery("visibility");
+    }
+  });
+  window.addEventListener("online",()=>{
+    if(session?.status==="live") sendLiveHeartbeat();
+    if(!isCameraTrackAlive() && !intentionalStudioShutdown) scheduleCameraRecovery("online");
+  });
+  const video=$("preview");
+  video?.addEventListener("emptied",()=>{
+    if(!intentionalStudioShutdown) scheduleCameraRecovery("video emptied");
+  });
+}
+
+function bindRecoveryTrackHandlers(){
+  stream?.getVideoTracks?.().forEach(track=>{
+    track.onended=()=>{
+      if(!intentionalStudioShutdown) scheduleCameraRecovery("track ended");
+    };
+  });
+}
+
+// Keep the existing openCamera behavior, but monitor every successful stream.
+const originalStopLocalMedia=stopLocalMedia;
+stopLocalMedia=function(){
+  intentionalStudioShutdown=true;
+  if(cameraRecoveryTimer){clearTimeout(cameraRecoveryTimer);cameraRecoveryTimer=null}
+  originalStopLocalMedia();
+  setTimeout(()=>{intentionalStudioShutdown=false},0);
+};
+
+async function resetStudioAutomatic(){
+  intentionalStudioShutdown=true;
+  stopHeartbeat();
+  if(cameraRecoveryTimer){clearTimeout(cameraRecoveryTimer);cameraRecoveryTimer=null}
+  await resetStudio();
+  intentionalStudioShutdown=false;
+}
+
+async function safeGoLive(){
+  if(!stream || !isCameraTrackAlive()){
+    const ok=await openCamera();
+    if(!ok){toast("Camera is not ready. Allow camera access or close the app using it.");return}
+  }
+  await goLive();
+  if(session?.status==="live"){
+    startHeartbeat();
+    bindRecoveryTrackHandlers();
+    try{await startHostRtc()}catch(e){console.warn("RTC start after go live",e)}
+  }
+}
+
+async function safeEndLive(){
+  stopHeartbeat();
+  await endLive();
+}
+
+async function initStudio(){
+  const ok=await protect();
+  if(!ok)return;
+  attachCameraRecovery();
+  $("cameraBtn").onclick=async()=>{
+    if(isCameraTrackAlive()){
+      stopLocalMedia();
+      toast("Camera released.");
+    }else{
+      intentionalStudioShutdown=false;
+      const opened=await openCamera();
+      if(opened){
+        bindRecoveryTrackHandlers();
+        if(session?.status==="live") { try{await startHostRtc()}catch(e){console.warn("RTC reconnect after camera open",e)} }
+      }
+    }
+  };
+  $("micBtn").onclick=toggleMic;
+  $("flipBtn").onclick=flipCamera;
+  $("screenBtn").onclick=screenShare;
+  $("goLiveBtn").onclick=safeGoLive;
+  $("endBtn").onclick=safeEndLive;
+  $("resetStudioBtn").onclick=resetStudioAutomatic;
+  $("recordBtn").onclick=async()=>mediaRecorder?.state==="recording"?stopRecordingIfNeeded():startRecording();
+  $("copyLiveLinkBtn").onclick=copyLive;
+  $("reconnectRtcBtn").onclick=async()=>{try{await startHostRtc();toast("Video connection refreshed.")}catch(e){toast("Could not reconnect video.")}};
+  $("sendBtn").onclick=sendChat;
+  $("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendChat()}});
+  document.querySelectorAll("[data-reaction]").forEach(b=>b.onclick=()=>react(b.dataset.reaction));
+  document.querySelectorAll("[data-gift]").forEach(b=>b.onclick=()=>sendGift(b.dataset.gift));
+  $("followHostBtn").onclick=toggleFollow;
+  $("removeGuestVideoBtn").onclick=removeGuestFromLive;
+  await loadStudioSettings();
+  await recoverHostLiveSession();
+  $("loader").classList.add("hide");
+}
+
+window.addEventListener("pagehide",()=>{
+  // Stop hardware immediately. The heartbeat naturally expires the DB session.
+  stopHeartbeat();
+  try{stopLocalMedia()}catch{}
+});
+window.addEventListener("beforeunload",()=>{
+  stopHeartbeat();
+  try{stream?.getTracks?.().forEach(t=>t.stop())}catch{}
+  try{screenStream?.getTracks?.().forEach(t=>t.stop())}catch{}
+});
+
+initStudio().catch(e=>{
+  console.error("Studio initialization failed",e);
+  $("loader").classList.add("hide");
+  toast("Studio could not initialize. Refresh and try again.");
+});
 
 </script>
-</body>
-</html>

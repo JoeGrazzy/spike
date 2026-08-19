@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SPIKE Room – Full</title>
-  <script src="https://cdn.jsdelivr.net/npm/@spikeDB/spikeDB-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
@@ -210,17 +210,16 @@
 </div>
 
 <script>
-(() => {
-// =================================================================
+// ================================================================
 // SPIKE ROOM – migrated to the existing SPIKE Supabase schema
 // Uses: profiles, rooms, room_members, room_messages,
 // room_message_pulses, room_user_stats, room_crate_rewards,
 // room_topics and notifications.
 // ================================================================
 
-const SUPABASE_URL = 'https://bkrrewagsbjqgmxaaqyt.supabase.co';
+const SUPABASE_URL = 'https://bkrrewagsbjqgmxaaqyt.spikeDB.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O';
-let spikeDB = null;
+const spikeDB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let currentRoom = null;
@@ -283,7 +282,7 @@ async function initAnonymousSession() {
 }
 
 async function getOrCreateProfile(userId) {
-  let { data: profile, error } = await spikeDB
+  let { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
@@ -296,7 +295,7 @@ async function getOrCreateProfile(userId) {
 
   if (!profile) {
     const username = 'User_' + Math.floor(1000 + Math.random() * 9000);
-    const { data, error: insertError } = await spikeDB
+    const { data, error: insertError } = await supabase
       .from('profiles')
       .insert([{ id: userId, username, display_name: username }])
       .select('*')
@@ -384,7 +383,7 @@ async function createRoom() {
 }
 
 async function loadUserState() {
-  const { data: stats, error: statsError } = await spikeDB
+  const { data: stats, error: statsError } = await supabase
     .from('room_user_stats')
     .select('energy,level')
     .eq('user_id', currentUser.id)
@@ -392,7 +391,7 @@ async function loadUserState() {
 
   if (statsError) console.error(statsError);
 
-  const { data: wallet, error: walletError } = await spikeDB
+  const { data: wallet, error: walletError } = await supabase
     .from('user_wallets')
     .select('coins')
     .eq('user_id', currentUser.id)
@@ -460,7 +459,7 @@ async function initApp() {
 }
 
 async function loadCurrentTopic() {
-  const { data } = await spikeDB
+  const { data } = await supabase
     .from('room_topics')
     .select('topic')
     .eq('room_id', currentRoom)
@@ -475,7 +474,7 @@ async function loadCurrentTopic() {
 }
 
 async function loadMessages(roomId) {
-  const { data, error } = await spikeDB
+  const { data, error } = await supabase
     .from('room_messages')
     .select(`
       id,
@@ -563,7 +562,7 @@ async function sendMessage() {
     return;
   }
 
-  const { data, error } = await spikeDB
+  const { data, error } = await supabase
     .from('room_messages')
     .insert([{
       room_id: currentRoom,
@@ -623,7 +622,7 @@ window.pulseMessage = async function(messageId) {
     return;
   }
 
-  const { error } = await spikeDB
+  const { error } = await supabase
     .from('room_message_pulses')
     .insert([{ message_id: messageId, user_id: currentUser.id }]);
 
@@ -639,14 +638,14 @@ window.pulseMessage = async function(messageId) {
   msg.pulse += 1;
   renderMessages();
 
-  const { count } = await spikeDB
+  const { count } = await supabase
     .from('room_message_pulses')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', currentUser.id);
 
   if (count && count % 5 === 0) {
     currentUser.avatar_level = Math.min(10, currentUser.avatar_level + 1);
-    await spikeDB
+    await supabase
       .from('room_user_stats')
       .update({ level: currentUser.avatar_level, updated_at: new Date().toISOString() })
       .eq('user_id', currentUser.id);
@@ -666,7 +665,7 @@ async function openCrate() {
 
   const reward = rewards[Math.floor(Math.random() * rewards.length)];
 
-  const { error } = await spikeDB
+  const { error } = await supabase
     .from('room_crate_rewards')
     .insert([{
       user_id: currentUser.id,
@@ -700,7 +699,7 @@ async function switchRoom(roomKey) { return selectRoom(roomKey); }
 function subscribeToRoom(roomId) {
   if (subChannel) spikeDB.removeChannel(subChannel);
 
-  subChannel = spikeDB
+  subChannel = supabase
     .channel(`spike-room:${roomId}`)
     .on('postgres_changes', {
       event: 'INSERT',
@@ -711,7 +710,7 @@ function subscribeToRoom(roomId) {
       const newMsg = payload.new;
       if (messages.some(m => m.id === newMsg.id)) return;
 
-      const { data: userData } = await spikeDB
+      const { data: userData } = await supabase
         .from('profiles')
         .select('username,display_name')
         .eq('id', newMsg.user_id)
@@ -760,7 +759,7 @@ function startEnergyDecay() {
     }
 
     if (currentUser.energy % 5 === 0 || currentUser.energy === 0) {
-      await spikeDB
+      await supabase
         .from('room_user_stats')
         .update({ energy: currentUser.energy, updated_at: new Date().toISOString() })
         .eq('user_id', currentUser.id);
@@ -770,7 +769,7 @@ function startEnergyDecay() {
 
 async function syncUserStats() {
   const [statsResult, walletResult] = await Promise.all([
-    spikeDB
+    supabase
       .from('room_user_stats')
       .upsert({
         user_id: currentUser.id,
@@ -778,7 +777,7 @@ async function syncUserStats() {
         level: currentUser.avatar_level,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' }),
-    spikeDB
+    supabase
       .from('user_wallets')
       .upsert({
         user_id: currentUser.id,
@@ -828,7 +827,7 @@ function switchTab(tab) {
 }
 
 async function loadFeed() {
-  const { data, error } = await spikeDB
+  const { data, error } = await supabase
     .from('room_messages')
     .select('id,body,created_at,user_id,profiles(username,display_name),room_message_pulses(id)')
     .order('created_at', { ascending: false })
@@ -859,7 +858,7 @@ async function loadFeed() {
 }
 
 async function loadInbox() {
-  const { data: myMessages, error: myError } = await spikeDB
+  const { data: myMessages, error: myError } = await supabase
     .from('room_messages')
     .select('id,body')
     .eq('user_id', currentUser.id);
@@ -876,7 +875,7 @@ async function loadInbox() {
 
   const ids = myMessages.map(m => m.id);
 
-  const { data: pulses, error } = await spikeDB
+  const { data: pulses, error } = await supabase
     .from('room_message_pulses')
     .select('id,created_at,user_id,message_id,profiles(username,display_name)')
     .in('message_id', ids)
@@ -909,19 +908,19 @@ async function loadInbox() {
 async function loadProfile() {
   if (!currentUser) return;
 
-  const { count: msgCount } = await spikeDB
+  const { count: msgCount } = await supabase
     .from('room_messages')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', currentUser.id);
 
-  const { data: ownMessages } = await spikeDB
+  const { data: ownMessages } = await supabase
     .from('room_messages')
     .select('id')
     .eq('user_id', currentUser.id);
 
   let pulseCount = 0;
   if (ownMessages?.length) {
-    const { count } = await spikeDB
+    const { count } = await supabase
       .from('room_message_pulses')
       .select('id', { count: 'exact', head: true })
       .in('message_id', ownMessages.map(m => m.id));
@@ -947,7 +946,7 @@ window.editUsername = async function() {
 
   const trimmed = newName.trim();
 
-  const { data: existing } = await spikeDB
+  const { data: existing } = await supabase
     .from('profiles')
     .select('id')
     .eq('username', trimmed)
@@ -959,7 +958,7 @@ window.editUsername = async function() {
     return;
   }
 
-  const { error } = await spikeDB
+  const { error } = await supabase
     .from('profiles')
     .update({ username: trimmed, display_name: trimmed, updated_at: new Date().toISOString() })
     .eq('id', currentUser.id);
@@ -994,20 +993,7 @@ function showToast(text) {
   toastTimer = setTimeout(() => toast.remove(), 2200);
 }
 
-window.SPIKE_SUPABASE_READY
-  .then(function (supabaseLib) {
-    spikeDB = supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return initApp();
-  })
-  .catch(function (err) {
-    console.error(err);
-    var box = document.getElementById("app");
-    if (box) {
-      box.innerHTML = '<div style="padding:24px;color:#fff;font-family:system-ui"><h2>SPIKE could not start</h2><p style="color:#aab2c0">' +
-        String(err.message || err) + '</p><p style="color:#aab2c0">Check your internet connection and reload.</p></div>';
-    }
-  });
-})();
+initApp();
 </script>
 </body>
 </html>

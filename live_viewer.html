@@ -24,47 +24,127 @@ const SUPABASE_KEY="sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O";
 const supabase=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id), sessionId=new URLSearchParams(location.search).get("session");
 const rtcConfig={iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun.cloudflare.com:3478"}]};
-let user=null,session=null,channel=null,pc=null,guestPc=null,guestStream=null,guestRequestId=null,connected=false,chatCount=0;
+let user=null,session=null,channel=null,pc=null,guestPc=null,guestStream=null,guestRequestId=null,
+connected=false,chatCount=0,connecting=false,reconnectTimer=null,reconnectAttempts=0,channelReady=false,
+iceQueue=[],guestIceQueue=[],leaving=false;
 
 function status(x){$("status").textContent=x}
-async function send(payload){if(channel)await channel.send({type:"broadcast",event:"signal",payload})}
-async function connect(){
-  if(!sessionId){status("Missing live session link");return}
-  const {data:{session:auth}}=await supabase.auth.getSession();
-  if(!auth?.user){status("Please sign in to watch this live");return}
-  user=auth.user;
-  const {data:live,error}=await supabase.from("feed_live_sessions").select("id,status,title,host_id,viewer_count,visibility,allow_chat,guest_limit,metadata").eq("id",sessionId).maybeSingle();
-  if(error||!live){status("Live session not found");return}
-  session=live;
-  if(live.status!=="live"){status("This live has ended");$("liveBadge").style.display="none";return}
-  $("title").textContent=live.title||"Live";$("viewerCount").textContent=live.viewer_count||0;$("host").textContent="SPIKE Live";
-  await supabase.rpc("feed_live_join",{p_session_id:session.id});
-  if(channel)await supabase.removeChannel(channel);
-  channel=supabase.channel(`live-video:${session.id}`,{config:{private:true,broadcast:{ack:true}}});
-  channel.on("broadcast",{event:"signal"},async({payload})=>{
-    if(!payload||payload.to&&payload.to!==user.id||payload.from===user.id)return;
-    if(payload.type==="offer"){
-      if(pc)pc.close();pc=new RTCPeerConnection(rtcConfig);
-      pc.ontrack=e=>{$("remote").srcObject=e.streams[0];status("🔴 Live now");connected=true};
-      pc.onicecandidate=e=>{if(e.candidate)send({type:"ice",from:user.id,to:payload.from,data:e.candidate,session_id:session.id})};
-      pc.onconnectionstatechange=()=>{if(["failed","disconnected"].includes(pc.connectionState)){status("Connection interrupted — tap Reconnect");connected=false}};
-      await pc.setRemoteDescription(payload.data);const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
-      await send({type:"answer",from:user.id,to:payload.from,data:pc.localDescription,session_id:session.id});
-    }else if(payload.type==="ice"&&pc&&payload.data){await pc.addIceCandidate(payload.data).catch(()=>{})}
-    else if(payload.type==="guest-accepted"&&payload.to===user.id){await startGuest(payload.from)}
-    else if(payload.type==="guest-rejected"&&payload.to===user.id){$("guestStatus").textContent="Host declined your request";$("requestGuest").disabled=false}
-    else if(payload.type==="guest-answer"&&payload.to===user.id&&guestPc){await guestPc.setRemoteDescription(payload.data)}
-    else if(payload.type==="guest-ice"&&payload.to===user.id&&guestPc){await guestPc.addIceCandidate(payload.data).catch(()=>{})}
-    else if(payload.type==="guest-kick"&&payload.to===user.id){stopGuest();$("guestStatus").textContent="Host removed you from the live";}
-  });
-  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_messages",filter:"session_id=eq."+session.id},p=>appendMessage(p.new));
-  channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_reactions",filter:"session_id=eq."+session.id},p=>status((p.new.emoji||"✨")+" reaction"));
-  channel.on("postgres_changes",{event:"UPDATE",schema:"public",table:"feed_live_sessions",filter:"id=eq."+session.id},p=>{session=p.new;$("viewerCount").textContent=p.new.viewer_count||0;if(p.new.status!=="live")status("Live ended")});
-  await channel.subscribe();
-  await send({type:"viewer-join",from:user.id,to:null,session_id:session.id});
-  await loadChat();
-  $("chatInput").disabled=false;$("send").disabled=false;status("Waiting for host video…");
+async function send(payload){
+  if(channel&&channelReady){
+    try{await channel.send({type:"broadcast",event:"signal",payload})}
+    catch(e){console.warn("Signal send failed",e)}
+  }
 }
+async function connect({silent=false}={}){
+  if(connecting)return;
+  if(!sessionId){status("Missing live session link");return}
+  connecting=true;
+  try{
+    const {data:{session:auth}}=await supabase.auth.getSession();
+    if(!auth?.user){status("Please sign in to watch this live");return}
+    user=auth.user;
+    const {data:live,error}=await supabase.from("feed_live_sessions")
+      .select("id,status,title,host_id,viewer_count,visibility,allow_chat,guest_limit,metadata")
+      .eq("id",sessionId).maybeSingle();
+    if(error||!live){status("Live session not found");return}
+    session=live;
+    if(live.status!=="live"){
+      stopViewerRtc(); status("This live has ended"); $("liveBadge").style.display="none";
+      $("chatInput").disabled=true; $("send").disabled=true; return;
+    }
+    $("liveBadge").style.display="inline-block";
+    $("title").textContent=live.title||"Live";
+    $("viewerCount").textContent=live.viewer_count||0;
+    $("host").textContent="SPIKE Live";
+    const joinResult=await supabase.rpc("feed_live_join",{p_session_id:session.id});
+    if(joinResult.error) console.warn("Live join:",joinResult.error.message);
+    if(channel)try{await supabase.removeChannel(channel)}catch{}
+    channel=null; channelReady=false;
+    channel=supabase.channel(`live-video:${session.id}`,{config:{private:true,broadcast:{ack:true}}});
+    channel.on("broadcast",{event:"signal"},async({payload})=>{
+      if(!payload||payload.session_id!==session.id||(payload.to&&payload.to!==user.id)||payload.from===user.id)return;
+      try{
+        if(payload.type==="offer"){
+          await createViewerPeer(payload.from);
+          await pc.setRemoteDescription(payload.data);
+          while(iceQueue.length)await pc.addIceCandidate(iceQueue.shift()).catch(()=>{});
+          const answer=await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          await send({type:"answer",from:user.id,to:payload.from,data:pc.localDescription,session_id:session.id});
+        }else if(payload.type==="ice"&&payload.data){
+          if(pc?.remoteDescription)await pc.addIceCandidate(payload.data).catch(()=>{});
+          else iceQueue.push(payload.data);
+        }else if(payload.type==="guest-accepted"&&payload.to===user.id)await startGuest(payload.from);
+        else if(payload.type==="guest-rejected"&&payload.to===user.id){
+          $("guestStatus").textContent="Host declined your request"; $("requestGuest").disabled=false;
+        }else if(payload.type==="guest-answer"&&payload.to===user.id&&guestPc){
+          await guestPc.setRemoteDescription(payload.data);
+          while(guestIceQueue.length)await guestPc.addIceCandidate(guestIceQueue.shift()).catch(()=>{});
+        }else if(payload.type==="guest-ice"&&payload.to===user.id&&guestPc){
+          if(guestPc.remoteDescription)await guestPc.addIceCandidate(payload.data).catch(()=>{});
+          else guestIceQueue.push(payload.data);
+        }else if(payload.type==="guest-kick"&&payload.to===user.id){
+          await stopGuest(); $("guestStatus").textContent="Host removed you from the live";
+        }
+      }catch(e){console.warn("Signal error",e);scheduleReconnect("Connection recovery in progress…")}
+    });
+    channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_messages",filter:"session_id=eq."+session.id},p=>appendMessage(p.new));
+    channel.on("postgres_changes",{event:"INSERT",schema:"public",table:"feed_live_reactions",filter:"session_id=eq."+session.id},p=>status((p.new.emoji||"✨")+" reaction"));
+    channel.on("postgres_changes",{event:"UPDATE",schema:"public",table:"feed_live_sessions",filter:"id=eq."+session.id},p=>{
+      session=p.new;$("viewerCount").textContent=p.new.viewer_count||0;
+      if(p.new.status!=="live"){stopViewerRtc();status("Live ended");$("liveBadge").style.display="none";$("chatInput").disabled=true;$("send").disabled=true}
+    });
+    channel.subscribe(st=>{
+      channelReady=st==="SUBSCRIBED";
+      if(channelReady){reconnectAttempts=0;send({type:"viewer-join",from:user.id,to:null,session_id:session.id});if(!silent)status("Waiting for host video…")}
+      else if(["CHANNEL_ERROR","TIMED_OUT","CLOSED"].includes(st))scheduleReconnect("Live connection interrupted — reconnecting…");
+    });
+    await loadChat();
+    $("chatInput").disabled=false;$("send").disabled=false;
+  }finally{connecting=false}
+}
+
+
+async function createViewerPeer(hostId){
+  if(pc)try{pc.close()}catch{}
+  iceQueue=[]; pc=new RTCPeerConnection(rtcConfig);
+  pc.ontrack=e=>{if(e.streams?.[0])$("remote").srcObject=e.streams[0];connected=true;reconnectAttempts=0;status("🔴 Live now")};
+  pc.onicecandidate=e=>{if(e.candidate)send({type:"ice",from:user.id,to:hostId,data:e.candidate,session_id:session.id})};
+  pc.onconnectionstatechange=()=>{
+    if(pc?.connectionState==="connected"){connected=true;reconnectAttempts=0;status("🔴 Live now")}
+    else if(["failed","disconnected","closed"].includes(pc?.connectionState)){connected=false;scheduleReconnect("Video interrupted — reconnecting…")}
+  };
+  pc.oniceconnectionstatechange=()=>{if(["failed","disconnected"].includes(pc?.iceConnectionState))scheduleReconnect("Network interrupted — reconnecting…")};
+}
+function stopViewerRtc(){if(pc)try{pc.close()}catch{};pc=null;iceQueue=[];connected=false;$("remote").srcObject=null}
+function scheduleReconnect(message="Reconnecting…"){
+  if(leaving||reconnectTimer)return;
+  status(message);
+  const delay=Math.min(15000,1000*Math.pow(2,reconnectAttempts++));
+  reconnectTimer=setTimeout(async()=>{
+    reconnectTimer=null;
+    if(!navigator.onLine){status("Waiting for internet connection…");return}
+    try{await disconnect({skipLeave:true});await connect({silent:true})}
+    catch(e){console.warn("Reconnect failed",e);scheduleReconnect("Retrying live connection…")}
+  },delay);
+}
+async function recoverCamera(){
+  if(!guestStream)return;
+  const vt=guestStream.getVideoTracks()[0];
+  if(vt?.readyState==="live")return;
+  try{
+    const old=guestStream;
+    const ms=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:720},height:{ideal:720},facingMode:"user"},audio:true});
+    guestStream=ms;$("guestLocal").srcObject=ms;
+    if(guestPc){
+      const v=guestPc.getSenders().find(s=>s.track?.kind==="video"),a=guestPc.getSenders().find(s=>s.track?.kind==="audio");
+      if(v&&ms.getVideoTracks()[0])await v.replaceTrack(ms.getVideoTracks()[0]);
+      if(a&&ms.getAudioTracks()[0])await a.replaceTrack(ms.getAudioTracks()[0]);
+    }
+    old.getTracks().forEach(t=>t.stop());$("guestStatus").textContent="Guest camera recovered";
+  }catch(e){$("guestStatus").textContent="Camera unavailable — close other camera apps and retry"}
+}
+
 async function loadChat(){const {data}=await supabase.from("feed_live_messages").select("id,user_id,body,created_at").eq("session_id",session.id).order("created_at",{ascending:true}).limit(100);$("chatList").innerHTML="";(data||[]).forEach(appendMessage)}
 function appendMessage(m){const el=document.createElement("div");el.className="msg";el.innerHTML="<b>Viewer</b> "+escapeHtml(m.body)+`<small> · ${new Date(m.created_at||Date.now()).toLocaleTimeString()}</small>`;$("chatList").appendChild(el);$("chatList").scrollTop=$("chatList").scrollHeight}
 function escapeHtml(x){return String(x??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
@@ -72,22 +152,43 @@ async function sendChat(){const body=$("chatInput").value.trim();if(!body||!sess
 async function requestGuest(){if(!session)return;const {data,error}=await supabase.from("feed_live_guest_requests").insert({session_id:session.id,user_id:user.id,status:"pending"}).select("id").single();if(error){status(error.message);return}guestRequestId=data.id;$("requestGuest").disabled=true;$("guestStatus").textContent="Request sent — waiting for host"}
 async function startGuest(hostId){
   try{
-    const ms=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:720},height:{ideal:720}},audio:true});guestStream=ms;
-    $("guestLocal").srcObject=ms;$("guestPreview").style.display="block";$("leaveGuest").style.display="inline-block";$("guestStatus").textContent="You are joining as a guest";
-    guestPc=new RTCPeerConnection(rtcConfig);ms.getTracks().forEach(t=>guestPc.addTrack(t,ms));
+    await stopGuest({notify:false});
+    const ms=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:720},height:{ideal:720},facingMode:"user"},audio:true});
+    guestStream=ms;$("guestLocal").srcObject=ms;$("guestPreview").style.display="block";$("leaveGuest").style.display="inline-block";$("guestStatus").textContent="You are joining as a guest";
+    guestPc=new RTCPeerConnection(rtcConfig);guestIceQueue=[];ms.getTracks().forEach(t=>guestPc.addTrack(t,ms));
     guestPc.onicecandidate=e=>{if(e.candidate)send({type:"guest-ice",from:user.id,to:hostId,data:e.candidate,session_id:session.id})};
-    guestPc.onconnectionstatechange=()=>{if(["failed","disconnected"].includes(guestPc.connectionState))$("guestStatus").textContent="Guest connection interrupted"};
+    guestPc.onconnectionstatechange=()=>{if(["failed","disconnected"].includes(guestPc?.connectionState))recoverCamera()};
+    ms.getVideoTracks().forEach(t=>t.onended=()=>recoverCamera());
     const offer=await guestPc.createOffer();await guestPc.setLocalDescription(offer);
     await send({type:"guest-offer",from:user.id,to:hostId,data:guestPc.localDescription,session_id:session.id});
-  }catch(e){$("guestStatus").textContent="Camera/microphone permission is required";status(e.message||"Guest access failed")}
+  }catch(e){$("guestStatus").textContent="Camera/microphone permission is required";status(e.name==="NotReadableError"?"Camera is already being used by another app":(e.message||"Guest access failed"))}
 }
-async function stopGuest(){if(guestPc)try{guestPc.close()}catch{};guestPc=null;if(guestStream)guestStream.getTracks().forEach(t=>t.stop());guestStream=null;$("guestPreview").style.display="none";$("leaveGuest").style.display="none";if(session&&channel)await send({type:"guest-leave",from:user.id,to:null,session_id:session.id})}
+async function stopGuest({notify=true}={}){
+  if(guestPc)try{guestPc.close()}catch{} guestPc=null;guestIceQueue=[];
+  if(guestStream)guestStream.getTracks().forEach(t=>t.stop());guestStream=null;$("guestLocal").srcObject=null;
+  $("guestPreview").style.display="none";$("leaveGuest").style.display="none";
+  if(notify&&session&&channelReady)await send({type:"guest-leave",from:user.id,to:null,session_id:session.id});
+}
 async function follow(){if(!session)return;const {data:ex}=await supabase.from("feed_live_follows").select("session_id").eq("session_id",session.id).eq("follower_id",user.id).maybeSingle();if(ex){await supabase.from("feed_live_follows").delete().eq("session_id",session.id).eq("follower_id",user.id);$("follow").textContent="➕ Follow"}else{await supabase.from("feed_live_follows").insert({session_id:session.id,follower_id:user.id,host_id:session.host_id});$("follow").textContent="✓ Following"}}
 async function react(e){if(session)await supabase.rpc("feed_live_send_reaction",{p_session_id:session.id,p_emoji:e})}
 async function share(){const u=new URL(location.href);if(navigator.share){try{await navigator.share({title:session?.title||"SPIKE Live",url:u.href})}catch{}}else{await navigator.clipboard?.writeText(u.href);status("Live link copied")}}
 async function report(){if(!session)return;const {error}=await supabase.rpc("feed_live_moderate",{p_session_id:session.id,p_target_user_id:session.host_id,p_action:"report",p_message_id:null});status(error?error.message:"Report sent")}
-async function disconnect(){if(channel&&user)await send({type:"viewer-leave",from:user.id,to:null,session_id:sessionId});try{await supabase.rpc("feed_live_leave",{p_session_id:sessionId})}catch{};if(channel)await supabase.removeChannel(channel);channel=null;if(pc)pc.close();pc=null;connected=false;$("remote").srcObject=null;await stopGuest()}
-$("connect").onclick=connect;$("reconnect").onclick=async()=>{await disconnect();await connect()};$("requestGuest").onclick=requestGuest;$("leaveGuest").onclick=stopGuest;$("follow").onclick=follow;$("share").onclick=share;$("report").onclick=report;$("send").onclick=sendChat;$("chatInput").onkeydown=e=>{if(e.key==="Enter")sendChat()};document.querySelectorAll("[data-reaction]").forEach(b=>b.onclick=()=>react(b.dataset.reaction));
-window.addEventListener("pagehide",()=>{try{navigator.sendBeacon?.(`${SUPABASE_URL}/rest/v1/rpc/feed_live_leave`,JSON.stringify({p_session_id:sessionId}))}catch{};try{pc?.close();guestPc?.close()}catch{}});
+async function disconnect({skipLeave=false}={}){
+  if(!skipLeave&&channel&&user)await send({type:"viewer-leave",from:user.id,to:null,session_id:sessionId});
+  if(!skipLeave&&sessionId)try{await supabase.rpc("feed_live_leave",{p_session_id:sessionId})}catch{}
+  if(channel)try{await supabase.removeChannel(channel)}catch{}
+  channel=null;channelReady=false;stopViewerRtc();await stopGuest({notify:false});
+}
+$("connect").onclick=connect;
+$("reconnect").onclick=async()=>{if(reconnectTimer){clearTimeout(reconnectTimer);reconnectTimer=null}await disconnect();await connect()};
+$("requestGuest").onclick=requestGuest;$("leaveGuest").onclick=stopGuest;$("follow").onclick=follow;$("share").onclick=share;$("report").onclick=report;$("send").onclick=sendChat;
+$("chatInput").onkeydown=e=>{if(e.key==="Enter")sendChat()};
+document.querySelectorAll("[data-reaction]").forEach(b=>b.onclick=()=>react(b.dataset.reaction));
+window.addEventListener("online",()=>scheduleReconnect("Internet restored — reconnecting…"));
+window.addEventListener("offline",()=>status("No internet connection — waiting…"));
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(!navigator.onLine){status("Waiting for internet connection…");return}if(session?.status==="live"&&(!channelReady||!connected))scheduleReconnect("Resuming live…");recoverCamera()}});
+navigator.mediaDevices?.addEventListener?.("devicechange",()=>{if(guestStream)recoverCamera()});
+window.addEventListener("pagehide",()=>{leaving=true;try{pc?.close();guestPc?.close()}catch{}});
+window.addEventListener("beforeunload",()=>{leaving=true});
 (async()=>{const {data:{session:s}}=await supabase.auth.getSession();if(!s?.user){status("Please sign in to watch this live");return}await connect()})();
 </script></body></html>
