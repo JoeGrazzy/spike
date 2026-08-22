@@ -305,7 +305,44 @@ video#preview {
 .setting-toggle input{width:auto}
 .settings-foot{display:flex;justify-content:flex-end;gap:8px;padding:11px;border-top:1px solid var(--border)}
 @media(max-width:520px){.settings-panel{width:calc(100% - 12px);max-height:95vh;border-radius:16px}.settings-body{padding:11px}.setting-row input,.setting-row select{width:52%}}
-.guest-stage-active #preview{width:50%;margin-right:auto}.mirror-preview{transform:scaleX(-1)}.moderated{opacity:.55;text-decoration:line-through}.msg{cursor:pointer}</style>
+.guest-stage-active #preview{width:50%;margin-right:auto}.mirror-preview{transform:scaleX(-1)}.moderated{opacity:.55;text-decoration:line-through}.msg{cursor:pointer}
+/* Grid-first feature layout */
+.tool-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:stretch}
+.tool-row .btn,.tool-row>input,.tool-row>select{width:100%;min-width:0}
+.controls{grid-template-columns:repeat(4,minmax(0,1fr))}
+#liveTools{grid-template-columns:repeat(3,minmax(0,1fr))}
+.form{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.form>.field:first-child,.form>.field:nth-child(2),.form>.notice{grid-column:1/-1}
+.form>.row,.form>.tool-row{grid-column:1/-1}
+.guest-request-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guest-request-card{margin:0!important;display:grid;gap:8px}
+.guest-request-card .tool-row{grid-template-columns:1fr 1fr}
+.moderation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gifts{grid-template-columns:repeat(5,minmax(0,1fr))}
+.settings-body{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.setting-row,.setting-toggle{display:grid;grid-template-columns:minmax(110px,.8fr) minmax(0,1.2fr);align-items:center}
+.setting-toggle input{justify-self:end}
+.settings-foot{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.settings-foot .btn{width:100%}
+@media(max-width:899px){
+ .form{grid-template-columns:1fr}
+ .form>.field:first-child,.form>.field:nth-child(2),.form>.notice,.form>.row,.form>.tool-row{grid-column:auto}
+ .controls{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .tool-row,#liveTools{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .guest-request-grid{grid-template-columns:1fr}
+ .moderation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .gifts{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:520px){
+ .controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .tool-row,#liveTools{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .moderation-grid,.gifts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .settings-body{grid-template-columns:1fr}
+ .setting-row,.setting-toggle{grid-template-columns:1fr auto}
+ .setting-row input,.setting-row select{width:100%}
+}
+
+</style>
 
 
 </style>
@@ -970,7 +1007,7 @@ async function loadGuestRequests(){
   $("guestList").innerHTML="";
   if(!data?.length){$("guestList").textContent="No pending guest requests.";return}
   data.forEach(g=>{
-    const el=document.createElement("div");el.className="notice";el.style.marginTop="7px";
+    const el=document.createElement("div");el.className="notice guest-request-card";
     el.innerHTML=`<b>${escapeHtml(g.user_id)}</b><div class="tool-row" style="margin-top:7px"><button class="btn" data-guest="${g.id}" data-action="accept">Accept</button><button class="btn" data-guest="${g.id}" data-action="reject">Reject</button></div>`;
     $("guestList").appendChild(el);
   });
@@ -1269,6 +1306,35 @@ function toggleModerationPanel(){
 
 async function initStudio(){
   $("settingsBtn").onclick=openStudioSettings;
+  $("scheduleBtn").onclick=async()=>{
+    const input=$("scheduleAt");
+    if(input.style.display==="none"){
+      input.style.display="block";
+      input.focus();
+      toast("Choose a future time, then tap Schedule again.");
+      return;
+    }
+    if(input.value && new Date(input.value).getTime()<=Date.now()){
+      toast("Choose a future schedule time.");
+      return;
+    }
+    await scheduleLive();
+    input.style.display="none";
+  };
+  $("guestBtn").onclick=()=>{
+    const panel=$("guestPanel");
+    if(!panel){toast("Guest panel is unavailable.");return}
+    panel.style.display=panel.style.display==="none"?"block":"none";
+    if(panel.style.display==="block")loadGuestRequests();
+  };
+  $("shareBtn").onclick=shareLive;
+  $("copyBtn").onclick=copyLive;
+  $("muteChatBtn").onclick=()=>{
+    chatMuted=!chatMuted;
+    $("muteChatBtn").textContent=chatMuted?"🔊 Unmute chat":"🔇 Mute chat";
+    if(chatMuted) $("chatList").innerHTML='<div class="notice">Chat is muted on this studio.</div>';
+    else loadMessages();
+  };
   $("closeStudioSettings").onclick=closeStudioSettings;
   $("cancelStudioSettings").onclick=closeStudioSettings;
   $("saveStudioSettings").onclick=saveStudioSettings;

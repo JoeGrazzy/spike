@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>SPIKE Room – Full</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ... (styles remain unchanged) ... */
+    * { margin:0; padding:0; box-sizing:border-box; min-width:0; }
+    html,body{width:100%;max-width:100%;min-height:100%;overflow:hidden!important;}
+    img,svg,video,canvas{max-width:100%;}
+    button,input,textarea,select{max-width:100%;}
+    .brand,.room-header,.energy-section,.panel,.feed-item,.inbox-item,.sp-summary,.sp-card,.sp-package,.spark-topic,.message,.msg-bubble{min-width:0;max-width:100%;}
+    .brand h1,.spark-topic span,.room-btn,.room-card-name,.room-card-desc,.sp-title,.sp-muted,.sp-card h4,.sp-card p,.sp-package-name,.sp-price,.profile-field .value{overflow-wrap:anywhere;word-break:break-word;}
+    :root {
+      --bg-primary: #0B0C10; --bg-secondary: #14161D; --bg-card: #1A1D27;
+      --border-glow: #2C2F3A; --violet: #8A2BE2; --lime: #39FF14;
+      --cyan: #00F0FF; --text-primary: #EDEDED; --text-muted: #8A8F9E;
+      --shadow-neon: 0 0 15px rgba(138,43,226,0.3);
+      --radius: 16px; --transition: all 0.25s ease;
+    }
+    body { font-family: 'Space Grotesk', sans-serif; background: var(--bg-primary); color: var(--text-primary); height: 100vh; display: flex; justify-content: center; align-items: center; margin: 0; overflow: hidden; }
+    #app { width: 100%; max-width: 420px; height: 100vh; max-height: 820px; background: var(--bg-secondary); border-radius: 32px; border: 1px solid var(--border-glow); box-shadow: var(--shadow-neon), 0 20px 60px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; position: relative; }
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: var(--violet); border-radius: 10px; }
+
+    header { padding: 16px 20px 10px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-glow); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, var(--violet), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand .live-badge { font-size: 9px; font-weight: 700; background: var(--lime); color: #000; padding: 2px 8px; border-radius: 20px; text-transform: uppercase; animation: pulse-dot 1.5s infinite; -webkit-text-fill-color: #000; }
+    @keyframes pulse-dot { 0% { opacity:1; } 50% { opacity:0.5; } 100% { opacity:1; } }
+    .user-mini { display: flex; align-items: center; gap: 8px; background: var(--bg-card); padding: 4px 12px 4px 4px; border-radius: 40px; border: 1px solid var(--border-glow); cursor: pointer; }
+    .avatar-morph { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #fff; box-shadow: 0 0 12px rgba(138,43,226,0.5); transition: var(--transition); }
+    .message-avatar{width:28px;height:28px;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;background:linear-gradient(135deg,var(--violet),var(--cyan));vertical-align:middle;margin-right:6px;}
+    .message-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+    .message-avatar-fallback{width:100%;height:100%;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:800;}
+
+    .level-badge { width: 42px; height: 42px; object-fit: contain; display: block; filter: drop-shadow(0 0 10px rgba(138,43,226,0.45)); }
+    .user-mini .level-text { font-size: 10px; font-weight: 800; color: var(--lime); background: rgba(57,255,20,0.15); padding: 3px 7px; border-radius: 10px; border: 1px solid rgba(57,255,20,0.3); }
+
+    .room-header { padding: 12px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border-glow); flex-shrink: 0; }
+    .room-selector { display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; width:100%; }
+    .room-btn { background: transparent; border: 1px solid var(--border-glow); color: var(--text-muted); padding: 4px 14px; border-radius: 30px; font-size: 11px; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: inherit; }
+    .room-btn.active { background: var(--violet); color: #fff; border-color: var(--violet); box-shadow: 0 0 20px rgba(138,43,226,0.4); }
+    .room-tools { display:flex; gap:8px; margin-bottom:8px; width:100%; flex-wrap:wrap; }
+    .room-tool-btn { flex:1 1 120px; min-width:0; background:var(--bg-secondary); border:1px solid var(--border-glow); color:var(--text-primary); padding:8px 10px; border-radius:10px; font:600 11px inherit; cursor:pointer; }
+    .room-tool-btn.primary { background:var(--violet); border-color:var(--violet); color:#fff; }
+    .room-browser { display:none; position:absolute; inset:0; z-index:80; background:var(--bg-primary); flex-direction:column; }
+    .room-browser.open { display:flex; }
+    .browser-head { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border-glow); background:var(--bg-secondary); }
+    .browser-head h2 { font-size:18px; }
+    .browser-close { background:transparent; border:1px solid var(--border-glow); color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; }
+    .browser-body { padding:14px 16px; overflow:auto; flex:1; }
+    .room-search { width:100%; background:var(--bg-card); border:1px solid var(--border-glow); color:#fff; padding:11px 14px; border-radius:12px; outline:none; margin-bottom:12px; }
+    .room-card { background:var(--bg-card); border:1px solid var(--border-glow); border-radius:14px; padding:13px; margin-bottom:10px; }
+    .room-card-top { display:flex; gap:10px; align-items:center; }
+    .room-avatar { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--violet),var(--cyan)); font-weight:800; }
+    .room-card-info { flex:1; min-width:0; }
+    .room-card-name { font-weight:800; font-size:14px; }
+    .room-card-meta { font-size:10px; color:var(--text-muted); margin-top:3px; }
+    .room-card-desc { font-size:11px; color:var(--text-muted); margin:9px 0; line-height:1.4; }
+    .room-card-actions { display:flex; gap:7px; }
+    .room-card-actions button { flex:1; border:1px solid var(--border-glow); background:var(--bg-secondary); color:#fff; padding:8px; border-radius:9px; cursor:pointer; font:600 10px inherit; }
+    .room-card-actions .join { background:var(--violet); border-color:var(--violet); }
+    .create-form { background:var(--bg-card); border:1px solid var(--border-glow); border-radius:14px; padding:14px; margin-bottom:14px; }
+    .create-form input,.create-form textarea { width:100%; background:var(--bg-secondary); border:1px solid var(--border-glow); color:#fff; border-radius:10px; padding:10px; margin-bottom:8px; font:inherit; outline:none; }
+    .create-form textarea { min-height:70px; resize:none; }
+    .create-form button { width:100%; padding:10px; border:0; border-radius:10px; background:var(--violet); color:#fff; font-weight:700; cursor:pointer; }
+    .room-empty { text-align:center; color:var(--text-muted); padding:35px 15px; font-size:12px; }
+    .message-menu { margin-left:auto; background:transparent; border:0; color:var(--text-muted); cursor:pointer; }
+
+    .spark-topic { display:flex; min-width:0; align-items: center; gap: 10px; background: rgba(0,240,255,0.05); padding: 6px 12px; border-radius: 40px; border-left: 3px solid var(--cyan); }
+    .spark-topic i { color: var(--cyan); font-size: 14px; }
+    .spark-topic span { font-size: 13px; min-width:0; flex:1; font-weight: 400; color: var(--text-primary); }
+    .spark-topic .ai-tag { font-size: 8px; font-weight: 700; color: var(--cyan); background: rgba(0,240,255,0.1); padding: 2px 6px; border-radius: 4px; margin-left: 8px; }
+
+    .energy-section { padding:8px 16px; min-width:0; background: var(--bg-secondary); flex-shrink: 0; display: flex; align-items: center; gap: 12px; }
+    .energy-label { font-size: 11px; font-weight: 700; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+    .energy-track { flex: 1; height: 6px; background: var(--bg-card); border-radius: 10px; overflow: hidden; }
+    .energy-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--lime), var(--cyan)); border-radius: 10px; transition: width 0.5s ease; }
+    .energy-fill.danger { background: linear-gradient(90deg, #FF4D4D, #FF9D4D); }
+    .coins-display { font-size: 13px; font-weight: 700; color: #FFD700; display: flex; align-items: center; gap: 4px; background: rgba(255,215,0,0.1); padding: 2px 10px; border-radius: 30px; border: 1px solid rgba(255,215,0,0.2); }
+
+    .panel { display: none; flex: 1; overflow-y: auto; padding: 16px 20px; background: var(--bg-primary); flex-direction: column; gap: 12px; }
+    .panel.active { display: flex; }
+    #chat-panel { padding: 0; background: transparent; }
+    #chat-container { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+    .feed-item, .inbox-item { background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 12px; padding: 12px 16px; }
+    .feed-item .msg-text { font-size: 14px; margin-bottom: 4px; }
+    .feed-item .meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; }
+    .inbox-item .inbox-text { font-size: 14px; }
+    .inbox-item .inbox-meta { font-size: 11px; color: var(--text-muted); }
+
+    .profile-avatar { font-size: 64px; text-align: center; margin-bottom: 12px; }
+    .profile-field { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-glow); }
+    .profile-field .label { color: var(--text-muted); }
+    .profile-field .value { font-weight: 600; }
+    .profile-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:14px;padding:14px;border:1px solid var(--border-glow);border-radius:16px;background:rgba(255,255,255,.025)}
+    .profile-avatar-img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:2px solid var(--violet);box-shadow:0 0 22px rgba(138,43,226,.35);background:var(--bg-card)}
+    .avatar-upload-btn{background:var(--violet);border:0;color:#fff;padding:9px 13px;border-radius:10px;font:700 11px inherit;cursor:pointer}
+    .avatar-upload-btn:disabled{opacity:.55;cursor:wait}
+
+    .edit-btn { background: var(--violet); border: none; color: #fff; padding: 8px 20px; border-radius: 40px; cursor: pointer; font-weight: 600; margin-top: 12px; }
+
+    .message { display:flex; flex-direction:column; width:auto; max-width:85%; min-width:0; animation: slide-up 0.2s ease-out; }
+    @keyframes slide-up { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .message.self { align-self: flex-end; align-items: flex-end; }
+    .message.other { align-self: flex-start; align-items: flex-start; }
+    .msg-bubble { max-width:100%; overflow-wrap:anywhere; word-break:break-word; background: var(--bg-card); padding: 10px 14px; border-radius: 14px; border-bottom-left-radius: 4px; border: 1px solid var(--border-glow); }
+    .message.self .msg-bubble { max-width:100%; overflow-wrap:anywhere; word-break:break-word; background: var(--violet); border-color: var(--violet); border-bottom-right-radius: 4px; border-bottom-left-radius: 14px; }
+    .msg-user { font-size: 10px; font-weight: 700; color: var(--cyan); margin-bottom: 2px; display: flex; align-items: center; gap: 6px; }
+    .message.self .msg-user { color: #fff; }
+    .msg-text { font-size: 14px; line-height: 1.4; word-break: break-word; }
+    .msg-actions { display: flex; align-items: center; gap: 12px; margin-top: 4px; }
+    .pulse-btn { background: transparent; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: var(--transition); font-family: inherit; padding: 2px 6px; border-radius: 20px; }
+    .pulse-btn:hover { color: var(--lime); }
+    .pulse-btn.pulsed { color: var(--lime); }
+    .msg-time { font-size: 9px; color: var(--text-muted); margin-top: 2px; }
+
+    .input-area { padding: 12px 16px; background: var(--bg-secondary); border-top: 1px solid var(--border-glow); display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
+    .input-area input { flex:1 1 auto; min-width:0; width:0; background: var(--bg-card); border: 1px solid var(--border-glow); padding: 10px 16px; border-radius: 40px; color: #fff; font-family: inherit; font-size: 14px; outline: none; }
+    .input-area input:focus { border-color: var(--violet); box-shadow: 0 0 15px rgba(138,43,226,0.2); }
+    .input-area input::placeholder { color: var(--text-muted); }
+    .input-area button { background: var(--violet); border: none; color: #fff; width: 44px; height: 44px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(138,43,226,0.3); }
+    .input-area button:hover { transform: scale(1.05); background: #7A1BD6; }
+
+    .bottom-nav { display:flex; width:100%; min-width:0; justify-content: space-around; padding: 8px 0 12px; background: var(--bg-secondary); border-top: 1px solid var(--border-glow); flex-shrink: 0; }
+    .nav-item { flex:1 1 0; min-width:0; background: transparent; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: var(--transition); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 16px; font-family: inherit; }
+    .nav-item span { font-size: 8px; font-weight: 600; letter-spacing: 0.5px; }
+    .nav-item.active { color: var(--violet); }
+
+
+    .sp-summary{background:linear-gradient(135deg,rgba(138,43,226,.18),rgba(0,240,255,.08));border:1px solid var(--border-glow);border-radius:16px;padding:14px}.sp-badge{width:58px;height:58px;object-fit:contain;flex:0 0 58px}.sp-head{display:flex;gap:12px;align-items:center}.sp-title{font-size:16px;font-weight:800}.sp-muted{font-size:10px;color:var(--text-muted);margin-top:3px}.sp-progress{height:8px;background:#0b0c10;border-radius:99px;overflow:hidden;margin-top:10px}.sp-progress>div{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:99px}.sp-card{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:14px;padding:12px}.sp-card.done{opacity:.62}.sp-card h4{font-size:13px;margin-bottom:4px}.sp-card p{font-size:11px;color:var(--text-muted);line-height:1.4}.sp-card-row{display:flex;align-items:center;gap:10px}.sp-card button,.sp-store button{border:0;background:var(--violet);color:#fff;padding:8px 11px;border-radius:10px;font:700 10px inherit;cursor:pointer}.sp-card button:disabled{opacity:.45}.sp-reward{margin-left:auto;color:var(--lime);font-weight:800;font-size:11px}.sp-store{display:grid;gap:8px}.sp-package{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:14px;padding:12px}.sp-package-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.sp-package-name{font-weight:800}.sp-price{font-size:12px;color:var(--cyan);font-weight:800}.sp-buy{width:100%;margin-top:9px}.sp-contact{font-size:11px;line-height:1.45;color:var(--text-muted);background:rgba(0,240,255,.05);border:1px solid rgba(0,240,255,.15);padding:10px;border-radius:12px}.sp-empty{color:var(--text-muted);font-size:12px;padding:12px 0}
+
+    .room-dialog-backdrop{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,5,10,.76);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);animation:dialog-fade .18s ease-out}
+    .room-dialog{width:min(420px,calc(100vw - 28px));max-width:100%;background:linear-gradient(145deg,rgba(28,31,43,.98),rgba(12,14,21,.98));border:1px solid rgba(138,43,226,.42);border-radius:24px;box-shadow:0 24px 80px rgba(0,0,0,.62),0 0 36px rgba(138,43,226,.16);overflow:hidden}
+    .room-dialog-head{display:flex;align-items:center;gap:12px;padding:18px 18px 12px}
+    .room-dialog-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(138,43,226,.28),rgba(0,240,255,.14));border:1px solid rgba(0,240,255,.22);color:var(--cyan);font-size:18px}
+    .room-dialog-title{font-size:16px;font-weight:800;min-width:0;overflow-wrap:anywhere}
+    .room-dialog-body{padding:0 18px 16px;color:var(--text-muted);font-size:12px;line-height:1.55;overflow-wrap:anywhere}
+    .room-dialog-input{width:100%;min-height:44px;margin-top:12px;padding:11px 13px;border-radius:13px;border:1px solid var(--border-glow);background:#0d0f15;color:#fff;outline:none;font:inherit;resize:vertical;max-width:100%}
+    .room-dialog-input:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(138,43,226,.12)}
+    .room-dialog-actions{display:flex;gap:9px;padding:0 18px 18px}
+    .room-dialog-actions button{flex:1;min-width:0;min-height:44px;border-radius:13px;border:1px solid var(--border-glow);background:#171a23;color:#fff;font:700 12px inherit;cursor:pointer}
+    .room-dialog-actions .primary{background:linear-gradient(135deg,var(--violet),#6d21b5);border-color:rgba(138,43,226,.7)}
+    .room-dialog-actions .danger{background:linear-gradient(135deg,#9f1239,#7f1d1d);border-color:rgba(255,77,77,.45)}
+    @keyframes dialog-fade{from{opacity:0}to{opacity:1}}
+    @media(max-width:440px){.room-dialog-backdrop{padding:14px}.room-dialog{width:100%;border-radius:20px}.room-dialog-actions button{min-height:46px}}
+
+    .toast { position:absolute; bottom:92px; left:50%; transform:translateX(-50%); width:min(390px,calc(100% - 28px)); max-width:calc(100% - 28px); background:linear-gradient(145deg,rgba(30,34,46,.97),rgba(13,15,22,.97)); border:1px solid rgba(57,255,20,.38); padding:12px 16px; border-radius:16px; color:#fff; font-weight:700; font-size:12px; line-height:1.35; text-align:center; box-shadow:0 14px 45px rgba(0,0,0,.45),0 0 28px rgba(57,255,20,.12); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); animation:toast-in .25s ease-out; z-index:9999; white-space:normal; overflow-wrap:anywhere; }
+    @keyframes toast-in { from { opacity:0; transform:translateX(-50%) translateY(30px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+    @media (max-width:440px) { #app { max-height:100vh; border-radius:0; border:none; } }
+  
+.spike-world{margin:10px 0;padding:12px;border:1px solid var(--border-glow);border-radius:14px;background:linear-gradient(135deg,rgba(0,255,170,.06),rgba(0,180,255,.04));}
+.spike-world-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.spike-world-title{font-weight:900;font-size:15px}.spike-world-sub{font-size:10px;color:var(--text-muted)}
+.world-energy{height:8px;background:var(--bg-secondary);border-radius:99px;overflow:hidden;margin:8px 0}.world-energy>div{height:100%;background:linear-gradient(90deg,#00ff9d,#00c8ff);transition:width .3s}
+.world-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-top:8px}.world-card{padding:9px;border:1px solid var(--border-glow);border-radius:10px;background:rgba(0,0,0,.12)}.world-card strong{display:block;font-size:11px}.world-card span{display:block;font-size:9px;color:var(--text-muted);margin-top:3px}.world-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.world-actions button{border:1px solid var(--border-glow);background:var(--bg-card);color:#fff;border-radius:9px;padding:7px 9px;font-size:9px;font-weight:800;cursor:pointer}.world-list{margin-top:8px;display:flex;flex-direction:column;gap:5px}.world-list-item{font-size:9px;padding:7px;border-radius:8px;background:rgba(255,255,255,.03)}
+
+
+.world-feature-nav{display:flex;gap:7px;padding:8px 10px;overflow-x:auto;border-bottom:1px solid var(--border-glow);background:var(--bg-secondary);scrollbar-width:none;flex-shrink:0}.world-feature-nav::-webkit-scrollbar{display:none}.world-feature-tab{flex:0 0 auto;border:1px solid var(--border-glow);background:var(--bg-card);color:var(--text-muted);border-radius:11px;padding:8px 10px;font:700 10px inherit;cursor:pointer;white-space:nowrap}.world-feature-tab.active{color:#fff;border-color:var(--violet);box-shadow:var(--shadow-neon);background:rgba(138,43,226,.16)}.world-feature-panel{display:none;flex:1;min-height:0;overflow:auto;padding:12px}.world-feature-panel.active{display:block}.feature-card{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:14px;padding:12px;margin-bottom:10px}.feature-card h3{font-size:15px;margin-bottom:5px}.feature-muted{font-size:11px;color:var(--text-muted);line-height:1.45}.feature-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px}.feature-row:last-child{border-bottom:0}.feature-btn{border:0;border-radius:10px;padding:8px 10px;background:linear-gradient(135deg,var(--violet),#6f18b8);color:#fff;font:700 10px inherit;cursor:pointer}.feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.feature-stat{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:10px}.feature-stat b{display:block;font-size:17px}.feature-stat span{font-size:9px;color:var(--text-muted)}.world-feature-shell{flex-direction:column;gap:0;padding:0;min-height:0;overflow:hidden}.world-feature-shell.active{display:flex}.world-feature-empty{padding:30px 12px;text-align:center;color:var(--text-muted);font-size:11px}
+
+.live-member-row{align-items:center;gap:10px}.live-member-main{display:flex;align-items:center;gap:10px;min-width:0}.live-member-main>span:last-child{display:flex;flex-direction:column;min-width:0}.live-member-main small{opacity:.58;font-size:10px;overflow:hidden;text-overflow:ellipsis}.member-avatar{display:inline-flex;flex:0 0 auto;width:38px;height:38px;border-radius:50%;object-fit:cover;align-items:center;justify-content:center;background:var(--bg-secondary,#151922);border:1px solid var(--border-glow,#2a3140);font-weight:800;overflow:hidden}.member-avatar img{width:100%;height:100%;object-fit:cover}.member-avatar-fallback{font-size:14px}.live-member-status{display:flex;align-items:center;gap:5px;font-size:11px;opacity:.85;text-transform:capitalize}.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#667085}.live-dot.online{background:#39d98a;box-shadow:0 0 8px rgba(57,217,138,.55)}.live-member-chip{display:flex;align-items:center;gap:5px;position:relative;font-size:10px;white-space:nowrap}.live-member-chip .member-avatar{width:34px;height:34px}.live-member-chip>span{max-width:76px;overflow:hidden;text-overflow:ellipsis}.live-member-chip .live-dot{position:absolute;right:-1px;bottom:0;border:2px solid var(--bg-primary,#090b10);width:9px;height:9px}
+.uid-color{font-weight:900;letter-spacing:.4px;animation:uidHue 4s linear infinite;}@keyframes uidHue{0%{color:#ff4fa3}33%{color:#55e87a}66%{color:#ff9b35}100%{color:#ff4fa3}}.coin-store-nav{font-weight:800}.store-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.store-package{padding:16px;text-align:center}.store-price{font-weight:800;margin:8px 0 14px}
+.cashout-requirements-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;margin:10px 0 6px;padding:10px 12px;border:1px solid rgba(255,255,255,.12);border-radius:10px;background:rgba(255,255,255,.04);color:inherit;font:inherit;font-weight:700;cursor:pointer}.cashout-requirements-toggle span{transition:transform .2s ease}.cashout-requirements-toggle[aria-expanded="true"] span{transform:rotate(180deg)}
+</style>
+<meta name="theme-color" content="#0B0C10"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<style id="final-room-android-fit">
+html,body{width:100%;max-width:100%;min-width:0;overflow:hidden!important;}
+body{min-height:100dvh;height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+#app{width:100%;max-width:420px;height:100dvh;max-height:none;border-radius:0;overflow:hidden;}
+@media(min-width:700px){#app{height:min(100dvh,900px);border-radius:28px;}}
+@media(max-width:699px){
+  #app{width:100vw;height:100dvh;max-width:none;max-height:none;border-radius:0;border-left:0;border-right:0;}
+  .room-header,.energy-section,.input-area{padding-left:max(12px,env(safe-area-inset-left));padding-right:max(12px,env(safe-area-inset-right));}
+  .panel{padding-left:14px;padding-right:14px;}
+  #chat-container{padding-left:12px;padding-right:12px;}
+  .room-dialog{width:min(420px,calc(100vw - 24px));max-height:calc(100dvh - 24px);}
+  .room-dialog-body{max-height:55dvh;overflow:auto;}
+}
+/* Never let generated content widen the Room. */
+#app *{min-width:0;}
+.room-btn,.room-card,.room-card-name,.room-card-desc,.spark-topic,.message,.msg-bubble,.profile-field,.sp-card,.sp-package{max-width:100%;overflow-wrap:anywhere;word-break:break-word;}
+.sp-card-row,.sp-package-top{min-width:0;flex-wrap:wrap;}
+.sp-reward{margin-left:auto;}
+.sp-package{cursor:pointer;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease;}
+.sp-package:active{transform:scale(.99);}
+.energy-store-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(2,4,9,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
+.energy-store-card{width:min(520px,100%);max-height:min(88dvh,760px);display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(145deg,rgba(25,29,42,.98),rgba(9,12,18,.99));border:1px solid rgba(0,240,255,.22);border-radius:24px;box-shadow:0 30px 100px rgba(0,0,0,.65),0 0 45px rgba(0,240,255,.08);}
+.energy-store-head{display:flex;align-items:center;gap:10px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.08);}
+.energy-store-head h3{margin:0;flex:1;font-size:17px;}
+.energy-store-close{width:38px;height:38px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);color:#fff;font-size:22px;line-height:1;}
+.energy-store-body{overflow:auto;padding:14px 16px 18px;}
+@media(max-width:699px){.energy-store-overlay{align-items:flex-end;padding:10px;}.energy-store-card{width:100%;max-height:calc(100dvh - 20px);border-radius:22px;}.energy-store-body{padding-bottom:max(16px,env(safe-area-inset-bottom));}}
+</style>
+
+<style id="cashout-lock-css">
+.cashout-lock-badge{float:right;font-size:10px;font-weight:900;padding:5px 8px;border-radius:999px;background:rgba(255,77,77,.12);border:1px solid rgba(255,77,77,.28);color:#ff8f8f}
+.cashout-box.cashout-unlocked .cashout-lock-badge{background:rgba(80,220,120,.12);border-color:rgba(80,220,120,.28);color:#74ee9a}
+.cashout-lock-notice{margin-top:8px;padding:10px;border-radius:10px;background:rgba(255,180,60,.07);border:1px solid rgba(255,180,60,.16);color:var(--text-muted);font-size:10px;line-height:1.45}
+.cashout-requirements{display:grid;gap:6px;margin-top:10px}
+.cashout-req{display:flex;align-items:center;gap:7px;padding:8px 9px;border-radius:9px;background:rgba(255,255,255,.025);font-size:10px;color:var(--text-muted)}
+.cashout-req.ok{color:#7cf09c;background:rgba(80,220,120,.06)}
+.cashout-req .req-state{margin-left:auto;font-weight:900;white-space:nowrap}
+.cashout-gated-form input:disabled,.cashout-gated-form button:disabled{opacity:.48;cursor:not-allowed}
+.cashout-box.cashout-unlocked .cashout-lock-notice{background:rgba(80,220,120,.06);border-color:rgba(80,220,120,.16)}
+</style>
+
+<style id="spike-streak-center-css">
+/* Premium Daily Streak Center */
+.streak-center{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:100%}
+.streak-hero{background:linear-gradient(145deg,rgba(138,43,226,.22),rgba(0,240,255,.08) 58%,rgba(57,255,20,.04));border:1px solid rgba(138,43,226,.35);border-radius:18px;padding:15px;box-shadow:0 12px 30px rgba(0,0,0,.22)}
+.streak-hero-top{display:flex;align-items:center;gap:12px;min-width:0}
+.streak-hero-badge{width:58px;height:58px;object-fit:contain;flex:0 0 58px;filter:drop-shadow(0 0 12px rgba(138,43,226,.45))}
+.streak-hero-title{font-size:18px;font-weight:800;overflow-wrap:anywhere}
+.streak-hero-sub{font-size:10px;color:var(--text-muted);margin-top:3px;overflow-wrap:anywhere}
+.streak-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:12px}
+.streak-metric{background:rgba(11,12,16,.52);border:1px solid var(--border-glow);border-radius:12px;padding:9px;min-width:0}
+.streak-metric strong{display:block;font-size:16px;line-height:1.1;overflow-wrap:anywhere}
+.streak-metric span{display:block;color:var(--text-muted);font-size:9px;margin-top:4px}
+.streak-progress-wrap{margin-top:12px}
+.streak-progress-head{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--text-muted)}
+.streak-progress{height:9px;background:#090a0e;border-radius:99px;overflow:hidden;border:1px solid rgba(255,255,255,.04);margin-top:6px}
+.streak-progress>div{height:100%;background:linear-gradient(90deg,var(--violet),var(--cyan),var(--lime));border-radius:99px;transition:width .35s ease}
+.streak-clock{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--text-muted)}
+.streak-clock strong{color:var(--cyan)}
+.streak-section-title{font-size:14px;font-weight:800;margin-top:2px}
+.streak-section-sub{font-size:10px;color:var(--text-muted);line-height:1.4}
+.streak-list{display:flex;flex-direction:column;gap:9px}
+.streak-card{background:var(--bg-card);border:1px solid var(--border-glow);border-radius:15px;padding:12px;min-width:0}
+.streak-card.complete{border-color:rgba(57,255,20,.25);background:linear-gradient(145deg,rgba(57,255,20,.06),var(--bg-card))}
+.streak-card-top{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.streak-slot{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(138,43,226,.14);border:1px solid rgba(138,43,226,.28);font-weight:800;font-size:11px;flex:0 0 32px}
+.streak-card.complete .streak-slot{background:rgba(57,255,20,.12);border-color:rgba(57,255,20,.3);color:var(--lime)}
+.streak-info{flex:1;min-width:0}
+.streak-info h4{font-size:13px;font-weight:800;overflow-wrap:anywhere}
+.streak-info p{font-size:10px;line-height:1.45;color:var(--text-muted);margin-top:3px;overflow-wrap:anywhere}
+.streak-reward{color:var(--lime);font-size:10px;font-weight:800;white-space:nowrap}
+.streak-status{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;margin-top:9px;padding-top:8px;border-top:1px solid rgba(255,255,255,.06)}
+.streak-status-time{font-size:9px;color:var(--text-muted)}
+.streak-action{border:0;background:linear-gradient(135deg,var(--violet),#6f18b8);color:#fff;padding:8px 12px;border-radius:10px;font:700 10px inherit;cursor:pointer;min-height:36px}
+.streak-action:disabled{opacity:.5;cursor:default}
+.streak-footer{background:rgba(0,240,255,.045);border:1px solid rgba(0,240,255,.12);border-radius:13px;padding:10px;font-size:10px;line-height:1.45;color:var(--text-muted)}
+@media(max-width:380px){.streak-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.streak-hero{padding:12px}.streak-hero-badge{width:50px;height:50px;flex-basis:50px}}
+</style>
+
+
+<style id="special-streak-ui-css">
+.special-event-box{margin-top:8px;padding:9px;border:1px solid rgba(0,240,255,.16);border-radius:10px;background:rgba(0,240,255,.035)}
+.special-event-box button{border:0;border-radius:9px;padding:7px 10px;background:linear-gradient(135deg,var(--violet),#6f18b8);color:#fff;font:700 10px inherit;cursor:pointer;margin-top:6px}
+.special-event-box button:disabled{opacity:.55;cursor:default}
+.special-event-meta{font-size:9px;color:var(--text-muted);line-height:1.35}
+</style>
+
+<style>
+.spike-world-extra{margin-top:10px;display:grid;gap:8px}.world-toolbar{display:flex;gap:6px;flex-wrap:wrap}.world-toolbar button{border:1px solid var(--border-glow);background:rgba(255,255,255,.04);color:var(--text-primary);border-radius:9px;padding:7px 9px;font-size:10px;cursor:pointer}.world-section{border-top:1px solid var(--border-glow);padding-top:9px}.world-section h4{margin:0 0 7px;font-size:11px}.world-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;font-size:10px}.world-pill{display:inline-flex;padding:3px 6px;border-radius:999px;background:rgba(0,255,170,.08);font-size:9px}.world-map-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.world-map-card{padding:8px;border:1px solid var(--border-glow);border-radius:9px;background:rgba(0,0,0,.12)}
+</style>
+
+<style id="preview-panel-close-css">
+.preview-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0 6px;flex:0 0 auto}
+.preview-panel-head .preview-panel-title{font-size:14px;font-weight:800;color:var(--text-primary,#fff)}
+.preview-panel-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--border-glow,#2c2f3a);border-radius:10px;background:var(--bg-card,#1a1d27);color:#fff;font-size:19px;line-height:1;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
+.preview-panel-close:active{transform:scale(.96)}
+.world-feature-panel .preview-panel-head{padding:0 0 9px}
+.world-feature-panel .preview-panel-close{margin-left:auto}
+</style>
+
+
+<style id="room-gifts-css">
+.gift-message-btn{border:0;background:transparent;color:inherit;cursor:pointer;padding:4px 6px;border-radius:8px}
+.gift-message-btn:hover{background:rgba(255,255,255,.08)}
+.gift-panel{display:none;position:fixed;inset:0;z-index:9999}
+.gift-panel.open{display:block}
+.gift-panel-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7)}
+.gift-panel-card{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(720px,94vw);max-height:86vh;overflow:auto;border:1px solid rgba(255,255,255,.14);border-radius:18px;background:var(--bg-card,#171a22);padding:16px;box-shadow:0 20px 70px rgba(0,0,0,.45)}
+.gift-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.gift-panel-head h3{margin:0}.gift-recipient{font-size:12px;color:var(--text-muted,#9aa0ad);margin-top:3px}
+.gift-close{width:36px;height:36px;border:1px solid rgba(255,255,255,.15);border-radius:10px;background:rgba(255,255,255,.06);color:#fff;font-size:22px;cursor:pointer}
+.gift-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.gift-card{border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:12px;background:rgba(255,255,255,.035);cursor:pointer;text-align:left;color:inherit}
+.gift-card:hover{background:rgba(255,255,255,.07);transform:translateY(-1px)}
+.gift-card img{width:64px;height:64px;object-fit:contain;display:block;margin:auto auto 8px}
+.gift-card-name{font-weight:800;text-align:center}.gift-card-price{font-size:12px;color:#f6c84c;text-align:center;margin-top:4px}
+.gift-balance{text-align:right;font-size:12px;color:var(--text-muted,#9aa0ad);margin-bottom:10px}
+.gift-empty{text-align:center;padding:24px;color:var(--text-muted,#9aa0ad)}
+@media(max-width:520px){.gift-grid{grid-template-columns:1fr 1fr}.gift-panel-card{padding:12px}}
+<style id="cashout-room-css">
+.cashout-box{margin-top:14px;padding:14px;border:1px solid var(--border-glow);border-radius:15px;background:rgba(255,255,255,.025)}
+.cashout-box h4{margin:0 0 8px;font-size:13px}.cashout-form{display:grid;gap:8px}.cashout-form input{width:100%;box-sizing:border-box;padding:10px;border:1px solid var(--border-glow);border-radius:10px;background:var(--bg-secondary);color:var(--text-primary)}.cashout-form button{border:0;border-radius:10px;padding:10px;background:linear-gradient(135deg,var(--violet),#6f18b8);color:#fff;font-weight:800;cursor:pointer}.cashout-note{font-size:9px;color:var(--text-muted);line-height:1.4}.cashout-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}@media(max-width:430px){.cashout-grid{grid-template-columns:1fr}}
+.streak-expiry{font-size:11px;color:var(--cyan);font-weight:800}.streak-challenge{margin-top:12px;padding:13px;border:1px solid rgba(138,43,226,.35);border-radius:14px;background:rgba(138,43,226,.08)}
+</style>
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- HEADER -->
+  <header>
+    <div class="brand"><h1>⚡ SPIKE Room</h1><span class="live-badge">● Live</span></div>
+    <div class="user-mini" id="headerProfileBtn" title="Your SPIKE level">
+      <img class="level-badge" id="levelBadge" src="assets/levels/01-freshman.png" alt="Level 1 badge">
+      <span class="level-text" id="levelText">Lv.1</span>
+    </div>
+  </header>
+
+  <!-- ROOM SELECTOR + SPARK -->
+  <div class="room-header" id="roomHeader">
+    <div class="room-tools">
+      <button class="room-tool-btn primary" id="browseRoomsBtn"><i class="fas fa-compass"></i> Browse rooms</button>
+      <button class="room-tool-btn" id="createRoomBtn"><i class="fas fa-plus"></i> Create room</button>
+    </div>
+    <div class="room-selector" id="roomSelector"></div>
+    <div class="spark-topic">
+      <i class="fas fa-bolt"></i>
+      <span id="sparkTopic">"Is cereal a soup?"</span>
+      <span class="ai-tag">AI SPARK</span>
+    </div>
+  </div>
+
+
+  <div class="room-browser" id="roomBrowser">
+    <div class="browser-head"><h2>⚡ Public Rooms</h2><button class="browser-close" id="closeBrowser"><i class="fas fa-times"></i></button></div>
+    <div class="browser-body">
+      <div id="createRoomForm" class="create-form" style="display:none">
+        <input id="newRoomName" maxlength="80" placeholder="Room name" />
+        <textarea id="newRoomDescription" maxlength="300" placeholder="What is this room about?"></textarea>
+        <input id="newRoomTopic" maxlength="160" placeholder="Opening topic (optional)" />
+        <button id="submitCreateRoom">Create public room</button>
+      </div>
+      <input id="roomSearch" class="room-search" placeholder="Search public rooms..." />
+      <div id="roomDirectory"></div>
+    </div>
+  </div>
+
+  <!-- ENERGY + COINS -->
+  <div class="energy-section" id="energySection">
+    <div class="energy-label"><i class="fas fa-bolt" style="color:var(--lime);"></i> <span id="energyText">100</span></div>
+    <div class="energy-track"><div class="energy-fill" id="energyFill" style="width:100%;"></div></div>
+    <button id="buyEnergyBtn" style="border:1px solid var(--border-glow);background:var(--bg-card);color:#fff;border-radius:9px;padding:5px 8px;font-size:10px;font-weight:700;cursor:pointer;">⚡ Charge</button>
+    <div class="coins-display"><i class="fas fa-coins"></i> <span id="coinText">0</span></div><div class="coins-display" title="XP"><b style="color:var(--cyan)">XP</b> <span id="spText">0</span></div>
+  </div>
+
+  <!-- CONTENT PANELS -->
+  <div class="panel active" id="chat-panel">
+    <div id="chat-container"></div>
+  </div>
+
+  <div class="panel" id="feed-panel">
+    <div id="feed-preview-spacer"></div><h3 style="margin-bottom:8px;">🔥 Top Pulsed Messages</h3>
+    <div id="feed-container"></div>
+  </div>
+
+  <div class="panel" id="inbox-panel">
+    <h3 style="margin-bottom:8px;">📬 Notifications</h3>
+    <div id="inbox-container"></div>
+  </div>
+
+  <div class="panel" id="profile-panel">
+    <input type="file" id="avatarFile" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+    <div id="profile-container"></div>
+  </div>
+
+  <div class="panel" id="sp-panel" aria-label="Daily Streak Center">
+    <div id="sp-container"></div>
+  </div>
+
+
+  <div id="spike-world" aria-hidden="true" style="display:none"></div>
+
+  <div class="panel world-feature-shell" id="worldFeatureShell" aria-label="SPIKE World" aria-hidden="true">
+    <div class="world-feature-nav" id="worldFeatureNav">
+      <button class="world-feature-tab active" data-feature="world">🌎 World</button>
+      <button class="world-feature-tab" data-feature="energy">⚡ Energy</button>
+      <button class="world-feature-tab" data-feature="leaderboard">🏆 Leaderboard</button>
+      <button class="world-feature-tab" data-feature="roles">👑 Roles</button>
+      <button class="world-feature-tab" data-feature="map">🗺️ Map</button>
+      <button class="world-feature-tab" data-feature="evolution">🧬 Evolution</button>
+      <button class="world-feature-tab" data-feature="championships">🏆 Championships</button>
+      <button class="world-feature-tab" data-feature="events">🎲 Events</button>
+      <button class="world-feature-tab" data-feature="economy">🪙 Economy</button>
+      <button class="world-feature-tab" data-feature="collection">🎒 Collection</button>
+      <button class="world-feature-tab" data-feature="moments">✨ Moments</button>
+      <button class="world-feature-tab" data-feature="quests">🤝 Quests</button>
+      <button class="world-feature-tab" data-feature="members">👥 Members</button>
+    </div>
+    <div id="feature-world" class="world-feature-panel active"></div>
+    <div id="feature-energy" class="world-feature-panel"></div>
+    <div id="feature-leaderboard" class="world-feature-panel"></div>
+    <div id="feature-roles" class="world-feature-panel"></div>
+    <div id="feature-map" class="world-feature-panel"></div>
+    <div id="feature-evolution" class="world-feature-panel"></div>
+    <div id="feature-championships" class="world-feature-panel"></div>
+    <div id="feature-events" class="world-feature-panel"></div>
+    <div id="feature-economy" class="world-feature-panel"></div>
+    <div id="feature-collection" class="world-feature-panel"></div>
+    <div id="feature-moments" class="world-feature-panel"></div>
+    <div id="feature-quests" class="world-feature-panel"></div>
+    <div id="feature-members" class="world-feature-panel"></div>
+  </div>
+
+  <div class="panel" id="store-panel" aria-label="Credit Store">
+    <div id="credit-store-panel" style="height:100%;overflow:auto;padding:12px"></div>
+  </div>
+
+  <!-- INPUT -->
+  <div class="input-area" id="inputArea">
+    <input type="text" id="msgInput" placeholder="Type your vibe..." maxlength="140" />
+    <button id="sendBtn"><i class="fas fa-paper-plane"></i></button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-item active" data-tab="chat"><i class="fas fa-comment-dots"></i><span>Rooms</span></button>
+    <button class="nav-item" data-tab="feed"><i class="fas fa-fire"></i><span>Feed</span></button>
+    <button class="nav-item" data-tab="inbox"><i class="fas fa-inbox"></i><span>Inbox</span></button>
+    <button class="nav-item" data-tab="profile"><i class="fas fa-user"></i><span>Profile</span></button>
+    <button class="nav-item" data-tab="sp"><i class="fas fa-bolt"></i><span>XP</span></button>
+    <button class="nav-item" data-tab="world"><i class="fas fa-globe"></i><span>World</span></button>
+    <button class="nav-item" data-tab="store"><i class="fas fa-coins"></i><span>Store</span></button>
+  </div>
+</div>
+
+
+<script id="preview-panel-close-js">
+(function(){
+  function addPreviewCloseButtons(){
+    const titles={
+      'feed-panel':'🔥 Top Pulsed Messages',
+      'inbox-panel':'📬 Notifications',
+      'profile-panel':'👤 Profile',
+      'sp-panel':'⚡ Daily Streak Center',
+      'store-panel':'🪙 Store',
+      'credit-store-panel':'🪙 Credit Store',
+      'worldFeatureShell':'🌎 SPIKE World'
+    };
+    const panels=Object.keys(titles).map(id=>document.getElementById(id)).filter(Boolean);
+    panels.forEach(panel=>{
+      if(panel.querySelector(':scope > .preview-panel-head')) return;
+      const head=document.createElement('div');
+      head.className='preview-panel-head';
+      const title=document.createElement('div');
+      title.className='preview-panel-title';
+      title.textContent=titles[panel.id]||'Preview';
+      const close=document.createElement('button');
+      close.type='button';
+      close.className='preview-panel-close';
+      close.setAttribute('aria-label','Close panel');
+      close.textContent='×';
+      close.addEventListener('click',()=>window.switchTab?.('chat'));
+      head.append(title,close);
+      panel.insertBefore(head,panel.firstChild);
+    });
+
+    document.querySelectorAll('.world-feature-panel').forEach(panel=>{
+      if(panel.querySelector(':scope > .preview-panel-head')) return;
+      const head=document.createElement('div');
+      head.className='preview-panel-head';
+      const title=document.createElement('div');
+      title.className='preview-panel-title';
+      const tab=panel.id.replace('feature-','');
+      title.textContent=({
+        world:'🌎 World',energy:'⚡ Energy',leaderboard:'🏆 Leaderboard',roles:'👑 Roles',
+        map:'🗺️ Map',evolution:'🧬 Evolution',championships:'🏆 Championships',
+        events:'🎯 Events',economy:'🪙 Economy',collection:'🎒 Collection',
+        moments:'✨ Moments',quests:'🤝 Quests',members:'👥 Members'
+      })[tab]||'Preview';
+      const close=document.createElement('button');
+      close.type='button';
+      close.className='preview-panel-close';
+      close.setAttribute('aria-label','Close preview');
+      close.textContent='×';
+      close.addEventListener('click',()=>window.switchTab?.('chat'));
+      head.append(title,close);
+      panel.insertBefore(head,panel.firstChild);
+    });
+  }
+
+  function boot(){
+    addPreviewCloseButtons();
+    const observer=new MutationObserver(()=>addPreviewCloseButtons());
+    observer.observe(document.body,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot);
+  else boot();
+})();
+</script>
+
+<script>
+(() => {
+// =================================================================
+// SPIKE ROOM – migrated to the existing SPIKE Supabase schema
+// Uses: profiles, rooms, room_members, room_messages,
+// room_message_pulses, room_user_stats,
+// room_topics and notifications. Energy purchases use energy_store_packages/energy_purchases.
+// ================================================================
+
+const SUPABASE_URL = 'https://bkrrewagsbjqgmxaaqyt.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O';
+let spikeDB = null;
+
+let currentUser = null;
+let currentRoom = null;
+let currentRoomKey = 'arena';
+let rooms = {};
+let messages = [];
+let energyInterval = null;
+let toastTimer = null;
+let subChannel = null;
+let currentTab = 'chat';
+
+const $ = id => document.getElementById(id);
+const chatContainer = $('chat-container');
+const feedContainer = $('feed-container');
+const inboxContainer = $('inbox-container');
+const profileContainer = $('profile-container');
+const spContainer = $('sp-container');
+let spActivities = []; let spPackages = []; let spStreak = 0; let spBestStreak = 0; let streakPanelTimer = null;
+const msgInput = $('msgInput');
+const sendBtn = $('sendBtn');
+const energyFill = $('energyFill');
+const energyText = $('energyText');
+const buyEnergyBtn = $('buyEnergyBtn');
+const coinText = $('coinText');
+const levelBadge = $('levelBadge');
+const levelText = $('levelText');
+const sparkTopic = $('sparkTopic');
+const roomBtns = document.querySelectorAll('.room-btn');
+const navBtns = document.querySelectorAll('.nav-item');
+const roomBrowser = $('roomBrowser');
+const roomDirectory = $('roomDirectory');
+const roomSearch = $('roomSearch');
+const createRoomForm = $('createRoomForm');
+const panels = {
+  chat: $('chat-panel'),
+  feed: $('feed-panel'),
+  inbox: $('inbox-panel'),
+  profile: $('profile-panel'),
+  store: $('store-panel'),
+  sp: $('sp-panel'),
+  world: $('worldFeatureShell')
+};
+const headerProfileBtn = $('headerProfileBtn');
+const avatarFile = $('avatarFile');
+const CLOUDINARY = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset' };
+
+let roomControlsBound = false;
+function bindRoomControls(){
+  if(roomControlsBound) return;
+  roomControlsBound = true;
+  sendBtn?.addEventListener('click', () => sendMessage());
+  msgInput?.addEventListener('keydown', e => { if(e.key === 'Enter') sendMessage(); });
+  $('browseRoomsBtn')?.addEventListener('click', () => openRoomBrowser(false));
+  $('createRoomBtn')?.addEventListener('click', () => openRoomBrowser(true));
+  $('closeBrowser')?.addEventListener('click', () => closeRoomBrowser());
+  $('submitCreateRoom')?.addEventListener('click', () => createRoom());
+  $('buyEnergyBtn')?.addEventListener('click', () => loadEnergyStore());
+  roomSearch?.addEventListener('input', () => renderRoomDirectory(Object.values(rooms)));
+  navBtns.forEach(btn => btn.addEventListener('click', (e) => { e.preventDefault(); switchTab(btn.dataset.tab); }));
+  headerProfileBtn?.addEventListener('click', () => switchTab('profile'));
+  avatarFile?.addEventListener('change', async e => { const f=e.target.files?.[0]; if(f) await uploadAvatarToCloudinary(f); e.target.value=''; });
+}
+
+const topics = [
+  'Is cereal a soup?',
+  'Which animal would rule the world?',
+  'Is water wet?',
+  'AI will take over in 2050.',
+  'Would you rather fight 1 horse-sized duck?',
+  'Pineapple on pizza?'
+];
+
+async function initAnonymousSession() {
+  const { data, error } = await spikeDB.auth.getSession();
+  if (data?.session?.user) return true;
+
+  const { error: signInError } = await spikeDB.auth.signInAnonymously();
+  if (signInError) {
+    console.error(signInError);
+    showToast('⚠️ Connection failed');
+    return false;
+  }
+  return true;
+}
+
+async function getOrCreateProfile(userId) {
+  let { data: profile, error } = await spikeDB
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  if (!profile) {
+    const username = 'User_' + Math.floor(1000 + Math.random() * 9000);
+    const { data, error: insertError } = await spikeDB
+      .from('profiles')
+      .insert([{ id: userId, username, display_name: username }])
+      .select('*')
+      .single();
+
+    if (insertError) {
+      console.error(insertError);
+      return null;
+    }
+    profile = data;
+  }
+
+  return profile;
+}
+
+async function loadRooms() {
+  const { data, error } = await spikeDB.from('rooms')
+    .select('id,name,description,avatar_url,is_public,is_active,participant_count,owner_id,created_at')
+    .eq('is_public', true).eq('is_active', true).order('created_at', { ascending:false });
+  if (error) { console.error(error); showToast('❌ Could not load rooms'); return false; }
+  const list = data || [];
+  rooms = {};
+  list.forEach(r => { rooms[r.id] = r; });
+  renderRoomSelector(list);
+  renderRoomDirectory(list);
+  const saved = localStorage.getItem('spike_current_room');
+  const candidate = list.find(r => r.id === saved);
+  if (candidate) currentRoom = candidate.id;
+  else if (list.length) currentRoom = list[0].id;
+  else currentRoom = null;
+  currentRoomKey = currentRoom || null;
+  return !!currentRoom;
+}
+
+function renderRoomSelector(list) {
+  const selector = $('roomSelector');
+  selector.innerHTML = list.slice(0,5).map(r => `<button class="room-btn ${r.id===currentRoom?'active':''}" data-room-id="${r.id}">${escapeHtml(r.name)}</button>`).join('');
+  selector.querySelectorAll('.room-btn').forEach(b => b.addEventListener('click', () => selectRoom(b.dataset.roomId)));
+}
+
+async function selectRoom(roomId) {
+  const room = rooms[roomId];
+  if (!room) return;
+  const { data: member } = await spikeDB.from('room_members').select('room_id').eq('room_id',roomId).eq('user_id',currentUser.id).maybeSingle();
+  if (!member) {
+    if (!(await roomConfirm(`Join ${room.name}?`, 'Join Room'))) return;
+    const { error } = await spikeDB.rpc('join_public_room',{p_room_id:roomId});
+    if (error) { showToast('❌ '+error.message); return; }
+    showToast(`✓ Joined ${room.name}`);
+  }
+  currentRoom = roomId; currentRoomKey = roomId; localStorage.setItem('spike_current_room',roomId);
+  document.querySelectorAll('.room-btn').forEach(b=>b.classList.toggle('active',b.dataset.roomId===roomId));
+  if (subChannel) { await spikeDB.removeChannel(subChannel); subChannel=null; }
+  await loadMessages(currentRoom); subscribeToRoom(currentRoom); await loadCurrentTopic(); await loadSpikeWorld();
+  closeRoomBrowser();
+}
+
+function renderRoomDirectory(list) {
+  const q=(roomSearch?.value||'').trim().toLowerCase();
+  const filtered=list.filter(r => !q || r.name.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q));
+  if (!filtered.length) { roomDirectory.innerHTML='<div class="room-empty">No public rooms found.<br>Create the first one.</div>'; return; }
+  roomDirectory.innerHTML=filtered.map(r=>{
+    const initial=escapeHtml((r.name||'R').charAt(0).toUpperCase());
+    return `<div class="room-card"><div class="room-card-top"><div class="room-avatar">${initial}</div><div class="room-card-info"><div class="room-card-name">${escapeHtml(r.name)}</div><div class="room-card-meta">${Number(r.participant_count||0)} members • Public</div></div></div><div class="room-card-desc">${escapeHtml(r.description||'No description yet.')}</div><div class="room-card-actions"><button class="join" onclick="joinAndOpenRoom('${r.id}')">Open / Join</button><button onclick="toggleFavorite('${r.id}')">★ Favorite</button></div></div>`;
+  }).join('');
+}
+
+window.joinAndOpenRoom = id => selectRoom(id);
+window.toggleFavorite = async function(roomId) {
+  const { data: existing } = await spikeDB.from('room_favorites').select('room_id').eq('room_id',roomId).eq('user_id',currentUser.id).maybeSingle();
+  if (existing) { await spikeDB.from('room_favorites').delete().eq('room_id',roomId).eq('user_id',currentUser.id); showToast('★ Removed from favorites'); }
+  else { const {error}=await spikeDB.from('room_favorites').insert({room_id:roomId,user_id:currentUser.id}); if(error){showToast('❌ Favorite failed');return;} showToast('★ Added to favorites'); }
+};
+
+function openRoomBrowser(showCreate=false) { roomBrowser.classList.add('open'); createRoomForm.style.display=showCreate?'block':'none'; renderRoomDirectory(Object.values(rooms)); }
+function closeRoomBrowser() { roomBrowser.classList.remove('open'); createRoomForm.style.display='none'; }
+
+async function createRoom() {
+  const name=$('newRoomName').value.trim(), description=$('newRoomDescription').value.trim(), topic=$('newRoomTopic').value.trim();
+  if(!name){showToast('Room name is required');return;}
+  const {data:id,error}=await spikeDB.rpc('create_public_room',{p_name:name,p_description:description||null,p_avatar_url:null,p_topic:topic||null});
+  if(error){console.error(error);showToast('❌ '+error.message);return;}
+  $('newRoomName').value=''; $('newRoomDescription').value=''; $('newRoomTopic').value='';
+  await loadRooms(); await selectRoom(id); showToast('✓ Room created');
+}
+
+async function loadUserState() {
+  const { data: stats, error: statsError } = await spikeDB
+    .from('room_user_stats')
+    .select('energy,level,sp,sp_total_earned,sp_total_purchased')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if (statsError) console.error(statsError);
+
+  const { data: wallet, error: walletError } = await spikeDB
+    .from('user_wallets')
+    .select('coins')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if (walletError) console.error(walletError);
+
+  currentUser.energy = Number(stats?.energy ?? 100);
+  currentUser.avatar_level = Number(stats?.level ?? 1);
+  currentUser.sp = Number(stats?.sp ?? 0);
+  currentUser.sp_total_earned = Number(stats?.sp_total_earned ?? 0);
+  currentUser.sp_total_purchased = Number(stats?.sp_total_purchased ?? 0);
+  const { data: streakRow } = await spikeDB.from('sp_user_streaks').select('current_streak,best_streak,last_completed_date').eq('user_id',currentUser.id).maybeSingle();
+  spStreak = Number(streakRow?.current_streak ?? 0);
+  currentUser.coins = Number(wallet?.coins ?? 50);
+  updateUI();
+}
+
+async function initApp() {
+  bindRoomControls();
+  if (!(await initAnonymousSession())) return;
+
+  const { data: { user } } = await spikeDB.auth.getUser();
+  if (!user) {
+    showToast('❌ No user');
+    return;
+  }
+
+  const profile = await getOrCreateProfile(user.id);
+  if (!profile) {
+    showToast('❌ Profile error');
+    return;
+  }
+
+  currentUser = profile;
+
+  if (!(await loadRooms())) {
+    showToast('No public rooms yet — create one.');
+  }
+  await loadUserState();
+  await loadSPPanel();
+  scheduleAutomaticDailySPRefresh();
+  if (currentRoom) {
+    await selectRoom(currentRoom);
+    startEnergyDecay();
+    await loadCurrentTopic();
+  } else {
+    sparkTopic.textContent = 'Create or join a public room to start';
+    msgInput.disabled = true; sendBtn.disabled = true;
+  }
+
+  setTimeout(() => {
+    addSystemMessage('👋 Welcome to SPIKE Room! Pulse, chat, level up!');
+  }, 500);
+
+  // Controls are bound once during boot by bindRoomControls().
+}
+
+async function loadCurrentTopic() {
+  const { data } = await spikeDB
+    .from('room_topics')
+    .select('topic')
+    .eq('room_id', currentRoom)
+    .eq('is_active', true)
+    .limit(20);
+
+  if (data?.length) {
+    sparkTopic.textContent = `"${data[Math.floor(Math.random() * data.length)].topic}"`;
+  } else {
+    sparkTopic.textContent = `"${topics[Math.floor(Math.random() * topics.length)]}"`;
+  }
+}
+
+async function loadMessages(roomId) {
+  const { data, error } = await spikeDB
+    .from('room_messages')
+    .select(`
+      id,
+      body,
+      created_at,
+      user_id,
+      profiles(username,display_name,avatar_url),
+      room_message_pulses(id,user_id)
+    `)
+    .eq('room_id', roomId)
+    .order('created_at', { ascending: true })
+    .limit(50);
+
+  if (error) {
+    console.error(error);
+    showToast('❌ Could not load messages');
+    return;
+  }
+
+  messages = (data || []).map(m => ({
+    id: m.id,
+    user: m.profiles?.display_name || m.profiles?.username || 'User',
+    avatarUrl: m.profiles?.avatar_url || '',
+    userId: m.user_id,
+    text: m.body || '',
+    pulse: m.room_message_pulses?.length || 0,
+    time: formatTime(m.created_at),
+    self: m.user_id === currentUser.id
+  }));
+
+  renderMessages();
+}
+
+function renderMessages() {
+  chatContainer.innerHTML = '';
+
+  messages.forEach(msg => {
+    const div = document.createElement('div');
+    div.className = `message ${msg.self ? 'self' : 'other'}`;
+    div.dataset.id = msg.id;
+
+    div.innerHTML = `
+      <div class="msg-bubble">
+        <div class="msg-user">
+          <span class="message-avatar">
+            ${msg.avatarUrl ? `<img src="${escapeHtml(msg.avatarUrl)}" alt="${escapeHtml(msg.user)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : ''}
+            <span class="message-avatar-fallback" style="display:${msg.avatarUrl ? 'none' : 'flex'}">${escapeHtml((msg.user || 'U').trim().charAt(0).toUpperCase())}</span>
+          </span>
+          <strong>${escapeHtml(msg.self ? 'You' : msg.user)}</strong>
+          ${!msg.self ? `<span style="color:var(--text-muted);font-weight:400;font-size:9px;">• ${msg.time}</span>` : ''}
+        </div>
+        <div class="msg-text">${escapeHtml(msg.text)}</div>
+      </div>
+      <div class="msg-actions">
+        <button class="pulse-btn ${msg.pulse > 5 ? 'pulsed' : ''}" onclick="pulseMessage('${msg.id}')">
+          <i class="fas fa-bolt"></i> <span class="pulse-count">${msg.pulse}</span>
+        </button>
+        <span class="msg-time">${msg.time}</span>
+        ${!msg.self ? `<button class="gift-message-btn" title="Send Gift" onclick="openGiftPanel('${msg.userId}','${escapeHtml(msg.user)}')"><i class="fas fa-gift"></i></button><button class="message-menu" title="Report" onclick="reportMessage('${msg.id}')"><i class="fas fa-flag"></i></button>` : ''}
+      </div>
+    `;
+    chatContainer.appendChild(div);
+  });
+
+  chatContainer.scrollTop = chatContainer.scrollHeight;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text ?? '';
+  return div.innerHTML;
+}
+
+function formatTime(value) {
+  return new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function getAvatarChar(level) {
+  const chars = ['S', '⚡', '🔥', '💀', '👾', '🚀', '🌟', '⚡', '🔥', '💎', '👑'];
+  return chars[Math.min(Math.max(Number(level) || 1, 1), 10)];
+}
+
+async function sendMessage() {
+  const text = msgInput.value.trim();
+  if (!text) return;
+  if (!currentRoom) { showToast('Join or create a room first'); return; }
+
+  const { data, error } = await spikeDB.rpc('room_send_message', {
+    p_room_id: currentRoom,
+    p_body: text
+  });
+
+  if (error) {
+    console.error(error);
+    showToast('❌ ' + error.message);
+    return;
+  }
+
+  // Normal Room messages are free: sending a message must not spend
+  // Energy and must never mint Coins. Rewards come only from the
+  // protected challenge/streak/gift economy paths.
+  msgInput.value = '';
+
+  if (data && !messages.some(m => m.id === data.id)) {
+    messages.push({
+      id: data.id,
+      user: currentUser.display_name || currentUser.username,
+      avatarUrl: currentUser.avatar_url || '',
+      userId: currentUser.id,
+      text: data.body,
+      pulse: 0,
+      time: formatTime(data.created_at),
+      self: true
+    });
+    renderMessages();
+  }
+  updateUI();
+}
+window.reportMessage = async function(messageId) {
+  const reason = await roomPrompt('Why are you reporting this message?', 'Report Message', '', 'Reason for report');
+  if (!reason?.trim()) return;
+  const details = await roomPrompt('Additional details (optional):', 'Report Message', '', 'Optional details', true) || null;
+  const { error } = await spikeDB.rpc('report_room_message',{p_message_id:messageId,p_reason:reason.trim(),p_details:details});
+  if (error) { console.error(error); showToast('❌ Could not report message'); return; }
+  showToast('✓ Report submitted');
+};
+
+window.deleteOwnMessage = async function(messageId) {
+  if (!(await roomConfirm('Delete this message?', 'Delete Message', 'Delete', true))) return;
+  const { error } = await spikeDB.rpc('room_delete_message',{p_room_id:currentRoom,p_message_id:messageId});
+  if (error) { console.error(error); showToast('❌ Could not delete: '+error.message); return; }
+  messages = messages.filter(m=>m.id!==messageId); renderMessages(); showToast('Message deleted');
+};
+
+window.pulseMessage = async function(messageId){
+  const msg = messages.find(m=>m.id===messageId);
+  if(!msg) return;
+  if(!currentUser){ toast('Sign in required'); return; }
+
+  const COST = 100;
+  if(Number(currentUser.coins || 0) < COST){
+    toast(`You need ${COST} coins to pulse this message`);
+    return;
+  }
+
+  try{
+    const {data,error} = await sb.rpc('room_pulse_message',{p_message_id:messageId});
+    if(error) throw error;
+
+    msg.pulse = (msg.pulse||0) + 1;
+    currentUser.coins = data?.coins != null
+      ? Number(data.coins)
+      : Math.max(0, Number(currentUser.coins||0)-COST);
+
+    if(data?.level) currentUser.avatar_level = data.level;
+
+    updateUI();
+    renderMessages();
+    renderAll();
+    if(data?.leveled_up) toast('Level Up! 🎉');
+    else toast(`🔥 Pulsed for ${COST} coins`);
+  }catch(e){
+    const m=String(e?.message||e);
+    if(/already pulsed/i.test(m)) toast('Already pulsed');
+    else if(/insufficient coins/i.test(m)) toast('You need 100 coins to pulse this message');
+    else toast(m);
+  }
+};
+
+
+function addSystemMessage(text) {
+  messages.push({
+    id: 'sys-' + Date.now(),
+    user: 'System',
+    userId: null,
+    text,
+    pulse: 0,
+    time: 'Now',
+    self: false
+  });
+  renderMessages();
+}
+
+function startEnergyDecay(){
+  if (energyInterval) clearInterval(energyInterval);
+  energyInterval=setInterval(async()=>{
+    if(!currentUser || Number(currentUser.energy)<=0) return;
+    const {data,error}=await spikeDB.rpc('room_decay_energy');
+    if(error){console.error(error);return;}
+    currentUser.energy=Number(data ?? currentUser.energy);
+    updateUI();
+    if(currentUser.energy===0) showToast('💤 Energy depleted. Wait for recovery.');
+    else if(currentUser.energy<20) showToast('⚠️ Energy is low.');
+  },5000);
+}
+
+if(window.__liveMembersInterval) clearInterval(window.__liveMembersInterval);
+window.__liveMembersInterval=setInterval(()=>{ if(document.visibilityState!=='hidden' && currentRoom && currentUser) loadLiveMembers().catch(()=>{}); },30000);
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && currentRoom && currentUser) loadLiveMembers().catch(()=>{}); });
+
+function updateUI() {
+  if (!currentUser) return;
+
+  const energy=Number(currentUser.energy)||0;
+  const pct = energy<=100 ? Math.max(0,energy) : 100;
+  energyFill.style.width = pct + '%';
+  energyFill.classList.toggle('danger', pct < 25);
+  energyText.textContent = Math.floor(energy).toLocaleString();
+  coinText.textContent = Math.floor(currentUser.coins);
+  const spEl = $('spText'); if (spEl) spEl.textContent = Math.floor(currentUser.sp || 0).toLocaleString();
+  const level = Math.min(Math.max(Number(currentUser.avatar_level) || 1, 1), 24);
+  const levelNames = [
+    'freshman','rising','promising','refined','polished','radiant','distinguished','elegant',
+    'exquisite','prestige','sublime','brilliant','majestic','regal','imperial','noble',
+    'magnificent','grand','ethereal','celestial','sovereign','glorious','legendary','iconic'
+  ];
+  if (levelBadge) {
+    levelBadge.src = `assets/levels/${String(level).padStart(2,'0')}-${levelNames[level-1]}.png`;
+    levelBadge.alt = `Level ${level} badge`;
+  }
+  if (levelText) levelText.textContent = `Lv.${level}`;
+}
+
+
+let currentFeature='world';
+const worldFeatureNames=['world','energy','leaderboard','roles','map','evolution','championships','events','economy','collection','moments','quests','members'];
+function switchWorldFeature(feature){
+  if(!worldFeatureNames.includes(feature)) feature='world';
+  currentFeature=feature;
+  document.querySelectorAll('.world-feature-tab').forEach(b=>b.classList.toggle('active',b.dataset.feature===feature));
+  document.querySelectorAll('.world-feature-panel').forEach(p=>p.classList.toggle('active',p.id==='feature-'+feature));
+  renderWorldFeature(feature);
+}
+function featureBox(title,body){return `<div class="feature-card"><h3>${title}</h3>${body}</div>`}
+function renderWorldFeature(feature){
+  const d=window.__spikeWorldDashboard||{};
+  const w=window.__spikeWorldData||{};
+  const prof=w.profile||{};
+  const set=(id,html)=>{const e=$(id);if(e)e.innerHTML=html;};
+  const lb=d.leaderboard||[], roles=d.roles||[], map=d.map||[], evo=d.evolution||{};
+  const champs=d.championships||[], events=w.events||[], quests=w.quests||[], moments=w.moments||[];
+  const presence=w.presence||[], collectibles=d.collectibles||[], wallet=d.wallet||{}, season=d.season||{};
+  if(feature==='world') set('feature-world',featureBox('🌎 '+escapeHtml(w.room?.name||'SPIKE World'),
+    `<div class="feature-grid"><div class="feature-stat"><b>${Number(prof.level||1)}</b><span>Room Level</span></div><div class="feature-stat"><b>${Number(prof.energy||0)}%</b><span>Energy</span></div><div class="feature-stat"><b>${presence.length}</b><span>Active</span></div><div class="feature-stat"><b>${Number(wallet.coins||0)}</b><span>Coins</span></div></div><p class="feature-muted" style="margin-top:10px">${escapeHtml(prof.tagline||'Your Room is alive.')}</p>`));
+  if(feature==='energy') set('feature-energy',featureBox('⚡ Room Energy',
+    `<div class="feature-grid"><div class="feature-stat"><b>${Number(prof.energy||0)}%</b><span>Current Energy</span></div><div class="feature-stat"><b>${Number(prof.xp||0)}</b><span>Room XP</span></div><div class="feature-stat"><b>Lv.${Number(prof.level||1)}</b><span>Evolution</span></div><div class="feature-stat"><b>${Number(prof.energy||0)>=100?'SPIKE MODE':'Charging'}</b><span>Status</span></div></div><button class="feature-btn" style="margin-top:10px" onclick="spikeWorldPulse()">⚡ Add Energy</button>`));
+  if(feature==='leaderboard') set('feature-leaderboard',featureBox('🏆 Room Leaderboard',lb.length?lb.map((x,i)=>`<div class="feature-row"><span>${i+1}. ${escapeHtml(x.username||'Spiker')} · Lv.${Number(x.level||1)}</span><strong>${Number(x.sp||0).toLocaleString()} XP</strong></div>`).join(''):'<div class="world-feature-empty">No rankings yet.</div>'));
+  if(feature==='roles') set('feature-roles',featureBox('👑 Badges & Roles',roles.length?roles.map(x=>`<div class="feature-row"><span>${escapeHtml(x.title||x.role_key)}</span><span>${escapeHtml(x.role_key||'role')}</span></div>`).join(''):'<div class="world-feature-empty">No special roles yet.</div>'));
+  if(feature==='map') set('feature-map',featureBox('🗺️ SPIKE World Map',map.length?map.map(x=>`<div class="feature-row"><span>${escapeHtml(x.icon||'⚡')} ${escapeHtml(x.name)}</span><span>${Number(x.rooms?.length||0)} Rooms</span></div>`).join(''):'<div class="world-feature-empty">World locations are being discovered.</div>'));
+  if(feature==='evolution') {
+    const unlockHtml=(evo.unlocks||[]).map(x=>`<div class="feature-row"><span>${escapeHtml(x.title)}</span><span>Lv.${Number(x.required_level||1)}</span></div>`).join('')||'<div class="world-feature-empty">No unlocks yet.</div>';
+    set('feature-evolution',featureBox('🧬 Room Evolution · Level '+Number(evo.level||prof.level||1),unlockHtml));
+  }
+  if(feature==='championships') {
+    const list=champs.length?champs.map(x=>`<div class="feature-row"><span>${escapeHtml(x.title)} · ${Number(x.progress||0)}/${Number(x.target||1)}</span><button class="feature-btn" onclick="spikeChampScore('${x.id}')">+1</button></div>`).join(''):'<div class="world-feature-empty">No championship yet.</div>';
+    set('feature-championships',featureBox('🏆 Seasonal Championships',`<div class="feature-muted">${escapeHtml(season.name||'No active season')}</div>${list}<button class="feature-btn" style="margin-top:10px" onclick="spikeCreateChampionship()">Create Championship</button>`));
+  }
+  if(feature==='events') {
+    const list=events.length?events.map(x=>`<div class="feature-row"><span><b>${escapeHtml(x.title)}</b><br><span class="feature-muted">${escapeHtml(x.description||'')}</span></span></div>`).join(''):'<div class="world-feature-empty">No live events.</div>';
+    set('feature-events',featureBox('🎲 Surprise Events',list+`<button class="feature-btn" style="margin-top:10px" onclick="spikeSurprise()">🎲 Trigger Surprise</button>`));
+  }
+  if(feature==='economy') set('feature-economy',featureBox('🪙 Economy',`<div class="feature-grid"><div class="feature-stat"><b>${Number(wallet.coins||0).toLocaleString()}</b><span>Credits</span></div><div class="feature-stat"><b>${Number(prof.energy||0)}/100</b><span>Charge</span></div><div class="feature-stat"><b>${Number(prof.xp||prof.sp||0).toLocaleString()}</b><span>XP</span></div></div><div class="world-actions" style="margin-top:10px"><button type="button" onclick="openCoinShop()">🛍️ Shop</button><button type="button" onclick="showCoinHistory()">🧾 History</button></div>`));
+  if(feature==='collection') {
+    const list=collectibles.length?collectibles.map(x=>`<div class="feature-row"><span>🎒 ${escapeHtml(x.title||x.collectible_key)}</span></div>`).join(''):'<div class="world-feature-empty">Your collection is empty.</div>';
+    set('feature-collection',featureBox('🎒 Collection',list+`<button class="feature-btn" style="margin-top:10px" onclick="spikeWorldBadge()">🎁 Claim Collectible</button>`));
+  }
+  if(feature==='moments') set('feature-moments',featureBox('✨ SPIKE Moments',moments.length?moments.map(x=>`<div class="feature-row"><span>⚡ ${escapeHtml(x.description||x.title||'SPIKE Moment')}</span></div>`).join(''):'<div class="world-feature-empty">Your Room history will appear here.</div>'));
+  if(feature==='quests') {
+    const list=quests.length?quests.map(q=>`<div class="feature-row"><span>${escapeHtml(q.title)} · ${Number(q.progress||0)}/${Number(q.target||1)}</span><button class="feature-btn" onclick="spikeContributeQuest('${q.id}')">+1</button></div>`).join(''):'<div class="world-feature-empty">No active quests.</div>';
+    set('feature-quests',featureBox('🤝 Room Quests',list+`<button class="feature-btn" style="margin-top:10px" onclick="spikeWorldQuest()">Create Quest</button>`));
+  }
+  if(feature==='members') loadLiveMembers();
+}
+function initWorldFeatureTabs(){document.querySelectorAll('.world-feature-tab').forEach(b=>b.addEventListener('click',()=>switchWorldFeature(b.dataset.feature)));}
+
+function switchTab(tab) {
+  if (!['chat','feed','inbox','profile','sp','world','store'].includes(tab)) tab='chat';
+  currentTab = tab;
+
+  navBtns.forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+
+  Object.keys(panels).forEach(key => {
+    const panel = panels[key];
+    if (panel) panel.classList.toggle('active', key === tab);
+  });
+
+  const chatVisible = tab === 'chat';
+  const worldVisible = tab === 'world';
+  const storeVisible = tab === 'store';
+  $('roomHeader').style.display = chatVisible ? 'block' : 'none';
+  $('energySection').style.display = chatVisible ? 'flex' : 'none';
+  $('inputArea').style.display = chatVisible ? 'flex' : 'none';
+  const worldPanel = $('worldFeatureShell');
+  if (worldPanel) worldPanel.setAttribute('aria-hidden', worldVisible ? 'false' : 'true');
+  if (worldVisible) {
+    loadSpikeWorld().then(()=>renderWorldFeature(currentFeature));
+  }
+  if (tab === 'store') loadCreditStorePanel();
+  else if (tab === 'feed') loadFeed();
+  else if (tab === 'inbox') loadInbox();
+  else if (tab === 'profile') loadProfile();
+  else if (tab === 'sp') loadSPPanel();
+}
+
+async function loadCreditStorePanel(){
+  const el=$('credit-store-panel');
+  // Keep a stable close control on the store content even when packages are re-rendered.
+  if(el && !el.querySelector(':scope > .preview-panel-head')){
+    const head=document.createElement('div');
+    head.className='preview-panel-head';
+    head.innerHTML='<div class="preview-panel-title">🪙 Credit Store</div><button type="button" class="preview-panel-close" aria-label="Close Credit Store">×</button>';
+    head.querySelector('button').addEventListener('click',()=>window.switchTab?.('chat'));
+    el.appendChild(head);
+  }
+  if(!el) return;
+  el.innerHTML='<div class="preview-panel-head"><div class="preview-panel-title">🪙 Credit Store</div><button type="button" class="preview-panel-close" aria-label="Close Credit Store" onclick="window.switchTab?.(&quot;chat&quot;)">×</button></div><div class="feature-card"><h3>🪙 Credit Store</h3><p class="feature-muted">Credits are SPIKE’s spendable currency. Choose a package and contact SPIKE Dev on WhatsApp to complete payment.</p><div class="world-feature-empty">Loading store…</div></div>';
+  const q=await spikeDB.from('credit_store_packages').select('id,name,credits,price_ngn').eq('active',true).order('sort_order');
+  if(q.error){el.innerHTML='<div class="feature-card"><h3>🪙 Credit Store</h3><p class="feature-muted">Unable to load the store right now.</p></div>';return;}
+  const items=q.data||[];
+  el.innerHTML=`<div class="preview-panel-head"><div class="preview-panel-title">🪙 Credit Store</div><button type="button" class="preview-panel-close" aria-label="Close Credit Store" onclick="window.switchTab?.(&quot;chat&quot;)">×</button></div><div class="feature-card"><h3>🪙 Credit Store</h3><p class="feature-muted">Buy Credits securely through SPIKE Dev. XP is never sold.</p></div>${items.length?items.map((x,i)=>`<div class="feature-card"><div class="feature-row"><div><strong>${escapeHtml(x.name)}</strong><div class="feature-muted">${Number(x.credits).toLocaleString()} Credits${i===1?' · ⭐ Popular':''}</div></div><strong>₦${Number(x.price_ngn).toLocaleString()}</strong></div><button class="feature-btn" style="width:100%;margin-top:8px" onclick="requestCreditPurchase('${x.id}')">💬 Buy via WhatsApp</button></div>`).join(''):'<div class="feature-card"><div class="world-feature-empty">No Credit packages are available.</div></div>'}`;
+}
+
+async function loadFeed() {
+  const { data, error } = await spikeDB
+    .from('room_messages')
+    .select('id,body,created_at,user_id,profiles(username,display_name,avatar_url),room_message_pulses(id)')
+    .order('created_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const ranked = (data || [])
+    .map(m => ({ ...m, pulseCount: m.room_message_pulses?.length || 0 }))
+    .sort((a, b) => b.pulseCount - a.pulseCount)
+    .slice(0, 10);
+
+  feedContainer.innerHTML = ranked.length === 0
+    ? '<div style="color:var(--text-muted);">No messages yet</div>'
+    : ranked.map(m => `
+      <div class="feed-item">
+        <div class="msg-text">${escapeHtml(m.body)}</div>
+        <div class="meta">
+          <span style="display:inline-flex;align-items:center;gap:6px;">${m.profiles?.avatar_url ? `<img src="${escapeHtml(m.profiles.avatar_url)}" alt="" style="width:22px;height:22px;border-radius:50%;object-fit:cover;" loading="lazy" onerror="this.style.display='none'">` : ''} 👤 ${escapeHtml(m.profiles?.display_name || m.profiles?.username || 'User')}</span>
+          <span>⚡ ${m.pulseCount} pulses</span>
+          <span>${new Date(m.created_at).toLocaleDateString()}</span>
+        </div>
+      </div>
+    `).join('');
+}
+
+async function loadInbox() {
+  const { data: myMessages, error: myError } = await spikeDB
+    .from('room_messages')
+    .select('id,body')
+    .eq('user_id', currentUser.id);
+
+  if (myError) {
+    console.error(myError);
+    return;
+  }
+
+  if (!myMessages?.length) {
+    inboxContainer.innerHTML = '<div style="color:var(--text-muted);">No notifications yet</div>';
+    return;
+  }
+
+  const ids = myMessages.map(m => m.id);
+
+  const { data: pulses, error } = await spikeDB
+    .from('room_message_pulses')
+    .select('id,created_at,user_id,message_id,profiles(username,display_name)')
+    .in('message_id', ids)
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (!pulses?.length) {
+    inboxContainer.innerHTML = '<div style="color:var(--text-muted);">No one has pulsed your messages yet</div>';
+    return;
+  }
+
+  const bodyById = Object.fromEntries(myMessages.map(m => [m.id, m.body]));
+
+  inboxContainer.innerHTML = pulses.map(p => `
+    <div class="inbox-item">
+      <div class="inbox-text">
+        ⚡ <strong>${escapeHtml(p.profiles?.display_name || p.profiles?.username || 'User')}</strong>
+        pulsed your message: “${escapeHtml(bodyById[p.message_id] || '')}”
+      </div>
+      <div class="inbox-meta">${new Date(p.created_at).toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+let spDailyRefreshTimer=null;
+let spDailyDateKey='';
+
+function roomDateKey(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function scheduleAutomaticDailySPRefresh(){
+  if(spDailyRefreshTimer) clearInterval(spDailyRefreshTimer);
+  spDailyDateKey=roomDateKey();
+  spDailyRefreshTimer=setInterval(async()=>{
+    if(!currentUser) return;
+    const key=roomDateKey();
+    if(key!==spDailyDateKey){
+      spDailyDateKey=key;
+      try{
+        // The server creates today's fixed assignments automatically.
+        await spikeDB.rpc('sp_generate_daily_activities');
+        await loadSPPanel();
+      }catch(e){ console.warn('Automatic daily SP refresh failed',e); }
+    }
+  },60000);
+}
+
+function formatStreakDate(value){
+  if(!value) return '';
+  return new Date(value).toLocaleString([], {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function durationLabel(ms){
+  if(ms<=0) return '0m';
+  const mins=Math.floor(ms/60000), days=Math.floor(mins/1440), hours=Math.floor((mins%1440)/60), m=mins%60;
+  if(days) return `${days}d ${hours}h`;
+  if(hours) return `${hours}h ${m}m`;
+  return `${m}m`;
+}
+function streakTimeRemaining(resetAt){
+  const ms=Math.max(0,new Date(resetAt).getTime()-Date.now());
+  const h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000), s=Math.floor((ms%60000)/1000);
+  return `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+}
+function startStreakPanelClock(resetAt){
+  if(streakPanelTimer) clearInterval(streakPanelTimer);
+  const tick=()=>{
+    const el=$('streakResetCountdown');
+    if(el) el.textContent=streakTimeRemaining(resetAt);
+  };
+  tick();
+  streakPanelTimer=setInterval(tick,1000);
+}
+function avatarMarkup(profile, size=38){
+  const url=profile?.avatar_url||'';
+  const name=profile?.display_name||profile?.username||'Spiker';
+  const initial=escapeHtml(String(name).trim().charAt(0).toUpperCase()||'S');
+  const safeUrl=escapeHtml(url);
+  const safeName=escapeHtml(name);
+  if(url) return `<img class="member-avatar" src="${safeUrl}" alt="${safeName}'s avatar" width="${size}" height="${size}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'member-avatar member-avatar-fallback',textContent:'${initial}'}))">`;
+  return `<span class="member-avatar member-avatar-fallback" aria-label="${safeName}'s avatar">${initial}</span>`;
+}
+
+async function loadLiveMembers(){
+  if(!currentRoom || !currentUser) return [];
+  try{
+    const {data: world,error}=await spikeDB.rpc('spike_room_world',{p_room_id:currentRoom});
+    if(error) throw error;
+    const presence=Array.isArray(world?.presence)?world.presence:[];
+    const ids=[...new Set(presence.map(x=>x.user_id).filter(Boolean))];
+    let profiles=[];
+    if(ids.length){
+      const {data,error:profileError}=await spikeDB.from('profiles').select('id,username,display_name,avatar_url').in('id',ids);
+      if(profileError) throw profileError;
+      profiles=data||[];
+    }
+    const byId=new Map(profiles.map(p=>[p.id,p]));
+    const members=presence.map(p=>({...p,profile:byId.get(p.user_id)||{username:'Spiker'}}));
+    const feature=$('feature-members');
+    if(feature){
+      feature.innerHTML=featureBox('👥 Live Members',members.length?members.map(m=>{
+        const name=m.profile.display_name||m.profile.username||'Spiker';
+        const status=m.status||'active';
+        const seen=m.last_seen_at?new Date(m.last_seen_at).getTime():Date.now();
+        const online=(Date.now()-seen)<15*60*1000;
+        return `<div class="feature-row live-member-row"><span class="live-member-main">${avatarMarkup(m.profile,40)}<span><b>${escapeHtml(name)}</b><small>@${escapeHtml(m.profile.username||'spiker')}</small></span></span><span class="live-member-status"><i class="live-dot ${online?'online':''}"></i>${escapeHtml(status)}</span></div>`;
+      }).join(''):'<div class="world-feature-empty">No active members yet.</div>');
+    }
+    const strip=$('liveMembersStrip');
+    if(strip){
+      strip.innerHTML=members.slice(0,8).map(m=>{
+        const name=m.profile.display_name||m.profile.username||'Spiker';
+        return `<div class="live-member-chip" title="${escapeHtml(name)}">${avatarMarkup(m.profile,34)}<span>${escapeHtml(name)}</span><i class="live-dot online"></i></div>`;
+      }).join('');
+    }
+    return members;
+  }catch(e){
+    console.error('Live members:',e);
+    const feature=$('feature-members');
+    if(feature) feature.innerHTML=featureBox('👥 Live Members','<div class="world-feature-empty">Live members could not be loaded.</div>');
+    return [];
+  }
+}
+
+async function loadSpikeWorld(){
+  const box=$('spike-world');
+  if(!box || !currentUser || !currentRoom) return;
+  const [worldRes,dashRes]=await Promise.all([
+    spikeDB.rpc('spike_room_world',{p_room_id:currentRoom}),
+    spikeDB.rpc('spike_world_dashboard',{p_room_id:currentRoom})
+  ]);
+  if(worldRes.error){console.error('SPIKE World unavailable',worldRes.error); box.innerHTML='<div class="spike-world-sub">SPIKE World is unavailable right now. Please refresh.</div>'; return;}
+  if(dashRes.error){console.error('SPIKE World dashboard unavailable',dashRes.error); showToast('⚠️ Some World data could not load');}
+  const w=worldRes.data||{}, d=dashRes.error?{}:(dashRes.data||{});
+  const prof=w.profile||{}, presence=w.presence||[], events=w.events||[], quests=w.quests||[], topics=w.topics||[], moments=w.moments||[];
+  window.__spikeWorldData=w;
+  const energy=Number(prof.energy||0), level=Number(prof.level||1), lb=d.leaderboard||[], unlocks=d.evolution?.unlocks||[], map=d.map||[], champs=d.championships||[], coins=Number(d.wallet?.coins||0), roles=d.roles||[], collectibles=d.collectibles||[], season=d.season||{};
+  box.innerHTML=`<div class="spike-world-head"><div><div class="spike-world-title">🌎 ${escapeHtml(prof.icon||'⚡')} ${escapeHtml(w.room?.name||'SPIKE World')}</div><div class="spike-world-sub">${escapeHtml(prof.tagline||'Your Room is alive.')}</div></div><strong>Lv.${level}</strong></div>
+  <div class="world-energy"><div style="width:${Math.max(0,Math.min(100,energy))}%"></div></div>
+  <div class="spike-world-sub">⚡ Room Energy ${energy}% · ${presence.length} active · Mood: ${escapeHtml(prof.mood||'Chill')} · 🪙 ${coins} Coins</div>
+  <div class="world-grid"><div class="world-card"><strong>👥 Presence</strong><span>${presence.slice(0,4).map(x=>escapeHtml(x.status||'active')).join(' · ')||'Be the first active'}</span></div><div class="world-card"><strong>🎲 Events</strong><span>${events.length} live event${events.length===1?'':'s'}</span></div><div class="world-card"><strong>🤝 Quests</strong><span>${quests.filter(q=>q.status==='active').length} active quest${quests.filter(q=>q.status==='active').length===1?'':'s'}</span></div><div class="world-card"><strong>🏆 Season</strong><span>${escapeHtml(season.name||'No active season')}</span></div></div>
+  <div class="world-actions"><button type="button" onclick="spikeWorldPulse()">⚡ Add Energy</button><button type="button" onclick="spikeWorldStatus()">👻 Set Status</button><button type="button" onclick="spikeWorldQuest()">🤝 Create Quest</button><button type="button" onclick="spikeWorldBadge()">🎒 Collectible</button></div>
+  <div class="spike-world-extra"><div class="world-toolbar"><button type="button" onclick="spikeShowLeaderboard()">🏆 Leaderboard</button><button type="button" onclick="spikeShowRoles()">👑 Roles</button><button type="button" onclick="spikeShowMap()">🗺️ World Map</button><button type="button" onclick="spikeShowEvolution()">🧬 Evolution</button><button type="button" onclick="spikeShowChampionship()">🏆 Championship</button><button type="button" onclick="spikeSurprise()">🎲 Surprise</button><button type="button" onclick="spikeEconomy()">🪙 Economy</button></div>
+  <div id="spike-world-detail" class="world-section"><h4>✨ Your SPIKE World</h4><div class="world-row"><span>Unlocks</span><span class="world-pill">${unlocks.length}</span></div><div class="world-row"><span>Your roles</span><span class="world-pill">${roles.length}</span></div><div class="world-row"><span>Collectibles</span><span class="world-pill">${collectibles.length}</span></div></div></div>
+  ${quests.length?`<div class="world-list">${quests.slice(0,3).map(q=>`<div class="world-list-item"><b>🤝 ${escapeHtml(q.title)}</b> · ${Number(q.progress||0)}/${Number(q.target||1)} <button type="button" style="float:right" onclick="spikeContributeQuest('${q.id}')">+1</button></div>`).join('')}</div>`:''}
+  ${moments.length?`<div class="world-list">${moments.slice(0,3).map(m=>`<div class="world-list-item">⚡ ${escapeHtml(m.description||m.title||'SPIKE Moment')}</div>`).join('')}</div>`:''}`;
+  window.__spikeWorldDashboard=d;
+  loadLiveMembers().catch(()=>{});
+}
+function spikeWorldDetail(html){const el=$('spike-world-detail');if(el)el.innerHTML=html;}
+window.spikeShowLeaderboard=()=>{const lb=window.__spikeWorldDashboard?.leaderboard||[];spikeWorldDetail('<h4>🏆 Room Leaderboard</h4>'+ (lb.length?lb.map((x,i)=>`<div class="world-row"><span>${i+1}. ${escapeHtml(x.username||'Spiker')} · Lv.${x.level||1}</span><strong>${Number(x.sp||0).toLocaleString()} XP</strong></div>`).join(''):'<div class="world-row">No rankings yet.</div>'));};
+window.spikeShowRoles=()=>{const roles=window.__spikeWorldDashboard?.roles||[];spikeWorldDetail('<h4>👑 Your Room Roles</h4>'+ (roles.length?roles.map(x=>`<div class="world-row"><span>${escapeHtml(x.title)}</span><span class="world-pill">${escapeHtml(x.role_key)}</span></div>`).join(''):'<div class="world-row">No special roles yet.</div>'));};
+window.spikeShowMap=()=>{const map=window.__spikeWorldDashboard?.map||[];spikeWorldDetail('<h4>🗺️ SPIKE World Map</h4><div class="world-map-list">'+map.map(x=>`<div class="world-map-card"><b>${escapeHtml(x.icon||'⚡')} ${escapeHtml(x.name)}</b><div class="spike-world-sub">${Number(x.rooms?.length||0)} Rooms</div></div>`).join('')+'</div>');};
+window.spikeShowEvolution=()=>{const e=window.__spikeWorldDashboard?.evolution||{};spikeWorldDetail('<h4>🧬 Room Evolution · Level '+Number(e.level||1)+'</h4>'+((e.unlocks||[]).map(x=>`<div class="world-row"><span>${escapeHtml(x.title)}</span><span class="world-pill">Lv.${x.required_level}</span></div>`).join('')||'<div class="world-row">No unlocks yet.</div>'));};
+window.spikeShowChampionship=()=>{const c=window.__spikeWorldDashboard?.championships||[];spikeWorldDetail('<h4>🏆 Seasonal Championships</h4>'+ (c.length?c.map(x=>`<div class="world-row"><span>${escapeHtml(x.title)} · ${Number(x.progress||0)}/${Number(x.target||1)}</span><button type="button" onclick="spikeChampScore('${x.id}')">+1</button></div>`).join(''):'<div class="world-row">No championship yet. <button type="button" onclick="spikeCreateChampionship()">Create</button></div>'));};
+window.spikeCreateChampionship=async()=>{const title=await roomPrompt('Championship title','Seasonal Championship','Room Championship','Title');if(!title?.trim())return;const r=await spikeDB.rpc('spike_create_seasonal_championship',{p_room_id:currentRoom,p_title:title.trim(),p_target:100,p_reward_sp:500});if(r.error)showToast('❌ '+r.error.message);else{showToast('🏆 Championship created');await loadSpikeWorld();spikeShowChampionship();}};
+window.spikeChampScore=async id=>{const r=await spikeDB.rpc('spike_championship_score',{p_championship_id:id,p_amount:1});if(r.error)showToast('❌ '+r.error.message);else{showToast('🏆 Championship point added');await loadSpikeWorld();spikeShowChampionship();}};
+window.spikeSurprise=async()=>{const r=await spikeDB.rpc('spike_surprise_event',{p_room_id:currentRoom});if(r.error)showToast('❌ '+r.error.message);else{showToast('🎲 '+(r.data?.title||'Surprise event!'));await loadSpikeWorld();}};
+window.spikeEconomy=async()=>{const d=window.__spikeWorldDashboard||{};const coins=Number(d.wallet?.coins||0);spikeWorldDetail(`<h4>🪙 Credits</h4><div class="world-row"><span>Balance</span><strong>${coins.toLocaleString()} Credits</strong></div><div class="world-toolbar"><button type="button" onclick="openCoinShop()">🛍️ Shop</button><button type="button" onclick="openCreditPurchaseStore()">💳 Buy Credits</button><button type="button" onclick="showCoinHistory()">🧾 History</button></div>`);};
+window.openCreditPurchaseStore=async function(){
+  const q=await spikeDB.from('credit_store_packages').select('id,name,credits,price_ngn').eq('active',true).order('sort_order');
+  if(q.error){showToast('❌ Unable to load Credit Store');return;}
+  const items=q.data||[];
+  const m=document.createElement('div');m.className='energy-store-overlay';m.id='creditPurchaseModal';
+  m.innerHTML=`<div class="energy-store-card"><div class="energy-store-head"><div>🪙</div><h3>Credit Store</h3><button class="energy-store-close" onclick="this.closest('#creditPurchaseModal').remove()">×</button></div>
+  <div class="energy-store-body"><p class="sp-contact">Credits are SPIKE's spendable currency. Choose a package, request it, then chat with SPIKE Dev on WhatsApp to complete payment and send your receipt.</p>
+  <div class="sp-store" style="margin-top:10px">${items.length?items.map((x,i)=>`<div class="sp-package" style="${i===1?'border:1px solid rgba(255,215,0,.45);':''}"><div><span class="sp-package-name">${escapeHtml(x.name)}</span>${i===1?'<span class="tag" style="margin-left:8px">POPULAR</span>':''}<span class="sp-price">${Number(x.credits).toLocaleString()} Credits · ₦${Number(x.price_ngn).toLocaleString()}</span></div><div class="sp-contact">${i===1?'Best value for regular Room users.':'Secure manual purchase via SPIKE Dev.'}</div><button class="sp-buy" onclick="requestCreditPurchase('${x.id}')">Buy via WhatsApp</button></div>`).join(''):'<div class="world-feature-empty">No Credit packages are available.</div>'}</div></div></div>`;
+  document.body.appendChild(m);
+};
+window.requestCreditPurchase=async function(id){
+  const pkg=await spikeDB.from('credit_store_packages').select('id,name,credits,price_ngn').eq('id',id).maybeSingle();
+  if(pkg.error||!pkg.data){showToast('❌ Credit package unavailable');return;}
+  const x=pkg.data;
+  const userId=currentUser?.id||'';
+  const req=await spikeDB.rpc('create_credit_purchase_request',{p_package_id:x.id,p_payment_note:'WhatsApp purchase request'});
+  if(req.error){showToast('❌ '+req.error.message);return;}
+  const message=`Hello SPIKE Dev 👋\n\nI want to buy Credits.\n\nPackage: ${x.name}\nCredits: ${Number(x.credits).toLocaleString()}\nPrice: ₦${Number(x.price_ngn).toLocaleString()}\nSPIKE User ID: ${userId}\nPurchase Request: ${req.data?.id||req.data?.purchase_id||'created'}\n\nPlease send me the payment details. I will send my receipt here after payment.`;
+  window.open('https://wa.me/2340000000000?text='+encodeURIComponent(message),'_blank');
+  showToast('💬 WhatsApp opened. Send your receipt there after payment.');
+};
+window.openCoinShop=async function(){const q=await spikeDB.rpc('spike_coin_shop');if(q.error){showToast('❌ '+q.error.message);return;}const items=q.data||[];const m=document.createElement('div');m.className='energy-store-overlay';m.id='coinShopModal';m.innerHTML=`<div class="energy-store-card"><div class="energy-store-head"><div>🪙</div><h3>Coin Shop</h3><button class="energy-store-close" onclick="document.getElementById('coinShopModal')?.remove()">×</button></div><div class="energy-store-body">${items.length?items.map(x=>`<div class="sp-package"><div class="sp-package-top"><span class="sp-package-name">${escapeHtml(x.icon||'🪙')} ${escapeHtml(x.name||'Item')}</span><span class="sp-price">${Number(x.price_coins||0).toLocaleString()} Credits</span></div><div class="sp-contact">${escapeHtml(x.description||'Digital SPIKE item')}</div><button class="sp-buy" onclick="buyCoinProduct('${x.id}')">Buy</button></div>`).join(''):'<div class="world-feature-empty">No shop items are available.</div>'}</div></div>`;document.body.appendChild(m)};window.buyCoinProduct=async function(id){const q=await spikeDB.rpc('spike_buy_coin_product',{p_product_id:id});if(q.error){showToast('❌ '+q.error.message);return;}showToast('🛍️ Purchase complete');document.getElementById('coinShopModal')?.remove();await loadSpikeWorld()};window.showCoinHistory=async function(){const q=await spikeDB.rpc('spike_coin_history',{p_limit:50});if(q.error){showToast('❌ '+q.error.message);return;}const rows=q.data||[];spikeWorldDetail('<h4>🧾 Credit History</h4>'+(rows.length?rows.map(x=>`<div class="world-row"><span>${escapeHtml(x.reason||'Transaction')}</span><strong>${Number(x.amount)>0?'+':''}${Number(x.amount||0).toLocaleString()}</strong></div>`).join(''):'<div class="world-row">No Credit transactions yet.</div>'))};
+async function loadSPPanel(){
+  if(!spContainer || !currentUser) return;
+  try{
+    // Load the authoritative active streak plus every assigned activity.
+    // Keep the existing page/layout intact; only the Streak Center data
+    // source/rendering is expanded so all active assignments are visible.
+    const [{data:streakData,error:getErr},{data:assigned,error:assignedErr}]=await Promise.all([
+      spikeDB.rpc('sp_get_current_streak'),
+      spikeDB.rpc('sp_get_assigned_streaks')
+    ]);
+    if(getErr) throw getErr;
+    const streak=streakData||{};
+    spStreak=Number(streak.current_streak||0);
+    spBestStreak=Number(streak.best_streak||0);
+    const level=Number(currentUser.avatar_level||currentUser.level||1);
+    const xp=Number(currentUser.sp||0);
+    const remaining=Number(streak.remaining_seconds||0);
+    const assignments=Array.isArray(assigned)?assigned:[];
+    const activeAssignments=assignments.filter(a=>String(a.streak_status||'active').toLowerCase()==='active');
+    const total=activeAssignments.length;
+    const completed=activeAssignments.filter(a=>a.completed).length;
+    const overallProgress=total?Math.round((completed/total)*100):0;
+    const challenge=streak.challenge||null;
+
+    if(assignedErr) throw assignedErr;
+    const list=activeAssignments;
+
+    spContainer.innerHTML=`
+      <div class="streak-center">
+        <div class="streak-hero">
+          <div class="streak-hero-top">
+            <img class="streak-hero-badge" src="assets/levels/${String(level).padStart(2,'0')}-freshman.png" alt="Level ${level} badge" onerror="this.style.display='none'">
+            <div style="min-width:0">
+              <div class="streak-hero-title">🔥 7-Day Streak</div>
+              <div class="streak-hero-sub">Level ${level} · ${xp.toLocaleString()} XP · Streak #${Number(streak.streak_id||1)}</div>
+            </div>
+          </div>
+          <div class="streak-metrics">
+            <div class="streak-metric"><strong>🔥 ${spStreak}</strong><span>Current streak</span></div>
+            <div class="streak-metric"><strong>🏆 ${spBestStreak}</strong><span>Best streak</span></div>
+            <div class="streak-metric"><strong>${escapeHtml(String(streak.status||'active'))}</strong><span>Status</span></div>
+            <div class="streak-metric"><strong>${Math.floor(remaining/86400)}d</strong><span>Remaining</span></div>
+          </div>
+          <div class="streak-progress-wrap">
+            <div class="streak-progress-head"><span>Assigned streak progress</span><strong>${overallProgress}% · ${completed}/${total}</strong></div>
+            <div class="streak-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${overallProgress}"><div style="width:${overallProgress}%"></div></div>
+          </div>
+          <div class="streak-clock"><span>⏳ Expires: <strong id="streakResetCountdown">--:--:--:--</strong></span><span>${streak.expires_at?formatStreakDate(streak.expires_at):''}</span></div>
+        </div>
+
+        <div class="streak-section-title">All Active Streak Assignments</div>
+        <div class="streak-section-sub">Every assignment attached to your active 7-day streak is shown below with its own progress.</div>
+        <div class="streak-list">
+          ${list.length?list.map((a,i)=>{
+            const pct=Number(a.progress)!=null?Math.max(0,Math.min(100,Number(a.progress))):(a.completed?100:0);
+            const done=!!a.completed;
+            const rewardXp=Number(a.xp_reward||0);
+            const rewardCoins=Number(a.coin_reward||0);
+            return `<div class="streak-card ${done?'complete':''}">
+              <div class="streak-card-top">
+                <div class="streak-slot">${done?'✓':String(Number(a.slot||i+1))}</div>
+                <div class="streak-info">
+                  <h4>${escapeHtml(a.title||'Streak assignment')}</h4>
+                  <p>${escapeHtml(a.description||'Complete this assigned activity before the streak expires.')}</p>
+                </div>
+                <div class="streak-reward">+${rewardXp.toLocaleString()} XP<br>🪙 ${rewardCoins.toLocaleString()}</div>
+              </div>
+              <div class="streak-progress-wrap">
+                <div class="streak-progress-head"><span>${done?'Completed':'Progress'}</span><strong>${pct}%</strong></div>
+                <div class="streak-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><div style="width:${pct}%"></div></div>
+              </div>
+              <div class="streak-status">
+                <span class="streak-status-time">${done?'Completed':`Expires with this 7-day streak`}</span>
+                ${done?'':renderSpecialStreakBox(a)||''}
+              </div>
+            </div>`;
+          }).join(''):'<div class="streak-footer">No active streak assignments are available right now. Refresh to generate your next assignment.</div>'}
+        </div>
+
+        ${challenge?`<div class="streak-challenge">
+          <div class="streak-section-title">Current Challenge</div>
+          <div class="streak-card ${streak.challenge_completed?'complete':''}" style="margin-top:9px">
+            <div class="streak-card-top"><div class="streak-slot">${streak.challenge_completed?'✓':'🔥'}</div><div class="streak-info"><h4>${escapeHtml(challenge.title||'Streak challenge')}</h4><p>${escapeHtml(challenge.description||'Complete this challenge before the streak expires.')}</p></div><div class="streak-reward">+${Number(challenge.xp_reward||0).toLocaleString()} XP<br>🪙 ${Number(challenge.coin_reward||0).toLocaleString()}</div></div>
+            <div class="streak-status"><span class="streak-status-time">${streak.challenge_completed?'Completed':'Expires with this 7-day streak'}</span><button class="streak-action" ${streak.challenge_completed?'disabled':''} onclick="completeCurrentServerStreak()">${streak.challenge_completed?'✓ Completed':'Complete Streak'}</button></div>
+          </div>
+        </div>`:''}
+        <div class="streak-footer">A streak lasts exactly 7 days from its server-created timestamp. Missing the deadline expires only the streak; your XP and level are preserved.</div>
+      </div>`;
+    startServerStreakClock(streak.expires_at);
+  }catch(e){
+    console.error('7-day streak:',e);
+    spContainer.innerHTML='<div class="streak-footer">Unable to load your streak right now. Please refresh.</div>';
+  }
+}
+function startServerStreakClock(expiresAt){
+  if(streakPanelTimer) clearInterval(streakPanelTimer);
+  const tick=()=>{
+    const el=$('streakResetCountdown'); if(!el)return;
+    let sec=Math.max(0,Math.floor((new Date(expiresAt).getTime()-Date.now())/1000));
+    const d=Math.floor(sec/86400); sec%=86400; const h=Math.floor(sec/3600); sec%=3600; const m=Math.floor(sec/60); const ss=sec%60;
+    el.textContent=`${String(d).padStart(2,'0')}:${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`;
+    if(d===0&&h===0&&m===0&&ss===0){clearInterval(streakPanelTimer);setTimeout(loadSPPanel,1200);}
+  };
+  tick(); streakPanelTimer=setInterval(tick,1000);
+}
+window.completeCurrentServerStreak=async function(){
+  const {data:streak,error:getErr}=await spikeDB.rpc('sp_get_current_streak');
+  if(getErr){showToast('❌ '+getErr.message);return;}
+  if(!streak?.challenge?.id){showToast('No active challenge.');return;}
+  if(streak.challenge_completed){showToast('Already completed.');return;}
+  const ok=await roomConfirm(`Complete “${streak.challenge.title}”? Supabase will verify the active streak and reward it.`,'Complete Streak','Complete');
+  if(!ok)return;
+  const r=await spikeDB.rpc('sp_complete_current_streak',{p_challenge_id:streak.challenge.id});
+  if(r.error){showToast('❌ '+r.error.message);return;}
+  currentUser.sp=Number(r.data?.xp||currentUser.sp||0); currentUser.coins=Number(currentUser.coins||0)+Number(r.data?.coins||0); currentUser.avatar_level=Number(r.data?.level||currentUser.avatar_level||1); updateUI(); showToast(`🔥 Streak completed · +${Number(r.data?.xp||0).toLocaleString()} XP · 🪙 +${Number(r.data?.coins||0).toLocaleString()}`); await loadSPPanel();
+};
+function specialStreakType(type){return ['battle','trivia','challenge','community','team'].includes(String(type||'').toLowerCase());}
+function specialEventLabel(type){return ({battle:'⚔️ Battle',trivia:'🧠 Trivia',challenge:'🎯 Challenge',community:'🤝 Community',team:'👥 Team'})[type]||type;}
+function renderSpecialStreakBox(a){
+  if(a.completed || !specialStreakType(a.activity_type)) return '';
+  return `<div class="special-event-box" data-special-assignment="${escapeHtml(a.id)}"><div class="special-event-meta">${specialEventLabel(a.activity_type)} is room-verified. Open it to participate and complete the real Room event.</div><button type="button" onclick="openSpecialStreakActivity('${a.id}')">Open ${escapeHtml(a.activity_type)}</button></div>`;
+}
+async function openSpecialStreakActivity(assignmentId){
+  const a=(spActivities||[]).find(x=>x.id===assignmentId);
+  if(!a || !specialStreakType(a.activity_type)){return claimSPActivity(assignmentId);}
+  if(!a.room_id){showToast('❌ This activity has no supported Room.');return;}
+  const {data: events, error: eventError}=await spikeDB.from('room_special_events').select('id,event_id: id,event_type,payload,status').eq('room_id',a.room_id).eq('activity_id',a.activity_id).eq('activity_date',new Date().toISOString().slice(0,10)).eq('event_type',a.activity_type).eq('status','active').limit(1);
+  if(eventError || !events?.length){showToast('❌ No active verified Room event is available.');return;}
+  const ev0=events[0];
+  const joined=await spikeDB.rpc('sp_join_special_event',{p_event_id:ev0.id});
+  if(joined.error){showToast('❌ '+joined.error.message);return;}
+  const ev=Object.assign({},joined.data||{}, {event_id:ev0.id});
+  const type=a.activity_type;
+  let body='';
+  if(type==='trivia'){
+    const payload=ev.payload||{}; const opts=Array.isArray(payload.options)?payload.options:[];
+    body=`<div style="font-size:12px;font-weight:800;margin-bottom:9px">${escapeHtml(payload.question||'Trivia question')}</div>${opts.map((x,i)=>`<button type="button" class="special-choice" data-answer="${i}">${escapeHtml(String(x))}</button>`).join('')}`;
+  }else if(type==='battle'){
+    body=`<div class="special-event-meta">Join the Room battle, then submit the verified result. A positive score is required.</div><input id="specialScore" type="number" min="1" value="1" style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1px solid var(--border-glow);background:var(--bg-secondary);color:#fff"><button type="button" id="submitBattle">Submit battle result</button>`;
+  }else if(type==='challenge'){
+    body=`<div class="special-event-meta">Complete the Room challenge objective, then submit your progress.</div><input id="specialProgress" type="number" min="1" value="1" style="width:100%;margin-top:8px;padding:9px;border-radius:9px;border:1px solid var(--border-glow);background:var(--bg-secondary);color:#fff"><button type="button" id="submitChallenge">Submit challenge</button>`;
+  }else{
+    body=`<div class="special-event-meta">${type==='team'?'Join at least one other Room member.':'Contribute with another Room member.'} Complete your verified contribution, then submit it.</div><button type="button" id="submitContribution">Submit contribution</button>`;
+  }
+  const modal=document.createElement('div'); modal.className='energy-store-overlay'; modal.id='specialStreakModal';
+  modal.innerHTML=`<div class="energy-store-card" style="max-width:430px"><div class="energy-store-head"><div style="font-size:20px">${specialEventLabel(type).split(' ')[0]}</div><h3>${escapeHtml(a.title||specialEventLabel(type))}</h3><button class="energy-store-close" type="button" onclick="this.closest('#specialStreakModal').remove()">×</button></div><div class="energy-store-body" id="specialEventBody">${body}</div></div>`;
+  document.body.appendChild(modal);
+  if(type==='trivia'){modal.querySelectorAll('.special-choice').forEach(btn=>btn.addEventListener('click',()=>{modal.querySelectorAll('.special-choice').forEach(x=>x.disabled=true);completeSpecialStreak(assignmentId,ev.event_id,1,0,Number(btn.dataset.answer));}));}
+  if(type==='battle') modal.querySelector('#submitBattle')?.addEventListener('click',()=>completeSpecialStreak(assignmentId,ev.event_id,1,Number(modal.querySelector('#specialScore')?.value||0),null));
+  if(type==='challenge') modal.querySelector('#submitChallenge')?.addEventListener('click',()=>completeSpecialStreak(assignmentId,ev.event_id,Number(modal.querySelector('#specialProgress')?.value||0),0,null));
+  if(type==='community'||type==='team') modal.querySelector('#submitContribution')?.addEventListener('click',()=>completeSpecialStreak(assignmentId,ev.event_id,1,0,null));
+}
+window.completeSpecialStreak=async function(assignmentId,eventId,progress,score,answerIndex){
+  const r=await spikeDB.rpc('sp_complete_special_event',{p_event_id:eventId,p_progress:Math.max(0,Number(progress)||0),p_score:Math.max(0,Number(score)||0),p_answer_index:answerIndex==null?null:Number(answerIndex)});
+  if(r.error){showToast('❌ '+r.error.message);return;}
+  if(!r.data?.event_complete){showToast(`✓ Participation recorded · ${Number(r.data?.participants||1)}/${Number(r.data?.required_participants||2)} members`);return;}
+  const modal=document.getElementById('specialStreakModal'); if(modal) modal.remove();
+  showToast('✓ Activity completed — verifying your streak reward…');
+  await claimSPActivity(assignmentId);
+};
+
+window.claimSPActivity=async function(id){
+  const button=document.querySelector(`button[onclick="claimSPActivity('${id}')"]`);
+  if(button) button.disabled=true;
+  const r=await spikeDB.rpc('sp_claim_activity',{p_assignment_id:id});
+  if(r.error){
+    if(button) button.disabled=false;
+    showToast('❌ '+r.error.message);
+    return;
+  }
+  currentUser.sp=Number(r.data?.sp||currentUser.sp);
+  currentUser.avatar_level=Number(r.data?.level||currentUser.avatar_level);
+  spStreak=Number(r.data?.streak||spStreak);
+  updateUI();
+  showToast(`+${Number(r.data?.activity_sp||0)+Number(r.data?.streak_bonus||0)} XP${r.data?.streak_bonus?` · 🔥 ${r.data.streak} day streak`:''}`);
+  await loadSPPanel();
+};
+
+
+async function loadEnergyStore(){
+  if(!spContainer || !currentUser) return;
+  const {data:packages,error}=await spikeDB.from('energy_store_packages').select('id,name,energy_amount,price_ngn').eq('active',true).order('sort_order');
+  if(error){showToast('❌ Unable to load Charge Store');return;}
+  window.__energyStorePackages=packages||[];
+  const html=`<div class="energy-store-overlay" id="energyStoreModal"><div class="energy-store-card"><div class="energy-store-head"><div style="font-size:20px">⚡</div><h3>Charge Store</h3<button class="energy-store-close" id="closeEnergyStore" aria-label="Close Charge Store">×</button></div><div class="energy-store-body"><p class="sp-contact">Tap a package to chat with SPIKE Dev on WhatsApp. Send your SPIKE User ID and package choice. Dev will reply with the account number to pay into. After payment, send your receipt in the same WhatsApp chat. Charge Reserve is credited manually after payment is verified.</p><div class="sp-store" style="margin-top:10px">${(packages||[]).map(x=>`<div class="sp-package" role="button" tabindex="0" onclick="buyEnergy('${x.id}')" onkeydown="if(event.key==='Enter'||event.key===' ')buyEnergy('${x.id}')"><div class="sp-package-top"><span class="sp-package-name">${escapeHtml(x.name)}</span><span class="sp-price">${Number(x.energy_amount).toLocaleString()} Charge Reserve · ₦${Number(x.price_ngn).toLocaleString()}</span></div><button class="sp-buy" type="button" onclick="event.stopPropagation();buyEnergy('${x.id}')">Chat with Dev on WhatsApp</button></div>`).join('')}</div></div></div></div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+  $('closeEnergyStore').onclick=()=>$('energyStoreModal')?.remove();
+}
+window.buyEnergy=async function(packageId){
+  const modal=document.getElementById('energyStoreModal');
+  const packages=modal?Array.from(modal.querySelectorAll('.sp-package')):[];
+  const raw=(window.__energyStorePackages||[]).find(x=>x.id===packageId);
+  if(!raw||!currentUser)return;
+  const message='Hello SPIKE Dev, I want to buy Charge Reserve.\nSPIKE User ID: '+currentUser.id+'\nPackage: '+raw.name+'\nEnergy: '+Number(raw.energy_amount).toLocaleString()+'\nPrice: ₦'+Number(raw.price_ngn).toLocaleString()+'\n\nPlease send me the account number to pay into. I will send my payment receipt here after payment.';
+  window.open('https://wa.me/2340000000000?text='+encodeURIComponent(message),'_blank');
+};
+
+async function uploadAvatarToCloudinary(file){
+  if(!currentUser || !file) return;
+  if(!file.type.startsWith('image/')) return showToast('Please select an image.');
+  if(file.size > 8*1024*1024) return showToast('Maximum image size is 8 MB.');
+  const form=new FormData();
+  form.append('file',file);
+  form.append('upload_preset',CLOUDINARY.uploadPreset);
+  showToast('Uploading profile picture…');
+  try{
+    const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`,{method:'POST',body:form});
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data?.error?.message||'Cloudinary upload failed');
+    const url=data.secure_url;
+    if(!url) throw new Error('Cloudinary did not return a secure URL');
+    const {data:updated,error}=await spikeDB.from('profiles').update({avatar_url:url,updated_at:new Date().toISOString()}).eq('id',currentUser.id).select('*').single();
+    if(error) throw error;
+    currentUser={...currentUser,...updated,avatar_url:url};
+    updateUI();
+    await loadProfile();
+    if(typeof loadLiveMembers==='function') await loadLiveMembers();
+    if(typeof loadMessages==='function') await loadMessages();
+    showToast('✅ Profile picture updated');
+  }catch(e){ console.error('Cloudinary avatar upload:',e); showToast('❌ Profile picture upload failed: '+(e.message||'Please try again.')); }
+}
+
+async function loadProfile() {
+  if (!currentUser) return;
+
+  const { count: msgCount } = await spikeDB
+    .from('room_messages')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', currentUser.id);
+
+  const { data: ownMessages } = await spikeDB
+    .from('room_messages')
+    .select('id')
+    .eq('user_id', currentUser.id);
+
+  let pulseCount = 0;
+  if (ownMessages?.length) {
+    const { count } = await spikeDB
+      .from('room_message_pulses')
+      .select('id', { count: 'exact', head: true })
+      .in('message_id', ownMessages.map(m => m.id));
+    pulseCount = count || 0;
+  }
+
+  const profileAvatar = currentUser.avatar_url
+    ? `<img class="profile-avatar-img" src="${escapeHtml(currentUser.avatar_url)}" alt="Profile picture" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const profileFallback = `<div class="profile-avatar" style="${currentUser.avatar_url?'display:none':''}">${getAvatarChar(currentUser.avatar_level)}</div>`;
+  profileContainer.innerHTML = `
+    <div class="profile-avatar-wrap">
+      ${profileAvatar}${profileFallback}
+      <button class="avatar-upload-btn" type="button" onclick="document.getElementById('avatarFile')?.click()">📷 ${currentUser.avatar_url?'Change':'Upload'} profile picture</button>
+      <div style="font-size:10px;color:var(--text-muted);text-align:center;line-height:1.4">SPIKE UID: <span class="uid-color" data-uid="${escapeHtml(currentUser.id || '')}">${escapeHtml(currentUser.id || '')}</span></div>
+    </div>
+    <div class="profile-field"><span class="label">Username</span><span class="value">${escapeHtml(currentUser.username || '')}</span></div>
+    <div class="profile-field"><span class="label">Level</span><span class="value">${currentUser.avatar_level}</span></div><div class="profile-field"><span class="label">XP</span><span class="value">${Number(currentUser.sp||0).toLocaleString()} XP</span></div><div class="profile-field"><span class="label">Daily streak</span><span class="value">🔥 ${spStreak} day${spStreak===1?"":"s"}</span></div>
+    <div class="profile-field"><span class="label">Coins</span><span class="value">${currentUser.coins}</span></div>
+    <div class="profile-field"><span class="label">Energy</span><span class="value">${Math.floor(currentUser.energy)}</span></div>
+    <div class="profile-field"><span class="label">Messages Sent</span><span class="value">${msgCount || 0}</span></div>
+    <div class="profile-field"><span class="label">Pulses Received</span><span class="value">${pulseCount}</span></div>
+    <button class="edit-btn" onclick="editUsername()">✏️ Change Username</button>
+    <div class="cashout-box cashout-locked" id="cashoutBox">
+      <h4>🏦 Cash-Out Account <span id="cashoutLockBadge" class="cashout-lock-badge">🔒 LOCKED</span></h4>
+      <div id="cashoutLockNotice" class="cashout-lock-notice">Cash-Out is locked until you meet all eligibility requirements. You can view your progress here, but withdrawals remain unavailable until SPIKE confirms that you qualify.</div>
+      <button id="cashoutRequirementsToggle" class="cashout-requirements-toggle" type="button" aria-expanded="false" aria-controls="cashoutCollapsibleContent">Eligibility &amp; Cash-Out Details <span>▾</span></button>
+      <div id="cashoutCollapsibleContent" class="cashout-collapsible-content" hidden>
+        <div id="cashoutRequirements" class="cashout-requirements">Checking your eligibility…</div>
+        <div class="cashout-form cashout-gated-form" style="margin-top:8px">
+          <input id="payoutAccountName" placeholder="Account name" disabled>
+          <div class="cashout-grid"><input id="payoutBankName" placeholder="Bank name" disabled><input id="payoutAccountNumber" inputmode="numeric" maxlength="10" placeholder="10-digit account number" disabled></div>
+          <button id="savePayoutBtn" type="button" onclick="savePayoutDetails()" disabled>Save Bank Details</button>
+          <input id="cashoutAmount" inputmode="decimal" placeholder="Withdrawal amount (₦)" disabled>
+          <button id="requestCashoutBtn" type="button" onclick="requestCashout()" disabled>🔒 Request Cash-Out</button>
+          <div id="cashoutEligibility" class="cashout-note">Loading eligibility…</div>
+        </div>
+      </div>
+    </div>
+    <button class="edit-btn" style="background:#FF4D4D; margin-top:8px;" onclick="logout()">🚪 Logout</button>
+  `;
+  loadPayoutDetails();
+}
+
+window.savePayoutDetails=async function(){
+  const name=$('payoutAccountName')?.value.trim(), bank=$('payoutBankName')?.value.trim(), num=$('payoutAccountNumber')?.value.trim();
+  const r=await spikeDB.rpc('save_my_payout_details',{p_account_name:name,p_bank_name:bank,p_account_number:num});
+  if(r.error){showToast('❌ '+r.error.message);return;} showToast('✅ Bank details saved'); await loadPayoutDetails();
+};
+document.addEventListener('click',(event)=>{
+  const cashoutToggle=event.target.closest('#cashoutRequirementsToggle');
+  if(!cashoutToggle) return;
+  const box=$('cashoutCollapsibleContent');
+  if(!box) return;
+  const open=cashoutToggle.getAttribute('aria-expanded')==='true';
+  cashoutToggle.setAttribute('aria-expanded',String(!open));
+  box.hidden=open;
+});
+
+window.loadPayoutDetails=async function(){
+  const payoutResult=await spikeDB.rpc('get_my_payout_details');
+  const d=payoutResult.error?{}:(payoutResult.data||{});
+  // Never display previously saved bank details while Cash-Out is locked.
+  ['payoutAccountName','payoutBankName','payoutAccountNumber'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  const [e,c]=await Promise.all([spikeDB.rpc('get_my_gift_value_summary'),spikeDB.rpc('get_my_cashout_challenge_progress')]);
+  const x=e.data||{};
+  if($('cashoutEligibility'))$('cashoutEligibility').textContent=`Matured Gift Value: ${Number(x.matured_gift_value||0).toLocaleString()} · Purchase-backed capacity: ₦${Number(x.purchase_based_capacity_ngn||0).toLocaleString()}`;
+  const challenges=Array.isArray(c.data)?c.data:(typeof c.data==='string'?(()=>{try{const parsed=JSON.parse(c.data);return Array.isArray(parsed)?parsed:[];}catch(_){return [];}})():Array.isArray(c.data?.result)?c.data.result:[]);
+  const purchase=Number(x.approved_coin_purchase_ngn||0);
+  const policy=await spikeDB.rpc('get_cashout_policy');
+  const pol=policy.data||{};
+  const purchaseOk=purchase>=Number(pol.min_coin_purchase_ngn||20000);
+  const allChallengesOk=challenges.length>0 && challenges.every(v=>v&&v.complete===true);
+  const maturedOk=Number(x.matured_gift_value||0)>=Number(pol.min_withdrawal_ngn||5000);
+  const capacityOk=Number(x.purchase_based_capacity_ngn||0)>=Number(pol.min_withdrawal_ngn||5000);
+  const eligible=purchaseOk && allChallengesOk && maturedOk && capacityOk;
+  const req=$('cashoutRequirements');
+  if(req){
+    const rows=[];
+    rows.push([purchaseOk,`Coin purchase: ₦${purchase.toLocaleString()} / ₦${Number(pol.min_coin_purchase_ngn||20000).toLocaleString()}`]);
+    if(challenges.length){
+      const unitLabels={friends:'friends',approved_posts:'posts',shares:'shares',room_activity:'messages',coin_purchase:'₦',gift_value:'gift value'};
+      challenges.forEach(v=>{
+        const code=String(v.code||'');
+        const label=String(v.name||code||'Eligibility challenge');
+        const unit=unitLabels[code] || (v.unit==='count'?'activities':String(v.unit||''));
+        const value=Number(v.value||0).toLocaleString();
+        const target=Number(v.target||0).toLocaleString();
+        const suffix=unit==='₦'?'':(unit?` ${unit}`:'');
+        const prefix=unit==='₦'?'₦':'';
+        rows.push([v.complete===true,`${escapeHtml(label)}: ${prefix}${value} / ${prefix}${target}${suffix}`]);
+      });
+    }
+    else if(c.error){rows.push([false,'Eligibility challenges: temporarily unavailable']);}
+    else rows.push([false,'Eligibility challenges: configured, awaiting progress']);
+    rows.push([maturedOk,`Matured Gift Value: ${Number(x.matured_gift_value||0).toLocaleString()} / ₦${Number(pol.min_withdrawal_ngn||5000).toLocaleString()} minimum`]);
+    rows.push([capacityOk,`Purchase-backed capacity: ₦${Number(x.purchase_based_capacity_ngn||0).toLocaleString()} / ₦${Number(pol.min_withdrawal_ngn||5000).toLocaleString()} minimum`]);
+    req.innerHTML=rows.map(([ok,text])=>`<div class="cashout-req ${ok?'ok':''}"><span>${ok?'✅':'🔒'}</span><span>${text}</span><span class="req-state">${ok?'Met':'Locked'}</span></div>`).join('');
+  }
+  const box=$('cashoutBox'),badge=$('cashoutLockBadge'),notice=$('cashoutLockNotice');
+  // Only reveal/load payout details after every eligibility requirement is met.
+  if(eligible){
+    if($('payoutAccountName'))$('payoutAccountName').value=d.account_name||'';
+    if($('payoutBankName'))$('payoutBankName').value=d.bank_name||'';
+    if($('payoutAccountNumber'))$('payoutAccountNumber').value=d.account_number||'';
+  }else{
+    ['payoutAccountName','payoutBankName','payoutAccountNumber'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  }
+  if(box)box.classList.toggle('cashout-unlocked',eligible);
+  if(badge){badge.textContent=eligible?'✓ ELIGIBLE':'🔒 LOCKED';}
+  if(notice){notice.textContent=eligible?'Eligibility requirements met. You may save your payout account and request a cash-out when you have sufficient matured Gift Value.':'Cash-Out is locked until every eligibility requirement is met. Your bank details and withdrawal request cannot be submitted while locked.';}
+  ['payoutAccountName','payoutBankName','payoutAccountNumber','savePayoutBtn','cashoutAmount','requestCashoutBtn'].forEach(id=>{const el=$(id);if(el)el.disabled=!eligible;});
+  const rb=$('requestCashoutBtn');if(rb)rb.textContent=eligible?'Request Cash-Out':'🔒 Request Cash-Out';
+};
+window.requestCashout=async function(){
+  const btn=$('requestCashoutBtn'); if(btn?.disabled){showToast('🔒 Cash-Out is still locked. Complete all eligibility requirements first.');return;}
+  const amount=Number($('cashoutAmount')?.value||0); if(!amount){showToast('Enter a withdrawal amount');return;}
+  const r=await spikeDB.rpc('submit_cashout_request',{p_amount_ngn:amount}); if(r.error){showToast('❌ '+r.error.message);await loadPayoutDetails();return;}
+  $('cashoutAmount').value=''; showToast('✅ Cash-out request submitted for Admin review'); await loadPayoutDetails();
+};
+
+window.editUsername = async function() {
+  const newName = await roomPrompt('Enter a new username.', 'Change Username', currentUser.username, 'Username');
+  if (!newName || !newName.trim()) return;
+
+  const { data, error } = await spikeDB.rpc('room_update_username', { p_username: newName.trim() });
+  if (error) {
+    console.error(error);
+    showToast('❌ ' + error.message);
+    return;
+  }
+
+  if (data) {
+    currentUser.username = data.username;
+    currentUser.display_name = data.display_name;
+  }
+  showToast('✅ Username updated!');
+  loadProfile();
+};
+window.logout = async function() {
+  await spikeDB.auth.signOut();
+  location.reload();
+};
+
+function showRoomDialog({title='SPIKE Room',message='',confirmText='OK',cancelText='Cancel',value='',placeholder='',danger=false,multiline=false,input=false,icon='⚡',showCancel=true}={}){
+  return new Promise(resolve=>{
+    document.querySelector('.room-dialog-backdrop')?.remove();
+    const wrap=document.createElement('div'); wrap.className='room-dialog-backdrop';
+    wrap.innerHTML=`<div class="room-dialog" role="dialog" aria-modal="true">
+      <div class="room-dialog-head"><div class="room-dialog-icon">${icon}</div><div class="room-dialog-title">${escapeHtml(title)}</div></div>
+      <div class="room-dialog-body"><div>${escapeHtml(message).replace(/\\n/g,'<br>')}</div>${input?(multiline?`<textarea class="room-dialog-input" id="roomDialogInput" placeholder="${escapeHtml(placeholder)}">${escapeHtml(value)}</textarea>`:`<input class="room-dialog-input" id="roomDialogInput" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">`):''}</div>
+      <div class="room-dialog-actions">${showCancel?`<button type="button" data-dialog-cancel>${escapeHtml(cancelText)}</button>`:''}<button type="button" class="${danger?'danger':'primary'}" data-dialog-ok>${escapeHtml(confirmText)}</button></div>
+    </div>`;
+    document.body.appendChild(wrap);
+    const input=wrap.querySelector('#roomDialogInput');
+    const finish=(result)=>{wrap.remove();resolve(result)};
+    wrap.querySelector('[data-dialog-cancel]')?.addEventListener('click',()=>finish(null));
+    wrap.querySelector('[data-dialog-ok]')?.addEventListener('click',()=>finish(input?input.value:null));
+    wrap.addEventListener('click',e=>{if(e.target===wrap && showCancel) finish(null)});
+    document.addEventListener('keydown',function esc(e){if(!document.body.contains(wrap)){document.removeEventListener('keydown',esc);return} if(e.key==='Escape'&&showCancel){e.preventDefault();finish(null)} if(e.key==='Enter'&&!multiline){e.preventDefault();finish(input?input.value:null)}});
+    requestAnimationFrame(()=>input?.focus());
+  });
+}
+function roomConfirm(message,title='Confirm',confirmText='Continue',danger=false){return showRoomDialog({title,message,confirmText,cancelText:'Cancel',showCancel:true,input:false,danger,icon:danger?'⚠️':'⚡'}).then(v=>v!==null)}
+function roomPrompt(message,title='SPIKE Room',value='',placeholder='',multiline=false){return showRoomDialog({title,message,value,placeholder,multiline,input:true,confirmText:'Continue',cancelText:'Cancel',showCancel:true,icon:'✦'});}
+
+function showToast(text) {
+  const old = document.querySelector('.toast');
+  if (old) old.remove();
+
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = text;
+  document.getElementById('app').appendChild(toast);
+
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.remove(), 2200);
+}
+
+try {
+  if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase client failed to load');
+  spikeDB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+  });
+  initWorldFeatureTabs();
+initApp();
+} catch (err) {
+  console.error(err);
+  var box = document.getElementById('app');
+  if (box) box.innerHTML = '<div style="padding:24px;color:#fff;font-family:system-ui"><h2>SPIKE could not start</h2><p style="color:#aab2c0">' + String(err.message || err) + '</p><p style="color:#aab2c0">Check your internet connection and reload.</p></div>';
+}
+})();
+</script>
+
+<div id="giftPanel" class="gift-panel" aria-hidden="true">
+  <div class="gift-panel-backdrop" onclick="closeGiftPanel()"></div>
+  <div class="gift-panel-card" role="dialog" aria-modal="true" aria-labelledby="giftPanelTitle">
+    <div class="gift-panel-head">
+      <div><h3 id="giftPanelTitle">🎁 Send Gift</h3><div id="giftRecipient" class="gift-recipient"></div></div>
+      <button type="button" class="gift-close" onclick="closeGiftPanel()" aria-label="Close Gift Store">×</button>
+    </div>
+    <div id="giftGrid" class="gift-grid"><div class="gift-empty">Loading gifts…</div></div>
+  </div>
+</div>
+
+<script id="room-gifts-js">
+let giftRecipientId=null;
+let giftRecipientName='';
+window.openGiftPanel=async function(recipientId,recipientName){
+  if(!currentUser||!currentRoom){showToast('Join a room first');return}
+  if(recipientId===currentUser.id){showToast('You cannot gift yourself');return}
+  giftRecipientId=recipientId; giftRecipientName=recipientName||'Member';
+  const panel=document.getElementById('giftPanel');
+  const recipient=document.getElementById('giftRecipient');
+  const grid=document.getElementById('giftGrid');
+  recipient.textContent=`Send a gift to ${giftRecipientName}`;
+  grid.innerHTML='<div class="gift-empty">Loading gifts…</div>';
+  panel.classList.add('open'); panel.setAttribute('aria-hidden','false');
+  const {data,error}=await spikeDB.from('room_gift_catalog')
+    .select('id,name,asset_path,price_coins')
+    .eq('active',true).order('sort_order',{ascending:true});
+  if(error){grid.innerHTML=`<div class="gift-empty">Could not load gifts.</div>`;return}
+  grid.innerHTML=(data||[]).map(g=>`
+    <button class="gift-card" type="button" onclick="confirmRoomGift('${g.id}','${escapeHtml(g.name)}',${Number(g.price_coins)})">
+      <img src="${escapeHtml(g.asset_path)}" alt="${escapeHtml(g.name)}" loading="lazy">
+      <div class="gift-card-name">${escapeHtml(g.name)}</div>
+      <div class="gift-card-price">🪙 ${Number(g.price_coins).toLocaleString()} coins</div>
+    </button>`).join('')||'<div class="gift-empty">No gifts available.</div>';
+}
+window.closeGiftPanel=function(){
+  const panel=document.getElementById('giftPanel');
+  panel?.classList.remove('open'); panel?.setAttribute('aria-hidden','true');
+  giftRecipientId=null; giftRecipientName='';
+}
+window.confirmRoomGift=async function(giftId,giftName,price){
+  if(!giftRecipientId||!currentRoom)return;
+  if(Number(currentUser.coins||0)<price){showToast(`You need ${price.toLocaleString()} coins`);return}
+  const ok=await roomConfirm(`Send ${giftName} to ${giftRecipientName} for ${price.toLocaleString()} coins?`,'Send Gift');
+  if(!ok)return;
+  const {data,error}=await spikeDB.rpc('room_send_gift',{
+    p_room_id:currentRoom,p_gift_id:giftId,p_recipient_id:giftRecipientId
+  });
+  if(error){showToast(error.message||'Gift failed');return}
+  if(data?.coins!=null)currentUser.coins=Number(data.coins);
+  updateUI(); renderAll(); closeGiftPanel();
+  showToast(`🎁 ${giftName} sent to ${giftRecipientName}`);
+}
+</script>
+</body>
+</html>

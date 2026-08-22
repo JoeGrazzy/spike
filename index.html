@@ -41,7 +41,7 @@ footer{border-top:1px solid var(--line);padding-top:16px;display:flex;justify-co
 <script>
 const SPIKE_SUPABASE_URL="https://bkrrewagsbjqgmxaaqyt.supabase.co";
 const SPIKE_SUPABASE_KEY="sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O";
-const spikeAuthClient=window.supabase.createClient(SPIKE_SUPABASE_URL,SPIKE_SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const spikeAuthClient=window.supabase.createClient(SPIKE_SUPABASE_URL,SPIKE_SUPABASE_KEY);
 const $=id=>document.getElementById(id);let register=false;
 const redirect=()=>location.origin+location.pathname;
 const show=(id,on)=>$(id).classList.toggle("hidden",!on);
@@ -59,7 +59,7 @@ $("switchBtn").onclick=()=>setRegister(!register);$("eye").onclick=()=>{let i=$(
 async function log(type,metadata={}){const {data:{user}}=await spikeAuthClient.auth.getUser();if(user)await spikeAuthClient.from("account_security_events").insert({user_id:user.id,event_type:type,metadata})}
 // SP ID/profile lookup remains silent so users enter Feed without waiting for provisioning.
 async function profile(){const {data:{user}}=await spikeAuthClient.auth.getUser();if(!user)return null;const {data}=await spikeAuthClient.from("profiles").select("sp_id").eq("id",user.id).maybeSingle();return data}
-async function render(){const {data:{session},error}=await spikeAuthClient.auth.getSession();if(error){console.warn("Session check:",error)}const recovery=location.hash==="#recovery";
+async function render(){const {data:{session}}=await spikeAuthClient.auth.getSession(),recovery=location.hash==="#recovery";
 if(session&&!recovery){location.replace("feed.html");return}
 show("authView",!session&&!recovery);show("accountView",false);show("resetView",false);show("recoveryView",recovery)}
 $("form").onsubmit=async e=>{e.preventDefault();$("submit").disabled=true;clean("authMessage");try{const email=$("email").value.trim(),password=$("password").value;let r;if(register){if(password.length<8)throw Error("Choose a password with at least 8 characters.");if(password!==$("confirm").value)throw Error("Passwords do not match.");r=await spikeAuthClient.auth.signUp({email,password,options:{emailRedirectTo:redirect(),data:{display_name:$("name").value.trim()}}})}else r=await spikeAuthClient.auth.signInWithPassword({email,password});if(r.error)throw r.error;if(register&&!r.data.session){tell("authMessage","Account created. Check your email to confirm your address.");return}await log(register?"register":"login",{method:"password"});await render()}catch(e){tell("authMessage",friendly(e),"err")}finally{$("submit").disabled=false}};

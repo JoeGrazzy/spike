@@ -8,14 +8,72 @@
 .wrap{width:min(1050px,100%);margin:auto;padding:10px}.video{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:16/9;display:grid;place-items:center}
 video{width:100%;height:100%;object-fit:contain}.badge{position:absolute;left:10px;top:10px;background:#ef4444;color:#fff;padding:6px 9px;border-radius:9px;font-size:12px;font-weight:800}.viewers{position:absolute;right:10px;top:10px;background:#0009;padding:6px 9px;border-radius:9px;font-size:12px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#182235;color:var(--text);border-radius:10px;padding:9px 12px;font-weight:700}.btn.primary{background:linear-gradient(135deg,var(--pink),var(--orange));border:0}.btn.danger{background:#7f1d1d}.status{color:var(--muted);font-size:13px}.chat{max-height:360px;display:flex;flex-direction:column}.chat-list{overflow:auto;min-height:80px;max-height:230px}.msg{padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.msg small{color:var(--muted);font-size:10px}.chat-send{display:flex;gap:7px;margin-top:8px}.chat-send input{min-width:0;flex:1;background:#0b1220;border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px}.guest-card{display:none}.guest-preview{display:none;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}.guest-preview video{object-fit:cover}.reaction-row{display:flex;gap:7px;flex-wrap:wrap}.hidden{display:none!important}
+
+/* Grid-first responsive feature layout */
+.viewer-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:12px}
+.viewer-grid>.span-2{grid-column:1/-1}
+.viewer-actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-top:10px}
+.viewer-actions .btn,.guest-actions .btn,.reaction-grid .btn{width:100%;min-width:0}
+.guest-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(160px,.7fr);gap:10px;align-items:start}
+.guest-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.guest-actions .status{grid-column:1/-1;margin-left:0}
+.reaction-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px}
+.chat-send{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px}
+@media(max-width:900px){
+ .viewer-grid{grid-template-columns:1fr}
+ .viewer-grid>.span-2{grid-column:auto}
+ .viewer-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:600px){
+ .viewer-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .guest-grid{grid-template-columns:1fr}
+ .reaction-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
 </style></head><body><main class="wrap">
 <div class="video"><video id="remote" autoplay playsinline controls></video><span class="badge" id="liveBadge">● LIVE</span><span class="viewers">👁 <span id="viewerCount">0</span></span></div>
-<div class="card"><h3 id="title" style="margin:0 0 5px">Live</h3><div class="status" id="host"></div><div class="status" id="status">Connecting…</div><div class="row" style="margin-top:9px">
-<button class="btn primary" id="connect">▶ Connect</button><button class="btn" id="reconnect">🔄 Reconnect</button><button class="btn" id="follow">➕ Follow</button><button class="btn" id="share">🔗 Share</button><button class="btn danger" id="report">🚩 Report</button>
-</div></div>
-<div class="card"><div class="row"><button class="btn primary" id="requestGuest">👥 Request to join</button><button class="btn" id="leaveGuest" style="display:none">Leave guest</button><span class="status" id="guestStatus"></span></div><div class="guest-preview" id="guestPreview"><video id="guestLocal" autoplay muted playsinline></video></div></div>
-<div class="card"><b>✨ Reactions</b><div class="reaction-row" style="margin-top:8px"><button class="btn" data-reaction="❤️">❤️</button><button class="btn" data-reaction="🔥">🔥</button><button class="btn" data-reaction="👏">👏</button><button class="btn" data-reaction="😂">😂</button></div></div>
-<div class="card chat"><b>💬 Live Chat</b><div class="chat-list" id="chatList"><div class="status">Connect to view chat.</div></div><div class="chat-send"><input id="chatInput" maxlength="1000" placeholder="Say something…" disabled><button class="btn" id="send" disabled>Send</button></div></div>
+<div class="viewer-grid">
+  <section class="card span-2">
+    <h3 id="title" style="margin:0 0 5px">Live</h3>
+    <div class="status" id="host"></div>
+    <div class="status" id="status">Connecting…</div>
+    <div class="viewer-actions">
+      <button class="btn primary" id="connect">▶ Connect</button>
+      <button class="btn" id="reconnect">🔄 Reconnect</button>
+      <button class="btn" id="follow">➕ Follow</button>
+      <button class="btn" id="share">🔗 Share</button>
+      <button class="btn danger" id="report">🚩 Report</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <b>👥 Guest Access</b>
+    <div class="guest-grid" style="margin-top:9px">
+      <div class="guest-actions">
+        <button class="btn primary" id="requestGuest">Request to join</button>
+        <button class="btn" id="leaveGuest" style="display:none">Leave guest</button>
+        <span class="status" id="guestStatus">You can request to join when guests are enabled.</span>
+      </div>
+      <div class="guest-preview" id="guestPreview"><video id="guestLocal" autoplay muted playsinline></video></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <b>✨ Reactions</b>
+    <div class="reaction-grid">
+      <button class="btn" data-reaction="❤️">❤️</button>
+      <button class="btn" data-reaction="🔥">🔥</button>
+      <button class="btn" data-reaction="👏">👏</button>
+      <button class="btn" data-reaction="😂">😂</button>
+    </div>
+  </section>
+
+  <section class="card chat span-2">
+    <b>💬 Live Chat</b>
+    <div class="chat-list" id="chatList"><div class="status">Connect to view chat.</div></div>
+    <div class="chat-send"><input id="chatInput" maxlength="1000" placeholder="Say something…" disabled><button class="btn" id="send" disabled>Send</button></div>
+  </section>
+</div>
 </main>
 <script type="module">
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2.57.0";

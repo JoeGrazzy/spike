@@ -60,7 +60,7 @@ button.danger{color:#ff8994}.switch{position:relative;width:46px;height:26px;fle
   <div class="card">
     <div class="row"><div class="icon">🔔</div><div class="copy"><div class="name">Notifications</div><div class="desc">Message and app notification preference</div></div><label class="switch"><input id="notifications" type="checkbox" checked><span class="track"></span></label></div>
     <div class="row"><div class="icon">💬</div><div class="copy"><div class="name">Message notifications</div><div class="desc">Uses your existing message_notifications system</div></div><label class="switch"><input id="messageNotifications" type="checkbox" checked><span class="track"></span></label></div>
-    <div class="row"><div class="copy"><div class="name">Theme</div><div class="desc">Choose the interface theme used across every SPIKE page.</div></div><select id="themeSelect" class="privacy-select" style="width:auto;margin-top:0"><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select></div>
+    <div class="row"><div class="copy"><div class="name">Theme</div><div class="desc">Dark theme is the default interface.</div></div><span class="value">Dark</span></div>
   </div>
 </section>
 
@@ -128,77 +128,10 @@ button.danger{color:#ff8994}.switch{position:relative;width:46px;height:26px;fle
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://bkrrewagsbjqgmxaaqyt.supabase.co";
-const SUPABASE_KEY = "sb_publishable_24Z2PQpdG13cf6_9w8C7nA_zXEzr60O";
-const sb = supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:"spike-auth"}});
+const SUPABASE_URL = window.SUPABASE_URL || "";
+const SUPABASE_KEY = window.SUPABASE_KEY || "";
+const sb = (SUPABASE_URL && SUPABASE_KEY) ? supabase.createClient(SUPABASE_URL,SUPABASE_KEY) : null;
 const $=id=>document.getElementById(id);
-// ─── Shared SPIKE settings source of truth ─────────────────────────
-window.SPIKE_SETTINGS = {};
-window.SPIKE_PRIVACY = {};
-window.spikeApplyTheme = function(theme){
-  const mode = ["dark","light","system"].includes(theme) ? theme : "dark";
-  const resolved = mode === "system"
-    ? (window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")
-    : mode;
-  document.documentElement.dataset.theme = resolved;
-  document.body.classList.toggle("light", resolved === "light");
-  document.body.dataset.theme = resolved;
-  document.documentElement.style.colorScheme = resolved;
-  localStorage.setItem("spike-theme", resolved);
-  if(!window.__spikeThemeMediaListener){
-    const mq=window.matchMedia("(prefers-color-scheme: light)");
-    mq.addEventListener?.("change",()=>{
-      if(window.SPIKE_SETTINGS?.theme==="system") window.spikeApplyTheme("system");
-    });
-    window.__spikeThemeMediaListener=true;
-  }
-};
-
-async function loadUserSettings(){
-  const user=await currentUser(); if(!user)return null;
-  const [{data:settings},{data:privacy}]=await Promise.all([
-    sb.from("user_settings").select("*").eq("user_id",user.id).maybeSingle(),
-    sb.from("user_privacy_settings").select("*").eq("user_id",user.id).maybeSingle()
-  ]);
-  window.SPIKE_SETTINGS={...(settings||{}),theme:settings?.theme||"dark"};
-  window.SPIKE_PRIVACY=privacy||{};
-  $("themeSelect").value=window.SPIKE_SETTINGS.theme;
-  window.spikeApplyTheme(window.SPIKE_SETTINGS.theme);
-  $("notifications").checked=window.SPIKE_SETTINGS.notifications_enabled!==false;
-  $("messageNotifications").checked=window.SPIKE_SETTINGS.message_notifications!==false;
-  return user;
-}
-async function saveUserSetting(patch){
-  const user=await currentUser(); if(!user)return status("Please sign in.",false);
-  const {error}=await sb.from("user_settings").upsert(
-    {user_id:user.id,...patch,updated_at:new Date().toISOString()},
-    {onConflict:"user_id"}
-  );
-  if(error)status(error.message,false);
-  else {
-    window.SPIKE_SETTINGS={...window.SPIKE_SETTINGS,...patch};
-    if(patch.theme)window.spikeApplyTheme(patch.theme);
-  }
-}
-
-async function listenSettingsRealtime(){
-  const user=await currentUser();
-  if(!user)return;
-  if(window.__spikeSettingsChannel) await sb.removeChannel(window.__spikeSettingsChannel);
-  window.__spikeSettingsChannel=sb.channel("spike-settings-"+user.id)
-    .on("postgres_changes",{event:"*",schema:"public",table:"user_settings",filter:"user_id=eq."+user.id},payload=>{
-      window.SPIKE_SETTINGS={...window.SPIKE_SETTINGS,...(payload.new||{})};
-      if(payload.new?.theme){ $("themeSelect").value=payload.new.theme; window.spikeApplyTheme(payload.new.theme); }
-    })
-    .subscribe();
-}
-
-
-async function currentUser(){
-  const {data:{session},error}=await sb.auth.getSession();
-  if(error){console.warn("Auth session:",error);return null}
-  return session?.user||null;
-}
 function status(msg,ok=true){const e=$("status");e.textContent=msg;e.className="status show "+(ok?"ok":"err");setTimeout(()=>e.classList.remove("show"),3500)}
 $("back").onclick=()=>history.length>1?history.back():location.href="index.html";
 
@@ -215,13 +148,13 @@ async function load(){
 }
 $("saveProfile").onclick=async()=>{
  if(!sb)return status("Configure Supabase first.",false);
- const user=await currentUser();if(!user)return status("Please sign in.",false);
+ const {data:{user}}=await sb.auth.getUser();if(!user)return status("Please sign in.",false);
  const {error}=await sb.from("profiles").update({display_name:$("displayName").value.trim()||null,username:$("username").value.trim()||null,bio:$("bio").value.trim()||null,updated_at:new Date().toISOString()}).eq("id",user.id);
  status(error?error.message:"Profile saved.",!error);
 };
 $("passwordReset").onclick=async()=>{
  if(!sb)return status("Configure Supabase first.",false);
- const user=await currentUser();if(!user?.email)return status("No email is available for this account.",false);
+ const {data:{user}}=await sb.auth.getUser();if(!user?.email)return status("No email is available for this account.",false);
  const {error}=await sb.auth.resetPasswordForEmail(user.email,{redirectTo:location.origin+location.pathname});
  status(error?error.message:"Password reset email sent.",!error);
 };
@@ -230,7 +163,7 @@ $("signOut").onclick=async()=>{if(sb){const {error}=await sb.auth.signOut();if(e
 const privacyFields=["profile_visibility","message_permission","friend_request_permission","online_status_visibility","last_seen_visibility","read_receipts","typing_indicator","activity_visibility","searchable_by_username","searchable_by_sp_id","show_profile_in_discover","allow_media_messages","allow_message_forwarding","personalized_recommendations","analytics_personalization"];
 async function loadPrivacy(){
  if(!sb)return;
- const user=await currentUser(); if(!user)return;
+ const {data:{user}}=await sb.auth.getUser(); if(!user)return;
  const {data}=await sb.from("user_privacy_settings").select("*").eq("user_id",user.id).maybeSingle();
  if(!data)return;
  document.querySelectorAll("[data-privacy]").forEach(el=>{
@@ -240,19 +173,13 @@ async function loadPrivacy(){
 }
 $("savePrivacy").onclick=async()=>{
  if(!sb)return status("Configure Supabase first.",false);
- const user=await currentUser(); if(!user)return status("Please sign in.",false);
+ const {data:{user}}=await sb.auth.getUser(); if(!user)return status("Please sign in.",false);
  const payload={user_id:user.id};
  document.querySelectorAll("[data-privacy]").forEach(el=>payload[el.dataset.privacy]=el.type==="checkbox"?el.checked:el.value);
  const {error}=await sb.from("user_privacy_settings").upsert(payload,{onConflict:"user_id"});
  status(error?error.message:"Privacy settings saved.",!error);
 };
-$("themeSelect").onchange=()=>saveUserSetting({theme:$("themeSelect").value});
-$("notifications").onchange=()=>saveUserSetting({notifications_enabled:$("notifications").checked});
-$("messageNotifications").onchange=()=>saveUserSetting({message_notifications:$("messageNotifications").checked});
-
-sb.auth.onAuthStateChange(()=>{setTimeout(async()=>{try{await loadUserSettings();await listenSettingsRealtime()}catch(e){console.warn("Settings sync:",e)}},0);});
 loadPrivacy();
 load();
-loadUserSettings().then(listenSettingsRealtime).catch(e=>console.warn("Settings init:",e));
 </script>
 </body></html>
