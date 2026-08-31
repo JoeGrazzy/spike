@@ -1,0 +1,2 @@
+/* SPIKE compatibility shim: page-level theme controllers remain authoritative. */
+(function(){ if(!window.SPIKE_THEME){ window.SPIKE_THEME={get:function(){return Number(localStorage.getItem('spikeTheme')||1)||1;},set:function(n){localStorage.setItem('spikeTheme',String(n));document.documentElement.dataset.theme=String(n);},next:function(){var n=this.get()+1;if(n>3)n=1;this.set(n);return n;}}; }})();

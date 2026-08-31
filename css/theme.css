@@ -1,0 +1,37 @@
+/* SPIKE shared theme fallback. Page-specific styles remain authoritative. */
+:root {
+  --spike-bg: #070b14;
+  --spike-surface: #101722;
+  --spike-card: #121a27;
+  --spike-card2: #182231;
+  --spike-text: #f5f7fb;
+  --spike-muted: #9aa6b5;
+  --spike-line: rgba(255,255,255,.10);
+  --spike-accent: #8b5cf6;
+  --spike-danger: #ef4444;
+  --spike-success: #22c55e;
+  --card: var(--spike-card);
+  --card2: var(--spike-card2);
+  --text: var(--spike-text);
+  --muted: var(--spike-muted);
+  --line: var(--spike-line);
+  --accent: var(--spike-accent);
+}
+html[data-theme="light"] {
+  --spike-bg: #f7f9fc;
+  --spike-surface: #ffffff;
+  --spike-card: #ffffff;
+  --spike-card2: #f0f3f8;
+  --spike-text: #172033;
+  --spike-muted: #667085;
+  --spike-line: rgba(15,23,42,.10);
+  --card: var(--spike-card);
+  --card2: var(--spike-card2);
+  --text: var(--spike-text);
+  --muted: var(--spike-muted);
+  --line: var(--spike-line);
+}
+html, body { background-color: var(--spike-bg); color: var(--spike-text); }
+button, input, textarea, select { font: inherit; }
+img, video { max-width: 100%; }
+:focus-visible { outline: 2px solid var(--spike-accent); outline-offset: 2px; }
