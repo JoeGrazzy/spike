@@ -195,28 +195,6 @@ html[data-theme="light"] .glow{opacity:.12!important}
 #spikeRecoverySettings[hidden]{display:none!important}
 
 </style>
-<script id="spike-universal-theme">
-(function(){
-const KEY="spike-feed-style";
-const allowed=[1,2,3,4,5];
-let n=parseInt(localStorage.getItem(KEY)||"1",10);
-if(!allowed.includes(n)) n=1;
-function apply(style){
-style=allowed.includes(Number(style))?Number(style):1;
-document.documentElement.dataset.spikeStyle=String(style);
-document.documentElement.dataset.theme=(style===1||style===4)?"light":"dark";
-document.documentElement.style.colorScheme=(style===1||style===4)?"light":"dark";
-try{localStorage.setItem(KEY,String(style));localStorage.setItem("spike-theme",(style===1||style===4)?"light":"dark")}catch(e){}
-window.__SPIKE_STYLE__=style;
-}
-window.SPIKE_THEME={
-get:()=>window.__SPIKE_STYLE__||n,
-set:apply,
-next:()=>apply(((window.__SPIKE_STYLE__||n)%5)+1)
-};
-apply(n);
-})();
-</script>
 <style id="spike-universal-theme-css">
 /* ===== SPIKE UNIVERSAL FEED THEMES ===== */
 html[data-spike-style="1"]{
@@ -891,7 +869,7 @@ video{contain:layout paint}
 </section>
 <div class="layout">
 <aside class="panel side">
-<button class="active" data-page="overview">📊 Overview</button><button data-page="economy">💰 Coin Control</button><button data-page="coinOrders">💳 Coin Orders <span id="navPendingOrders" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="packages">🪙 Coin Store</button><button data-page="economyRewards">🎯 Room Rewards</button><button data-page="rooms">🏠 Rooms</button><button data-page="users">👥 Users</button><button data-page="broadcasts">📣 Announcements & Messages</button><button data-page="maintenance">🛠️ Maintenance</button><button data-page="admins">👑 Admin Access</button><button data-page="audit">🛡️ Audit Log</button>
+<button class="active" data-page="overview">📊 Overview</button><button data-page="economy">💰 Coin Control</button><button data-page="coinOrders">💳 Coin Orders <span id="navPendingOrders" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="roomPurchases">🛒 Feature Purchases <span id="navPendingFeaturePurchases" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="packages">🪙 Coin Store</button><button data-page="economyRewards">🎯 Room Rewards</button><button data-page="rooms">🏠 Rooms</button><button data-page="users">👥 Users</button><button data-page="broadcasts">📣 Announcements & Messages</button><button data-page="maintenance">🛠️ Maintenance</button><button data-page="admins">👑 Admin Access</button><button data-page="audit">🛡️ Audit Log</button>
 </aside>
 
 
@@ -920,6 +898,11 @@ video{contain:layout paint}
 </div>
 <div id="coinOrdersList" class="coinOrderGrid" style="margin-top:10px"><div class="coinOrderEmpty" style="grid-column:1/-1">Loading incoming orders…</div></div>
 </div>
+</section>
+<section id="roomPurchases" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>🛒 Room Feature Purchases</h2><span class="muted">Every paid Room feature stays locked until a Super Admin approves the purchase. Coin purchases are charged only at approval.</span></div><div class="actions"><button class="ghost" id="refreshRoomPurchases">↻ Refresh</button></div></div>
+<div class="coinOrderToolbar" style="margin-top:4px"><div class="coinOrderFilters" id="roomPurchaseFilters"><button class="active" data-purchase-status="pending">Pending</button><button data-purchase-status="paid_review">Paid / Review</button><button data-purchase-status="approved">Approved</button><button data-purchase-status="rejected">Rejected</button></div></div>
+<div id="roomPurchasesList" class="coinOrderGrid" style="margin-top:10px"><div class="coinOrderEmpty" style="grid-column:1/-1">Loading feature purchases…</div></div></div>
 </section>
 <section id="economyRewards" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🎯 Room Rewards</h2><span class="muted">Operational view of the earning economy used inside room.html.</span></div><button class="ghost" id="refreshRewardEconomy">↻ Refresh</button></div><div class="cards"><div class="room"><strong>🪙 Wallet</strong><span class="muted">Purchased and earned coins share the same wallet and ledger.</span></div><div class="room"><strong>🎁 Gifts</strong><span class="muted">Members can gift catalog items and coins through protected Room RPCs.</span></div><div class="room"><strong>🔥 Streaks</strong><span class="muted">Daily participation can be rewarded without exposing wallet mutation to the browser.</span></div><div class="room"><strong>🏆 Weekly</strong><span class="muted">Room creators can generate weekly results from the Creator Panel.</span></div></div><div class="panel" style="margin-top:14px"><div class="toolbar"><div><h3 style="margin:0">🎯 Active Targets</h3><span class="muted">Server-authoritative target catalog used by room.html.</span></div></div><div id="adminTargetCatalog" class="cards"><div class="muted">Loading targets…</div></div></div><div class="panel" style="margin-top:14px"><div class="toolbar"><div><h3 style="margin:0">🎨 Chat Styles</h3><span class="muted">Premium Room cosmetics and subscription pricing.</span></div></div><div id="adminStyleCatalog" class="cards"><div class="muted">Loading styles…</div></div></div><div style="margin-top:12px;padding:13px;border:1px solid var(--line);border-radius:15px;background:#101219"><b>Recommended operating rules</b><ul style="color:var(--muted);font-size:12px;line-height:1.65"><li>Keep reward amounts server-authoritative.</li><li>Use daily limits and idempotency for automatic rewards.</li><li>Keep purchased coins, earned coins and gifts auditable in the ledger.</li><li>Never allow client-side JavaScript to directly change a wallet balance.</li></ul></div></div></section><section id="packages" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🪙 Coin Store</h2><span class="muted">Only active packages appear in Rooms.</span></div><button class="primary" id="addPackage">+ Package</button></div><div id="packagesList"></div></div></section>
 <section id="rooms" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🏠 Rooms</h2><span class="muted">Create, feature, activate and deactivate Rooms.</span></div><button class="primary" id="addRoom">+ Room</button></div><div id="roomsList"></div></div></section>
@@ -1132,13 +1115,22 @@ async function safeRpc(name,args,context=name){
   return {data:null,error:lastError||new Error('Supabase is unavailable.')};
 }
 let me=null;
+let adminAuthReady=false;
 async function auth(){
 const {data,error}=await sb.auth.getUser();
 if(error||!data.user){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Sign in required</h2><p>Please sign in to SPIKE.</p></div>';return false}
 me=data.user;
-const {data:isSuper,error:re}=await sb.rpc('is_super_admin',{p_user_id:me.id});
-if(re||isSuper!==true){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Access denied</h2><p>Super admin authorization is required.</p></div>';return false}
-$('#role').textContent='SUPER ADMIN'; return true;
+const {data:isSuper,error:superErr}=await sb.rpc('is_super_admin',{p_user_id:me.id});
+let isAdmin=isSuper===true;
+if(!isAdmin){
+  const {data:guard,error:guardErr}=await sb.rpc('admin_guard');
+  isAdmin=guard===true;
+  if(superErr) console.warn('[SPIKE ADMIN] is_super_admin check:',superErr);
+  if(guardErr) console.warn('[SPIKE ADMIN] admin_guard check:',guardErr);
+}
+if(!isAdmin){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Access denied</h2><p>Administrator authorization is required for this account.</p></div>';return false}
+const {data:profile}=await sb.from('profiles').select('role').eq('id',me.id).maybeSingle();
+$('#role').textContent=String(profile?.role||(isSuper===true?'SUPER ADMIN':'ADMIN')).replace(/_/g,' ').toUpperCase(); return true;
 }
 
 async function stats(){
@@ -1148,6 +1140,8 @@ async function stats(){
   $('#sCoins').textContent=Number(data?.coins||0).toLocaleString();
   $('#sPackages').textContent=Number(data?.active_packages||0).toLocaleString();
   $('#sOrders').textContent=Number(data?.pending_orders||0).toLocaleString();
+  const featureBadge=$('#navPendingFeaturePurchases');
+  if(featureBadge) featureBadge.textContent=Number(data?.pending_room_purchases||0).toLocaleString();
   return data;
 }
 function showAdminPage(page, button){
@@ -1156,10 +1150,11 @@ function showAdminPage(page, button){
   document.querySelectorAll('.side button[data-page]').forEach(x=>x.classList.toggle('active', x===button || x.dataset.page===page));
   document.querySelectorAll('.page').forEach(x=>x.hidden=true);
   target.hidden=false;
+  if(!adminAuthReady) return;
   try{
     if(page==='overview'){ stats(); refreshCoinOrdersAll(); }
     else if(page==='economy') loadCoinAdjustments();
-    else if(page==='coinOrders'){ loadCoinOrders(coinOrderStatus||'pending'); loadCoinOrderStats(); }
+    else if(page==='coinOrders'){ loadCoinOrders(coinOrderStatus||'pending'); loadCoinOrderStats(); } else if(page==='roomPurchases'){ loadRoomPurchases(roomPurchaseStatus||'pending'); }
     else if(page==='packages') loadPackages();
     else if(page==='rooms') loadRooms();
     else if(page==='economyRewards') loadFinalRoomEconomyCatalog();
@@ -1172,19 +1167,16 @@ function showAdminPage(page, button){
 }
 function nav(){
   const buttons=[...document.querySelectorAll('.side button[data-page]')];
-  buttons.forEach(b=>{
-    b.type='button';
-    b.onclick=()=>showAdminPage(b.dataset.page,b);
-  });
-  // Delegated fallback guarantees taps still work if another script replaces a handler.
-  if(!window.__SPIKE_ADMIN_NAV_DELEGATED){
+  buttons.forEach(b=>{ b.type='button'; });
+  const side=document.querySelector('.side');
+  if(side && !window.__SPIKE_ADMIN_NAV_DELEGATED){
     window.__SPIKE_ADMIN_NAV_DELEGATED=true;
-    document.addEventListener('click',e=>{
-      const b=e.target.closest('.side button[data-page]');
-      if(!b)return;
+    side.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-page]');
+      if(!b || !side.contains(b)) return;
       e.preventDefault();
       showAdminPage(b.dataset.page,b);
-    },true);
+    });
   }
   const initial=buttons.find(b=>b.classList.contains('active'))||buttons[0];
   if(initial) showAdminPage(initial.dataset.page,initial);
@@ -1328,7 +1320,6 @@ async function refreshCoinOrdersAll(){
   }
 }
 async function updateCoinOrder(id,status,ref){const r=await safeRpc('admin_update_coin_order',{p_order_id:id,p_status:status,p_payment_reference:ref??null});if(r.error){toast(r.error.message);return false}toast('Order updated');await refreshCoinOrdersAll();return true}
-async function approveCoinOrder(id){if(!(await spikePremiumConfirm('Grant the listed coins to this buyer and mark the order approved?',{title:'Approve coin order',icon:'🪙',ok:'Approve order'})))return;const r=await safeRpc('admin_approve_coin_order',{p_order_id:id});if(r.error){toast(r.error.message);return}toast(`Approved: ${Number(r.data?.coins||0).toLocaleString()} coins credited`);await refreshCoinOrdersAll();await stats()}
 let coinOrderModalMode=null,coinOrderModalId=null;
 function ensureCoinOrderModal(){if(document.getElementById('coinOrderActionModal'))return;const d=document.createElement('div');d.id='coinOrderActionModal';d.className='modal';d.innerHTML=`<div class=\"sheet\" style=\"width:min(560px,100%);\"><div class=\"sheethead\"><div><h2 id=\"coinActionTitle\" style=\"margin:0;\">Coin Order Review</h2><div id=\"coinActionSub\" class=\"muted\">Secure admin action</div></div><button class=\"close\" id=\"coinActionClose\">×</button></div><div style=\"margin-top:14px;padding:13px;border:1px solid var(--line);border-radius:15px;background:#101219;\"><div id=\"coinActionOrder\" style=\"font-size:12px;line-height:1.55;\"></div></div><div id=\"coinActionFields\" style=\"margin-top:12px;\"></div><div class=\"actions\" style=\"justify-content:flex-end;margin-top:15px;\"><button class=\"ghost\" id=\"coinActionCancel\">Cancel</button><button class=\"primary\" id=\"coinActionConfirm\">Continue</button></div></div>`;document.body.appendChild(d);document.getElementById('coinActionClose').onclick=closeCoinOrderModal;document.getElementById('coinActionCancel').onclick=closeCoinOrderModal;document.getElementById('coinActionConfirm').onclick=confirmCoinOrderAction}
 function closeCoinOrderModal(){const m=document.getElementById('coinOrderActionModal');if(m)m.classList.remove('show');coinOrderModalMode=null;coinOrderModalId=null}
@@ -1340,6 +1331,20 @@ function markInstructions(id){openCoinOrderModal(id,'instructions')}
 function markPaidReview(id){openCoinOrderModal(id,'paid')}
 function openCoinOrderWhats(o){const total=coinOrderTotal(o);const text=`Hello SPIKE Developer,\n\nI am reviewing a SPIKE Coin order.\nOrder: ${o.reference||o.id}\nUser: ${o.display_name||o.username||'SPIKE User'}\nSP_ID: ${o.sp_id||o.room_handle||'N/A'}\nCoins: ${total.toLocaleString()}\nAmount: ${coinOrderMoney(o)}\nPayment ref: ${o.payment_reference||'Not supplied'}\n\nPlease send payment instructions / confirm payment.`;window.open('https://wa.me/2349159096952?text='+encodeURIComponent(text),'_blank','noopener');if(o.status==='pending')updateCoinOrder(o.id,'payment_instructions_sent',o.payment_reference||null)}
 async function handleCoinOrderAction(e){const a=e.target.closest('[data-order-approve]');const r=e.target.closest('[data-order-reject]');const w=e.target.closest('[data-order-whats]');const ins=e.target.closest('[data-order-instructions]');const paid=e.target.closest('[data-order-paid]');const cp=e.target.closest('[data-order-copy]');if(a)return approveCoinOrder(a.dataset.orderApprove);if(r)return rejectCoinOrder(r.dataset.orderReject);if(ins)return markInstructions(ins.dataset.orderInstructions);if(paid)return markPaidReview(paid.dataset.orderPaid);if(cp){try{await navigator.clipboard.writeText(cp.dataset.orderCopy);toast('Order reference copied')}catch(_){toast(cp.dataset.orderCopy)}return}if(w){const o=coinOrderRows.find(x=>String(x.id)===String(w.dataset.orderWhats));if(o)openCoinOrderWhats(o)}}
+
+let roomPurchaseStatus='pending';
+let roomPurchaseRows=[];
+function roomPurchaseMoney(o){return o.fiat_amount_minor>0?new Intl.NumberFormat(undefined,{style:'currency',currency:o.currency||'NGN'}).format(Number(o.fiat_amount_minor)/100):'🪙 '+Number(o.coin_amount||0).toLocaleString()+' coins'}
+function roomPurchaseCard(o){const can=['pending','paid_review'].includes(String(o.status||''));const method=o.payment_method==='coins'?'🪙 Coins':'💳 '+String(o.payment_method||'Payment');return `<article class="coinOrderCard"><div class="coinOrderTop"><div><div class="coinOrderRef">${esc(o.item_name||'Room purchase')}</div><div class="coinOrderMeta"><b>${esc(o.user_id||'User')}</b> · ${method}<br>${esc(o.purchase_option||'')}</div></div><span class="coinOrderStatus ${esc(o.status||'pending')}">${esc(String(o.status||'pending').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase()))}</span></div><div class="coinOrderMeta">${esc(roomPurchaseMoney(o))}<br>Created ${o.created_at?new Date(o.created_at).toLocaleString():'—'}${o.transaction_id?'<br>Transaction ID: '+esc(o.transaction_id):''}${o.admin_note?'<br>Admin note: '+esc(o.admin_note):''}</div>${can?`<div class="coinOrderActions"><button class="approve" data-room-purchase-approve="${esc(o.id)}">Approve & Unlock</button><button class="reject" data-room-purchase-reject="${esc(o.id)}">Reject</button></div>`:''}</article>`}
+async function loadRoomPurchases(status=roomPurchaseStatus){roomPurchaseStatus=status||'pending';const box=$('#roomPurchasesList');if(box)box.innerHTML='<div class="coinOrderEmpty" style="grid-column:1/-1">Loading feature purchases…</div>';const r=await safeRpc('admin_list_room_purchase_requests',{p_status:roomPurchaseStatus,p_limit:200},'Room feature purchases');if(r.error){if(box)box.innerHTML='<div class="coinOrderEmpty" style="grid-column:1/-1">'+esc(r.error.message||'Could not load feature purchases.')+'</div>';return}roomPurchaseRows=r.data||[];if(box)box.innerHTML=roomPurchaseRows.length?roomPurchaseRows.map(roomPurchaseCard).join(''):'<div class="coinOrderEmpty" style="grid-column:1/-1">No purchases in this status.</div>';
+  const badge=$('#navPendingFeaturePurchases');
+  if(badge){
+    const pending=await safeRpc('admin_list_room_purchase_requests',{p_status:'pending',p_limit:500},'Pending feature purchase count');
+    if(!pending.error) badge.textContent=String((pending.data||[]).length);
+  }
+}
+async function reviewRoomPurchase(id,approve){const note=approve?'Approved after payment/purchase verification.':(await spikePremiumInput('Reject Room Purchase','Enter the reason this purchase cannot be approved.',{icon:'🔒',ok:'Reject purchase',inputType:'text',maxLength:500})||'Payment not confirmed.');if(!approve && !String(note).trim())return;const r=await safeRpc('admin_review_room_purchase',{p_request_id:id,p_approve:approve,p_note:String(note||'')},'Room purchase review');if(r.error){toast(r.error.message);return}toast(approve?'✓ Purchase approved and unlocked.':'Purchase rejected.');await loadRoomPurchases(roomPurchaseStatus)}
+function handleRoomPurchaseAction(e){const a=e.target.closest('[data-room-purchase-approve]');const r=e.target.closest('[data-room-purchase-reject]');if(a)return reviewRoomPurchase(a.dataset.roomPurchaseApprove,true);if(r)return reviewRoomPurchase(r.dataset.roomPurchaseReject,false)}
 async function loadMaintenance(){const {data,error}=await sb.from('app_maintenance').select('*').eq('id',true).maybeSingle();if(error){toast(error.message);return}$('#maintenanceState').textContent=data?.enabled?`🛠️ MAINTENANCE ACTIVE${data.ends_at?' · ends '+new Date(data.ends_at).toLocaleString():''}`:'✅ Maintenance mode is OFF';$('#maintTitle').value=data?.title||'SPIKE is under maintenance';$('#maintMessage').value=data?.message||'We will be back shortly';if(data?.ends_at){const d=new Date(data.ends_at);$('#maintEnds').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}else $('#maintEnds').value=''}
 async function setMaintenance(enabled){const ends=$('#maintEnds').value?new Date($('#maintEnds').value).toISOString():null;const r=await safeRpc('admin_set_maintenance',{p_enabled:enabled,p_title:$('#maintTitle').value.trim(),p_message:$('#maintMessage').value.trim(),p_starts_at:null,p_ends_at:ends});if(r.error){toast(r.error.message);return}toast(enabled?'Maintenance enabled':'Maintenance disabled');loadMaintenance()}
 async function loadAdmins(){const {data,error}=await safeRpc('admin_list_admins');if(error){toast(error.message);return}$('#adminsList').innerHTML=data?.length?data.map(a=>`<div class="usercard" style="margin-bottom:8px"><strong>${esc(a.display_name||'SPIKE User')}</strong><div class="muted">${esc(a.email)} · ${esc(a.sp_id||'No SP ID')}</div><div style="margin-top:5px">👑 ${esc(a.role)}</div></div>`).join(''):'<div class="empty">No admins found.</div>'}
@@ -1352,6 +1357,7 @@ const modal=$('#modal'), close=$('#close');
 if(close) close.onclick=()=>modal?.classList.remove('show');
 if(modal) modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')modal?.classList.remove('show')});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-room-purchase-approve]');const r=e.target.closest('[data-room-purchase-reject]');if(a){reviewRoomPurchase(a.dataset.roomPurchaseApprove,true);return}if(r){reviewRoomPurchase(r.dataset.roomPurchaseReject,false);return}});
 on('refresh','click',()=>{stats();toast('Refreshed')});
 on('findCoinUser','click',findCoinUser);on('creditCoins','click',()=>adjustCoins(1));on('deductCoins','click',()=>adjustCoins(-1));on('loadCoinAdjustments','click',loadCoinAdjustments);
 on('findAdmin','click',findAdmin);on('loadAudit','click',loadAudit);on('loadAdmins','click',loadAdmins);
@@ -1367,38 +1373,18 @@ on('refreshBroadcasts','click',()=>{loadBroadcastRooms();loadBroadcasts()});
 on('queueBroadcast','click',queueBroadcast);
 on('broadcastAudience','change',()=>{const x=$('#broadcastRoomWrap');if(x)x.hidden=$('#broadcastAudience').value!=='room_members'});
 on('broadcastBanner','change',()=>{const x=$('#broadcastEndsWrap');if(x)x.hidden=$('#broadcastBanner').value!=='true'});
+on('refreshRoomPurchases','click',()=>loadRoomPurchases(roomPurchaseStatus));
+on('roomPurchaseFilters','click',e=>{const b=e.target.closest('[data-purchase-status]');if(!b)return;document.querySelectorAll('#roomPurchaseFilters [data-purchase-status]').forEach(x=>x.classList.toggle('active',x===b));loadRoomPurchases(b.dataset.purchaseStatus)});
 on('openCoinOrders','click',()=>document.querySelector('[data-page=\"coinOrders\"]')?.click());on('refreshCoinOrdersOverview','click',refreshCoinOrdersAll);on('refreshCoinOrders','click',()=>loadCoinOrders(coinOrderStatus));on('coinOrderSearch','input',renderCoinOrderList);on('coinOrderFilters','click',e=>{const b=e.target.closest('[data-order-status]');if(!b)return;document.querySelectorAll('#coinOrderFilters [data-order-status]').forEach(x=>x.classList.toggle('active',x===b));loadCoinOrders(b.dataset.orderStatus)});on('coinOrdersList','click',handleCoinOrderAction);on('coinOrderStats','click',()=>loadCoinOrderStats());on('refreshMaintenance','click',loadMaintenance);on('enableMaintenance','click',()=>setMaintenance(true));on('disableMaintenance','click',()=>setMaintenance(false));
-// Final delegated navigation safety-net: guarantees taps still work if another script replaces a button handler.
-document.querySelector('.side')?.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(!b)return;if(typeof b.onclick==='function')return;const target=$('#'+b.dataset.page);if(!target)return;document.querySelectorAll('.side button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(x=>x.hidden=true);target.hidden=false;});
 nav();
-(async()=>{if(await auth()){await stats();await refreshCoinOrdersAll()}})();
-</script>
-<script id="spike-universal-theme-runtime">
-(function(){
-const names={1:"Style 1",2:"Style 2",3:"Style 3",4:"Style 4",5:"Style 5"};
-function label(btn){
-const n=window.SPIKE_THEME?.get?.()||1;
-btn.setAttribute("aria-label","Switch theme — "+names[n]);
-btn.setAttribute("title","Switch theme • "+names[n]);
-btn.innerHTML='<span class="spike-theme-dot" aria-hidden="true"></span><span>'+names[n]+'</span>';
-}
-function init(){
-const btn=document.getElementById("spikeThemeSwitch");
-if(!btn||!window.SPIKE_THEME)return;
-label(btn);
-btn.addEventListener("click",function(){
-window.SPIKE_THEME.next();
-label(btn);
-});
-window.addEventListener("storage",function(e){
-if(e.key==="spike-feed-style"){
-const n=parseInt(e.newValue||"1",10);
-window.SPIKE_THEME.set(n);
-label(btn);
-}
-});
-}
-if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+(async()=>{
+  if(await auth()){
+    adminAuthReady=true;
+    window.__SPIKE_ADMIN_AUTH_READY=true;
+    window.dispatchEvent(new CustomEvent('spike:admin-auth-ready'));
+    const active=document.querySelector('.side button[data-page].active')||document.querySelector('.side button[data-page]');
+    if(active) showAdminPage(active.dataset.page,active);
+  }
 })();
 </script>
 <script id="spike-final-theme-controller">
@@ -1567,7 +1553,7 @@ else setTimeout(install,1500);
     input.placeholder=pin?'••••••':'Create 6-digit PIN';
     enter.textContent=pin?'Enter Admin Center':'Set Secret PIN & Enter';
     if(reset) reset.hidden=false;
-    refreshRecovery();
+    if(window.__SPIKE_ADMIN_AUTH_READY) refreshRecovery();
   }
 
   q?.addEventListener('change',()=>{
@@ -1675,6 +1661,7 @@ else setTimeout(install,1500);
   reset?.addEventListener('click',resetPin);
   saveRecoveryBtn?.addEventListener('click',saveRecoveryFromPage);
   gate.addEventListener('click',e=>{if(e.target===gate)input.focus()});
+  window.addEventListener('spike:admin-auth-ready',()=>refreshRecovery(),{once:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&gate.hidden===false)refreshRecovery()});
   render();
 })();

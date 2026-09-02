@@ -322,6 +322,17 @@ body.spike-image-viewer-open{overflow:hidden}
 @media(max-width:600px){.spike-image-viewer-nav{width:42px;height:42px;font-size:20px}.spike-image-viewer-prev{left:8px}.spike-image-viewer-next{right:8px}.spike-image-viewer-counter{top:14px}}
 @media(prefers-reduced-motion:reduce){.spike-image-viewer-overlay.open{animation:none}.spike-image-viewer-loading{animation:none}}
 
+/* SIGNAL STRENGTH TOP PICKS */
+#signalTopPicks{margin:0 0 14px;padding:12px;border:1px solid rgba(167,139,250,.30);background:linear-gradient(145deg,rgba(124,58,237,.13),rgba(236,72,153,.055));border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+#signalTopPicks[hidden]{display:none!important}.signal-picks-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.signal-picks-head h2{font-size:16px;margin:0}.signal-picks-head p{font-size:10px;color:var(--muted);margin-top:3px}.signal-picks-refresh{font-size:9px;color:var(--muted);padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}.signal-picks-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.signal-pick{position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;overflow:hidden;padding:0;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:#0a0d16;color:var(--text);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.16);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.signal-pick:hover,.signal-pick:focus-visible{transform:translateY(-2px);border-color:rgba(167,139,250,.56);box-shadow:0 12px 30px rgba(124,58,237,.18);outline:none}.signal-pick-media{position:relative;aspect-ratio:4/3;background:#05070b;overflow:hidden}.signal-pick-media img,.signal-pick-media video{display:block;width:100%;height:100%;object-fit:cover}.signal-pick-media.is-empty{display:grid;place-items:center;color:var(--muted);font-size:20px}.signal-pick-rank{position:absolute;left:7px;top:7px;z-index:3;display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:rgba(9,10,18,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:12px;font-weight:950;color:#c4b5fd;box-shadow:0 4px 14px rgba(0,0,0,.25)}.signal-pick-main{min-width:0;padding:8px 9px 9px}.signal-pick-main b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main span{display:block;margin-top:2px;font-size:9px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main small{display:block;margin-top:4px;color:var(--muted);font-size:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-score{position:absolute;right:7px;top:7px;z-index:4;min-width:45px;padding:4px 6px;border-radius:999px;text-align:center;font-size:13px;line-height:1;font-weight:950;color:#fff;background:rgba(124,58,237,.88);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.signal-pick-score em{display:inline;font-size:6px;font-style:normal;color:rgba(255,255,255,.72);font-weight:700}.signal-pick-bar{height:3px;margin:0 9px 9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.signal-pick-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c3aed,#c084fc);transform-origin:left center}.signal-strength-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);color:var(--primary2);font-size:9px;font-weight:900}.rank-badge{font-variant-numeric:tabular-nums}
+@media(max-width:760px){.signal-picks-list{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}.signal-picks-list::-webkit-scrollbar{display:none}.signal-pick{flex:0 0 160px;scroll-snap-align:start}.signal-pick-media{aspect-ratio:1/1}}
+@media(max-width:420px){.signal-pick{flex-basis:148px}}
+
+/* SIGNAL INTELLIGENCE */
+.signal-pick-main small{display:flex;align-items:center;gap:3px;flex-wrap:wrap;white-space:normal;min-height:20px}.signal-pick:focus-visible{outline:2px solid #c084fc;outline-offset:2px}.signal-featured-post{position:relative}.signal-featured-post::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(180deg,rgba(124,58,237,.06),transparent 34%)}
+.signal-featured-media .post-media-grid,.signal-featured-media .post-media,.signal-featured-media img,.signal-featured-media video{position:relative;z-index:1}
+@media(max-width:760px){#signalTopPicks{padding:10px}.signal-picks-head h2{font-size:15px}.signal-pick{flex-basis:172px}.signal-pick-main{padding:8px}.signal-pick-main small{font-size:8px}}
+
 /* POSTS */
 .posts { display:grid; gap:12px; }
 .post { padding:12px 12px 8px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); transition:.2s ease; }
@@ -445,6 +456,25 @@ body.spike-image-viewer-open{overflow:hidden}
 .post-feed-video{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 
 @media(max-width:600px){ .post-media{margin-left:-10px;margin-right:-10px} .post-media img{min-height:150px;max-height:560px} .post-video-inline{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px;border-radius:16px;min-height:150px;max-height:260px} .post-video-inline.is-playing{max-height:min(680px,78vh)} .post-feed-video,.post-video-inline.is-playing .post-feed-video{max-height:min(680px,78vh)} }
+/* RANKED MEDIA PRESENTATION */
+.post-media-grid{gap:3px;border-radius:18px;background:#05070b;aspect-ratio:1/1;height:auto!important;max-height:none!important}
+.post-media-grid .post-media,.post-media-grid .post-grid-video{margin:0!important;width:100%;height:100%;border:0;border-radius:0;background:#05070b}
+.post-media-grid img,.post-media-grid video{width:100%;height:100%;min-height:0;max-height:none;object-fit:cover;object-position:center}
+.post-media-grid.count-1{aspect-ratio:auto;height:auto!important;min-height:0}
+.post-media-grid.count-1 .post-media{height:auto}
+.post-media-grid.count-1 img,.post-media-grid.count-1 video{width:100%;height:auto;max-height:min(680px,78vh);min-height:0;object-fit:contain}
+.post-media-grid.count-2{grid-template-rows:1fr;aspect-ratio:16/9;height:auto!important}
+.post-media-grid.count-3{grid-template-columns:1.15fr .85fr}
+.post-media-grid.count-3 .post-media:first-child{grid-row:span 2}
+.post-media-grid.count-4{aspect-ratio:1/1}
+.signal-featured-post{border-color:rgba(167,139,250,.46);box-shadow:0 14px 42px rgba(91,33,182,.16)}
+.signal-featured-post .post-content{margin-top:8px}
+.signal-featured-media{position:relative}
+.signal-featured-media::after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid rgba(167,139,250,.22);border-radius:inherit}
+.signal-featured-badge{position:absolute;left:10px;top:10px;z-index:8;display:flex;align-items:center;gap:7px;padding:6px 9px;border-radius:12px;background:rgba(8,9,16,.86);border:1px solid rgba(192,132,252,.48);color:#fff;box-shadow:0 7px 22px rgba(0,0,0,.3);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);pointer-events:none}
+.signal-featured-badge b{font-size:12px;font-weight:950;color:#c4b5fd}.signal-featured-badge span{font-size:9px;color:#fff;font-weight:850}.signal-featured-badge em{font-size:7px;color:#a1a1aa;font-style:normal;font-weight:700}
+.signal-score-track{height:3px;width:62px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.signal-score-track i{display:block;height:100%;background:linear-gradient(90deg,#7c3aed,#c084fc);border-radius:inherit}
+@media(max-width:600px){.post-media-grid{border-radius:16px}.signal-featured-badge{left:8px;top:8px;padding:5px 8px}.signal-featured-badge b{font-size:11px}}
 .post-stats { display:flex; justify-content:flex-start; align-items:center; gap:12px; color:var(--muted); font-size:10px; padding:6px 2px 4px; border-bottom:1px solid var(--line); margin-bottom:6px; flex-wrap:wrap; }
 .post-stats .likes-count { font-weight:700; color:var(--text); }
 .post-stats .comments-count { color:var(--muted); }
@@ -1402,7 +1432,6 @@ async function loadPosts() {
     const scheduled = p.scheduledAt && new Date(p.scheduledAt) > new Date();
     return !scheduled || p.authorUid === state.user.id;
   });
-  state.posts.sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
   renderPosts();
 }
 
@@ -1426,54 +1455,195 @@ function postMetrics(p) {
   return { likes, comments, reactions, totalReactions, shares, saves };
 }
 
-function score(p) {
-  const m = postMetrics(p);
-  return m.likes * 3 + m.reactions * 2 + m.comments * 4 + m.shares * 5 + m.saves * 6;
-}
+// ─── SIGNAL STRENGTH RANKING ─────────────────────────────
+// Signal Strength keeps the product-defined 40/30/20/10 foundation while
+// enriching each signal with momentum, quality, topic affinity, fatigue,
+// negative feedback and controlled exploration.
+const SIGNAL_STRENGTH = Object.freeze({
+  recency: 0.40,
+  velocity: 0.30,
+  affinity: 0.20,
+  diversity: 0.10,
+  refreshMs: 30000,
+  explorationRate: 0.08,
+  fatigueWindowMs: 6 * 60 * 60 * 1000
+});
+const SIGNAL_STORE_PREFIX = 'spike-signal-strength-v2:';
+let signalRefreshTimer = null;
+let signalRefreshQueued = false;
 
-function trendingScore(p) {
-  const ageHours = Math.max(0, (Date.now() - new Date(p.createdAt || p.created_at || Date.now())) / 3600000);
-  const freshness = Math.max(.18, Math.exp(-ageHours / 30));
-  return score(p) * freshness;
+function signalStoreKey() { return `${SIGNAL_STORE_PREFIX}${state.user?.id || 'guest'}`; }
+function readSignalStore() {
+  try { const value = JSON.parse(localStorage.getItem(signalStoreKey()) || '{}'); return value && typeof value === 'object' ? value : {}; }
+  catch (_) { return {}; }
 }
+function writeSignalStore(store) { try { localStorage.setItem(signalStoreKey(), JSON.stringify(store)); } catch (_) {} }
 
-function postRankBadge(p) {
-  const m = postMetrics(p);
-  const t = trendingScore(p);
-  if (m.comments >= 5 && m.comments >= Math.max(2, m.likes * .35)) return '💬 Hot discussion';
-  if (t >= 24) return '🔥 Trending';
-  if (t >= 10) return '📈 Rising';
-  return '';
-}
-
-function getFeedSignals() {
-  try { return JSON.parse(localStorage.getItem(`spike-feed-signals:${state.user?.id || 'guest'}`) || '{}') || {}; } catch (_) { return {}; }
-}
-
-function rememberFeedSignal(postId, type) {
+function recordSignal(postId, type, delta = 1) {
   if (!postId || !state.user?.id) return;
-  const key = `spike-feed-signals:${state.user.id}`;
-  const signals = getFeedSignals();
-  signals[postId] = signals[postId] || {};
-  signals[postId][type] = Number(signals[postId][type] || 0) + 1;
-  try { localStorage.setItem(key, JSON.stringify(signals)); } catch (_) {}
+  const store = readSignalStore();
+  const row = store[postId] || { opens:0, likes:0, saves:0, comments:0, reactions:0, shares:0, reposts:0, skips:0, hides:0, lastOpenedAt:0, impressions:0 };
+  row[type] = Math.max(0, Number(row[type] || 0) + Number(delta || 0));
+  if (type === 'opens' && delta > 0) row.lastOpenedAt = Date.now();
+  row.updatedAt = Date.now();
+  store[postId] = row;
+  writeSignalStore(store);
 }
 
-function smartScore(p) {
-  const age = Math.max(0, (Date.now() - new Date(p.createdAt || Date.now())) / 3600000);
-  const author = p.authorUid;
-  const sig = getFeedSignals()[p.id] || {};
-  const personal = Number(sig.like || 0) * 10 + Number(sig.save || 0) * 12 + Number(sig.comment || 0) * 7 + Number(sig.open || 0) * 1.5;
-  const mediaBoost = p.mediaType === 'video' ? 2 : 0;
-  return (state.following.has(author) ? 18 : 0) + (author === state.user.id ? 8 : 0) + personal + mediaBoost + score(p) * .35 + Math.max(0, 24 - age) * 1.4;
+function postAgeHours(p) {
+  const raw = p?.createdAt || p?.created_at;
+  const created = raw ? new Date(raw).getTime() : Date.now();
+  return Number.isFinite(created) ? Math.max(0, (Date.now() - created) / 3600000) : 0;
 }
+function signalInteractionCount(p) {
+  const m = postMetrics(p);
+  return m.likes + m.comments + m.reactions + m.shares + m.saves;
+}
+function signalMediaType(p) { return p?.mediaType === 'video' ? 'video' : (p?.mediaItems?.length || p?.mediaUrl ? 'media' : 'text'); }
+function signalText(p) { return String(p?.content || '').toLowerCase(); }
+function signalTokens(p) {
+  return new Set((signalText(p).match(/#[a-z0-9_]+|[a-z0-9]{4,}/g) || []).slice(0, 80));
+}
+function signalTopics(p) { return [...signalTokens(p)].filter(x => x.startsWith('#')).slice(0, 8); }
+
+function signalRecency(p) {
+  // 48-hour half-life: fresh content matters, but good older posts remain eligible.
+  return Math.max(0, Math.min(1, Math.exp(-postAgeHours(p) / 48)));
+}
+
+function signalQualityRaw(p) {
+  const m = postMetrics(p);
+  const weighted = m.likes * 0.45 + m.comments * 1.7 + m.reactions * 0.75 + m.shares * 2.2 + m.saves * 2.0;
+  const depth = Math.min(1, (m.comments * 0.35 + m.saves * 0.25 + m.shares * 0.30) / Math.max(1, weighted));
+  return Math.log1p(weighted) * (0.75 + depth * 0.5);
+}
+function signalVelocityRaw(p) {
+  const ageHours = Math.max(0.25, postAgeHours(p));
+  const m = postMetrics(p);
+  const momentum = Math.log1p((m.likes + m.comments * 2.2 + m.reactions * 1.2 + m.shares * 2.8 + m.saves * 2.4) / ageHours);
+  const quality = Math.min(1, signalQualityRaw(p) / 6);
+  return momentum * (0.82 + quality * 0.18);
+}
+
+function signalCreatorAffinity(authorId, store) {
+  if (!authorId) return 0;
+  if (authorId === state.user?.id) return 1;
+  let score = state.following?.has(authorId) ? 0.58 : 0;
+  let interactions = 0;
+  for (const post of state.posts) {
+    if (post.authorUid !== authorId) continue;
+    const s = store[post.id] || {};
+    interactions += Number(s.opens || 0) * 0.06 + Number(s.likes || 0) * 0.7 + Number(s.saves || 0) * 1.0 + Number(s.comments || 0) * 1.2 + Number(s.reactions || 0) * 0.55 + Number(s.shares || 0) * 1.3;
+  }
+  return Math.min(1, 0.18 + score + 0.10 * Math.log1p(interactions));
+}
+function signalTopicAffinity(p, store) {
+  const tokens = signalTokens(p);
+  if (!tokens.size) return 0.18;
+  let learned = 0, total = 0;
+  for (const post of state.posts) {
+    const s = store[post.id] || {};
+    const engagement = Number(s.opens || 0) * 0.05 + Number(s.likes || 0) * 0.5 + Number(s.saves || 0) * 0.8 + Number(s.comments || 0) * 1.0 + Number(s.shares || 0) * 1.1;
+    if (!engagement) continue;
+    const overlap = [...tokens].filter(t => signalTokens(post).has(t)).length;
+    if (overlap) { learned += Math.min(3, overlap) * engagement; total += engagement; }
+  }
+  return Math.max(0, Math.min(1, 0.18 + 0.82 * Math.min(1, learned / Math.max(2, total * 0.8))));
+}
+function signalAffinityRaw(p, store) {
+  return Math.max(0, Math.min(1, signalCreatorAffinity(p?.authorUid, store) * 0.72 + signalTopicAffinity(p, store) * 0.28));
+}
+
+function signalDiversityRaw(p, candidates) {
+  if (!candidates.length) return 1;
+  const author = p?.authorUid || 'unknown';
+  const type = signalMediaType(p);
+  const topics = signalTopics(p);
+  const authorCount = candidates.reduce((n, x) => n + (x.authorUid === author ? 1 : 0), 0);
+  const typeCount = candidates.reduce((n, x) => n + (signalMediaType(x) === type ? 1 : 0), 0);
+  const topicCount = topics.length ? candidates.filter(x => signalTopics(x).some(t => topics.includes(t))).length : 0;
+  return Math.max(0, Math.min(1, 1 - (authorCount / candidates.length) * 0.55 - (typeCount / candidates.length) * 0.20 - (topicCount / candidates.length) * 0.25));
+}
+
+function signalFatigueRaw(p, store) {
+  const s = store[p.id] || {};
+  const impressions = Number(s.impressions || 0);
+  const opens = Number(s.opens || 0);
+  const recentOpen = Number(s.lastOpenedAt || 0) && Date.now() - Number(s.lastOpenedAt) < SIGNAL_STRENGTH.fatigueWindowMs;
+  const skip = Number(s.skips || 0) + Number(s.hides || 0) * 2;
+  return Math.max(0, Math.min(1, recentOpen * 0.45 + Math.min(0.35, impressions / 8) + Math.min(0.45, skip / 3) - Math.min(0.25, opens / 10)));
+}
+function signalExplorationRaw(p, candidates, store) {
+  const authorPosts = candidates.filter(x => x.authorUid === p.authorUid).length;
+  const s = store[p.id] || {};
+  const known = Number(s.opens || 0) + Number(s.likes || 0) + Number(s.comments || 0) + Number(s.saves || 0);
+  const rising = signalVelocityRaw(p) > (candidates.length ? candidates.map(signalVelocityRaw).sort((a,b)=>b-a)[Math.min(4,candidates.length-1)] || 0 : 0);
+  return Math.max(0, Math.min(1, (authorPosts <= 1 ? 0.5 : 0.15) + (known === 0 ? 0.3 : 0) + (rising ? 0.25 : 0)));
+}
+function explainSignalStrength(p) {
+  const b = p.__signalBreakdown || {};
+  const s = readSignalStore()[p.id] || {};
+  if (Number(s.hides || 0) > 0) return 'Re-evaluated after your feedback';
+  if (b.exploration > 0.7) return 'Promising discovery pick';
+  if (b.velocity > 0.78 && b.quality > 0.55) return 'Fast-growing, high-quality conversation';
+  if (b.affinity > 0.72) return 'Strong match for your interests';
+  if (b.diversity > 0.78) return 'Adds variety to your feed';
+  if (b.recency > 0.9) return 'Fresh content';
+  return 'Strong overall Signal Strength';
+}
+
+function computeSignalStrength(candidates) {
+  const list = Array.isArray(candidates) ? candidates : [];
+  if (!list.length) return [];
+  const store = readSignalStore();
+  const velocities = list.map(signalVelocityRaw);
+  const maxVelocity = Math.max(1e-9, ...velocities);
+  const explorationPool = list.map(p => signalExplorationRaw(p, list, store));
+  const maxExploration = Math.max(1e-9, ...explorationPool);
+  return list.map((p, index) => {
+    const recency = signalRecency(p);
+    const velocity = Math.max(0, Math.min(1, velocities[index] / maxVelocity));
+    const affinity = signalAffinityRaw(p, store);
+    const diversity = signalDiversityRaw(p, list);
+    const quality = Math.max(0, Math.min(1, signalQualityRaw(p) / 7));
+    const fatigue = signalFatigueRaw(p, store);
+    const exploration = Math.max(0, Math.min(1, explorationPool[index] / maxExploration));
+    const negative = Math.min(0.28, Number(store[p.id]?.hides || 0) * 0.10 + Number(store[p.id]?.skips || 0) * 0.025);
+
+    // Required 40/30/20/10 weights remain the only primary score components.
+    // Quality, fatigue, negative feedback and exploration act as controlled modifiers.
+    const base = recency * SIGNAL_STRENGTH.recency + velocity * SIGNAL_STRENGTH.velocity + affinity * SIGNAL_STRENGTH.affinity + diversity * SIGNAL_STRENGTH.diversity;
+    const modifier = (quality * 0.045) + (exploration * SIGNAL_STRENGTH.explorationRate) - (fatigue * 0.09) - negative;
+    const score = Math.round(Math.max(0, Math.min(100, (base + modifier) * 100)));
+    p.__signalStrength = score;
+    p.__signalBreakdown = { recency, velocity, affinity, diversity, quality, fatigue, exploration };
+    p.__signalWhy = explainSignalStrength(p);
+    p.__signalQuality = Math.round(quality * 100);
+    p.__signalExploration = exploration > 0.7;
+    return p;
+  });
+}
+
+function rankPosts(candidates) {
+  const ranked = computeSignalStrength(candidates.slice());
+  ranked.sort((a, b) => {
+    const scoreDiff = b.__signalStrength - a.__signalStrength;
+    if (scoreDiff) return scoreDiff;
+    const velocityDiff = (b.__signalBreakdown?.velocity || 0) - (a.__signalBreakdown?.velocity || 0);
+    if (velocityDiff) return velocityDiff;
+    return (new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0)) || String(a.id).localeCompare(String(b.id));
+  });
+  return ranked;
+}
+function signalScore(p) { return Number.isFinite(Number(p?.__signalStrength)) ? Number(p.__signalStrength) : Number(computeSignalStrength([p])[0]?.__signalStrength || 0); }
+function postRankBadge(p) { const score = signalScore(p); return score >= 80 ? '🔥 Top Signal' : score >= 60 ? '✦ Strong Signal' : score >= 40 ? '• Signal' : ''; }
 
 function filteredPosts() {
   let x = state.posts.filter(p => !state.blocked.has(p.authorUid) && !state.muted.has(p.authorUid));
   const prefs = window.SPIKE_APP_PREFS?.feed || {};
   const keywords = Array.isArray(prefs.muted_keywords) ? prefs.muted_keywords.map(x => String(x).toLowerCase().trim()).filter(Boolean) : [];
   x = x.filter(p => {
-    const text = String(p.content || "").toLowerCase();
+    const text = String(p.content || '').toLowerCase();
     if (keywords.some(k => text.includes(k))) return false;
     if (prefs.following_only && !state.following.has(p.authorUid) && p.authorUid !== state.user.id) return false;
     if (prefs.show_sensitive === false && (p.sensitive || p.is_sensitive)) return false;
@@ -1481,14 +1651,45 @@ function filteredPosts() {
     if (prefs.show_political === false && (p.political || p.is_political)) return false;
     return true;
   });
-  if (state.filter === "following") x = x.filter(p => state.following.has(p.authorUid) || p.authorUid === state.user.id);
-  if (state.filter === "saved") x = x.filter(p => state.saved.has(p.id));
-  if (state.filter === "popular") x.sort((a, b) => score(b) - score(a));
-  if (state.filter === "trending") x.sort((a, b) => trendingScore(b) - trendingScore(a));
-  if (state.filter === "latest") x.sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0));
-  if (state.filter === "following") x.sort((a, b) => smartScore(b) - smartScore(a));
-  const pinned = x.filter(p => p.pinned), rest = x.filter(p => !p.pinned);
-  return [...pinned, ...rest];
+  if (state.filter === 'following') x = x.filter(p => state.following.has(p.authorUid) || p.authorUid === state.user.id);
+  if (state.filter === 'saved') x = x.filter(p => state.saved.has(p.id));
+  return rankPosts(x);
+}
+
+function renderSignalTopPicks(ranked) {
+  const box = $('signalTopPicks'), list = $('signalTopPicksList');
+  if (!box || !list) return;
+  const top = ranked.slice(0, 5);
+  box.hidden = !top.length;
+  list.innerHTML = top.length ? top.map((p, i) => {
+    const a = authorFor(p), score = signalScore(p);
+    const items = Array.isArray(p.mediaItems) && p.mediaItems.length ? p.mediaItems : (p.mediaUrl ? [{url:p.mediaUrl,type:p.mediaType||'image'}] : []);
+    const first = items.find(x => safeHttpUrl(x?.url)), media = first ? safeHttpUrl(first.url) : '', isVideo = first?.type === 'video';
+    const preview = String(p.content || (isVideo ? 'Video post' : 'SPIKE post')).replace(/\s+/g, ' ').trim().slice(0, 70);
+    const why = p.__signalWhy || 'Strong overall Signal Strength';
+    const b = p.__signalBreakdown || {};
+    const chips = [b.velocity > .72 ? '🔥 Momentum' : '', b.affinity > .72 ? '🎯 For you' : '', b.quality > .65 ? '💬 Quality' : '', b.exploration > .7 ? '✦ Discover' : ''].filter(Boolean).slice(0,2);
+    return `<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i + 1}, Signal Strength ${score} out of 100. ${esc(preview)}">
+      <span class="signal-pick-media${media ? '' : ' is-empty'}">${media ? (isVideo ? `<video src="${esc(media)}" muted playsinline preload="metadata" aria-hidden="true"></video>` : `<img src="${esc(media)}" alt="" loading="lazy" decoding="async">`) : '✦'}<span class="signal-pick-rank">#${i + 1}</span><strong class="signal-pick-score">${score}<em>/100</em></strong></span>
+      <span class="signal-pick-main"><b>${esc(nameOf(a))}</b><span>${esc(preview || 'Untitled')}</span><small title="${esc(why)}">${chips.map(c=>esc(c)).join(' · ') || '✦ Signal Strength'} · ${esc(why)}</small></span>
+      <span class="signal-pick-bar" aria-hidden="true"><i style="width:${score}%"></i></span>
+    </button>`;
+  }).join('') : '<div class="meta">No eligible posts yet.</div>';
+}
+
+function refreshSignalRanking({ render = true } = {}) {
+  const candidates = filteredPosts();
+  if (render) { renderSignalTopPicks(candidates); renderPostsFromRanked(candidates); }
+  return candidates;
+}
+function scheduleSignalRefresh() {
+  if (signalRefreshQueued) return;
+  signalRefreshQueued = true;
+  queueMicrotask(() => { signalRefreshQueued = false; refreshSignalRanking(); });
+}
+function startSignalAutoRefresh() {
+  clearInterval(signalRefreshTimer);
+  signalRefreshTimer = setInterval(() => { if (document.visibilityState === 'visible') refreshSignalRanking(); }, SIGNAL_STRENGTH.refreshMs);
 }
 
 function ago(v) {
@@ -1580,21 +1781,25 @@ function postHTML(p) {
     ? `<button type="button" class="reaction-summary" data-react-menu="${esc(p.id)}" aria-label="${m.totalReactions} reactions">${topReactions}<span>${m.totalReactions}</span></button>`
     : `<button type="button" class="reaction-summary is-empty" data-react-menu="${esc(p.id)}" aria-label="React to post"><span>React</span></button>`;
   const rankBadge = postRankBadge(p);
+  const signalScoreValue = signalScore(p);
   const isOwner = p.authorUid === state.user.id;
-  return `<article class="post" data-post="${esc(p.id)}">
+  const signalRank = Number(p.__signalTopRank || 0);
+  const isSignalFeatured = signalRank >= 1 && signalRank <= 5;
+  const signalFeaturedBadge = isSignalFeatured ? `<div class="signal-featured-badge" aria-label="Top Pick rank ${signalRank}, Signal Strength ${signalScoreValue} out of 100"><b>#${signalRank}</b><span>Top Pick</span><em>${signalScoreValue}/100</em><i class="signal-score-track" aria-hidden="true"><i style="width:${signalScoreValue}%"></i></i></div>` : '';
+  return `<article class="post${isSignalFeatured ? ' signal-featured-post' : ''}" data-post="${esc(p.id)}"${isSignalFeatured ? ` data-signal-rank="${signalRank}"` : ''}>
 <div class="post-head">
 <a class="post-author" href="${profileLink(p.authorUid)}">
 <div class="post-avatar">${avatarOf(a)?`<img src="${esc(avatarOf(a))}" alt="" loading="lazy" decoding="async">`:esc(nameOf(a).charAt(0).toUpperCase())}</div>
 <div>
 <div class="post-name">${esc(nameOf(a))}</div>
-<div class="post-meta">@${esc(a.username||"spike")} · ${ago(p.createdAt||p.created_at)}${rankBadge ? `<span class="rank-badge">${rankBadge}</span>` : ""}${p.updatedAt && (p.edited === true || !!p.editedAt) ? `<span class="edited">(edited)</span>` : ""}${isScheduled ? `<span class="scheduled-badge">Scheduled</span>` : ""}</div>
+<div class="post-meta">@${esc(a.username||"spike")} · ${ago(p.createdAt||p.created_at)}${rankBadge ? `<span class="rank-badge" title="Signal Strength ${signalScoreValue}/100">${rankBadge} ${signalScoreValue}</span>` : `<span class="rank-badge" title="Signal Strength ${signalScoreValue}/100">Signal ${signalScoreValue}</span>`}${p.updatedAt && (p.edited === true || !!p.editedAt) ? `<span class="edited">(edited)</span>` : ""}${isScheduled ? `<span class="scheduled-badge">Scheduled</span>` : ""}</div>
 </div>
 </a>
 <button class="more" data-more="${esc(p.id)}" aria-label="More">⋯</button>
 </div>
 ${p.repostOf?`<div class="meta" style="margin-top:9px">↻ Reposted</div>`:""}
 ${p.content?`<div class="post-content is-collapsed" data-caption><span class="caption-body">${markdownToHTML(p.content)}</span><button type="button" class="caption-more" data-caption-toggle aria-label="Expand caption"></button></div>`:""}
-${mediaMarkup(p)}
+${isSignalFeatured && mediaMarkup(p) ? `<div class="signal-featured-media">${signalFeaturedBadge}${mediaMarkup(p)}</div>` : mediaMarkup(p)}
 ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl(p.linkUrl))}" target="_blank" rel="noopener noreferrer">${esc(p.linkUrl)}</a></div>`:""}
 <div class="post-stats">
 <span class="reaction-count">${m.totalReactions ? `${m.totalReactions} reactions` : ""}</span>
@@ -1623,13 +1828,18 @@ ${commentsHtml||`<div class="meta">No comments yet.</div>`}
 </article>`;
 }
 
-function renderPosts() {
-  const list = filteredPosts(), visible = list.slice(0, state.visiblePosts);
+function renderPostsFromRanked(list) {
+  state.posts.forEach(p => { delete p.__signalTopRank; });
+  list.slice(0, 5).forEach((p, i) => { p.__signalTopRank = i + 1; });
+  const visible = list.slice(0, state.visiblePosts);
   state.allLoaded = visible.length >= list.length;
   const container = $("posts");
   container.innerHTML = visible.length ? visible.map(postHTML).join("") : `<div class="card empty">No posts match this feed yet.</div>`;
-  // Re-bind video controls after rendering
   initVideoControls();
+}
+
+function renderPosts() {
+  refreshSignalRanking();
 }
 
 // ─── SETTINGS ──────────────────────────────────────────
@@ -1841,8 +2051,10 @@ async function reactToPost(id, emoji) {
   try {
     const data = await mutatePostInteraction(id, 'reaction', emoji);
     if (data && typeof data === 'object') Object.assign(p, data);
+    recordSignal(id, 'reactions', 1);
     syncReactionDom(id, p);
     closeReactionTray();
+    scheduleSignalRefresh();
   } catch (e) {
     p.reactions = before;
     syncReactionDom(id, p);
@@ -1859,7 +2071,7 @@ async function addComment(postId,text,parentCommentId=null) {
   const key=`comment:${postId}`;feedInteractionBusy.add(key);
   const comment={id:crypto.randomUUID?crypto.randomUUID():`${Date.now()}_${Math.random()}`,postId,authorName:nameOf(state.profile),authorAvatar:avatarOf(state.profile),text:text.trim(),parentCommentId,createdAt:now()};
   const old=Array.isArray(p.comments)?[...p.comments]:[];p.comments=[...old,{...comment,authorUid:state.user.id}];syncCommentDom(postId,p);
-  try{const data=await mutatePostInteraction(postId,'comment',null,comment);if(data&&typeof data==='object')Object.assign(p,data);syncCommentDom(postId,p);toast('Comment added','success');}
+  try{const data=await mutatePostInteraction(postId,'comment',null,comment);if(data&&typeof data==='object')Object.assign(p,data);recordSignal(postId,'comments',1);syncCommentDom(postId,p);toast('Comment added','success');scheduleSignalRefresh();}
   catch(e){p.comments=old;syncCommentDom(postId,p);toast(e?.message||'Could not add comment','error');}
   finally{feedInteractionBusy.delete(key);}
 }
@@ -1995,7 +2207,7 @@ async function spikeShareSendFriends(){
       if(error) throw error;
       sent++;
     }
-    await spikeIncrementShareCount(p,'friend',sent);
+    recordSignal(p.id, 'shares', 1); await spikeIncrementShareCount(p,'friend',sent); scheduleSignalRefresh();
     spikeShareSuccess('Shared successfully',`Sent privately to ${sent} friend${sent===1?'':'s'}.`);
   }catch(e){
     console.error('[SPIKE SHARE FRIENDS]',e);
@@ -2399,8 +2611,8 @@ function scheduleStoryFromActions() {
 
 // ─── FEED V2 PANELS ────────────────────────────────────
 function renderTrending() {
-  const list = state.posts.slice().sort((a, b) => score(b) - score(a)).slice(0, 8);
-  $('v2TrendingList').innerHTML = list.length ? list.map(p => `<div class="stat" style="margin-bottom:7px"><b>${score(p)}</b><span>${esc((p.content||'').slice(0,100)||'Untitled')}</span></div>`).join('') : '<div class="empty">No trends yet.</div>';
+  const list = rankPosts(state.posts.slice()).slice(0, 8);
+  $('v2TrendingList').innerHTML = list.length ? list.map(p => `<div class="stat" style="margin-bottom:7px"><b>${signalScore(p)}</b><span>${esc((p.content||'').slice(0,100)||'Untitled')}</span></div>`).join('') : '<div class="empty">No trends yet.</div>';
 }
 function renderAnalytics() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
@@ -2421,7 +2633,7 @@ function renderGamify() {
   $('v2BadgeList').innerHTML = badges.length ? `<div class="meta">${badges.join(' • ')}</div>` : '<div class="meta">Create and engage to unlock your first badge.</div>';
 }
 function renderReels() {
-  const reels = state.posts.filter(p => p.mediaType === 'video' && p.mediaUrl).sort((a,b) => smartScore(b)-smartScore(a)).slice(0, 10);
+  const reels = rankPosts(state.posts.filter(p => p.mediaType === 'video' && p.mediaUrl)).slice(0, 10);
   $('v2ReelsList').innerHTML = reels.length ? reels.map(p =>
     `<div class="v2-reel-card"><video src="${esc(p.mediaUrl)}" muted playsinline loop preload="metadata"></video>${(!p.mediaWatermarked && videoWatermarkHTML(p))}<button class="v2-reel-overlay" data-open-reel="${esc(p.id)}" type="button"><span>▶ ${esc((p.content||'Video').slice(0,70))}<small>${esc(nameOf(authorFor(p)))}</small></span><span>↗</span></button></div>`
   ).join('') : '<div class="empty">No video posts yet.</div>';
@@ -2430,11 +2642,11 @@ function renderReels() {
 }
 function renderCreator() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
-  const signals = getFeedSignals();
-  const interactions = Object.values(signals).reduce((n, x) => n + Number(x.like||0) + Number(x.save||0) + Number(x.comment||0), 0);
-  const top = mine.slice().sort((a,b) => score(b)-score(a))[0];
+  const signals = readSignalStore();
+  const interactions = Object.values(signals).reduce((n, x) => n + Number(x.likes||0) + Number(x.saves||0) + Number(x.comments||0) + Number(x.reactions||0), 0);
+  const top = rankPosts(mine.slice())[0];
   const engagement = mine.length ? Math.round((mine.reduce((n,p)=>n+(Array.isArray(p.likes)?p.likes.length:0)+(Array.isArray(p.comments)?p.comments.length:0),0)/mine.length)*10)/10 : 0;
-  $('v2CreatorGrid').innerHTML = `<div class="stat"><b>${mine.length}</b><span>Posts published</span></div><div class="stat"><b>${engagement}</b><span>Avg. interactions/post</span></div><div class="stat"><b>${interactions}</b><span>Your feed interactions</span></div><div class="stat"><b>${top ? score(top) : 0}</b><span>Top post score</span></div>`;
+  $('v2CreatorGrid').innerHTML = `<div class="stat"><b>${mine.length}</b><span>Posts published</span></div><div class="stat"><b>${engagement}</b><span>Avg. interactions/post</span></div><div class="stat"><b>${interactions}</b><span>Your feed interactions</span></div><div class="stat"><b>${top ? signalScore(top) : 0}</b><span>Top post Signal Strength</span></div>`;
   $('v2CreatorBadges').textContent = top ? `Top post: ${(top.content || 'Untitled').slice(0, 90)}` : 'Publish your first post to unlock creator insights.';
 }
 function findNearby() {
@@ -3435,8 +3647,8 @@ function bindEvents() {
     if (!b) return;
     const p = state.posts.find(x => x.id === b.dataset.openReel);
     if (!p || !p.mediaUrl) return;
-    rememberFeedSignal(p.id, 'open');
-    const list = state.posts.filter(x => x.mediaType === 'video' && x.mediaUrl).sort((a,c) => smartScore(c)-smartScore(a)).slice(0,10);
+    recordSignal(p.id, 'opens', 1); scheduleSignalRefresh();
+    const list = state.posts.filter(x => x.mediaType === 'video' && x.mediaUrl).sort((a,c) => signalScore(c)-signalScore(a)).slice(0,10);
     $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video src="${esc(x.mediaUrl)}" controls autoplay muted playsinline loop style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${(!x.mediaWatermarked && videoWatermarkHTML(x))}</div>`).join('');
     openOverlay('reelsShell');
   }, true);
@@ -3445,6 +3657,18 @@ function bindEvents() {
   // Post interactions (delegated)
   $('posts').addEventListener('click', handlePostClick);
   $('posts').addEventListener('submit', handlePostSubmit);
+  $('signalTopPicksRefresh')?.addEventListener('click', () => refreshSignalRanking());
+  $('signalTopPicksList')?.addEventListener('click', e => {
+    const b = e.target.closest('[data-signal-pick]');
+    if (!b) return;
+    const id = b.dataset.signalPick;
+    recordSignal(id, 'opens', 1);
+    const article = getPostArticle(id);
+    if (article) article.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    scheduleSignalRefresh();
+  });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refreshSignalRanking(); });
+  startSignalAutoRefresh();
 
   // Repost/Report overlays
   $('confirmRepost').onclick = () => repostPost(state.activePost, $('repostText').value);
@@ -3569,9 +3793,9 @@ function handlePostClick(e) {
   if (!id || b.dataset.busy === '1') return;
   const lock = () => { b.dataset.busy = '1'; b.disabled = true; };
   const unlock = () => { b.dataset.busy = '0'; b.disabled = false; };
-  if (b.dataset.like) { rememberFeedSignal(id, 'like'); lock(); return toggleLike(id).catch(x => toast(x?.message || 'Could not update like','error')).finally(unlock); }
-  if (b.dataset.save) { rememberFeedSignal(id, 'save'); lock(); return toggleSave(id).catch(x => toast(x?.message || 'Could not update saved post','error')).finally(unlock); }
-  if (b.dataset.comments) { rememberFeedSignal(id, 'comment'); $(`comments-${id}`)?.classList.toggle('open'); return; }
+  if (b.dataset.like) { lock(); return toggleLike(id).then(() => { const p = state.posts.find(x => x.id === id); recordSignal(id, 'likes', p && Array.isArray(p.likes) && p.likes.includes(state.user.id) ? 1 : -1); scheduleSignalRefresh(); }).catch(x => toast(x?.message || 'Could not update like','error')).finally(unlock); }
+  if (b.dataset.save) { lock(); return toggleSave(id).then(() => { recordSignal(id, 'saves', state.saved.has(id) ? 1 : -1); scheduleSignalRefresh(); }).catch(x => toast(x?.message || 'Could not update saved post','error')).finally(unlock); }
+  if (b.dataset.comments) { recordSignal(id, 'opens', 1); $(`comments-${id}`)?.classList.toggle('open'); scheduleSignalRefresh(); return; }
   if (b.dataset.insights) { const panel = $(`insights-${id}`); if(panel){ const opening=panel.hidden; panel.hidden=!opening; b.textContent=opening?'📊 Hide insights':'📊 Insights'; } return; }
   if (b.dataset.share) { lock(); return Promise.resolve(sharePost(id)).catch(x => toast(x?.message || 'Could not open share','error')).finally(unlock); }
   if (b.dataset.repost) { state.activePost = id; $('repostText').value = ''; openOverlay('repostOverlay'); return; }
@@ -3732,7 +3956,7 @@ else boot();
 <button data-v2="safety">🛡️ Safety</button>
 <a class="feed-v2-admin-link" id="feedAdminLink" href="admin.html" hidden>⚡ Admin</a>
 </div>
-<div class="feed-v2-panel open" data-v2-panel="forYou"><p class="meta" id="v2PersonalStatus">Personalized ranking is ready.</p></div>
+<div class="feed-v2-panel open" data-v2-panel="forYou"><p class="meta" id="v2PersonalStatus">Signal Strength ranking is ready.</p></div>
 <div class="feed-v2-panel" data-v2-panel="discover">
   <div class="discover-search-row"><input class="v2-input" id="v2DiscoverSearch" placeholder="Search people, posts or #hashtags…"><button class="post-btn" id="v2DiscoverGo">Search</button></div>
   <div id="v2DiscoverResults" style="margin-top:9px"></div>
@@ -3753,7 +3977,7 @@ else boot();
 </div>
 </section>
 
-<div class="feed-status"><span class="presence-dot"></span><span id="onlineStatus">Connecting…</span><span class="smart-label" id="smartFeedLabel">Smart feed</span></div>
+<div class="feed-status"><span class="presence-dot"></span><span id="onlineStatus">Connecting…</span><span class="smart-label" id="smartFeedLabel">Signal Strength · 40/30/20/10</span></div>
 
 <section class="card feed-recommendations" id="friendRecommendations" aria-labelledby="friendRecommendationsTitle">
   <div class="fr-head">
@@ -3803,6 +4027,11 @@ else boot();
 <button class="filter" data-filter="trending">Trending</button>
 <button class="filter" data-filter="saved">Saved</button>
 </div>
+
+<section class="card" id="signalTopPicks" aria-labelledby="signalTopPicksTitle" hidden>
+  <div class="signal-picks-head"><div><h2 id="signalTopPicksTitle">🔥 Top Picks</h2><p>Best-ranked posts right now, updated as signals change.</p></div><button type="button" class="signal-picks-refresh" id="signalTopPicksRefresh" aria-label="Refresh Top Picks">↻ 30s</button></div>
+  <div class="signal-picks-list" id="signalTopPicksList" aria-live="polite"></div>
+</section>
 
 <section class="posts" id="posts"><div class="card empty">Loading your feed…</div></section>
 <div id="infiniteScrollSentinel" style="height:2px;margin:10px 0"></div>
