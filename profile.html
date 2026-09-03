@@ -460,7 +460,7 @@ img, video, iframe { max-width:100%; }
   <div class="privacy-panel-foot"><span>🛡️ Your choices are enforced by SPIKE's access controls.</span><span>Changes apply after saving.</span></div>
 </section>
 <div class="modal-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button class="btn primary">Save profile</button></div></form></div></div>
-<div class="overlay" id="menuOverlay"><div class="modal"><h2>Profile options</h2><p>Quick actions for this profile.</p><div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="copyProfile">🔗 Copy profile link</button><button class="btn" id="showQr">▣ Show QR</button><button class="btn" id="scanQr">⌗ Scan QR</button><button class="btn" id="themeBtn">◐ Theme</button><button class="btn danger" id="signOutBtn">↪ Sign out</button></div><div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div></div></div>
+<div class="overlay" id="menuOverlay"><div class="modal"><h2 id="profileMenuTitle">Profile options</h2><p id="profileMenuText">Quick actions for this profile.</p><div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="copyProfile">🔗 Copy profile link</button><button class="btn" id="showQr">▣ Show QR</button><button class="btn" id="scanQr">⌗ Scan QR</button><button class="btn" id="themeBtn">◐ Theme</button><button class="btn danger" id="signOutBtn">↪ Sign out</button></div><div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div></div></div>
 
 <div class="qr-overlay" id="qrOverlay"><div class="qr-sheet"><div class="qr-head"><div><h2 style="margin:0">My SPIKE QR</h2><div class="feature-muted">Scan to connect instantly</div></div><button class="qr-close" id="qrClose" aria-label="Close">×</button></div><div class="qr-code-box" id="qrCodeBox"></div><p class="qr-help">Show this code to someone nearby. They can scan it and connect with you without a friend request.</p><div class="qr-actions"><button class="qr-btn" id="qrShare">📤 Share</button><button class="qr-btn" id="qrCopy">🔗 Copy link</button></div></div></div><div class="scanner-overlay" id="scannerOverlay"><video class="scanner-video" id="scannerVideo" playsinline muted></video><div class="scanner-shade"></div><div class="scanner-top"><button class="scanner-icon-btn" id="scannerClose" aria-label="Close scanner">×</button><div class="scanner-title">Scan SPIKE QR</div></div><div class="scan-frame"><span class="scan-corner scan-c1"></span><span class="scan-corner scan-c2"></span><span class="scan-corner scan-c3"></span><span class="scan-corner scan-c4"></span><span class="scan-line"></span></div><div class="scanner-bottom"><p>Point your camera at a SPIKE QR code</p><div class="scanner-controls"><button class="scanner-control" id="galleryQr">🖼 Gallery</button></div><input class="scanner-file" id="qrFile" type="file" accept="image/*"></div></div><div class="connect-preview" id="connectPreview"><div class="connect-card"><div id="connectAvatarWrap"></div><h2 id="connectName">SPIKE member</h2><div class="connect-id" id="connectSpId"></div><p class="feature-muted">Connect instantly. No request or approval required.</p><div class="connect-actions"><button class="btn" id="connectCancel">Cancel</button><button class="btn primary" id="connectConfirm">⚡ Connect instantly</button></div></div></div><div class="toast" id="toast"></div>
 <script>
@@ -567,14 +567,14 @@ async function loadProfile(){
   // The relational profile is the authoritative source for identity fields,
   // especially verified. App-document data is only an optional source of
   // profile extras that are not columns on public.profiles.
+  // Only the owner may read legacy app-document profile extras. For another
+  // member, the RPC result is the complete authorized public projection.
   let extras={};
-  try{
-    const ext=await getDoc(`users/${state.uid}`);
-    if(ext && typeof ext==="object") extras=ext;
-  }catch(err){
-    // Public profiles must still render when the legacy users document is
-    // unavailable. Do not replace authoritative relational fields with null.
-    console.warn("[SPIKE PROFILE EXTRAS]",err?.message||err);
+  if(state.uid===state.me.id){
+    try{
+      const ext=await getDoc(`users/${state.uid}`);
+      if(ext && typeof ext==="object") extras=ext;
+    }catch(err){ console.warn("[SPIKE PROFILE EXTRAS]",err?.message||err); }
   }
 
   state.profile={
@@ -629,6 +629,15 @@ async function loadSocial(){
 
 async function loadPosts(){
   if(!state.canSeePosts){ state.posts=[]; return; }
+  if(state.uid!==state.me.id){
+    const r=await db.rpc('get_public_profile_posts',{p_owner:state.uid,p_limit:12});
+    if(r.error) throw r.error;
+    state.posts=(r.data||[]).map(x=>({
+      id:x.id, authorUid:state.uid, content:x.content||'',
+      createdAt:x.created_at, mediaUrl:x.media_url||'', mediaType:x.media_type||''
+    }));
+    return;
+  }
   const rows=await listCollection("posts");
   state.posts=rows.map(r=>({id:r.document_id,...(r.data||{})}))
     .filter(p=>p.authorUid===state.uid&&!p.deleted)
@@ -666,7 +675,21 @@ function render(){renderMediaGallery();$("postCount").textContent=state.posts.le
 function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc(n[0]||"U");const c=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(c){$("coverImg").src=c;$("coverImg").classList.remove("hidden")}const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.max(1,Number(p.level||1)),base=100;const progress=Math.min(100,Math.round((xp%base)/base*100));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=`${base-(xp%base)} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
 function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverEdit").classList.toggle("hidden",!own);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
 function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
-async function toggleFollow(){const me=await getDoc(`users/${state.me.id}`).catch(()=>({}));const f=new Set(me?.following||[]);f.has(state.uid)?f.delete(state.uid):f.add(state.uid);await putDoc(`users/${state.me.id}`,{...(me||{}),following:[...f]},"users");state.following=f.has(state.uid);state.followers=Math.max(0,state.followers+(state.following?1:-1));renderActions();render()}
+function syncProfileToFeed(action,active){
+  const msg={id:String(state.uid),action,active:!!active,at:Date.now()};
+  try{localStorage.setItem('spike.profile.sync',JSON.stringify(msg));}catch(_){ }
+  try{window.dispatchEvent(new CustomEvent('spike:profile-sync',{detail:msg}));}catch(_){ }
+}
+async function toggleFollow(){
+  const me=await getDoc(`users/${state.me.id}`).catch(()=>({}));
+  const f=new Set(me?.following||[]); const wasFollowing=f.has(state.uid);
+  wasFollowing?f.delete(state.uid):f.add(state.uid);
+  await putDoc(`users/${state.me.id}`,{...(me||{}),following:[...f]},"users");
+  state.following=f.has(state.uid);
+  state.followers=Math.max(0,state.followers+(state.following?1:-1));
+  syncProfileToFeed('follow',state.following);
+  renderActions();render();
+}
 function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
 async function saveProfile(e){
   e.preventDefault();
@@ -828,6 +851,11 @@ $("coverFile").addEventListener("change",e=>{
 const f=e.target.files?.[0];
 if(f) uploadProfileImage(f,"cover");
 });
+$("backBtn").onclick=()=>{
+  const raw=sessionStorage.getItem('spike.feed.return');
+  if(raw){ sessionStorage.removeItem('spike.feed.return'); location.href='feed.html'; }
+  else if(history.length>1) history.back(); else location.href='feed.html';
+};
 $("menuBtn").onclick=()=>open("menuOverlay");$("closeMenu").onclick=()=>close("menuOverlay");$("cancelEdit").onclick=()=>close("editOverlay");$("editForm").addEventListener("submit",saveProfile);$("themeBtn").onclick=toggleTheme;$("shareProfileBtn")?.addEventListener("click",openShareProfile);$("signOutBtn").onclick=async()=>{try{await window.AppPresence?.stop?.();try{await db.removeAllChannels?.()}catch(_){}const {error}=await db.auth.signOut({scope:"local"});if(error)throw error;location.replace("index.html?logged_out=1")}catch(e){console.error("[SPIKE PROFILE SIGNOUT]",e);toast(e.message||"Could not sign out. Please try again.","error")}};$("copyProfile").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied")}catch{toast(location.href)}};document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(x=>x.classList.remove("open"))});document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));$("mediaPanel").classList.toggle("hidden",t.dataset.tab!=="media");$("aboutPanel").classList.toggle("hidden",t.dataset.tab!=="about")});$("mediaPosts").addEventListener("click",e=>{const tile=e.target.closest("[data-gallery-index]");if(tile)openMediaViewer(Number(tile.dataset.galleryIndex))});}
 let mediaViewerIndex=0;
 function openMediaViewer(index){
@@ -888,7 +916,19 @@ $("mediaViewerStage").addEventListener("touchend",e=>{const x=e.changedTouches[0
 
 async function realtime(){if(state.realtime)await db.removeChannel(state.realtime);state.realtime=db.channel("profile:"+state.uid,{config:{private:true}}).on("broadcast",{event:"UPDATE"},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path?.startsWith("posts/")||r?.path===`users/${state.uid}`)loadPosts().then(render).catch(()=>{})}).subscribe()}
 window.addEventListener("pagehide",()=>{if(state.realtime){db.removeChannel(state.realtime);state.realtime=null;}});
-async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader();await loadProfile();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
+// Keep Feed and Profile state coherent across navigation and same-browser tabs.
+window.addEventListener('storage',e=>{
+  if(e.key!=='spike.profile.sync'||!e.newValue)return;
+  try{const m=JSON.parse(e.newValue);if(String(m.id)===String(state.uid)&&m.action==='follow'){state.following=!!m.active;renderActions();render();}}catch(_){ }
+});
+async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader();
+  try{ const raw=sessionStorage.getItem('spike.feed.return'); if(raw){ const x=JSON.parse(raw); if(x?.source==='feed' && Date.now()-Number(x.at||0)<30*60*1000) document.body.dataset.returnToFeed='1'; } }catch(_){ }
+  // QR identity controls are owner-only; a viewer must never be able to present
+  // another member's connect QR as if it were their own.
+  const ownerView=state.uid===state.me.id;
+  if($('showQr')) $('showQr').hidden=!ownerView;
+  if($('copyProfile')) $('copyProfile').textContent=ownerView?'🔗 Copy profile link':'🔗 Share profile link';
+await loadProfile();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
 
 // SPIKE Connect QR — scanner without flashlight.
 let qrStream=null,qrScanTimer=null,qrTargetUid=null;

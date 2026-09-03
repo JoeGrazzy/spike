@@ -1141,6 +1141,32 @@ html[data-spike-style="5"] .post-actions button.active{color:#f5f5f5!important;b
 
 .spike-profile-action-sheet[aria-hidden="true"]{visibility:hidden;pointer-events:none}
 .spike-profile-action-sheet.show{visibility:visible;pointer-events:auto}
+
+/* SPIKE premium profile sheet */
+.spike-profile-sheet{background:rgba(2,4,14,.18)}
+.spike-profile-backdrop{background:rgba(2,5,18,.78);backdrop-filter:blur(22px) saturate(145%)}
+.spike-profile-panel{width:min(720px,100%);max-height:min(92vh,820px);padding:14px 18px 30px;background:linear-gradient(180deg,rgba(25,29,55,.985),rgba(8,11,25,.995));border:1px solid rgba(255,255,255,.13);border-bottom:0;border-radius:34px 34px 0 0;box-shadow:0 -30px 100px rgba(0,0,0,.62),0 -2px 35px rgba(139,92,246,.12);}
+.spike-profile-panel:after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:34px 34px 0 0;background:linear-gradient(135deg,rgba(255,255,255,.08),transparent 24%,transparent 70%,rgba(139,92,246,.06));}
+.spike-profile-hero{position:relative;padding:18px 28px 24px}
+.spike-profile-status{background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(76,201,240,.08));border-color:rgba(167,139,250,.25);box-shadow:0 8px 24px rgba(0,0,0,.16);font-weight:800;letter-spacing:.01em}
+.spike-profile-avatar{width:116px;height:116px;margin:14px auto 17px;border:3px solid rgba(255,255,255,.34);box-shadow:0 0 0 8px rgba(139,92,246,.09),0 20px 55px rgba(0,0,0,.42)}
+.spike-profile-name{font-size:27px;letter-spacing:-.035em;text-shadow:0 4px 22px rgba(0,0,0,.28)}
+.spike-profile-username{font-size:13px;color:rgba(255,255,255,.62)}
+.spike-profile-bio{max-width:560px;color:#d9def1}
+.spike-profile-mutual{background:rgba(255,255,255,.065);border-color:rgba(255,255,255,.11);box-shadow:inset 0 1px rgba(255,255,255,.05)}
+.spike-premium-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 14px}
+.spike-premium-stat{min-height:66px;padding:12px 10px;border-radius:18px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.025));box-shadow:inset 0 1px rgba(255,255,255,.045)}
+.spike-premium-stat b{font-size:17px}.spike-premium-stat span{display:block;margin-top:4px;font-size:11px;color:rgba(255,255,255,.52)}
+.spike-quick-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:4px 0 15px}
+.spike-quick-actions button{border:1px solid rgba(255,255,255,.09)!important;background:rgba(255,255,255,.045)!important;color:#e9ebf7!important;border-radius:13px!important;padding:9px 12px!important;transition:.2s ease}
+.spike-quick-actions button:hover{transform:translateY(-1px);background:rgba(255,255,255,.08)!important}
+.spike-profile-actions{gap:10px}.spike-profile-actions button{min-height:52px;border-radius:17px!important;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.spike-profile-actions button:hover{transform:translateY(-1px)}
+.spike-profile-primary{background:linear-gradient(135deg,#9b72ff,#6d35e8)!important;box-shadow:0 13px 34px rgba(109,40,217,.34)!important}
+.spike-profile-secondary,.spike-profile-tertiary{background:rgba(255,255,255,.065)!important}
+.spike-profile-secondary.is-following{background:linear-gradient(135deg,rgba(139,92,246,.24),rgba(76,201,240,.10))!important;border-color:rgba(167,139,250,.28)!important}
+.spike-profile-privacy-note{background:rgba(255,255,255,.035);border-color:rgba(255,255,255,.07)}
+@media(max-width:520px){.spike-profile-panel{border-radius:28px 28px 0 0;padding-left:12px;padding-right:12px}.spike-profile-hero{padding-left:12px;padding-right:12px}.spike-profile-avatar{width:104px;height:104px}.spike-profile-name{font-size:24px}}
 </style>
 
 <!-- ===== SCRIPTS ===== -->
@@ -1386,6 +1412,34 @@ function verifiedBadgeHTML(u, extraClass="") {
 }
 function avatarOf(u) { return u?.avatar_url || u?.avatar || ""; }
 function profileLink(id) { return `profile.html?uid=${encodeURIComponent(id)}`; }
+
+// Centralized, shadow-proof navigation for profile actions. Always resolve from
+// the current document URL so local preview folders and production paths behave
+// identically, and never touch the mutable global `location` binding directly.
+function navigateToMessage(userId, callType = '') {
+  const uid = String(userId || '').trim();
+  if (!uid) { toast('This user could not be opened.', 'error'); return false; }
+  const type = callType === 'audio' || callType === 'video' ? callType : '';
+  // Persist the handoff before navigation. message.html consumes this together
+  // with the URL query, so a slow load, SPA restoration, or browser history
+  // operation cannot silently lose an outgoing-call request.
+  if (type) {
+    try {
+      sessionStorage.setItem('spike.pending-private-call', JSON.stringify({
+        uid, type, createdAt: Date.now()
+      }));
+    } catch (_) {}
+  } else {
+    try { sessionStorage.removeItem('spike.pending-private-call'); } catch (_) {}
+  }
+  const url = new URL('message.html', document.baseURI || window.location.href);
+  url.searchParams.set('private_uid', uid);
+  if (type) url.searchParams.set('call', type);
+  else url.searchParams.delete('call');
+  window.location.href = url.href;
+  return true;
+}
+
 function applyTheme(theme) { const n = Number(theme); if (window.SPIKE_THEME && Number.isFinite(n)) window.SPIKE_THEME.set(n); }
 function initTheme() { if (window.SPIKE_THEME) window.SPIKE_THEME.set(window.SPIKE_THEME.get()); }
 
@@ -1748,7 +1802,7 @@ function scheduleFeedFlush(){if(feedFlushTimer)return;feedFlushTimer=setTimeout(
 function recordSignal(postId,type,delta=1){const map={opens:'open',likes:delta>0?'like':'unlike',saves:delta>0?'save':'unsave',comments:'comment',reactions:'reaction',shares:'share',reposts:'repost'};if(map[type])queueFeedEvent(postId,map[type],{metadata:{delta}})}
 let trendingFeatureCache={},serverSignalProfile={};
 async function loadServerSignalProfile(){if(!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_signal_profile',{p_days:90});if(error)throw error;const out={...serverSignalProfile};(data||[]).forEach(r=>{out[String(r.post_id)]={...r,opens:Number(r.opens||0),viewed:Number(r.viewed||0),impressions:Number(r.impressions||0),likes:Number(r.likes||0),saves:Number(r.saves||0),comments:Number(r.comments||0),reactions:Number(r.reactions||0),shares:Number(r.shares||0),reposts:Number(r.reposts||0),not_interested:Number(r.not_interested||0),show_fewer:Number(r.show_fewer||0),mute_creator:Number(r.mute_creator||0),hides:Number(r.hides||0),lastViewedAt:r.last_viewed_at?new Date(r.last_viewed_at).getTime():0}});serverSignalProfile=out}catch(e){console.warn('[FEED SIGNAL PROFILE]',e)}}
-async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).filter(Boolean).slice(0,200);if(!ids.length||!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_trending_features',{p_post_ids:ids});if(error)throw error;const next={...trendingFeatureCache};(data||[]).forEach(r=>{next[String(r.post_id)]={currentVelocity:Number(r.current_velocity||0),previousVelocity:Number(r.previous_velocity||0),currentEngagement:Number(r.current_engagement||0),previousEngagement:Number(r.previous_engagement||0)}});trendingFeatureCache=next}catch(e){console.warn('[FEED TRENDING FEATURES]',e)}}
+async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).filter(Boolean).slice(0,200);if(!ids.length||!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_trending_features',{p_post_ids:ids,p_window_hours:24});if(error)throw error;const next={...trendingFeatureCache};(data||[]).forEach(r=>{next[String(r.post_id)]={currentVelocity:Number(r.current_velocity||0),previousVelocity:Number(r.previous_velocity||0),currentEngagement:Number(r.current_engagement||0),previousEngagement:Number(r.previous_engagement||0)}});trendingFeatureCache=next}catch(e){console.warn('[FEED TRENDING FEATURES]',e)}}
 function rankingContext(posts){return{userId:state.user?.id||'',following:state.following||new Set(),signals:Object.fromEntries(Object.entries(readSignalStore()).map(([id,v])=>[id,{...(serverSignalProfile[id]||{}),...v}])),creatorAffinity:{},topicAffinity:{},explorationIds:new Set(),recentEngagement:trendingFeatureCache,now:Date.now(),posts}}
 function rankPosts(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function postRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
@@ -3579,22 +3633,34 @@ async function loadFriendRecommendations(){
     if(error) throw error;
     const me=state.user.id;
     const candidates=(data||[]).filter(u=>{const id=rid(u);return id&&id!==me&&!dismissedFriends.has(id)&&!state.blocked?.has(id);});
-    recState.rows=candidates.slice(0,20);
+    // The recommendation RPC already excludes friends, but the UI can briefly
+    // contain a stale recommendation after a friendship is accepted elsewhere.
+    // Reconcile against the authoritative friends RPC before rendering so an
+    // existing friend can NEVER be offered an "Add Friend" action.
+    let friendIds=new Set();
+    try{
+      const fr=await db.rpc('get_friends_public',{p_limit:500,p_offset:0});
+      if(!fr.error) friendIds=new Set((fr.data||[]).map(x=>rid(x)).filter(Boolean));
+    }catch(_){}
+    recState.rows=candidates
+      .map(u=>({...u,__relationship:friendIds.has(rid(u))?'friend':'stranger'}))
+      .filter(u=>u.__relationship!=='friend')
+      .slice(0,20);
     renderFriends();
   }catch(e){ console.error('[FRIEND RECOMMENDATIONS]',e); box.innerHTML='<div class="fr-empty">Recommendations are temporarily unavailable.</div>'; }
 }
 function renderFriends(){
   const box=document.getElementById('friendRecommendationsList'); if(!box)return;
   if(!recState.rows.length){ box.innerHTML='<div class="fr-empty">No new people to recommend right now.</div>'; return; }
-  box.innerHTML=recState.rows.map(u=>{const id=rid(u), name=rname(u), av=rav(u), mc=Number(u.mutual_count||0); return `<article class="fr-card" data-fr-id="${esc(id)}"><div class="fr-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(name.slice(0,1).toUpperCase())}</div><div class="fr-copy"><div class="fr-name">${esc(name)}</div><div class="fr-username">${u.username?'@'+esc(u.username):'People you may know'}</div><div class="fr-mutual">${mc?`👥 ${mc} mutual friend${mc===1?'':'s'}`:'✨ Suggested for you'}</div>${u.bio?`<div class="fr-bio">${esc(u.bio)}</div>`:''}</div><div class="fr-actions"><button type="button" class="fr-add" data-fr-add="${esc(id)}">Add Friend</button><button type="button" class="fr-view" data-fr-profile="${esc(id)}">View</button><button type="button" class="fr-dismiss" data-fr-dismiss="${esc(id)}" aria-label="Dismiss recommendation">×</button></div></article>`}).join('');
+  box.innerHTML=recState.rows.map(u=>{const id=rid(u), name=rname(u), av=rav(u), mc=Number(u.mutual_count||0); const isFriend=u.__relationship==='friend'; return `<article class="fr-card" data-fr-id="${esc(id)}"><div class="fr-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(name.slice(0,1).toUpperCase())}</div><div class="fr-copy"><div class="fr-name">${esc(name)}</div><div class="fr-username">${u.username?'@'+esc(u.username):'People you may know'}</div><div class="fr-mutual">${mc?`👥 ${mc} mutual friend${mc===1?'':'s'}`:'✨ Suggested for you'}</div>${u.bio?`<div class="fr-bio">${esc(u.bio)}</div>`:''}</div><div class="fr-actions">${isFriend?`<button type="button" class="fr-add" data-fr-message="${esc(id)}">💬 Message</button>`:`<button type="button" class="fr-add" data-fr-add="${esc(id)}">Add Friend</button>`}<button type="button" class="fr-view" data-fr-profile="${esc(id)}">View</button><button type="button" class="fr-dismiss" data-fr-dismiss="${esc(id)}" aria-label="Dismiss recommendation">×</button></div></article>`}).join('');
 }
 async function sendFriendRequest(id,btn){
   if(!id||recState.busy.has(id))return; recState.busy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
   try{
-    const r=await db.rpc('send_friend_request',{p_recipient_id:id});
+    const r=await db.rpc('send_friend_request',{p_user_id:id});
     if(r.error) throw r.error;
     dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); toast('Friend request sent','success');
-  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ recState.busy.delete(id); }
+  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} throw e; } finally{ recState.busy.delete(id); }
 }
 
 // ─── PROFILE PREVIEW ──────────────────────────────────
@@ -3602,7 +3668,7 @@ async function openSpikeProfilePreview(id, seed){
   const body = $('spikeProfileBody');
   const sheet = $('spikeProfileSheet');
   if(!body || !sheet || !id || id === state.user?.id) {
-    if(id === state.user?.id) location.href = profileLink(id);
+    if(id === state.user?.id) window.location.href = profileLink(id);
     return;
   }
   window.__SPIKE_PROFILE_FOCUS__ = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -3616,7 +3682,6 @@ async function openSpikeProfilePreview(id, seed){
   let profile = seed && typeof seed === 'object' ? {...seed} : {};
   let mutual = Number(profile.mutual_count || 0);
   let relationship = 'stranger';
-  let posts = [];
   const currentUid = state.user?.id || '';
   const safeQuery = async fn => { try { return await fn(); } catch(error) { return {data:null,error}; } };
 
@@ -3624,17 +3689,26 @@ async function openSpikeProfilePreview(id, seed){
     const r=await db.rpc('get_public_profiles',{p_user_ids:[id]});
     return {data:r.data?.[0]||null,error:r.error};
   });
-  const [pr] = await Promise.all([profileReq]);
+  const relationshipReq = safeQuery(async () => {
+    const r=await db.rpc('get_profile_relationship',{p_other_user_id:id});
+    return {data:r.data||'stranger',error:r.error};
+  });
+  const [pr, rr] = await Promise.all([profileReq, relationshipReq]);
   if(requestId !== window.__SPIKE_PROFILE_REQUEST__) return;
   if(!pr.error && pr.data) profile = {...profile,...pr.data};
-  if(!pr.error && pr.data) {
+  if(!rr.error && ['friend','request_sent','request_received','stranger'].includes(rr.data)) relationship=rr.data;
+  else if(!pr.error && pr.data) {
     const rel=pr.data.relationship||pr.data.friendship_status||pr.data.relationship_status;
     if(rel==='friend'||rel==='request_sent'||rel==='request_received') relationship=rel;
   }
-  // Recent posts come from the already-authorized feed cache; profile metadata
-  // itself is sourced exclusively from the public-profile RPC above.
-  posts = state.posts.filter(p=>p.authorUid===id && !p.deleted)
-    .sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0)).slice(0,3);
+  // Keep the exact profile picture visible even when the public-profile RPC
+  // omits the avatar field. Reuse the already-loaded feed/user cache as a fallback.
+  const cachedUser = state.users?.get?.(id) || {};
+  const cachedPost = state.posts?.find?.(p=>p.authorUid===id && (p.authorAvatar || p.author_avatar)) || {};
+  const cachedAvatar = cachedUser.avatar_url || cachedUser.avatar || cachedUser.photo_url || cachedPost.authorAvatar || cachedPost.author_avatar || '';
+  if(!(profile.avatar_url || profile.avatar || profile.photo_url) && cachedAvatar){
+    profile.avatar_url = cachedAvatar;
+  }
   if(!mutual && relationship === 'stranger') {
     const rec = await safeQuery(()=>db.rpc('get_friend_recommendations',{p_limit:50}));
     if(requestId !== window.__SPIKE_PROFILE_REQUEST__) return;
@@ -3644,14 +3718,23 @@ async function openSpikeProfilePreview(id, seed){
   const name = profile.display_name || profile.name || profile.username || 'User';
   const username = profile.username ? '@'+profile.username : '';
   const bio = profile.bio || '';
-  const location = profile.location || '';
-  const avatarUrl = safeHttpUrl(profile.avatar_url || profile.avatar || profile.photo_url || '');
-  const avatarHtml = avatarUrl ? `<img class="spike-profile-avatar" src="${esc(avatarUrl)}" alt="${esc(name)}" loading="lazy" decoding="async">` : `<div class="spike-profile-avatar spike-profile-avatar-fallback" aria-hidden="true"><span>👤</span></div>`;
+  // Do not shadow the browser's global `location` object. The profile action
+  // handlers below need window.location for navigation; shadowing it with the
+  // user's profile-location string makes location.assign()/href fail at runtime.
+  const profileLocation = profile.location || '';
+  const avatarUrl = safeHttpUrl(profile.avatar_url || profile.avatar || profile.photo_url || cachedAvatar || '');
+  const avatarHtml = avatarUrl ? `<img class="spike-profile-avatar" src="${esc(avatarUrl)}" alt="${esc(name)}" loading="lazy" decoding="async" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'spike-profile-avatar spike-profile-avatar-fallback',innerHTML:'<span>👤</span>'}))">` : `<div class="spike-profile-avatar spike-profile-avatar-fallback" aria-hidden="true"><span>👤</span></div>`;
+  let isFollowing = false;
+  try {
+    const meDoc = await getDoc(`users/${state.user.id}`);
+    isFollowing = Array.isArray(meDoc?.following) && meDoc.following.includes(id);
+    state.following = new Set(Array.isArray(meDoc?.following) ? meDoc.following : [...(state.following || [])]);
+  } catch(_) { isFollowing = state.following?.has?.(id) === true; }
   const rel = {
     friend:{badge:'✓ Friends',primary:'💬 Message',secondary:'📞 Voice Call',tertiary:'🎥 Video Call'},
     request_sent:{badge:'⏳ Request sent',primary:'Request Sent',secondary:'Cancel Request',tertiary:'Message'},
     request_received:{badge:'💌 Wants to connect',primary:'Accept',secondary:'Decline',tertiary:'Message'},
-    stranger:{badge:mutual?'People you may know':'Suggested connection',primary:'Add Friend',secondary:'Follow',tertiary:'Message'}
+    stranger:{badge:mutual?'People you may know':'Suggested connection',primary:'Add Friend',secondary:isFollowing?'Following':'Follow',tertiary:'Message'}
   }[relationship];
   const mutualLabel = mutual ? `👥 ${mutual} mutual friend${mutual===1?'':'s'}` : '✨ Suggested for you';
   body.innerHTML=`
@@ -3659,43 +3742,102 @@ async function openSpikeProfilePreview(id, seed){
       <div class="spike-profile-topline"><span class="spike-profile-status">${esc(rel.badge)}</span><button class="spike-profile-more" type="button" data-profile-more aria-label="More profile actions">•••</button></div>
       ${avatarHtml}<h2 id="spikeProfileName" class="spike-profile-name">${esc(name)}</h2>
       ${username?`<div class="spike-profile-username">${esc(username)}</div>`:''}
-      ${location?`<div class="spike-profile-meta">${esc(location)}</div>`:''}
+      ${profileLocation?`<div class="spike-profile-meta">${esc(profileLocation)}</div>`:''}
       ${bio?`<div class="spike-profile-bio">${esc(bio)}</div>`:''}
       <div class="spike-profile-mutual">${esc(mutualLabel)}</div>
-      <div class="spike-premium-stats"><div class="spike-premium-stat"><b>${posts.length}</b><span>Recent posts</span></div><div class="spike-premium-stat"><b>${mutual||'—'}</b><span>Mutual friends</span></div><div class="spike-premium-stat"><b>✓</b><span>SPIKE member</span></div></div>
+      <div class="spike-premium-stats"><div class="spike-premium-stat"><b>${mutual||'—'}</b><span>Mutual friends</span></div><div class="spike-premium-stat"><b>✓</b><span>SPIKE member</span></div></div>
       <div class="spike-quick-actions"><button type="button" data-pq="share">↗ Share</button><button type="button" data-pq="copy">🔗 Copy link</button><button type="button" data-pq="mute">🔕 Mute</button><button type="button" data-pq="report">⚑ Report</button></div>
-      <div class="spike-profile-actions"><button class="spike-profile-primary" data-profile-primary="${esc(id)}">${esc(rel.primary)}</button><button class="spike-profile-secondary" data-profile-secondary="${esc(id)}">${esc(rel.secondary)}</button><button class="spike-profile-tertiary" data-profile-tertiary="${esc(id)}">${esc(rel.tertiary)}</button></div>
+      <div class="spike-profile-actions"><button class="spike-profile-primary" data-profile-primary="${esc(id)}">${esc(rel.primary)}</button><button class="spike-profile-secondary ${relationship==='stranger'&&isFollowing?'is-following':''}" data-profile-secondary="${esc(id)}">${esc(rel.secondary)}</button><button class="spike-profile-tertiary" data-profile-tertiary="${esc(id)}">${esc(rel.tertiary)}</button></div>
     </div>
-    <section class="spike-profile-section" aria-labelledby="spikeProfileRecentTitle"><div class="spike-profile-section-head"><strong id="spikeProfileRecentTitle">Recent Posts</strong>${posts.length?`<span class="spike-profile-count">${posts.length}</span>`:''}</div><div class="spike-profile-posts">${posts.length?posts.map(p=>{const bodyText=String(p.content||p.text||p.body||'');const media=safeHttpUrl(p.media_url||p.image_url||'');return `<article class="spike-profile-post"><div class="spike-profile-post-time">${esc(ago(p.createdAt||p.created_at))}</div>${bodyText?`<div>${esc(bodyText).slice(0,420)}</div>`:''}${media?`<img class="spike-profile-post-media" src="${esc(media)}" alt="Post media" loading="lazy" decoding="async">`:''}</article>`}).join(''):'<div class="spike-profile-empty">No public posts yet.</div>'}</div></section>
     <div class="spike-profile-privacy-note"><span aria-hidden="true">🛡️</span><span>Only information allowed by this person’s privacy settings is shown here.</span></div>`;
+
+  const refreshRelationshipUi = () => {
+    const cfg = {
+      friend:{badge:'✓ Friends',primary:'💬 Message',secondary:'📞 Voice Call',tertiary:'🎥 Video Call'},
+      request_sent:{badge:'⏳ Request sent',primary:'Request Sent',secondary:'Cancel Request',tertiary:'Message'},
+      request_received:{badge:'💌 Wants to connect',primary:'Accept',secondary:'Decline',tertiary:'Message'},
+      stranger:{badge:mutual?'People you may know':'Suggested connection',primary:'Add Friend',secondary:isFollowing?'Following':'Follow',tertiary:'Message'}
+    }[relationship];
+    const status=body.querySelector('.spike-profile-status');
+    const primary=body.querySelector('[data-profile-primary]');
+    const secondary=body.querySelector('[data-profile-secondary]');
+    const tertiary=body.querySelector('[data-profile-tertiary]');
+    if(status) status.textContent=cfg.badge;
+    if(primary) primary.textContent=cfg.primary;
+    if(secondary) secondary.textContent=cfg.secondary;
+    if(tertiary) tertiary.textContent=cfg.tertiary;
+  };
+
+  const shareProfile = async () => {
+    const url=window.location.origin+window.location.pathname+'?profile='+encodeURIComponent(id);
+    if(navigator.share){
+      try{ await navigator.share({title:name||'SPIKE profile',url}); toast('Profile shared','success'); return; }
+      catch(e){ if(e?.name==='AbortError') return; }
+    }
+    await copyTextSafe(url); toast('Profile link copied','success');
+  };
+
+  const setMuted = async () => {
+    if(!state.user?.id) throw new Error('You must be signed in to mute users.');
+    if(!state.muted) state.muted=new Set();
+    const muted=state.muted.has(id);
+    let doc={}; try{ doc=await getDoc(`users/${state.user.id}`)||{}; } catch(_){}
+    const set=new Set(Array.isArray(doc.mutedAuthors)?doc.mutedAuthors:[]);
+    if(muted) set.delete(id); else set.add(id);
+    await putDoc(`users/${state.user.id}`,{...doc,mutedAuthors:[...set]},'users');
+    state.muted=set;
+    toast(muted?'Unmuted':'Muted','success');
+    renderPosts();
+  };
+
+  const reportProfile = async () => {
+    const reason=prompt(`Report ${name}. Please enter a reason:`, '');
+    if(!reason||!reason.trim()) return;
+    const {error}=await db.from('profile_reports').insert({
+      reporter_id:state.user.id, reported_user_id:id, reason:reason.trim().slice(0,1000)
+    });
+    if(error) throw error;
+    toast('Report submitted','success');
+  };
 
   body.querySelectorAll('[data-pq]').forEach(btn=>btn.addEventListener('click',async()=>{
     const act=btn.dataset.pq;
-    if(act==='share'||act==='copy'){
-      const url=location.origin+location.pathname+'?profile='+encodeURIComponent(id);
-      try{if(act==='share'&&navigator.share){await navigator.share({title:'SPIKE profile',url});toast('Profile shared','success');return;}await copyTextSafe(url);toast('Profile link copied','success');}catch(e){if(e?.name!=='AbortError')toast('Could not share profile','error');}
-    } else if(act==='mute') toast('Use the profile menu to manage mute settings.','info');
-    else if(act==='report') toast('Use the profile menu to report this account.','info');
-  }));
-  body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{if(relationship==='friend')location.href='message.html?private_uid='+encodeURIComponent(id);else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await acceptFriendRequest(id);else await sendFriendRequest(id,null);});
-  body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{
-    if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio';return;}
-    if(relationship==='request_sent'){await cancelFriendRequest(id);return;}
-    if(relationship==='request_received'){await declineFriendRequest(id);return;}
     try{
-      const me=await getDoc(`users/${state.user.id}`).catch(()=>({}));
-      const following=new Set(Array.isArray(me?.following)?me.following:state.following||[]);
-      const isFollowing=following.has(id);
-      if(isFollowing) following.delete(id); else following.add(id);
-      await putDoc(`users/${state.user.id}`,{...(me||{}),following:[...following]},`users`);
-      state.following=following;
+      if(act==='share'||act==='copy') await shareProfile();
+      else if(act==='mute') await setMuted();
+      else if(act==='report') await reportProfile();
+    }catch(e){ console.error('[SPIKE profile quick action]',e); toast(e?.message||'Profile action failed','error'); }
+  }));
+
+  body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{
+    try{
+      if(relationship==='friend') return navigateToMessage(id);
+      if(relationship==='request_sent'){ await cancelFriendRequest(id); relationship='stranger'; refreshRelationshipUi(); return; }
+      if(relationship==='request_received'){ await acceptFriendRequest(id); relationship='friend'; refreshRelationshipUi(); return; }
+      await sendFriendRequest(id,null);
+      relationship='request_sent'; refreshRelationshipUi();
+    }catch(e){ toast(e?.message||'Could not update connection','error'); }
+  });
+  body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{
+    try{
+      if(relationship==='friend'){ navigateToMessage(id,'audio'); return; }
+      if(relationship==='request_sent'){await cancelFriendRequest(id); relationship='stranger'; refreshRelationshipUi(); return;}
+      if(relationship==='request_received'){await declineFriendRequest(id); relationship='stranger'; refreshRelationshipUi(); return;}
+      const me=await getDoc(`users/${state.user.id}`) || {};
+      const following=new Set(Array.isArray(me.following) ? me.following : [...(state.following || [])]);
+      const wasFollowing=following.has(id);
+      if(wasFollowing) following.delete(id); else following.add(id);
+      const nextFollowing=[...following];
+      await putDoc(`users/${state.user.id}`,{...me,following:nextFollowing},'users');
+      state.following=new Set(nextFollowing);
+      isFollowing=!wasFollowing;
       const btn=body.querySelector('[data-profile-secondary]');
-      if(btn)btn.textContent=isFollowing?'Follow':'Following';
-      toast(isFollowing?'Unfollowed':'Following','success');
+      if(btn){ btn.textContent=isFollowing?'Following':'Follow'; btn.classList.toggle('is-following',isFollowing); }
+      toast(isFollowing?'Following':'Unfollowed','success');
       rankingDirty=true;rankingCache.clear();renderPosts();
     }catch(e){toast(e?.message||'Could not update following','error');}
   });
-  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{if(relationship==='friend'&&typeof window.startCall==='function')window.startCall(id,'video');else location.href='message.html?private_uid='+encodeURIComponent(id);});
+  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{ if(relationship==='friend'){ navigateToMessage(id,'video'); return; } navigateToMessage(id); });
   body.querySelector('[data-profile-more]')?.addEventListener('click',()=>showProfileActions(id,relationship,name));
   setTimeout(()=>body.querySelector('[data-profile-more]')?.focus(),0);
 }
@@ -3711,7 +3853,7 @@ function closeSpikeProfile(){
 }
 
 async function cancelFriendRequest(id){
-  try{ const r=await db.rpc('cancel_friend_request',{p_recipient_id:id}); if(r.error) throw r.error; toast('Request cancelled','success'); relationship='stranger'; } catch(e){ toast(e?.message||'Could not cancel request','error'); }
+  const r=await db.rpc('cancel_friend_request',{p_recipient_id:id}); if(r.error) throw r.error; toast('Request cancelled','success'); return r.data;
 }
 async function resolvePendingFriendRequestId(otherId){
   if(!state.user?.id||!otherId) throw new Error('Friend request participant is missing.');
@@ -3724,10 +3866,10 @@ async function resolvePendingFriendRequestId(otherId){
   return data.id;
 }
 async function acceptFriendRequest(id){
-  try{ const requestId=await resolvePendingFriendRequestId(id); const r=await db.rpc('accept_friend_request',{p_request_id:requestId}); if(r.error) throw r.error; toast('Friend request accepted','success'); relationship='friend'; } catch(e){ toast(e?.message||'Could not accept request','error'); }
+  const requestId=await resolvePendingFriendRequestId(id); const r=await db.rpc('accept_friend_request',{p_request_id:requestId}); if(r.error) throw r.error; toast('Friend request accepted','success'); return r.data;
 }
 async function declineFriendRequest(id){
-  try{ const requestId=await resolvePendingFriendRequestId(id); const r=await db.rpc('decline_friend_request',{p_request_id:requestId}); if(r.error) throw r.error; toast('Request declined','success'); relationship='stranger'; } catch(e){ toast(e?.message||'Could not decline request','error'); }
+  const requestId=await resolvePendingFriendRequestId(id); const r=await db.rpc('decline_friend_request',{p_request_id:requestId}); if(r.error) throw r.error; toast('Request declined','success'); return r.data;
 }
 
 function closeProfileActions(){
@@ -3744,15 +3886,16 @@ function showProfileActions(id, relationship, name){
   const run=async(fn)=>{ closeProfileActions(); closeSpikeProfile(); try{ await fn(); } catch(e){ console.error('[SPIKE profile action]',e); toast(e?.message||'Action could not be completed','error'); } };
   items.push(['👤','View profile',()=>{ closeProfileActions(); window.location.href=profileLink(id); }]);
   if(relationship==='friend'){
-    items.push(['💬','Message',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id); }]);
-    items.push(['📞','Voice call',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio'; }]);
-    items.push(['🎥','Video call',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=video'; }]);
+    items.push(['💬','Message',()=>{ navigateToMessage(id); }]);
+    items.push(['📞','Voice call',()=>{ navigateToMessage(id,'audio'); }]);
+    items.push(['🎥','Video call',()=>{ navigateToMessage(id,'video'); }]);
     items.push(['❌','Unfriend',()=>run(async ()=>{
       const ok=await premiumConfirm({title:'Unfriend user', message:`Remove ${name} from your friends?`, confirmText:'Unfriend', cancelText:'Cancel', icon:'🗑️', danger:true });
       if(!ok)return;
       const r=await db.rpc('dm_unfriend',{p_other_user_id:id});
       if(r.error) throw r.error;
-      if(window.state?.following instanceof Set) window.state.following.delete(id);
+      // Unfriending must not silently remove a separate follow relationship.
+      // Friendship and following are independent persisted states in SPIKE.
       toast('Friend removed','success');
       window.dispatchEvent(new CustomEvent('spike:friends-changed'));
     })]);
@@ -3763,7 +3906,7 @@ function showProfileActions(id, relationship, name){
     items.push(['×','Decline request',()=>run(()=>declineFriendRequest(id))]);
   } else {
     items.push(['➕','Add friend',()=>run(()=>sendFriendRequest(id,null))]);
-    items.push(['💬','Message',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id); }]);
+    items.push(['💬','Message',()=>{ navigateToMessage(id); }]);
   }
   items.push(['🔗','Share profile',()=>run(async()=>{
     const url=location.origin+location.pathname+'?profile='+encodeURIComponent(id);
@@ -3792,7 +3935,11 @@ function showProfileActions(id, relationship, name){
   items.push(['⚠️','Report',()=>run(async()=>{
     const reason=prompt(`Report ${name}. Please enter a reason:`, '');
     if(!reason||!reason.trim()) return;
-    toast('User reporting is not available in the current Supabase schema.','warning');
+    const {error}=await db.from('profile_reports').insert({
+      reporter_id:state.user.id, reported_user_id:id, reason:reason.trim().slice(0,1000)
+    });
+    if(error) throw error;
+    toast('Report submitted','success');
   })]);
 
   b.innerHTML=items.map((x,i)=>`<button type="button" data-action-index="${i}" class="${/Unfriend|Block|Report/.test(x[1])?'danger':''}">${x[0]}&nbsp; ${esc(x[1])}</button>`).join('');
@@ -4126,7 +4273,8 @@ function bindEvents() {
   // Friend recommendations
   document.getElementById('friendRecommendationsRefresh')?.addEventListener('click', loadFriendRecommendations);
   document.getElementById('friendRecommendationsList')?.addEventListener('click', e => {
-    const add=e.target.closest('[data-fr-add]'), dis=e.target.closest('[data-fr-dismiss]'), view=e.target.closest('[data-fr-profile]');
+    const add=e.target.closest('[data-fr-add]'), message=e.target.closest('[data-fr-message]'), dis=e.target.closest('[data-fr-dismiss]'), view=e.target.closest('[data-fr-profile]');
+    if(message){ e.preventDefault(); navigateToMessage(message.dataset.frMessage); return; }
     if(add){ sendFriendRequest(add.dataset.frAdd,add); return; }
     if(dis){ const id=dis.dataset.frDismiss; dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); return; }
     if(view){ e.preventDefault(); openSpikeProfilePreview(view.dataset.frProfile); }
