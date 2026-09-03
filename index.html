@@ -17,7 +17,7 @@
 body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:center}
 .shell{width:min(430px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;justify-content:center;gap:clamp(9px,1.6dvh,16px)}
 .brand{text-align:center;flex:0 0 auto}.brand img{width:clamp(48px,7.5dvh,70px);height:clamp(48px,7.5dvh,70px);object-fit:contain;border-radius:19px;filter:drop-shadow(0 0 24px rgba(139,61,255,.3))}.brand h1{font-size:clamp(21px,2.8dvh,25px);line-height:1.1;margin:7px 0 3px;letter-spacing:-.5px}.brand p{margin:0;color:var(--muted);font-size:11px}
-.card{min-height:0;border:1px solid var(--line);border-radius:27px;padding:clamp(14px,2.3dvh,23px);background:linear-gradient(145deg,rgba(24,27,43,.97),rgba(12,14,25,.99));box-shadow:0 28px 80px rgba(0,0,0,.42);overflow:hidden}
+.card{min-height:0;border:1px solid var(--line);border-radius:27px;padding:clamp(14px,2.3dvh,23px);background:linear-gradient(145deg,rgba(24,27,43,.97),rgba(12,14,25,.99));box-shadow:0 28px 80px rgba(0,0,0,.42);overflow:auto}
 .tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:rgba(255,255,255,.045);padding:4px;border-radius:15px;margin-bottom:clamp(12px,2dvh,19px)}.tabs button{border:0;background:transparent;color:var(--muted);min-height:41px;border-radius:11px;font-weight:850}.tabs button.active{background:rgba(139,61,255,.27);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.14)}.tabs.otp-hidden{display:none}
 .panel{display:none;min-height:0}.panel.active{display:block}.title{margin:0 0 5px;font-size:clamp(19px,2.7dvh,22px);letter-spacing:-.35px}.subtitle{margin:0 0 clamp(9px,1.8dvh,16px);color:var(--muted);font-size:12px;line-height:1.45}.form-note{font-size:9.5px;color:#747c8d;line-height:1.35;margin:-2px 0 8px;max-height:28px;overflow:hidden}
 .field{margin:0 0 9px}.label{display:flex;justify-content:space-between;gap:8px;margin:0 0 4px;color:#d7dbe5;font-size:11px;font-weight:800}.input-wrap{position:relative}.input-wrap input{width:100%;height:43px;padding:0 43px 0 13px;border-radius:13px;border:1px solid var(--line);background:var(--surface2);color:#fff;outline:none;font-size:13px}.input-wrap input:focus{border-color:rgba(176,92,255,.68);box-shadow:0 0 0 3px rgba(139,61,255,.11)}.password-toggle{position:absolute;right:6px;top:4px;height:35px;width:43px;border:0;border-radius:9px;background:transparent;color:#aeb5c4;font-size:9px;font-weight:850;text-transform:uppercase}.field.invalid input{border-color:rgba(251,113,133,.65)}.field.valid input{border-color:rgba(52,211,153,.45)}
@@ -149,12 +149,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;bac
 </section>
 <section class="panel" id="forgotPanel" role="region" aria-labelledby="forgotTitle">
 <h2 class="title" id="forgotTitle">Reset your password</h2><p class="subtitle">Enter your email and we'll send a secure recovery link.</p>
-<div class="recovery-callout"><b>Safe recovery.</b> We never reveal whether an email belongs to an account. Use the newest message from SPIKE.</div><form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">Email delivery is rate-limited for security. If you just requested a message, wait before trying again.</div></form>
-<div id="recoveryPanel" hidden>
-  <div class="field"><label class="label" for="recoveryPassword"><span>New password</span></label><div class="input-wrap"><input id="recoveryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a new password"></div></div>
-  <div class="field"><label class="label" for="recoveryConfirm"><span>Confirm new password</span></label><div class="input-wrap"><input id="recoveryConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Repeat your new password"></div></div>
-  <button class="primary" id="recoveryBtn" type="button">Update Password</button>
-  <div class="inline-help">This secure recovery session is temporary. After updating your password, SPIKE will sign you in.</div>
+<div class="recovery-callout"><b>Safe recovery.</b> Enter your account email and we'll send a secure password-reset link.</div><form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">The reset link opens a dedicated secure page where you can create and save your new password.</div></form>
 </div>
 
 </section>
@@ -174,6 +169,7 @@ const PRODUCTION_ORIGIN = "https://spike.mediachat.workers.dev";
 // stays on the deployed HTTPS origin. Never force https://localhost.
 const isLocalAuthOrigin = /^(localhost|127\.0.0.1)$/.test(window.location.hostname);
 const AUTH_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/`;
+const PASSWORD_RESET_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/reset-password.html`;
 const PRODUCTION_AUTH_URL = `${PRODUCTION_ORIGIN}/`;
 const $ = id => document.getElementById(id);
 const state = {
@@ -290,10 +286,14 @@ function switchPanel(name) {
 ["login", "register", "forgot", "otp"].forEach(x => {
 $(x + "Panel")?.classList.toggle("active", x === name);
 });
+const isOtp = name === "otp";
 $("loginTab")?.classList.toggle("active", name === "login");
 $("registerTab")?.classList.toggle("active", name === "register");
 $("loginTab")?.setAttribute("aria-selected", String(name === "login"));
 $("registerTab")?.setAttribute("aria-selected", String(name === "register"));
+$("loginTab")?.setAttribute("aria-hidden", String(isOtp));
+$("registerTab")?.setAttribute("aria-hidden", String(isOtp));
+$("loginTab")?.closest(".tabs")?.classList.toggle("otp-hidden", isOtp);
 requestAnimationFrame(() => focusPanel(name));
 clearStatus();
 }
@@ -455,17 +455,23 @@ if (isEmailRateLimit(error)) { startEmailCooldown(90000);
 }
 throw error;
 }
-if (data.user && data.session) {
-await completeLogin(data.user);
-toast("Account created successfully.", "success");
-} else if (data.user) {
-state.signupOtpEmail = email;
-try { sessionStorage.setItem("spike_signup_otp_email", email); } catch {}
-startOtpCooldown(60000);
-showOtpScreen(email);
-toast("Verification code sent to your email.", "success");
+if (data.user) {
+  // Email confirmation is the signup gate. Show the OTP screen whenever the
+  // returned user is not confirmed, even if Supabase also returned a session.
+  // Some Auth configurations issue a temporary session before confirmation.
+  const confirmed = !!data.user.email_confirmed_at;
+  if (!confirmed) {
+    state.signupOtpEmail = email;
+    try { sessionStorage.setItem("spike_signup_otp_email", email); } catch {}
+    startOtpCooldown(60000);
+    showOtpScreen(email);
+    toast("Verification code sent to your email.", "success");
+  } else {
+    await completeLogin(data.user);
+    toast("Account created successfully.", "success");
+  }
 } else {
-throw new Error("Account creation did not return a user.");
+  throw new Error("Account creation did not return a user.");
 }
 } catch (err) {
 console.error("[SPIKE SIGNUP]", {
@@ -511,8 +517,9 @@ const btn = $("resetBtn");
 setBusy(btn, true, "Sending…");
 try {
 const db = await ensureClient();
-const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: AUTH_REDIRECT_URL });
+const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: PASSWORD_RESET_REDIRECT_URL });
 if (error) throw error;
+try { sessionStorage.setItem("spike_password_reset_pending", String(Date.now())); } catch {}
 startEmailCooldown(60000);
 toast("If an account exists, a secure reset link has been sent.", "success");
 status("Check your email for the password reset link.", "success");
@@ -606,46 +613,6 @@ function isRecoveryFlow(callback = getAuthCallback()) {
   return callback.type === "recovery";
 }
 
-function showRecoveryForm() {
-  $("resetForm")?.setAttribute("hidden", "");
-  $("recoveryPanel")?.removeAttribute("hidden");
-  switchPanel("forgot");
-  status("Enter and confirm your new password.", "info");
-  requestAnimationFrame(() => $("recoveryPassword")?.focus());
-}
-
-async function finishRecovery() {
-  if (state.busy) return;
-  const password = $("recoveryPassword")?.value || "";
-  const confirm = $("recoveryConfirm")?.value || "";
-  if (!password || !confirm) return toast("Enter and confirm your new password.", "warning");
-  if (!passwordChecks(password)) return toast("Please meet all password requirements.", "warning");
-  if (password !== confirm) return toast("Passwords do not match.", "warning");
-  state.busy = true;
-  const btn = $("recoveryBtn");
-  setBusy(btn, true, "Updating…");
-  try {
-    const db = await ensureClient();
-    const { data, error } = await db.auth.updateUser({ password });
-    if (error) throw error;
-    if (!data?.user) throw new Error("Password update did not return an account.");
-    toast("Password updated successfully.", "success");
-    cleanAuthUrl();
-    await completeLogin(data.user);
-  } catch (err) {
-    console.error("[SPIKE RECOVERY]", { status: err?.status, code: err?.code, message: err?.message, name: err?.name });
-    const msg = String(err?.message || "").toLowerCase();
-    const friendly = /expired|invalid|otp|token/.test(msg)
-      ? "This recovery link is invalid or has expired. Request a new password reset email."
-      : friendlyError(err, "reset");
-    status(friendly, "error");
-    toast(friendly, "error");
-  } finally {
-    state.busy = false;
-    setBusy(btn, false, "");
-  }
-}
-
 function handleAuthCallback() {
   const callback = getAuthCallback();
   if (callback.code || callback.error || callback.hasAccessToken || callback.type) {
@@ -703,22 +670,29 @@ function improveErrors(){
 }
 renderRanking();improveErrors();otpAutoAdvance();
 
-// ─── boot: restore session ───
+// ─── boot: restore session / dedicated password-recovery routing ───
+function routeRecoveryCallbackToDedicatedPage(callback) {
+  // Supabase can return a recovery callback to the Site URL when the redirect
+  // URL is not selected/allowed correctly. Never leave a password-reset
+  // session on the normal login screen. Preserve the callback intact so the
+  // dedicated page can consume the recovery session.
+  if (!callback?.type || callback.type !== "recovery") return false;
+  if (/\/reset-password\.html$/i.test(window.location.pathname)) return false;
+  try {
+    const target = `${window.location.origin.replace(/\/$/, "")}/reset-password.html${window.location.search}${window.location.hash}`;
+    window.location.replace(target);
+    return true;
+  } catch (err) {
+    console.error("[SPIKE RECOVERY ROUTE]", err);
+    return false;
+  }
+}
+
 async function boot() {
 try {
 const callback = handleAuthCallback();
+if (routeRecoveryCallbackToDedicatedPage(callback)) return;
 const db = await ensureClient();
-
-// Supabase can return recovery as a query/hash callback. Let supabase-js
-// consume the session first, then expose the password-update form.
-if (isRecoveryFlow(callback) && !callback.error) {
-  const { data: recoverySession } = await db.auth.getSession();
-  if (recoverySession?.session?.user) showRecoveryForm();
-  else {
-    switchPanel("forgot");
-    status("Your recovery link could not start a secure session. Request a new reset link.", "error");
-  }
-}
 
 const { data, error } = await db.auth.getSession();
 if (error) throw error;
@@ -742,10 +716,21 @@ state.currentUser = null;
 return;
 }
 if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
-try { await completeLogin(session.user); } catch (err) {
-console.error("[SPIKE AUTH COMPLETE]", err);
-toast(friendlyError(err, "login"), "error");
-}
+  // Never bypass email verification just because Supabase supplied a session.
+  // Keep the user on the single-file OTP screen until email_confirmed_at exists.
+  if (!session.user.email_confirmed_at) {
+    const pendingEmail = state.signupOtpEmail || session.user.email || "";
+    if (pendingEmail) {
+      state.signupOtpEmail = pendingEmail;
+      try { sessionStorage.setItem("spike_signup_otp_email", pendingEmail); } catch {}
+      showOtpScreen(pendingEmail);
+    }
+    return;
+  }
+  try { await completeLogin(session.user); } catch (err) {
+    console.error("[SPIKE AUTH COMPLETE]", err);
+    toast(friendlyError(err, "login"), "error");
+  }
 }
 });
 } catch (err) { console.error("[SPIKE AUTH LISTENER]", err); }
@@ -801,7 +786,6 @@ $("otpForm")?.addEventListener("submit", verifySignupOtp);
 $("otpResendBtn")?.addEventListener("click", resendSignupOtp);
 $("otpBackBtn")?.addEventListener("click", leaveOtpScreen);
 $("otpInput")?.addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6); });
-$("recoveryBtn")?.addEventListener("click", finishRecovery);
 // password strength
 $("regPassword").addEventListener("input", e => passwordChecks(e.target.value));
 // confirm password validation
