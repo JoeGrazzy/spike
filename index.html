@@ -70,7 +70,7 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 </section>
 <section class="panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab">
 <h2 class="title">Create your account</h2><p class="subtitle">Get your lifetime SP ID and join the community.</p>
-<div class="form-note">Use an email you can access. You may need to confirm it before your first sign in.</div>
+<div class="form-note">Use an email you can access. You may need to confirm it before your first sign in. If confirmation delivery fails, fix Supabase SMTP before retrying.</div>
 <form id="registerForm" novalidate>
 <div class="field"><label class="label" for="regName"><span>Full name</span></label><div class="input-wrap"><input id="regName" type="text" minlength="2" maxlength="100" aria-label="Full name" autocomplete="name" placeholder="Your full name" required></div></div>
 <div class="field"><label class="label" for="regEmail"><span>Email</span></label><div class="input-wrap"><input id="regEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div>
@@ -87,6 +87,12 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 <section class="panel" id="forgotPanel" role="region" aria-labelledby="forgotTitle">
 <h2 class="title" id="forgotTitle">Reset your password</h2><p class="subtitle">Enter your email and we'll send a secure recovery link.</p>
 <form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">Email delivery is rate-limited for security. If you just requested a message, wait before trying again.</div></form>
+<div id="recoveryPanel" hidden>
+  <div class="field"><label class="label" for="recoveryPassword"><span>New password</span></label><div class="input-wrap"><input id="recoveryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a new password"></div></div>
+  <div class="field"><label class="label" for="recoveryConfirm"><span>Confirm new password</span></label><div class="input-wrap"><input id="recoveryConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Repeat your new password"></div></div>
+  <button class="primary" id="recoveryBtn" type="button">Update Password</button>
+  <div class="inline-help">This secure recovery session is temporary. After updating your password, SPIKE will sign you in.</div>
+</div>
 
 </section>
 <div class="security-strip" aria-label="SPIKE account protections"><div class="security-chip"><strong>🔐 Secure</strong><span>Supabase Auth</span></div><div class="security-chip"><strong>✉️ Verified</strong><span>Email protection</span></div><div class="security-chip"><strong>⚡ Fast</strong><span>Smart session</span></div></div><div class="auth-hint"><span class="pulse"></span><span><b>Your session stays on this device</b> until you sign out.</span></div>
@@ -99,13 +105,12 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 const SUPABASE_URL = "https://cjqpyndceqyqsijihxbb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
 const PRODUCTION_ORIGIN = "https://spike.mediachat.workers.dev";
-// Use the actual local origin (including HTTP) so OAuth returns to the
-// server that is actually serving this page. Hard-coding https://localhost
-// causes ERR_CONNECTION_CLOSED when the local dev server is HTTP-only.
-const isLocalAuthOrigin = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-const AUTH_REDIRECT_URL = isLocalAuthOrigin
-  ? `${window.location.origin}/`
-  : `${PRODUCTION_ORIGIN}/`;
+// Auth callbacks must return to the exact origin that started the flow.
+// This keeps local HTTP testing on http://localhost:7700 while production
+// stays on the deployed HTTPS origin. Never force https://localhost.
+const isLocalAuthOrigin = /^(localhost|127\.0.0.1)$/.test(window.location.hostname);
+const AUTH_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/`;
+const PRODUCTION_AUTH_URL = `${PRODUCTION_ORIGIN}/`;
 const $ = id => document.getElementById(id);
 const state = {
 client: null,
@@ -184,6 +189,8 @@ if (code === "email_not_confirmed") return "Your email is not confirmed yet. Che
 if (code === "user_already_exists" || msg.includes("already registered") || msg.includes("already exists"))
 return "An account with this email already exists. Switch to Sign In instead.";
 if (isEmailRateLimit(err)) return `Email delivery is temporarily busy. Please wait ${formatWait(emailCooldownRemaining() || 60000)} before requesting another message.`;
+if (err?.status === 500 && /error sending confirmation email|confirmation email/i.test(msg))
+  return "Your account could not finish signup because Supabase could not send the confirmation email. Check Authentication → Emails → SMTP Settings in Supabase, then try again. Do not create another account until email delivery is fixed.";
 if (msg.includes("failed to fetch") || msg.includes("network")) return "We couldn't reach SPIKE securely. Check your internet connection and try again.";
 if (code === "weak_password" || msg.includes("password")) return "Please use a stronger password that meets all requirements.";
 if (context === "signup" && err?.status === 400) return "We couldn't create the account. Check your details and try again.";
@@ -385,7 +392,12 @@ $("loginEmail").value = email;
 switchPanel("login");
 }
 } catch (err) {
-console.error("[SPIKE SIGNUP]", err);
+console.error("[SPIKE SIGNUP]", {
+  status: err?.status,
+  code: err?.code,
+  message: err?.message,
+  name: err?.name
+});
 const friendly = friendlyError(err, "signup");
 status(friendly, "error");
 toast(friendly, "error");
@@ -478,61 +490,116 @@ if (b) { b.disabled = false; if (b.dataset.original) b.innerHTML = b.dataset.ori
 });
 }
 }
-// ─── OAuth callback error handling ───
-(function handleAuthCallbackError() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.has("code") || params.has("error") || window.location.hash.includes("access_token")) {
-    try { sessionStorage.removeItem("spike_oauth_in_progress"); } catch {}
-  }
-  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
-  const error = params.get("error") || hash.get("error");
-  const description = params.get("error_description") || hash.get("error_description");
-  if (error) {
-    const message = description || "Authentication could not be completed. Please try again.";
-    console.error("[SPIKE OAUTH CALLBACK]", error, message);
-    setTimeout(() => { status(friendlyError({ message }, "oauth"), "error"); toast(friendlyError({ message }, "oauth"), "error"); }, 0);
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-})();
+// ─── Auth callback / redirect handling ───
+function getAuthCallback() {
+  const url = new URL(window.location.href);
+  const query = url.searchParams;
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const get = key => query.get(key) || hash.get(key);
+  return {
+    code: query.get("code"),
+    type: get("type"),
+    error: get("error"),
+    errorCode: get("error_code"),
+    description: get("error_description"),
+    hasAccessToken: !!(hash.get("access_token") || hash.get("refresh_token"))
+  };
+}
 
-// ─── AUTH ROUTING SAFETY ─────────────────────────────────
-function clearAuthUrlArtifacts() {
+function cleanAuthUrl() {
   try {
     const u = new URL(window.location.href);
-    const keys = ["code","error","error_code","error_description","access_token","refresh_token","token_type","type"];
-    let changed = false;
-    for (const k of keys) if (u.searchParams.has(k)) { u.searchParams.delete(k); changed = true; }
-    if (window.location.hash && /access_token|refresh_token|error|code_verifier/i.test(window.location.hash)) { u.hash = ""; changed = true; }
-    if (changed) window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ""));
+    ["code","error","error_code","error_description","access_token","refresh_token","token_type","type","sb"].forEach(k => u.searchParams.delete(k));
+    u.hash = "";
+    window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ""));
   } catch (_) {}
 }
-function isRecoveryFlow() {
-  const u = new URL(window.location.href);
-  return u.searchParams.get("type") === "recovery" || /type=recovery/i.test(window.location.hash || "");
+
+function isRecoveryFlow(callback = getAuthCallback()) {
+  return callback.type === "recovery";
+}
+
+function showRecoveryForm() {
+  $("resetForm")?.setAttribute("hidden", "");
+  $("recoveryPanel")?.removeAttribute("hidden");
+  switchPanel("forgot");
+  status("Enter and confirm your new password.", "info");
+  requestAnimationFrame(() => $("recoveryPassword")?.focus());
+}
+
+async function finishRecovery() {
+  if (state.busy) return;
+  const password = $("recoveryPassword")?.value || "";
+  const confirm = $("recoveryConfirm")?.value || "";
+  if (!password || !confirm) return toast("Enter and confirm your new password.", "warning");
+  if (!passwordChecks(password)) return toast("Please meet all password requirements.", "warning");
+  if (password !== confirm) return toast("Passwords do not match.", "warning");
+  state.busy = true;
+  const btn = $("recoveryBtn");
+  setBusy(btn, true, "Updating…");
+  try {
+    const db = await ensureClient();
+    const { data, error } = await db.auth.updateUser({ password });
+    if (error) throw error;
+    if (!data?.user) throw new Error("Password update did not return an account.");
+    toast("Password updated successfully.", "success");
+    cleanAuthUrl();
+    await completeLogin(data.user);
+  } catch (err) {
+    console.error("[SPIKE RECOVERY]", { status: err?.status, code: err?.code, message: err?.message, name: err?.name });
+    const msg = String(err?.message || "").toLowerCase();
+    const friendly = /expired|invalid|otp|token/.test(msg)
+      ? "This recovery link is invalid or has expired. Request a new password reset email."
+      : friendlyError(err, "reset");
+    status(friendly, "error");
+    toast(friendly, "error");
+  } finally {
+    state.busy = false;
+    setBusy(btn, false, "");
+  }
+}
+
+function handleAuthCallback() {
+  const callback = getAuthCallback();
+  if (callback.code || callback.error || callback.hasAccessToken || callback.type) {
+    try { sessionStorage.removeItem("spike_oauth_in_progress"); } catch {}
+  }
+  if (callback.error) {
+    const msg = callback.errorCode === "otp_expired" || /invalid or has expired/i.test(callback.description || "")
+      ? "This email link is invalid or has expired. Request a new verification or password-reset email, then use the newest link."
+      : callback.description || "Authentication could not be completed. Please try again.";
+    setTimeout(() => { status(msg, "error"); toast(msg, "error"); }, 0);
+    cleanAuthUrl();
+    return callback;
+  }
+  return callback;
 }
 
 // ─── boot: restore session ───
 async function boot() {
 try {
+const callback = handleAuthCallback();
 const db = await ensureClient();
-if (isRecoveryFlow()) {
-  clearAuthUrlArtifacts();
-  switchPanel("forgot");
-  status("Enter your email below to request a fresh secure reset link.", "info");
+
+// Supabase can return recovery as a query/hash callback. Let supabase-js
+// consume the session first, then expose the password-update form.
+if (isRecoveryFlow(callback) && !callback.error) {
+  const { data: recoverySession } = await db.auth.getSession();
+  if (recoverySession?.session?.user) showRecoveryForm();
+  else {
+    switchPanel("forgot");
+    status("Your recovery link could not start a secure session. Request a new reset link.", "error");
+  }
 }
 
 const { data, error } = await db.auth.getSession();
 if (error) throw error;
 
-// A successful PKCE callback leaves `code` in the address bar. Remove it
-// immediately so refresh/back cannot replay the single-use OAuth state.
-const callbackParams = new URLSearchParams(window.location.search);
-if (callbackParams.has("code")) {
-try { sessionStorage.removeItem("spike_oauth_in_progress"); } catch {}
-window.history.replaceState({}, document.title, window.location.pathname);
-}
+// Remove one-time callback artifacts only after Supabase has had a chance to
+// consume them. This prevents refresh/back from replaying stale auth state.
+if (callback.code || callback.hasAccessToken || callback.type || callback.error) cleanAuthUrl();
 
-if (data.session?.user) await completeLogin(data.session.user);
+if (data.session?.user && !isRecoveryFlow(callback) && !callback.error) await completeLogin(data.session.user);
 } catch (err) {
 console.error("[SPIKE BOOT]", err);
 toast(friendlyError(err, "boot"), "warning");
@@ -599,6 +666,7 @@ $("githubLoginBtn").onclick = () => signInWithProvider("github");
 $("loginForm").addEventListener("submit", signIn);
 $("registerForm").addEventListener("submit", signUp);
 $("resetForm").addEventListener("submit", resetPassword);
+$("recoveryBtn")?.addEventListener("click", finishRecovery);
 // password strength
 $("regPassword").addEventListener("input", e => passwordChecks(e.target.value));
 // confirm password validation
