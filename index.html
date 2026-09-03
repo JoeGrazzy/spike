@@ -30,6 +30,14 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 @media(max-width:390px){.oauth-grid{grid-template-columns:1fr}.oauth-btn{height:37px}.card{padding:12px}.tabs button{min-height:38px}.brand img{width:44px;height:44px}.brand h1{font-size:20px}.input-wrap input{height:40px}.primary{height:40px}}
 @media(max-height:760px){.shell{gap:7px}.brand img{width:43px;height:43px}.brand h1{font-size:20px;margin:4px 0 1px}.brand p{display:none}.card{max-height:calc(100dvh - 58px);padding:12px}.tabs{margin-bottom:8px}.tabs button{min-height:36px}.account-state{padding:6px 9px;margin-bottom:7px}.field{margin-bottom:6px}.input-wrap input{height:38px}.primary{height:38px}.oauth-divider{margin:7px 0}.oauth-btn{height:36px}.bottom{margin-top:6px}.strength-bars span{height:3px}}
 @media(max-height:650px){body{padding:6px}.shell{max-height:calc(100dvh - 12px)}.brand{display:flex;align-items:center;justify-content:center;gap:7px}.brand img{width:34px;height:34px}.brand h1{font-size:18px;margin:0}.card{max-height:calc(100dvh - 44px);padding:9px}.content{padding:0}.tabs button{min-height:33px}.title{font-size:16px}.subtitle{font-size:9px;margin-bottom:5px}.account-state{display:none}.field{margin-bottom:4px}.label{font-size:9px;margin-bottom:2px}.input-wrap input{height:33px;min-height:33px;font-size:11px}.strength,.password-help,.requirements{display:none!important}.terms{margin:2px 0 4px}.terms label{font-size:8px}.primary{height:34px;min-height:34px;font-size:11px}.oauth-divider{margin:5px 0}.oauth-btn{height:32px;font-size:9px}.bottom{font-size:8px;margin-top:3px}}
+
+/* ===== SPIKE AUTH EXPERIENCE UPGRADE ===== */
+.auth-ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}.auth-orb{position:absolute;border-radius:50%;filter:blur(1px);opacity:.42;mix-blend-mode:screen}.auth-orb.a{width:360px;height:360px;left:-170px;top:-150px;background:radial-gradient(circle,rgba(139,61,255,.34),transparent 68%)}.auth-orb.b{width:300px;height:300px;right:-140px;bottom:-130px;background:radial-gradient(circle,rgba(176,92,255,.28),transparent 70%)}.auth-orb.c{width:180px;height:180px;right:12%;top:18%;background:radial-gradient(circle,rgba(52,211,153,.09),transparent 70%)}
+.shell{position:relative}.brand{position:relative}.brand-badge{display:inline-flex;align-items:center;gap:5px;margin:4px 0 0;padding:4px 8px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035);color:#aeb5c4;font-size:7.5px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}.brand-badge i{width:5px;height:5px;border-radius:50%;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.65)}
+.card{position:relative;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 30px 100px rgba(0,0,0,.48),0 0 0 1px rgba(139,61,255,.025)}.card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),rgba(176,92,255,.3),transparent);pointer-events:none}.tabs button{transition:transform .18s ease,background .18s ease,color .18s ease}.tabs button:hover{color:#fff;transform:translateY(-1px)}.primary{position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.primary:after{content:"";position:absolute;inset:-80% -20%;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);transform:translateX(-70%) rotate(8deg);transition:transform .65s ease}.primary:hover{transform:translateY(-1px);box-shadow:0 15px 34px rgba(139,61,255,.31);filter:saturate(1.08)}.primary:hover:after{transform:translateX(70%) rotate(8deg)}
+.oauth-btn{transition:transform .18s ease,border-color .18s ease,background .18s ease}.oauth-btn:hover{transform:translateY(-1px);border-color:rgba(176,92,255,.32);background:rgba(255,255,255,.065)}.link,.bottom button{transition:color .16s ease}.link:hover,.bottom button:hover{color:#fff}.input-wrap input{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}.input-wrap input:hover{background:#1a1e2f}.account-state{transition:border-color .18s ease,background .18s ease}.security-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 0}.security-chip{min-width:0;padding:7px 7px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.02);text-align:center;color:#747c8e;font-size:7.5px;font-weight:800;line-height:1.25}.security-chip strong{display:block;color:#b9c0cf;font-size:8px;margin-bottom:2px}.security-chip span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.auth-hint{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;color:#666e80;font-size:7.5px}.auth-hint b{color:#9ca5b8}.auth-hint .pulse{width:5px;height:5px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.06)}
+@media(max-width:390px){.security-strip{gap:4px}.security-chip{padding:6px 4px;font-size:7px}}
+@media(max-height:760px){.brand-badge,.security-strip,.auth-hint{display:none}}
 </style>
 <meta name="description" content="Sign in or create your SPIKE account.">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -37,8 +45,9 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 
 </head>
 <body>
+<div class="auth-ambient" aria-hidden="true"><span class="auth-orb a"></span><span class="auth-orb b"></span><span class="auth-orb c"></span></div>
 <main class="shell">
-<div class="brand"><img src="assets/icon/icon.png" alt="SPIKE" loading="lazy" decoding="async"><h1>Welcome to SPIKE</h1><p>Connect • Share • Discover</p></div>
+<div class="brand"><img src="assets/icon/icon.png" alt="SPIKE" loading="lazy" decoding="async"><h1>Welcome to SPIKE</h1><p>Connect • Share • Discover</p><span class="brand-badge"><i></i> Secure access • powered by SPIKE</span></div>
 <section class="card">
 <div class="tabs" role="tablist" aria-label="Account access"><button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="loginPanel">Sign In</button><button class="tab" id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerPanel">Create</button></div>
 <div class="content">
@@ -80,6 +89,7 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 <form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">Email delivery is rate-limited for security. If you just requested a message, wait before trying again.</div></form>
 
 </section>
+<div class="security-strip" aria-label="SPIKE account protections"><div class="security-chip"><strong>🔐 Secure</strong><span>Supabase Auth</span></div><div class="security-chip"><strong>✉️ Verified</strong><span>Email protection</span></div><div class="security-chip"><strong>⚡ Fast</strong><span>Smart session</span></div></div><div class="auth-hint"><span class="pulse"></span><span><b>Your session stays on this device</b> until you sign out.</span></div>
 </div></section>
 </main>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
@@ -485,10 +495,32 @@ if (b) { b.disabled = false; if (b.dataset.original) b.innerHTML = b.dataset.ori
   }
 })();
 
+// ─── AUTH ROUTING SAFETY ─────────────────────────────────
+function clearAuthUrlArtifacts() {
+  try {
+    const u = new URL(window.location.href);
+    const keys = ["code","error","error_code","error_description","access_token","refresh_token","token_type","type"];
+    let changed = false;
+    for (const k of keys) if (u.searchParams.has(k)) { u.searchParams.delete(k); changed = true; }
+    if (window.location.hash && /access_token|refresh_token|error|code_verifier/i.test(window.location.hash)) { u.hash = ""; changed = true; }
+    if (changed) window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ""));
+  } catch (_) {}
+}
+function isRecoveryFlow() {
+  const u = new URL(window.location.href);
+  return u.searchParams.get("type") === "recovery" || /type=recovery/i.test(window.location.hash || "");
+}
+
 // ─── boot: restore session ───
 async function boot() {
 try {
 const db = await ensureClient();
+if (isRecoveryFlow()) {
+  clearAuthUrlArtifacts();
+  switchPanel("forgot");
+  status("Enter your email below to request a fresh secure reset link.", "info");
+}
+
 const { data, error } = await db.auth.getSession();
 if (error) throw error;
 
@@ -520,6 +552,14 @@ toast(friendlyError(err, "login"), "error");
 }
 });
 } catch (err) { console.error("[SPIKE AUTH LISTENER]", err); }
+// Keep a stale tab from becoming a dead login screen after the session changes elsewhere.
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible") return;
+  try {
+    const { data } = await db.auth.getSession();
+    if (data?.session?.user && !state.redirecting && !state.completingLogin) await completeLogin(data.session.user);
+  } catch (e) { console.debug("[SPIKE SESSION REFRESH]", e); }
+});
 }
 // Accessible keyboard behavior
 document.addEventListener("keydown", e => {

@@ -224,6 +224,18 @@ img, video, iframe { max-width: 100%; }
 .spike-theme-pill:hover { transform:translateY(-1px) scale(1.03); }
 @media(max-width:600px){ .header{height:54px;padding:5px 9px} .icon{width:36px;height:36px;min-width:36px} .spike-ask-ai,.spike-theme-pill{width:37px;min-width:37px;height:37px} .brand-title{font-size:1.28rem;letter-spacing:.09em} .brand-subtitle{font-size:5.5px;margin-top:2px} }
 
+
+/* GLOBAL SPIKE SEARCH */
+.spike-global-search-overlay{position:fixed;inset:0;z-index:100001;display:flex;align-items:flex-start;justify-content:center;padding:74px 12px 20px;background:rgba(2,5,12,.68);backdrop-filter:blur(18px) saturate(135%);-webkit-backdrop-filter:blur(18px);opacity:0;visibility:hidden;pointer-events:none;transition:.2s ease}
+.spike-global-search-overlay.open{opacity:1;visibility:visible;pointer-events:auto}
+.spike-global-search-modal{width:min(760px,100%);max-height:calc(100dvh - 94px);overflow:hidden;display:flex;flex-direction:column;border:1px solid rgba(255,255,255,.12);border-radius:26px;background:linear-gradient(145deg,rgba(25,30,50,.98),rgba(8,11,22,.99));box-shadow:0 30px 100px rgba(0,0,0,.58),0 0 70px rgba(124,58,237,.13);transform:translateY(-12px) scale(.985);transition:.24s cubic-bezier(.2,.8,.2,1)}
+.spike-global-search-overlay.open .spike-global-search-modal{transform:none}
+.spike-global-search-head{display:flex;align-items:center;gap:10px;padding:13px;border-bottom:1px solid rgba(255,255,255,.08)}
+.spike-global-search-input-wrap{position:relative;flex:1}.spike-global-search-input{width:100%;height:46px;padding:0 14px 0 42px;border:1px solid rgba(255,255,255,.1);border-radius:15px;background:rgba(255,255,255,.055);color:#fff;outline:0;font:inherit;font-size:14px}.spike-global-search-input:focus{border-color:rgba(167,139,250,.55);box-shadow:0 0 0 4px rgba(139,92,246,.1)}.spike-global-search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;opacity:.72}.spike-global-search-close{width:42px;height:42px;border:1px solid rgba(255,255,255,.1);border-radius:13px;background:rgba(255,255,255,.055);color:#fff;font-size:20px}
+.spike-global-search-tabs{display:flex;gap:7px;padding:10px 13px;border-bottom:1px solid rgba(255,255,255,.07);overflow:auto;scrollbar-width:none}.spike-global-search-tabs::-webkit-scrollbar{display:none}.spike-global-search-tab{white-space:nowrap;padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(255,255,255,.68);font-size:11px;font-weight:800}.spike-global-search-tab.active{background:rgba(139,92,246,.18);border-color:rgba(167,139,250,.4);color:#fff}
+.spike-global-search-body{overflow:auto;padding:12px}.spike-global-search-status{text-align:center;padding:26px 12px;color:rgba(255,255,255,.52);font-size:12px}.spike-global-result{display:grid;grid-template-columns:44px 1fr auto;gap:11px;align-items:center;padding:11px;border:1px solid rgba(255,255,255,.065);border-radius:16px;background:rgba(255,255,255,.035);margin-bottom:8px;cursor:pointer;transition:.16s ease}.spike-global-result:hover{transform:translateY(-1px);background:rgba(139,92,246,.09);border-color:rgba(167,139,250,.28)}.spike-global-result-avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:#292f46;border:1px solid rgba(255,255,255,.1);font-weight:900}.spike-global-result-avatar img{width:100%;height:100%;object-fit:cover}.spike-global-result-title{font-weight:850;font-size:13px;color:#fff;line-height:1.25}.spike-global-result-sub{margin-top:3px;font-size:10px;color:rgba(255,255,255,.5);line-height:1.45}.spike-global-result-type{font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#b9a5ff}.spike-global-empty{padding:38px 14px;text-align:center;color:rgba(255,255,255,.5);font-size:12px;line-height:1.6}
+@media(max-width:600px){.spike-global-search-overlay{padding:62px 7px 8px}.spike-global-search-modal{max-height:calc(100dvh - 70px);border-radius:22px}.spike-global-search-head{padding:9px}.spike-global-search-input{height:44px}.spike-global-search-close{width:40px;height:40px}}
+
 /* MAIN LAYOUT */
 .main { width:min(100%,720px); margin:0 auto; padding:12px 10px 35px; }
 .card { background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
@@ -324,8 +336,9 @@ body.spike-image-viewer-open{overflow:hidden}
 
 /* SIGNAL STRENGTH TOP PICKS */
 #signalTopPicks{margin:0 0 14px;padding:12px;border:1px solid rgba(167,139,250,.30);background:linear-gradient(145deg,rgba(124,58,237,.13),rgba(236,72,153,.055));border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-#signalTopPicks[hidden]{display:none!important}.signal-picks-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.signal-picks-head h2{font-size:16px;margin:0}.signal-picks-head p{font-size:10px;color:var(--muted);margin-top:3px}.signal-picks-refresh{font-size:9px;color:var(--muted);padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}.signal-picks-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.signal-pick{position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;overflow:hidden;padding:0;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:#0a0d16;color:var(--text);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.16);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.signal-pick:hover,.signal-pick:focus-visible{transform:translateY(-2px);border-color:rgba(167,139,250,.56);box-shadow:0 12px 30px rgba(124,58,237,.18);outline:none}.signal-pick-media{position:relative;aspect-ratio:4/3;background:#05070b;overflow:hidden}.signal-pick-media img,.signal-pick-media video{display:block;width:100%;height:100%;object-fit:cover}.signal-pick-media.is-empty{display:grid;place-items:center;color:var(--muted);font-size:20px}.signal-pick-rank{position:absolute;left:7px;top:7px;z-index:3;display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:rgba(9,10,18,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:12px;font-weight:950;color:#c4b5fd;box-shadow:0 4px 14px rgba(0,0,0,.25)}.signal-pick-main{min-width:0;padding:8px 9px 9px}.signal-pick-main b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main span{display:block;margin-top:2px;font-size:9px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main small{display:block;margin-top:4px;color:var(--muted);font-size:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-score{position:absolute;right:7px;top:7px;z-index:4;min-width:45px;padding:4px 6px;border-radius:999px;text-align:center;font-size:13px;line-height:1;font-weight:950;color:#fff;background:rgba(124,58,237,.88);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.signal-pick-score em{display:inline;font-size:6px;font-style:normal;color:rgba(255,255,255,.72);font-weight:700}.signal-pick-bar{height:3px;margin:0 9px 9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.signal-pick-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c3aed,#c084fc);transform-origin:left center}.signal-strength-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);color:var(--primary2);font-size:9px;font-weight:900}.rank-badge{font-variant-numeric:tabular-nums}
+#signalTopPicks[hidden]{display:none!important}.signal-picks-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}.signal-picks-head h2{font-size:16px;margin:0}.signal-picks-head p{font-size:10px;color:var(--muted);margin-top:3px}.signal-picks-refresh{font-size:9px;color:var(--muted);padding:6px 8px;border:1px solid var(--line);border-radius:999px;background:var(--surface2)}.signal-picks-list{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.signal-pick{position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;overflow:hidden;padding:0;text-align:left;border:1px solid rgba(255,255,255,.09);border-radius:15px;background:#0a0d16;color:var(--text);cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.16);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.signal-pick:hover,.signal-pick:focus-visible{transform:translateY(-2px);border-color:rgba(167,139,250,.56);box-shadow:0 12px 30px rgba(124,58,237,.18);outline:none}.signal-pick-media{position:relative;aspect-ratio:4/3;background:#05070b;overflow:hidden}.signal-pick-media img,.signal-pick-media video{display:block;width:100%;height:100%;object-fit:cover}.signal-pick-media-type{position:absolute;left:7px;bottom:7px;z-index:3;padding:3px 6px;border-radius:999px;background:rgba(8,10,18,.78);border:1px solid rgba(255,255,255,.14);font-size:7px;font-weight:950;letter-spacing:.04em;color:#fff;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}.signal-pick-media.is-empty{display:grid;place-items:center;color:var(--muted);font-size:20px}.signal-pick-rank{position:absolute;left:7px;top:7px;z-index:3;display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:rgba(9,10,18,.82);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:12px;font-weight:950;color:#c4b5fd;box-shadow:0 4px 14px rgba(0,0,0,.25)}.signal-pick-main{min-width:0;padding:8px 9px 9px}.signal-pick-main b{display:block;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main span{display:block;margin-top:2px;font-size:9px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-main small{display:block;margin-top:4px;color:var(--muted);font-size:8px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.signal-pick-score{position:absolute;right:7px;top:7px;z-index:4;min-width:45px;padding:4px 6px;border-radius:999px;text-align:center;font-size:13px;line-height:1;font-weight:950;color:#fff;background:rgba(124,58,237,.88);border:1px solid rgba(255,255,255,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}.signal-pick-score em{display:inline;font-size:6px;font-style:normal;color:rgba(255,255,255,.72);font-weight:700}.signal-pick-bar{height:3px;margin:0 9px 9px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.signal-pick-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7c3aed,#c084fc);transform-origin:left center}.signal-strength-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);color:var(--primary2);font-size:9px;font-weight:900}.rank-badge{font-variant-numeric:tabular-nums}
 @media(max-width:760px){.signal-picks-list{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding-bottom:2px}.signal-picks-list::-webkit-scrollbar{display:none}.signal-pick{flex:0 0 160px;scroll-snap-align:start}.signal-pick-media{aspect-ratio:1/1}}
+.signal-pick-media img,.signal-pick-media video{transition:transform .35s ease,filter .35s ease}.signal-pick:hover .signal-pick-media img,.signal-pick:hover .signal-pick-media video{transform:scale(1.045);filter:saturate(1.08) contrast(1.03)}.signal-pick-media::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.08),transparent 38%,rgba(0,0,0,.22));z-index:2}.signal-pick-media-type{box-shadow:0 4px 14px rgba(0,0,0,.25)}.signal-pick:nth-child(1){border-color:rgba(250,204,21,.34);box-shadow:0 10px 30px rgba(250,204,21,.08)}.signal-pick:nth-child(1) .signal-pick-rank{color:#fde68a;border-color:rgba(250,204,21,.32)}
 @media(max-width:420px){.signal-pick{flex-basis:148px}}
 
 /* SIGNAL INTELLIGENCE */
@@ -1807,7 +1820,19 @@ function rankingContext(posts){return{userId:state.user?.id||'',following:state.
 function rankPosts(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function postRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
 function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankPosts(x,mode)}
-function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>`<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${signalScore(p)} out of 100"><span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#${i+1}</span><strong class="signal-pick-score">${signalScore(p)}<em>/100</em></strong></span><span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(String(p.content||'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${signalScore(p)}%"></i></span></button>`).join('')}
+function signalTopPickMedia(p){
+  const items=Array.isArray(p.mediaItems)&&p.mediaItems.length?p.mediaItems:(p.mediaUrl?[{url:p.mediaUrl,type:p.mediaType||'image',mimeType:p.mimeType||'',originalUrl:p.mediaOriginalUrl||null,playbackUrl:p.playbackUrl||null}]:[]);
+  if(!items.length)return '<span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#RANK#</span><strong class="signal-pick-score">SCORE<em>/100</em></strong></span>';
+  const m=items[0], kind=mediaKindOf(m);
+  const raw=safeHttpUrl(m.url||m.mediaUrl||m.originalUrl||m.playbackUrl);
+  let media='';
+  if(kind==='video') media=postVideoPlaybackUrl(m);
+  else if(kind==='gif'||kind==='image') media=cloudinaryFeedImageUrl(raw);
+  if(!media)return '<span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#RANK#</span><strong class="signal-pick-score">SCORE<em>/100</em></strong></span>';
+  if(kind==='video') return `<span class="signal-pick-media"><video src="${esc(media)}" poster="${esc(cloudinaryVideoPosterUrl(raw))}" muted autoplay loop playsinline preload="metadata" aria-hidden="true"></video><span class="signal-pick-media-type">▶ VIDEO</span><span class="signal-pick-rank">#RANK#</span><strong class="signal-pick-score">SCORE<em>/100</em></strong></span>`;
+  return `<span class="signal-pick-media"><img src="${esc(media)}" alt="" loading="lazy" decoding="async">${kind==='gif'?'<span class="signal-pick-media-type">GIF</span>':''}<span class="signal-pick-rank">#RANK#</span><strong class="signal-pick-score">SCORE<em>/100</em></strong></span>`;
+}
+function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>{const score=signalScore(p);const media=signalTopPickMedia(p).replaceAll('#RANK#',String(i+1)).replaceAll('SCORE',String(score));return `<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${score} out of 100">${media}<span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(String(p.content||'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${score}%"></i></span></button>`}).join('')}
 function refreshSignalRanking({render=true,force=false}={}){
   const mode=state.filter==='following'?'following':state.filter==='saved'?'saved':(state.filter||'forYou');
   const raw=state.posts.slice();
@@ -3947,6 +3972,47 @@ function showProfileActions(id, relationship, name){
   s.classList.add('show'); s.setAttribute('aria-hidden','false');
 }
 
+
+// ─── GLOBAL SPIKE SEARCH ─────────────────────────────
+function initGlobalSearch(){
+  const overlay=$('spikeGlobalSearchOverlay'),input=$('spikeGlobalSearchInput'),body=$('spikeGlobalSearchBody');
+  if(!overlay||!input||!body)return;
+  let timer=0,request=0,filter='all';
+  const featureDocs=[
+    ['Feed','For You, Discover, Trending, Reels, Nearby and Creator tools.'],['Friends','Find people, send requests and manage friendships.'],['Messages','Chat privately with your connections.'],['Voice & Video Calls','Call eligible friends from a private conversation.'],['Stories','Share and view time-limited updates.'],['Rooms','Discover and participate in communities.'],['Notifications','Review mentions, activity and system updates.'],['Profile','Manage your profile, privacy, followers and connections.'],['Saved','Save posts and organize them into collections.'],['Safety','Block, report and tune your feed preferences.']
+  ];
+  const escLocal=v=>esc(String(v??''));
+  function open(){overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');setTimeout(()=>input.focus(),20);}
+  function close(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');}
+  function featureMatches(q){const n=q.toLowerCase();return featureDocs.filter(x=>(x[0]+' '+x[1]).toLowerCase().includes(n)).map(x=>({type:'feature',id:'feature-'+x[0],title:x[0],subtitle:x[1],url:''}));}
+  function render(rows,q){
+    if(!rows.length){body.innerHTML=`<div class="spike-global-empty">No results for <b>${escLocal(q)}</b>.<br>Try a name, username, post text, or SPIKE feature.</div>`;return;}
+    body.innerHTML=rows.map(r=>{const av=r.avatar_url?`<img src="${escLocal(r.avatar_url)}" alt="" loading="lazy">`:(r.type==='person'?'👤':r.type==='post'?'📝':'✦');return `<div class="spike-global-result" data-result-type="${escLocal(r.type)}" data-result-id="${escLocal(r.id)}" data-result-url="${escLocal(r.url||'')}"><div class="spike-global-result-avatar">${av}</div><div><div class="spike-global-result-title">${escLocal(r.title)}</div><div class="spike-global-result-sub">${escLocal(r.subtitle||'')}</div></div><span class="spike-global-result-type">${escLocal(r.type)}</span></div>`}).join('');
+  }
+  async function search(q){
+    q=q.trim(); if(q.length<2){body.innerHTML='<div class="spike-global-empty">Type at least 2 characters to search all discoverable SPIKE content.</div>';return;}
+    const rid=++request;body.innerHTML='<div class="spike-global-search-status">🔎 Searching SPIKE…</div>';
+    let remote=[];
+    try{const {data,error}=await db.rpc('search_spike',{p_query:q,p_limit:60});if(error)throw error;remote=(data||[]).map(r=>({type:r.result_type==='person'?'person':'post',id:r.result_id,title:r.title,subtitle:r.subtitle,url:r.url,avatar_url:r.avatar_url}));}catch(e){console.warn('[SPIKE SEARCH]',e);}
+    if(rid!==request)return;
+    const local=featureMatches(q).map(x=>({type:'feature',id:x.id,title:x.title,subtitle:x.subtitle,url:''}));
+    let rows=[...remote,...local];
+    if(filter==='people')rows=rows.filter(r=>r.type==='person');
+    if(filter==='posts')rows=rows.filter(r=>r.type==='post');
+    if(filter==='features')rows=rows.filter(r=>r.type==='feature');
+    render(rows.slice(0,60),q);
+  }
+  function schedule(){clearTimeout(timer);timer=setTimeout(()=>search(input.value),180);}
+  $('spikeGlobalSearchBtn')?.addEventListener('click',open);
+  $('spikeGlobalSearchClose')?.addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
+  input.addEventListener('input',schedule);
+  input.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();}});
+  $('spikeGlobalSearchTabs')?.addEventListener('click',e=>{const b=e.target.closest('[data-search-type]');if(!b)return;filter=b.dataset.searchType||'all';document.querySelectorAll('#spikeGlobalSearchTabs .spike-global-search-tab').forEach(x=>x.classList.toggle('active',x===b));if(input.value.trim())search(input.value);});
+  body.addEventListener('click',e=>{const r=e.target.closest('.spike-global-result');if(!r)return;const type=r.dataset.resultType,id=r.dataset.resultId,url=r.dataset.resultUrl;if(type==='person'&&id){close();openSpikeProfilePreview(id);return;}if(type==='post'&&id){close();const el=document.querySelector(`#posts [data-post="${CSS.escape(id)}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.animate([{boxShadow:'0 0 0 3px rgba(139,92,246,.55)'},{boxShadow:''}],700);}else{const u=new URL(window.location.href);u.searchParams.set('post',id);window.location.href=u.href;}return;}if(url)window.location.href=url;});
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&!e.target.matches('input,textarea,select')){e.preventDefault();open();}});
+}
+
 // ─── AI SEARCH ─────────────────────────────────────────
 function initAISearch(){
   const overlay = $('spikeAiSearchOverlay'), input = $('spikeAiInput'), body = $('spikeAiBody');
@@ -4607,6 +4673,7 @@ async function boot() {
     refreshSignalRanking();
     initModernApp();
     initAISearch();
+  initGlobalSearch();
     initRealtime().catch(e => console.warn('realtime init', e));
     loadFriendRecommendations().catch(e => console.warn('friend recommendations', e));
 
@@ -4680,6 +4747,7 @@ else boot();
 <header class="header">
 <a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title"><img class="spike-official-logo" src="assets/icon/icon.png" data-spike-brand="responsive" alt="SPIKE" decoding="async" loading="lazy"></span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></span></a>
 <div class="header-actions spike-header-actions">
+<button class="icon" id="spikeGlobalSearchBtn" type="button" title="Search SPIKE" aria-label="Search SPIKE">🔎</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
 <button class="icon" id="notificationBtn" title="Notifications" aria-label="Notifications">🔔<span class="badge" id="notificationBadge"></span></button>
@@ -4687,6 +4755,23 @@ else boot();
 <button class="icon" id="profileBtn" title="Profile" aria-label="Profile"><span class="avatar" id="headerAvatar">U</span></button>
 </div>
 </header>
+
+
+<div class="spike-global-search-overlay" id="spikeGlobalSearchOverlay" aria-hidden="true">
+ <section class="spike-global-search-modal" role="dialog" aria-modal="true" aria-labelledby="spikeGlobalSearchTitle">
+  <div class="spike-global-search-head">
+   <div class="spike-global-search-input-wrap"><span class="spike-global-search-icon" aria-hidden="true">🔎</span><input id="spikeGlobalSearchInput" class="spike-global-search-input" autocomplete="off" spellcheck="false" placeholder="Search SPIKE — people, posts, topics…" aria-label="Search SPIKE"></div>
+   <button type="button" class="spike-global-search-close" id="spikeGlobalSearchClose" aria-label="Close search">×</button>
+  </div>
+  <div class="spike-global-search-tabs" id="spikeGlobalSearchTabs" aria-label="Search filters">
+   <button type="button" class="spike-global-search-tab active" data-search-type="all">Everything</button>
+   <button type="button" class="spike-global-search-tab" data-search-type="people">People</button>
+   <button type="button" class="spike-global-search-tab" data-search-type="posts">Posts</button>
+   <button type="button" class="spike-global-search-tab" data-search-type="features">SPIKE</button>
+  </div>
+  <div class="spike-global-search-body" id="spikeGlobalSearchBody"><div class="spike-global-search-empty">Search across discoverable SPIKE people and posts. Private content is excluded by Supabase.</div></div>
+ </section>
+</div>
 
 <div class="spike-ai-search-overlay" id="spikeAiSearchOverlay" aria-hidden="true">
  <section class="spike-ai-search-modal" role="dialog" aria-modal="true" aria-labelledby="spikeAiTitle">

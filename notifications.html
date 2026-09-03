@@ -636,29 +636,63 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSe
 window.sb=sb;
 window.supabaseClient=sb;
 const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
-let me=null,rows=[],channel=null;
+let me=null,rows=[],channel=null,profileCache=new Map(),appPrefs={message_tone:true,browser_notifications:false};
 function dataOf(n){return n&&n.data&&typeof n.data==="object"?n.data:{}}
 function firstValue(d,keys){for(const k of keys){const v=d?.[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v)}return ""}
-function actorOf(n){const d=dataOf(n);return firstValue(d,["actor_name","from_name","sender_name","username","name","display_name","actor"]) }
+
 function targetOf(n){const d=dataOf(n);return firstValue(d,["target_name","post_title","room_name","conversation_name","recipient_name"]) }
 function detailOf(n){const d=dataOf(n);return firstValue(d,["body","description","detail","details","preview","content","message"])}
-function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",new_follower:"New follower",follow:"New follower",like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",new_follower:"New follower",follow:"New follower",like:"New like",post_like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",room_purchase_verified:"Purchase approved",room_purchase_rejected:"Purchase rejected",broadcast:"SPIKE broadcast",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
 function notificationText(n){
 const d=dataOf(n);
 const explicit=firstValue(d,["message","body","description","detail","preview"]);
 if(explicit)return explicit;
 const actor=actorOf(n),target=targetOf(n);
 const amount=Number(d.amount||0).toLocaleString(),coins=Number(d.coins||0).toLocaleString();
-const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",new_follower:"started following you",follow:"followed you",like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",announcement:"published a new announcement"};
+const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",new_follower:"started following you",follow:"followed you",like:"liked your post",post_like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",room_purchase_verified:`purchase approved: ${d.item||"item"}`,room_purchase_rejected:`purchase rejected: ${d.item||"item"}`,broadcast:"published a SPIKE broadcast",announcement:"published a new announcement"};
 const action=map[String(n.type||"").toLowerCase()];
 if(action)return actor?`${actor} ${action}${target?` · ${target}`:""}`:action;
 return actor?`${actor}${target?` · ${target}`:""}`:String(n.type||"Notification").replaceAll("_"," ");
 }
 function notificationIcon(n){const t=String(n.type||"").toLowerCase();if(/coin/.test(t))return "🪙";if(/friend|follow/.test(t))return "👥";if(/like/.test(t))return "❤️";if(/comment|message|chat/.test(t))return "💬";if(/room/.test(t))return "🎙️";if(/announcement/.test(t))return "📢";if(/login|security|auth/.test(t))return "🔐";if(/error|fail/.test(t))return "⚠️";return "🔔"}
 function formatTime(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "";const diff=Math.max(0,Date.now()-d.getTime());if(diff<60000)return "Just now";if(diff<3600000)return Math.floor(diff/60000)+"m ago";if(diff<86400000)return Math.floor(diff/3600000)+"h ago";if(diff<604800000)return Math.floor(diff/86400000)+"d ago";return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:d.getFullYear()===new Date().getFullYear()?undefined:"numeric"})}
-function notificationHref(n){const d=n.data&&typeof n.data==="object"?n.data:{};const href=d.url||d.href||d.link;if(!href)return null;try{const u=new URL(href,location.href);return u.origin===location.origin?u.href:null}catch(e){return null}}
+function notificationHref(n){
+const d=dataOf(n),t=String(n?.type||"").toLowerCase();
+const explicit=d.url||d.href||d.link;
+let href=explicit;
+if(!href&&d.post_id) href="feed.html?post="+encodeURIComponent(String(d.post_id));
+if(!href&&d.actor_id) href="profile.html?uid="+encodeURIComponent(String(d.actor_id));
+if(!href&&d.user_id&&String(d.user_id)!==String(me?.id||"")) href="profile.html?uid="+encodeURIComponent(String(d.user_id));
+if(!href&&/message|chat/.test(t)) href="message.html";
+if(!href&&/room/.test(t)) href="rooms.html";
+if(!href&&/announcement|broadcast|system|security/.test(t)) href=null;
+if(!href)return null;
+try{const u=new URL(String(href),window.location.href);return u.origin===window.location.origin?u.href:null}catch(e){return null}
+}
 let notificationFilter="all",notificationQuery="";
-function categoryOf(n){const t=String(n?.type||"").toLowerCase();if(t.includes("announcement"))return "announcements";if(t.includes("mention"))return "mentions";if(t.includes("system")||t.includes("security")||t.includes("auth"))return "system";return "activity";}
+async function hydrateNotificationActors(list){
+  const ids=[...new Set((list||[]).flatMap(n=>{
+    const d=dataOf(n),v=[d.actor_id,d.from_user_id,d.sender_id,d.from_id];
+    return v.filter(x=>x&&/^[0-9a-f-]{36}$/i.test(String(x))).map(String);
+  }))];
+  const missing=ids.filter(id=>!profileCache.has(id));
+  if(!missing.length)return;
+  try{
+    const r=await sb.rpc("get_public_profiles",{p_user_ids:missing});
+    if(r.error)throw r.error;
+    (r.data||[]).forEach(p=>{if(p?.id)profileCache.set(String(p.id),p)});
+  }catch(e){console.warn("SPIKE notification actor lookup unavailable",e)}
+}
+function actorOf(n){
+  const d=dataOf(n),explicit=firstValue(d,["actor_name","from_name","sender_name","username","name","display_name","actor"]);
+  if(explicit)return explicit;
+  for(const key of ["actor_id","from_user_id","sender_id","from_id"]){
+    const id=d?.[key],p=id&&profileCache.get(String(id));
+    if(p)return p.display_name||p.full_name||p.username||"SPIKE user";
+  }
+  return "";
+}
+function categoryOf(n){const t=String(n?.type||"").toLowerCase();if(t.includes("announcement")||t==="broadcast")return "announcements";if(t.includes("mention"))return "mentions";if(t.includes("system")||t.includes("security")||t.includes("auth")||t.startsWith("room_purchase_"))return "system";return "activity";}
 function render(){
 const box=$("#notificationList"); if(!box)return; const count=rows.filter(n=>!n.read).length;
 $("#unreadCount").textContent=count>99?"99+":String(count);$("#unreadPlural").textContent=count===1?"":"s";$("#markAll").disabled=!count;$("#clearAll").disabled=!rows.length;
