@@ -18,26 +18,88 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 .shell{width:min(430px,100%);max-height:calc(100dvh - 24px);display:flex;flex-direction:column;justify-content:center;gap:clamp(9px,1.6dvh,16px)}
 .brand{text-align:center;flex:0 0 auto}.brand img{width:clamp(48px,7.5dvh,70px);height:clamp(48px,7.5dvh,70px);object-fit:contain;border-radius:19px;filter:drop-shadow(0 0 24px rgba(139,61,255,.3))}.brand h1{font-size:clamp(21px,2.8dvh,25px);line-height:1.1;margin:7px 0 3px;letter-spacing:-.5px}.brand p{margin:0;color:var(--muted);font-size:11px}
 .card{min-height:0;border:1px solid var(--line);border-radius:27px;padding:clamp(14px,2.3dvh,23px);background:linear-gradient(145deg,rgba(24,27,43,.97),rgba(12,14,25,.99));box-shadow:0 28px 80px rgba(0,0,0,.42);overflow:hidden}
-.tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:rgba(255,255,255,.045);padding:4px;border-radius:15px;margin-bottom:clamp(12px,2dvh,19px)}.tabs button{border:0;background:transparent;color:var(--muted);min-height:41px;border-radius:11px;font-weight:850}.tabs button.active{background:rgba(139,61,255,.27);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.14)}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:3px;background:rgba(255,255,255,.045);padding:4px;border-radius:15px;margin-bottom:clamp(12px,2dvh,19px)}.tabs button{border:0;background:transparent;color:var(--muted);min-height:41px;border-radius:11px;font-weight:850}.tabs button.active{background:rgba(139,61,255,.27);color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.14)}.tabs.otp-hidden{display:none}
 .panel{display:none;min-height:0}.panel.active{display:block}.title{margin:0 0 5px;font-size:clamp(19px,2.7dvh,22px);letter-spacing:-.35px}.subtitle{margin:0 0 clamp(9px,1.8dvh,16px);color:var(--muted);font-size:12px;line-height:1.45}.form-note{font-size:9.5px;color:#747c8d;line-height:1.35;margin:-2px 0 8px;max-height:28px;overflow:hidden}
 .field{margin:0 0 9px}.label{display:flex;justify-content:space-between;gap:8px;margin:0 0 4px;color:#d7dbe5;font-size:11px;font-weight:800}.input-wrap{position:relative}.input-wrap input{width:100%;height:43px;padding:0 43px 0 13px;border-radius:13px;border:1px solid var(--line);background:var(--surface2);color:#fff;outline:none;font-size:13px}.input-wrap input:focus{border-color:rgba(176,92,255,.68);box-shadow:0 0 0 3px rgba(139,61,255,.11)}.password-toggle{position:absolute;right:6px;top:4px;height:35px;width:43px;border:0;border-radius:9px;background:transparent;color:#aeb5c4;font-size:9px;font-weight:850;text-transform:uppercase}.field.invalid input{border-color:rgba(251,113,133,.65)}.field.valid input{border-color:rgba(52,211,153,.45)}
 .account-state{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:8px 10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.025);font-size:10px;color:#9ca3b3}.account-state .dot{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(52,211,153,.08)}
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:3px 0 10px}.check{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px}.check input{width:15px;height:15px;margin:0;padding:0;accent-color:var(--purple)}.link,.bottom button{border:0;background:none;color:#c4b5fd;font-size:11px;font-weight:800;padding:0}.primary{width:100%;height:43px;margin-top:5px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;font-weight:900;font-size:13px;box-shadow:0 12px 28px rgba(139,61,255,.22)}.primary.loading{pointer-events:none}.spinner,.oauth-loading{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
 .oauth-divider{display:flex;align-items:center;gap:10px;margin:11px 0 9px;color:#596173;font-size:9px;letter-spacing:.25px;text-transform:uppercase}.oauth-divider:before,.oauth-divider:after{content:"";height:1px;background:var(--line);flex:1}.oauth-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.oauth-btn{height:40px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.035);color:#eef0f5;font-weight:750;font-size:11px}.oauth-icon{width:21px;height:21px;display:grid;place-items:center}.oauth-icon svg{width:21px;height:21px;display:block}.google-icon{background:#fff;border-radius:50%;overflow:hidden}.github-icon{background:#24292f;border-radius:50%;padding:3px}.bottom{text-align:center;margin-top:10px;color:var(--muted);font-size:10px}.fine{margin-top:10px;text-align:center;color:#777e91;font-size:8.5px;line-height:1.4}
 .strength{margin:-2px 0 6px}.strength-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.strength-bars span{height:4px;border-radius:99px;background:#292e3b}.strength-bars span.on{background:var(--good)}#strengthText{font-size:8.5px;color:#81899a;margin-top:3px}.password-help{margin:-1px 0 6px}.password-help button{border:0;background:none;padding:0;color:#a98bff;font-size:8.5px;font-weight:800}.requirements{display:none;grid-template-columns:1fr 1fr;gap:3px 8px;margin:4px 0 6px;padding:7px 8px;border-radius:10px;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06)}.requirements.open{display:grid}.req{font-size:8px;color:#777f90}.req.ok{color:#8ee8bf}.terms{margin:3px 0 6px}.terms label{font-size:9px;margin:0}.status{display:none;padding:8px 10px;border-radius:11px;margin:0 0 9px;font-size:10px;line-height:1.35}.status.show{display:block}.status.error{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.22);color:#fecdd3}.status.success{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.2);color:#bbf7d0}.status.info{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.2);color:#bfdbfe}
-.inline-help{margin-top:7px;font-size:9px;color:#687080;line-height:1.4}.toast-stack{position:fixed;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:100;display:grid;gap:7px;pointer-events:none}.toast{display:flex;gap:9px;align-items:flex-start;max-width:420px;margin-left:auto;background:rgba(18,22,31,.97);border:1px solid var(--line);box-shadow:0 18px 45px rgba(0,0,0,.42);border-radius:14px;padding:10px 11px;pointer-events:auto}.toast .ico{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:11px;flex:none}.toast .msg{font-size:10px;line-height:1.4;color:#eef0f5;flex:1}.toast .x{border:0;background:none;color:#7f8797;font-size:14px;padding:0}
+.otp-panel{text-align:center}.otp-icon{width:54px;height:54px;margin:0 auto 10px;display:grid;place-items:center;border-radius:17px;background:rgba(139,61,255,.12);border:1px solid rgba(139,61,255,.28);font-size:24px}.otp-email{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ddd6fe;font-weight:800}.otp-input{width:100%;height:56px;margin:8px 0 10px;padding:0 12px;border-radius:15px;border:1px solid rgba(176,92,255,.38);background:var(--surface2);color:#fff;text-align:center;letter-spacing:9px;font-size:25px;font-weight:900;outline:none}.otp-input:focus{border-color:rgba(176,92,255,.8);box-shadow:0 0 0 4px rgba(139,61,255,.12)}.otp-input::placeholder{letter-spacing:7px;color:#555d70}.otp-countdown{text-align:center;color:#777f91;font-size:9px;margin-top:9px}.otp-resend{border:0;background:none;color:#c4b5fd;font-weight:850;font-size:10px;padding:0}.otp-resend:disabled{color:#666d7d}.otp-panel .subtitle{margin-bottom:10px}.inline-help{margin-top:7px;font-size:9px;color:#687080;line-height:1.4}.toast-stack{position:fixed;right:12px;bottom:max(12px,env(safe-area-inset-bottom));left:12px;z-index:100;display:grid;gap:7px;pointer-events:none}.toast{display:flex;gap:9px;align-items:flex-start;max-width:420px;margin-left:auto;background:rgba(18,22,31,.97);border:1px solid var(--line);box-shadow:0 18px 45px rgba(0,0,0,.42);border-radius:14px;padding:10px 11px;pointer-events:auto}.toast .ico{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:11px;flex:none}.toast .msg{font-size:10px;line-height:1.4;color:#eef0f5;flex:1}.toast .x{border:0;background:none;color:#7f8797;font-size:14px;padding:0}
 .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.74);display:none;place-items:center;padding:14px;z-index:200}.modal-backdrop.show{display:grid}.modal{width:min(390px,100%);max-height:calc(100dvh - 28px);overflow:hidden;background:#11151e;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.5)}.modal h2{margin:0 0 6px;font-size:19px}.modal p{margin:0 0 14px;color:var(--muted);font-size:11px;line-height:1.45}.spid-label{text-align:center;color:#7f8797;font-size:8px;letter-spacing:1px;margin-bottom:4px}.spid{font-size:24px;font-weight:900;letter-spacing:1px;text-align:center;padding:14px;border:1px solid rgba(139,61,255,.35);background:rgba(139,61,255,.1);border-radius:14px;margin-bottom:13px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.secondary{height:40px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.05);color:#fff;font-weight:800}.footer{display:none}
 @media(max-width:390px){.oauth-grid{grid-template-columns:1fr}.oauth-btn{height:37px}.card{padding:12px}.tabs button{min-height:38px}.brand img{width:44px;height:44px}.brand h1{font-size:20px}.input-wrap input{height:40px}.primary{height:40px}}
 @media(max-height:760px){.shell{gap:7px}.brand img{width:43px;height:43px}.brand h1{font-size:20px;margin:4px 0 1px}.brand p{display:none}.card{max-height:calc(100dvh - 58px);padding:12px}.tabs{margin-bottom:8px}.tabs button{min-height:36px}.account-state{padding:6px 9px;margin-bottom:7px}.field{margin-bottom:6px}.input-wrap input{height:38px}.primary{height:38px}.oauth-divider{margin:7px 0}.oauth-btn{height:36px}.bottom{margin-top:6px}.strength-bars span{height:3px}}
 @media(max-height:650px){body{padding:6px}.shell{max-height:calc(100dvh - 12px)}.brand{display:flex;align-items:center;justify-content:center;gap:7px}.brand img{width:34px;height:34px}.brand h1{font-size:18px;margin:0}.card{max-height:calc(100dvh - 44px);padding:9px}.content{padding:0}.tabs button{min-height:33px}.title{font-size:16px}.subtitle{font-size:9px;margin-bottom:5px}.account-state{display:none}.field{margin-bottom:4px}.label{font-size:9px;margin-bottom:2px}.input-wrap input{height:33px;min-height:33px;font-size:11px}.strength,.password-help,.requirements{display:none!important}.terms{margin:2px 0 4px}.terms label{font-size:8px}.primary{height:34px;min-height:34px;font-size:11px}.oauth-divider{margin:5px 0}.oauth-btn{height:32px;font-size:9px}.bottom{font-size:8px;margin-top:3px}}
 
-/* ===== SPIKE AUTH EXPERIENCE UPGRADE ===== */
-.auth-ambient{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}.auth-orb{position:absolute;border-radius:50%;filter:blur(1px);opacity:.42;mix-blend-mode:screen}.auth-orb.a{width:360px;height:360px;left:-170px;top:-150px;background:radial-gradient(circle,rgba(139,61,255,.34),transparent 68%)}.auth-orb.b{width:300px;height:300px;right:-140px;bottom:-130px;background:radial-gradient(circle,rgba(176,92,255,.28),transparent 70%)}.auth-orb.c{width:180px;height:180px;right:12%;top:18%;background:radial-gradient(circle,rgba(52,211,153,.09),transparent 70%)}
-.shell{position:relative}.brand{position:relative}.brand-badge{display:inline-flex;align-items:center;gap:5px;margin:4px 0 0;padding:4px 8px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035);color:#aeb5c4;font-size:7.5px;font-weight:900;letter-spacing:.65px;text-transform:uppercase}.brand-badge i{width:5px;height:5px;border-radius:50%;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.65)}
-.card{position:relative;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 30px 100px rgba(0,0,0,.48),0 0 0 1px rgba(139,61,255,.025)}.card:before{content:"";position:absolute;inset:0 0 auto;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.24),rgba(176,92,255,.3),transparent);pointer-events:none}.tabs button{transition:transform .18s ease,background .18s ease,color .18s ease}.tabs button:hover{color:#fff;transform:translateY(-1px)}.primary{position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.primary:after{content:"";position:absolute;inset:-80% -20%;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);transform:translateX(-70%) rotate(8deg);transition:transform .65s ease}.primary:hover{transform:translateY(-1px);box-shadow:0 15px 34px rgba(139,61,255,.31);filter:saturate(1.08)}.primary:hover:after{transform:translateX(70%) rotate(8deg)}
-.oauth-btn{transition:transform .18s ease,border-color .18s ease,background .18s ease}.oauth-btn:hover{transform:translateY(-1px);border-color:rgba(176,92,255,.32);background:rgba(255,255,255,.065)}.link,.bottom button{transition:color .16s ease}.link:hover,.bottom button:hover{color:#fff}.input-wrap input{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}.input-wrap input:hover{background:#1a1e2f}.account-state{transition:border-color .18s ease,background .18s ease}.security-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0 0}.security-chip{min-width:0;padding:7px 7px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.02);text-align:center;color:#747c8e;font-size:7.5px;font-weight:800;line-height:1.25}.security-chip strong{display:block;color:#b9c0cf;font-size:8px;margin-bottom:2px}.security-chip span{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.auth-hint{display:flex;align-items:center;justify-content:center;gap:5px;margin-top:7px;color:#666e80;font-size:7.5px}.auth-hint b{color:#9ca5b8}.auth-hint .pulse{width:5px;height:5px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.06)}
-@media(max-width:390px){.security-strip{gap:4px}.security-chip{padding:6px 4px;font-size:7px}}
-@media(max-height:760px){.brand-badge,.security-strip,.auth-hint{display:none}}
+
+/* SPIKE 8-UPGRADE UI SYSTEM */
+:root{--glass:rgba(255,255,255,.045);--focus:rgba(176,92,255,.72);--gold:#fbbf24}
+body{isolation:isolate}
+.auth-ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:-1}.auth-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.22;animation:orbFloat 14s ease-in-out infinite}.auth-orb.a{width:240px;height:240px;background:#7c3aed;left:-90px;top:8%}.auth-orb.b{width:210px;height:210px;background:#db2777;right:-80px;bottom:12%;animation-delay:-5s}.auth-orb.c{width:140px;height:140px;background:#2563eb;left:42%;top:30%;animation-delay:-9s}@keyframes orbFloat{50%{transform:translate3d(0,-18px,0) scale(1.06)}}
+.brand-badge{display:inline-flex;align-items:center;gap:5px;margin-top:7px;padding:5px 8px;border:1px solid rgba(255,255,255,.08);border-radius:999px;background:rgba(255,255,255,.035);color:#8f97aa;font-size:8px;font-weight:800;letter-spacing:.2px}.brand-badge i{width:5px;height:5px;border-radius:50%;background:var(--good);box-shadow:0 0 10px var(--good)}
+.card{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}.card:focus-within{border-color:rgba(176,92,255,.25);box-shadow:0 32px 90px rgba(0,0,0,.48),0 0 0 1px rgba(139,61,255,.08)}
+button,input{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}button:not(:disabled):hover{transform:translateY(-1px)}button:focus-visible,input:focus-visible{outline:2px solid var(--focus);outline-offset:2px}.primary:not(:disabled):hover{box-shadow:0 15px 34px rgba(139,61,255,.3);filter:saturate(1.08)}
+.field-hint{display:none;margin:4px 1px 0;font-size:8.5px;line-height:1.35;color:#7e8799}.field.invalid .field-hint{display:block;color:#fda4af}.field.valid .field-hint{display:block;color:#86efac}.field.invalid input{box-shadow:0 0 0 2px rgba(251,113,133,.06)}
+.status{position:relative;padding-left:34px}.status:before{content:'ℹ';position:absolute;left:11px;top:8px;width:15px;height:15px;border-radius:50%;display:grid;place-items:center;background:rgba(96,165,250,.16);font-size:8px;font-weight:900}.status.error:before{content:'!';background:rgba(244,63,94,.18);color:#fecdd3}.status.success:before{content:'✓';background:rgba(52,211,153,.16);color:#bbf7d0}.status.warning:before{content:'!';background:rgba(251,191,36,.16);color:#fde68a}
+.auth-insights{display:grid;grid-template-columns:1fr;gap:7px;margin-top:10px}.insight-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.insight-title{font-size:10px;font-weight:900}.insight-meta{font-size:8px;color:#737b8c}.rank-list{display:grid;gap:6px}.rank-item{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:8px;padding:7px 8px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:linear-gradient(100deg,rgba(255,255,255,.035),rgba(255,255,255,.018));cursor:pointer}.rank-num{font-size:9px;font-weight:950;color:#b9a4ff}.rank-main{min-width:0}.rank-name{font-size:9.5px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-reason{font-size:7.5px;color:#737b8c;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-score{font-size:8px;font-weight:900;color:#d8ccff}.rank-item:hover{border-color:rgba(176,92,255,.25);background:rgba(139,61,255,.07)}.insight-foot{font-size:7.5px;color:#666e80;line-height:1.35;margin-top:5px}
+.otp-progress{display:flex;align-items:center;gap:7px;margin:0 0 11px}.otp-progress span{height:3px;border-radius:99px;background:rgba(255,255,255,.08);flex:1}.otp-progress span.done,.otp-progress span.active{background:linear-gradient(90deg,var(--purple),var(--pink))}.otp-progress-label{font-size:8px;color:#858da0;font-weight:800}.otp-input.otp-complete{border-color:rgba(52,211,153,.65);box-shadow:0 0 0 4px rgba(52,211,153,.08)}
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.trust-item{padding:7px 6px;border:1px solid rgba(255,255,255,.055);border-radius:11px;background:rgba(255,255,255,.02);text-align:center}.trust-item b{display:block;font-size:8px}.trust-item span{display:block;color:#687184;font-size:7px;margin-top:2px}
+.recovery-callout{margin:0 0 9px;padding:8px 10px;border:1px solid rgba(139,61,255,.16);border-radius:11px;background:rgba(139,61,255,.06);color:#aeb5c5;font-size:9px;line-height:1.35}.recovery-callout b{color:#e4ddff}
+@media(max-height:650px){.brand-badge,.auth-insights,.trust-grid{display:none!important}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+/* ─────────────────────────────────────────────────────────────
+   SPIKE AUTH — premium visual system v2
+   Keeps the existing auth behavior; upgrades hierarchy, depth,
+   touch targets, typography and mobile composition.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --bg:#070811;--surface:#10121d;--surface2:#151827;--line:rgba(255,255,255,.085);
+  --text:#f7f7fb;--muted:#989fb1;--purple:#8d42ff;--pink:#c15cff;--focus:#b98cff;
+  --glow:rgba(141,66,255,.26);--panel:rgba(17,19,31,.82)
+}
+html,body{background:
+  radial-gradient(900px 520px at 50% -18%,rgba(112,49,255,.22),transparent 62%),
+  radial-gradient(520px 420px at 105% 35%,rgba(207,67,255,.10),transparent 62%),
+  radial-gradient(560px 460px at -10% 85%,rgba(49,86,255,.09),transparent 65%),#070811}
+body{padding:max(18px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));overflow-y:auto!important;overflow-x:hidden!important;align-items:flex-start}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.018) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:38px 38px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.42),transparent 72%);opacity:.32}
+.shell{width:min(440px,100%);max-height:none;min-height:calc(100dvh - 36px);margin:auto;justify-content:center;gap:clamp(13px,2.1dvh,22px);padding:8px 0}
+.brand{position:relative;text-align:center;padding:2px 0 1px}.brand:after{content:"";position:absolute;left:50%;top:18px;width:110px;height:110px;transform:translateX(-50%);border-radius:50%;background:rgba(139,61,255,.13);filter:blur(34px);z-index:-1}
+.brand img{width:clamp(58px,8dvh,76px);height:clamp(58px,8dvh,76px);border-radius:22px;filter:drop-shadow(0 16px 30px rgba(124,58,237,.34));box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 7px rgba(139,61,255,.035);animation:brandFloat 6s ease-in-out infinite}
+@keyframes brandFloat{50%{transform:translateY(-3px)}}
+.brand h1{font-size:clamp(24px,3.4dvh,29px);font-weight:950;letter-spacing:-.9px;margin:9px 0 4px}.brand p{font-size:11px;color:#858c9f;letter-spacing:.15px}
+.brand-badge{margin-top:10px;padding:7px 11px;border:1px solid rgba(255,255,255,.095);background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:0 8px 24px rgba(0,0,0,.18);font-size:8.5px;color:#a9afbf;backdrop-filter:blur(14px)}.brand-badge i{width:6px;height:6px;box-shadow:0 0 12px #34d399}
+.card{position:relative;border-radius:30px;padding:clamp(15px,2.6dvh,25px);background:linear-gradient(150deg,rgba(24,27,43,.94),rgba(10,12,21,.97));border:1px solid rgba(255,255,255,.105);box-shadow:0 32px 100px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.045);overflow:hidden}
+.card:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgba(183,131,255,.075),transparent 28%,transparent 70%,rgba(90,62,255,.055));mask-image:linear-gradient(#000,#000);opacity:.9}.card>*{position:relative}
+.card:after{content:"";position:absolute;width:240px;height:150px;right:-130px;top:-110px;border-radius:50%;background:rgba(179,91,255,.15);filter:blur(45px);pointer-events:none}
+.tabs{gap:4px;padding:5px;margin-bottom:18px;border-radius:17px;background:rgba(5,7,15,.45);border:1px solid rgba(255,255,255,.055);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.tabs button{min-height:46px;border-radius:13px;font-size:13px;letter-spacing:-.1px}.tabs button.active{background:linear-gradient(135deg,rgba(123,64,229,.92),rgba(77,44,139,.92));box-shadow:0 9px 22px rgba(76,42,143,.26),inset 0 1px 0 rgba(255,255,255,.12)}
+.title{font-size:clamp(21px,3dvh,25px);font-weight:950;letter-spacing:-.55px;margin-bottom:6px}.subtitle{font-size:12px;color:#969daf;line-height:1.5;margin-bottom:14px}
+.account-state{padding:9px 11px;margin-bottom:13px;border-radius:13px;background:linear-gradient(90deg,rgba(52,211,153,.045),rgba(255,255,255,.018));border-color:rgba(52,211,153,.10);font-size:9.5px}.account-state .dot{width:8px;height:8px;flex-basis:8px}
+.field{margin-bottom:11px}.label{font-size:11px;margin-bottom:6px;color:#e0e2e9}.input-wrap input{height:49px;border-radius:15px;padding:0 47px 0 15px;background:rgba(20,23,37,.9);border:1px solid rgba(255,255,255,.10);font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.input-wrap input::placeholder{color:#62697a}.input-wrap input:hover{border-color:rgba(255,255,255,.16)}.input-wrap input:focus{border-color:rgba(176,92,255,.72);box-shadow:0 0 0 4px rgba(141,66,255,.10),0 8px 22px rgba(0,0,0,.12)}
+.password-toggle{right:7px;top:6px;height:37px;border-radius:10px;color:#b5bac7;background:rgba(255,255,255,.025)}.password-toggle:hover{background:rgba(255,255,255,.07);color:#fff}
+.field-hint{font-size:9px;margin:5px 2px 0}.row{margin:4px 0 12px}.check{font-size:11px;color:#9ea5b6}.check input{width:16px;height:16px}
+.primary{height:49px;border-radius:15px;font-size:13px;background:linear-gradient(135deg,#7d32ff 0%,#a846ff 48%,#c15bff 100%);box-shadow:0 14px 30px rgba(141,66,255,.25),inset 0 1px 0 rgba(255,255,255,.16);position:relative;overflow:hidden}.primary:after{content:"";position:absolute;inset:0;transform:translateX(-110%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent);transition:transform .65s ease}.primary:hover:after{transform:translateX(110%)}
+.oauth-divider{margin:15px 0 11px;color:#62697a;font-size:8px;letter-spacing:1px}.oauth-divider:before,.oauth-divider:after{background:rgba(255,255,255,.07)}
+.oauth-grid{gap:9px}.oauth-btn{height:47px;border-radius:15px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.018));box-shadow:0 8px 18px rgba(0,0,0,.12);font-size:11px}.oauth-btn:hover{border-color:rgba(176,92,255,.22);background:rgba(139,61,255,.06)}.oauth-icon{width:25px;height:25px}
+.bottom{font-size:10px;color:#7f8798;margin-top:10px}.link,.bottom button{font-size:10.5px}.link:hover,.bottom button:hover{color:#e1d7ff}
+.status{border-radius:13px;margin-bottom:11px;padding:10px 12px 10px 38px;background:rgba(96,165,250,.055);border:1px solid rgba(96,165,250,.10);font-size:10px}.status:before{left:12px;top:10px}
+.security-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:13px}.security-chip{min-height:52px;padding:8px 7px;border:1px solid rgba(255,255,255,.065);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));display:flex;align-items:center;gap:7px;text-align:left;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.security-icon{width:25px;height:25px;display:grid;place-items:center;flex:0 0 25px;border-radius:9px;background:rgba(139,61,255,.12);border:1px solid rgba(176,92,255,.12);color:#d5bdff;font-size:10px;font-weight:950}.security-chip strong{display:block;font-size:8.5px;color:#f2f2f7}.security-chip small{display:block;margin-top:2px;color:#707789;font-size:7px;white-space:nowrap}
+.auth-hint{display:flex;align-items:center;gap:8px;margin-top:9px;padding:9px 11px;border-radius:13px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.018);color:#858c9d;font-size:9px}.auth-hint b{color:#d9dce5}.pulse{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.07),0 0 14px rgba(52,211,153,.35)}
+.trust-grid{gap:7px;margin-top:9px}.trust-item{padding:9px 6px;border-radius:13px;background:rgba(255,255,255,.018);border-color:rgba(255,255,255,.06)}.trust-item b{font-size:8px}.trust-item span{font-size:7px;color:#697183}
+.auth-insights{margin-top:13px;gap:8px}.insight-head{margin-bottom:2px}.insight-title{font-size:11px;letter-spacing:-.1px}.insight-meta{padding:4px 7px;border:1px solid rgba(255,255,255,.06);border-radius:999px;background:rgba(255,255,255,.025);font-size:7px}.rank-list{gap:7px}.rank-item{grid-template-columns:29px 1fr auto;gap:9px;padding:10px;border-radius:15px;border-color:rgba(255,255,255,.065);background:linear-gradient(100deg,rgba(255,255,255,.045),rgba(255,255,255,.016));text-align:left}.rank-item:hover{transform:translateY(-1px);border-color:rgba(176,92,255,.28);box-shadow:0 9px 20px rgba(0,0,0,.15)}.rank-num{width:29px;height:29px;display:grid;place-items:center;border-radius:10px;background:rgba(139,61,255,.10);border:1px solid rgba(176,92,255,.11);font-size:8px}.rank-main{display:block}.rank-name{display:flex;align-items:center;gap:6px;font-size:9.5px}.rank-icon{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:6px;background:rgba(255,255,255,.05);color:#d9c8ff;font-size:8px}.rank-reason{font-size:7.5px;margin-top:3px;color:#737b8d}.rank-score{display:flex;flex-direction:column;align-items:flex-end;gap:1px}.rank-score b{font-size:9px;color:#dfd3ff}.rank-score small{font-size:6.5px;color:#697184;text-transform:uppercase;letter-spacing:.5px}.insight-foot{font-size:7px;color:#60687a;line-height:1.45;padding:0 2px}
+.otp-panel{padding-top:2px}.otp-icon{width:54px;height:54px;display:grid;place-items:center;margin:2px auto 12px;border-radius:18px;background:linear-gradient(145deg,rgba(139,61,255,.18),rgba(193,92,255,.05));border:1px solid rgba(176,92,255,.16);box-shadow:0 12px 30px rgba(94,42,173,.15);font-size:22px}.otp-panel .title,.otp-panel .subtitle{text-align:center}.otp-input{height:62px!important;border-radius:17px!important;text-align:center;letter-spacing:.42em;font-size:24px!important;font-weight:900!important;padding:0 8px!important}.otp-progress{gap:6px}.otp-progress span{height:4px}.otp-progress-label{min-width:26px;text-align:right}.otp-countdown{text-align:center;color:#747c8d;font-size:8px;margin:9px 0}.otp-resend{padding:5px 9px!important}
+.password-help{margin:2px 0 6px}.password-help button{color:#bba0ff;font-weight:850;font-size:9px}.requirements{padding:7px 9px;border-radius:11px;background:rgba(139,61,255,.035);border:1px solid rgba(139,61,255,.08);margin-bottom:9px}.req{font-size:8px;color:#777f91;margin-right:7px;line-height:1.8}.req.ok{color:#86efac}
+.terms{margin:4px 0 10px}.terms .check{align-items:flex-start;line-height:1.35}.terms input{margin-top:1px}
+.recovery-callout{padding:10px 11px;border-radius:13px;background:linear-gradient(90deg,rgba(139,61,255,.07),rgba(255,255,255,.02));border-color:rgba(139,61,255,.13);font-size:9px}.inline-help{font-size:8px;line-height:1.45;color:#697183;margin-top:8px}
+.toast-stack{z-index:50}.toast{border-radius:15px!important;border:1px solid rgba(255,255,255,.10)!important;background:rgba(17,19,30,.94)!important;box-shadow:0 18px 50px rgba(0,0,0,.4)!important;backdrop-filter:blur(18px)}
+.modal-backdrop{backdrop-filter:blur(12px);background:rgba(3,4,9,.72)}.modal{border-radius:26px!important;border-color:rgba(255,255,255,.10)!important;background:linear-gradient(150deg,#1a1d2c,#0d0f19)!important;box-shadow:0 30px 100px rgba(0,0,0,.6)!important}.spid{letter-spacing:.12em!important}
+@media(max-width:420px){.card{padding:14px}.brand h1{font-size:24px}.security-chip{min-height:49px}.security-chip small{font-size:6.5px}.rank-item{padding:9px}.input-wrap input{height:48px}}
+@media(max-height:760px){.shell{justify-content:flex-start}.brand img{width:58px;height:58px}.brand h1{margin-top:6px}.brand-badge{margin-top:7px}.card{padding:14px}.auth-insights{margin-top:9px}.trust-grid{display:none}.auth-hint{margin-top:7px}.security-strip{margin-top:9px}}
+@media(max-height:650px){.brand-badge,.auth-insights,.security-strip,.auth-hint{display:none!important}.shell{gap:10px}.brand img{width:48px;height:48px}.card{border-radius:24px}}
+@media(prefers-reduced-motion:reduce){.brand img{animation:none}}
+
+
 </style>
 <meta name="description" content="Sign in or create your SPIKE account.">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -56,8 +118,8 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 <h2 class="title">Welcome back</h2><p class="subtitle">Sign in securely to continue to SPIKE.</p>
 <div class="account-state"><span class="dot"></span><span>Your session stays protected on this device.</span></div>
 <form id="loginForm" novalidate>
-<div class="field"><label class="label" for="loginEmail"><span>Email</span></label><div class="input-wrap"><input id="loginEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div>
-<div class="field"><label class="label" for="loginPassword"><span>Password</span></label><div class="input-wrap"><input id="loginPassword" type="password" aria-label="Password" autocomplete="current-password" placeholder="Your password" required><button class="password-toggle" type="button" data-target="loginPassword" aria-label="Show password">Show</button></div></div>
+<div class="field"><label class="label" for="loginEmail"><span>Email</span></label><div class="input-wrap"><input id="loginEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required aria-describedby="loginEmailHint"><div class="field-hint" id="loginEmailHint">Use the email address connected to your SPIKE account.</div></div>
+<div class="field"><label class="label" for="loginPassword"><span>Password</span></label><div class="input-wrap"><input id="loginPassword" type="password" aria-label="Password" autocomplete="current-password" placeholder="Your password" required aria-describedby="loginPasswordHint"><button class="password-toggle" type="button" data-target="loginPassword" aria-label="Show password">Show</button><div class="field-hint" id="loginPasswordHint">Passwords are case-sensitive.</div></div>
 <div class="row"><label class="check"><input id="remember" type="checkbox" checked> Remember me</label><button class="link" type="button" id="forgotBtn">Forgot password?</button></div>
 <button class="primary" id="loginBtn" type="submit">Sign In</button>
 </form>
@@ -70,10 +132,10 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 </section>
 <section class="panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab">
 <h2 class="title">Create your account</h2><p class="subtitle">Get your lifetime SP ID and join the community.</p>
-<div class="form-note">Use an email you can access. You may need to confirm it before your first sign in. If confirmation delivery fails, fix Supabase SMTP before retrying.</div>
+<div class="form-note">Use an email you can access. SPIKE will send a 6-digit code to confirm your account before your first sign in.</div>
 <form id="registerForm" novalidate>
-<div class="field"><label class="label" for="regName"><span>Full name</span></label><div class="input-wrap"><input id="regName" type="text" minlength="2" maxlength="100" aria-label="Full name" autocomplete="name" placeholder="Your full name" required></div></div>
-<div class="field"><label class="label" for="regEmail"><span>Email</span></label><div class="input-wrap"><input id="regEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div>
+<div class="field"><label class="label" for="regName"><span>Full name</span></label><div class="input-wrap"><input id="regName" type="text" minlength="2" maxlength="100" aria-label="Full name" autocomplete="name" placeholder="Your full name" required aria-describedby="regNameHint"><div class="field-hint" id="regNameHint">Use the name you want displayed on your SPIKE profile.</div></div>
+<div class="field"><label class="label" for="regEmail"><span>Email</span></label><div class="input-wrap"><input id="regEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required aria-describedby="regEmailHint"><div class="field-hint" id="regEmailHint">You’ll need access to this inbox to receive your verification code.</div></div>
 <div class="field"><label class="label" for="regPassword"><span>Password</span></label><div class="input-wrap"><input id="regPassword" type="password" minlength="8" maxlength="128" aria-label="Password" autocomplete="new-password" placeholder="Create a strong password" required><button class="password-toggle" type="button" data-target="regPassword" aria-label="Show password">Show</button></div></div>
 <div class="strength"><div class="strength-bars"><span id="b1"></span><span id="b2"></span><span id="b3"></span><span id="b4"></span></div><div id="strengthText">Use 8+ characters</div></div>
 <div class="password-help"><button type="button" id="passwordHelpBtn">Password requirements</button></div>
@@ -83,10 +145,11 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 <button class="primary" id="registerBtn" type="submit">Create Account</button>
 </form>
 <div class="bottom">Already have an account? <button type="button" id="goLogin">Sign in</button></div>
+</div>
 </section>
 <section class="panel" id="forgotPanel" role="region" aria-labelledby="forgotTitle">
 <h2 class="title" id="forgotTitle">Reset your password</h2><p class="subtitle">Enter your email and we'll send a secure recovery link.</p>
-<form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">Email delivery is rate-limited for security. If you just requested a message, wait before trying again.</div></form>
+<div class="recovery-callout"><b>Safe recovery.</b> We never reveal whether an email belongs to an account. Use the newest message from SPIKE.</div><form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">Email delivery is rate-limited for security. If you just requested a message, wait before trying again.</div></form>
 <div id="recoveryPanel" hidden>
   <div class="field"><label class="label" for="recoveryPassword"><span>New password</span></label><div class="input-wrap"><input id="recoveryPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a new password"></div></div>
   <div class="field"><label class="label" for="recoveryConfirm"><span>Confirm new password</span></label><div class="input-wrap"><input id="recoveryConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Repeat your new password"></div></div>
@@ -95,7 +158,8 @@ body{min-height:100dvh;padding:max(12px,env(safe-area-inset-top)) max(12px,env(s
 </div>
 
 </section>
-<div class="security-strip" aria-label="SPIKE account protections"><div class="security-chip"><strong>🔐 Secure</strong><span>Supabase Auth</span></div><div class="security-chip"><strong>✉️ Verified</strong><span>Email protection</span></div><div class="security-chip"><strong>⚡ Fast</strong><span>Smart session</span></div></div><div class="auth-hint"><span class="pulse"></span><span><b>Your session stays on this device</b> until you sign out.</span></div>
+<section class="panel otp-panel" id="otpPanel" role="region" aria-labelledby="otpTitle"><div class="otp-progress" aria-label="Verification progress"><span class="done"></span><span class="active"></span><span></span><span></span><span class="otp-progress-label">2/5</span></div><div class="otp-icon" aria-hidden="true">✉️</div><h2 class="title" id="otpTitle">Confirm your email</h2><p class="subtitle">We sent a 6-digit verification code to<br><span class="otp-email" id="otpEmail">your email</span></p><form id="otpForm" novalidate><label class="label" for="otpInput"><span>Verification code</span></label><input class="otp-input" id="otpInput" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" aria-label="6-digit verification code" required><button class="primary" id="otpVerifyBtn" type="submit">Confirm Email</button></form><div class="otp-countdown" id="otpCountdown">You can request a new code shortly.</div><div class="bottom"><button class="otp-resend" id="otpResendBtn" type="button" disabled>Resend Code</button></div><div class="bottom"><button class="link" id="otpBackBtn" type="button">Back to account creation</button></div><div class="inline-help">Enter the newest code from your SPIKE email. Codes are temporary and can only be used once.</div></section>
+<div class="security-strip" aria-label="SPIKE account protections"><div class="security-chip"><span class="security-icon">✓</span><span><strong>Secure</strong><small>Supabase Auth</small></span></div><div class="security-chip"><span class="security-icon">@</span><span><strong>Verified</strong><small>Email protection</small></span></div><div class="security-chip"><span class="security-icon">↯</span><span><strong>Fast</strong><small>Smart session</small></span></div></div><div class="auth-hint"><span class="pulse"></span><span><b>Private by default.</b> Your session stays on this device until you sign out.</span></div><div class="trust-grid" aria-label="Account benefits"><div class="trust-item"><b>Private</b><span>Protected session</span></div><div class="trust-item"><b>Verified</b><span>Email ownership</span></div><div class="trust-item"><b>Personal</b><span>Your SPIKE identity</span></div></div><div class="auth-insights" id="authInsights"><div class="insight-head"><span class="insight-title">Top ranking picks</span><span class="insight-meta" id="rankMeta">Ranked preview</span></div><div class="rank-list" id="rankList"></div><div class="insight-foot">Recommendations are a preview of the discovery experience. Ranking can adapt after you join based on activity and engagement.</div></div>
 </div></section>
 </main>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
@@ -120,7 +184,9 @@ emailCooldownUntil: Number(sessionStorage.getItem("spike_email_cooldown_until") 
 currentUser: null,
 profile: null,
 completingLogin: false,
-redirecting: false
+redirecting: false,
+signupOtpEmail: "",
+signupOtpBusy: false
 };
 const toastHistory = new Map();
 function toast(message, type = "info", ms = 4800) {
@@ -186,6 +252,12 @@ const code = String(err?.code || "").toLowerCase();
 const msg = String(err?.message || "").toLowerCase();
 if (code === "invalid_credentials") return "We couldn’t sign you in. Check your email and password, then try again.";
 if (code === "email_not_confirmed") return "Your email is not confirmed yet. Check your inbox, then try signing in again.";
+if (code === "user_not_found" || msg.includes("user not found")) return "We couldn't find that account. Check the email or create a new SPIKE account.";
+if (code === "same_password" || msg.includes("same password")) return "Choose a password you haven't used before.";
+if (msg.includes("invalid email") || msg.includes("email address")) return "That email address doesn't look right. Check for typos and try again.";
+if (msg.includes("signup is disabled")) return "New account creation is temporarily unavailable. Please try again later.";
+if (msg.includes("database") || msg.includes("profiles")) return "Your account was created, but SPIKE couldn't finish setting up your profile. Please retry shortly.";
+if (msg.includes("captcha")) return "Security verification could not be completed. Refresh the page and try again.";
 if (code === "user_already_exists" || msg.includes("already registered") || msg.includes("already exists"))
 return "An account with this email already exists. Switch to Sign In instead.";
 if (isEmailRateLimit(err)) return `Email delivery is temporarily busy. Please wait ${formatWait(emailCooldownRemaining() || 60000)} before requesting another message.`;
@@ -215,7 +287,7 @@ function focusPanel(name) {
 }
 
 function switchPanel(name) {
-["login", "register", "forgot"].forEach(x => {
+["login", "register", "forgot", "otp"].forEach(x => {
 $(x + "Panel")?.classList.toggle("active", x === name);
 });
 $("loginTab")?.classList.toggle("active", name === "login");
@@ -323,6 +395,7 @@ e.preventDefault();
 if (state.busy) return;
 const email = $("loginEmail").value.trim(),
 password = $("loginPassword").value;
+if (!explainValidation(e.currentTarget)) return;
 if (!email || !password) { toast("Enter your email and password.", "warning"); return; }
 state.busy = true;
 clearStatus();
@@ -353,6 +426,7 @@ const name = $("regName").value.trim(),
 email = $("regEmail").value.trim(),
 pw = $("regPassword").value,
 confirm = $("regConfirm").value;
+if (!explainValidation(e.currentTarget)) return;
 if (!name || !email || !pw || !confirm) { toast("Complete all required fields.", "warning"); return; }
 if (!passwordChecks(pw)) { toast("Please meet all password requirements.", "warning"); return; }
 if (pw !== confirm) { toast("Passwords do not match.", "warning"); return; }
@@ -384,12 +458,14 @@ throw error;
 if (data.user && data.session) {
 await completeLogin(data.user);
 toast("Account created successfully.", "success");
+} else if (data.user) {
+state.signupOtpEmail = email;
+try { sessionStorage.setItem("spike_signup_otp_email", email); } catch {}
+startOtpCooldown(60000);
+showOtpScreen(email);
+toast("Verification code sent to your email.", "success");
 } else {
-status("Account created. Check your email and verify it. Your lifetime SP ID will be assigned after verification and shown to you once.",
-"success");
-toast("Verify your email to receive your lifetime SP ID.", "success");
-$("loginEmail").value = email;
-switchPanel("login");
+throw new Error("Account creation did not return a user.");
 }
 } catch (err) {
 console.error("[SPIKE SIGNUP]", {
@@ -406,11 +482,22 @@ state.busy = false;
 setBusy(btn, false, "");
 }
 }
+// ─── email OTP confirmation (single-file screen) ───
+let otpCooldownTimer = null;
+function otpCooldownRemaining() { return Math.max(0, state.emailCooldownUntil - Date.now()); }
+function updateOtpCooldown() { const btn=$("otpResendBtn"), label=$("otpCountdown"), r=otpCooldownRemaining(); if(btn) btn.disabled=r>0||state.signupOtpBusy; if(label) label.textContent=r>0?`You can request a new code in ${formatWait(r)}.`:"Didn't receive it? Request a new code."; if(r<=0&&otpCooldownTimer){clearInterval(otpCooldownTimer);otpCooldownTimer=null;} }
+function startOtpCooldown(ms=60000){ startEmailCooldown(ms); if(otpCooldownTimer) clearInterval(otpCooldownTimer); otpCooldownTimer=setInterval(updateOtpCooldown,1000); updateOtpCooldown(); }
+function showOtpScreen(email){ state.signupOtpEmail=String(email||"").trim(); if(!state.signupOtpEmail)return switchPanel("register"); $("otpEmail").textContent=state.signupOtpEmail; $("otpInput").value=""; switchPanel("otp"); updateOtpCooldown(); requestAnimationFrame(()=>$("otpInput")?.focus()); }
+function leaveOtpScreen(){ try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; switchPanel("register"); }
+async function verifySignupOtp(e){ e.preventDefault(); if(state.signupOtpBusy)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; const token=$("otpInput")?.value.replace(/\D/g,"").slice(0,6)||""; if(!email){status("Your verification session is missing. Create the account again.","error");return;} if(!/^\d{6}$/.test(token)){toast("Enter the 6-digit code from your email.","warning");$("otpInput")?.focus();return;} state.signupOtpBusy=true; const btn=$("otpVerifyBtn"); setBusy(btn,true,"Confirming…"); clearStatus(); try{const db=await ensureClient(); const {data,error}=await db.auth.verifyOtp({email,token,type:"signup"}); if(error)throw error; if(!data?.user)throw new Error("Email confirmation did not return an account."); try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; toast("Email confirmed successfully.","success"); await completeLogin(data.user);}catch(err){console.error("[SPIKE SIGNUP OTP]",{status:err?.status,code:err?.code,message:err?.message}); const msg=String(err?.message||"").toLowerCase(); const friendly=/expired|invalid|token|otp/.test(msg)?"That code is invalid or expired. Check the newest SPIKE email, then enter its 6-digit code.":isEmailRateLimit(err)?"Too many verification attempts. Please wait a little before trying again.":friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;setBusy(btn,false,"");updateOtpCooldown();} }
+async function resendSignupOtp(){ if(state.signupOtpBusy||otpCooldownRemaining()>0)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; if(!email)return status("Your verification session is missing. Create the account again.","error"); state.signupOtpBusy=true; const btn=$("otpResendBtn"); if(btn)btn.disabled=true; try{const db=await ensureClient(); const {error}=await db.auth.resend({type:"signup",email}); if(error)throw error; startOtpCooldown(60000); status("A new 6-digit verification code has been sent.","success"); toast("New verification code sent.","success");}catch(err){if(isEmailRateLimit(err))startOtpCooldown(90000); const friendly=friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;updateOtpCooldown();} }
+
 // ─── reset password ───
 async function resetPassword(e) {
 e.preventDefault();
 if (state.busy) return;
 const email = $("resetEmail").value.trim();
+if (!explainValidation(e.currentTarget)) return;
 if (!email) { toast("Enter your email.", "warning"); return; }
 const emailWait = emailCooldownRemaining();
 if (emailWait > 0) {
@@ -575,6 +662,47 @@ function handleAuthCallback() {
   return callback;
 }
 
+
+// ─── smart UI / ranking layer ───
+const rankingSeed = [
+ {name:"Live Rooms",reason:"High-energy conversations",score:98,icon:"◉"},
+ {name:"Trending Creators",reason:"Popular community voices",score:96,icon:"✦"},
+ {name:"Friends & People",reason:"Build your SPIKE circle",score:94,icon:"◎"}
+];
+function renderRanking(){
+ const list=$("rankList"); if(!list)return;
+ const ranked=[...rankingSeed].sort((a,b)=>b.score-a.score);
+ list.innerHTML=ranked.map((x,i)=>`<button class="rank-item" type="button" data-rank="${i}" aria-label="${x.name}: ${x.reason}"><span class="rank-num">${String(i+1).padStart(2,"0")}</span><span class="rank-main"><span class="rank-name"><span class="rank-icon">${x.icon}</span>${x.name}</span><span class="rank-reason">${x.reason}</span></span><span class="rank-score"><b>${x.score}%</b><small>match</small></span></button>`).join("");
+ list.querySelectorAll("[data-rank]").forEach(btn=>btn.addEventListener("click",()=>{toast("Sign in to unlock personalized SPIKE recommendations.","info");switchPanel("login");}));
+}
+function smartField(input){
+ if(!input)return true;
+ const value=input.value.trim(), field=input.closest(".field");
+ if(!field)return true;
+ let ok=input.validity.valid && !!value;
+ if(input.type==="email") ok=ok && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+ field.classList.toggle("valid",ok);field.classList.toggle("invalid",!ok);
+ return ok;
+}
+function explainValidation(form){
+ const bad=[...form.querySelectorAll("input")].find(x=>x.required&&!smartField(x));
+ if(!bad)return true;
+ const label=form.querySelector(`label[for="${bad.id}"] span`)?.textContent||"field";
+ const msg=bad.type==="email"?`Enter a valid email address for ${label.toLowerCase()}.`:bad.id==="terms"?"Please accept the Terms and Privacy Policy to continue.":`Please check your ${label.toLowerCase()}.`;
+ status(msg,"warning");toast(msg,"warning");bad.focus();return false;
+}
+function otpAutoAdvance(){
+ const input=$("otpInput"); if(!input)return;
+ input.addEventListener("paste",e=>{const text=(e.clipboardData?.getData("text")||"").replace(/\D/g,"").slice(0,6);if(text){e.preventDefault();input.value=text;input.classList.toggle("otp-complete",text.length===6);if(text.length===6)requestAnimationFrame(()=>$("otpVerifyBtn")?.focus());}});
+ input.addEventListener("input",()=>{input.classList.toggle("otp-complete",input.value.length===6);if(input.value.length===6){status("Code ready. Confirm your email to continue.","success");}});
+}
+function improveErrors(){
+ const emailInputs=[$("loginEmail"),$("regEmail"),$("resetEmail")].filter(Boolean);
+ emailInputs.forEach(input=>input.addEventListener("input",()=>{if(input.value)smartField(input);}));
+ $("regName")?.addEventListener("input",e=>{if(e.target.value)smartField(e.target);});
+}
+renderRanking();improveErrors();otpAutoAdvance();
+
 // ─── boot: restore session ───
 async function boot() {
 try {
@@ -594,6 +722,8 @@ if (isRecoveryFlow(callback) && !callback.error) {
 
 const { data, error } = await db.auth.getSession();
 if (error) throw error;
+const pendingOtp = (()=>{try{return sessionStorage.getItem("spike_signup_otp_email")||""}catch{return ""}})();
+if (pendingOtp && !callback.error && !data.session?.user) showOtpScreen(pendingOtp);
 
 // Remove one-time callback artifacts only after Supabase has had a chance to
 // consume them. This prevents refresh/back from replaying stale auth state.
@@ -662,10 +792,15 @@ switchPanel("forgot"); };
 // OAuth buttons
 $("googleLoginBtn").onclick = () => signInWithProvider("google");
 $("githubLoginBtn").onclick = () => signInWithProvider("github");
+// email OTP confirmation
 // forms
 $("loginForm").addEventListener("submit", signIn);
 $("registerForm").addEventListener("submit", signUp);
 $("resetForm").addEventListener("submit", resetPassword);
+$("otpForm")?.addEventListener("submit", verifySignupOtp);
+$("otpResendBtn")?.addEventListener("click", resendSignupOtp);
+$("otpBackBtn")?.addEventListener("click", leaveOtpScreen);
+$("otpInput")?.addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6); });
 $("recoveryBtn")?.addEventListener("click", finishRecovery);
 // password strength
 $("regPassword").addEventListener("input", e => passwordChecks(e.target.value));

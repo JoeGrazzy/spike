@@ -1316,6 +1316,10 @@ video{contain:layout paint}
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0b0b10">
 <link rel="stylesheet" href="css/premium-back.css">
+
+<script src="js/spike-core.js"></script>
+<script src="js/security-hardening.js"></script>
+<script src="js/media-guard.js"></script>
 </head>
 <body>
 <header class="header">
@@ -1351,7 +1355,7 @@ video{contain:layout paint}
 </section>
 </div>
 <style>
-.notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.friend-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.friend-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ===== SPIKE PREMIUM THEME SYSTEM ===== */
 :root{
 --sp-bg:#f6f7fb;
@@ -1783,7 +1787,10 @@ $('friendsContainer').innerHTML=rows.map(f=>`
 <div class="friend-card" data-user-id="${esc(f.user_id)}">
 <div class="friend-avatar spike-presence-target" data-presence-user="${esc(f.user_id)}" data-presence-status="Offline">${avatar(f)}<span class="status-dot"></span></div>
 <div class="friend-info"><div class="name">${esc(f.display_name||f.username||'User')}</div><div class="sub">@${esc(f.username||'')}</div></div>
-<div class="friend-action"><button class="icon-btn" aria-label="Message" data-message="${esc(f.user_id)}"><i class="fas fa-comment"></i></button></div>
+<div class="friend-action">
+<button class="icon-btn" aria-label="Message ${esc(f.display_name||f.username||'friend')}" title="Message" data-message="${esc(f.user_id)}"><i class="fas fa-comment"></i></button>
+<button class="icon-btn unfriend-btn" aria-label="Unfriend ${esc(f.display_name||f.username||'friend')}" title="Unfriend" data-unfriend="${esc(f.user_id)}"><i class="fas fa-user-minus"></i></button>
+</div>
 </div>`).join('');
 }
 async function searchPeople(q) {
@@ -1831,6 +1838,35 @@ const {error}=await db.rpc(fn,{p_request_id:id});
 if(error){notice(error.message||'Could not update request.',true);if(btn)btn.disabled=false;return;}
 await refresh(); notice(action==='accept'?'Friend request accepted.':'Friend request declined.');
 }
+async function unfriend(id, btn) {
+id=String(id||'').trim();
+if(!validUuid(id)){ notice('Could not unfriend this person because their profile ID is unavailable. Refreshing your friends…',true); await loadFriends().catch(()=>{}); return; }
+const friend=state.friends.find(f=>personId(f)===id);
+const name=friend?.display_name||friend?.username||'this friend';
+const confirmed=window.confirm(`Unfriend ${name}?\n\nThey will be removed from your friends list.`);
+if(!confirmed) return;
+if(btn) btn.disabled=true;
+try {
+  const {error}=await db.rpc('dm_unfriend',{p_other_user_id:id});
+  if(error) throw error;
+  state.friends=state.friends.filter(f=>personId(f)!==id);
+  renderFriends();
+  updateCounts();
+  window.dispatchEvent(new CustomEvent('spike:friends-changed',{detail:{userId:id,action:'unfriend'}}));
+  notice(`${name} was removed from your friends.`);
+} catch(error) {
+  console.error('[SPIKE unfriend]',error);
+  if(btn) btn.disabled=false;
+  const message=String(error?.message||'');
+  if(/not found|friend|relationship|permission|denied|blocked/i.test(message)) {
+    notice(message||'This friendship may already have been removed. Refreshing your friends…',true);
+  } else {
+    notice('Could not remove this friend. Please check your connection and try again.',true);
+  }
+  await loadFriends().catch(()=>{});
+}
+}
+
 async function sendRequest(id,btn) {
 id=String(id||'').trim();
 if(!validUuid(id)){ if(btn) btn.disabled=false; notice('Could not add this user because their profile ID is unavailable. Refreshing people…',true); await loadRegisteredUsers(state.query).catch(()=>{}); return; }
@@ -1865,6 +1901,7 @@ document.addEventListener('click', async e=>{
 const tab=e.target.closest('.tab'); if(tab){setTab(tab.dataset.tab);return;}
 const a=e.target.closest('[data-action]'); if(a){await actRequest(a.dataset.id,a.dataset.action);return;}
 const send=e.target.closest('[data-send]'); if(send){await sendRequest(send.dataset.send,send);return;}
+const unfriendBtn=e.target.closest('[data-unfriend]'); if(unfriendBtn){await unfriend(unfriendBtn.dataset.unfriend,unfriendBtn);return;}
 const msg=e.target.closest('[data-message]'); if(msg){location.href='messages.html?user='+encodeURIComponent(msg.dataset.message);return;}
 if(e.target.closest('#requestsButton')) setTab('pending');
 if(e.target.closest('#searchButton')) $('searchInput').focus();
