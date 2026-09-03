@@ -417,7 +417,7 @@ body.spike-image-viewer-open{overflow:hidden}
 }
 .post-video-inline { position:relative; width:calc(100% + 24px); margin:10px -12px 8px; display:flex; align-items:center; justify-content:center; min-height:180px; max-height:300px; background:#05070b; border-radius:18px; overflow:hidden; border:1px solid rgba(255,255,255,.08); transition:max-height .25s ease,box-shadow .25s ease; }
 .post-video-inline.is-playing { max-height:min(760px,78vh); box-shadow:0 12px 36px rgba(0,0,0,.22); }
-.post-feed-video { display:block; width:100%; height:auto; max-height:300px; object-fit:contain; object-position:center; background:#05070b; cursor:pointer; aspect-ratio:auto; }
+.post-feed-video { display:block; width:100%; height:auto; max-height:680px; object-fit:contain; object-position:center; background:#05070b; cursor:pointer; aspect-ratio:auto; }
 .post-video-inline.is-playing .post-feed-video { max-height:min(760px,78vh); }
 .video-duration-badge { position:absolute; right:10px; bottom:10px; z-index:2; padding:4px 7px; border-radius:7px; background:rgba(0,0,0,.68); color:#fff; font-size:10px; font-weight:800; line-height:1; pointer-events:none; }
 .post-video-inline.is-playing .video-duration-badge { display:none; }
@@ -1147,7 +1147,7 @@ html[data-spike-style="5"] .post-actions button.active{color:#f5f5f5!important;b
 <script>
 "use strict";
 // ─── CONFIG ──────────────────────────────────────────────
-const CLOUDINARY_CONFIG = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset' };
+const CLOUDINARY_CONFIG = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset', videoEagerTransform: '' };
 const SUPABASE_URL = "https://cjqpyndceqyqsijihxbb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: !0, autoRefreshToken: !0, detectSessionInUrl: !1, flowType: "pkce" } });
@@ -1189,6 +1189,9 @@ const state = {
 window.state = state;
 
 // ─── SUPABASE HELPERS ───────────────────────────────────
+const SPIKE_VIDEO_DELIVERY_TRANSFORM = 'f_mp4,vc_h264:baseline:3.1,ac_aac,q_auto:good';
+const SPIKE_VIDEO_FALLBACK_TRANSFORM = 'f_mp4,vc_h264,ac_aac,q_auto:good';
+
 function cloudinaryWatermarkedVideoUrl(secureUrl, spid) {
   const url = String(secureUrl || '');
   const id = String(spid || '').trim();
@@ -1196,33 +1199,124 @@ function cloudinaryWatermarkedVideoUrl(secureUrl, spid) {
   const enc = encodeURIComponent(id).replace(/%/g, '%25');
   const sparkle = encodeURIComponent('✦').replace(/%/g, '%25');
   const transforms = [
+    SPIKE_VIDEO_DELIVERY_TRANSFORM,
     `l_text:Arial_28_bold:SPIKE,co_rgb:EC4899/e_glow:8/fl_layer_apply,g_south_west,x_38,y_24`,
     `l_text:Arial_22_bold:${enc},co_rgb:22C55E/e_glow:8/fl_layer_apply,g_south_west,x_116,y_27`,
     `l_text:Arial_28_bold:${sparkle},co_rgb:F97316/e_glow:10/fl_layer_apply,g_south_west,x_16,y_22`
   ].join('/');
-  return url.replace('/video/upload/', `/video/upload/${transforms}/`);
+  return cloudinaryVideoTransformUrl(url, transforms);
+}
+
+async function uploadCloudinaryChunked(file, endpoint, folder, options = {}) {
+  const CHUNK_SIZE = 20 * 1024 * 1024;
+  const uploadId = (globalThis.crypto?.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/[^a-zA-Z0-9_-]/g,'');
+  let lastResponse = null;
+  for (let start = 0, part = 1; start < file.size; start += CHUNK_SIZE, part++) {
+    const end = Math.min(file.size, start + CHUNK_SIZE) - 1;
+    const blob = file.slice(start, end + 1);
+    let partError = null;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        lastResponse = await new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          const timer = setTimeout(() => { try { xhr.abort(); } catch (_) {} reject(new Error('Cloudinary chunk upload timed out')); }, 90000);
+          xhr.open('POST', endpoint, true);
+          xhr.responseType = 'json';
+          xhr.setRequestHeader('X-Unique-Upload-Id', uploadId);
+          xhr.setRequestHeader('Content-Range', `bytes ${start}-${end}/${file.size}`);
+          xhr.upload.onprogress = e => {
+            if (e.lengthComputable) {
+              const overall = (start + e.loaded) / file.size;
+              options.onProgress?.(Math.max(0, Math.min(1, overall)), part, part);
+            }
+          };
+          xhr.onerror = () => reject(new Error('Cloudinary chunk upload failed. Check your connection.'));
+          xhr.ontimeout = () => reject(new Error('Cloudinary chunk upload timed out'));
+          xhr.onabort = () => reject(new Error('Cloudinary chunk upload cancelled'));
+          xhr.onload = () => {
+            clearTimeout(timer);
+            const d = xhr.response || (() => { try { return JSON.parse(xhr.responseText || '{}'); } catch (_) { return {}; } })();
+            if (xhr.status >= 200 && xhr.status < 300 && (d.done === false || d.secure_url)) resolve(d);
+            else reject(new Error(d.error?.message || `Cloudinary chunk upload failed (${xhr.status})`));
+          };
+          const form = new FormData();
+          form.append('file', blob, file.name || `chunk-${part}`);
+          form.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+          form.append('folder', folder);
+          xhr.send(form);
+        });
+        break;
+      } catch (e) {
+        partError = e;
+        if (attempt < 3) await new Promise(r => setTimeout(r, 800 * attempt));
+      }
+    }
+    if (!lastResponse || !lastResponse.secure_url && partError) throw partError;
+  }
+  if (!lastResponse?.secure_url) throw new Error('Cloudinary did not return a completed video asset.');
+  return lastResponse;
 }
 
 async function uploadToCloudinary(file, folder = "spike", options = {}) {
   if (!file) return null;
-  const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/auto/upload`;
-  const form = new FormData();
-  form.append("file", file);
-  form.append("upload_preset", CLOUDINARY_CONFIG.uploadPreset);
-  form.append("folder", folder);
-  const r = await Promise.race([
-    fetch(endpoint, { method: "POST", body: form }),
-    new Promise((_,reject)=>setTimeout(()=>reject(new Error("Cloudinary upload timed out")),30000))
-  ]);
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok || !data.secure_url) throw new Error(data.error?.message || "Cloudinary upload failed");
+  const type=String(file.type||'');
+  const maxBytes=type.startsWith('video/')?200*1024*1024:type.startsWith('image/')?25*1024*1024:type.startsWith('audio/')?30*1024*1024:0;
+  if(!maxBytes) throw new Error('Unsupported media type.');
+  if(file.size>maxBytes) throw new Error(`File is too large. Maximum size is ${type.startsWith('video/')?'200 MB':type.startsWith('image/')?'25 MB':'30 MB'}.`);
 
-  if (options.watermark && file.type?.startsWith('video/')) {
-    const spid = spIdOf(state.profile) || spIdOf(state.user);
-    if (!spid) throw new Error("Your SP ID could not be verified for this video.");
-    return { url: cloudinaryWatermarkedVideoUrl(data.secure_url, spid), watermarked: true, spid };
+  const isVideo=type.startsWith('video/');
+  const endpoint = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${isVideo?'video':'auto'}/upload`;
+  let lastError=null;
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const data = (isVideo && file.size > 100 * 1024 * 1024)
+        ? await uploadCloudinaryChunked(file, endpoint, folder, options)
+        : await new Promise((resolve,reject)=>{
+        const xhr=new XMLHttpRequest();
+        const timer=setTimeout(()=>{try{xhr.abort()}catch(_){} reject(new Error('Cloudinary upload timed out'));},90000);
+        xhr.open('POST',endpoint,true); xhr.responseType='json';
+        xhr.upload.onprogress=e=>{if(e.lengthComputable) options.onProgress?.(e.loaded/e.total,attempt);};
+        xhr.onerror=()=>reject(new Error('Cloudinary upload failed. Check your connection.'));
+        xhr.ontimeout=()=>reject(new Error('Cloudinary upload timed out'));
+        xhr.onabort=()=>reject(new Error('Cloudinary upload cancelled'));
+        xhr.onload=()=>{
+          clearTimeout(timer);
+          const d=xhr.response||(()=>{try{return JSON.parse(xhr.responseText||'{}')}catch(_){return{}}})();
+          if(xhr.status>=200&&xhr.status<300&&d.secure_url)resolve(d);
+          else reject(new Error(d.error?.message||`Cloudinary upload failed (${xhr.status})`));
+        };
+        const form=new FormData();
+        form.append('file',file);
+        form.append('upload_preset',CLOUDINARY_CONFIG.uploadPreset);
+        form.append('folder',folder);
+        // If the preset permits eager transforms, request a pre-generated Android-safe MP4.
+        // Unsigned presets may reject this parameter; that is handled by the normal delivery fallback.
+        if(isVideo && options.eagerVideo !== false && CLOUDINARY_CONFIG.videoEagerTransform){
+          form.append('eager', CLOUDINARY_CONFIG.videoEagerTransform);
+        }
+        xhr.send(form);
+      });
+
+      if(isVideo){
+        const spid=spIdOf(state.profile)||spIdOf(state.user)||'';
+        const originalUrl=data.secure_url;
+        const eagerUrl=data.eager?.[0]?.secure_url || '';
+        let playbackUrl=eagerUrl || cloudinaryFeedVideoUrl(originalUrl);
+        let watermarked=false;
+        if(options.watermark){
+          if(!spid) throw new Error('Your SP ID could not be verified for this video.');
+          playbackUrl=cloudinaryWatermarkedVideoUrl(originalUrl,spid);
+          watermarked=true;
+        }
+        return {url:playbackUrl,playbackUrl,originalUrl,watermarked,spid:watermarked?spid:null,normalized:true,format:'mp4',videoCodec:'h264',audioCodec:'aac'};
+      }
+      return{url:data.secure_url,playbackUrl:data.secure_url,originalUrl:data.secure_url,watermarked:false,spid:null,normalized:false};
+    }catch(e){
+      lastError=e;
+      if(attempt<3)await new Promise(r=>setTimeout(r,700*attempt));
+    }
   }
-  return { url: data.secure_url, watermarked: false, spid: null };
+  throw lastError||new Error('Cloudinary upload failed');
 }
 async function docPath(path) { return db.from("app_documents").select("data,created_at").eq("path", path).maybeSingle(); }
 async function getDoc(path) { const r = await docPath(path); if (r.error) throw r.error; return r.data?.data || null; }
@@ -1276,6 +1370,9 @@ function spIdOf(u) {
                 u?.spIdentifier || u?.authorSpId || u?.authorSPID;
   return value ? String(value).trim() : "";
 }
+function videoWatermarkForPost(mediaItem, post) {
+  return (!mediaItem?.watermarked && !post?.mediaWatermarked) ? videoWatermarkHTML(post) : '';
+}
 function videoWatermarkHTML(entity) {
   const author = entity?.authorUid ? authorFor(entity) : entity;
   const spid = spIdOf(entity) || spIdOf(author);
@@ -1297,10 +1394,10 @@ async function requireUser() {
   if (error || !data.session?.user) { location.replace("index.html?reauth=1"); return false; }
   state.user = data.session.user;
   db.auth.getUser().then(({data})=>{ if(data?.user) window.AppPresence?.start(db); });
-  const p = await withTimeout(db.from("profiles").select("id,display_name,username,avatar_url,bio").eq("id", state.user.id).maybeSingle(), 8000, "Profile loading");
-  if (p.error) console.warn("profile", p.error);
+  const p = await withTimeout(db.rpc('get_public_profiles', { p_user_ids: [state.user.id] }), 8000, "Profile loading");
+  if (p.error) throw p.error;
   const ext = await withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null);
-  state.profile = { ...(p.data || {}), ...(ext || {}) };
+  state.profile = { ...(p.data?.[0] || {}), ...(ext || {}), id: state.user.id };
   if (avatarOf(state.profile)) $("headerAvatar").innerHTML = `<img src="${esc(avatarOf(state.profile))}" alt="" loading="lazy" decoding="async">`;
   else $("headerAvatar").textContent = nameOf(state.profile).charAt(0).toUpperCase();
   return true;
@@ -1308,28 +1405,32 @@ async function requireUser() {
 
 // ─── DATA LOADING ──────────────────────────────────────
 async function loadAux() {
-  const [users, me, blocks] = await Promise.all([
-    withTimeout(listCollection("users", "").catch(() => []), 8000, "User list"),
-    withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null),
-    withTimeout(db.from("feed_blocks").select("blocked_id").eq("blocker_id", state.user.id), 8000, "Block list").catch(() => ({ data: [] }))
-  ]);
-  users.forEach(r => state.users.set(r.document_id, { ...(r.data || {}), id: r.document_id }));
-  // Verification is authoritative in relational profiles, not the client-side users document.
-  const profileIds = users.map(r => r.document_id).filter(id => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(id)));
-  for (let i = 0; i < profileIds.length; i += 100) {
-    try {
-      const vr = await db.rpc('get_public_profiles', { p_user_ids: profileIds.slice(i, i + 100) });
-      (vr.data || []).forEach(u => {
-        const current = state.users.get(u.id) || {};
-        state.users.set(u.id, { ...current, ...u, id: u.id });
-      });
-    } catch (e) { console.warn('[SPIKE FEED] verification profile sync failed', e); }
+  const mePromise = withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null);
+  const blocksPromise = withTimeout(db.from("feed_blocks").select("blocked_id").eq("blocker_id", state.user.id), 8000, "Block list").catch(() => ({ data: [] }));
+  const ids = [...new Set([
+    ...state.posts.map(p => p.authorUid),
+    ...state.stories.map(st => st.authorUid),
+    state.user.id
+  ].filter(Boolean))];
+  const profilesPromise = (async () => {
+    const out = [];
+    for (let i = 0; i < ids.length; i += 100) {
+      const r = await withTimeout(db.rpc('get_public_profiles', { p_user_ids: ids.slice(i, i + 100) }), 8000, 'Public profiles');
+      if (r.error) throw r.error;
+      out.push(...(r.data || []));
+    }
+    return out;
+  })();
+  const [profiles, me, blocks] = await Promise.all([profilesPromise, mePromise, blocksPromise]);
+  for (const u of profiles) {
+    if (!u?.id) continue;
+    state.users.set(String(u.id), { ...(state.users.get(String(u.id)) || {}), ...u, id: String(u.id) });
   }
-  state.users.set(state.user.id, { ...state.users.get(state.user.id), ...state.profile, id: state.user.id });
+  state.users.set(state.user.id, { ...(state.users.get(state.user.id) || {}), ...state.profile, id: state.user.id });
   state.saved = new Set(me?.savedPosts || me?.saved || []);
   state.following = new Set(me?.following || []);
   state.muted = new Set(me?.mutedAuthors || []);
-  state.blocked = new Set((blocks.data || []).map(x => x.blocked_id));
+  state.blocked = new Set((blocks.data || []).map(x => x.blocked_id).filter(Boolean));
 }
 
 // ─── STORIES ──────────────────────────────────────────
@@ -1373,6 +1474,91 @@ function storyRank(s) {
   return relationship + unseen * 70 + freshness * 28 + engagement + mediaQuality;
 }
 
+function isGifUrl(url){ return /\.gif(?:[?#].*)?$/i.test(String(url||'')); }
+function mediaKindOf(item){
+  const type=String(item?.type||item?.mediaType||'').toLowerCase();
+  const urls=[item?.url,item?.mediaUrl,item?.originalUrl,item?.playbackUrl].map(x=>String(x||'')).filter(Boolean);
+  const mime=String(item?.mimeType||item?.mime||'').toLowerCase();
+  // GIFs are animated images, never HTML5 video sources. Check every stored
+  // URL (including original/playback URLs) before trusting a legacy mediaType.
+  // This prevents a GIF whose delivery URL was converted to .mp4 from being
+  // rendered inside <video>, which causes Android to show "format not supported".
+  if(type==='gif' || /image\/gif/i.test(mime) || urls.some(isGifUrl)) return 'gif';
+  return type==='video' ? 'video' : 'image';
+}
+function cloudinaryFeedImageUrl(url){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{
+    const u=new URL(raw); if(!u.hostname.includes('cloudinary.com'))return raw;
+    const marker='/upload/'; const i=u.pathname.indexOf(marker); if(i<0)return raw;
+    const tail=u.pathname.slice(i+marker.length);
+    // Preserve animated GIF delivery. Do not let f_auto silently change an
+    // animated GIF into a still/unsupported representation for older clients.
+    const gif=isGifUrl(raw);
+    const transform=gif ? 'f_gif,fl_animated,q_auto:eco,w_1080,c_limit' : 'f_auto,q_auto:eco,w_1080,c_limit,dpr_auto';
+    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
+    return u.toString();
+  }catch(_){return raw;}
+}
+
+function cloudinaryVideoPosterUrl(url){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return '';const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return '';const tail=cloudinaryVideoAssetTail(u.pathname,i);if(!tail)return '';u.pathname=u.pathname.slice(0,i+marker.length)+'so_0,f_jpg,q_auto:eco,w_1080,c_limit/'+tail;u.pathname=u.pathname.replace(/\.(mp4|webm|mov|m4v|avi|mpeg|mpg)$/i,'.jpg');return u.toString();}catch(_){return '';}
+}
+
+// Browser-safe Cloudinary video delivery. Rebuild from the clean asset tail
+// instead of stacking transformations on an already-derived URL.
+function cloudinaryVideoAssetTail(pathname, markerIndex){
+  const after=pathname.slice(markerIndex + '/upload/'.length);
+  const parts=after.split('/').filter(Boolean);
+  const versionIndex=parts.findIndex(x=>/^v\d+$/.test(x));
+  if(versionIndex>=0) return parts.slice(versionIndex).join('/');
+  const transformPrefix=/^(?:f|vc|ac|q|w|h|c|g|l|e|so|du|br|fps|sp|d|r|ar|dpr|fl|x|y|z)_/i;
+  let i=0;
+  while(i<parts.length && transformPrefix.test(parts[i])) i++;
+  return parts.slice(i).join('/');
+}
+
+function cloudinaryVideoTransformUrl(url, transform){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{
+    const u=new URL(raw);
+    if(!u.hostname.includes('cloudinary.com')) return raw;
+    const marker='/upload/'; const i=u.pathname.indexOf(marker);
+    if(i<0) return raw;
+    const tail=cloudinaryVideoAssetTail(u.pathname,i);
+    if(!tail) return raw;
+    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
+    u.pathname=u.pathname.replace(/\.(mov|m4v|webm|avi|mpeg|mpg|gif)$/i,'.mp4');
+    return u.toString();
+  }catch(_){ return raw; }
+}
+
+function cloudinaryFeedVideoCandidates(url){
+  const raw=safeHttpUrl(url); if(!raw)return [];
+  if(!/cloudinary\.com/i.test(raw)) return [raw];
+  const transforms=[
+    // Android-safe H.264 + AAC first. Keep the baseline profile as a later
+    // fallback instead of making it the primary delivery path.
+    'f_mp4,vc_h264,ac_aac,q_auto:good',
+    'f_mp4,vc_auto,ac_aac,q_auto:good',
+    SPIKE_VIDEO_FALLBACK_TRANSFORM,
+    SPIKE_VIDEO_DELIVERY_TRANSFORM,
+    'f_mp4,q_auto:good'
+  ];
+  const out=[];
+  for(const t of transforms){
+    const candidate=cloudinaryVideoTransformUrl(raw,t);
+    if(candidate && !out.includes(candidate)) out.push(candidate);
+  }
+  if(!out.includes(raw)) out.push(raw);
+  return out;
+}
+
+function cloudinaryFeedVideoUrl(url){
+  return cloudinaryFeedVideoCandidates(url)[0] || '';
+}
+
 function storyCardMediaUrl(url, kind='image') {
   const raw = String(url || '').trim();
   if (!raw) return '';
@@ -1389,7 +1575,7 @@ function storyCardMediaUrl(url, kind='image') {
 
 function storyFullMediaUrl(url, kind='image') {
   const raw=String(url||'').trim(); if(!raw)return '';
-  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return raw;const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return raw;u.pathname=u.pathname.slice(0,i+marker.length)+(kind==='video'?'f_auto,q_auto:good':'f_auto,q_auto:good,w_1080,h_1920,c_limit')+'/'+u.pathname.slice(i+marker.length);return u.toString();}catch(_){return raw;}
+  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return raw;const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return raw;u.pathname=u.pathname.slice(0,i+marker.length)+(kind==='video'?'f_mp4,vc_h264,ac_aac,q_auto:good':'f_auto,q_auto:good,w_1080,h_1920,c_limit')+'/'+u.pathname.slice(i+marker.length);if(kind==='video')u.pathname=u.pathname.replace(/\.(mov|m4v|webm|avi)$/i,'.mp4');return u.toString();}catch(_){return raw;}
 }
 
 function storyAvatarUrl(url) {
@@ -1436,7 +1622,8 @@ function renderStories() {
     card.dataset.story=story.id; card.dataset.storyAuthor=g.authorUid;
     card.setAttribute('aria-label',`${g.authorUid===state.user?.id?'Your Story':nameOf(g.author)}${g.stories.length>1?`, ${g.stories.length} stories`:''}`);
     const wrap=document.createElement('span'); wrap.className='story-preview';
-    const media=story?.mediaUrl ? storyCardMediaUrl(story.mediaUrl,story.mediaType==='video'?'video':'image') : '';
+    const storyKind=mediaKind(story);
+    const media=story?.mediaUrl ? storyCardMediaUrl(story.mediaUrl,storyKind==='video'?'video':'image') : '';
     if(media){
       const img=document.createElement('img'); img.className='story-preview-media'; img.src=media; img.alt=''; img.width=84; img.height=118;
       img.loading=idx<4?'eager':'lazy'; img.decoding='async';
@@ -1459,14 +1646,38 @@ function renderStories() {
 }
 
 // ─── POSTS ─────────────────────────────────────────────
+// Client-side canonical model: reactions is the only reaction store. Legacy
+// likes arrays returned by older RPCs are normalized into reactions.like_users.
+function normalizeReactionModel(raw) {
+  const reactions = raw && typeof raw === 'object' ? { ...(raw.reactions || {}) } : {};
+  const legacyLikes = Array.isArray(raw?.likes) ? raw.likes.filter(Boolean).map(String) : [];
+  const likeUsers = Array.isArray(reactions.like_users) ? reactions.like_users.filter(Boolean).map(String) : legacyLikes;
+  reactions.like_users = [...new Set(likeUsers)];
+  reactions.like = reactions.like_users.length;
+  for (const [k, v] of Object.entries(reactions)) {
+    if (!k.endsWith('_users') && Number(v) < 0) reactions[k] = 0;
+  }
+  return reactions;
+}
+function normalizePostModel(p) {
+  if (!p || typeof p !== 'object') return p;
+  p.reactions = normalizeReactionModel(p);
+  delete p.likes;
+  return p;
+}
+function reactionLikeUsers(p) {
+  return new Set(Array.isArray(p?.reactions?.like_users) ? p.reactions.like_users.map(String) : []);
+}
+function reactionLikeCount(p) { return reactionLikeUsers(p).size; }
+
 async function loadPosts() {
   const rows = await withTimeout(listCollection('posts', ''), 10000, "Posts loading");
-  state.posts = rows.map(r => ({ id: r.document_id, ...(r.data || {}) })).filter(p => {
+  state.posts = rows.map(r => normalizePostModel({ id: r.document_id, ...(r.data || {}) })).filter(p => {
     if (!p.id || p.deleted) return false;
     const scheduled = p.scheduledAt && new Date(p.scheduledAt) > new Date();
     return !scheduled || p.authorUid === state.user.id;
   });
-  renderPosts();
+  rankingDirty=true; rankingCache.clear();
 }
 
 const SPIKE_REACTIONS = ["❤️","👍","😂","😮","😢","🔥"];
@@ -1480,10 +1691,10 @@ function normalizedReactionEntries(p) {
 }
 
 function postMetrics(p) {
-  const likes = Array.isArray(p?.likes) ? new Set(p.likes).size : 0;
+  const likes = reactionLikeCount(p);
   const comments = Array.isArray(p?.comments) ? p.comments.length : 0;
   const reactions = normalizedReactionEntries(p).reduce((n, [,count]) => n + count, 0);
-  const totalReactions = likes + reactions;
+  const totalReactions = reactions;
   const shares = Number(p?.shareCount || p?.shares || 0);
   const saves = Number(p?.saveCount || p?.savesCount || p?.bookmarkCount || 0);
   return { likes, comments, reactions, totalReactions, shares, saves };
@@ -1506,8 +1717,8 @@ class FeedRankingEngine{
  static age(p,now){const t=new Date(p?.createdAt||p?.created_at||0).getTime();return Number.isFinite(t)?Math.max(0,(now-t)/36e5):0}
  static type(p){return p?.mediaType==='video'?'video':(p?.mediaItems?.length||p?.mediaUrl?'media':'text')}
  static topics(p){return [...new Set((String(p?.content||'').toLowerCase().match(/#[a-z0-9_]+/g)||[]))].slice(0,8)}
- static m(p){return{likes:Array.isArray(p?.likes)?new Set(p.likes).size:Number(p?.likeCount||0),comments:Array.isArray(p?.comments)?p.comments.length:Number(p?.commentCount||0),reactions:normalizedReactionEntries(p).reduce((n,[,c])=>n+Number(c||0),0),shares:Number(p?.shareCount||p?.shares||0),saves:Number(p?.saveCount||0),views:Math.max(0,Number(p?.views||p?.viewCount||0))}}
- static engagement(p){const m=this.m(p);return m.likes+2*m.comments+1.2*m.reactions+2.8*m.shares+2.4*m.saves}
+ static m(p){return{likes:reactionLikeCount(p),comments:Array.isArray(p?.comments)?p.comments.length:Number(p?.commentCount||0),reactions:normalizedReactionEntries(p).reduce((n,[,c])=>n+Number(c||0),0),shares:Number(p?.shareCount||p?.shares||0),saves:Number(p?.saveCount||0),views:Math.max(0,Number(p?.views||p?.viewCount||0))}}
+ static engagement(p){const m=this.m(p);const nonLikeReactions=Math.max(0,m.reactions-m.likes);return m.likes+2*m.comments+1.2*nonLikeReactions+2.8*m.shares+2.4*m.saves}
  static sig(x,mid,scale){return 1/(1+Math.exp(-(x-mid)/Math.max(.0001,scale)))}
  static pct(x,c){if(x<=c.p25)return .25*x/Math.max(c.p25,.0001);if(x<=c.p50)return .25+.25*(x-c.p25)/(c.p50-c.p25);if(x<=c.p75)return .5+.25*(x-c.p50)/(c.p75-c.p50);if(x<=c.p90)return .75+.15*(x-c.p75)/(c.p90-c.p75);if(x<=c.p99)return .9+.09*(x-c.p90)/(c.p99-c.p90);return Math.min(1,.99+.01*(1-Math.exp(-(x-c.p99)/c.p99)))}
  static recency(p,ctx){return Math.exp(-Math.LN2*this.age(p,ctx.now)/feedCfg.recency.halfLifeHours)}
@@ -1522,10 +1733,11 @@ class FeedRankingEngine{
  static score(p,ctx,contract){const age=this.age(p,ctx.now);if(contract.base==='latest')return{score:Math.max(0,1-age/72),baseScore:Math.max(0,1-age/72),parts:{recency:this.recency(p,ctx)},modifiers:{},why:'Newest eligible content'};if(contract.base==='saved')return{score:Math.max(0,1-age/8760),baseScore:1,parts:{recency:this.recency(p,ctx)},modifiers:{},why:'Saved by you'};if(contract.base==='popular'){const pop=Math.min(1,Math.log1p(this.engagement(p))/Math.log(1001));const q=this.quality(p),r=this.recency(p,ctx),score=.72*pop+.18*q+.10*r;return{score,baseScore:score,parts:{popularity:pop,quality:q,recency:r},modifiers:{},why:'High total engagement over time'}}if(contract.base==='trending'){const e=ctx.recentEngagement?.[p.id]||{},v=this.sig(Math.log1p(Math.max(0,e.currentVelocity??this.engagement(p)/Math.max(.25,age))),feedCfg.trending.velocityMid,feedCfg.trending.velocityScale),a=Number.isFinite(e.currentVelocity)&&Number.isFinite(e.previousVelocity)?this.sig(e.currentVelocity-e.previousVelocity,0,feedCfg.trending.accelerationScale):.5,d=Math.exp(-Math.LN2*age/feedCfg.trending.halfLifeHours),score=.58*v+.30*a+.12*d;return{score,baseScore:score,parts:{recentVelocity:v,acceleration:a,timeDecay:d},modifiers:{},why:a>.65?'Rapidly accelerating':'Growing faster than established content'}}const b=this.base(p,ctx),novelty=(ctx.signals?.[p.id]?.impressions||0)===0?1:0,explore=ctx.explorationIds?.has(p.id)&&b.x.quality>=.25?1:0,modifiers={qualityBonus:Math.min(feedCfg.modifier.quality,b.x.quality*feedCfg.modifier.quality),exploration:explore*feedCfg.modifier.exploration,novelty:novelty*feedCfg.modifier.novelty,fatigue:-this.fatigue(p,ctx)*feedCfg.modifier.fatigue,negative:-this.negative(p,ctx)*feedCfg.modifier.negative};let mod=Object.values(modifiers).reduce((a,x)=>a+x,0);mod=Math.max(-feedCfg.modifier.max,Math.min(feedCfg.modifier.max,mod));return{score:Math.max(0,Math.min(1,b.score+mod)),baseScore:b.score,parts:b.x,modifiers,why:b.x.personalization>.72?'Strong match to your interests':b.x.momentum>.75?'Strong recent momentum':b.x.recency>.9?'Fresh content':'Balanced relevance and quality'}}
  static penalty(p,selected){if(!selected.length)return 0;const a=selected.filter(x=>x.authorUid===p.authorUid).length,t=selected.filter(x=>this.type(x)===this.type(p)).length,ts=new Set(this.topics(p));const topic=selected.filter(x=>this.topics(x).some(z=>ts.has(z))).length;return Math.min(1,a/feedCfg.diversity.maxPerCreator*feedCfg.diversity.author+t/feedCfg.diversity.maxSameType*feedCfg.diversity.type+topic/feedCfg.diversity.maxSameTopic*feedCfg.diversity.topic)}
  static mmr(scored,limit){const left=new Set(scored.map(x=>x.post.id)),selected=[];while(left.size&&selected.length<limit){let best=null,bv=-Infinity;for(const x of scored){if(!left.has(x.post.id))continue;const p=x.post,ac=selected.filter(y=>y.post.authorUid===p.authorUid).length,tc=selected.filter(y=>this.type(y.post)===this.type(p)).length;if(ac>=feedCfg.diversity.maxPerCreator&&left.size>1)continue;if(tc>=feedCfg.diversity.maxSameType&&left.size>1)continue;const value=feedCfg.diversity.lambda*x.score+(1-feedCfg.diversity.lambda)*(1-this.penalty(p,selected.map(y=>y.post)));if(value>bv){bv=value;best={...x,mmrScore:value,selectionReason:selected.length?'MMR diversity + relevance':'Highest eligible relevance'}}}if(!best)break;left.delete(best.post.id);selected.push(best)}return selected}
- static rank(posts,ctx,mode,limit){const c=FEED_CONTRACTS[mode]||FEED_CONTRACTS.forYou;const bounded=posts.slice(0,Math.min(posts.length,200));const scored=bounded.map(post=>({post,...this.score(post,ctx,c)})).sort((a,b)=>b.score-a.score||new Date(b.post.createdAt||b.post.created_at||0)-new Date(a.post.createdAt||a.post.created_at||0)||String(a.post.id).localeCompare(String(b.post.id)));const k=Math.min(limit,feedCfg.session?.maxTopK||50);if(!c.diversity)return scored.slice(0,limit);const head=this.mmr(scored,k),chosen=new Set(head.map(x=>x.post.id));return head.concat(scored.filter(x=>!chosen.has(x.post.id)).slice(0,Math.max(0,limit-head.length)))}
+ static rank(posts,ctx,mode,limit){const c=FEED_CONTRACTS[mode]||FEED_CONTRACTS.forYou;const bounded=posts.slice(0,Math.min(posts.length,Math.max(200,feedCfg.session?.maxTopK||50)));const scored=bounded.map(post=>({post,...this.score(post,ctx,c)})).sort((a,b)=>b.score-a.score||new Date(b.post.createdAt||b.post.created_at||0)-new Date(a.post.createdAt||a.post.created_at||0)||String(a.post.id).localeCompare(String(b.post.id)));const k=Math.min(limit,feedCfg.session?.maxTopK||50);if(!c.diversity)return scored.slice(0,limit);const head=this.mmr(scored,k),chosen=new Set(head.map(x=>x.post.id));return head.concat(scored.filter(x=>!chosen.has(x.post.id)).slice(0,Math.max(0,limit-head.length)))}
 }
 
-let signalRefreshTimer=null,signalRefreshQueued=false;
+let signalRefreshTimer=null,signalRefreshQueued=false,rankingDirty=true;
+const rankingCache=new Map();
 const SIGNAL_STORE_PREFIX='spike-feed-ranking-v3:';const signalStoreKey=()=>SIGNAL_STORE_PREFIX+(state.user?.id||'guest');
 function readSignalStore(){try{const x=JSON.parse(localStorage.getItem(signalStoreKey())||'{}');return x&&typeof x==='object'?x:{}}catch(_){return{}}}
 function writeSignalStore(x){try{localStorage.setItem(signalStoreKey(),JSON.stringify(x))}catch(_) {}}
@@ -1540,9 +1752,28 @@ async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).
 function rankingContext(posts){return{userId:state.user?.id||'',following:state.following||new Set(),signals:Object.fromEntries(Object.entries(readSignalStore()).map(([id,v])=>[id,{...(serverSignalProfile[id]||{}),...v}])),creatorAffinity:{},topicAffinity:{},explorationIds:new Set(),recentEngagement:trendingFeatureCache,now:Date.now(),posts}}
 function rankPosts(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function postRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
-function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankPosts(x,mode)}
+function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankPosts(x,mode)}
 function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>`<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${signalScore(p)} out of 100"><span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#${i+1}</span><strong class="signal-pick-score">${signalScore(p)}<em>/100</em></strong></span><span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(String(p.content||'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${signalScore(p)}%"></i></span></button>`).join('')}
-function refreshSignalRanking({render=true}={}){const mode=state.filter==='following'?'following':state.filter==='saved'?'saved':(state.filter||'forYou');const raw=state.posts.slice();if(mode==='trending'){loadTrendingFeatures(raw).then(()=>{const r=filteredPosts(mode);if(render){renderSignalTopPicks(r);renderPostsFromRanked(r)}});return filteredPosts(mode)}const r=filteredPosts(mode);if(render){renderSignalTopPicks(r);renderPostsFromRanked(r)}return r}function scheduleSignalRefresh({render=false}={}){if(signalRefreshQueued)return;signalRefreshQueued=true;queueMicrotask(()=>{signalRefreshQueued=false;refreshSignalRanking({render})})}function startSignalAutoRefresh(){clearInterval(signalRefreshTimer);signalRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSignalRanking({render:false})},300000)}
+function refreshSignalRanking({render=true,force=false}={}){
+  const mode=state.filter==='following'?'following':state.filter==='saved'?'saved':(state.filter||'forYou');
+  const raw=state.posts.slice();
+  const key=`${mode}:${state.posts.length}:${state.visiblePosts}:${state.following.size}:${state.muted.size}:${state.blocked.size}:${state.saved.size}`;
+  const cached=rankingCache.get(key);
+  if(!force&&!rankingDirty&&cached&&Date.now()-cached.at<30000){if(render){renderSignalTopPicks(cached.ranked);renderPostsFromRanked(cached.ranked)}return cached.ranked;}
+  if(mode==='trending'){
+    loadTrendingFeatures(raw).then(()=>{const r=filteredPosts(mode);rankingCache.set(key,{at:Date.now(),ranked:r});rankingDirty=false;if(render){renderSignalTopPicks(r);renderPostsFromRanked(r)}});
+    return cached?.ranked||filteredPosts(mode);
+  }
+  const r=filteredPosts(mode);rankingCache.set(key,{at:Date.now(),ranked:r});rankingDirty=false;
+  if(render){renderSignalTopPicks(r);renderPostsFromRanked(r)}
+  return r;
+}
+function scheduleSignalRefresh({render=false}={}){
+  rankingDirty=true;
+  if(!render||signalRefreshQueued)return;
+  signalRefreshQueued=true;
+  queueMicrotask(()=>{signalRefreshQueued=false;refreshSignalRanking({render:true})});
+}function startSignalAutoRefresh(){clearInterval(signalRefreshTimer);signalRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSignalRanking({render:false})},300000)}
 const feedVisibility=new Map();let feedObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}})}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
 function feedbackMenu(p){const old=$('feedFeedbackOverlay');old?.remove();const o=document.createElement('div');o.id='feedFeedbackOverlay';o.className='feed-feedback-overlay';const topics=FeedRankingEngine.topics(p),type=FeedRankingEngine.type(p);o.innerHTML=`<section class="feed-feedback-sheet" role="dialog" aria-modal="true"><div class="feed-feedback-head"><b>Tune your feed</b><button data-feedback-close type="button">×</button></div><button data-feedback="not_interested" type="button">Not interested<small>Show fewer posts of this content type.</small></button><button data-feedback="show_fewer" type="button">Show fewer like this<small>${topics.length?'Reduce posts about '+topics.slice(0,2).join(', '):'Reduce similar topics.'}</small></button><button data-feedback="mute_creator" type="button">Mute creator<small>Stop recommendations from this creator.</small></button><button data-feedback="hide" type="button">Hide this post<small>Remove this post from your feed.</small></button></section>`;document.body.appendChild(o);o.onclick=async e=>{if(e.target===o||e.target.closest('[data-feedback-close]'))return o.remove();const b=e.target.closest('[data-feedback]');if(!b)return;const k=b.dataset.feedback;try{const {error}=await db.rpc('record_feed_negative_feedback',{p_post_id:p.id,p_event_type:k,p_metadata:{content_type:type,topics:Object.fromEntries(topics.map(t=>[t,1]))}});if(error)throw error;const l=readSignalStore(),r=l[p.id]||{};r[k]=Number(r[k]||0)+1;l[p.id]=r;writeSignalStore(l);if(k==='hide')state.posts=state.posts.filter(x=>x.id!==p.id);if(k==='mute_creator')state.muted.add(p.authorUid);renderPostsFromRanked(filteredPosts());toast(k==='mute_creator'?'Creator muted':k==='hide'?'Post hidden':'Feed preference saved','success');o.remove()}catch(err){queueFeedEvent(p.id,k,{metadata:{content_type:type,topics,offline:true}});toast('Saved locally; it will sync when you are back online','success');o.remove()}}}
 function ago(v) {
@@ -1581,13 +1812,38 @@ function markdownToHTML(text) {
   return x;
 }
 
+function postVideoPlaybackUrl(mediaItem){
+  const raw=safeHttpUrl(mediaItem?.playbackUrl||mediaItem?.url||'');
+  if(!raw)return '';
+  // A stored playback URL may be a legacy/failed derivative. Keep it as the
+  // first candidate so watermarks are preserved, but the video controller will
+  // automatically fall back to fresh H.264/AAC Cloudinary derivatives.
+  if(mediaItem?.playbackUrl || mediaItem?.watermarked===true || mediaItem?.normalized===true) return raw;
+  return cloudinaryFeedVideoUrl(raw);
+}
+
+function videoMarkupForFeed(mediaItem, post, index='') {
+  const kind=mediaKindOf(mediaItem);
+  if(kind!=='video') return '';
+  const media=postVideoPlaybackUrl(mediaItem);
+  if(!media) return '';
+  const original=safeHttpUrl(mediaItem?.originalUrl||mediaItem?.url||media)||media;
+  const label=index!==''?`SPIKE video ${Number(index)+1}`:'SPIKE video';
+  return `<div class="post-video-inline${index!=='' ? ' post-grid-video' : ''}" data-video-ready="0" data-video-mode="preview"><video class="post-feed-video" data-original-src="${esc(original)}" data-playback-src="${esc(media)}" src="${esc(media)}" poster="${esc(cloudinaryVideoPosterUrl(original))}" preload="metadata" muted autoplay loop playsinline controlslist="nodownload" disablepictureinpicture aria-label="${esc(label)}"></video>${videoWatermarkForPost(mediaItem,post)}<span class="grid-video-play" aria-hidden="true">▶</span><span class="video-duration-badge" data-video-duration aria-hidden="true">Video</span><div class="feed-video-error" role="alert">Video unavailable · <button type="button" data-video-retry>Retry</button></div></div>`;
+}
+
 function mediaMarkup(p) {
   const items=Array.isArray(p.mediaItems)&&p.mediaItems.length?p.mediaItems:(p.mediaUrl?[{url:p.mediaUrl,type:p.mediaType||'image',watermarked:!!p.mediaWatermarked,spid:p.mediaSpid||null}]:[]);
   if(!items.length) return "";
   const caption=String(p.content||'SPIKE media').replace(/\s+/g,' ').trim().slice(0,90);
-  if(items.length===1){ const m=items[0], media=safeHttpUrl(m.url); if(!media)return ''; if(m.type==='video'){return `<div class="post-video-inline" data-video-ready="0" data-video-mode="preview"><video class="post-feed-video" src="${esc(media)}" preload="metadata" muted autoplay loop playsinline aria-label="SPIKE video"></video>${(!m.watermarked&&!p.mediaWatermarked&&videoWatermarkHTML(p))}<span class="video-duration-badge" data-video-duration aria-hidden="true">Video</span><div class="feed-video-error" role="alert">Video unavailable · <button type="button" data-video-retry>Retry</button></div></div>`;} return `<button class="post-media" data-image="${esc(media)}" data-media-caption="${esc(caption)}" aria-label="Open image"><img src="${esc(media)}" alt="Post media" loading="lazy" decoding="async"></button>`; }
+  if(items.length===1){
+    const m=items[0], kind=mediaKindOf(m), media=kind==='gif'||kind==='image'?cloudinaryFeedImageUrl(m.url):kind==='video'?postVideoPlaybackUrl(m):safeHttpUrl(m.url);
+    if(!media)return '';
+    if(kind==='video') return videoMarkupForFeed(m,p);
+    return `<button class="post-media" data-image="${esc(media)}" data-media-caption="${esc(caption)}" aria-label="Open image"><img src="${esc(media)}" alt="Post media" loading="lazy" decoding="async"></button>`;
+  }
   const count=items.length;
-  return `<div class="post-media-grid count-${Math.min(count,4)} layout-${esc(p.mediaLayout||'auto')}" aria-label="${count} media items">${items.slice(0,4).map((m,i)=>{const media=safeHttpUrl(m.url);if(!media)return '';if(m.type==='video')return `<div class="post-grid-video"><video src="${esc(media)}" preload="metadata" muted autoplay loop playsinline aria-label="SPIKE video ${i+1}"></video><span>▶</span></div>`;return `<button class="post-media" data-image="${esc(media)}" data-media-caption="${esc(caption)}" aria-label="Open image ${i+1}"><img src="${esc(media)}" alt="Post media ${i+1}" loading="lazy" decoding="async">${i===3&&count>4?`<b class="post-media-more">+${count-4}</b>`:''}</button>`;}).join('')}<span class="post-media-count">${count} ${count===1?'item':'items'}</span></div>`;
+  return `<div class="post-media-grid count-${Math.min(count,4)} layout-${esc(p.mediaLayout||'auto')}" aria-label="${count} media items">${items.slice(0,4).map((m,i)=>{const kind=mediaKindOf(m),media=kind==='gif'||kind==='image'?cloudinaryFeedImageUrl(m.url):kind==='video'?postVideoPlaybackUrl(m):safeHttpUrl(m.url);if(!media)return '';if(kind==='video')return videoMarkupForFeed(m,p,i);return `<button class="post-media" data-image="${esc(media)}" data-media-caption="${esc(caption)}" aria-label="Open image ${i+1}"><img src="${esc(media)}" alt="Post media ${i+1}" loading="lazy" decoding="async">${i===3&&count>4?`<b class="post-media-more">+${count-4}</b>`:''}</button>`;}).join('')}<span class="post-media-count">${count} ${count===1?'item':'items'}</span></div>`;
 }
 function renderComments(comments, parentId = null, level = 0, seen = new Set()) {
   if (!Array.isArray(comments) || level > 8) return "";
@@ -1627,8 +1883,8 @@ ${Array.from({length:4},()=>`<div class="skeleton-text" style="width:50px;height
 }
 
 function postHTML(p) {
-  const a = authorFor(p), likes = Array.isArray(p.likes) ? p.likes : [], comments = Array.isArray(p.comments) ? p.comments : [];
-  const liked = likes.includes(state.user.id), saved = state.saved.has(p.id);
+  const a = authorFor(p), comments = Array.isArray(p.comments) ? p.comments : [];
+  const liked = reactionLikeUsers(p).has(String(state.user.id)), saved = state.saved.has(p.id);
   const isScheduled = p.scheduledAt && new Date(p.scheduledAt) > new Date();
   const commentsHtml = renderComments(comments);
   const reactionEntries = normalizedReactionEntries(p);
@@ -1773,18 +2029,18 @@ async function loadAnnouncement() {
 }
 
 // ─── POST CRUD ─────────────────────────────────────────
-async function writePost({ content = '', mediaUrl = null, mediaType = null, mediaWatermarked = false, mediaSpid = null, mediaItems = [], mediaLayout = 'auto', linkUrl = null, scheduledAt = null } = {}) {
+async function writePost({ content = '', mediaUrl = null, mediaType = null, mediaWatermarked = false, mediaSpid = null, mediaOriginalUrl = null, mediaNormalized = false, mediaItems = [], mediaLayout = 'auto', linkUrl = null, scheduledAt = null } = {}) {
   if (!state.user) return;
   const text = String(content || '').trim();
   if (!text && !mediaUrl && !mediaItems.length && !linkUrl) { toast('Write something first'); return null; }
   const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
   const data = {
     authorUid: state.user.id, authorName: nameOf(state.profile), authorAvatar: avatarOf(state.profile),
-    content: text, mediaUrl, mediaType, mediaWatermarked: !!mediaWatermarked, mediaSpid: mediaSpid || null, mediaItems: Array.isArray(mediaItems) ? mediaItems : [], mediaLayout: mediaLayout || 'auto', linkUrl, scheduledAt: scheduledAt || null,
-    likes: [], comments: [], reactions: {}, views: 0, createdAt: now(), updatedAt: null, deleted: false
+    content: text, mediaUrl, mediaType, mediaWatermarked: !!mediaWatermarked, mediaSpid: mediaSpid || null, mediaOriginalUrl: mediaOriginalUrl || null, mediaNormalized: !!mediaNormalized, mediaItems: Array.isArray(mediaItems) ? mediaItems : [], mediaLayout: mediaLayout || 'auto', linkUrl, scheduledAt: scheduledAt || null,
+    comments: [], reactions: { like: 0, like_users: [] }, views: 0, createdAt: now(), updatedAt: null, deleted: false
   };
   await putDoc(`posts/${id}`, data, 'posts');
-  state.posts.unshift({ id, ...data });
+  state.posts.unshift(normalizePostModel({ id, ...data })); rankingDirty=true; rankingCache.clear();
   renderPosts();
   return id;
 }
@@ -1794,18 +2050,53 @@ async function updatePost(id, patch) {
   if (!p) throw new Error('Post not found');
   const next = { ...p, ...patch, updatedAt: now() };
   await putDoc(`posts/${id}`, next, 'posts');
-  Object.assign(p, next);
+  Object.assign(p, next); rankingDirty=true; rankingCache.clear();
   renderPosts();
 }
 
 async function deletePost(id) {
   const p = state.posts.find(x => x.id === id);
   if (!p || p.authorUid !== state.user.id) { toast('You cannot delete this post'); return; }
-  const ok = await premiumConfirm({ title: 'Delete this post?', message: 'This post will be removed from your SPIKE feed.', confirmText: 'Delete post', cancelText: 'Keep post', icon: '🗑️', eyebrow: 'DANGER ZONE', danger: true });
-  if (!ok) return;
-  try { await updatePost(id, { deleted: true }); toast('Post deleted', 'success'); } catch (e) { console.error('deletePost', e); toast(e.message || 'Could not delete this post', 'error'); }
-}
 
+  const ok = await premiumConfirm({
+    title: 'Delete this post?',
+    message: 'This post will be removed from your SPIKE feed.',
+    confirmText: 'Delete post',
+    cancelText: 'Keep post',
+    icon: '🗑️',
+    eyebrow: 'DANGER ZONE',
+    danger: true
+  });
+  if (!ok) return;
+
+  // Optimistic UI: remove it from the in-memory feed immediately.
+  // Previously updatePost() set deleted=true but left the post inside
+  // state.posts, so it stayed visible until the next full feed reload.
+  const previousPosts = state.posts;
+  state.posts = previousPosts.filter(x => x.id !== id);
+  rankingDirty = true;
+  rankingCache.clear();
+  renderPosts();
+  toast('Post deleted', 'success');
+
+  try {
+    // Persist directly instead of calling updatePost(), which would render
+    // the still-present deleted object before it was removed from state.posts.
+    await putDoc(
+      `posts/${id}`,
+      { ...p, deleted: true, deletedAt: now(), updatedAt: now() },
+      'posts'
+    );
+  } catch (e) {
+    // Roll back the optimistic removal if the backend write fails.
+    state.posts = previousPosts;
+    rankingDirty = true;
+    rankingCache.clear();
+    renderPosts();
+    console.error('deletePost', e);
+    toast(e.message || 'Could not delete this post', 'error');
+  }
+}
 async function mutatePostInteraction(id, action, emoji = null, comment = null) {
   if (!state.user?.id) throw new Error('Please sign in again.');
   const { data, error } = await withTimeout(
@@ -1863,7 +2154,7 @@ function syncLikeDom(id, post) {
   if (!article) return;
   const btn = article.querySelector(`[data-like="${CSS.escape(String(id))}"]`);
   if (btn) {
-    const liked = Array.isArray(post?.likes) && post.likes.includes(state.user?.id);
+    const liked = reactionLikeUsers(post).has(String(state.user?.id));
     btn.classList.toggle('active', liked);
     btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
   }
@@ -1937,26 +2228,22 @@ async function toggleLike(id) {
   const p = getPostState(id);
   const key = `like:${id}`;
   if (!p || !state.user?.id || feedInteractionBusy.has(key)) return false;
-
   feedInteractionBusy.add(key);
   setInteractionBusy(id, true, 'like');
-
-  const before = Array.isArray(p.likes) ? [...p.likes] : [];
-  const wasLiked = before.includes(state.user.id);
-  const optimistic = wasLiked
-    ? before.filter(uid => uid !== state.user.id)
-    : [...before, state.user.id];
-  p.likes = optimistic;
+  const before = JSON.parse(JSON.stringify(p.reactions || {}));
+  const users = reactionLikeUsers(p);
+  const wasLiked = users.has(String(state.user.id));
+  if (wasLiked) users.delete(String(state.user.id)); else users.add(String(state.user.id));
+  p.reactions = { ...(p.reactions || {}), like_users: [...users], like: users.size };
   syncLikeDom(id, p);
-
   try {
     const data = await mutatePostInteraction(id, 'like');
-    if (data && typeof data === 'object') Object.assign(p, data);
+    if (data && typeof data === 'object') normalizePostModel(Object.assign(p, data));
     syncLikeDom(id, p);
     recordSignal(id, 'likes', wasLiked ? -1 : 1);
     return !wasLiked;
   } catch (e) {
-    p.likes = before;
+    p.reactions = before;
     syncLikeDom(id, p);
     throw e;
   } finally {
@@ -1967,15 +2254,16 @@ async function toggleLike(id) {
 
 async function toggleSave(id) {
   const key = `save:${id}`;
-  if (feedInteractionBusy.has(key)) return;
+  if (!state.posts.some(p => String(p.id) === String(id)) || feedInteractionBusy.has(key)) return;
   feedInteractionBusy.add(key);
   setInteractionBusy(id, true, 'save');
   const wasSaved = state.saved.has(id);
   if (wasSaved) state.saved.delete(id); else state.saved.add(id);
   syncSaveDom(id);
   try {
-    const me = await withTimeout(getDoc(`users/${state.user.id}`).catch(() => ({})), 8000, 'Saved posts');
-    await withTimeout(putDoc(`users/${state.user.id}`, { ...(me || {}), savedPosts: [...state.saved] }, 'users'), 10000, 'Saved posts');
+    const data = await mutatePostInteraction(id, wasSaved ? 'unsave' : 'save');
+    const p = getPostState(id);
+    if (data && typeof data === 'object' && p) normalizePostModel(Object.assign(p, data));
     toast(state.saved.has(id) ? 'Saved' : 'Removed from saved', 'success');
   } catch (e) {
     if (wasSaved) state.saved.add(id); else state.saved.delete(id);
@@ -2023,7 +2311,7 @@ async function reactToPost(id, emoji) {
 
   try {
     const data = await mutatePostInteraction(id, 'reaction', emoji);
-    if (data && typeof data === 'object') Object.assign(p, data);
+    if (data && typeof data === 'object') normalizePostModel(Object.assign(p, data));
     recordSignal(id, 'reactions', 1);
     syncReactionDom(id, p);
     closeReactionTray();
@@ -2305,7 +2593,7 @@ function renderMediaStudio(){
   stage.innerHTML=`<span class="media-index">${state.activeMediaIndex+1} / ${total}</span><span class="media-type-badge">${active.type==='video'?'VIDEO':'PHOTO'}</span>${active.type==='video'?`<video src="${mediaSrc}" controls playsinline preload="metadata" ${active.muted?'muted':''} style="${mediaStyle}"></video>`:`<img src="${mediaSrc}" alt="Selected photo" decoding="async" style="${mediaStyle}" loading="lazy">`}`;
   if($('mediaEditbar'))$('mediaEditbar').hidden=false;
   if($('mediaLayoutSelect'))$('mediaLayoutSelect').value=state.mediaLayout||'auto';
-  strip.innerHTML=items.map((item,i)=>`<div class="media-thumb-wrap" draggable="${busy?'false':'true'}" data-media-wrap="${i}"><button type="button" class="media-thumb ${i===state.activeMediaIndex?'active':''}" data-media-index="${i}" aria-label="${item.type==='video'?'Video':'Photo'} ${i+1}: ${esc(item.file?.name||'media')}" ${busy?'disabled':''}>${item.type==='video'?`<video src="${esc(item.previewUrl)}" muted preload="metadata"></video><span class="thumb-video">▶</span>`:`<img src="${esc(item.previewUrl)}" alt="" loading="lazy" decoding="async">`}<span class="thumb-number">${i+1}</span>${item.status==='uploading'?'<span class="thumb-status">↑</span>':''}${item.status==='complete'?'<span class="thumb-status">✓</span>':''}</button><button type="button" class="thumb-remove" data-media-remove="${i}" aria-label="Remove media ${i+1}" ${busy?'disabled':''}>×</button></div>`).join('')+`<button type="button" class="media-thumb media-thumb-add" id="mediaStripAdd" ${busy?'disabled':''} aria-label="Add more media"><span>＋</span><small>Add</small></button>`;
+  strip.innerHTML=items.map((item,i)=>`<div class="media-thumb-wrap" draggable="${busy?'false':'true'}" data-media-wrap="${i}"><button type="button" class="media-thumb ${i===state.activeMediaIndex?'active':''}" data-media-index="${i}" aria-label="${item.type==='video'?'Video':'Photo'} ${i+1}: ${esc(item.file?.name||'media')}" ${busy?'disabled':''}>${item.type==='video'?`<video src="${esc(item.previewUrl)}" muted preload="metadata"></video><span class="thumb-video">▶</span>`:`<img src="${esc(item.previewUrl)}" alt="" loading="lazy" decoding="async">`}<span class="thumb-number">${i+1}</span>${item.status==='uploading'?`<span class="thumb-status">${Math.round((item.progress||0)*100)}%</span>`:''}${item.status==='complete'?'<span class="thumb-status">✓</span>':''}</button><button type="button" class="thumb-remove" data-media-remove="${i}" aria-label="Remove media ${i+1}" ${busy?'disabled':''}>×</button></div>`).join('')+`<button type="button" class="media-thumb media-thumb-add" id="mediaStripAdd" ${busy?'disabled':''} aria-label="Add more media"><span>＋</span><small>Add</small></button>`;
   strip.querySelectorAll('[data-media-index]').forEach(btn=>btn.onclick=()=>{state.activeMediaIndex=Number(btn.dataset.mediaIndex);renderMediaStudio();});
   strip.querySelectorAll('[data-media-remove]').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation();removeMediaItem(Number(btn.dataset.mediaRemove));});
   $('mediaStripAdd')?.addEventListener('click',()=>openMediaPicker());
@@ -2341,7 +2629,7 @@ async function prepareMediaForUpload(item){
   const c=document.createElement('canvas');c.width=swap?h:w;c.height=swap?w:h;const ctx=c.getContext('2d');ctx.translate(c.width/2,c.height/2);ctx.rotate(angle*Math.PI/180);ctx.filter=mediaFilterCss(item.filter||0);ctx.drawImage(img,-w/2,-h/2,w,h);
   return await new Promise(resolve=>c.toBlob(b=>resolve(b||item.file),item.file.type||'image/jpeg',.94));
 }
-async function uploadMedia(file,type){return await uploadToCloudinary(file,type==='video'?'spike/videos':'spike/images',{watermark:type==='video'});}
+async function uploadMedia(file,type,options={}){return await uploadToCloudinary(file,type==='video'?'spike/videos':'spike/images',{watermark:type==='video',...options});}
 function validateMediaCollection(items){
   if(items.length>MAX_POST_MEDIA)return `You can select up to ${MAX_POST_MEDIA} media items`;
   for(const item of items){if(!item.file)return 'One selected media item is unavailable.';if(!/^image\//.test(item.file.type)&&!/^video\//.test(item.file.type))return `Unsupported media: ${item.file.name}`;}
@@ -2351,7 +2639,7 @@ function validateMediaCollection(items){
 const CONTENT_DRAFTS_KEY='spike-content-drafts-v2';
 function saveCurrentDraft(){const text=$('postText')?.value.trim()||'',link=$('linkInput')?.value.trim()||'';if(!text&&!mediaItemsFromState().length&&!link){toast('Nothing to save yet','warning');return;}let d=[];try{d=JSON.parse(localStorage.getItem(CONTENT_DRAFTS_KEY)||'[]')}catch(_){}d.unshift({id:mediaItemId(),text,link,layout:state.mediaLayout||'auto',media:mediaItemsFromState().map(x=>({name:x.file?.name||'media',type:x.type,size:x.file?.size||0})),updatedAt:new Date().toISOString()});try{localStorage.setItem(CONTENT_DRAFTS_KEY,JSON.stringify(d.slice(0,20)));toast('Draft saved','success')}catch(_){toast('Could not save draft','error')}}
 function loadDrafts(){try{return JSON.parse(localStorage.getItem(CONTENT_DRAFTS_KEY)||'[]')}catch(_){return []}}
-function renderContentCenter(tab='drafts'){const body=$('contentCenterBody');if(!body)return;if(tab==='drafts'){const d=loadDrafts();body.innerHTML=d.length?d.map(x=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(x.text||'Media draft')}</div><div class="content-item-meta">${x.media?.length?x.media.length+' media · ':''}${new Date(x.updatedAt).toLocaleString()}</div></div><div class="content-item-actions"><button data-draft-delete="${esc(x.id)}">Delete</button></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">No drafts yet</div><div class="content-item-meta">Save a post draft from the composer.</div></div></div>';}else if(tab==='scheduled'){const rows=state.posts.filter(p=>p.scheduledAt&&new Date(p.scheduledAt)>new Date()).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));body.innerHTML=rows.length?rows.map(p=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(p.content||'Scheduled media post')}</div><div class="content-item-meta">${new Date(p.scheduledAt).toLocaleString()} · ${Array.isArray(p.mediaItems)&&p.mediaItems.length?p.mediaItems.length+' media':'Text'}</div></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">Nothing scheduled</div><div class="content-item-meta">Scheduled posts will appear here.</div></div></div>';}else{const rows=state.posts.filter(p=>!p.scheduledAt||new Date(p.scheduledAt)<=new Date()).slice(0,20),views=rows.reduce((n,p)=>n+Number(p.views||0),0),likes=rows.reduce((n,p)=>n+(Array.isArray(p.likes)?p.likes.length:Number(p.likes||0)),0),comments=rows.reduce((n,p)=>n+(Array.isArray(p.comments)?p.comments.length:Number(p.comments||0)),0);body.innerHTML=`<div class="analytics-grid"><div class="analytics-stat"><b>${views}</b><span>Views</span></div><div class="analytics-stat"><b>${likes}</b><span>Likes</span></div><div class="analytics-stat"><b>${comments}</b><span>Comments</span></div><div class="analytics-stat"><b>${rows.length}</b><span>Published posts</span></div></div>`;}}
+function renderContentCenter(tab='drafts'){const body=$('contentCenterBody');if(!body)return;if(tab==='drafts'){const d=loadDrafts();body.innerHTML=d.length?d.map(x=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(x.text||'Media draft')}</div><div class="content-item-meta">${x.media?.length?x.media.length+' media · ':''}${new Date(x.updatedAt).toLocaleString()}</div></div><div class="content-item-actions"><button data-draft-delete="${esc(x.id)}">Delete</button></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">No drafts yet</div><div class="content-item-meta">Save a post draft from the composer.</div></div></div>';}else if(tab==='scheduled'){const rows=state.posts.filter(p=>p.scheduledAt&&new Date(p.scheduledAt)>new Date()).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));body.innerHTML=rows.length?rows.map(p=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(p.content||'Scheduled media post')}</div><div class="content-item-meta">${new Date(p.scheduledAt).toLocaleString()} · ${Array.isArray(p.mediaItems)&&p.mediaItems.length?p.mediaItems.length+' media':'Text'}</div></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">Nothing scheduled</div><div class="content-item-meta">Scheduled posts will appear here.</div></div></div>';}else{const rows=state.posts.filter(p=>!p.scheduledAt||new Date(p.scheduledAt)<=new Date()).slice(0,20),views=rows.reduce((n,p)=>n+Number(p.views||0),0),likes=rows.reduce((n,p)=>n+reactionLikeCount(p),0),comments=rows.reduce((n,p)=>n+(Array.isArray(p.comments)?p.comments.length:Number(p.comments||0)),0);body.innerHTML=`<div class="analytics-grid"><div class="analytics-stat"><b>${views}</b><span>Views</span></div><div class="analytics-stat"><b>${likes}</b><span>Likes</span></div><div class="analytics-stat"><b>${comments}</b><span>Comments</span></div><div class="analytics-stat"><b>${rows.length}</b><span>Published posts</span></div></div>`;}}
 function openContentCenter(tab='drafts'){openOverlay('contentCenterOverlay');document.querySelectorAll('[data-center-tab]').forEach(b=>b.classList.toggle('active',b.dataset.centerTab===tab));renderContentCenter(tab)}
 function localAiAction(action){const t=$('postText');if(!t)return;let v=t.value.trim();if(action==='polish')v=v.replace(/\s+/g,' ').replace(/(^|[.!?]\s+)([a-z])/g,(m,a,b)=>a+b.toUpperCase());if(action==='hook'&&v)v=`Here’s what you need to know: ${v}`;if(action==='shorten'&&v){const a=v.split(/\s+/);v=a.slice(0,35).join(' ')+(a.length>35?'…':'')}if(action==='hashtags'&&v){const words=v.toLowerCase().match(/\b[a-z][a-z0-9]{4,}\b/g)||[],tags=[...new Set(words)].slice(0,5).map(w=>`#${w}`);if(tags.length)v+=`\n\n${tags.join(' ')}`}t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}));toast('AI suggestion applied','success')}
 
@@ -2368,11 +2656,11 @@ async function publishCurrentPost(){
     const uploadedItems=[];
     for(let i=0;i<items.length;i++){
       const item=items[i]; item.status='uploading'; renderMediaStudio();
-      try{ const uploadFile=await prepareMediaForUpload(item); const uploaded=await uploadMedia(uploadFile,item.type); uploadedItems.push({id:item.id,url:uploaded?.url||uploaded,type:item.type,name:item.file.name,size:item.file.size,watermarked:!!uploaded?.watermarked,spid:uploaded?.spid||null}); item.status='complete'; }
+      try{ const uploadFile=await prepareMediaForUpload(item); const uploaded=await uploadMedia(uploadFile,item.type,{onProgress:(ratio)=>{item.progress=ratio;renderMediaStudio();}}); uploadedItems.push({id:item.id,url:uploaded?.playbackUrl||uploaded?.url||uploaded,type:item.type,name:item.file.name,size:item.file.size,originalUrl:uploaded?.originalUrl||null,playbackUrl:uploaded?.playbackUrl||uploaded?.url||null,normalized:!!uploaded?.normalized,format:uploaded?.format||null,videoCodec:uploaded?.videoCodec||null,audioCodec:uploaded?.audioCodec||null,watermarked:!!uploaded?.watermarked,spid:uploaded?.spid||null}); item.status='complete'; }
       catch(e){item.status='error';renderMediaStudio();throw e;}
     }
     const first=uploadedItems[0]||null;
-    await writePost({content,mediaUrl:first?.url||null,mediaType:first?.type||null,mediaWatermarked:!!first?.watermarked,mediaSpid:first?.spid||null,mediaItems:uploadedItems,mediaLayout:state.mediaLayout||'auto',linkUrl:link||null,scheduledAt});
+    await writePost({content,mediaUrl:first?.url||null,mediaType:first?.type||null,mediaWatermarked:!!first?.watermarked,mediaSpid:first?.spid||null,mediaOriginalUrl:first?.originalUrl||null,mediaNormalized:!!first?.normalized,mediaItems:uploadedItems,mediaLayout:state.mediaLayout||'auto',linkUrl:link||null,scheduledAt});
     $('postText').value='';$('scheduleTime').value='';clearMedia();toast(scheduledAt?'Post scheduled':'Posted','success');
   }catch(e){console.error('publish',e);toast(e?.message||'Could not publish','error');}
   finally{publishInFlight=false;if(btn){btn.disabled=false;btn.textContent=btn.dataset.originalText||'Post';delete btn.dataset.originalText;}}
@@ -2399,18 +2687,21 @@ async function publishStory() {
   closeOverlay('storyOverlay');
   setStoryPublishing(true, "Publishing your story…");
   try {
-    let mediaUrl = null, mediaType = null, audioUrl = null;
+    let mediaUrl = null, mediaType = null, audioUrl = null, mediaOriginalUrl = null, mediaNormalized = false;
     if (mediaFile) {
       mediaType = mediaFile.type.startsWith('video/') ? 'video' : 'image';
       const uploadedMedia = await uploadToCloudinary(mediaFile, 'spike/stories', { watermark: mediaType === 'video' });
-      mediaUrl = uploadedMedia?.url || uploadedMedia;
+      mediaUrl = uploadedMedia?.playbackUrl || uploadedMedia?.url || uploadedMedia;
+       mediaOriginalUrl = uploadedMedia?.originalUrl || null;
+       mediaNormalized = !!uploadedMedia?.normalized;
     }
     if (audioFile) { audioUrl = await uploadToCloudinary(audioFile, 'spike/story-audio'); }
     const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
     const data = {
       authorUid: state.user.id, authorName: nameOf(state.profile), authorAvatar: avatarOf(state.profile),
       text, mediaUrl, mediaType, audioUrl, playbackSeconds: 50, lifetimeSeconds: 86400,
-      createdAt: now(), expiresAt: new Date(Date.now() + 86400000).toISOString(), deleted: false
+      mediaOriginalUrl, mediaNormalized,
+       createdAt: now(), expiresAt: new Date(Date.now() + 86400000).toISOString(), deleted: false
     };
     await putDoc(`stories/${id}`, data, 'stories');
     const saved = await getDoc(`stories/${id}`);
@@ -2437,7 +2728,7 @@ const StoryEngine = (() => {
     return s.groups;
   }
   function locate(id){ const gs=rebuildGroups(); for(let gi=0;gi<gs.length;gi++){ const si=gs[gi].stories.findIndex(st=>st.id===id); if(si>=0)return {gi,si}; } return null; }
-  function mediaKind(st){ const url=String(st?.mediaUrl||'').trim(); const mt=String(st?.mediaType||'').toLowerCase(); if(mt==='video'||/\.(mp4|webm|mov)(?:[?#].*)?$/i.test(url))return'video'; if(mt==='image'||url)return'image'; return'text'; }
+  function mediaKind(st){ const url=String(st?.mediaUrl||'').trim(); const mt=String(st?.mediaType||'').toLowerCase(); if(mt==='gif'||isGifUrl(url)||/image\/gif/i.test(String(st?.mimeType||'')))return'image'; if(mt==='video'||/\.(mp4|webm|mov|m4v|avi|mpeg|mpg)(?:[?#].*)?$/i.test(url))return'video'; if(mt==='image'||url)return'image'; return'text'; }
   function seconds(st){ return Math.max(2,Math.min(60,Number(st?.playbackSeconds||st?.duration||5))); }
   function audioUrl(st){ return String(st?.audioUrl||st?.musicUrl||'').trim(); }
   function cancelClock(){ if(s.raf)cancelAnimationFrame(s.raf); s.raf=0; clearTimeout(s.timer); s.timer=0; }
@@ -2492,7 +2783,7 @@ const StoryEngine = (() => {
     v.onloadedmetadata=begin; v.onloadeddata=begin;
     v.oncanplay=()=>{ if(token===s.token&&!v.paused) v.play().catch(()=>{}); };
     v.ontimeupdate=()=>{ if(token!==s.token||s.completed)return; if(Number.isFinite(v.duration)&&v.duration>0){ const r=v.currentTime/v.duration;setProgress(r);if(r>=.999)finish(token); } };
-    v.onended=()=>finish(token); v.onerror=()=>finish(token); v.src=st.mediaUrl; v.load();
+    v.onended=()=>finish(token); v.onerror=()=>finish(token); v.src=(st.mediaNormalized||st.mediaWatermarked)?st.mediaUrl:(typeof storyFullMediaUrl==='function'?storyFullMediaUrl(st.mediaUrl,'video'):st.mediaUrl); v.load();
   }
   function playText(st,token){ const text=$e('storyViewerText'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); if(!text)return finish(token); text.hidden=false; text.textContent=st.text||'Story'; shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready'); startBackgroundAudio(st,token); timed(token,seconds(st)); }
   function render(direction=1){ cancelClock();stopMedia(); const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index]; if(!st)return close(); const token=++s.token; s.completed=false;s.paused=false;s.busy=false; setAudioButton(!s.muted); showAudioHint(false); const viewer=$e('storyViewer'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); const avatar=$e('storyViewerAvatar'), author=$e('storyViewerAuthor'), time=$e('storyViewerTime'); const cap=$e('storyViewerCaption'), meta=$e('storyViewerMeta');
@@ -2622,7 +2913,7 @@ function scheduleStoryFromActions() {
 function renderTrending(){const ranked=filteredPosts('trending').slice(0,8),list=$('v2TrendingList');list.innerHTML=ranked.length?ranked.map(p=>{const b=p.__signalBreakdown||{};return `<div class="stat" style="margin-bottom:7px"><b>${signalScore(p)}</b><span>${esc((p.content||'Untitled').slice(0,100))}<small style="display:block;color:var(--muted)">${b.acceleration>.65?'↑ Accelerating':'↑ Rising'} · ${Math.round((b.recentVelocity||0)*100)}% momentum</small></span></div>`}).join(''):'<div class="empty">No trends yet.</div>'}
 function renderAnalytics() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
-  const likes = mine.reduce((n, p) => n + (Array.isArray(p.likes) ? p.likes.length : 0), 0);
+  const likes = mine.reduce((n, p) => n + reactionLikeCount(p), 0);
   const comments = mine.reduce((n, p) => n + (Array.isArray(p.comments) ? p.comments.length : 0), 0);
   const views = mine.reduce((n, p) => n + Number(p.views || 0), 0);
   const saves = mine.filter(p => state.saved.has(p.id)).length;
@@ -2630,7 +2921,7 @@ function renderAnalytics() {
 }
 function renderGamify() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
-  const posts = mine.length, likes = mine.reduce((n, p) => n + (Array.isArray(p.likes) ? p.likes.length : 0), 0);
+  const posts = mine.length, likes = mine.reduce((n, p) => n + reactionLikeCount(p), 0);
   const comments = mine.reduce((n, p) => n + (Array.isArray(p.comments) ? p.comments.length : 0), 0);
   const xp = posts * 10 + likes * 2 + comments * 3;
   const level = Math.max(1, Math.floor(xp / 100) + 1);
@@ -2638,13 +2929,13 @@ function renderGamify() {
   $('v2GamifyGrid').innerHTML = `<div class="stat"><b>${xp}</b><span>XP</span></div><div class="stat"><b>${level}</b><span>Level</span></div><div class="stat"><b>${posts}</b><span>Posts</span></div><div class="stat"><b>${likes}</b><span>Likes received</span></div>`;
   $('v2BadgeList').innerHTML = badges.length ? `<div class="meta">${badges.join(' • ')}</div>` : '<div class="meta">Create and engage to unlock your first badge.</div>';
 }
-function renderReels(){const reels=filteredPosts('forYou').filter(p=>p.mediaType==='video'&&p.mediaUrl).slice(0,10);$('v2ReelsList').innerHTML=reels.length?reels.map(p=>`<div class="v2-reel-card"><video src="${esc(p.mediaUrl)}" muted playsinline loop preload="metadata"></video>${(!p.mediaWatermarked&&videoWatermarkHTML(p))}<button class="v2-reel-overlay" data-open-reel="${esc(p.id)}" type="button"><span>▶ ${esc((p.content||'Video').slice(0,70))}<small>${esc(nameOf(authorFor(p)))}</small></span><span>↗</span></button></div>`).join(''):'<div class="empty">No video posts yet.</div>';if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()),{threshold:.5});$('v2ReelsList').querySelectorAll('video').forEach(v=>io.observe(v))}}
+function renderReels(){const reels=filteredPosts('forYou').filter(p=>p.mediaType==='video'&&p.mediaUrl&&!isGifUrl(p.mediaUrl)).slice(0,10);$('v2ReelsList').innerHTML=reels.length?reels.map(p=>`<div class="v2-reel-card"><video src="${esc(postVideoPlaybackUrl({url:p.mediaUrl,playbackUrl:p.mediaUrl,watermarked:!!p.mediaWatermarked,normalized:!!p.mediaNormalized}))}" muted playsinline loop preload="metadata"></video>${videoWatermarkForPost({watermarked:!!p.mediaWatermarked},p)}<button class="v2-reel-overlay" data-open-reel="${esc(p.id)}" type="button"><span>▶ ${esc((p.content||'Video').slice(0,70))}<small>${esc(nameOf(authorFor(p)))}</small></span><span>↗</span></button></div>`).join(''):'<div class="empty">No video posts yet.</div>';if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()),{threshold:.5});$('v2ReelsList').querySelectorAll('video').forEach(v=>io.observe(v))}}
 function renderCreator() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
   const signals = readSignalStore();
   const interactions = Object.values(signals).reduce((n, x) => n + Number(x.likes||0) + Number(x.saves||0) + Number(x.comments||0) + Number(x.reactions||0), 0);
   const top = rankPosts(mine.slice())[0];
-  const engagement = mine.length ? Math.round((mine.reduce((n,p)=>n+(Array.isArray(p.likes)?p.likes.length:0)+(Array.isArray(p.comments)?p.comments.length:0),0)/mine.length)*10)/10 : 0;
+  const engagement = mine.length ? Math.round((mine.reduce((n,p)=>n+reactionLikeCount(p)+(Array.isArray(p.comments)?p.comments.length:0),0)/mine.length)*10)/10 : 0;
   $('v2CreatorGrid').innerHTML = `<div class="stat"><b>${mine.length}</b><span>Posts published</span></div><div class="stat"><b>${engagement}</b><span>Avg. interactions/post</span></div><div class="stat"><b>${interactions}</b><span>Your feed interactions</span></div><div class="stat"><b>${top ? signalScore(top) : 0}</b><span>Top post Signal Strength</span></div>`;
   $('v2CreatorBadges').textContent = top ? `Top post: ${(top.content || 'Untitled').slice(0, 90)}` : 'Publish your first post to unlock creator insights.';
 }
@@ -2692,7 +2983,7 @@ function renderSavedPanel(saved,cols){
   const collectionOptions=cols.map(c=>`<option value="${esc(c.id)}" ${selected===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
   openPremiumSheet('saved','Saved & Collections',`${saved.length} saved item${saved.length===1?'':'s'} · private to you`,'🔖',`
     <div class="spike-premium-stat"><div><b>${saved.length}</b><small>Saved</small></div><div><b>${cols.length}</b><small>Collections</small></div><div><b>${active?active.postIds?.length||0:0}</b><small>In selected</small></div></div>
-    <div class="spike-premium-tabs"><button class="spike-premium-tab ${!active?'active':''}" data-col="">All saved</button>${cols.map(c=>`<button class="spike-premium-tab ${active&&c.id===selected?'active':''}" data-col="${esc(c.id)}">${esc(c.name)}</button>`).join('')}</div>
+    <div class="spike-premium-tabs"><button class="spike-premium-tab ${!active?'active':''}" data-col="">All saved</button>${cols.map(c=>`<button class="spike-premium-tab ${(active&&c.id===selected)?'active':''}" data-col="${esc(c.id)}">${esc(c.name)}</button>`).join('')}</div>
     <div class="spike-premium-search"><input id="spikeCollectionName" placeholder="New collection name…"><button class="spike-premium-btn primary" id="spikeCreateCollection">＋ Create</button></div>
     ${edit?`<div class="spike-premium-card" style="margin-bottom:10px"><div class="spike-premium-card-main"><b>Rename collection</b><small>Choose a new name for “${esc(edit.name)}”.</small></div><input id="spikeRenameValue" value="${esc(edit.name)}" style="flex:1;min-width:90px"><button class="spike-premium-btn primary" id="spikeRenameSave">Save</button><button class="spike-premium-btn" id="spikeRenameCancel">Cancel</button></div>`:''}
     ${active&&!edit?`<div class="spike-premium-card" style="margin-bottom:10px"><div class="spike-premium-card-main"><b>${esc(active.name)}</b><small>${active.postIds?.length||0} saved posts</small></div><button class="spike-premium-btn" data-col-rename="${esc(active.id)}">Rename</button><button class="spike-premium-btn danger" data-col-delete="${esc(active.id)}">Delete</button></div>`:''}
@@ -2818,12 +3109,16 @@ async function downloadWatermarkedVideoUrl(url, filename, button) {
   if (button?.dataset.busy === '1') return;
   if (button) { button.dataset.busy='1'; button.disabled=true; button.classList.add('is-busy'); }
   try {
+    const postLike = state.posts.find(p=>p.mediaUrl===url);
+    const spid = spIdOf(postLike) || spIdOf(state.users.get(postLike?.authorUid)) || spIdOf(state.profile) || 'video';
+    const sourceUrl = postLike?.mediaOriginalUrl || postLike?.mediaItems?.find(x=>x.type==='video'&&x.originalUrl)?.originalUrl || url;
+    const downloadUrl = cloudinaryWatermarkedVideoUrl(sourceUrl, spid);
     let blob = null;
     try {
-      const r = await withTimeout(fetch(url, { mode:'cors', credentials:'omit' }), 20000, 'Video download');
+      const r = await withTimeout(fetch(downloadUrl, { mode:'cors', credentials:'omit' }), 20000, 'Video download');
       if (r.ok) blob = await r.blob();
     } catch (_) {}
-    const objectUrl = blob ? URL.createObjectURL(blob) : url;
+    const objectUrl = blob ? URL.createObjectURL(blob) : downloadUrl;
     const a=document.createElement('a');
     a.href=objectUrl; a.download=filename || 'SPIKE-watermarked-video.mp4'; a.rel='noopener';
     document.body.appendChild(a); a.click(); a.remove();
@@ -2843,6 +3138,8 @@ function initVideoControls() {
   const PREVIEW_SECONDS = 3;
   const observed = new WeakSet();
   const previewTimers = new WeakMap();
+  const retryTokens = new WeakMap();
+  let switchingVideo = false;
 
   const wrap = video => video?.closest('.post-video-inline');
   const setState = (video, mode) => {
@@ -2861,7 +3158,7 @@ function initVideoControls() {
   };
   const setError = (video, message = 'Video unavailable') => {
     const w = wrap(video);
-    if (!w) return;
+    if (!w || w.dataset.videoReloading === '1') return;
     // Never show the error layer over an actively playing video.
     if (!video.error && !video.networkState) return;
     w.classList.add('has-video-error');
@@ -2881,6 +3178,41 @@ function initVideoControls() {
     if (t) clearTimeout(t);
     previewTimers.delete(video);
   };
+  const safePlay = async (video, reason = 'playback') => {
+    if (!video || !video.isConnected) return false;
+    const w = wrap(video);
+    if (!w || w.dataset.videoReloading === '1') return false;
+    try {
+      await video.play();
+      return true;
+    } catch (err) {
+      // AbortError is normal when a competing pause/load interrupts play().
+      // It is not a broken video and must not create a retry loop or error UI.
+      if (err?.name === 'AbortError' || err?.code === DOMException.ABORT_ERR) return false;
+      if (reason === 'preview') return false;
+      throw err;
+    }
+  };
+  const waitForCanPlay = (video, timeout = 8000) => new Promise((resolve, reject) => {
+    if (!video || !video.isConnected) return reject(new Error('Video element is unavailable'));
+    if (video.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return resolve();
+    let done = false;
+    const finish = (fn, value) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      video.removeEventListener('canplay', onReady);
+      video.removeEventListener('loadeddata', onReady);
+      video.removeEventListener('error', onError);
+      fn(value);
+    };
+    const onReady = () => finish(resolve);
+    const onError = () => finish(reject, video.error || new Error('Video source could not be loaded'));
+    const timer = setTimeout(() => finish(reject, new Error('Video load timed out')), timeout);
+    video.addEventListener('canplay', onReady, { once: true });
+    video.addEventListener('loadeddata', onReady, { once: true });
+    video.addEventListener('error', onError, { once: true });
+  });
   const schedulePreviewLoop = video => {
     clearPreviewTimer(video);
     const w = wrap(video);
@@ -2889,28 +3221,35 @@ function initVideoControls() {
 
     const target = Math.min(PREVIEW_SECONDS, video.duration);
     const remaining = Math.max(100, (target - video.currentTime) * 1000);
-    previewTimers.set(video, setTimeout(() => {
-      if (w.dataset.videoMode !== 'preview') return;
+    previewTimers.set(video, setTimeout(async () => {
+      if (w.dataset.videoMode !== 'preview' || w.dataset.videoReloading === '1') return;
       try { video.currentTime = 0; } catch (_) {}
       video.muted = true;
-      video.play().catch(() => {});
+      await safePlay(video, 'preview');
       schedulePreviewLoop(video);
     }, remaining));
   };
 
   const pauseOthers = current => {
-    document.querySelectorAll(SELECTOR).forEach(v => {
-      if (v === current) return;
-      clearPreviewTimer(v);
-      if (!v.paused) v.pause();
-      const w = wrap(v);
-      if (w?.dataset.videoMode === 'preview') {
-        v.muted = true;
-        v.loop = true;
-        v.play().catch(() => {});
-        schedulePreviewLoop(v);
-      }
-    });
+    switchingVideo = true;
+    try {
+      document.querySelectorAll(SELECTOR).forEach(v => {
+        if (v === current) return;
+        clearPreviewTimer(v);
+        if (!v.paused) v.pause();
+        const w = wrap(v);
+        if (w?.dataset.videoMode === 'preview' && w.dataset.videoReloading !== '1') {
+          v.muted = true;
+          v.loop = true;
+          // Re-start previews without allowing their play events to recurse
+          // back into pauseOthers().
+          safePlay(v, 'preview').catch(() => {});
+          schedulePreviewLoop(v);
+        }
+      });
+    } finally {
+      switchingVideo = false;
+    }
   };
 
   const enterPlayback = async video => {
@@ -2930,17 +3269,40 @@ function initVideoControls() {
     // working muted instead of presenting a false "unavailable" error.
     video.muted = false;
     try {
-      await video.play();
+      await safePlay(video, 'user');
       clearError(video);
     } catch (_) {
       video.muted = true;
       try {
-        await video.play();
+        await safePlay(video, 'user');
         clearError(video);
       } catch (err) {
+        if (err?.name === 'AbortError') return;
         setError(video, 'Video could not be played');
         console.warn('[SPIKE video] playback failed', err);
       }
+    }
+  };
+
+  const videoSourceCandidates = video => {
+    const candidates = [];
+    const playback = safeHttpUrl(video?.dataset?.spikePlaybackSrc || video?.getAttribute('data-playback-src') || video?.getAttribute('src') || video?.currentSrc || '');
+    const original = safeHttpUrl(video?.dataset?.spikeOriginalSrc || video?.getAttribute('data-original-src') || '');
+    const add = u => { if (u && !candidates.includes(u)) candidates.push(u); };
+    // Always try the exact URL stored for playback first. This preserves watermarks and
+    // avoids replacing a known-good derived asset with another transformation.
+    add(playback);
+    if (original && /cloudinary\.com/i.test(original)) cloudinaryFeedVideoCandidates(original).forEach(add);
+    else add(original);
+    return candidates;
+  };
+
+  const probeVideoSource = async source => {
+    try {
+      const r = await fetch(source,{method:'GET',headers:{Range:'bytes=0-1'},credentials:'omit',cache:'no-store'});
+      return {ok:r.ok,status:r.status,type:r.headers.get('content-type')||'',length:r.headers.get('content-length')||'',acceptRanges:r.headers.get('accept-ranges')||'',cldError:r.headers.get('x-cld-error')||''};
+    } catch(error) {
+      return {ok:false,status:0,type:'',message:error?.message||String(error)};
     }
   };
 
@@ -2949,37 +3311,72 @@ function initVideoControls() {
     const w = wrap(video);
     if (!w) return;
 
+    const token = (retryTokens.get(video) || 0) + 1;
+    retryTokens.set(video, token);
     clearPreviewTimer(video);
     clearError(video);
     setState(video, 'preview');
+    w.dataset.videoReloading = '1';
     video.controls = false;
     video.loop = true;
     video.muted = true;
 
-    try { video.pause(); } catch (_) {}
-    try { video.currentTime = 0; } catch (_) {}
-
-    // Reload the same URL without modifying it (important for signed URLs).
-    const source = video.currentSrc || video.src;
-    if (!source) {
+    const candidates = videoSourceCandidates(video);
+    if (!candidates.length) {
+      w.dataset.videoReloading = '0';
       setError(video, 'Video unavailable');
       return;
     }
 
-    video.removeAttribute('src');
-    video.load();
-    video.src = source;
-    video.load();
-
-    try {
-      await video.play();
-      clearError(video);
-      schedulePreviewLoop(video);
-    } catch (err) {
-      // Metadata may still be loading. The normal events below will retry
-      // playback once the browser has enough media data.
-      console.warn('[SPIKE video] retry pending', err);
+    let lastErr = null;
+    const diagnostics = [];
+    let sawProcessing = false;
+    for (let index=0; index<candidates.length; index++) {
+      const source=candidates[index];
+      if (retryTokens.get(video)!==token || !video.isConnected) return;
+      // Cloudinary may return HTTP 423 while a newly requested video derivative
+      // is being generated. Give that exact candidate a short grace period
+      // instead of immediately declaring the video unsupported.
+      for (let attempt=0; attempt<3; attempt++) {
+        if (retryTokens.get(video)!==token || !video.isConnected) return;
+        try {
+          const preflight=await probeVideoSource(source);
+          if (preflight.status===423) {
+            sawProcessing=true;
+            diagnostics.push({index,attempt,source,preflight});
+            await new Promise(r=>setTimeout(r,2500));
+            continue;
+          }
+          video.pause();
+          video.removeAttribute('src');
+          video.load();
+          video.src=source;
+          video.load();
+          await waitForCanPlay(video,12000);
+          if (retryTokens.get(video)!==token || !video.isConnected) return;
+          w.dataset.videoReloading='0';
+          clearError(video);
+          await safePlay(video,'preview');
+          if (retryTokens.get(video)===token) schedulePreviewLoop(video);
+          return;
+        } catch(err) {
+          lastErr=err;
+          const probe=await probeVideoSource(source);
+          if (probe.status===423) sawProcessing=true;
+          diagnostics.push({index,attempt,source,mediaCode:video.error?.code||0,mediaMessage:video.error?.message||'',networkState:video.networkState,readyState:video.readyState,canPlayMp4:video.canPlayType('video/mp4'),probe});
+          try { video.pause(); } catch(_) {}
+          break;
+        }
+      }
     }
+    if (retryTokens.get(video)!==token) return;
+    w.dataset.videoReloading='0';
+    const mediaError=video.error;
+    const code=mediaError?.code;
+    const mp4Support=video.canPlayType('video/mp4');
+    const message=sawProcessing?'Video is still processing · Retry':code===MediaError.MEDIA_ERR_NETWORK?'Video network error':code===MediaError.MEDIA_ERR_DECODE?'Video could not be decoded':code===MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED?(mp4Support?'Video source unavailable':'Video format is not supported'):'Video unavailable';
+    setError(video,message);
+    console.warn('[SPIKE video] retry failed',lastErr,{code,mp4Support,currentSrc:video.currentSrc,sources:candidates,diagnostics});
   };
 
   document.querySelectorAll(SELECTOR).forEach(v => {
@@ -2990,12 +3387,22 @@ function initVideoControls() {
     v.playsInline = true;
     v.loop = true;
     v.controls = false;
+    if (!v.dataset.spikeOriginalSrc) {
+      const declared = v.getAttribute('data-original-src') || v.getAttribute('src') || '';
+      if (declared) v.dataset.spikeOriginalSrc = declared;
+    }
+    if (!v.dataset.spikePlaybackSrc) {
+      const playback = v.getAttribute('data-playback-src') || v.getAttribute('src') || '';
+      if (playback) v.dataset.spikePlaybackSrc = playback;
+    }
 
     const w = wrap(v);
     if (w) {
       w.dataset.videoReady = '0';
       w.dataset.videoMode = 'preview';
       w.dataset.videoError = '';
+      w.dataset.videoReloading = '0';
+      w.dataset.videoAutoRetry = '0';
     }
 
     v.addEventListener('loadedmetadata', () => {
@@ -3003,9 +3410,9 @@ function initVideoControls() {
       clearError(v);
       setDuration(v);
       const w2 = wrap(v);
-      if (w2?.dataset.videoMode === 'preview') {
+      if (w2?.dataset.videoMode === 'preview' && w2.dataset.videoReloading !== '1') {
         v.muted = true;
-        v.play().catch(() => {});
+        safePlay(v, 'preview').catch(() => {});
         schedulePreviewLoop(v);
       }
     });
@@ -3019,22 +3426,20 @@ function initVideoControls() {
     v.addEventListener('canplay', () => {
       clearError(v);
       const w2 = wrap(v);
-      if (w2?.dataset.videoMode === 'preview' && v.paused) {
+      if (w2?.dataset.videoMode === 'preview' && w2.dataset.videoReloading !== '1' && v.paused) {
         v.muted = true;
-        v.play().catch(() => {});
+        safePlay(v, 'preview').catch(() => {});
       }
     });
 
     v.addEventListener('playing', () => {
-      // A successful playback event is authoritative: never leave an error
-      // overlay visible while media is actually playing.
       clearError(v);
       const w2 = wrap(v);
       if (w2?.dataset.videoMode === 'preview') schedulePreviewLoop(v);
     });
 
     v.addEventListener('play', () => {
-      pauseOthers(v);
+      if (!switchingVideo) pauseOthers(v);
       const w2 = wrap(v);
       if (w2?.dataset.videoMode === 'playing') {
         clearPreviewTimer(v);
@@ -3051,9 +3456,9 @@ function initVideoControls() {
     v.addEventListener('pause', () => {
       const w2 = wrap(v);
       // Do not auto-resume a user-paused full playback video.
-      if (w2?.dataset.videoMode === 'preview') {
+      if (w2?.dataset.videoMode === 'preview' && w2.dataset.videoReloading !== '1') {
         v.muted = true;
-        v.play().catch(() => {});
+        safePlay(v, 'preview').catch(() => {});
         schedulePreviewLoop(v);
       }
     });
@@ -3068,15 +3473,17 @@ function initVideoControls() {
       try { v.currentTime = 0; } catch (_) {}
       v.muted = true;
       v.loop = true;
-      v.play().catch(() => {});
+      safePlay(v, 'preview').catch(() => {});
       schedulePreviewLoop(v);
     });
 
     v.addEventListener('error', () => {
-      // Ignore stale errors that arrive after a successful play event.
-      if (!v.error) return;
+      // Ignore errors generated while intentionally replacing/reloading src.
       const w2 = wrap(v);
-      if (w2?.dataset.videoMode === 'playing' && !v.paused && v.readyState >= 2) {
+      if (!w2 || w2.dataset.videoReloading === '1') return;
+      if (!v.error) return;
+      // Ignore stale errors that arrive after a successful play event.
+      if (w2.dataset.videoMode === 'playing' && !v.paused && v.readyState >= 2) {
         clearError(v);
         return;
       }
@@ -3086,6 +3493,13 @@ function initVideoControls() {
         code === MediaError.MEDIA_ERR_DECODE ? 'Video format could not be decoded' :
         code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED ? 'Video format is not supported' :
         'Video unavailable';
+      // One automatic recovery pass is critical for legacy posts whose stored
+      // playback URL is an unsupported derivative. Do not loop forever.
+      if (w2.dataset.videoAutoRetry !== '1') {
+        w2.dataset.videoAutoRetry = '1';
+        resetAndRetry(v).catch(err => console.warn('[SPIKE video] auto-retry failed', err));
+        return;
+      }
       setError(v, message);
     });
   });
@@ -3142,7 +3556,7 @@ function renderDiscover(q=''){
     <div class="discover-section-title">#️⃣ Topics & communities</div>
     <div class="spike-chip-row">${tags.map(([t,n])=>`<button class="spike-chip" data-discover-tag="${esc(t)}">${esc(t)} <small>(${n})</small></button>`).join('')||'<span class="meta">Hashtags from current posts will appear here.</span>'}</div>
     <div class="discover-section-title">📝 ${needle?'Search results':'Explore posts'}</div>
-    <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${Array.isArray(p.likes)?p.likes.length:0} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
+    <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
 }
 
 // ─── FRIEND RECOMMENDATIONS ──────────────────────────
@@ -3177,14 +3591,8 @@ function renderFriends(){
 async function sendFriendRequest(id,btn){
   if(!id||recState.busy.has(id))return; recState.busy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
   try{
-    let ok=false,last=null;
-    for(const fn of ['send_friend_request','create_friend_request','request_friendship']){ try{ const r=await db.rpc(fn,{p_recipient_id:id}); if(!r.error){ ok=true; break; } last=r.error; } catch(e){ last=e; } }
-    if(!ok){
-      const payload={sender_id:state.user.id,recipient_id:id,status:'pending'};
-      const r=await db.from('friend_requests').insert(payload);
-      if(r.error) throw (last||r.error);
-      ok=true;
-    }
+    const r=await db.rpc('send_friend_request',{p_recipient_id:id});
+    if(r.error) throw r.error;
     dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); toast('Friend request sent','success');
   }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ recState.busy.delete(id); }
 }
@@ -3216,27 +3624,17 @@ async function openSpikeProfilePreview(id, seed){
     const r=await db.rpc('get_public_profiles',{p_user_ids:[id]});
     return {data:r.data?.[0]||null,error:r.error};
   });
-  const requestReq = currentUid ? safeQuery(() => db.from('friend_requests')
-    .select('sender_id,recipient_id,status')
-    .or(`and(sender_id.eq.${id},recipient_id.eq.${currentUid}),and(sender_id.eq.${currentUid},recipient_id.eq.${id})`)
-    .eq('status','pending').limit(1)) : Promise.resolve({data:null,error:null});
-  const postsReq = safeQuery(() => db.from('app_documents')
-    .select('document_id,data,created_at')
-    .eq('collection_name','posts')
-    .limit(100));
-
-  const [pr, rr, docs] = await Promise.all([profileReq, requestReq, postsReq]);
+  const [pr] = await Promise.all([profileReq]);
   if(requestId !== window.__SPIKE_PROFILE_REQUEST__) return;
   if(!pr.error && pr.data) profile = {...profile,...pr.data};
-  if(!rr.error && rr.data?.length) {
-    const row=rr.data[0];
-    relationship = row.sender_id === id ? 'request_received' : 'request_sent';
+  if(!pr.error && pr.data) {
+    const rel=pr.data.relationship||pr.data.friendship_status||pr.data.relationship_status;
+    if(rel==='friend'||rel==='request_sent'||rel==='request_received') relationship=rel;
   }
-  if(!docs.error) {
-    posts = (docs.data||[]).map(r=>({id:r.document_id,...(r.data||{}),createdAt:r.data?.createdAt||r.created_at}))
-      .filter(p=>p.authorUid===id || p.author_id===id)
-      .sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0)).slice(0,3);
-  }
+  // Recent posts come from the already-authorized feed cache; profile metadata
+  // itself is sourced exclusively from the public-profile RPC above.
+  posts = state.posts.filter(p=>p.authorUid===id && !p.deleted)
+    .sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0)).slice(0,3);
   if(!mutual && relationship === 'stranger') {
     const rec = await safeQuery(()=>db.rpc('get_friend_recommendations',{p_limit:50}));
     if(requestId !== window.__SPIKE_PROFILE_REQUEST__) return;
@@ -3280,7 +3678,23 @@ async function openSpikeProfilePreview(id, seed){
     else if(act==='report') toast('Use the profile menu to report this account.','info');
   }));
   body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{if(relationship==='friend')location.href='message.html?private_uid='+encodeURIComponent(id);else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await acceptFriendRequest(id);else await sendFriendRequest(id,null);});
-  body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio';}else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await declineFriendRequest(id);else toast('Follow is not available yet','info');});
+  body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{
+    if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio';return;}
+    if(relationship==='request_sent'){await cancelFriendRequest(id);return;}
+    if(relationship==='request_received'){await declineFriendRequest(id);return;}
+    try{
+      const me=await getDoc(`users/${state.user.id}`).catch(()=>({}));
+      const following=new Set(Array.isArray(me?.following)?me.following:state.following||[]);
+      const isFollowing=following.has(id);
+      if(isFollowing) following.delete(id); else following.add(id);
+      await putDoc(`users/${state.user.id}`,{...(me||{}),following:[...following]},`users`);
+      state.following=following;
+      const btn=body.querySelector('[data-profile-secondary]');
+      if(btn)btn.textContent=isFollowing?'Follow':'Following';
+      toast(isFollowing?'Unfollowed':'Following','success');
+      rankingDirty=true;rankingCache.clear();renderPosts();
+    }catch(e){toast(e?.message||'Could not update following','error');}
+  });
   body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{if(relationship==='friend'&&typeof window.startCall==='function')window.startCall(id,'video');else location.href='message.html?private_uid='+encodeURIComponent(id);});
   body.querySelector('[data-profile-more]')?.addEventListener('click',()=>showProfileActions(id,relationship,name));
   setTimeout(()=>body.querySelector('[data-profile-more]')?.focus(),0);
@@ -3536,7 +3950,7 @@ function bindEvents() {
   $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
   $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
   $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { window.SPIKEPresencePatch?.stop?.(); window.AppPresence?.stop?.(); try { await db.removeAllChannels?.(); } catch(_) {} const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; sessionStorage.removeItem('spikeDismissedFriendRecs'); location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); } };
+  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; sessionStorage.removeItem('spikeDismissedFriendRecs'); location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
 
   // Composer
   $('imageBtn').onclick = () => $('imageInput').click();
@@ -3555,7 +3969,6 @@ function bindEvents() {
   $('contentCenterClose')?.addEventListener('click',()=>closeOverlay('contentCenterOverlay'));
   $('contentCenterBody')?.addEventListener('click',e=>{const b=e.target.closest('[data-draft-delete]');if(!b)return;const id=b.dataset.draftDelete;const next=loadDrafts().filter(x=>x.id!==id);try{localStorage.setItem(CONTENT_DRAFTS_KEY,JSON.stringify(next));renderContentCenter('drafts');toast('Draft deleted','success')}catch(_){toast('Could not delete draft','error')}});
   document.querySelectorAll('[data-center-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-center-tab]').forEach(x=>x.classList.toggle('active',x===b));renderContentCenter(b.dataset.centerTab)}));
-  document.querySelectorAll('[data-draft-delete]').forEach(b=>b.addEventListener('click',()=>{}));
   $('composeAiBtn')?.addEventListener('click',()=>{const p=$('composeAiPanel');if(p)p.hidden=!p.hidden});
   document.querySelectorAll('[data-ai-action]').forEach(b=>b.addEventListener('click',()=>localAiAction(b.dataset.aiAction)));
   document.querySelectorAll('[data-media-edit]').forEach(b=>b.addEventListener('click',()=>applyMediaEdit(b.dataset.mediaEdit)));
@@ -3647,8 +4060,12 @@ function bindEvents() {
     const p = state.posts.find(x => x.id === b.dataset.openReel);
     if (!p || !p.mediaUrl) return;
     recordSignal(p.id, 'opens', 1); scheduleSignalRefresh();
-    const list = rankPosts(state.posts.filter(x => x.mediaType === 'video' && x.mediaUrl),'forYou').slice(0,10);
-    $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video src="${esc(x.mediaUrl)}" controls autoplay muted playsinline loop style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${(!x.mediaWatermarked && videoWatermarkHTML(x))}</div>`).join('');
+    const list = rankPosts(state.posts.filter(x => {
+      if (!x || !x.mediaUrl || x.deleted) return false;
+      const items = Array.isArray(x.mediaItems) && x.mediaItems.length ? x.mediaItems : [{url:x.mediaUrl,type:x.mediaType||'image',originalUrl:x.mediaOriginalUrl}];
+      return items.some(m => mediaKindOf(m)==='video');
+    }),'forYou').slice(0,10);
+    $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video src="${esc(postVideoPlaybackUrl({url:x.mediaUrl,playbackUrl:x.mediaUrl,watermarked:!!x.mediaWatermarked,normalized:!!x.mediaNormalized}))}" controls autoplay muted playsinline loop style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${videoWatermarkForPost({watermarked:!!x.mediaWatermarked},x)}</div>`).join('');
     openOverlay('reelsShell');
   }, true);
   $('reelsClose').onclick = () => closeOverlay('reelsShell');
@@ -3893,6 +4310,20 @@ function closeFeedImageViewer(){
   controller.open=open; controller.close=close; controller.closeAll=closeAll; controller.toggle=toggle; controller.setReply=setReply; controller.clearReply=clearReply;
 })();
 
+function showReactionUsers(id, anchor){
+  const p=getPostState(id); if(!p)return;
+  document.querySelector('#spikeReactionUsers')?.remove();
+  const rows=[];
+  for(const [emoji,value] of Object.entries(p.reactions||{})){
+    if(!emoji.endsWith('_users')||!Array.isArray(value)||!value.length)continue;
+    const names=value.map(uid=>nameOf(state.users.get(String(uid))||{id:uid,name:'SPIKE user'}));
+    rows.push(`<div style="padding:7px 0;border-bottom:1px solid var(--line)"><b>${esc(emoji)}</b> ${esc(names.join(', '))}</div>`);
+  }
+  const box=document.createElement('div');box.id='spikeReactionUsers';box.className='spike-reaction-tray';box.style.display='block';box.innerHTML=rows.length?rows.join(''):'<span style="padding:6px 10px;font-size:10px">No reactions yet.</span>';document.body.appendChild(box);
+  const r=anchor.getBoundingClientRect();const w=Math.min(window.innerWidth-20,360);box.style.width=`${w}px`;box.style.left=`${Math.max(10,Math.min(window.innerWidth-w-10,r.left))}px`;box.style.top=`${Math.max(8,r.top-box.offsetHeight-8)}px`;
+  const close=e=>{if(!box.contains(e.target)&&e.target!==anchor){box.remove();document.removeEventListener('pointerdown',close,true);}};setTimeout(()=>document.addEventListener('pointerdown',close,true),0);
+}
+
 function handlePostClick(e) {
   const b = e.target.closest('button');
   if (!b) return;
@@ -3907,7 +4338,12 @@ function handlePostClick(e) {
   if (b.dataset.share) { lock(); return Promise.resolve(sharePost(id)).catch(x => toast(x?.message || 'Could not open share','error')).finally(unlock); }
   if (b.dataset.repost) { state.activePost = id; $('repostText').value = ''; openOverlay('repostOverlay'); return; }
   if (b.dataset.more) { state.activePost = id; const p = state.posts.find(x => x.id === id); if (p?.authorUid === state.user.id) deletePost(id); else if (p) feedbackMenu(p); return; }
-  if (b.dataset.reactMenu) { state.activePost = id; openReactionTray(id, b); return; }
+  if (b.dataset.reactMenu) {
+    state.activePost = id;
+    if(b.classList.contains('reaction-summary') && getPostState(id)?.reactions){ showReactionUsers(id,b); }
+    else openReactionTray(id, b);
+    return;
+  }
   if (b.dataset.image) { const post=b.closest('.post'); const buttons=[...(post?.querySelectorAll('button[data-image]')||[])]; const items=buttons.map(x=>({url:x.dataset.image,caption:x.dataset.mediaCaption||''})); const index=Math.max(0,buttons.indexOf(b)); openFeedImageViewer(b.dataset.image,b.dataset.mediaCaption||'',items,index); return; }
   if (b.dataset.replyTo) { window.SPIKEComments?.setReply(b.dataset.post, b.dataset.replyTo, b.dataset.replyAuthor || 'User'); return; }
 }
@@ -3940,15 +4376,27 @@ async function handlePostSubmit(e) {
   }
 }
 
+function cleanupFeedRuntime(){
+  try{feedSentinelObserver?.disconnect?.();}catch(_){}
+  try{feedObserver?.disconnect?.();}catch(_){}
+  try{clearInterval(signalRefreshTimer);}catch(_){}
+  try{window.SPIKEPresencePatch?.stop?.();window.AppPresence?.stop?.();}catch(_){}
+  try{state.realtime?.unsubscribe?.();}catch(_){}
+  try{db.removeAllChannels?.();}catch(_){}
+}
+
 function go(page) { location.href = page; }
 
 // ─── INFINITE SCROLL ───────────────────────────────────
+let feedSentinelObserver = null;
 function loadMorePosts() {
   if (state.loadingMore || state.allLoaded) return;
   state.loadingMore = true;
-  state.visiblePosts += 10;
-  renderPosts();
-  state.loadingMore = false;
+  requestAnimationFrame(() => {
+    state.visiblePosts += 10;
+    renderPosts();
+    state.loadingMore = false;
+  });
 }
 
 // ─── REALTIME ──────────────────────────────────────────
@@ -3959,14 +4407,21 @@ async function initRealtime() {
     if (!postId) return false;
     const local = getPostState(postId);
     if (!local) return false;
-    if (r && typeof r === 'object') Object.assign(local, r);
+    if (r && typeof r === 'object') normalizePostModel(Object.assign(local, r));
     syncLikeDom(postId, local);
     syncCommentDom(postId, local);
     syncReactionDom(postId, local);
     return true;
   };
 
+  state.realtime?.unsubscribe?.().catch?.(()=>{});
   state.realtime = db.channel("feed:global", { config: { private: true } })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: `collection_name=in.(posts,stories)` }, p => {
+      const r=p?.new||p?.record||{};
+      const collection=r.collection_name;
+      if(collection==='stories') loadStories().catch(()=>{});
+      else if(collection==='posts') { if(!applyPostEvent(r.data ? {id:r.document_id,...r.data}:r)) loadPosts().catch(()=>{}); }
+    })
     .on("broadcast", { event: "INSERT" }, p => {
       const r = p.payload?.record || p.payload?.new;
       if (r?.path?.startsWith("stories/")) loadStories().catch(() => {});
@@ -3994,22 +4449,24 @@ async function boot() {
     bindEvents();
     $("v2PersonalStatus").textContent = `Personalized feed for ${nameOf(state.profile)}.`;
 
-    const hydrate = Promise.allSettled([
-      loadAux(), loadSettings(), loadStories(), loadBadges(), loadAnnouncement(), loadServerSignalProfile(), loadPosts()
-    ]);
-    setTimeout(() => initRealtime().catch(e => console.warn('realtime init', e)), 1200);
+    // Critical hydration is sequential: posts must exist before public profiles are
+    // hydrated, and both must exist before the first ranked render.
+    await loadSettings();
+    await loadPosts();
+    await loadStories();
+    await loadAux();
+    await Promise.allSettled([loadBadges(), loadAnnouncement(), loadServerSignalProfile()]);
+    refreshSignalRanking();
+    initModernApp();
+    initAISearch();
+    initRealtime().catch(e => console.warn('realtime init', e));
+    loadFriendRecommendations().catch(e => console.warn('friend recommendations', e));
 
-    hydrate.then(() => {
-      const deepStory = new URLSearchParams(location.search).get('story');
-      if (deepStory && state.stories.some(s => s.id === deepStory)) {
-        storyViewerOpen(deepStory);
-        document.querySelector(`[data-story="${CSS.escape(deepStory)}"]`)?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-      }
-      initModernApp();
-      initAISearch();
-      // Load friend recommendations after initial data is ready
-      loadFriendRecommendations();
-    });
+    const deepStory = new URLSearchParams(location.search).get('story');
+    if (deepStory && state.stories.some(s => s.id === deepStory)) {
+      storyViewerOpen(deepStory);
+      document.querySelector(`[data-story="${CSS.escape(deepStory)}"]`)?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+    }
 
     if (sessionStorage.getItem("spikeAnnouncementClosed") === "1") $("announcement").classList.remove("show");
   } catch (e) {
@@ -4021,7 +4478,9 @@ async function boot() {
     // Set up intersection observer for infinite scroll
     const sentinel = document.getElementById("infiniteScrollSentinel");
     if (sentinel) {
-      new IntersectionObserver(entries => { if (entries[0].isIntersecting) loadMorePosts(); }).observe(sentinel);
+      feedSentinelObserver?.disconnect();
+      feedSentinelObserver = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' });
+      feedSentinelObserver.observe(sentinel);
     }
   }
 }
