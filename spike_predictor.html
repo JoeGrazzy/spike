@@ -65,6 +65,7 @@
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#0b0b10">
 <link rel="stylesheet" href="css/premium-back.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 <div class="loader-overlay" id="footballLoader">
@@ -80,7 +81,7 @@
 <header class="top">
   <button type="button" class="spike-premium-back" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back"><span class="spike-back-icon" aria-hidden="true">←</span><span class="spike-back-label">Back</span></button><div class="brand">SPIKE<span>_PREDICTOR</span></div><button class="feed-btn" onclick="window.location.href='feed.html'" aria-label="Open SPIKE Feed">▣ Feed</button><div class="live"><i class="dot"></i><span id="status">LIVE</span></div></header>
 
-<section class="hero"><div class="eyebrow">Saturday · Daily picks</div><h1>Find your strongest<br>football predictions.</h1><p>StatsHawk fixtures ranked by the SPIKE model.</p>
+<section class="hero"><div class="eyebrow" id="predictorEyebrow">Today · Daily picks</div><h1>Find your strongest<br>football predictions.</h1><p>Today's fixtures ranked by the SPIKE model. Use the confidence signal to compare picks; no prediction is guaranteed.</p>
 <div class="hero-row"><div class="hero-stat"><b id="fixtureCount">—</b><span>FIXTURES</span></div><div class="hero-stat"><b id="pickCount">—</b><span>TOP PICKS</span></div><div class="hero-stat"><b id="bestConf">—</b><span>BEST CONFIDENCE</span></div></div></section>
 
 <div class="tabs" id="leagueTabs"><button class="active" data-league="all">All leagues</button></div>
@@ -129,7 +130,7 @@ function openDetail(x){if(!x)return;$("detail").innerHTML=`<button class="close"
 $("close").onclick=()=>$("modal").style.display="none";$("modal").onclick=e=>{if(e.target.id==="modal")$("modal").style.display="none";};
 document.querySelectorAll("[data-market]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-market]").forEach(x=>x.classList.remove("active"));b.classList.add("active");market=b.dataset.market;render();});
 document.querySelectorAll(".nav").forEach(n=>n.onclick=()=>renderView(n.dataset.view));
-async function load(){const loader=$("footballLoader");$("status").textContent="SYNCING";if(loader)loader.classList.remove("hide");try{if($("loaderText"))$("loaderText").textContent="Connecting to SPIKE…";const r=await fetch(FUNCTION_URL,{method:"POST",headers:{"Authorization":"Bearer "+SUPABASE_ANON_KEY,"apikey":SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"});const sr=await r.json().catch(()=>({}));if(!r.ok||sr.ok===false)throw Error(sr.error||"Predictor sync failed");if($("loaderText"))$("loaderText").textContent="Loading predictions…";const date=new Date().toISOString().slice(0,10),h={"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY};const [pr,fr]=await Promise.all([fetch(SUPABASE_URL+"/rest/v1/spike_predictions?prediction_date=eq."+date+"&order=confidence.desc",{headers:h}),fetch(SUPABASE_URL+"/rest/v1/spike_fixtures?fixture_date=eq."+date,{headers:h})]);const ps=await pr.json(),fs=await fr.json();if(!pr.ok)throw Error(ps?.message||"Could not load predictions");const by=new Map((Array.isArray(fs)?fs:[]).map(f=>[String(f.id),f]));rows=(Array.isArray(ps)?ps:[]).map(x=>({...x,...(by.get(String(x.fixture_id))||{}),id:String(x.id)}));$("status").textContent="LIVE";renderLeagues();render();if(loader){$("loaderText").textContent="Predictions ready";setTimeout(()=>loader.classList.add("hide"),250);}}catch(e){$("status").textContent="OFFLINE";$("error").style.display="block";$("error").textContent=e.message||"Connection failed";if($("loaderText"))$("loaderText").textContent="SPIKE could not load today's data";setTimeout(()=>loader?.classList.add("hide"),800);}}
+async function load(){const eyebrow=$("predictorEyebrow");if(eyebrow){eyebrow.textContent=new Intl.DateTimeFormat(undefined,{weekday:"long"}).format(new Date())+" · Daily picks";}const loader=$("footballLoader");$("status").textContent="SYNCING";if(loader)loader.classList.remove("hide");try{if($("loaderText"))$("loaderText").textContent="Connecting to SPIKE…";const r=await fetch(FUNCTION_URL,{method:"POST",headers:{"Authorization":"Bearer "+SUPABASE_ANON_KEY,"apikey":SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"});const sr=await r.json().catch(()=>({}));if(!r.ok||sr.ok===false)throw Error(sr.error||"Predictor sync failed");if($("loaderText"))$("loaderText").textContent="Loading predictions…";const date=new Date().toISOString().slice(0,10),h={"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY};const [pr,fr]=await Promise.all([fetch(SUPABASE_URL+"/rest/v1/spike_predictions?prediction_date=eq."+date+"&order=confidence.desc",{headers:h}),fetch(SUPABASE_URL+"/rest/v1/spike_fixtures?fixture_date=eq."+date,{headers:h})]);const ps=await pr.json(),fs=await fr.json();if(!pr.ok)throw Error(ps?.message||"Could not load predictions");const by=new Map((Array.isArray(fs)?fs:[]).map(f=>[String(f.id),f]));rows=(Array.isArray(ps)?ps:[]).map(x=>({...x,...(by.get(String(x.fixture_id))||{}),id:String(x.id)}));$("status").textContent="LIVE";renderLeagues();render();if(loader){$("loaderText").textContent="Predictions ready";setTimeout(()=>loader.classList.add("hide"),250);}}catch(e){$("status").textContent="OFFLINE";$("error").style.display="block";$("error").textContent=e.message||"Connection failed";if($("loaderText"))$("loaderText").textContent="SPIKE could not load today's data";setTimeout(()=>loader?.classList.add("hide"),800);}}
 load();setInterval(load,900000);
 </script><script id="spike-menu-nav-controller-fixed">
 (function(){
@@ -161,4 +162,5 @@ load();setInterval(load,900000);
 
 <script src="js/premium-back.js" defer></script>
 <script src="js/telemetry.js" defer></script>
+  <script src="js/theme.js"></script>
 </body></html>

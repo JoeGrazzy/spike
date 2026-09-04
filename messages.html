@@ -28,7 +28,7 @@ img{content-visibility:auto;}
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<script>(function(){try{var n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>5)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===4)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(e){}})();</script>
+<script>(function(){try{var n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(e){}})();</script>
 <style>
 :root{--bg:#f6f7fb;--surface:rgba(255,255,255,.9);--solid:#fff;--text:#172033;--muted:#667085;--line:rgba(17,24,39,.1);--a:#7c3aed;--a2:#ec4899;--good:#10b981;--danger:#ef476f;--shadow:0 18px 55px rgba(31,41,55,.1)}
 html[data-theme=dark]{--bg:#080912;--surface:rgba(18,20,31,.9);--solid:#12141f;--text:#f7f8fc;--muted:#9aa2b5;--line:rgba(255,255,255,.095);--shadow:0 22px 70px rgba(0,0,0,.38)}
@@ -624,8 +624,7 @@ function featureMenu(){
         <button class="feature-action" id="fSearch"><i class="fas fa-search"></i><span>Search messages</span></button>
         <button class="feature-action" id="fMute"><i class="fas fa-bell-slash"></i><span>${settings.muted?'Unmute':'Mute'} notifications</span></button>
         <button class="feature-action" id="fDisappear"><i class="fas fa-hourglass-half"></i><span>Disappearing messages</span></button>
-        <button class="feature-action" id="fTheme"><i class="fas fa-palette"></i><span>Chat theme</span></button>
-      </div>
+              </div>
 
       <div class="features-section-title">Productivity</div>
       <div class="features-grid">
@@ -697,34 +696,6 @@ function featureMenu(){
         });
       });
     });
-
-    bindClick('fTheme',()=>{
-      openActionModal(`
-        <div class="premium-hero">
-          <div class="premium-headline">
-            <div class="premium-icon"><i class="fas fa-palette"></i></div>
-            <div><div class="premium-kicker">Personalization</div><div class="premium-title">Chat theme</div></div>
-          </div>
-          <div class="premium-sub">Choose a conversation appearance.</div>
-        </div>
-        <div class="premium-body">
-          <div class="features-grid">
-            <button class="feature-action" data-theme="default">Default</button>
-            <button class="feature-action" data-theme="soft">Soft</button>
-            <button class="feature-action" data-theme="midnight">Midnight</button>
-            <button class="feature-action" data-theme="warm">Warm</button>
-          </div>
-        </div>
-      `,()=>{
-        document.querySelectorAll('[data-theme]').forEach(b=>{
-          b.addEventListener('click',()=>{
-            const chat=$('chatPanel')||$('chat');
-            const theme=b.dataset.theme;
-            if(chat)chat.dataset.theme=theme;
-            localStorage.setItem('chat_theme_'+active,theme);
-            closeActionModal();
-            toast('Chat theme updated');
-          });
         });
       });
     });

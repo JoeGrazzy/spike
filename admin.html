@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>5)n=1;document.documentElement.dataset.spikeStyle=String(n);var t=(n===1||n===4)?"light":"dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+<script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);var t=(n===6||n===8)?"light":"dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
@@ -1298,7 +1298,7 @@ nav();
 <script id="spike-final-theme-controller">
 (function(){
 "use strict";
-const KEY="spike-feed-style", allowed=new Set([1,2,3,4,5]);
+const KEY="spike-feed-style", allowed=new Set([1,2,3,4,5,6,7,8,9,10]);
 const prefersLight=n=>n===1||n===4;
 function read(){
 try{
@@ -1326,7 +1326,7 @@ const initial=apply(read(),false);
 window.SPIKE_THEME={
 get:()=>window.__SPIKE_STYLE__||initial,
 set:(n)=>apply(n,true),
-next:()=>apply(((window.__SPIKE_STYLE__||initial)%5)+1,true)
+next:()=>apply(((window.__SPIKE_STYLE__||initial)%10)+1,true)
 };
 window.addEventListener("storage",e=>{
 if(e.key===KEY && e.newValue!=null) apply(e.newValue,false);
@@ -1367,4 +1367,5 @@ else setTimeout(install,1500);
 })();
 </script>
 
+  <script src="js/theme.js"></script>
 </body></html>

@@ -17,7 +17,9 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:rgba(255,255,255,.9);--surface2:rg
 </head><body><main class="wrap">
 <header class="top"><button class="back spike-premium-back" id="back" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back" type="button">‹</button><div><h1>Settings</h1><small id="account" style="color:var(--muted)">Loading…</small></div></header>
 <section class="card"><div class="section">Appearance</div>
-<div class="row"><div><strong>Theme</strong><small>Use the same SPIKE theme preference across pages.</small></div><select id="theme" class="control"><option value="1">Light</option><option value="2">Dark</option><option value="3">Midnight</option><option value="4">Light Pro</option><option value="5">Dark Pro</option><option value="6">OLED</option></select></div>
+<div class="row"><div><strong>Theme</strong><small>Use the same SPIKE theme preference across pages.</small></div><select id="theme" class="control">
+<option value="1">Aurora Glass</option><option value="2">Velvet Nocturne</option><option value="3">Solar Ember</option><option value="4">Emerald Atelier</option><option value="5">Ocean Cobalt</option><option value="6">Desert Rose</option><option value="7">Royal Amethyst</option><option value="8">Arctic Platinum</option><option value="9">Neon Citrus</option><option value="10">Midnight Cherry</option>
+</select></div>
 </section>
 <section class="card"><div class="section">Notifications & Calls</div>
 <div class="row"><div><strong>Message notification sound</strong><small>Play notifications.mp3 for new messages.</small></div><input id="messageTone" class="switch" type="checkbox"></div>
@@ -36,7 +38,7 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:rgba(255,255,255,.9);--surface2:rg
 <div class="row"><div><strong>Profile discovery</strong><small>Allow your profile to appear in profile discovery.</small></div><input id="discovery" class="switch" type="checkbox"></div>
 </section>
 <section class="card"><div class="section">Account</div><div class="row"><div><strong>Save settings</strong><small id="status">Changes are saved to your SPIKE account.</small></div><button id="save" class="btn" type="button">Save</button></div><div class="row"><div><strong>Sign out</strong><small>End this session on this device.</small></div><button id="signout" class="btn danger" type="button">Sign out</button></div></section>
-<div class="nav"><button data-go="feed.html">Feed</button><button data-go="message.html">Messages</button><button data-go="profile.html">Profile</button><button data-go="rooms.html">Rooms</button><button data-go="room.html">Room</button><button data-go="room_chat.html">Room Chat</button></div>
+<div class="nav" aria-label="SPIKE navigation"><button data-go="feed.html">Feed</button><button data-go="messages.html">Messages</button><button data-go="friends.html">Friends</button><button data-go="notifications.html">Notifications</button><button data-go="profile.html">Profile</button><button data-go="rooms.html">Rooms</button><button data-go="help.html">Help</button></div>
 </main><script>
 'use strict';
 const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
@@ -44,13 +46,13 @@ const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);
 const DEFAULTS={messageTone:true,incomingTone:true,outgoingTone:true,browser_notifications:false,theme_style:1};
 const PRIVACY_DEFAULTS={profile_visibility:'public',posts_visibility:'public',media_visibility:'public',friends_visibility:'public',allow_messages:'friends',allow_calls:'friends',show_online_status:true,allow_profile_discovery:true};
-const ALLOWED_THEMES=[1,2,3,4,5,6];
+const ALLOWED_THEMES=[1,2,3,4,5,6,7,8,9,10];
 function toneKey(k){return 'spike-setting-'+k}
 function getTone(k){try{const v=localStorage.getItem(toneKey(k));return v===null?DEFAULTS[k]:v==='1'}catch{return DEFAULTS[k]}}
 function setTone(k,v){try{localStorage.setItem(toneKey(k),v?'1':'0')}catch{}}
 function setLocal(k,v){try{localStorage.setItem('spike-setting-'+k,String(v))}catch{}}
 function getLocal(k,d){try{const v=localStorage.getItem('spike-setting-'+k);return v===null?d:v}catch{return d}}
-function applyTheme(n){n=Number(n);if(!ALLOWED_THEMES.includes(n))n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===4)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme;try{localStorage.setItem('spike-feed-style',String(n))}catch{}}
+function applyTheme(n){n=Number(n);if(!ALLOWED_THEMES.includes(n))n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme;try{localStorage.setItem('spike-feed-style',String(n))}catch{}}
 function setStatus(text){$('status').textContent=text}
 function setPrivacy(q){$('online').checked=q.show_online_status!==false;$('messages').value=q.allow_messages||'friends';$('calls').value=q.allow_calls||'friends';$('profile').value=q.profile_visibility||'public';$('posts').value=q.posts_visibility||'public';$('media').value=q.media_visibility||'public';$('friends').value=q.friends_visibility||'public';$('discovery').checked=q.allow_profile_discovery!==false}
 async function getSession(){const r=await db.auth.getSession();if(r.error)throw r.error;return r.data?.session||null}
@@ -63,11 +65,12 @@ if(privacyResult.error)throw privacyResult.error;if(appResult.error)throw appRes
 setPrivacy({...PRIVACY_DEFAULTS,...(privacyResult.data||{})});
 const app={...DEFAULTS,...(appResult.data||{})};
 $('messageTone').checked=app.message_tone!==false;$('incomingTone').checked=app.incoming_call_tone!==false;$('outgoingTone').checked=app.outgoing_call_tone!==false;
-let theme=Number(app.theme_style||getLocal('theme_style',localStorage.getItem('spike-feed-style')||1));if(!ALLOWED_THEMES.includes(theme))theme=1;$('theme').value=String(theme);applyTheme(theme);
+let theme=Number(app.theme_style||getLocal('theme_style',1));try{const shared=localStorage.getItem('spike-feed-style');if(shared!==null&&ALLOWED_THEMES.includes(Number(shared)))theme=Number(shared)}catch{}if(!ALLOWED_THEMES.includes(theme))theme=1;$('theme').value=String(theme);if(window.SPIKE_THEME)window.SPIKE_THEME.set(theme,false);else applyTheme(theme);
 const notificationSupported='Notification' in window;const granted=notificationSupported&&Notification.permission==='granted';$('notify').textContent=app.browser_notifications&&granted?'Enabled':granted?'Enable':'Enable';setLocal('browser_notifications',app.browser_notifications===true&&granted);
 window.__SPIKE_ONLINE_ALLOWED__=$('online').checked;if(window.AppPresence){if($('online').checked)await window.AppPresence.start(db);else await window.AppPresence.stop()}
 }
-$('theme').onchange=e=>{applyTheme(e.target.value);setLocal('theme_style',e.target.value);setStatus('Theme updated locally. Save to sync it to your account.')};
+$('theme').onchange=e=>{const n=Number(e.target.value);if(window.SPIKE_THEME)window.SPIKE_THEME.set(n);else applyTheme(n);setLocal('theme_style',String(n));setStatus('Theme updated locally. Save to sync it to your account.')};
+document.addEventListener('spike:theme-change',e=>{const n=Number(e.detail?.id);if(ALLOWED_THEMES.includes(n)&&$('theme').value!==String(n))$('theme').value=String(n)},{passive:true});
 ['messageTone','incomingTone','outgoingTone'].forEach(k=>$(k).onchange=e=>{setTone(k,e.target.checked);setStatus('Changes ready to save.')});
 $('notify').onclick=async()=>{if(!('Notification' in window)){setStatus('Browser notifications are not supported.');return}try{const p=await Notification.requestPermission();const enabled=p==='granted';$('notify').textContent=enabled?'Enabled':'Retry';setLocal('browser_notifications',enabled);const session=await getSession();if(!session?.user)return location.replace('index.html');const r=await db.from('user_app_settings').upsert({user_id:session.user.id,browser_notifications:enabled,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(r.error)throw r.error;setStatus('Browser notifications: '+p)}catch(e){console.error('[SPIKE SETTINGS NOTIFICATIONS]',e);setStatus(e.message||'Could not update browser notifications.')}};
 $('save').onclick=async()=>{const session=await getSession();if(!session?.user)return location.replace('index.html');const uid=session.user.id;$('save').disabled=true;setStatus('Saving…');try{

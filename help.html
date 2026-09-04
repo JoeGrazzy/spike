@@ -2426,7 +2426,7 @@ video{contain:layout paint}
 @media(max-width:600px){.help-grid,.help-contact{grid-template-columns:1fr}.help-page{padding-left:8px;padding-right:8px}}
 
 
-/* AI Search help */
+/* Help Assistant help */
 .ai-search-help{padding:15px;margin-bottom:10px}
 .ai-search-demo{display:flex;gap:8px;margin-top:10px}
 .ai-search-demo input{flex:1;min-width:0;padding:11px 12px;border:1px solid var(--spike-line);border-radius:12px;background:var(--spike-surface-2);color:var(--spike-text);outline:none}
@@ -2483,6 +2483,7 @@ video{contain:layout paint}
 }
 </style>
 <link rel="stylesheet" href="css/premium-back.css">
+  <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 <header class="header spike-help-header">
@@ -2523,12 +2524,12 @@ video{contain:layout paint}
   </section>
 
   <section class="help-section" id="ai-search">
-    <div class="help-section-head"><h2>🔎 AI Search</h2><p>Get quick answers about SPIKE without leaving the app.</p></div>
+    <div class="help-section-head"><h2>🔎 Help Assistant</h2><p>Get quick answers about SPIKE without leaving the app.</p></div>
     <div class="card ai-search-help">
-      <h3>Ask SPIKE</h3>
-      <p>SPIKE's AI Search is designed to answer questions using information available inside SPIKE. It runs without an external AI API.</p>
+      <h3>Search the guide</h3>
+      <p>SPIKE's Help Assistant is designed to answer questions using information available inside SPIKE. It runs without an external AI API.</p>
       <div class="ai-search-demo">
-        <input id="helpAiQuery" type="search" placeholder="Try: How do I make a video call?" aria-label="Ask SPIKE">
+        <input id="helpAiQuery" type="search" placeholder="Try: How do I make a video call?" aria-label="Search the guide">
         <button id="helpAiAsk" type="button">Ask</button>
       </div>
       <div class="ai-answer" id="helpAiAnswer"></div>
@@ -2796,5 +2797,6 @@ video{contain:layout paint}
 
 <script src="js/premium-back.js" defer></script>
 <script src="js/telemetry.js" defer></script>
+  <script src="js/theme.js"></script>
 </body>
 </html>
