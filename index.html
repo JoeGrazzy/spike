@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="css/perf.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b14">
+<meta name="description" content="Sign in or create your SPIKE account securely.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>SPIKE — Sign in</title>
+<link rel="icon" type="image/png" href="assets/icon/icon.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js">
+</script>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#05050a;--panel:#0c0d14;--panel-2:#11131d;--glass:rgba(17,18,29,.78);
+  --line:rgba(255,255,255,.095);--line-soft:rgba(255,255,255,.055);
+  --text:#f8f7ff;--muted:#9498aa;--muted-2:#686d80;
+  --violet:#8b5cf6;--violet-2:#a855f7;--pink:#d946ef;--cyan:#22d3ee;
+  --good:#34d399;--bad:#fb7185;--shadow:0 32px 100px rgba(0,0,0,.58);
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden!important;overscroll-behavior:none}
+body{min-height:100dvh;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:center;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#05050a;color:var(--text)}
+button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}
+.auth-ambient{position:fixed;inset:0;overflow:hidden;pointer-events:none;background:radial-gradient(900px 520px at 50% -15%,rgba(124,58,237,.18),transparent 62%),radial-gradient(650px 520px at 100% 100%,rgba(217,70,239,.08),transparent 65%),linear-gradient(180deg,#07070d 0%,#05050a 100%)}
+.auth-ambient:before{content:"";position:absolute;inset:0;opacity:.24;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,#000 0%,transparent 78%)}
+.auth-orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.55;animation:orbFloat 12s ease-in-out infinite}.auth-orb.a{width:360px;height:360px;left:-180px;top:12%;background:radial-gradient(circle,rgba(124,58,237,.18),transparent 68%)}.auth-orb.b{width:300px;height:300px;right:-150px;top:25%;background:radial-gradient(circle,rgba(217,70,239,.14),transparent 70%);animation-delay:-4s}.auth-orb.c{width:280px;height:280px;left:35%;bottom:-180px;background:radial-gradient(circle,rgba(34,211,238,.08),transparent 70%);animation-delay:-8s}@keyframes orbFloat{50%{transform:translate3d(0,-18px,0) scale(1.04)}}
+.shell{position:relative;z-index:1;width:min(460px,100%);max-height:calc(100dvh - 28px);display:flex;flex-direction:column;justify-content:center;gap:14px}
+.brand{text-align:center;flex:0 0 auto}.brand img{width:66px;height:66px;object-fit:contain;border-radius:21px;filter:drop-shadow(0 0 28px rgba(139,92,246,.42));animation:brandFloat 6s ease-in-out infinite}.brand h1{font-size:clamp(24px,3.4dvh,30px);font-weight:950;line-height:1.08;letter-spacing:-1px;margin:10px 0 4px}.brand p{margin:0;color:#85899a;font-size:11px;letter-spacing:.15px}@keyframes brandFloat{50%{transform:translateY(-3px)}}
+.card{position:relative;min-height:0;border:1px solid rgba(255,255,255,.105);border-radius:30px;padding:clamp(16px,2.7dvh,26px);background:linear-gradient(145deg,rgba(20,21,33,.88),rgba(9,10,17,.94));box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.045);backdrop-filter:blur(26px) saturate(135%);overflow:auto}.card:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.05),transparent 25%,transparent 68%,rgba(139,92,246,.06));}.card:after{content:"";position:absolute;width:230px;height:150px;right:-120px;top:-105px;border-radius:50%;background:rgba(168,85,247,.13);filter:blur(46px);pointer-events:none}.card>*{position:relative;z-index:1}
+.content{min-height:0}.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:5px;margin-bottom:19px;border:1px solid var(--line-soft);border-radius:17px;background:rgba(3,4,9,.48);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}.tabs button{min-height:45px;border:0;border-radius:13px;background:transparent;color:#7e8293;font-size:12px;font-weight:850;transition:.22s ease}.tabs button:hover{color:#d8d3e9;background:rgba(255,255,255,.035)}.tabs button.active{color:#fff;background:linear-gradient(135deg,rgba(124,58,237,.95),rgba(168,85,247,.82));box-shadow:0 10px 26px rgba(124,58,237,.22),inset 0 1px 0 rgba(255,255,255,.15)}.tabs.otp-hidden{display:none}.back-link{border:0;background:none;color:#9ea5b6;padding:0;margin:0 0 13px;font-size:10.5px;font-weight:800}.back-link:hover{color:#fff}
+.panel{display:none;min-height:0;animation:panelIn .25s ease}.panel.active{display:block}@keyframes panelIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}.title{margin:0 0 6px;font-size:clamp(21px,3dvh,25px);font-weight:950;letter-spacing:-.6px}.subtitle{margin:0 0 15px;color:#969aaa;font-size:12px;line-height:1.52}.form-note{font-size:9.5px;color:#74798b;line-height:1.4;margin:-3px 0 10px}
+.field{margin:0 0 11px}.label{display:flex;justify-content:space-between;gap:8px;margin:0 0 6px;color:#dfe1e9;font-size:10.5px;font-weight:850}.input-wrap{position:relative}.input-wrap input{width:100%;height:49px;padding:0 48px 0 15px;border-radius:15px;border:1px solid rgba(255,255,255,.095);background:linear-gradient(180deg,rgba(23,25,38,.92),rgba(15,17,28,.92));color:#fff;outline:none;font-size:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,.025);transition:border-color .2s,box-shadow .2s,transform .2s}.input-wrap input::placeholder{color:#5f6577}.input-wrap input:hover{border-color:rgba(255,255,255,.16)}.input-wrap input:focus{border-color:rgba(168,85,247,.72);box-shadow:0 0 0 4px rgba(139,92,246,.11),0 12px 25px rgba(0,0,0,.13)}.field.invalid input{border-color:rgba(251,113,133,.65)}.field.valid input{border-color:rgba(52,211,153,.5)}.field-hint{font-size:8.5px;color:#62687a;line-height:1.35;margin:5px 2px 0}.password-toggle{position:absolute;right:7px;top:6px;height:37px;min-width:40px;border:0;border-radius:10px;background:rgba(255,255,255,.025);color:#aeb3c1;font-size:8.5px;font-weight:900;text-transform:uppercase}.password-toggle:hover{background:rgba(255,255,255,.07);color:#fff}
+.account-state{display:flex;align-items:center;gap:8px;margin:0 0 13px;padding:9px 11px;border:1px solid rgba(52,211,153,.1);border-radius:13px;background:linear-gradient(90deg,rgba(52,211,153,.045),rgba(255,255,255,.018));font-size:9.5px;color:#969cad}.account-state .dot{width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 4px rgba(52,211,153,.07),0 0 13px rgba(52,211,153,.4)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 12px}.check{display:flex;align-items:center;gap:7px;color:#969cad;font-size:10.5px}.check input{width:16px;height:16px;margin:0;accent-color:var(--violet)}.link,.bottom button{border:0;background:none;color:#c4b5fd;font-size:10.5px;font-weight:850;padding:0}.link:hover,.bottom button:hover{color:#fff}
+.primary{position:relative;width:100%;height:49px;margin-top:5px;border:0;border-radius:15px;overflow:hidden;background:linear-gradient(135deg,#7c3aed 0%,#a855f7 52%,#d946ef 100%);color:#fff;font-weight:950;font-size:12.5px;letter-spacing:.05px;box-shadow:0 16px 34px rgba(139,92,246,.24),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.primary:after{content:"";position:absolute;inset:0;transform:translateX(-120%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transition:transform .7s ease}.primary:hover{transform:translateY(-1px);box-shadow:0 20px 38px rgba(139,92,246,.3),inset 0 1px 0 rgba(255,255,255,.2);filter:saturate(1.08)}.primary:hover:after{transform:translateX(120%)}.primary:active{transform:translateY(0)}.primary.loading{pointer-events:none}.spinner,.oauth-loading{display:inline-block;width:15px;height:15px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;margin-right:6px}@keyframes spin{to{transform:rotate(360deg)}}
+.oauth-divider{display:flex;align-items:center;gap:10px;margin:15px 0 11px;color:#62687a;font-size:8px;letter-spacing:1px;text-transform:uppercase}.oauth-divider:before,.oauth-divider:after{content:"";height:1px;background:rgba(255,255,255,.07);flex:1}.oauth-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.oauth-btn{height:47px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid rgba(255,255,255,.085);border-radius:15px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.016));box-shadow:0 8px 18px rgba(0,0,0,.12);color:#eef0f6;font-weight:800;font-size:11px;transition:.2s ease}.oauth-btn:hover{border-color:rgba(168,85,247,.28);background:rgba(139,92,246,.06);transform:translateY(-1px)}.oauth-icon{width:25px;height:25px;display:grid;place-items:center}.oauth-icon svg{width:21px;height:21px;display:block}.google-icon{background:#fff;border-radius:50%;overflow:hidden}.github-icon{background:#24292f;border-radius:50%;padding:3px}.bottom{text-align:center;margin-top:10px;color:#7e8496;font-size:10px}.fine{margin-top:10px;text-align:center;color:#666c7d;font-size:8.5px;line-height:1.4}
+.strength{margin:-2px 0 7px}.strength-bars{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}.strength-bars span{height:4px;border-radius:99px;background:#292d39;transition:.25s ease}.strength-bars span.on{background:linear-gradient(90deg,#34d399,#a7f3d0);box-shadow:0 0 9px rgba(52,211,153,.18)}#strengthText{font-size:8.5px;color:#818799;margin-top:4px}.password-help{margin:2px 0 6px}.password-help button{border:0;background:none;padding:0;color:#bba0ff;font-size:9px;font-weight:850}.requirements{display:none;grid-template-columns:1fr 1fr;gap:4px 8px;margin:4px 0 9px;padding:8px 9px;border-radius:11px;background:rgba(139,92,246,.035);border:1px solid rgba(139,92,246,.09)}.requirements.open{display:grid}.req{font-size:8px;color:#777e90;line-height:1.7}.req.ok{color:#86efac}.terms{margin:4px 0 10px}.terms .check{align-items:flex-start;line-height:1.35}.terms input{margin-top:1px}
+.status{position:relative;display:none;padding:10px 12px 10px 38px;border-radius:13px;margin:0 0 11px;font-size:9.5px;line-height:1.4}.status.show{display:block;animation:panelIn .2s ease}.status:before{content:"";position:absolute;left:12px;top:11px;width:18px;height:18px;border-radius:7px;background:rgba(255,255,255,.06)}.status.error{background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.2);color:#fecdd3}.status.success{background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.18);color:#bbf7d0}.status.info{background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.18);color:#bfdbfe}
+.otp-panel{text-align:center;padding-top:2px}.otp-progress{display:flex;align-items:center;gap:6px;margin:0 0 16px}.otp-progress span{height:4px;flex:1;border-radius:99px;background:rgba(255,255,255,.08)}.otp-progress span.done,.otp-progress span.active{background:linear-gradient(90deg,#7c3aed,#d946ef)}.otp-progress-label{min-width:26px!important;flex:0 0 auto!important;height:auto!important;background:none!important;color:#7d8495;font-size:8px;text-align:right}.otp-icon{width:56px;height:56px;display:grid;place-items:center;margin:2px auto 12px;border-radius:18px;background:linear-gradient(145deg,rgba(139,92,246,.19),rgba(217,70,239,.05));border:1px solid rgba(168,85,247,.17);box-shadow:0 14px 34px rgba(94,42,173,.18);font-size:22px}.otp-email{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#ddd6fe;font-weight:850}.otp-input{width:100%;height:64px!important;margin:8px 0 10px;padding:0 10px!important;border-radius:17px!important;border:1px solid rgba(168,85,247,.32);background:rgba(18,20,32,.9);color:#fff;text-align:center;letter-spacing:.42em;font-size:24px!important;font-weight:950!important;outline:none}.otp-input:focus{border-color:rgba(168,85,247,.78);box-shadow:0 0 0 4px rgba(139,92,246,.11),0 12px 26px rgba(0,0,0,.14)}.otp-input::placeholder{letter-spacing:.3em;color:#4f5669}.otp-countdown{text-align:center;color:#747b8d;font-size:8.5px;margin:9px 0}.otp-resend{border:0;background:none;color:#c4b5fd;font-weight:900;font-size:10px;padding:5px 9px}.otp-resend:disabled{color:#666d7d}.otp-panel .subtitle{margin-bottom:10px}.inline-help{margin-top:8px;font-size:8px;color:#697183;line-height:1.45}
+.recovery-callout{padding:11px 12px;border-radius:13px;background:linear-gradient(90deg,rgba(139,92,246,.07),rgba(255,255,255,.02));border:1px solid rgba(139,92,246,.13);font-size:9px;color:#a0a6b6;margin-bottom:12px}.recovery-callout b{color:#ddd6fe}
+
+.:hover{transform:translateY(-1px);border-color:rgba(176,92,255,.28);box-shadow:0 9px 20px rgba(0,0,0,.15)}.b{font-size:9px;color:#dfd3ff}.small{font-size:6.5px;color:#697184;text-transform:uppercase;letter-spacing:.5px}
+.toast-stack{position:fixed;right:14px;bottom:max(14px,env(safe-area-inset-bottom));left:14px;z-index:100;display:grid;gap:8px;pointer-events:none}.toast{display:flex;gap:9px;align-items:flex-start;max-width:430px;margin-left:auto;background:rgba(14,16,25,.92)!important;border:1px solid rgba(255,255,255,.1)!important;box-shadow:0 18px 50px rgba(0,0,0,.42)!important;border-radius:15px!important;padding:10px 11px;backdrop-filter:blur(18px);pointer-events:auto}.toast .ico{width:22px;height:22px;border-radius:7px;display:grid;place-items:center;background:rgba(255,255,255,.07);font-size:11px;flex:none}.toast .msg{font-size:10px;line-height:1.4;color:#eef0f5;flex:1}.toast .x{border:0;background:none;color:#7f8797;font-size:14px;padding:0}
+.modal-backdrop{position:fixed;inset:0;background:rgba(2,2,7,.72);display:none;place-items:center;padding:14px;z-index:200;backdrop-filter:blur(14px)}.modal-backdrop.show{display:grid}.modal{width:min(390px,100%);max-height:calc(100dvh - 28px);overflow:auto;background:linear-gradient(150deg,#191b2a,#0b0d15)!important;border:1px solid rgba(255,255,255,.1)!important;border-radius:26px!important;padding:20px;box-shadow:0 30px 100px rgba(0,0,0,.6)!important}.modal h2{margin:0 0 6px;font-size:19px}.modal p{margin:0 0 14px;color:var(--muted);font-size:11px;line-height:1.45}.spid-label{text-align:center;color:#7f8797;font-size:8px;letter-spacing:1px;margin-bottom:4px}.spid{font-size:24px;font-weight:950;letter-spacing:.12em;text-align:center;padding:14px;border:1px solid rgba(139,92,246,.35);background:rgba(139,92,246,.1);border-radius:14px;margin-bottom:13px}.modal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.secondary{height:40px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.05);color:#fff;font-weight:850}
+@media(max-width:420px){.shell{gap:11px}.card{padding:14px;border-radius:27px}.brand img{width:58px;height:58px}.brand h1{font-size:24px}.input-wrap input{height:47px}.primary{height:47px}}
+@media(max-width:390px){.oauth-grid{grid-template-columns:1fr}.oauth-btn{height:42px}.tabs button{min-height:41px}}
+@media(max-height:760px){.shell{justify-content:flex-start}.brand img{width:52px;height:52px}.brand h1{margin-top:6px}.card{padding:14px}.tabs{margin-bottom:11px}}
+@media(max-height:650px){.shell{gap:9px}.brand img{width:44px;height:44px}.brand h1{font-size:21px;margin:4px 0 1px}.brand p{display:none}.card{border-radius:24px;padding:12px}.tabs{margin-bottom:8px}.tabs button{min-height:37px}.field{margin-bottom:7px}.input-wrap input{height:40px}.primary{height:40px}.oauth-divider{margin:8px 0}.oauth-btn{height:38px}.bottom{margin-top:6px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+
+    /* SPIKE Premium Boot Loader — integrated with the auth surface */
+    #spike-auth-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(5, 5, 10, .68);
+      backdrop-filter: blur(14px) saturate(120%);
+      -webkit-backdrop-filter: blur(14px) saturate(120%);
+      opacity: 1;
+      visibility: visible;
+      transition: opacity .28s ease, visibility .28s ease;
+    }
+
+    #spike-auth-loader.is-hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .spike-loader-card {
+      width: min(340px, 100%);
+      padding: 28px 24px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(20,21,33,.96), rgba(9,10,17,.96));
+      box-shadow:
+        0 28px 80px rgba(0,0,0,.42),
+        inset 0 1px 0 rgba(255,255,255,.055);
+    }
+
+    .spike-loader-mark-wrap {
+      position: relative;
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      display: grid;
+      place-items: center;
+    }
+
+    .spike-loader-spinner {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.075);
+      border-top-color: #a855f7;
+      border-right-color: rgba(168,85,247,.28);
+      animation: spike-loader-spin .9s linear infinite;
+    }
+
+    .spike-loader-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 22px rgba(139,92,246,.28));
+    }
+
+    .spike-loader-title {
+      margin: 0;
+      color: #f8f7ff;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 900;
+      letter-spacing: -.35px;
+    }
+
+    .spike-loader-subtitle {
+      margin: 7px 0 0;
+      color: #85899a;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .spike-loader-line {
+      width: 100%;
+      height: 3px;
+      margin-top: 20px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: rgba(255,255,255,.055);
+    }
+
+    .spike-loader-line::after {
+      content: "";
+      display: block;
+      width: 35%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #7c3aed, #a855f7, #d946ef);
+      animation: spike-loader-progress 1.15s ease-in-out infinite;
+    }
+
+    @keyframes spike-loader-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spike-loader-progress {
+      0% { transform: translateX(-120%); }
+      100% { transform: translateX(360%); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .spike-loader-spinner,
+      .spike-loader-line::after {
+        animation: none !important;
+      }
+      .spike-loader-line::after {
+        transform: translateX(185%);
+      }
+    }
+</style>
+<meta name="description" content="Sign in or create your SPIKE account.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0b0b10">
+
+  <link rel="stylesheet" href="css/theme.css">
+</head>
+<body>
+
+  <div id="spike-auth-loader" role="status" aria-live="polite" aria-label="Loading SPIKE">
+  <div class="spike-loader-card">
+    <div class="spike-loader-mark-wrap" aria-hidden="true">
+      <div class="spike-loader-spinner"></div>
+      <img class="spike-loader-logo" src="assets/icon/icon.png" alt="">
+    </div>
+    <h2 class="spike-loader-title">Loading SPIKE</h2>
+    <p class="spike-loader-subtitle">Preparing your sign-in experience…</p>
+    <div class="spike-loader-line" aria-hidden="true"></div>
+  </div>
+</div>
+<script>
+/* SPIKE boot loader: tied to real application startup, not an arbitrary delay. */
+(() => {
+  const loader = document.getElementById("spike-auth-loader");
+  if (!loader) return;
+
+  let hidden = false;
+  const hide = () => {
+    if (hidden) return;
+    hidden = true;
+    loader.classList.add("is-hidden");
+    window.setTimeout(() => loader.remove(), 320);
+  };
+
+  const startedAt = performance.now();
+  const MIN_LOADER_MS = 1600;
+
+  window.SPIKE_HIDE_BOOT_LOADER = () => {
+    const elapsed = performance.now() - startedAt;
+    const remaining = Math.max(0, MIN_LOADER_MS - elapsed);
+    window.setTimeout(hide, remaining);
+  };
+
+  // Never trap the user behind a loader because a remote service is slow.
+  window.setTimeout(hide, 9000);
+})();
+</script>
+
+
+
+<div class="auth-ambient" aria-hidden="true"><span class="auth-orb a"></span><span class="auth-orb b"></span><span class="auth-orb c"></span></div>
+<main class="shell">
+<div class="brand"><img src="assets/icon/icon.png" alt="SPIKE" loading="lazy" decoding="async"><h1>Welcome to SPIKE</h1><p>Sign in to continue</p></div>
+<section class="card">
+<div class="tabs" role="tablist" aria-label="Account access"><button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="loginPanel">Sign In</button><button class="tab" id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerPanel">Create</button></div>
+<div class="content">
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<section class="panel active" id="loginPanel" role="tabpanel" aria-labelledby="loginTab">
+<h2 class="title">Welcome back</h2><p class="subtitle">Sign in securely to continue to SPIKE.</p>
+
+<form id="loginForm" novalidate>
+<div class="field"><label class="label" for="loginEmail"><span>Email</span></label><div class="input-wrap"><input id="loginEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required aria-describedby="loginEmailHint"><div class="field-hint" id="loginEmailHint">Use the email address connected to your SPIKE account.</div></div>
+<div class="field"><label class="label" for="loginPassword"><span>Password</span></label><div class="input-wrap"><input id="loginPassword" type="password" aria-label="Password" autocomplete="current-password" placeholder="Your password" required aria-describedby="loginPasswordHint"><button class="password-toggle" type="button" data-target="loginPassword" aria-label="Show password">Show</button><div class="field-hint" id="loginPasswordHint">Passwords are case-sensitive.</div></div>
+<div class="row"><label class="check"><input id="remember" type="checkbox" checked> Remember me</label><button class="link" type="button" id="forgotBtn">Forgot password?</button></div>
+<button class="primary" id="loginBtn" type="submit">Sign In</button>
+</form>
+<div class="oauth-divider"><span>or continue with</span></div>
+<div class="oauth-grid">
+<button class="oauth-btn" id="googleLoginBtn" type="button" aria-label="Continue with Google"><span class="oauth-icon google-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.61 20.083H42V20H24v8h11.303C33.65 32.657 29.178 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.153 7.967 3.033L37.627 9.373C34.046 6.053 29.31 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.39-3.917Z"/><path fill="#FF3D00" d="M6.306 14.691 12.88 19.51C14.657 15.108 18.999 12 24 12c3.059 0 5.842 1.153 7.967 3.033L37.627 9.373C34.046 6.053 29.31 4 24 4 16.318 4 9.656 8.337 6.306 14.691Z"/><path fill="#4CAF50" d="M24 44c5.209 0 9.869-1.997 13.409-5.255l-6.19-5.238C29.135 35.091 26.715 36 24 36c-5.157 0-9.616-3.318-11.283-7.946l-6.525 5.026C9.532 39.482 16.227 44 24 44Z"/><path fill="#1976D2" d="M43.61 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.084 5.507l.003-.002 6.19 5.238C36.973 39.21 44 34 44 24c0-1.341-.138-2.65-.39-3.917Z"/></svg></span><span>Google</span></button>
+<button class="oauth-btn" id="githubLoginBtn" type="button" aria-label="Continue with GitHub"><span class="oauth-icon github-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 .297a12 12 0 0 0-3.79 23.39c.6.111.82-.26.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.73.083-.73 1.205.085 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.303-5.467-1.332-5.467-5.93 0-1.31.465-2.377 1.235-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23A11.49 11.49 0 0 1 12 6.844c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.844 1.233 1.911 1.233 3.221 0 4.61-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .32.216.694.825.576A12 12 0 0 0 12 .297Z"/></svg></span><span>GitHub</span></button>
+</div>
+<div class="bottom">New to SPIKE? <button type="button" id="goCreate">Create an account</button></div>
+</section>
+<section class="panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab">
+<h2 class="title">Create your account</h2><p class="subtitle">Get your lifetime SP ID and join the community.</p>
+<div class="form-note">Use an email you can access. We’ll send a 6-digit code to verify your account.</div>
+<form id="registerForm" novalidate>
+<div class="field"><label class="label" for="regName"><span>Full name</span></label><div class="input-wrap"><input id="regName" type="text" minlength="2" maxlength="100" aria-label="Full name" autocomplete="name" placeholder="Your full name" required aria-describedby="regNameHint"><div class="field-hint" id="regNameHint">Use the name you want displayed on your SPIKE profile.</div></div>
+<div class="field"><label class="label" for="regEmail"><span>Email</span></label><div class="input-wrap"><input id="regEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required aria-describedby="regEmailHint"><div class="field-hint" id="regEmailHint">You’ll need access to this inbox to receive your verification code.</div></div>
+<div class="field"><label class="label" for="regPassword"><span>Password</span></label><div class="input-wrap"><input id="regPassword" type="password" minlength="8" maxlength="128" aria-label="Password" autocomplete="new-password" placeholder="Create a strong password" required><button class="password-toggle" type="button" data-target="regPassword" aria-label="Show password">Show</button></div></div>
+<div class="strength"><div class="strength-bars"><span id="b1"></span><span id="b2"></span><span id="b3"></span><span id="b4"></span></div><div id="strengthText">Use 8+ characters</div></div>
+<div class="password-help"><button type="button" id="passwordHelpBtn">Password requirements</button></div>
+<div class="requirements" id="passwordRequirements"><span class="req" id="r1">○ 8+ characters</span><span class="req" id="r2">○ Upper &amp; lowercase</span><span class="req" id="r3">○ Contains a number</span><span class="req" id="r4">○ Special character</span></div>
+<div class="field"><label class="label" for="regConfirm"><span>Confirm password</span></label><div class="input-wrap"><input id="regConfirm" type="password" minlength="8" maxlength="128" aria-label="Confirm password" autocomplete="new-password" placeholder="Repeat your password" required></div></div>
+<div class="terms"><label class="check"><input id="terms" type="checkbox" required> I agree to the Terms and Privacy Policy</label></div>
+<button class="primary" id="registerBtn" type="submit">Create Account</button>
+</form>
+<div class="bottom">Already have an account? <button type="button" id="goLogin">Sign in</button></div>
+</div>
+</section>
+<section class="panel" id="forgotPanel" role="region" aria-labelledby="forgotTitle">
+<h2 class="title" id="forgotTitle">Reset your password</h2><p class="subtitle">Enter your email and we'll send a secure recovery link.</p>
+<div class="recovery-callout"><b>Almost there.</b> The link will open the dedicated password-reset page where you can choose and save a new password.</div><form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail"><span>Email</span></label><div class="input-wrap"><input id="resetEmail" type="email" aria-label="Email address" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button><div class="inline-help">The reset link opens a dedicated secure page where you can create and save your new password.</div></form>
+</div>
+
+</section>
+<section class="panel otp-panel" id="otpPanel" role="region" aria-labelledby="otpTitle"><div class="otp-progress" aria-label="Verification progress"><span class="done"></span><span class="active"></span><span class="otp-progress-label">Step 2 of 2</span></div><div class="otp-icon" aria-hidden="true">✉️</div><h2 class="title" id="otpTitle">Confirm your email</h2><p class="subtitle">We sent a 6-digit verification code to<br><span class="otp-email" id="otpEmail">your email</span></p><form id="otpForm" novalidate><label class="label" for="otpInput"><span>Verification code</span></label><input class="otp-input" id="otpInput" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="000000" aria-label="6-digit verification code" required><button class="primary" id="otpVerifyBtn" type="submit">Confirm Email</button></form><div class="otp-countdown" id="otpCountdown">You can request a new code shortly.</div><div class="bottom"><button class="otp-resend" id="otpResendBtn" type="button" disabled>Resend Code</button></div><div class="bottom"><button class="link" id="otpBackBtn" type="button">← Back to account creation</button></div><div class="inline-help">Enter the newest code from your SPIKE email. Codes are temporary and can only be used once.</div></section>
+<span>
+</div>
+</div></section>
+</main>
+<div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+<div class="modal-backdrop" id="successModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeIntro"><h2 id="welcomeTitle">Welcome to SPIKE! 🎉</h2><p id="welcomeIntro">Your account is verified and your permanent SPIKE identity is ready.</p><div class="spid-label">YOUR LIFETIME SP ID</div><div class="spid" id="spidValue">SP-XXXXXX</div><p id="welcomeDetails">Your SP ID is your unique SPIKE account identification number.</p><p id="welcomeNote"><strong>Keep it handy:</strong> your SP ID stays connected to your SPIKE account for its lifetime.</p><div class="modal-actions"><button class="secondary" id="copySpid" type="button">Copy SP ID</button><button class="primary" id="continueBtn" type="button">Continue</button></div></div></div>
+<script>
+"use strict";
+const SUPABASE_URL = "https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const PRODUCTION_ORIGIN = "https://spike.mediachat.workers.dev";
+// Auth callbacks must return to the exact origin that started the flow.
+// This keeps local HTTP testing on http://localhost:7700 while production
+// stays on the deployed HTTPS origin. Never force https://localhost.
+const isLocalAuthOrigin = /^(localhost|127\.0.0.1)$/.test(window.location.hostname);
+const AUTH_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/`;
+const PASSWORD_RESET_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/reset-password.html`;
+const PRODUCTION_AUTH_URL = `${PRODUCTION_ORIGIN}/`;
+const $ = id => document.getElementById(id);
+const state = {
+client: null,
+busy: false,
+cooldownUntil: 0,
+emailCooldownUntil: Number(sessionStorage.getItem("spike_email_cooldown_until") || 0),
+currentUser: null,
+profile: null,
+completingLogin: false,
+redirecting: false,
+signupOtpEmail: "",
+signupOtpBusy: false
+};
+const toastHistory = new Map();
+function toast(message, type = "info", ms = 4800) {
+const stack = $("toastStack");
+if (!stack) return;
+const key = type + "|" + String(message).trim().toLowerCase();
+const now = Date.now();
+if (toastHistory.has(key) && now - toastHistory.get(key) < 2200) return;
+toastHistory.set(key, now);
+for (const [k,t] of toastHistory) if (now - t > 10000) toastHistory.delete(k);
+const item = document.createElement("div");
+item.className = "toast " + type;
+item.style.setProperty("--toast-life", ms + "ms");
+const icon = type === "success" ? "✓" : type === "error" ? "✕" : type === "warning" ? "⚠" : "ℹ";
+item.innerHTML =
+'<span class="ico">' + icon + '</span><span class="msg"></span><button class="x" type="button" aria-label="Dismiss notification">×</button>';
+item.querySelector(".msg").textContent = message;
+item.querySelector(".x").onclick = () => item.remove();
+stack.appendChild(item);
+setTimeout(() => { if (item.isConnected) item.remove(); }, ms);
+}
+function status(message, type = "info") {
+const el = $("status");
+if (!el) return;
+el.textContent = message;
+el.className = "status show " + type;
+}
+function clearStatus() {
+const el = $("status");
+if (el) el.className = "status";
+}
+function emailCooldownRemaining() {
+return Math.max(0, state.emailCooldownUntil - Date.now());
+}
+function startEmailCooldown(ms = 60000) {
+state.emailCooldownUntil = Date.now() + ms;
+try { sessionStorage.setItem("spike_email_cooldown_until", String(state.emailCooldownUntil)); } catch {}
+}
+function formatWait(ms) {
+const s = Math.max(1, Math.ceil(ms / 1000));
+return s >= 60 ? `${Math.ceil(s / 60)} minute${Math.ceil(s / 60) === 1 ? "" : "s"}` :
+`${s} second${s === 1 ? "" : "s"}`;
+}
+function isEmailRateLimit(err) {
+const code = String(err?.code || "").toLowerCase();
+const msg = String(err?.message || "").toLowerCase();
+return err?.status === 429 || code.includes("rate") || msg.includes("rate limit") || msg.includes(
+"too many");
+}
+function friendlyError(err, context) {
+if (context === "oauth") {
+const msg = String(err?.message || "").toLowerCase();
+if (msg.includes("provider is not enabled") || msg.includes("unsupported provider"))
+return "This social login provider is not enabled in Supabase yet.";
+if (msg.includes("unable to exchange external code") || msg.includes("exchange external code"))
+return "Google reached Supabase, but Supabase could not exchange the Google authorization code. Check the Google Client ID/Secret in Supabase and the exact Supabase callback URI in Google Cloud.";
+if (msg.includes("invalid grant") || msg.includes("code verifier") || msg.includes("pkce"))
+return "The secure OAuth session could not be completed. Restart the login from SPIKE and make sure cookies/storage are enabled.";
+if (msg.includes("redirect"))
+return "OAuth redirect URL is not configured correctly in Supabase.";
+}
+const code = String(err?.code || "").toLowerCase();
+const msg = String(err?.message || "").toLowerCase();
+if (code === "invalid_credentials") return "We couldn’t sign you in. Check your email and password, then try again.";
+if (code === "email_not_confirmed") return "Your email is not confirmed yet. Check your inbox, then try signing in again.";
+if (code === "user_not_found" || msg.includes("user not found")) return "We couldn't find that account. Check the email or create a new SPIKE account.";
+if (code === "same_password" || msg.includes("same password")) return "Choose a password you haven't used before.";
+if (msg.includes("invalid email") || msg.includes("email address")) return "That email address doesn't look right. Check for typos and try again.";
+if (msg.includes("signup is disabled")) return "New account creation is temporarily unavailable. Please try again later.";
+if (msg.includes("database") || msg.includes("profiles")) return "Your account was created, but SPIKE couldn't finish setting up your profile. Please retry shortly.";
+if (msg.includes("captcha")) return "Security verification could not be completed. Refresh the page and try again.";
+if (code === "user_already_exists" || msg.includes("already registered") || msg.includes("already exists"))
+return "An account with this email already exists. Switch to Sign In instead.";
+if (isEmailRateLimit(err)) return `Email delivery is temporarily busy. Please wait ${formatWait(emailCooldownRemaining() || 60000)} before requesting another message.`;
+if (err?.status === 500 && /error sending confirmation email|confirmation email/i.test(msg))
+  return "Your account could not finish signup because Supabase could not send the confirmation email. Check Authentication → Emails → SMTP Settings in Supabase, then try again. Do not create another account until email delivery is fixed.";
+if (msg.includes("failed to fetch") || msg.includes("network")) return "We couldn't reach SPIKE securely. Check your internet connection and try again.";
+if (code === "weak_password" || msg.includes("password")) return "Please use a stronger password that meets all requirements.";
+if (context === "signup" && err?.status === 400) return "We couldn't create the account. Check your details and try again.";
+return err?.message || "Something went wrong. Please try again.";
+}
+function setBusy(button, busy, label) {
+if (!button) return;
+button.disabled = busy;
+button.classList.toggle("loading", busy);
+if (busy) {
+button.dataset.original = button.textContent;
+button.innerHTML = '<span class="spinner"></span>' + label;
+} else {
+button.textContent = button.dataset.original || button.textContent;
+}
+}
+let lastFocusedElement = null;
+function focusPanel(name) {
+ const panel = $(name + "Panel");
+ const target = panel?.querySelector("input,button,textarea,select");
+ target?.focus({preventScroll:true});
+}
+
+function switchPanel(name) {
+["login", "register", "forgot", "otp"].forEach(x => {
+$(x + "Panel")?.classList.toggle("active", x === name);
+});
+const isOtp = name === "otp";
+$("loginTab")?.classList.toggle("active", name === "login");
+$("registerTab")?.classList.toggle("active", name === "register");
+$("loginTab")?.setAttribute("aria-selected", String(name === "login"));
+$("registerTab")?.setAttribute("aria-selected", String(name === "register"));
+$("loginTab")?.setAttribute("aria-hidden", String(isOtp));
+$("registerTab")?.setAttribute("aria-hidden", String(isOtp));
+$("loginTab")?.closest(".tabs")?.classList.toggle("otp-hidden", isOtp);
+requestAnimationFrame(() => focusPanel(name));
+clearStatus();
+}
+function passwordChecks(pw) {
+const checks = [
+pw.length >= 8,
+/[a-z]/.test(pw) && /[A-Z]/.test(pw),
+/\d/.test(pw),
+/[^A-Za-z0-9]/.test(pw)
+];
+["r1", "r2", "r3", "r4"].forEach((id, i) => {
+const el = $(id);
+if (el) {
+el.classList.toggle("ok", checks[i]);
+el.textContent = (checks[i] ? "✓" : "○") + " " + ["8+ characters", "Upper & lowercase",
+"Contains a number", "Special character"
+][i];
+}
+});
+["b1", "b2", "b3", "b4"].forEach((id, i) => $(id)?.classList.toggle("on", i < checks.filter(Boolean)
+.length));
+$("strengthText").textContent = checks.every(Boolean) ? "Strong password" : checks.filter(Boolean)
+.length >= 2 ? "Password could be stronger" : "Use 8+ characters";
+return checks.every(Boolean);
+}
+async function ensureClient() {
+if (state.client) return state.client;
+if (!window.supabase?.createClient) throw new Error("Secure authentication service is unavailable.");
+state.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: "pkce" }
+});
+window.sb = state.client;
+window.supabaseClient = state.client;
+window.AppPresence?.start(state.client);
+return state.client;
+}
+async function ensureProfile(user) {
+const db = await ensureClient();
+const { data, error } = await db.from("profiles").select("id,full_name,display_name,activated,coins,updated_at,sp_id,sp_id_welcome_seen").eq("id", user.id).maybeSingle();
+if (error) throw error;
+if (data) return data;
+// fallback: create profile shell if auth trigger hasn't fired yet
+const row = {
+id: user.id,
+full_name: user.user_metadata?.full_name || "",
+display_name: user.user_metadata?.display_name || user.email?.split("@")[0] || "",
+activated: false,
+coins: 0,
+updated_at: new Date().toISOString()
+};
+const result = await db.from("profiles").upsert(row, { onConflict: "id" }).select().single();
+if (result.error) throw result.error;
+return result.data;
+}
+async function getVerifiedProfile(user) {
+const db = await ensureClient();
+for (let attempt = 0; attempt < 6; attempt++) {
+const { data, error } = await db.from("profiles").select("id,full_name,display_name,activated,coins,updated_at,sp_id,sp_id_welcome_seen").eq("id", user.id).maybeSingle();
+if (error) throw error;
+if (data?.sp_id) return data;
+await new Promise(resolve => setTimeout(resolve, 300));
+}
+return ensureProfile(user);
+}
+async function completeLogin(user) {
+if (state.redirecting || state.completingLogin) return;
+state.completingLogin = true;
+state.currentUser = user;
+try {
+const verified = !!user.email_confirmed_at;
+state.profile = verified ? await getVerifiedProfile(user) : await ensureProfile(user);
+if (verified && state.profile.sp_id) {
+const db = await ensureClient();
+const { data: welcomeClaim, error: welcomeClaimError } = await db.rpc("claim_sp_id_welcome");
+if (welcomeClaimError) throw welcomeClaimError;
+const claimedSpId = Array.isArray(welcomeClaim) ? welcomeClaim[0]?.sp_id : welcomeClaim?.sp_id;
+if (claimedSpId) {
+state.profile.sp_id_welcome_seen = true;
+const name = (state.profile.display_name || state.profile.full_name || user.user_metadata
+?.display_name || user.user_metadata?.full_name || user.email?.split("@")[0] || "there")
+.trim();
+$("welcomeTitle").textContent = `Welcome to SPIKE, ${name}! 🎉`;
+$("welcomeIntro").textContent = "Your email is verified and your permanent SPIKE identity is now ready.";
+$("spidValue").textContent = state.profile.sp_id;
+$("welcomeDetails").textContent =
+"Your SP ID is your unique SPIKE account identification number. You can use it to help others find you and, as SPIKE grows, to receive gifts, coins, XP, rewards and other features connected to your account.";
+$("welcomeNote").innerHTML = "<strong>Keep it handy:</strong> your SP ID stays connected to your SPIKE account for its lifetime.";
+lastFocusedElement = document.activeElement;
+$("successModal").classList.add("show");
+requestAnimationFrame(() => $("continueBtn")?.focus());
+return;
+}
+}
+state.redirecting = true;
+location.replace("feed.html");
+} catch (err) {
+console.error("[SPIKE PROFILE]", err);
+toast(friendlyError(err, "profile"), "error");
+} finally {
+state.completingLogin = false;
+}
+}
+// ─── sign in with email/password ───
+async function signIn(e) {
+e.preventDefault();
+if (state.busy) return;
+const email = $("loginEmail").value.trim(),
+password = $("loginPassword").value;
+if (!explainValidation(e.currentTarget)) return;
+if (!email || !password) { toast("Enter your email and password.", "warning"); return; }
+state.busy = true;
+clearStatus();
+const btn = $("loginBtn");
+setBusy(btn, true, "Signing in…");
+try {
+const db = await ensureClient();
+const { data, error } = await db.auth.signInWithPassword({ email, password });
+if (error) throw error;
+if (!data.user) throw new Error("Sign in did not return an account session.");
+toast("Signed in successfully.", "success", 2500);
+await completeLogin(data.user);
+} catch (err) {
+console.error("[SPIKE LOGIN]", err);
+const friendly = friendlyError(err, "login");
+status(friendly, "error");
+toast(friendly, "error");
+} finally {
+state.busy = false;
+setBusy(btn, false, "");
+}
+}
+// ─── sign up ───
+async function signUp(e) {
+e.preventDefault();
+if (state.busy) return;
+const name = $("regName").value.trim(),
+email = $("regEmail").value.trim(),
+pw = $("regPassword").value,
+confirm = $("regConfirm").value;
+if (!explainValidation(e.currentTarget)) return;
+if (!name || !email || !pw || !confirm) { toast("Complete all required fields.", "warning"); return; }
+if (!passwordChecks(pw)) { toast("Please meet all password requirements.", "warning"); return; }
+if (pw !== confirm) { toast("Passwords do not match.", "warning"); return; }
+if (!$("terms").checked) { toast("Please agree to the Terms and Privacy Policy.", "warning"); return; }
+const signupWait = emailCooldownRemaining();
+if (signupWait > 0) {
+const message =
+`Please wait ${formatWait(signupWait)} before requesting another verification email.`;
+toast(message, "warning");
+status(message, "info");
+return;
+}
+state.busy = true;
+const btn = $("registerBtn");
+setBusy(btn, true, "Creating account…");
+clearStatus();
+try {
+const db = await ensureClient();
+const { data, error } = await db.auth.signUp({
+email,
+password: pw,
+options: { data: { full_name: name, display_name: name }, emailRedirectTo: AUTH_REDIRECT_URL }
+});
+if (error) {
+if (isEmailRateLimit(error)) { startEmailCooldown(90000);
+}
+throw error;
+}
+if (data.user) {
+  // Email confirmation is the signup gate. Show the OTP screen whenever the
+  // returned user is not confirmed, even if Supabase also returned a session.
+  // Some Auth configurations issue a temporary session before confirmation.
+  const confirmed = !!data.user.email_confirmed_at;
+  if (!confirmed) {
+    state.signupOtpEmail = email;
+    try { sessionStorage.setItem("spike_signup_otp_email", email); } catch {}
+    startOtpCooldown(60000);
+    showOtpScreen(email);
+    toast("Verification code sent to your email.", "success");
+  } else {
+    await completeLogin(data.user);
+    toast("Account created successfully.", "success");
+  }
+} else {
+  throw new Error("Account creation did not return a user.");
+}
+} catch (err) {
+console.error("[SPIKE SIGNUP]", {
+  status: err?.status,
+  code: err?.code,
+  message: err?.message,
+  name: err?.name
+});
+const friendly = friendlyError(err, "signup");
+status(friendly, "error");
+toast(friendly, "error");
+} finally {
+state.busy = false;
+setBusy(btn, false, "");
+}
+}
+// ─── email OTP confirmation (single-file screen) ───
+let otpCooldownTimer = null;
+function otpCooldownRemaining() { return Math.max(0, state.emailCooldownUntil - Date.now()); }
+function updateOtpCooldown() { const btn=$("otpResendBtn"), label=$("otpCountdown"), r=otpCooldownRemaining(); if(btn) btn.disabled=r>0||state.signupOtpBusy; if(label) label.textContent=r>0?`You can request a new code in ${formatWait(r)}.`:"Didn't receive it? Request a new code."; if(r<=0&&otpCooldownTimer){clearInterval(otpCooldownTimer);otpCooldownTimer=null;} }
+function startOtpCooldown(ms=60000){ startEmailCooldown(ms); if(otpCooldownTimer) clearInterval(otpCooldownTimer); otpCooldownTimer=setInterval(updateOtpCooldown,1000); updateOtpCooldown(); }
+function showOtpScreen(email){ state.signupOtpEmail=String(email||"").trim(); if(!state.signupOtpEmail)return switchPanel("register"); $("otpEmail").textContent=state.signupOtpEmail; $("otpInput").value=""; switchPanel("otp"); updateOtpCooldown(); requestAnimationFrame(()=>$("otpInput")?.focus()); }
+function leaveOtpScreen(){ try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; switchPanel("register"); }
+async function verifySignupOtp(e){ e.preventDefault(); if(state.signupOtpBusy)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; const token=$("otpInput")?.value.replace(/\D/g,"").slice(0,6)||""; if(!email){status("Your verification session is missing. Create the account again.","error");return;} if(!/^\d{6}$/.test(token)){toast("Enter the 6-digit code from your email.","warning");$("otpInput")?.focus();return;} state.signupOtpBusy=true; const btn=$("otpVerifyBtn"); setBusy(btn,true,"Confirming…"); clearStatus(); try{const db=await ensureClient(); const {data,error}=await db.auth.verifyOtp({email,token,type:"signup"}); if(error)throw error; if(!data?.user)throw new Error("Email confirmation did not return an account."); try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; toast("Email confirmed successfully.","success"); await completeLogin(data.user);}catch(err){console.error("[SPIKE SIGNUP OTP]",{status:err?.status,code:err?.code,message:err?.message}); const msg=String(err?.message||"").toLowerCase(); const friendly=/expired|invalid|token|otp/.test(msg)?"That code is invalid or expired. Check the newest SPIKE email, then enter its 6-digit code.":isEmailRateLimit(err)?"Too many verification attempts. Please wait a little before trying again.":friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;setBusy(btn,false,"");updateOtpCooldown();} }
+async function resendSignupOtp(){ if(state.signupOtpBusy||otpCooldownRemaining()>0)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; if(!email)return status("Your verification session is missing. Create the account again.","error"); state.signupOtpBusy=true; const btn=$("otpResendBtn"); if(btn)btn.disabled=true; try{const db=await ensureClient(); const {error}=await db.auth.resend({type:"signup",email}); if(error)throw error; startOtpCooldown(60000); status("A new 6-digit verification code has been sent.","success"); toast("New verification code sent.","success");}catch(err){if(isEmailRateLimit(err))startOtpCooldown(90000); const friendly=friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;updateOtpCooldown();} }
+
+// ─── reset password ───
+async function resetPassword(e) {
+e.preventDefault();
+if (state.busy) return;
+const email = $("resetEmail").value.trim();
+if (!explainValidation(e.currentTarget)) return;
+if (!email) { toast("Enter your email.", "warning"); return; }
+const emailWait = emailCooldownRemaining();
+if (emailWait > 0) {
+const message = `Please wait ${formatWait(emailWait)} before requesting another email.`;
+toast(message, "warning");
+status(message, "info");
+return;
+}
+state.busy = true;
+const btn = $("resetBtn");
+setBusy(btn, true, "Sending…");
+try {
+const db = await ensureClient();
+const { error } = await db.auth.resetPasswordForEmail(email, { redirectTo: PASSWORD_RESET_REDIRECT_URL });
+if (error) throw error;
+try { sessionStorage.setItem("spike_password_reset_pending", String(Date.now())); } catch {}
+startEmailCooldown(60000);
+toast("If an account exists, a secure reset link has been sent.", "success");
+status("Check your email for the password reset link.", "success");
+} catch (err) {
+const friendly = friendlyError(err, "reset");
+toast(friendly, "error");
+status(friendly, "error");
+} finally {
+state.busy = false;
+setBusy(btn, false, "");
+}
+}
+// ─── OAuth ───
+async function signInWithProvider(provider) {
+if (state.busy || state.redirecting || state.completingLogin) return;
+const oauthLockKey = "spike_oauth_in_progress";
+const now = Date.now();
+try {
+const existing = Number(sessionStorage.getItem(oauthLockKey) || 0);
+if (existing && now - existing < 120000) {
+status("A secure sign-in is already in progress. Please finish it or wait a moment.", "info");
+return;
+}
+sessionStorage.setItem(oauthLockKey, String(now));
+} catch {}
+state.busy = true;
+const googleBtn = $("googleLoginBtn"),
+githubBtn = $("githubLoginBtn");
+const buttons = [googleBtn, githubBtn];
+buttons.forEach(b => { if (b) b.disabled = true; });
+const button = provider === "google" ? googleBtn : githubBtn;
+if (button) {
+button.dataset.original = button.innerHTML;
+button.innerHTML =
+`<span class="oauth-loading" aria-hidden="true"></span><span>Connecting…</span>`;
+}
+clearStatus();
+try {
+const db = await ensureClient();
+const { data, error } = await db.auth.signInWithOAuth({
+provider,
+options: {
+redirectTo: AUTH_REDIRECT_URL,
+skipBrowserRedirect: true,
+queryParams: provider === "google" ? { access_type: "offline", prompt: "select_account" } : undefined
+}
+});
+if (error) throw error;
+if (!data?.url || data.url === "null" || data.url === "undefined") {
+throw new Error("Supabase did not return a valid OAuth authorization URL. Check that the provider is enabled and configured in Supabase.");
+}
+window.location.replace(data.url);
+} catch (err) {
+try { sessionStorage.removeItem("spike_oauth_in_progress"); } catch {}
+console.error("[SPIKE OAUTH]", provider, err);
+const friendly = friendlyError(err, "oauth");
+status(friendly, "error");
+toast(friendly, "error");
+state.busy = false;
+buttons.forEach(b => {
+if (b) { b.disabled = false; if (b.dataset.original) b.innerHTML = b.dataset.original; }
+});
+}
+}
+// ─── Auth callback / redirect handling ───
+function getAuthCallback() {
+  const url = new URL(window.location.href);
+  const query = url.searchParams;
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+  const get = key => query.get(key) || hash.get(key);
+  return {
+    code: query.get("code"),
+    type: get("type"),
+    error: get("error"),
+    errorCode: get("error_code"),
+    description: get("error_description"),
+    hasAccessToken: !!(hash.get("access_token") || hash.get("refresh_token"))
+  };
+}
+
+function cleanAuthUrl() {
+  try {
+    const u = new URL(window.location.href);
+    ["code","error","error_code","error_description","access_token","refresh_token","token_type","type","sb"].forEach(k => u.searchParams.delete(k));
+    u.hash = "";
+    window.history.replaceState({}, document.title, u.pathname + (u.search ? u.search : ""));
+  } catch (_) {}
+}
+
+function isRecoveryFlow(callback = getAuthCallback()) {
+  return callback.type === "recovery";
+}
+
+function handleAuthCallback() {
+  const callback = getAuthCallback();
+  if (callback.code || callback.error || callback.hasAccessToken || callback.type) {
+    try { sessionStorage.removeItem("spike_oauth_in_progress"); } catch {}
+  }
+  if (callback.error) {
+    const msg = callback.errorCode === "otp_expired" || /invalid or has expired/i.test(callback.description || "")
+      ? "This email link is invalid or has expired. Request a new verification or password-reset email, then use the newest link."
+      : callback.description || "Authentication could not be completed. Please try again.";
+    setTimeout(() => { status(msg, "error"); toast(msg, "error"); }, 0);
+    cleanAuthUrl();
+    return callback;
+  }
+  return callback;
+}
+
+function smartField(input){
+ if(!input)return true;
+ const value=input.value.trim(), field=input.closest(".field");
+ if(!field)return true;
+ let ok=input.validity.valid && !!value;
+ if(input.type==="email") ok=ok && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+ field.classList.toggle("valid",ok);field.classList.toggle("invalid",!ok);
+ return ok;
+}
+function explainValidation(form){
+ const bad=[...form.querySelectorAll("input")].find(x=>x.required&&!smartField(x));
+ if(!bad)return true;
+ const label=form.querySelector(`label[for="${bad.id}"] span`)?.textContent||"field";
+ const msg=bad.type==="email"?`Enter a valid email address for ${label.toLowerCase()}.`:bad.id==="terms"?"Please accept the Terms and Privacy Policy to continue.":`Please check your ${label.toLowerCase()}.`;
+ status(msg,"warning");toast(msg,"warning");bad.focus();return false;
+}
+function otpAutoAdvance(){
+ const input=$("otpInput"); if(!input)return;
+ input.addEventListener("paste",e=>{const text=(e.clipboardData?.getData("text")||"").replace(/\D/g,"").slice(0,6);if(text){e.preventDefault();input.value=text;input.classList.toggle("otp-complete",text.length===6);if(text.length===6)requestAnimationFrame(()=>$("otpVerifyBtn")?.focus());}});
+ input.addEventListener("input",()=>{input.classList.toggle("otp-complete",input.value.length===6);if(input.value.length===6){status("Code ready. Confirm your email to continue.","success");}});
+}
+function improveErrors(){
+ const emailInputs=[$("loginEmail"),$("regEmail"),$("resetEmail")].filter(Boolean);
+ emailInputs.forEach(input=>input.addEventListener("input",()=>{if(input.value)smartField(input);}));
+ $("regName")?.addEventListener("input",e=>{if(e.target.value)smartField(e.target);});
+}
+improveErrors();otpAutoAdvance();
+
+// ─── boot: restore session / dedicated password-recovery routing ───
+function routeRecoveryCallbackToDedicatedPage(callback) {
+  // Supabase can return a recovery callback to the Site URL when the redirect
+  // URL is not selected/allowed correctly. Never leave a password-reset
+  // session on the normal login screen. Preserve the callback intact so the
+  // dedicated page can consume the recovery session.
+  if (!callback?.type || callback.type !== "recovery") return false;
+  if (/\/reset-password\.html$/i.test(window.location.pathname)) return false;
+  try {
+    const target = `${window.location.origin.replace(/\/$/, "")}/reset-password.html${window.location.search}${window.location.hash}`;
+    window.location.replace(target);
+    return true;
+  } catch (err) {
+    console.error("[SPIKE RECOVERY ROUTE]", err);
+    return false;
+  }
+}
+
+async function boot() {
+try {
+const callback = handleAuthCallback();
+if (routeRecoveryCallbackToDedicatedPage(callback)) return;
+const db = await ensureClient();
+
+const { data, error } = await db.auth.getSession();
+if (error) throw error;
+const pendingOtp = (()=>{try{return sessionStorage.getItem("spike_signup_otp_email")||""}catch{return ""}})();
+if (pendingOtp && !callback.error && !data.session?.user) showOtpScreen(pendingOtp);
+
+// Remove one-time callback artifacts only after Supabase has had a chance to
+// consume them. This prevents refresh/back from replaying stale auth state.
+if (callback.code || callback.hasAccessToken || callback.type || callback.error) cleanAuthUrl();
+
+if (data.session?.user && !isRecoveryFlow(callback) && !callback.error) await completeLogin(data.session.user);
+} catch (err) {
+console.error("[SPIKE BOOT]", err);
+toast(friendlyError(err, "boot"), "warning");
+}
+finally {
+  window.SPIKE_HIDE_BOOT_LOADER?.();
+}
+try {
+const db = await ensureClient();
+db.auth.onAuthStateChange(async (event, session) => {
+if (event === "SIGNED_OUT") {
+state.currentUser = null;
+return;
+}
+if ((event === "SIGNED_IN" || event === "INITIAL_SESSION") && session?.user) {
+  // Never bypass email verification just because Supabase supplied a session.
+  // Keep the user on the single-file OTP screen until email_confirmed_at exists.
+  if (!session.user.email_confirmed_at) {
+    const pendingEmail = state.signupOtpEmail || session.user.email || "";
+    if (pendingEmail) {
+      state.signupOtpEmail = pendingEmail;
+      try { sessionStorage.setItem("spike_signup_otp_email", pendingEmail); } catch {}
+      showOtpScreen(pendingEmail);
+    }
+    return;
+  }
+  try { await completeLogin(session.user); } catch (err) {
+    console.error("[SPIKE AUTH COMPLETE]", err);
+    toast(friendlyError(err, "login"), "error");
+  }
+}
+});
+} catch (err) { console.error("[SPIKE AUTH LISTENER]", err); }
+// Keep a stale tab from becoming a dead login screen after the session changes elsewhere.
+document.addEventListener("visibilitychange", async () => {
+  if (document.visibilityState !== "visible") return;
+  try {
+    const { data } = await db.auth.getSession();
+    if (data?.session?.user && !state.redirecting && !state.completingLogin) await completeLogin(data.session.user);
+  } catch (e) { console.debug("[SPIKE SESSION REFRESH]", e); }
+});
+}
+// Accessible keyboard behavior
+document.addEventListener("keydown", e => {
+ if (e.key === "Escape" && $("successModal")?.classList.contains("show")) {
+   e.preventDefault();
+   $("successModal").classList.remove("show");
+   lastFocusedElement?.focus?.();
+   return;
+ }
+ if (e.key === "Enter" && e.target.matches("[role=tab]")) e.target.click();
+});
+
+// ─── DOM events ───
+// password toggle
+document.addEventListener("click", e => {
+const b = e.target.closest(".password-toggle");
+if (!b) return;
+const input = $(b.dataset.target);
+if (!input) return;
+input.type = input.type === "password" ? "text" : "password";
+b.textContent = input.type === "password" ? "Show" : "Hide";
+ b.setAttribute("aria-label", input.type === "password" ? "Show password" : "Hide password");
+ b.setAttribute("aria-pressed", input.type !== "password");
+});
+// tab switching
+$("loginTab").onclick = () => switchPanel("login");
+$("registerTab").onclick = () => switchPanel("register");
+$("goCreate").onclick = () => switchPanel("register");
+$("goLogin").onclick = () => switchPanel("login");
+$("forgotBtn").onclick = () => { $("resetEmail").value = $("loginEmail").value.trim();
+switchPanel("forgot"); };
+$("forgotBackBtn")?.addEventListener("click", () => switchPanel("login"));
+
+// OAuth buttons
+$("googleLoginBtn").onclick = () => signInWithProvider("google");
+$("githubLoginBtn").onclick = () => signInWithProvider("github");
+// email OTP confirmation
+// forms
+$("loginForm").addEventListener("submit", signIn);
+$("registerForm").addEventListener("submit", signUp);
+$("resetForm").addEventListener("submit", resetPassword);
+$("otpForm")?.addEventListener("submit", verifySignupOtp);
+$("otpResendBtn")?.addEventListener("click", resendSignupOtp);
+$("otpBackBtn")?.addEventListener("click", leaveOtpScreen);
+$("otpInput")?.addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 6); });
+// password strength
+$("regPassword").addEventListener("input", e => passwordChecks(e.target.value));
+// confirm password validation
+$("regConfirm")?.addEventListener("input", () => {
+const ok = $("regConfirm").value.length > 0 && $("regConfirm").value === $("regPassword").value;
+const field = $("regConfirm")?.closest(".field");
+if (field) {
+field.classList.toggle("valid", !!ok);
+field.classList.toggle("invalid", ok === false);
+}
+});
+// field validation on blur
+["loginEmail", "regEmail", "resetEmail"].forEach(id => {
+const el = $(id);
+el?.addEventListener("blur", () => {
+if (!el.value.trim()) { markField(el, false); return; }
+markField(el, el.validity.valid);
+});
+});
+function markField(input, valid) {
+const field = input?.closest(".field");
+if (!field) return;
+field.classList.toggle("valid", !!valid);
+field.classList.toggle("invalid", valid === false);
+}
+// modal: copy & continue
+$("copySpid").onclick = async () => {
+const v = $("spidValue").textContent;
+try {
+await navigator.clipboard.writeText(v);
+toast("SP ID copied.", "success");
+} catch { toast("Your SP ID is " + v, "info"); }
+};
+$("continueBtn").onclick = async () => {
+$("successModal").classList.remove("show");
+lastFocusedElement?.focus?.();
+location.replace("feed.html");
+};
+// expose safe helpers
+window.SPIKE = {
+version: "2026.08.2-smart",
+supabase: () => state.client,
+signIn,
+signUp,
+switchPanel,
+toast
+};
+boot();
+</script>
+<script>
+(function(){
+ const b=document.getElementById('passwordHelpBtn'), r=document.getElementById('passwordRequirements'), p=document.getElementById('regPassword');
+ if(!b||!r)return;
+ b.addEventListener('click',()=>{const open=r.classList.toggle('open');b.textContent=open?'Hide password requirements':'Password requirements';});
+ p?.addEventListener('focus',()=>{if(window.innerHeight>=650){r.classList.add('open');b.textContent='Hide password requirements';}});
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+<script src="js/telemetry.js" defer></script>
+  <script src="js/theme.js"></script>
+</body></html>
