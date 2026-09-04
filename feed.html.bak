@@ -1844,7 +1844,7 @@ const StoryEngine = (() => {
     const storyNeedsOverlay = storyIsVideo && st.mediaWatermarked !== true;
     if (wm) wm.classList.toggle('show', storyNeedsOverlay);
     if (wmId) wmId.textContent = storyIsVideo ? `• ${storySpId}` : '';
- viewer?.classList.remove('story-transition-next','story-transition-prev'); void viewer?.offsetWidth; viewer?.classList.add(direction>0?'story-transition-next':'story-transition-prev'); shell?.classList.add('story-loading'); stage?.classList.remove('story-media-ready'); if(avatar){ const av=typeof storyAvatarUrl==='function'?storyAvatarUrl(avatarOf(st)):''; avatar.style.backgroundImage=av?`url("${av.replace(/"/g,'')}")`:''; avatar.textContent=av?'':((nameOf(st)||'S')[0]||'S').toUpperCase(); } if(author)author.textContent=nameOf(st)||'Story'; if(time)time.textContent=typeof SPIKETime?.relativeTime==='function'?SPIKETime.relativeTime(st.createdAt||st.created_at):'now'; if(cap)cap.textContent=st.text||''; if(meta)meta.textContent=`${nameOf(st)} · ${s.index+1}/${group.stories.length}`; buildProgress(group.stories); markStoryViewed(st.id).catch(()=>{}); const k=mediaKind(st); const muteBtn=$e('storyViewerMute'); const hasAudio = k==='video' || !!audioUrl(st); const dlBtn=$e('storyViewerDownload'); const delBtn=$e('storyViewerDelete'); if(dlBtn){ dlBtn.hidden = !['video','image'].includes(k); dlBtn.setAttribute('aria-label', k==='video'?'Download story video':'Download story image'); dlBtn.title = k==='video'?'Download story video':'Download story image'; } if(delBtn) delBtn.hidden = st.authorUid !== state.user.id; if(muteBtn){ muteBtn.hidden=!hasAudio; if(hasAudio)setAudioButton(!s.muted); } if(k==='video')playVideo(st,token); else if(k==='image')playImage(st,token); else playText(st,token); const ns=group.stories[s.index+1]||gs[s.creatorIndex+1]?.stories?.[0]; if(ns?.mediaUrl){ if(mediaKind(ns)==='video'){const p=document.createElement('video');p.preload='metadata';p.src=ns.mediaUrl;} else{const p=new Image();p.decoding='async';p.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(ns.mediaUrl,'image'):ns.mediaUrl;} } }
+ viewer?.classList.remove('story-transition-next','story-transition-prev'); void viewer?.offsetWidth; viewer?.classList.add(direction>0?'story-transition-next':'story-transition-prev'); shell?.classList.add('story-loading'); stage?.classList.remove('story-media-ready'); if(avatar){ const av=typeof storyAvatarUrl==='function'?storyAvatarUrl(avatarOf(st)):''; avatar.style.backgroundImage=av?`url("${av.replace(/"/g,'')}")`:''; avatar.textContent=av?'':((nameOf(st)||'S')[0]||'S').toUpperCase(); } if(author)author.textContent=nameOf(st)||'Story'; if(time)time.textContent=typeof SPIKETime?.relativeTime==='function'?SPIKETime.relativeTime(st.createdAt||st.created_at):'now'; if(cap)cap.textContent=st.text||''; if(meta)meta.textContent=`${nameOf(st)} · ${s.index+1}/${group.stories.length}`; buildProgress(group.stories); markStoryViewed(st.id).catch(()=>{}); const k=mediaKind(st); const muteBtn=$e('storyViewerMute'); const hasAudio = k==='video' || !!audioUrl(st); const dlBtn=$e('storyViewerDownload'); const delBtn=$e('storyViewerDelete'); if(dlBtn) dlBtn.hidden = k!=='video'; if(delBtn) delBtn.hidden = st.authorUid !== state.user.id; if(muteBtn){ muteBtn.hidden=!hasAudio; if(hasAudio)setAudioButton(!s.muted); } if(k==='video')playVideo(st,token); else if(k==='image')playImage(st,token); else playText(st,token); const ns=group.stories[s.index+1]||gs[s.creatorIndex+1]?.stories?.[0]; if(ns?.mediaUrl){ if(mediaKind(ns)==='video'){const p=document.createElement('video');p.preload='metadata';p.src=ns.mediaUrl;} else{const p=new Image();p.decoding='async';p.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(ns.mediaUrl,'image'):ns.mediaUrl;} } }
   function next(auto=false){ if(s.busy)return false; const gs=rebuildGroups(), g=gs[s.creatorIndex]; if(!g)return false; if(s.index<g.stories.length-1){s.busy=true;s.index++;render(1);return true;} if(s.creatorIndex<gs.length-1){s.busy=true;s.creatorIndex++;s.index=0;render(1);return true;} close();return false; }
   function previous(){ if(s.busy)return false; const gs=rebuildGroups(); if(s.index>0){s.busy=true;s.index--;render(-1);return true;} if(s.creatorIndex>0){s.busy=true;s.creatorIndex--;s.index=gs[s.creatorIndex].stories.length-1;render(-1);return true;} return false; }
   function open(id){ const loc=locate(id);if(!loc)return; cancelClock();stopMedia();s.token++; s.creatorIndex=loc.gi; s.index=0; s.busy=false; s.muted=true; setAudioButton(false); showAudioHint(false); document.body.classList.add('story-viewer-open'); const viewer=$e('storyViewer'); viewer?.classList.add('open'); viewer?.setAttribute('aria-hidden','false'); render(1); }
@@ -1856,23 +1856,20 @@ const StoryEngine = (() => {
     $e('storyViewerDownload')?.addEventListener('click',async e=>{
       e.preventDefault(); e.stopPropagation();
       const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index];
-      const kind=st ? mediaKind(st) : 'text';
-      if (!st?.mediaUrl || !['video','image'].includes(kind)) { toast('This story has no downloadable media.', 'warning'); return; }
+      if (!st?.mediaUrl || mediaKind(st)!=='video') { toast('This story has no downloadable video.', 'warning'); return; }
       const spid=spIdOf(st)||spIdOf(state.users.get(st.authorUid))||'story';
-      const isVideo=kind==='video';
-      const ext=isVideo?'mp4':'jpg';
-      const filename=`SPIKE-${String(spid).replace(/[^a-z0-9_-]/gi,'-')}-story.${ext}`;
+      const filename=`SPIKE-${String(spid).replace(/[^a-z0-9_-]/gi,'-')}-story-watermarked.mp4`;
       const ok=await premiumConfirm({
-        title:isVideo?'Download this story video?':'Download this story picture?',
-        message:isVideo?'The watermarked video will be saved to your device without leaving SPIKE.':'The story picture will be saved to your device without leaving SPIKE.',
-        confirmText:isVideo?'Download video':'Download picture',
+        title:'Download this story?',
+        message:'We’ll prepare the watermarked video and save it to your device. Ready when you are.',
+        confirmText:'Download video',
         cancelText:'Not now',
         icon:'⬇️',
         eyebrow:'SPIKE DOWNLOAD'
       });
       if(!ok)return;
-      const source=isVideo && st.mediaWatermarked!==true ? (st.mediaOriginalUrl || st.mediaUrl) : st.mediaUrl;
-      await downloadStoryMediaInApp(source, filename, kind, $e('storyViewerDownload'));
+      const source=st.mediaWatermarked===true ? st.mediaUrl : (st.mediaOriginalUrl || st.mediaUrl);
+      await downloadWatermarkedVideoUrl(source, filename, $e('storyViewerDownload'));
     });
     $e('storyViewerDelete')?.addEventListener('click',async e=>{
       e.preventDefault(); e.stopPropagation();
@@ -2185,114 +2182,36 @@ async function verifyAdminUid() {
 function cloudinaryDownloadUrl(url, filename='SPIKE-video.mp4') {
   const raw=safeHttpUrl(url); if(!raw)return '';
   if(!/cloudinary\.com/i.test(raw))return raw;
-  const safeName=String(filename||'SPIKE-video.mp4').trim().replace(/[^a-z0-9._-]/gi,'-').replace(/-+/g,'-') || 'SPIKE-video.mp4';
-  // Cloudinary accepts fl_attachment[:filename] for video delivery. The filename
-  // is a transformation qualifier, so encode the qualifier value only; do not
-  // encode the whole transformation or the public ID. This avoids malformed
-  // paths while preserving a predictable download name.
+  const safeName=String(filename||'SPIKE-video.mp4').replace(/[^a-z0-9._-]/gi,'-');
   return cloudinaryVideoTransformUrl(raw, `fl_attachment:${encodeURIComponent(safeName)}`);
 }
 
-function cloudinaryStandardDownloadUrl(url) {
-  const raw=safeHttpUrl(url); if(!raw)return '';
-  if(!/cloudinary\.com/i.test(raw))return raw;
-  return cloudinaryVideoTransformUrl(raw, 'fl_attachment');
-}
-
-// Build a Cloudinary attachment URL for either image or video without changing
-// the public ID. The response is then downloaded as a Blob when CORS allows it;
-// otherwise the attachment navigation is handed to the browser/WebView download
-// manager. Neither path intentionally opens a new tab or sends the user away
-// from the SPIKE UI.
-function cloudinaryStoryAttachmentUrl(url, filename) {
-  const raw=safeHttpUrl(url); if(!raw)return '';
-  if(!/cloudinary\.com/i.test(raw))return raw;
-  try {
-    const u=new URL(raw);
-    const marker='/upload/';
-    const i=u.pathname.indexOf(marker);
-    if(i<0)return raw;
-    const tail=cloudinaryVideoAssetTail(u.pathname,i);
-    if(!tail)return raw;
-    const safeName=String(filename||'SPIKE-story-download').trim()
-      .replace(/[^a-z0-9._-]/gi,'-').replace(/-+/g,'-') || 'SPIKE-story-download';
-    u.pathname=u.pathname.slice(0,i+marker.length)+`fl_attachment:${encodeURIComponent(safeName)}/`+tail;
-    return u.toString();
-  } catch (_) { return raw; }
-}
-
-async function downloadStoryMediaInApp(url, filename, kind, button) {
-  if (!url) { toast('Media is not available', 'error'); return; }
+async function downloadWatermarkedVideoUrl(url, filename, button) {
+  if (!url) { toast('Video is not available', 'error'); return; }
   if (button?.dataset.busy === '1') return;
   if (button) { button.dataset.busy='1'; button.disabled=true; button.classList.add('is-busy'); }
   try {
-    const requestedName=String(filename||`SPIKE-story.${kind==='video'?'mp4':'jpg'}`).trim();
-    const sourceUrl=safeHttpUrl(url);
-    if (!sourceUrl) throw new Error('Story media URL is invalid.');
-
-    // First try the media directly. If Cloudinary CORS blocks the browser,
-    // use SPIKE's authenticated media-download Edge Function. This keeps the
-    // current SPIKE document active and never navigates the WebView to CDN.
-    const candidates=[];
-    const push=u=>{u=String(u||'').trim();if(u&&!candidates.includes(u))candidates.push(u);};
-    push(sourceUrl);
-    if (/cloudinary\.com/i.test(sourceUrl)) {
-      try {
-        const u=new URL(sourceUrl);
-        const marker='/upload/';
-        const i=u.pathname.indexOf(marker);
-        if(i>=0){
-          const tail=cloudinaryVideoAssetTail(u.pathname,i);
-          if(tail) { u.pathname=u.pathname.slice(0,i+marker.length)+tail; push(u.toString()); }
-        }
-      } catch (_) {}
-    }
-
-    let lastError=null;
-    for (const candidate of candidates) {
-      try {
-        const response=await fetch(candidate,{mode:'cors',credentials:'omit',cache:'no-store',redirect:'follow'});
-        if (!response.ok) throw new Error(`Media request failed (${response.status})`);
-        const blob=await response.blob();
-        if (!blob.size) throw new Error('Downloaded file is empty.');
-        const blobUrl=URL.createObjectURL(blob);
-        const a=document.createElement('a'); a.href=blobUrl; a.download=requestedName; a.rel='noopener';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
-        window.__SPIKE_LAST_DOWNLOAD={url:candidate,filename:requestedName,kind,mode:'blob',createdAt:Date.now()};
-        toast(kind==='video'?'Video saved to your device':'Picture saved to your device','success');
-        return;
-      } catch(e) { lastError=e; }
-    }
-
-    // CORS-safe server-side stream. The function requires the signed-in
-    // Supabase JWT and only permits Cloudinary as its upstream host.
-    const sessionResult=await db.auth.getSession();
-    const accessToken=sessionResult?.data?.session?.access_token;
-    if(!accessToken) throw new Error('Please sign in again to download this story.');
-    const endpoint=`${SUPABASE_URL}/functions/v1/spike-media-download?url=${encodeURIComponent(sourceUrl)}&filename=${encodeURIComponent(requestedName)}`;
-    const proxyResponse=await fetch(endpoint,{method:'GET',headers:{Authorization:`Bearer ${accessToken}`,apikey:SUPABASE_KEY},cache:'no-store'});
-    if(!proxyResponse.ok) throw new Error(`Download service failed (${proxyResponse.status})`);
-    const proxyBlob=await proxyResponse.blob();
-    if(!proxyBlob.size) throw new Error('Downloaded file is empty.');
-    const blobUrl=URL.createObjectURL(proxyBlob);
-    const a=document.createElement('a'); a.href=blobUrl; a.download=requestedName; a.rel='noopener';
+    const postLike = state.posts.find(p=>p.mediaUrl===url);
+    const spid = spIdOf(postLike) || spIdOf(state.users.get(postLike?.authorUid)) || spIdOf(state.profile) || 'video';
+    const sourceUrl = postLike?.mediaOriginalUrl || postLike?.mediaItems?.find(x=>x.type==='video'&&x.originalUrl)?.originalUrl || url;
+    const downloadUrl = cloudinaryWatermarkedVideoUrl(sourceUrl, spid);
+    let blob = null;
+    try {
+      const r = await withTimeout(fetch(downloadUrl, { mode:'cors', credentials:'omit' }), 20000, 'Video download');
+      if (r.ok) blob = await r.blob();
+    } catch (_) {}
+    const objectUrl = blob ? URL.createObjectURL(blob) : cloudinaryDownloadUrl(downloadUrl, filename || 'SPIKE-watermarked-video.mp4');
+    const a=document.createElement('a');
+    a.href=objectUrl; a.download=filename || 'SPIKE-watermarked-video.mp4'; a.rel='noopener';
     document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(blobUrl),60000);
-    window.__SPIKE_LAST_DOWNLOAD={url:endpoint,filename:requestedName,kind,mode:'supabase-proxy',createdAt:Date.now()};
-    toast(kind==='video'?'Video saved to your device':'Picture saved to your device','success');
+    if (blob) setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+    toast('Watermarked video download started', 'success');
   } catch(e) {
-    console.error('downloadStoryMediaInApp',e);
-    toast(e?.message || 'Could not download story media','error');
+    console.error('downloadWatermarkedVideoUrl',e);
+    toast(e?.message || 'Could not download video','error');
   } finally {
     if (button) { button.dataset.busy='0'; button.disabled=false; button.classList.remove('is-busy'); }
   }
-}
-// Backward-compatible post-video helper. Story downloads use the generic
-// in-app media helper above, while existing feed-post video downloads continue
-// to use the same Cloudinary attachment behavior.
-async function downloadWatermarkedVideoUrl(url, filename, button) {
-  return downloadStoryMediaInApp(url, filename, 'video', button);
 }
 
 // ─── VIDEO CONTROLS ────────────────────────────────────
