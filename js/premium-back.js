@@ -9,6 +9,11 @@
   const FEED='feed.html';
   /** @type {Set<string>} */
   const ENTRY=new Set(['index.html','feed.html']);
+  const FEED_RETURN_KEY='spike.feed.return.v2';
+
+  function markFeedReturn(){
+    try{ sessionStorage.setItem(FEED_RETURN_KEY, JSON.stringify({target:'feed',at:Date.now(),source:'premium-back'})); }catch(_){}
+  }
 
   /** @returns {string} */
   function currentPage(){
@@ -31,11 +36,24 @@
    * @returns {void}
    */
   function goBack(button){
-    if(safeSameOriginReferrer()&&history.length>1){history.back();return}
-    location.assign(button.dataset.backFallback||FEED);
+    if(safeSameOriginReferrer()&&history.length>1){markFeedReturn();history.back();return}
+    const fallback=button.dataset.backFallback||FEED;
+    if(/(?:^|\/)feed\.html(?:[?#]|$)/i.test(fallback)) markFeedReturn();
+    location.assign(fallback);
   }
 
   /** @returns {void} */
+  function markFeedAnchorNavigation(event){
+    const anchor=event.target?.closest?.('a[href]');
+    if(!anchor) return;
+    try{
+      const url=new URL(anchor.href,location.href);
+      if(url.origin===location.origin && /\/feed\.html$/i.test(url.pathname)) markFeedReturn();
+    }catch(_){}
+  }
+
+  document.addEventListener('click',markFeedAnchorNavigation,true);
+
   function bind(){
     const page=currentPage();
     if(ENTRY.has(page)){

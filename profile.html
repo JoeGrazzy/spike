@@ -505,7 +505,7 @@ async function getDoc(p){const r=await docPath(p);if(r.error)throw r.error;retur
 async function putDoc(path,data,parent=""){const old=await docPath(path);const row={path,parent_path:(parent&&parent!==path.split("/")[0])?parent:"",collection_name:path.split("/").slice(0,-1).join("/")||path.split("/")[0],document_id:path.split("/").pop(),owner_id:state.me?.id||null,data,updated_at:now(),created_at:old.data?.created_at||now()};const r=await db.from("app_documents").upsert(row,{onConflict:"path"});if(r.error)throw r.error}
 async function listCollection(c,p=""){let q=db.from("app_documents").select("*").eq("collection_name",c);if(p)q=q.eq("parent_path",p);const r=await q;if(r.error)throw r.error;return r.data||[]}
 async function bootAuth(){const r=await Promise.race([db.auth.getSession(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("Session check timed out.")),15000))]);if(r.error||!r.data.session?.user){location.replace("index.html?reauth=1");return false}state.me=r.data.session.user;window.__SPIKE_ONLINE_ALLOWED__=true;state.uid=new URLSearchParams(location.search).get("uid")||state.me.id;return true}
-function initAdminHeader(){
+async function initAdminHeader(){
 const btn=$("adminBtn");
 if(!btn || !state.me) return;
 try {

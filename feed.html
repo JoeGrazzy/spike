@@ -7,40 +7,111 @@
 <meta name="theme-color" content="#070b10">
 <meta name="description" content="SPIKE community feed">
 <title>SPIKE — Feed</title>
+<style id="spike-feed-loader-guard">
+/* Navigation-safe boot gate. The loader is opt-in: it cannot paint unless the
+   early navigation gate explicitly enables it. History returns are a hard veto. */
+#spike-feed-loader { display: none !important; }
+html.spike-feed-booting body > :not(#spike-feed-loader) { visibility: hidden !important; }
+html.spike-feed-booting { overflow: hidden !important; }
+html.spike-feed-booting #spike-feed-loader { display: grid !important; }
+html.spike-feed-history-return #spike-feed-loader { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
+</style>
+<script id="spike-feed-loader-early">
+(() => {
+  'use strict';
+  const root = document.documentElement;
+  const RETURN_KEY = 'spike.feed.return.v2';
+  const navEntry = (() => { try { return performance.getEntriesByType('navigation')[0] || null; } catch (_) { return null; } })();
+  const navigationType = navEntry?.type || (performance.navigation?.type === 2 ? 'back_forward' : 'navigate');
+  const sameOriginReferrer = (() => {
+    try {
+      if (!document.referrer) return false;
+      const ref = new URL(document.referrer, location.href);
+      return ref.origin === location.origin && ref.pathname !== location.pathname;
+    } catch (_) { return false; }
+  })();
+  const returnFlag = (() => {
+    try {
+      const raw = sessionStorage.getItem(RETURN_KEY);
+      if (!raw) return false;
+      sessionStorage.removeItem(RETURN_KEY);
+      const obj = JSON.parse(raw);
+      return obj?.target === 'feed' && (Date.now() - Number(obj.at || 0) < 30 * 60 * 1000);
+    } catch (_) { return false; }
+  })();
+  const historyTraversal = navigationType === 'back_forward';
+  const returnNavigation = historyTraversal || returnFlag || (navigationType === 'navigate' && sameOriginReferrer);
+  const veto = () => {
+    root.classList.add('spike-feed-history-return');
+    root.classList.remove('spike-feed-booting');
+    try { window.__SPIKE_FEED_LOADER_VETO = true; } catch (_) {}
+    const loader = document.getElementById('spike-feed-loader');
+    if (loader) {
+      loader.classList.add('is-hidden');
+      loader.setAttribute('aria-hidden', 'true');
+    }
+  };
+  const log = () => {
+    try { console.debug('[SPIKE FEED NAV]', { type: navigationType, historyTraversal, returnFlag, sameOriginReferrer, returnNavigation, persisted: !!window.__SPIKE_FEED_PERSISTED_RETURN }); } catch (_) {}
+  };
+
+  window.__SPIKE_FEED_NAVIGATION = Object.freeze({
+    type: navigationType,
+    historyTraversal,
+    returnFlag,
+    sameOriginReferrer,
+    returnNavigation,
+    freshBoot: !returnNavigation
+  });
+
+  if (returnNavigation) {
+    root.classList.add('spike-feed-history-return');
+    root.classList.remove('spike-feed-booting');
+    try { window.__SPIKE_FEED_LOADER_VETO = true; } catch (_) {}
+  } else {
+    root.classList.add('spike-feed-booting');
+  }
+
+  window.addEventListener('pageshow', event => {
+    if (event.persisted) {
+      window.__SPIKE_FEED_PERSISTED_RETURN = true;
+      veto();
+    }
+    log();
+  }, { passive: true });
+
+  window.addEventListener('pagehide', event => {
+    // Mark that this live Feed is being left. A subsequent Feed document can
+    // consume the marker; reload is still forced through the navigation-type veto.
+    try { sessionStorage.setItem(RETURN_KEY, JSON.stringify({ target: 'feed', at: Date.now(), persisted: !!event.persisted })); } catch (_) {}
+  }, { passive: true });
+
+  document.addEventListener('visibilitychange', () => {
+    // BFCache/page restoration can transiently change visibility. Never let a
+    // restored Feed acquire a loader while hidden/visible state changes.
+    if (window.__SPIKE_FEED_LOADER_VETO || document.visibilityState === 'hidden') return;
+    if (window.__SPIKE_FEED_NAVIGATION?.returnNavigation) veto();
+  }, { passive: true });
+
+  // Emergency veto: any later code attempting to reveal the loader on a return
+  // navigation is overridden synchronously before the next paint.
+  const protectLoader = () => {
+    if (!window.__SPIKE_FEED_LOADER_VETO) return;
+    const loader = document.getElementById('spike-feed-loader');
+    if (loader) {
+      loader.classList.add('is-hidden');
+      loader.setAttribute('aria-hidden', 'true');
+    }
+    root.classList.remove('spike-feed-booting');
+    root.classList.add('spike-feed-history-return');
+  };
+  window.__SPIKE_FEED_VETO_LOADER = protectLoader;
+  log();
+})();
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/presence.js"></script>
 <script src="js/call-receiver.js"></script>
-
-<!-- ===== SPIKE CORE THEME SYSTEM ===== -->
-<script>
-(function() {
-  const KEY = "spike-feed-style";
-  const allowed = [1,2,3,4,5,6,7,8,9,10];
-  let n = parseInt(localStorage.getItem(KEY) || "1", 10);
-  if (!allowed.includes(n)) n = 1;
-  const isLight = n === 1 || n === 4;
-  const root = document.documentElement;
-  root.dataset.spikeStyle = String(n);
-  root.dataset.theme = isLight ? "light" : "dark";
-  root.style.colorScheme = isLight ? "light" : "dark";
-  window.__SPIKE_STYLE__ = n;
-  window.SPIKE_THEME = {
-    get: () => window.__SPIKE_STYLE__ || n,
-    set: (v) => { const s = allowed.includes(Number(v)) ? Number(v) : 1; applyTheme(s); },
-    next: () => { const next = ((window.__SPIKE_STYLE__ || n) % 10) + 1; applyTheme(next); return next; }
-  };
-  function applyTheme(s) {
-    const isLight = s === 1 || s === 4;
-    const root = document.documentElement;
-    root.dataset.spikeStyle = String(s);
-    root.dataset.theme = isLight ? "light" : "dark";
-    root.style.colorScheme = isLight ? "light" : "dark";
-    try { localStorage.setItem(KEY, String(s)); } catch(_) {}
-    window.__SPIKE_STYLE__ = s;
-  }
-  applyTheme(n);
-})();
-</script>
 
 <!-- ===== SPIKE PERFORMANCE BOOTSTRAP ===== -->
 <script>
@@ -3471,16 +3542,19 @@ async function boot() {
     console.error("[SPIKE FEED]", e);
     const feedLoaderSubtitle = $("spike-feed-loader")?.querySelector(".spike-feed-loader-subtitle");
     if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE could not load this feed.";
+    if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE is still initializing. Please stay on this screen.";
     toast(e.message || "Feed initialization failed.");
-  } finally {
-    window.SPIKE_HIDE_FEED_LOADER?.();
-    // Set up intersection observer for infinite scroll
-    const sentinel = document.getElementById("infiniteScrollSentinel");
-    if (sentinel) {
-      feedSentinelObserver?.disconnect();
-      feedSentinelObserver = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' });
-      feedSentinelObserver.observe(sentinel);
-    }
+    return;
+  }
+
+  // Release only after successful core initialization; the loader has no timeout or fallback hide.
+  await window.SPIKE_HIDE_FEED_LOADER?.();
+  // Set up intersection observer for infinite scroll
+  const sentinel = document.getElementById("infiniteScrollSentinel");
+  if (sentinel) {
+    feedSentinelObserver?.disconnect();
+    feedSentinelObserver = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' });
+    feedSentinelObserver.observe(sentinel);
   }
 }
 
@@ -3505,7 +3579,8 @@ else boot();
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(5, 5, 10, .68);
+  background: #05050a;
+  isolation: isolate;
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   opacity: 1;
@@ -3608,27 +3683,46 @@ else boot();
 </div>
 
 <script>
-/* SPIKE feed boot loader — never owns or replaces feed application logic. */
+/* SPIKE feed boot loader — released only after authenticated core hydration and first paint. */
 (() => {
   const loader = document.getElementById("spike-feed-loader");
   if (!loader) return;
   let hidden = false;
-  const startedAt = performance.now();
-  const MIN_LOADER_MS = 1600;
 
-  const hide = () => {
+  const waitForCorePaint = async () => {
+    try { if (document.fonts?.ready) await document.fonts.ready; } catch (_) {}
+    const images = [...document.querySelectorAll("#posts img:not([loading=\"lazy\"]), #stories img:not([loading=\"lazy\"])")];
+    await Promise.allSettled(images.map(img => {
+      if (img.complete) return img.decode?.().catch?.(() => {}) || Promise.resolve();
+      return new Promise(resolve => {
+        const done = () => { img.removeEventListener("load", done); img.removeEventListener("error", done); resolve(); };
+        img.addEventListener("load", done, { once: true });
+        img.addEventListener("error", done, { once: true });
+      });
+    }));
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+  };
+
+  const hide = async () => {
     if (hidden) return;
+    if (window.__SPIKE_FEED_NAVIGATION?.returnNavigation || window.__SPIKE_FEED_LOADER_VETO) {
+      hidden = true;
+      loader.remove();
+      document.documentElement.classList.remove("spike-feed-booting", "spike-feed-history-return");
+      return;
+    }
+    await waitForCorePaint();
     hidden = true;
-    const elapsed = performance.now() - startedAt;
-    const wait = Math.max(0, MIN_LOADER_MS - elapsed);
+    loader.classList.add("is-hidden");
     window.setTimeout(() => {
-      loader.classList.add("is-hidden");
-      window.setTimeout(() => loader.remove(), 320);
-    }, wait);
+      loader.remove();
+      document.documentElement.classList.remove("spike-feed-booting");
+    }, 320);
   };
 
   window.SPIKE_HIDE_FEED_LOADER = hide;
-  window.setTimeout(hide, 9000);
+  window.__SPIKE_FEED_VETO_LOADER?.();
 })();
 </script>
 

@@ -27,7 +27,7 @@ img{content-visibility:auto;}
 <title>SPIKE — Messages</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 <script>(function(){try{var n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(e){}})();</script>
 <style>
 :root{--bg:#f6f7fb;--surface:rgba(255,255,255,.9);--solid:#fff;--text:#172033;--muted:#667085;--line:rgba(17,24,39,.1);--a:#7c3aed;--a2:#ec4899;--good:#10b981;--danger:#ef476f;--shadow:0 18px 55px rgba(31,41,55,.1)}
@@ -693,9 +693,6 @@ function featureMenu(){
               toast(seconds?'Disappearing messages enabled':'Disappearing messages turned off');
             }catch(e){console.error(e);toast(e?.message||'Could not update setting')}
           });
-        });
-      });
-    });
         });
       });
     });
