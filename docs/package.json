@@ -18,14 +18,15 @@
     "test:telemetry": "node --test js/audit/tests/telemetry.test.mjs",
     "test:ui": "node --test js/audit/tests/ui-contract.test.mjs",
     "test:a11y": "playwright test js/audit/tests/a11y.spec.mjs",
-    "test:rpc": "node js/audit/rpc-gate.mjs"
+    "test:rpc": "node js/audit/rpc-gate.mjs",
+    "test:integrity": "node --test js/audit/tests/project-integrity.test.mjs"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
-    "@playwright/test": "^1.55.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.0.0",
-    "wrangler": "^4.0.0",
-    "globals": "^15.0.0"
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.55.0",
+    "eslint": "9.0.0",
+    "prettier": "3.0.0",
+    "wrangler": "4.0.0",
+    "globals": "15.0.0"
   }
 }
