@@ -350,7 +350,7 @@ function verifiedBadgeHTML(u, extraClass="") {
   return isVerified(u) ? `<span class="verified-badge ${extraClass}" aria-label="Verified account" title="Verified account">✓</span>` : "";
 }
 function avatarOf(u) { return u?.avatar_url || u?.avatar || ""; }
-function profileLink(id) { return `profile.html?uid=${encodeURIComponent(id)}`; }
+function profileLink(id) { const uid=String(id||""); return uid && uid===String(state.user?.id||"") ? `profile.html?uid=${encodeURIComponent(uid)}` : `view_user.html?uid=${encodeURIComponent(uid)}`; }
 function applyTheme(theme) { const n = Number(theme); if (window.SPIKE_THEME && Number.isFinite(n)) window.SPIKE_THEME.set(n); }
 function initTheme() { if (window.SPIKE_THEME) window.SPIKE_THEME.set(window.SPIKE_THEME.get()); }
 
@@ -1688,7 +1688,14 @@ const StoryEngine = (() => {
   const s = { groups: [], creatorIndex: 0, index: 0, token: 0, raf: 0, timer: 0, completed: false, paused: false, busy: false, audio: null, muted: true }
   const $e = id => document.getElementById(id);
   function allStories(){ return (window.state?.stories || []).filter(s => s && !s.deleted && (!s.expiresAt || new Date(s.expiresAt).getTime() > Date.now())).sort((a,b) => (new Date(a.createdAt||a.created_at||0) - new Date(b.createdAt||b.created_at||0))); }
-  function creatorKey(s){ return s?.authorUid || s?.authorId || s?.userId || s?.authorName || s?.id; }
+  function creatorKey(s){ return s?.authorUid || s?.authorId || s?.userId || s?.author_id || s?.user_id || s?.uid || s?.authorName || s?.id; }
+  function isOwnStory(stOrKey){
+    const uid=String(state.user?.id||'').trim().toLowerCase();
+    if(!uid)return false;
+    if(typeof stOrKey==='string')return stOrKey.trim().toLowerCase()===uid;
+    const candidates=[stOrKey?.authorUid,stOrKey?.authorId,stOrKey?.userId,stOrKey?.author_id,stOrKey?.user_id,stOrKey?.uid];
+    return candidates.some(v=>String(v||'').trim().toLowerCase()===uid);
+  }
   function rebuildGroups(){
     const map = new Map();
     for(const st of allStories()){ const k=creatorKey(st); if(!map.has(k)) map.set(k,[]); map.get(k).push(st); }
@@ -1844,7 +1851,7 @@ const StoryEngine = (() => {
     const storyNeedsOverlay = storyIsVideo && st.mediaWatermarked !== true;
     if (wm) wm.classList.toggle('show', storyNeedsOverlay);
     if (wmId) wmId.textContent = storyIsVideo ? `• ${storySpId}` : '';
- viewer?.classList.remove('story-transition-next','story-transition-prev'); void viewer?.offsetWidth; viewer?.classList.add(direction>0?'story-transition-next':'story-transition-prev'); shell?.classList.add('story-loading'); stage?.classList.remove('story-media-ready'); if(avatar){ const av=typeof storyAvatarUrl==='function'?storyAvatarUrl(avatarOf(st)):''; avatar.style.backgroundImage=av?`url("${av.replace(/"/g,'')}")`:''; avatar.textContent=av?'':((nameOf(st)||'S')[0]||'S').toUpperCase(); } if(author)author.textContent=nameOf(st)||'Story'; if(time)time.textContent=typeof SPIKETime?.relativeTime==='function'?SPIKETime.relativeTime(st.createdAt||st.created_at):'now'; if(cap)cap.textContent=st.text||''; if(meta)meta.textContent=`${nameOf(st)} · ${s.index+1}/${group.stories.length}`; buildProgress(group.stories); markStoryViewed(st.id).catch(()=>{}); const k=mediaKind(st); const muteBtn=$e('storyViewerMute'); const hasAudio = k==='video' || !!audioUrl(st); const dlBtn=$e('storyViewerDownload'); const delBtn=$e('storyViewerDelete'); if(dlBtn){ dlBtn.hidden = !['video','image'].includes(k); dlBtn.setAttribute('aria-label', k==='video'?'Download story video':'Download story image'); dlBtn.title = k==='video'?'Download story video':'Download story image'; } if(delBtn) delBtn.hidden = st.authorUid !== state.user.id; if(muteBtn){ muteBtn.hidden=!hasAudio; if(hasAudio)setAudioButton(!s.muted); } if(k==='video')playVideo(st,token); else if(k==='image')playImage(st,token); else playText(st,token); const ns=group.stories[s.index+1]||gs[s.creatorIndex+1]?.stories?.[0]; if(ns?.mediaUrl){ if(mediaKind(ns)==='video'){const p=document.createElement('video');p.preload='metadata';p.src=ns.mediaUrl;} else{const p=new Image();p.decoding='async';p.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(ns.mediaUrl,'image'):ns.mediaUrl;} } }
+ viewer?.classList.remove('story-transition-next','story-transition-prev'); void viewer?.offsetWidth; viewer?.classList.add(direction>0?'story-transition-next':'story-transition-prev'); shell?.classList.add('story-loading'); stage?.classList.remove('story-media-ready'); if(avatar){ const av=typeof storyAvatarUrl==='function'?storyAvatarUrl(avatarOf(st)):''; avatar.style.backgroundImage=av?`url("${av.replace(/"/g,'')}")`:''; avatar.textContent=av?'':((nameOf(st)||'S')[0]||'S').toUpperCase(); } if(author)author.textContent=nameOf(st)||'Story'; if(time)time.textContent=typeof SPIKETime?.relativeTime==='function'?SPIKETime.relativeTime(st.createdAt||st.created_at):'now'; if(cap)cap.textContent=st.text||''; if(meta)meta.textContent=`${nameOf(st)} · ${s.index+1}/${group.stories.length}`; buildProgress(group.stories); markStoryViewed(st.id).catch(()=>{}); const k=mediaKind(st); const muteBtn=$e('storyViewerMute'); const hasAudio = k==='video' || !!audioUrl(st); const dlBtn=$e('storyViewerDownload'); const delBtn=$e('storyViewerDelete'); const canManageStory=isOwnStory(st); if(dlBtn){ dlBtn.hidden = !canManageStory || !['video','image'].includes(k); dlBtn.setAttribute('aria-label', k==='video'?'Download story video':'Download story image'); dlBtn.title = k==='video'?'Download story video':'Download story image'; } if(delBtn) delBtn.hidden = !canManageStory; if(muteBtn){ muteBtn.hidden=!hasAudio; if(hasAudio)setAudioButton(!s.muted); } if(k==='video')playVideo(st,token); else if(k==='image')playImage(st,token); else playText(st,token); const ns=group.stories[s.index+1]||gs[s.creatorIndex+1]?.stories?.[0]; if(ns?.mediaUrl){ if(mediaKind(ns)==='video'){const p=document.createElement('video');p.preload='metadata';p.src=ns.mediaUrl;} else{const p=new Image();p.decoding='async';p.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(ns.mediaUrl,'image'):ns.mediaUrl;} } }
   function next(auto=false){ if(s.busy)return false; const gs=rebuildGroups(), g=gs[s.creatorIndex]; if(!g)return false; if(s.index<g.stories.length-1){s.busy=true;s.index++;render(1);return true;} if(s.creatorIndex<gs.length-1){s.busy=true;s.creatorIndex++;s.index=0;render(1);return true;} close();return false; }
   function previous(){ if(s.busy)return false; const gs=rebuildGroups(); if(s.index>0){s.busy=true;s.index--;render(-1);return true;} if(s.creatorIndex>0){s.busy=true;s.creatorIndex--;s.index=gs[s.creatorIndex].stories.length-1;render(-1);return true;} return false; }
   function open(id){ const loc=locate(id);if(!loc)return; cancelClock();stopMedia();s.token++; s.creatorIndex=loc.gi; s.index=0; s.busy=false; s.muted=true; setAudioButton(false); showAudioHint(false); document.body.classList.add('story-viewer-open'); const viewer=$e('storyViewer'); viewer?.classList.add('open'); viewer?.setAttribute('aria-hidden','false'); render(1); }
@@ -1857,6 +1864,7 @@ const StoryEngine = (() => {
       e.preventDefault(); e.stopPropagation();
       const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index];
       const kind=st ? mediaKind(st) : 'text';
+      if (!isOwnStory(st)) { toast('You can only download your own story.', 'error'); return; }
       if (!st?.mediaUrl || !['video','image'].includes(kind)) { toast('This story has no downloadable media.', 'warning'); return; }
       const spid=spIdOf(st)||spIdOf(state.users.get(st.authorUid))||'story';
       const isVideo=kind==='video';
@@ -1878,7 +1886,7 @@ const StoryEngine = (() => {
       e.preventDefault(); e.stopPropagation();
       const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index];
       if(!st)return;
-      if(st.authorUid!==state.user.id){ toast('You can only delete your own story','error'); return; }
+      if(!isOwnStory(st)){ toast('You can only delete your own story','error'); return; }
       await deleteStory(st.id, { closeViewer:true });
     });
     $e('storyViewerMute')?.addEventListener('click',async e=>{ e.preventDefault(); e.stopPropagation(); if(s.muted) await enableAudio(); else disableAudio(); });
@@ -2230,9 +2238,32 @@ async function downloadStoryMediaInApp(url, filename, kind, button) {
     const sourceUrl=safeHttpUrl(url);
     if (!sourceUrl) throw new Error('Story media URL is invalid.');
 
-    // First try the media directly. If Cloudinary CORS blocks the browser,
-    // use SPIKE's authenticated media-download Edge Function. This keeps the
-    // current SPIKE document active and never navigates the WebView to CDN.
+    // Android app path: hand the authenticated SPIKE proxy URL to the native
+    // DownloadManager bridge. Native Android owns the filesystem destination
+    // (/storage/emulated/0/Download) and the WebView stays on the current page.
+    // Never hand the Cloudinary URL directly to Android.
+    const isAndroidApp=/Android/i.test(navigator.userAgent||'');
+    const androidBridge=window.SPIKEAndroidDownload;
+    if(isAndroidApp && androidBridge && typeof androidBridge.download==='function'){
+      const sessionResult=await db.auth.getSession();
+      const accessToken=sessionResult?.data?.session?.access_token;
+      if(!accessToken) throw new Error('Please sign in again to download this story.');
+      const endpoint=`${SUPABASE_URL}/functions/v1/spike-media-download?url=${encodeURIComponent(sourceUrl)}&filename=${encodeURIComponent(requestedName)}`;
+      const mimeType=kind==='video'?'video/mp4':'image/jpeg';
+      try {
+        const accepted=androidBridge.download(endpoint,requestedName,mimeType,accessToken);
+        if(accepted!==false){
+          window.__SPIKE_LAST_DOWNLOAD={url:endpoint,filename:requestedName,kind,mode:'android-download-manager',createdAt:Date.now()};
+          toast(kind==='video'?'Download started · check your Downloads folder':'Download started · check your Downloads folder','success');
+          return;
+        }
+      } catch(e) {
+        console.warn('[SPIKE DOWNLOAD] Android bridge failed; using WebView fallback',e);
+      }
+    }
+
+    // Browser/WebView fallback: first try the media directly. If Cloudinary CORS
+    // blocks the browser, use SPIKE's authenticated media-download Edge Function.
     const candidates=[];
     const push=u=>{u=String(u||'').trim();if(u&&!candidates.includes(u))candidates.push(u);};
     push(sourceUrl);
@@ -3964,7 +3995,7 @@ else boot();
       </div>
       <div class="story-viewer-actions">
         <button class="story-icon-btn" id="storyViewerMute" type="button" aria-label="Unmute video">⌁</button>
-        <button class="story-icon-btn story-download-btn" id="storyViewerDownload" type="button" aria-label="Download watermarked story video" title="Download watermarked story video">⬇️</button>
+        <button class="story-icon-btn story-download-btn" id="storyViewerDownload" type="button" aria-label="Download story media" title="Download story media" hidden>⬇️</button>
         <button class="story-icon-btn story-delete-btn" id="storyViewerDelete" type="button" aria-label="Delete story" title="Delete story" hidden>🗑️</button>
         <button class="story-icon-btn" id="storyViewerClose" type="button" aria-label="Close story">×</button>
       </div>

@@ -623,7 +623,11 @@ async function loadSocial(){
   const following=Array.isArray(meDoc?.following)?meDoc.following:[];
   state.following=following.includes(state.uid);
   state.profile.savedPosts=Array.isArray(meDoc?.savedPosts)?meDoc.savedPosts:(Array.isArray(meDoc?.saved)?meDoc.saved:[]);
-  state.followers=Number(state.profile.followers_count||state.profile.follower_count||0);
+  const counts=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});
+  if(counts.error) throw counts.error;
+  const c=Array.isArray(counts.data)?counts.data[0]:counts.data;
+  state.followers=Number(c?.followers_count||0);
+  state.profile.following_count=Number(c?.following_count||0);
   state.views=state.uid===state.me.id?Number(meDoc?.profileViews||0):0;
 }
 
@@ -686,7 +690,11 @@ async function toggleFollow(){
   wasFollowing?f.delete(state.uid):f.add(state.uid);
   await putDoc(`users/${state.me.id}`,{...(me||{}),following:[...f]},"users");
   state.following=f.has(state.uid);
-  state.followers=Math.max(0,state.followers+(state.following?1:-1));
+  const counts=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});
+  if(counts.error) throw counts.error;
+  const c=Array.isArray(counts.data)?counts.data[0]:counts.data;
+  state.followers=Number(c?.followers_count||0);
+  state.profile.following_count=Number(c?.following_count||0);
   syncProfileToFeed('follow',state.following);
   renderActions();render();
 }
