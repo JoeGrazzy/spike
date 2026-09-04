@@ -59,7 +59,6 @@ function toast(msg){const t=$('toast');t.textContent=String(msg||'');t.classList
 function closeSheet(){$('sheetBackdrop').classList.remove('open')}
 async function getDoc(path){const r=await db.from('app_documents').select('data,created_at').eq('path',path).maybeSingle();if(r.error)throw r.error;return r.data?.data||null}
 async function accessCall(fn,args){const r=await db.rpc(fn,args);if(r.error){console.warn('[SPIKE VIEW PROFILE]',fn,{message:r.error.message||'',code:r.error.code||'',details:r.error.details||'',hint:r.error.hint||''});return null}return r.data}
-async function loadFollowCounts(){const r=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});if(r.error)throw r.error;const c=Array.isArray(r.data)?r.data[0]:r.data;state.profile.followers_count=Number(c?.followers_count||0);state.profile.following_count=Number(c?.following_count||0)}
 async function boot(){
  if(!target||!UUID.test(target)){throw new Error('No valid SPIKE profile was specified.')}
  const s=await db.auth.getSession();if(s.error||!s.data.session?.user){location.replace('index.html?reauth=1');return false}state.me=s.data.session.user;state.uid=target;
@@ -76,7 +75,6 @@ async function boot(){
   accessCall('can_message_spike_user',{p_sender:state.me.id,p_recipient:state.uid})
  ]);state.canSeePosts=postsOk===true;state.canSeeMedia=mediaOk===true;state.canSeeFriends=friendsOk===true;state.canSeeOnline=onlineOk===true;state.canMessage=messageOk===true;
  await loadRelationship();
- await loadFollowCounts();
  if(state.canSeePosts)await loadPosts();
  render();
  await setupRealtime();
@@ -107,7 +105,7 @@ async function acceptRequest(){try{const r=await db.rpc('accept_friend_request',
 async function declineRequest(){try{const r=await db.rpc('decline_friend_request',{p_request_id:state.requestId});if(r.error)throw r.error;toast('Friend request declined');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not decline request')}}
 async function cancelRequest(){try{const r=await db.rpc('cancel_friend_request',{p_recipient_id:state.uid});if(r.error)throw r.error;toast('Friend request cancelled');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not cancel request')}}
 async function unfriend(){if(!confirm(`Remove ${nameOf(state.profile)} from your friends?`))return;try{const r=await db.rpc('dm_unfriend',{p_other_user_id:state.uid});if(r.error)throw r.error;toast('Friend removed');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not remove friend')}}
-async function toggleFollow(){const b=$('followBtn');if(b)b.disabled=true;try{const me=await getDoc(`users/${state.me.id}`)||{};const f=new Set(Array.isArray(me.following)?me.following:[]);state.following?f.delete(state.uid):f.add(state.uid);const r=await db.from('app_documents').upsert({path:`users/${state.me.id}`,parent_path:'users',collection_name:'users',document_id:state.me.id,owner_id:state.me.id,data:{...me,following:[...f]},updated_at:new Date().toISOString(),created_at:me.created_at||new Date().toISOString()},{onConflict:'path'});if(r.error)throw r.error;state.following=f.has(state.uid);await loadFollowCounts();toast(state.following?'Following':'Unfollowed');renderActions();renderStats()}catch(e){toast(e.message||'Could not update follow')}finally{if($('followBtn'))$('followBtn').disabled=false}}
+async function toggleFollow(){const b=$('followBtn');if(b)b.disabled=true;try{const me=await getDoc(`users/${state.me.id}`)||{};const f=new Set(Array.isArray(me.following)?me.following:[]);state.following?f.delete(state.uid):f.add(state.uid);const r=await db.from('app_documents').upsert({path:`users/${state.me.id}`,parent_path:'users',collection_name:'users',document_id:state.me.id,owner_id:state.me.id,data:{...me,following:[...f]},updated_at:new Date().toISOString(),created_at:me.created_at||new Date().toISOString()},{onConflict:'path'});if(r.error)throw r.error;state.following=f.has(state.uid);toast(state.following?'Following':'Unfollowed');renderActions()}catch(e){toast(e.message||'Could not update follow')}finally{if($('followBtn'))$('followBtn').disabled=false}}
 async function shareProfile(){try{if(navigator.share){await navigator.share({title:`${nameOf(state.profile)} on SPIKE`,text:`Check out ${nameOf(state.profile)} on SPIKE`,url:location.href})}else{await navigator.clipboard.writeText(location.href);toast('Profile link copied')}}catch{}}
 async function blockUser(){if(!confirm(`Block ${nameOf(state.profile)}?`))return;try{const r=await db.rpc('dm_block_user',{p_other_user_id:state.uid});if(r.error)throw r.error;closeSheet();toast('User blocked');setTimeout(()=>location.href='feed.html',500)}catch(e){toast(e.message||'Could not block user')}}
 function setup(){

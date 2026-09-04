@@ -659,10 +659,12 @@ function formatTime(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "
 function notificationHref(n){
 const d=dataOf(n),t=String(n?.type||"").toLowerCase();
 const explicit=d.url||d.href||d.link;
-let href=explicit;
+const actor=d.actor_id||d.from_user_id||d.sender_id||d.from_id||d.caller_id||"";
+const actorRelated=!!actor&&/follow|friend|story|like|reaction|comment|mention|repost|post/.test(t);
+let href=actorRelated?"view_user.html?uid="+encodeURIComponent(String(actor)):explicit;
 if(!href&&d.post_id) href="feed.html?post="+encodeURIComponent(String(d.post_id));
-if(!href&&d.actor_id) href="profile.html?uid="+encodeURIComponent(String(d.actor_id));
-if(!href&&d.user_id&&String(d.user_id)!==String(me?.id||"")) href="profile.html?uid="+encodeURIComponent(String(d.user_id));
+if(!href&&actor) href="view_user.html?uid="+encodeURIComponent(String(actor));
+if(!href&&d.user_id&&String(d.user_id)!==String(me?.id||"")) href="view_user.html?uid="+encodeURIComponent(String(d.user_id));
 if(!href&&/message|chat/.test(t)) href="message.html";
 if(!href&&/room/.test(t)) href="rooms.html";
 if(!href&&/announcement|broadcast|system|security/.test(t)) href=null;
@@ -733,7 +735,7 @@ rows=all;render();return rows;
 }
 async function markRead(id){
 if(!me||!id)return;
-const r=await withTimeout(sb.from("notifications").update({read:true}).eq("id",id).eq("user_id",me.id),10000,"Could not mark notification as read.");
+const r=await withTimeout(sb.rpc("mark_notification_read",{p_notification_id:id}),10000,"Could not mark notification as read.");
 if(r.error)throw r.error;
 const n=rows.find(x=>String(x.id)===String(id));if(n)n.read=true;render();
 }
@@ -741,7 +743,7 @@ async function markAll(){
 if(!me)return;
 const btn=$("#markAll");btn.disabled=true;
 try{
-const r=await withTimeout(sb.from("notifications").update({read:true}).eq("user_id",me.id).eq("read",false),10000,"Could not mark notifications as read.");
+const r=await withTimeout(sb.rpc("mark_all_notifications_read"),10000,"Could not mark notifications as read.");
 if(r.error)throw r.error;
 rows.forEach(n=>n.read=true);render();
 if(window.spikePremiumToast)window.spikePremiumToast("All notifications marked as read.","success",2600);
@@ -768,7 +770,7 @@ async function clearAllNotifications(){
   if(!await askClearAll())return;
   btn.dataset.busy="1";btn.disabled=true;
   try{
-    const r=await withTimeout(sb.from("notifications").delete().eq("user_id",me.id),12000,"Could not clear notifications.");
+    const r=await withTimeout(sb.rpc("clear_notifications"),12000,"Could not clear notifications.");
     if(r.error)throw r.error;
     rows=[];render();
     window.spikePremiumToast?.("All notifications cleared.","success",2600);
@@ -786,7 +788,7 @@ async function deleteReadNotifications(){
  if(!confirm("Delete all read notifications? This cannot be undone."))return;
  btn.disabled=true; btn.setAttribute("aria-busy","true");
  try{
-  const r=await withTimeout(sb.from("notifications").delete().eq("user_id",me.id).eq("read",true),12000,"Could not delete read notifications.");
+  const r=await withTimeout(sb.rpc("delete_read_notifications"),12000,"Could not delete read notifications.");
   if(r.error)throw r.error;
   rows=rows.filter(n=>!n.read); render();
   window.spikePremiumToast?.("Read notifications deleted.","success",2200);
