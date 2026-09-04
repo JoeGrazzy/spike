@@ -587,7 +587,7 @@ function renderStories() {
     card.dataset.story=story.id; card.dataset.storyAuthor=g.authorUid;
     card.setAttribute('aria-label',`${g.authorUid===state.user?.id?'Your Story':nameOf(g.author)}${g.stories.length>1?`, ${g.stories.length} stories`:''}`);
     const wrap=document.createElement('span'); wrap.className='story-preview';
-    const storyKind=mediaKind(story);
+    const storyKind=mediaKindOf(story);
     const media=story?.mediaUrl ? storyCardMediaUrl(story.mediaUrl,storyKind==='video'?'video':'image') : '';
     if(media){
       const img=document.createElement('img'); img.className='story-preview-media'; img.src=media; img.alt=''; img.width=84; img.height=118;
@@ -713,7 +713,7 @@ function scheduleFeedFlush(){if(feedFlushTimer)return;feedFlushTimer=setTimeout(
 function recordSignal(postId,type,delta=1){const map={opens:'open',likes:delta>0?'like':'unlike',saves:delta>0?'save':'unsave',comments:'comment',reactions:'reaction',shares:'share',reposts:'repost'};if(map[type])queueFeedEvent(postId,map[type],{metadata:{delta}})}
 let trendingFeatureCache={},serverSignalProfile={};
 async function loadServerSignalProfile(){if(!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_signal_profile',{p_days:90});if(error)throw error;const out={...serverSignalProfile};(data||[]).forEach(r=>{out[String(r.post_id)]={...r,opens:Number(r.opens||0),viewed:Number(r.viewed||0),impressions:Number(r.impressions||0),likes:Number(r.likes||0),saves:Number(r.saves||0),comments:Number(r.comments||0),reactions:Number(r.reactions||0),shares:Number(r.shares||0),reposts:Number(r.reposts||0),not_interested:Number(r.not_interested||0),show_fewer:Number(r.show_fewer||0),mute_creator:Number(r.mute_creator||0),hides:Number(r.hides||0),lastViewedAt:r.last_viewed_at?new Date(r.last_viewed_at).getTime():0}});serverSignalProfile=out}catch(e){console.warn('[FEED SIGNAL PROFILE]',e)}}
-async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).filter(Boolean).slice(0,200);if(!ids.length||!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_trending_features',{p_post_ids:ids});if(error)throw error;const next={...trendingFeatureCache};(data||[]).forEach(r=>{next[String(r.post_id)]={currentVelocity:Number(r.current_velocity||0),previousVelocity:Number(r.previous_velocity||0),currentEngagement:Number(r.current_engagement||0),previousEngagement:Number(r.previous_engagement||0)}});trendingFeatureCache=next}catch(e){console.warn('[FEED TRENDING FEATURES]',e)}}
+async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).filter(Boolean).slice(0,200);if(!ids.length||!navigator.onLine||!state.user?.id)return;try{const {data,error}=await db.rpc('get_feed_trending_features',{p_post_ids:ids,p_window_hours:6});if(error)throw error;const next={...trendingFeatureCache};(data||[]).forEach(r=>{next[String(r.post_id)]={currentVelocity:Number(r.current_velocity||0),previousVelocity:Number(r.previous_velocity||0),currentEngagement:Number(r.current_engagement||0),previousEngagement:Number(r.previous_engagement||0)}});trendingFeatureCache=next}catch(e){console.warn('[FEED TRENDING FEATURES]',e)}}
 function rankingContext(posts){return{userId:state.user?.id||'',following:state.following||new Set(),signals:Object.fromEntries(Object.entries(readSignalStore()).map(([id,v])=>[id,{...(serverSignalProfile[id]||{}),...v}])),creatorAffinity:{},topicAffinity:{},explorationIds:new Set(),recentEngagement:trendingFeatureCache,now:Date.now(),posts}}
 function rankPosts(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function postRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
@@ -1653,13 +1653,15 @@ async function publishStory() {
   closeOverlay('storyOverlay');
   setStoryPublishing(true, "Publishing your story…");
   try {
-    let mediaUrl = null, mediaType = null, audioUrl = null, mediaOriginalUrl = null, mediaNormalized = false;
+    let mediaUrl = null, mediaType = null, audioUrl = null, mediaOriginalUrl = null, mediaNormalized = false, mediaWatermarked = false, mediaSpid = null;
     if (mediaFile) {
       mediaType = mediaFile.type.startsWith('video/') ? 'video' : 'image';
       const uploadedMedia = await uploadToCloudinary(mediaFile, 'spike/stories', { watermark: mediaType === 'video' });
       mediaUrl = uploadedMedia?.playbackUrl || uploadedMedia?.url || uploadedMedia;
        mediaOriginalUrl = uploadedMedia?.originalUrl || null;
        mediaNormalized = !!uploadedMedia?.normalized;
+       mediaWatermarked = !!uploadedMedia?.watermarked;
+       mediaSpid = uploadedMedia?.spid || null;
     }
     if (audioFile) { audioUrl = await uploadToCloudinary(audioFile, 'spike/story-audio'); }
     const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
@@ -1730,17 +1732,25 @@ const StoryEngine = (() => {
   }
   function disableAudio(){ s.muted=true; setAudioButton(false); showAudioHint(false); const v=$e('storyViewerVideo'); if(v && !v.hidden) v.muted=true; if(s.audio) s.audio.muted=true; }
   function playImage(st,token){ const img=$e('storyViewerImage'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); if(!img||!st.mediaUrl)return playText(st,token); img.hidden=false; img.decoding='async'; img.onload=()=>{ if(token!==s.token)return; shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready'); startBackgroundAudio(st,token); timed(token,seconds(st)); }; img.onerror=()=>finish(token); img.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(st.mediaUrl,'image'):st.mediaUrl; }
+  function storyVideoCandidates(st){
+    const out=[];
+    const push=u=>{u=String(u||'').trim();if(u&&!out.includes(u))out.push(u);};
+    push(st.mediaUrl);
+    const original=st.mediaOriginalUrl || st.mediaUrl;
+    if(st.mediaSpid && typeof cloudinaryWatermarkedVideoUrl==='function') push(cloudinaryWatermarkedVideoUrl(original,st.mediaSpid));
+    else if(typeof cloudinaryFeedVideoCandidates==='function') cloudinaryFeedVideoCandidates(original).forEach(push);
+    return out;
+  }
   function playVideo(st,token){
     const v=$e('storyViewerVideo'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage');
     if(!v||!st.mediaUrl)return finish(token);
     v.hidden=false; v.muted=!!s.muted; v.controls=false; v.playsInline=true; v.preload='auto';
     setAudioButton(false); showAudioHint(false);
-    let begun=false;
+    const candidates=storyVideoCandidates(st); let sourceIndex=0; let begun=false;
+    const applySource=()=>{ const src=candidates[sourceIndex]||st.mediaUrl; v.src=src; v.load(); };
     const begin=()=>{
       if(token!==s.token||begun)return; begun=true;
       shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready');
-      // Autoplay starts muted for mobile/browser policy. Audio is enabled only
-      // after the user taps the explicit sound control.
       v.muted=!!s.muted; v.currentTime=0;
       v.play().catch(()=>{ if(!s.muted){ s.muted=true; v.muted=true; setAudioButton(false); showAudioHint(true); } });
       timed(token,seconds(st),()=>{ if(Number.isFinite(v.duration)&&v.duration>0)return v.currentTime/v.duration; return Math.min(1,(performance.now()-s.videoStarted)/(seconds(st)*1000)); });
@@ -1749,7 +1759,9 @@ const StoryEngine = (() => {
     v.onloadedmetadata=begin; v.onloadeddata=begin;
     v.oncanplay=()=>{ if(token===s.token&&!v.paused) v.play().catch(()=>{}); };
     v.ontimeupdate=()=>{ if(token!==s.token||s.completed)return; if(Number.isFinite(v.duration)&&v.duration>0){ const r=v.currentTime/v.duration;setProgress(r);if(r>=.999)finish(token); } };
-    v.onended=()=>finish(token); v.onerror=()=>finish(token); v.src=(st.mediaNormalized||st.mediaWatermarked)?st.mediaUrl:(typeof storyFullMediaUrl==='function'?storyFullMediaUrl(st.mediaUrl,'video'):st.mediaUrl); v.load();
+    v.onended=()=>finish(token);
+    v.onerror=()=>{ if(token!==s.token)return; if(sourceIndex<candidates.length-1){sourceIndex++;begun=false;applySource();return;} finish(token); };
+    applySource();
   }
   function playText(st,token){ const text=$e('storyViewerText'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); if(!text)return finish(token); text.hidden=false; text.textContent=st.text||'Story'; shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready'); startBackgroundAudio(st,token); timed(token,seconds(st)); }
   function render(direction=1){ cancelClock();stopMedia(); const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index]; if(!st)return close(); const token=++s.token; s.completed=false;s.paused=false;s.busy=false; setAudioButton(!s.muted); showAudioHint(false); const viewer=$e('storyViewer'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); const avatar=$e('storyViewerAvatar'), author=$e('storyViewerAuthor'), time=$e('storyViewerTime'); const cap=$e('storyViewerCaption'), meta=$e('storyViewerMeta');
@@ -2525,14 +2537,42 @@ function renderDiscover(q=''){
     <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
 }
 
-const friendRequestBusy = new Set();
+// ─── FRIEND RECOMMENDATIONS ──────────────────────────
+const dismissedFriends = new Set(JSON.parse(sessionStorage.getItem('spikeDismissedFriendRecs')||'[]'));
+const saveDismissedFriends = () => sessionStorage.setItem('spikeDismissedFriendRecs', JSON.stringify([...dismissedFriends].slice(-100)));
+const recState = { rows: [], busy: new Set() };
+const rid = u => u?.id || u?.user_id || null;
+const rname = u => u?.display_name || u?.full_name || u?.name || u?.username || 'SPIKE user';
+const rav = u => u?.avatar_url || u?.avatar || '';
+
+async function loadFriendRecommendations(){
+  const box = document.getElementById('friendRecommendationsList');
+  if(!box||!state.user?.id) return;
+  box.innerHTML='<div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div>';
+  try{
+    // Direct profiles/friendships SELECTs are intentionally avoided here: their RLS only
+    // exposes the signed-in user's own rows. The SECURITY DEFINER recommendation RPC
+    // applies the same discovery, friendship, pending-request and block rules server-side.
+    const {data,error}=await db.rpc('get_friend_recommendations',{p_limit:50});
+    if(error) throw error;
+    const me=state.user.id;
+    const candidates=(data||[]).filter(u=>{const id=rid(u);return id&&id!==me&&!dismissedFriends.has(id)&&!state.blocked?.has(id);});
+    recState.rows=candidates.slice(0,20);
+    renderFriends();
+  }catch(e){ console.error('[FRIEND RECOMMENDATIONS]',e); box.innerHTML='<div class="fr-empty">Recommendations are temporarily unavailable.</div>'; }
+}
+function renderFriends(){
+  const box=document.getElementById('friendRecommendationsList'); if(!box)return;
+  if(!recState.rows.length){ box.innerHTML='<div class="fr-empty">No new people to recommend right now.</div>'; return; }
+  box.innerHTML=recState.rows.map(u=>{const id=rid(u), name=rname(u), av=rav(u), mc=Number(u.mutual_count||0); return `<article class="fr-card" data-fr-id="${esc(id)}"><div class="fr-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(name.slice(0,1).toUpperCase())}</div><div class="fr-copy"><div class="fr-name">${esc(name)}</div><div class="fr-username">${u.username?'@'+esc(u.username):'People you may know'}</div><div class="fr-mutual">${mc?`👥 ${mc} mutual friend${mc===1?'':'s'}`:'✨ Suggested for you'}</div>${u.bio?`<div class="fr-bio">${esc(u.bio)}</div>`:''}</div><div class="fr-actions"><button type="button" class="fr-add" data-fr-add="${esc(id)}">Add Friend</button><button type="button" class="fr-view" data-fr-profile="${esc(id)}">View</button><button type="button" class="fr-dismiss" data-fr-dismiss="${esc(id)}" aria-label="Dismiss recommendation">×</button></div></article>`}).join('');
+}
 async function sendFriendRequest(id,btn){
-  if(!id||friendRequestBusy.has(id))return; friendRequestBusy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
+  if(!id||recState.busy.has(id))return; recState.busy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
   try{
     const r=await db.rpc('send_friend_request',{p_recipient_id:id});
     if(r.error) throw r.error;
-    toast('Friend request sent','success');
-  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ friendRequestBusy.delete(id); }
+    dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); toast('Friend request sent','success');
+  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ recState.busy.delete(id); }
 }
 
 // ─── PROFILE PREVIEW ──────────────────────────────────
@@ -2888,7 +2928,7 @@ function bindEvents() {
   $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
   $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
   $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
+  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; sessionStorage.removeItem('spikeDismissedFriendRecs'); location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
 
   // Composer
   $('imageBtn').onclick = () => $('imageInput').click();
@@ -3060,6 +3100,15 @@ function bindEvents() {
   $("premiumDialogConfirm")?.addEventListener('click', () => finishPremiumConfirm(true));
   $("premiumDialog")?.addEventListener('click', e => { if (e.target.id === 'premiumDialog') finishPremiumConfirm(false); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $("premiumDialog")?.classList.contains('open')) finishPremiumConfirm(false); });
+
+  // Friend recommendations
+  document.getElementById('friendRecommendationsRefresh')?.addEventListener('click', loadFriendRecommendations);
+  document.getElementById('friendRecommendationsList')?.addEventListener('click', e => {
+    const add=e.target.closest('[data-fr-add]'), dis=e.target.closest('[data-fr-dismiss]'), view=e.target.closest('[data-fr-profile]');
+    if(add){ sendFriendRequest(add.dataset.frAdd,add); return; }
+    if(dis){ const id=dis.dataset.frDismiss; dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); return; }
+    if(view){ e.preventDefault(); openSpikeProfilePreview(view.dataset.frProfile); }
+  });
 
   // Profile sheet close
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeSpikeProfile(); });
@@ -3343,25 +3392,29 @@ async function initRealtime() {
     return true;
   };
 
-  state.realtime?.unsubscribe?.().catch?.(()=>{});
-  state.realtime = db.channel("feed:global", { config: { private: true } })
+  if (state.realtime?.unsubscribe) {
+    try { await state.realtime.unsubscribe(); } catch (_) {}
+    state.realtime = null;
+  }
+  // This feed uses Postgres Changes, not Realtime Broadcast. A `private: true`
+  // channel requires policies on realtime.messages; this project has none, so a
+  // private feed channel is rejected by Realtime with `Unauthorized` before any
+  // Postgres-change subscription can become active. Keep this channel public and
+  // let the underlying Postgres Changes + table RLS enforce row visibility.
+  state.realtime = db.channel("feed:global")
     .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: `collection_name=in.(posts,stories)` }, p => {
       const r=p?.new||p?.record||{};
       const collection=r.collection_name;
       if(collection==='stories') loadStories().catch(()=>{});
       else if(collection==='posts') { if(!applyPostEvent(r.data ? {id:r.document_id,...r.data}:r)) loadPosts().catch(()=>{}); }
     })
-    .on("broadcast", { event: "INSERT" }, p => {
-      const r = p.payload?.record || p.payload?.new;
-      if (r?.path?.startsWith("stories/")) loadStories().catch(() => {});
-      else if (r?.path?.startsWith("posts/")) { if (!applyPostEvent(r)) loadPosts().catch(() => {}); }
-    })
-    .on("broadcast", { event: "UPDATE" }, p => {
-      const r = p.payload?.record || p.payload?.new;
-      if (r?.path?.startsWith("stories/")) loadStories().catch(() => {});
-      else if (r?.path?.startsWith("posts/")) { if (!applyPostEvent(r)) loadPosts().catch(() => {}); }
-    })
-    .subscribe(s => { if (s === "SUBSCRIBED") $("onlineStatus").textContent = "Live · real-time"; });
+    .subscribe((status, err) => {
+      if (status === "SUBSCRIBED") $("onlineStatus").textContent = "Live · real-time";
+      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        console.warn("[SPIKE FEED REALTIME]", status, err || null);
+        $("onlineStatus").textContent = "Live updates unavailable";
+      }
+    });
 }
 
 // ─── BOOT ──────────────────────────────────────────────
@@ -3390,6 +3443,7 @@ async function boot() {
     initModernApp();
     initAISearch();
     initRealtime().catch(e => console.warn('realtime init', e));
+    loadFriendRecommendations().catch(e => console.warn('friend recommendations', e));
 
     const deepStory = new URLSearchParams(location.search).get('story');
     if (deepStory && state.stories.some(s => s.id === deepStory)) {
@@ -3678,6 +3732,13 @@ else boot();
 <section class="posts" id="posts" aria-live="polite" aria-busy="true"></section>
 <div id="infiniteScrollSentinel" style="height:2px;margin:10px 0"></div>
 
+<section class="card feed-recommendations" id="friendRecommendations" aria-labelledby="friendRecommendationsTitle">
+  <div class="fr-head">
+    <div><div class="fr-kicker">DISCOVER PEOPLE</div><h2 id="friendRecommendationsTitle">People You May Know</h2><p>Friends of friends and people you may know.</p></div>
+    <button class="fr-refresh" id="friendRecommendationsRefresh" type="button" aria-label="Refresh recommendations">↻</button>
+  </div>
+  <div id="friendRecommendationsList" class="fr-list"><div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div></div>
+</section>
 </main>
 
 <footer>© 2026 SPIKE. All rights reserved.</footer>
