@@ -48,34 +48,6 @@ test('Feed has no private duplicate theme registry', async () => {
 });
 
 
-
-test('Feed loader is a zero-paint fresh boot gate with a return-navigation veto', async () => {
-  const feed = await readFile('feed.html', 'utf8');
-  const back = await readFile('js/premium-back.js', 'utf8');
-  assert.match(feed, /id="spike-feed-loader-early"/);
-  assert.match(feed, /performance\.getEntriesByType\(['"]navigation['"]\)/);
-  assert.match(feed, /performance\.navigation\?\.type === 2/);
-  assert.match(feed, /navigationType === ['"]back_forward['"]/);
-  assert.match(feed, /sessionStorage\.getItem\(RETURN_KEY\)/);
-  assert.match(feed, /sessionStorage\.removeItem\(RETURN_KEY\)/);
-  assert.match(feed, /sameOriginReferrer/);
-  assert.match(feed, /returnNavigation/);
-  assert.match(feed, /#spike-feed-loader \{ display: none !important; \}/);
-  assert.match(feed, /html\.spike-feed-booting #spike-feed-loader \{ display: grid !important; \}/);
-  assert.match(feed, /html\.spike-feed-history-return #spike-feed-loader/);
-  assert.match(feed, /event\.persisted/);
-  assert.match(feed, /pagehide/);
-  assert.match(feed, /visibilitychange/);
-  assert.match(feed, /__SPIKE_FEED_VETO_LOADER/);
-  assert.match(feed, /returnNavigation \|\| window\.__SPIKE_FEED_LOADER_VETO/);
-  assert.doesNotMatch(feed, /if \(event\.persisted\)[\s\S]*location\.reload\(\)/);
-  assert.doesNotMatch(feed, /setTimeout\(hide,\s*9000/);
-  assert.match(feed, /await window\.SPIKE_HIDE_FEED_LOADER\?\.\(\)/);
-  assert.match(back, /spike\.feed\.return\.v2/);
-  assert.match(back, /sessionStorage\.setItem\(FEED_RETURN_KEY/);
-  assert.match(back, /markFeedAnchorNavigation/);
-});
-
 test('all inline HTML JavaScript blocks are syntactically valid', async () => {
   const { readdir: readDir } = await import('node:fs/promises');
   const files = (await readDir('.')).filter(x => x.endsWith('.html'));
@@ -93,5 +65,5 @@ test('all inline HTML JavaScript blocks are syntactically valid', async () => {
       assert.equal(result.code, 0, `${page} inline script ${i + 1} failed syntax check: ${result.stderr}`);
     }
   }
-  assert.equal(checked, 106);
+  assert.equal(checked, 105);
 });

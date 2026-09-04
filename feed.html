@@ -7,108 +7,6 @@
 <meta name="theme-color" content="#070b10">
 <meta name="description" content="SPIKE community feed">
 <title>SPIKE — Feed</title>
-<style id="spike-feed-loader-guard">
-/* Navigation-safe boot gate. The loader is opt-in: it cannot paint unless the
-   early navigation gate explicitly enables it. History returns are a hard veto. */
-#spike-feed-loader { display: none !important; }
-html.spike-feed-booting body > :not(#spike-feed-loader) { visibility: hidden !important; }
-html.spike-feed-booting { overflow: hidden !important; }
-html.spike-feed-booting #spike-feed-loader { display: grid !important; }
-html.spike-feed-history-return #spike-feed-loader { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
-</style>
-<script id="spike-feed-loader-early">
-(() => {
-  'use strict';
-  const root = document.documentElement;
-  const RETURN_KEY = 'spike.feed.return.v2';
-  const navEntry = (() => { try { return performance.getEntriesByType('navigation')[0] || null; } catch (_) { return null; } })();
-  const navigationType = navEntry?.type || (performance.navigation?.type === 2 ? 'back_forward' : 'navigate');
-  const sameOriginReferrer = (() => {
-    try {
-      if (!document.referrer) return false;
-      const ref = new URL(document.referrer, location.href);
-      return ref.origin === location.origin && ref.pathname !== location.pathname;
-    } catch (_) { return false; }
-  })();
-  const returnFlag = (() => {
-    try {
-      const raw = sessionStorage.getItem(RETURN_KEY);
-      if (!raw) return false;
-      sessionStorage.removeItem(RETURN_KEY);
-      const obj = JSON.parse(raw);
-      return obj?.target === 'feed' && (Date.now() - Number(obj.at || 0) < 30 * 60 * 1000);
-    } catch (_) { return false; }
-  })();
-  const historyTraversal = navigationType === 'back_forward';
-  const returnNavigation = historyTraversal || returnFlag || (navigationType === 'navigate' && sameOriginReferrer);
-  const veto = () => {
-    root.classList.add('spike-feed-history-return');
-    root.classList.remove('spike-feed-booting');
-    try { window.__SPIKE_FEED_LOADER_VETO = true; } catch (_) {}
-    const loader = document.getElementById('spike-feed-loader');
-    if (loader) {
-      loader.classList.add('is-hidden');
-      loader.setAttribute('aria-hidden', 'true');
-    }
-  };
-  const log = () => {
-    try { console.debug('[SPIKE FEED NAV]', { type: navigationType, historyTraversal, returnFlag, sameOriginReferrer, returnNavigation, persisted: !!window.__SPIKE_FEED_PERSISTED_RETURN }); } catch (_) {}
-  };
-
-  window.__SPIKE_FEED_NAVIGATION = Object.freeze({
-    type: navigationType,
-    historyTraversal,
-    returnFlag,
-    sameOriginReferrer,
-    returnNavigation,
-    freshBoot: !returnNavigation
-  });
-
-  if (returnNavigation) {
-    root.classList.add('spike-feed-history-return');
-    root.classList.remove('spike-feed-booting');
-    try { window.__SPIKE_FEED_LOADER_VETO = true; } catch (_) {}
-  } else {
-    root.classList.add('spike-feed-booting');
-  }
-
-  window.addEventListener('pageshow', event => {
-    if (event.persisted) {
-      window.__SPIKE_FEED_PERSISTED_RETURN = true;
-      veto();
-    }
-    log();
-  }, { passive: true });
-
-  window.addEventListener('pagehide', event => {
-    // Mark that this live Feed is being left. A subsequent Feed document can
-    // consume the marker; reload is still forced through the navigation-type veto.
-    try { sessionStorage.setItem(RETURN_KEY, JSON.stringify({ target: 'feed', at: Date.now(), persisted: !!event.persisted })); } catch (_) {}
-  }, { passive: true });
-
-  document.addEventListener('visibilitychange', () => {
-    // BFCache/page restoration can transiently change visibility. Never let a
-    // restored Feed acquire a loader while hidden/visible state changes.
-    if (window.__SPIKE_FEED_LOADER_VETO || document.visibilityState === 'hidden') return;
-    if (window.__SPIKE_FEED_NAVIGATION?.returnNavigation) veto();
-  }, { passive: true });
-
-  // Emergency veto: any later code attempting to reveal the loader on a return
-  // navigation is overridden synchronously before the next paint.
-  const protectLoader = () => {
-    if (!window.__SPIKE_FEED_LOADER_VETO) return;
-    const loader = document.getElementById('spike-feed-loader');
-    if (loader) {
-      loader.classList.add('is-hidden');
-      loader.setAttribute('aria-hidden', 'true');
-    }
-    root.classList.remove('spike-feed-booting');
-    root.classList.add('spike-feed-history-return');
-  };
-  window.__SPIKE_FEED_VETO_LOADER = protectLoader;
-  log();
-})();
-</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/presence.js"></script>
 <script src="js/call-receiver.js"></script>
@@ -2627,42 +2525,14 @@ function renderDiscover(q=''){
     <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
 }
 
-// ─── FRIEND RECOMMENDATIONS ──────────────────────────
-const dismissedFriends = new Set(JSON.parse(sessionStorage.getItem('spikeDismissedFriendRecs')||'[]'));
-const saveDismissedFriends = () => sessionStorage.setItem('spikeDismissedFriendRecs', JSON.stringify([...dismissedFriends].slice(-100)));
-const recState = { rows: [], busy: new Set() };
-const rid = u => u?.id || u?.user_id || null;
-const rname = u => u?.display_name || u?.full_name || u?.name || u?.username || 'SPIKE user';
-const rav = u => u?.avatar_url || u?.avatar || '';
-
-async function loadFriendRecommendations(){
-  const box = document.getElementById('friendRecommendationsList');
-  if(!box||!state.user?.id) return;
-  box.innerHTML='<div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div>';
-  try{
-    // Direct profiles/friendships SELECTs are intentionally avoided here: their RLS only
-    // exposes the signed-in user's own rows. The SECURITY DEFINER recommendation RPC
-    // applies the same discovery, friendship, pending-request and block rules server-side.
-    const {data,error}=await db.rpc('get_friend_recommendations',{p_limit:50});
-    if(error) throw error;
-    const me=state.user.id;
-    const candidates=(data||[]).filter(u=>{const id=rid(u);return id&&id!==me&&!dismissedFriends.has(id)&&!state.blocked?.has(id);});
-    recState.rows=candidates.slice(0,20);
-    renderFriends();
-  }catch(e){ console.error('[FRIEND RECOMMENDATIONS]',e); box.innerHTML='<div class="fr-empty">Recommendations are temporarily unavailable.</div>'; }
-}
-function renderFriends(){
-  const box=document.getElementById('friendRecommendationsList'); if(!box)return;
-  if(!recState.rows.length){ box.innerHTML='<div class="fr-empty">No new people to recommend right now.</div>'; return; }
-  box.innerHTML=recState.rows.map(u=>{const id=rid(u), name=rname(u), av=rav(u), mc=Number(u.mutual_count||0); return `<article class="fr-card" data-fr-id="${esc(id)}"><div class="fr-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(name.slice(0,1).toUpperCase())}</div><div class="fr-copy"><div class="fr-name">${esc(name)}</div><div class="fr-username">${u.username?'@'+esc(u.username):'People you may know'}</div><div class="fr-mutual">${mc?`👥 ${mc} mutual friend${mc===1?'':'s'}`:'✨ Suggested for you'}</div>${u.bio?`<div class="fr-bio">${esc(u.bio)}</div>`:''}</div><div class="fr-actions"><button type="button" class="fr-add" data-fr-add="${esc(id)}">Add Friend</button><button type="button" class="fr-view" data-fr-profile="${esc(id)}">View</button><button type="button" class="fr-dismiss" data-fr-dismiss="${esc(id)}" aria-label="Dismiss recommendation">×</button></div></article>`}).join('');
-}
+const friendRequestBusy = new Set();
 async function sendFriendRequest(id,btn){
-  if(!id||recState.busy.has(id))return; recState.busy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
+  if(!id||friendRequestBusy.has(id))return; friendRequestBusy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
   try{
     const r=await db.rpc('send_friend_request',{p_recipient_id:id});
     if(r.error) throw r.error;
-    dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); toast('Friend request sent','success');
-  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ recState.busy.delete(id); }
+    toast('Friend request sent','success');
+  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ friendRequestBusy.delete(id); }
 }
 
 // ─── PROFILE PREVIEW ──────────────────────────────────
@@ -3018,7 +2888,7 @@ function bindEvents() {
   $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
   $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
   $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; sessionStorage.removeItem('spikeDismissedFriendRecs'); location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
+  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
 
   // Composer
   $('imageBtn').onclick = () => $('imageInput').click();
@@ -3190,15 +3060,6 @@ function bindEvents() {
   $("premiumDialogConfirm")?.addEventListener('click', () => finishPremiumConfirm(true));
   $("premiumDialog")?.addEventListener('click', e => { if (e.target.id === 'premiumDialog') finishPremiumConfirm(false); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $("premiumDialog")?.classList.contains('open')) finishPremiumConfirm(false); });
-
-  // Friend recommendations
-  document.getElementById('friendRecommendationsRefresh')?.addEventListener('click', loadFriendRecommendations);
-  document.getElementById('friendRecommendationsList')?.addEventListener('click', e => {
-    const add=e.target.closest('[data-fr-add]'), dis=e.target.closest('[data-fr-dismiss]'), view=e.target.closest('[data-fr-profile]');
-    if(add){ sendFriendRequest(add.dataset.frAdd,add); return; }
-    if(dis){ const id=dis.dataset.frDismiss; dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); return; }
-    if(view){ e.preventDefault(); openSpikeProfilePreview(view.dataset.frProfile); }
-  });
 
   // Profile sheet close
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeSpikeProfile(); });
@@ -3529,7 +3390,6 @@ async function boot() {
     initModernApp();
     initAISearch();
     initRealtime().catch(e => console.warn('realtime init', e));
-    loadFriendRecommendations().catch(e => console.warn('friend recommendations', e));
 
     const deepStory = new URLSearchParams(location.search).get('story');
     if (deepStory && state.stories.some(s => s.id === deepStory)) {
@@ -3542,19 +3402,16 @@ async function boot() {
     console.error("[SPIKE FEED]", e);
     const feedLoaderSubtitle = $("spike-feed-loader")?.querySelector(".spike-feed-loader-subtitle");
     if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE could not load this feed.";
-    if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE is still initializing. Please stay on this screen.";
     toast(e.message || "Feed initialization failed.");
-    return;
-  }
-
-  // Release only after successful core initialization; the loader has no timeout or fallback hide.
-  await window.SPIKE_HIDE_FEED_LOADER?.();
-  // Set up intersection observer for infinite scroll
-  const sentinel = document.getElementById("infiniteScrollSentinel");
-  if (sentinel) {
-    feedSentinelObserver?.disconnect();
-    feedSentinelObserver = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' });
-    feedSentinelObserver.observe(sentinel);
+  } finally {
+    window.SPIKE_HIDE_FEED_LOADER?.();
+    // Set up intersection observer for infinite scroll
+    const sentinel = document.getElementById("infiniteScrollSentinel");
+    if (sentinel) {
+      feedSentinelObserver?.disconnect();
+      feedSentinelObserver = new IntersectionObserver(entries => { if (entries[0]?.isIntersecting) loadMorePosts(); }, { rootMargin: '600px 0px' });
+      feedSentinelObserver.observe(sentinel);
+    }
   }
 }
 
@@ -3579,8 +3436,7 @@ else boot();
   display: grid;
   place-items: center;
   padding: 20px;
-  background: #05050a;
-  isolation: isolate;
+  background: rgba(5, 5, 10, .68);
   backdrop-filter: blur(14px) saturate(120%);
   -webkit-backdrop-filter: blur(14px) saturate(120%);
   opacity: 1;
@@ -3683,46 +3539,27 @@ else boot();
 </div>
 
 <script>
-/* SPIKE feed boot loader — released only after authenticated core hydration and first paint. */
+/* SPIKE feed boot loader — never owns or replaces feed application logic. */
 (() => {
   const loader = document.getElementById("spike-feed-loader");
   if (!loader) return;
   let hidden = false;
+  const startedAt = performance.now();
+  const MIN_LOADER_MS = 1600;
 
-  const waitForCorePaint = async () => {
-    try { if (document.fonts?.ready) await document.fonts.ready; } catch (_) {}
-    const images = [...document.querySelectorAll("#posts img:not([loading=\"lazy\"]), #stories img:not([loading=\"lazy\"])")];
-    await Promise.allSettled(images.map(img => {
-      if (img.complete) return img.decode?.().catch?.(() => {}) || Promise.resolve();
-      return new Promise(resolve => {
-        const done = () => { img.removeEventListener("load", done); img.removeEventListener("error", done); resolve(); };
-        img.addEventListener("load", done, { once: true });
-        img.addEventListener("error", done, { once: true });
-      });
-    }));
-    await new Promise(requestAnimationFrame);
-    await new Promise(requestAnimationFrame);
-  };
-
-  const hide = async () => {
+  const hide = () => {
     if (hidden) return;
-    if (window.__SPIKE_FEED_NAVIGATION?.returnNavigation || window.__SPIKE_FEED_LOADER_VETO) {
-      hidden = true;
-      loader.remove();
-      document.documentElement.classList.remove("spike-feed-booting", "spike-feed-history-return");
-      return;
-    }
-    await waitForCorePaint();
     hidden = true;
-    loader.classList.add("is-hidden");
+    const elapsed = performance.now() - startedAt;
+    const wait = Math.max(0, MIN_LOADER_MS - elapsed);
     window.setTimeout(() => {
-      loader.remove();
-      document.documentElement.classList.remove("spike-feed-booting");
-    }, 320);
+      loader.classList.add("is-hidden");
+      window.setTimeout(() => loader.remove(), 320);
+    }, wait);
   };
 
   window.SPIKE_HIDE_FEED_LOADER = hide;
-  window.__SPIKE_FEED_VETO_LOADER?.();
+  window.setTimeout(hide, 9000);
 })();
 </script>
 
@@ -3841,13 +3678,6 @@ else boot();
 <section class="posts" id="posts" aria-live="polite" aria-busy="true"></section>
 <div id="infiniteScrollSentinel" style="height:2px;margin:10px 0"></div>
 
-<section class="card feed-recommendations" id="friendRecommendations" aria-labelledby="friendRecommendationsTitle">
-  <div class="fr-head">
-    <div><div class="fr-kicker">DISCOVER PEOPLE</div><h2 id="friendRecommendationsTitle">People You May Know</h2><p>Friends of friends and people you may know.</p></div>
-    <button class="fr-refresh" id="friendRecommendationsRefresh" type="button" aria-label="Refresh recommendations">↻</button>
-  </div>
-  <div id="friendRecommendationsList" class="fr-list"><div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div></div>
-</section>
 </main>
 
 <footer>© 2026 SPIKE. All rights reserved.</footer>
