@@ -2537,44 +2537,6 @@ function renderDiscover(q=''){
     <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
 }
 
-// ─── FRIEND RECOMMENDATIONS ──────────────────────────
-const dismissedFriends = new Set(JSON.parse(sessionStorage.getItem('spikeDismissedFriendRecs')||'[]'));
-const saveDismissedFriends = () => sessionStorage.setItem('spikeDismissedFriendRecs', JSON.stringify([...dismissedFriends].slice(-100)));
-const recState = { rows: [], busy: new Set() };
-const rid = u => u?.id || u?.user_id || null;
-const rname = u => u?.display_name || u?.full_name || u?.name || u?.username || 'SPIKE user';
-const rav = u => u?.avatar_url || u?.avatar || '';
-
-async function loadFriendRecommendations(){
-  const box = document.getElementById('friendRecommendationsList');
-  if(!box||!state.user?.id) return;
-  box.innerHTML='<div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div>';
-  try{
-    // Direct profiles/friendships SELECTs are intentionally avoided here: their RLS only
-    // exposes the signed-in user's own rows. The SECURITY DEFINER recommendation RPC
-    // applies the same discovery, friendship, pending-request and block rules server-side.
-    const {data,error}=await db.rpc('get_friend_recommendations',{p_limit:50});
-    if(error) throw error;
-    const me=state.user.id;
-    const candidates=(data||[]).filter(u=>{const id=rid(u);return id&&id!==me&&!dismissedFriends.has(id)&&!state.blocked?.has(id);});
-    recState.rows=candidates.slice(0,20);
-    renderFriends();
-  }catch(e){ console.error('[FRIEND RECOMMENDATIONS]',e); box.innerHTML='<div class="fr-empty">Recommendations are temporarily unavailable.</div>'; }
-}
-function renderFriends(){
-  const box=document.getElementById('friendRecommendationsList'); if(!box)return;
-  if(!recState.rows.length){ box.innerHTML='<div class="fr-empty">No new people to recommend right now.</div>'; return; }
-  box.innerHTML=recState.rows.map(u=>{const id=rid(u), name=rname(u), av=rav(u), mc=Number(u.mutual_count||0); return `<article class="fr-card" data-fr-id="${esc(id)}"><div class="fr-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(name.slice(0,1).toUpperCase())}</div><div class="fr-copy"><div class="fr-name">${esc(name)}</div><div class="fr-username">${u.username?'@'+esc(u.username):'People you may know'}</div><div class="fr-mutual">${mc?`👥 ${mc} mutual friend${mc===1?'':'s'}`:'✨ Suggested for you'}</div>${u.bio?`<div class="fr-bio">${esc(u.bio)}</div>`:''}</div><div class="fr-actions"><button type="button" class="fr-add" data-fr-add="${esc(id)}">Add Friend</button><button type="button" class="fr-view" data-fr-profile="${esc(id)}">View</button><button type="button" class="fr-dismiss" data-fr-dismiss="${esc(id)}" aria-label="Dismiss recommendation">×</button></div></article>`}).join('');
-}
-async function sendFriendRequest(id,btn){
-  if(!id||recState.busy.has(id))return; recState.busy.add(id); if(btn){btn.disabled=true; btn.textContent='Sending…';}
-  try{
-    const r=await db.rpc('send_friend_request',{p_recipient_id:id});
-    if(r.error) throw r.error;
-    dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); toast('Friend request sent','success');
-  }catch(e){ console.error('[FRIEND REQUEST]',e); toast(e?.message||'Could not send friend request','error'); if(btn){btn.disabled=false; btn.textContent='Add Friend';} } finally{ recState.busy.delete(id); }
-}
-
 // ─── PROFILE PREVIEW ──────────────────────────────────
 async function openSpikeProfilePreview(id, seed){
   const body = $('spikeProfileBody');
@@ -2613,12 +2575,6 @@ async function openSpikeProfilePreview(id, seed){
   // itself is sourced exclusively from the public-profile RPC above.
   posts = state.posts.filter(p=>p.authorUid===id && !p.deleted)
     .sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0)).slice(0,3);
-  if(!mutual && relationship === 'stranger') {
-    const rec = await safeQuery(()=>db.rpc('get_friend_recommendations',{p_limit:50}));
-    if(requestId !== window.__SPIKE_PROFILE_REQUEST__) return;
-    if(!rec.error) { const row=(rec.data||[]).find(x=>x.user_id===id); if(row) mutual=Number(row.mutual_count||0); }
-  }
-
   const name = profile.display_name || profile.name || profile.username || 'User';
   const username = profile.username ? '@'+profile.username : '';
   const bio = profile.bio || '';
@@ -2629,7 +2585,7 @@ async function openSpikeProfilePreview(id, seed){
     friend:{badge:'✓ Friends',primary:'💬 Message',secondary:'📞 Voice Call',tertiary:'🎥 Video Call'},
     request_sent:{badge:'⏳ Request sent',primary:'Request Sent',secondary:'Cancel Request',tertiary:'Message'},
     request_received:{badge:'💌 Wants to connect',primary:'Accept',secondary:'Decline',tertiary:'Message'},
-    stranger:{badge:mutual?'People you may know':'Suggested connection',primary:'Add Friend',secondary:'Follow',tertiary:'Message'}
+    stranger:{badge:'Suggested connection',primary:'Add Friend',secondary:'Follow',tertiary:'Message'}
   }[relationship];
   const mutualLabel = mutual ? `👥 ${mutual} mutual friend${mutual===1?'':'s'}` : '✨ Suggested for you';
   body.innerHTML=`
@@ -2928,7 +2884,7 @@ function bindEvents() {
   $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
   $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
   $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; sessionStorage.removeItem('spikeDismissedFriendRecs'); location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
+  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
 
   // Composer
   $('imageBtn').onclick = () => $('imageInput').click();
@@ -3100,15 +3056,6 @@ function bindEvents() {
   $("premiumDialogConfirm")?.addEventListener('click', () => finishPremiumConfirm(true));
   $("premiumDialog")?.addEventListener('click', e => { if (e.target.id === 'premiumDialog') finishPremiumConfirm(false); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && $("premiumDialog")?.classList.contains('open')) finishPremiumConfirm(false); });
-
-  // Friend recommendations
-  document.getElementById('friendRecommendationsRefresh')?.addEventListener('click', loadFriendRecommendations);
-  document.getElementById('friendRecommendationsList')?.addEventListener('click', e => {
-    const add=e.target.closest('[data-fr-add]'), dis=e.target.closest('[data-fr-dismiss]'), view=e.target.closest('[data-fr-profile]');
-    if(add){ sendFriendRequest(add.dataset.frAdd,add); return; }
-    if(dis){ const id=dis.dataset.frDismiss; dismissedFriends.add(id); saveDismissedFriends(); recState.rows=recState.rows.filter(x=>rid(x)!==id); renderFriends(); return; }
-    if(view){ e.preventDefault(); openSpikeProfilePreview(view.dataset.frProfile); }
-  });
 
   // Profile sheet close
   document.addEventListener('keydown', e => { if(e.key==='Escape') closeSpikeProfile(); });
@@ -3443,7 +3390,6 @@ async function boot() {
     initModernApp();
     initAISearch();
     initRealtime().catch(e => console.warn('realtime init', e));
-    loadFriendRecommendations().catch(e => console.warn('friend recommendations', e));
 
     const deepStory = new URLSearchParams(location.search).get('story');
     if (deepStory && state.stories.some(s => s.id === deepStory)) {
@@ -3732,13 +3678,6 @@ else boot();
 <section class="posts" id="posts" aria-live="polite" aria-busy="true"></section>
 <div id="infiniteScrollSentinel" style="height:2px;margin:10px 0"></div>
 
-<section class="card feed-recommendations" id="friendRecommendations" aria-labelledby="friendRecommendationsTitle">
-  <div class="fr-head">
-    <div><div class="fr-kicker">DISCOVER PEOPLE</div><h2 id="friendRecommendationsTitle">People You May Know</h2><p>Friends of friends and people you may know.</p></div>
-    <button class="fr-refresh" id="friendRecommendationsRefresh" type="button" aria-label="Refresh recommendations">↻</button>
-  </div>
-  <div id="friendRecommendationsList" class="fr-list"><div class="fr-loading"><span class="fr-spinner"></span> Finding people you may know…</div></div>
-</section>
 </main>
 
 <footer>© 2026 SPIKE. All rights reserved.</footer>
