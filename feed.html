@@ -350,7 +350,7 @@ function verifiedBadgeHTML(u, extraClass="") {
   return isVerified(u) ? `<span class="verified-badge ${extraClass}" aria-label="Verified account" title="Verified account">✓</span>` : "";
 }
 function avatarOf(u) { return u?.avatar_url || u?.avatar || ""; }
-function profileLink(id) { const uid=String(id||""); return uid && uid===String(state.user?.id||"") ? `profile.html?uid=${encodeURIComponent(uid)}` : `view_user.html?uid=${encodeURIComponent(uid)}`; }
+function profileLink(id) { return `profile.html?uid=${encodeURIComponent(id)}`; }
 function applyTheme(theme) { const n = Number(theme); if (window.SPIKE_THEME && Number.isFinite(n)) window.SPIKE_THEME.set(n); }
 function initTheme() { if (window.SPIKE_THEME) window.SPIKE_THEME.set(window.SPIKE_THEME.get()); }
 

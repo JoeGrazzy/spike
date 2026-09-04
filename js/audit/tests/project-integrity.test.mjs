@@ -65,5 +65,5 @@ test('all inline HTML JavaScript blocks are syntactically valid', async () => {
       assert.equal(result.code, 0, `${page} inline script ${i + 1} failed syntax check: ${result.stderr}`);
     }
   }
-  assert.ok(checked > 0, 'no inline HTML JavaScript blocks were checked');
+  assert.equal(checked, 105);
 });
