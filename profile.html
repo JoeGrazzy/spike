@@ -22,6 +22,7 @@ document.documentElement.classList.add("spike-cv-ready");
 <title>SPIKE — Profile</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
 :root{--bg:#070b10;--surface:#0d131b;--surface2:#111923;--surface3:#17212c;--text:#f1f5f9;--muted:#8d9aaa;--line:rgba(255,255,255,.09);--primary:#8b5cf6;--primary2:#a78bfa;--danger:#fb7185;--shadow:0 14px 45px rgba(0,0,0,.28)}
 html[data-theme=light]{--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3:#eef2f7;--text:#111827;--muted:#64748b;--line:rgba(15,23,42,.1);--shadow:0 14px 45px rgba(15,23,42,.08)}
@@ -940,17 +941,182 @@ async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader()
 await loadProfile();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
 
 // SPIKE Connect QR — scanner without flashlight.
-let qrStream=null,qrScanTimer=null,qrTargetUid=null;
-function spikeQrPayload(){return `spike://connect?uid=${encodeURIComponent(state.uid)}`;}
-function renderMyQr(){const box=$("qrCodeBox");box.innerHTML="";if(!window.qrcode){box.textContent="QR generator unavailable. Please reload.";return}const qr=qrcode(0,"M");qr.addData(spikeQrPayload());qr.make();box.innerHTML=qr.createImgTag(6,0);}
+let qrStream=null,qrScanTimer=null,qrTargetUid=null,qrScanBusy=false,qrCanvas=null,qrCtx=null;
+
+function spikeQrPayload(){
+  return `${location.origin}${location.pathname}?uid=${encodeURIComponent(state.uid)}`;
+}
+function renderMyQr(){
+  const box=$("qrCodeBox"); box.innerHTML="";
+  if(!window.qrcode){box.textContent="QR generator unavailable. Please reload.";return}
+  const qr=qrcode(0,"M"); qr.addData(spikeQrPayload()); qr.make();
+  box.innerHTML=qr.createImgTag(6,0);
+}
 function openQr(){renderMyQr();open("qrOverlay")}
-function stopScanner(){if(qrScanTimer)clearInterval(qrScanTimer);qrScanTimer=null;if(qrStream){qrStream.getTracks().forEach(t=>t.stop());qrStream=null}close("scannerOverlay")}
-async function startScanner(){close("menuOverlay");open("scannerOverlay");const v=$("scannerVideo");try{qrStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});v.srcObject=qrStream;await v.play();if("BarcodeDetector" in window){const detector=new BarcodeDetector({formats:["qr_code"]});qrScanTimer=setInterval(async()=>{if(!v.videoWidth)return;try{const codes=await detector.detect(v);if(codes?.[0]?.rawValue)handleQrValue(codes[0].rawValue)}catch{}},350)}else toast("Your browser does not support live QR scanning. Use Gallery.","warning")}catch(e){toast("Camera permission is required to scan QR codes.","error");stopScanner()}}
-function handleQrValue(raw){let uid=null;try{const u=new URL(raw);if(u.protocol==="spike:"&&u.searchParams.get("uid"))uid=u.searchParams.get("uid");else if(u.searchParams.get("uid"))uid=u.searchParams.get("uid");else if(u.pathname.includes("profile.html"))uid=u.searchParams.get("uid")}catch{}if(!uid&&/^[-0-9a-f]{36}$/i.test(String(raw)))uid=raw;if(!uid||uid===state.uid){toast(uid===state.uid?"That's your own QR code.":"Invalid SPIKE QR code.","warning");return}stopScanner();prepareConnect(uid)}
-async function prepareConnect(uid){qrTargetUid=uid;try{const {data:profiles,error}=await db.rpc("get_public_profiles",{p_user_ids:[uid]});if(error)throw error;const data=Array.isArray(profiles)?profiles[0]:null;if(!data)throw new Error("SPIKE member not found");$("connectName").textContent=nameOf(data);$("connectSpId").textContent=data.sp_id?`SPIKE ID • ${data.sp_id}`:"SPIKE member";const a=avatarOf(data);$("connectAvatarWrap").innerHTML=a?`<img class="connect-avatar" src="${esc(a)}" alt="" loading="lazy" decoding="async">`:`<div class="connect-avatar connect-avatar-fallback">${esc(nameOf(data)[0]||"U")}</div>`;open("connectPreview")}catch(e){toast(e.message||"Could not load this SPIKE profile","error")}}
-async function connectInstant(){if(!qrTargetUid)return;const b=$("connectConfirm");b.disabled=true;b.textContent="Connecting…";try{const {error}=await db.rpc("connect_via_spike_qr",{p_user_id:qrTargetUid});if(error)throw error;close("connectPreview");toast("You're now friends on SPIKE!","success");state.following=true;renderActions()}catch(e){toast(e.message||"Could not connect","error")}finally{b.disabled=false;b.textContent="⚡ Connect instantly"}}
-$("showQr")?.addEventListener("click",()=>{close("menuOverlay");openQr()});$("scanQr")?.addEventListener("click",startScanner);$("qrClose")?.addEventListener("click",()=>close("qrOverlay"));$("qrCopy")?.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}catch{toast(location.href,"info")}});$("qrShare")?.addEventListener("click",async()=>{try{await navigator.share?.({title:"Connect with me on SPIKE",text:`Connect with ${nameOf(state.profile)} on SPIKE`,url:location.href})}catch{}});
-$("qrOverlay")?.addEventListener("click",e=>{if(e.target.id==="qrOverlay")close("qrOverlay")});$("scannerClose")?.addEventListener("click",stopScanner);$("galleryQr")?.addEventListener("click",()=>$("qrFile").click());$("qrFile")?.addEventListener("change",async e=>{const f=e.target.files?.[0];if(!f)return;try{if(!window.BarcodeDetector)throw new Error("QR image scanning is not supported in this browser.");const d=new BarcodeDetector({formats:["qr_code"]}),codes=await d.detect(await createImageBitmap(f));if(codes?.[0]?.rawValue)handleQrValue(codes[0].rawValue);else throw new Error("No SPIKE QR code found in that image.")}catch(err){toast(err.message,"error")}finally{e.target.value=""}});$("connectCancel")?.addEventListener("click",()=>{qrTargetUid=null;close("connectPreview")});$("connectConfirm")?.addEventListener("click",connectInstant);
+
+function stopScanner(){
+  if(qrScanTimer)clearInterval(qrScanTimer);
+  qrScanTimer=null; qrScanBusy=false;
+  if(qrStream){qrStream.getTracks().forEach(t=>t.stop());qrStream=null}
+  const v=$("scannerVideo"); if(v) v.srcObject=null;
+  close("scannerOverlay");
+}
+
+function decodeVideoFrame(){
+  if(qrScanBusy || !qrStream || !window.jsQR) return;
+  const v=$("scannerVideo");
+  if(!v || !v.videoWidth || !v.videoHeight) return;
+  qrScanBusy=true;
+  try{
+    if(!qrCanvas) qrCanvas=document.createElement("canvas");
+    // Downscale large camera frames for faster, more reliable mobile decoding.
+    const max=1000, scale=Math.min(1,max/v.videoWidth);
+    qrCanvas.width=Math.max(1,Math.round(v.videoWidth*scale));
+    qrCanvas.height=Math.max(1,Math.round(v.videoHeight*scale));
+    if(!qrCtx) qrCtx=qrCanvas.getContext("2d",{willReadFrequently:true});
+    qrCtx.drawImage(v,0,0,qrCanvas.width,qrCanvas.height);
+    const image=qrCtx.getImageData(0,0,qrCanvas.width,qrCanvas.height);
+    const code=window.jsQR(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
+    if(code?.data) handleQrValue(code.data);
+  }catch(e){
+    console.warn("[SPIKE QR] frame decode failed",e);
+  }finally{
+    qrScanBusy=false;
+  }
+}
+
+async function startScanner(){
+  close("menuOverlay"); open("scannerOverlay");
+  const v=$("scannerVideo");
+  try{
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error("Camera access is not supported in this browser.");
+    qrStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},
+      audio:false
+    });
+    v.srcObject=qrStream;
+    await v.play();
+
+    // jsQR is the reliable fallback and also avoids browser-specific BarcodeDetector behavior.
+    if(window.jsQR){
+      qrScanTimer=setInterval(decodeVideoFrame,250);
+    }else if("BarcodeDetector" in window){
+      const detector=new BarcodeDetector({formats:["qr_code"]});
+      qrScanTimer=setInterval(async()=>{
+        if(qrScanBusy || !v.videoWidth)return;
+        qrScanBusy=true;
+        try{
+          const codes=await detector.detect(v);
+          if(codes?.[0]?.rawValue)handleQrValue(codes[0].rawValue);
+        }catch(e){console.warn("[SPIKE QR] native detector failed",e)}
+        finally{qrScanBusy=false}
+      },350);
+    }else{
+      throw new Error("QR scanner could not be loaded. Please reload the page.");
+    }
+  }catch(e){
+    toast(e.message||"Camera permission is required to scan QR codes.","error");
+    stopScanner();
+  }
+}
+
+function handleQrValue(raw){
+  let uid=null;
+  const value=String(raw||"").trim();
+  try{
+    const u=new URL(value);
+    if(u.protocol==="spike:"&&u.searchParams.get("uid")) uid=u.searchParams.get("uid");
+    else if(u.searchParams.get("uid")) uid=u.searchParams.get("uid");
+    else if(u.pathname.includes("profile.html")) uid=u.searchParams.get("uid");
+  }catch{}
+  if(!uid && /^[-0-9a-f]{36}$/i.test(value)) uid=value;
+  if(!uid||uid===state.uid){
+    toast(uid===state.uid?"That's your own QR code.":"Invalid SPIKE QR code.","warning");
+    return;
+  }
+  stopScanner(); prepareConnect(uid);
+}
+
+async function prepareConnect(uid){
+  qrTargetUid=uid;
+  try{
+    const {data:profiles,error}=await db.rpc("get_public_profiles",{p_user_ids:[uid]});
+    if(error)throw error;
+    const data=Array.isArray(profiles)?profiles[0]:null;
+    if(!data)throw new Error("SPIKE member not found");
+    $("connectName").textContent=nameOf(data);
+    $("connectSpId").textContent=data.sp_id?`SPIKE ID • ${data.sp_id}`:"SPIKE member";
+    const a=avatarOf(data);
+    $("connectAvatarWrap").innerHTML=a
+      ?`<img class="connect-avatar" src="${esc(a)}" alt="" loading="lazy" decoding="async">`
+      :`<div class="connect-avatar connect-avatar-fallback">${esc(nameOf(data)[0]||"U")}</div>`;
+    open("connectPreview");
+  }catch(e){
+    toast(e.message||"Could not load this SPIKE profile","error");
+  }
+}
+
+async function connectInstant(){
+  if(!qrTargetUid)return;
+  const b=$("connectConfirm"); b.disabled=true; b.textContent="Connecting…";
+  try{
+    const {error}=await db.rpc("connect_via_spike_qr",{p_user_id:qrTargetUid});
+    if(error)throw error;
+    close("connectPreview");
+    toast("You're now friends on SPIKE!","success");
+    state.following=true; renderActions();
+  }catch(e){
+    toast(e.message||"Could not connect","error");
+  }finally{
+    b.disabled=false; b.textContent="⚡ Connect instantly";
+  }
+}
+
+$("showQr")?.addEventListener("click",()=>{close("menuOverlay");openQr()});
+$("scanQr")?.addEventListener("click",startScanner);
+$("qrClose")?.addEventListener("click",()=>close("qrOverlay"));
+$("qrCopy")?.addEventListener("click",async()=>{
+  try{
+    await navigator.clipboard.writeText(spikeQrPayload());
+    toast("SPIKE QR link copied","success");
+  }catch{toast(spikeQrPayload(),"info")}
+});
+$("qrShare")?.addEventListener("click",async()=>{
+  try{
+    await navigator.share?.({
+      title:"Connect with me on SPIKE",
+      text:`Connect with ${nameOf(state.profile)} on SPIKE`,
+      url:spikeQrPayload()
+    });
+  }catch{}
+});
+$("qrOverlay")?.addEventListener("click",e=>{if(e.target.id==="qrOverlay")close("qrOverlay")});
+$("scannerClose")?.addEventListener("click",stopScanner);
+$("galleryQr")?.addEventListener("click",()=>$("qrFile").click());
+
+$("qrFile")?.addEventListener("change",async e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  try{
+    if(!window.jsQR) throw new Error("QR scanner could not be loaded. Please reload the page.");
+    const bitmap=await createImageBitmap(f);
+    const max=1800,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const c=document.createElement("canvas");
+    c.width=Math.max(1,Math.round(bitmap.width*scale));
+    c.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=c.getContext("2d",{willReadFrequently:true});
+    ctx.drawImage(bitmap,0,0,c.width,c.height);
+    bitmap.close?.();
+    const image=ctx.getImageData(0,0,c.width,c.height);
+    const code=window.jsQR(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
+    if(code?.data) handleQrValue(code.data);
+    else throw new Error("No QR code found in that image.");
+  }catch(err){
+    toast(err.message||"Could not scan that QR image.","error");
+  }finally{e.target.value=""}
+});
+
+$("connectCancel")?.addEventListener("click",()=>{qrTargetUid=null;close("connectPreview")});
+$("connectConfirm")?.addEventListener("click",connectInstant);
 window.addEventListener("pagehide",stopScanner);
 boot();
 </script>
