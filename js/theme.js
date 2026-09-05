@@ -3,16 +3,16 @@
   'use strict';
   const KEY='spike-feed-style';
   const THEMES=[
-    {id:1,name:'Aurora Glass',mode:'dark'},
-    {id:2,name:'Velvet Nocturne',mode:'dark'},
-    {id:3,name:'Solar Ember',mode:'dark'},
-    {id:4,name:'Emerald Atelier',mode:'dark'},
-    {id:5,name:'Ocean Cobalt',mode:'dark'},
-    {id:6,name:'Desert Rose',mode:'light'},
-    {id:7,name:'Royal Amethyst',mode:'dark'},
-    {id:8,name:'Arctic Platinum',mode:'light'},
-    {id:9,name:'Neon Citrus',mode:'dark'},
-    {id:10,name:'Midnight Cherry',mode:'dark'}
+    {id:1,name:'Aurora Glass',mode:'dark',signature:'Electric Cyan'},
+    {id:2,name:'Velvet Nocturne',mode:'dark',signature:'Neon Purple'},
+    {id:3,name:'Solar Ember',mode:'dark',signature:'Blazing Orange'},
+    {id:4,name:'Emerald Atelier',mode:'dark',signature:'Mint Emerald'},
+    {id:5,name:'Ocean Cobalt',mode:'dark',signature:'Royal Blue'},
+    {id:6,name:'Desert Rose',mode:'light',signature:'Warm Rose'},
+    {id:7,name:'Royal Amethyst',mode:'dark',signature:'Lavender'},
+    {id:8,name:'Arctic Platinum',mode:'light',signature:'Glacier Cyan'},
+    {id:9,name:'Neon Citrus',mode:'dark',signature:'Metallic Gold'},
+    {id:10,name:'Midnight Cherry',mode:'dark',signature:'Crimson OLED'}
   ];
   const allowed=new Set(THEMES.map(t=>t.id));
   const clamp=n=>allowed.has(Number(n))?Number(n):1;

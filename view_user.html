@@ -19,9 +19,35 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3
 .spid{margin-top:12px;padding:1px;border-radius:15px;background:linear-gradient(100deg,#ec4899,#22c55e,#f97316,#ec4899);background-size:300% 100%;animation:grad 5s linear infinite}.spid-inner{background:var(--surface);border-radius:14px;padding:10px 11px;display:flex;align-items:center;gap:10px}.spid-icon{font-size:18px}.spid-copy{min-width:0;flex:1}.eyebrow{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:950}.spid-value{font-size:13px;font-weight:1000;letter-spacing:.06em}.spid-note{font-size:8px;color:var(--muted);margin-top:2px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.stat{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.stat b{font-size:16px;display:block}.stat span{font-size:8px;color:var(--muted);font-weight:850;text-transform:uppercase}
 .tabs{position:sticky;top:58px;z-index:50;margin-top:8px;padding:5px;border:1px solid var(--line);border-radius:15px;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(18px);display:flex;gap:5px}.tab{flex:1;padding:10px;border-radius:10px;color:var(--muted);font-size:10px;font-weight:900}.tab.active{background:var(--surface3);color:var(--text)}.panel{margin-top:8px}.post{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:8px;overflow:hidden}.post-head{display:flex;align-items:center;gap:9px}.mini-avatar{width:34px;height:34px;flex:none;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#a78bfa,#6d28d9);font-size:11px;font-weight:900}.mini-avatar img{width:100%;height:100%;object-fit:cover}.author{min-width:0;flex:1}.author-name{font-size:11px;font-weight:900}.post-time{font-size:9px;color:var(--muted);margin-top:2px}.post-body{font-size:13px;line-height:1.6;margin:9px 0;white-space:pre-wrap;overflow-wrap:anywhere}.post-media{margin:8px -12px -12px;background:#05070a}.post-media img,.post-media video{width:100%;max-height:520px;display:block;object-fit:cover}.empty{padding:44px 20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}.empty-icon{font-size:28px;margin-bottom:8px}.empty b{display:block;color:var(--text);font-size:12px}.empty span{display:block;margin-top:5px;font-size:10px;line-height:1.5}
 .media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.media-tile{position:relative;aspect-ratio:1/1;border-radius:10px;overflow:hidden;background:var(--surface);border:1px solid var(--line)}.media-tile img,.media-tile video{width:100%;height:100%;object-fit:cover}.media-badge{position:absolute;right:6px;bottom:6px;padding:4px 6px;border-radius:7px;background:rgba(0,0,0,.62);color:#fff;font-size:9px}
-.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(5px);z-index:200;display:none;align-items:flex-end}.sheet-backdrop.open{display:flex}.sheet{width:min(100%,720px);margin:auto;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:10px 12px 18px;box-shadow:0 -25px 80px rgba(0,0,0,.35)}.grab{width:42px;height:4px;border-radius:99px;background:var(--surface3);margin:2px auto 13px}.sheet h3{font-size:13px;margin-bottom:9px}.sheet-btn{width:100%;padding:13px;border-radius:12px;text-align:left;background:var(--surface2);margin-top:6px;font-size:11px;font-weight:850;border:1px solid var(--line)}.sheet-btn.danger{color:#fda4af}.sheet-note{font-size:9px;color:var(--muted);line-height:1.45;margin-top:8px}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);opacity:0;pointer-events:none;z-index:500;padding:10px 14px;border-radius:12px;background:#10151d;color:#fff;border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:800;transition:.22s ease;max-width:calc(100vw - 30px);text-align:center}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.loader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:var(--bg);color:var(--muted)}.loader-box{text-align:center}.spinner{width:34px;height:34px;border:3px solid var(--surface3);border-top-color:var(--primary);border-radius:50%;animation:spin .75s linear infinite;margin:auto}.loader b{display:block;margin-top:12px;color:var(--text);font-size:12px}.loader span{display:block;margin-top:4px;font-size:9px}@keyframes spin{to{transform:rotate(360deg)}}@keyframes grad{0%{background-position:0 60%}100%{background-position:300% 60%}}
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(5px);z-index:200;display:none;align-items:flex-end}.sheet-backdrop.open{display:flex}.sheet{width:min(100%,720px);margin:auto;background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:22px 22px 0 0;padding:10px 12px 18px;box-shadow:0 -25px 80px rgba(0,0,0,.35)}.grab{width:42px;height:4px;border-radius:99px;background:var(--surface3);margin:2px auto 13px}.sheet h3{font-size:13px;margin-bottom:9px}.sheet-btn{width:100%;padding:13px;border-radius:12px;text-align:left;background:var(--surface2);margin-top:6px;font-size:11px;font-weight:850;border:1px solid var(--line)}.sheet-btn.danger{color:#fda4af}.sheet-note{font-size:9px;color:var(--muted);line-height:1.45;margin-top:8px}
+
+.confirm-backdrop{position:fixed;inset:0;z-index:900;display:none;align-items:flex-end;justify-content:center;padding:0;background:rgba(0,0,0,.42);backdrop-filter:blur(18px) saturate(125%);-webkit-backdrop-filter:blur(18px) saturate(125%);animation:iosFadeIn .2s ease}
+.confirm-backdrop.open{display:flex}
+.confirm-card{width:min(100%,560px);position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-bottom:0;border-radius:30px 30px 0 0;background:color-mix(in srgb,var(--surface) 96%,#fff 4%);box-shadow:0 -20px 70px rgba(0,0,0,.42),0 -1px 0 rgba(255,255,255,.06) inset;animation:iosSheetIn .32s cubic-bezier(.22,.8,.25,1)}
+.confirm-card:before{content:"";position:absolute;left:50%;top:7px;transform:translateX(-50%);width:42px;height:5px;border-radius:99px;background:rgba(255,255,255,.22)}
+.confirm-card:after{content:"";position:absolute;left:0;right:0;top:0;height:105px;background:radial-gradient(circle at 50% 0,rgba(255,255,255,.075),transparent 65%);pointer-events:none}
+.confirm-head{position:relative;display:flex;gap:14px;align-items:center;padding:29px 22px 13px}
+.confirm-icon{width:50px;height:50px;flex:none;display:grid;place-items:center;border-radius:17px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(145deg,rgba(255,255,255,.11),rgba(255,255,255,.035));font-size:20px;box-shadow:0 8px 25px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.1)}
+.confirm-card.danger .confirm-icon{border-color:rgba(255,107,129,.18);background:linear-gradient(145deg,rgba(255,107,129,.14),rgba(255,255,255,.025))}
+.confirm-copy{min-width:0;padding-right:30px}
+.confirm-title{font-size:17px;font-weight:800;letter-spacing:-.025em}
+.confirm-subtitle{margin-top:4px;color:var(--muted);font-size:10px;line-height:1.45}
+.confirm-body{position:relative;padding:5px 22px 18px;color:var(--muted);font-size:11px;line-height:1.6}
+.confirm-name{color:var(--text);font-weight:800}
+.confirm-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:9px;padding:13px 18px calc(18px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface) 98%,#fff 2%)}
+.confirm-action{min-height:48px;border-radius:14px;border:1px solid var(--line);background:var(--surface2);font-size:12px;font-weight:800;letter-spacing:-.01em;transition:transform .16s ease,opacity .16s ease,background .16s ease}
+.confirm-action:active{transform:scale(.98)}
+.confirm-action.primary{border:0;color:#fff;background:linear-gradient(180deg,#9b7af4,#7650dc);box-shadow:0 7px 18px rgba(118,80,220,.22)}
+.confirm-action.danger{border:0;color:#fff;background:linear-gradient(180deg,#ff6f87,#e64562);box-shadow:0 7px 18px rgba(230,69,98,.18)}
+.confirm-action:disabled{opacity:.55;cursor:not-allowed}
+.confirm-close{position:absolute;right:17px;top:25px;z-index:4;width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,.09);background:rgba(127,127,127,.1);font-size:17px;line-height:1;color:var(--muted)}
+@keyframes iosSheetIn{from{opacity:0;transform:translateY(100%)}to{opacity:1;transform:translateY(0)}}
+@keyframes iosFadeIn{from{opacity:0}to{opacity:1}}
+@media(min-width:601px){.confirm-backdrop{align-items:center;padding:20px}.confirm-card{border-bottom:1px solid rgba(255,255,255,.12);border-radius:28px}.confirm-actions{padding-bottom:18px}}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(14px);opacity:0;pointer-events:none;z-index:500;padding:10px 14px;border-radius:12px;background:#10151d;color:#fff;border:1px solid rgba(255,255,255,.12);font-size:10px;font-weight:800;transition:.22s ease;max-width:calc(100vw - 30px);text-align:center}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.loader{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:var(--bg);color:var(--muted)}.loader-box{text-align:center}.spinner{width:34px;height:34px;border:3px solid var(--surface3);border-top-color:var(--primary);border-radius:50%;animation:spin .75s linear infinite;margin:auto}.loader b{display:block;margin-top:12px;color:var(--text);font-size:12px}.loader span{display:block;margin-top:4px;font-size:9px}@keyframes spin{to{transform:rotate(360deg)}}@keyframes grad{0%{background-position:0 60%}100%{background-position:300% 60%}}
 @media(max-width:600px){.header{height:54px}.main{padding:5px}.cover{height:175px}.profile{padding:0 12px 13px}.profile-top{display:block}.actions{justify-content:flex-start;margin-top:11px}.name{font-size:20px}.tabs{top:54px}.stats{grid-template-columns:repeat(3,1fr)}}
 </style>
+<link rel="stylesheet" href="css/theme-v14.css">
 </head>
 <body>
 <div class="loader" id="loader"><div class="loader-box"><div class="spinner"></div><b>Loading SPIKE profile</b><span id="loaderText">Checking profile access…</span></div></div>
@@ -41,6 +67,25 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3
 <section class="panel hidden" id="aboutPanel"><div class="post"><div class="eyebrow">ABOUT THIS MEMBER</div><div id="about" style="display:grid;gap:9px;margin-top:10px"></div></div></section>
 </main>
 <div class="sheet-backdrop" id="sheetBackdrop"><div class="sheet"><div class="grab"></div><h3>Profile options</h3><button class="sheet-btn" id="shareBtn">↗ Share profile</button><button class="sheet-btn danger" id="blockBtn">🚫 Block user</button><button class="sheet-btn" id="closeSheet">Cancel</button><div class="sheet-note">Blocking uses SPIKE's existing private-message protection and can remove the ability to interact with this member.</div></div></div>
+
+<div class="confirm-backdrop" id="confirmBackdrop" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmBody">
+  <div class="confirm-card" id="confirmCard">
+    <button class="confirm-close" id="confirmClose" type="button" aria-label="Close">×</button>
+    <div class="confirm-head">
+      <div class="confirm-icon" id="confirmIcon">✦</div>
+      <div class="confirm-copy">
+        <div class="confirm-title" id="confirmTitle">Confirm action</div>
+        <div class="confirm-subtitle" id="confirmSubtitle">A quick confirmation before you continue.</div>
+      </div>
+    </div>
+    <div class="confirm-body" id="confirmBody"></div>
+    <div class="confirm-actions">
+      <button class="confirm-action" id="confirmCancel" type="button">Cancel</button>
+      <button class="confirm-action primary" id="confirmOk" type="button">Continue</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
@@ -50,7 +95,7 @@ const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSe
 const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const qp=new URLSearchParams(location.search); const target=qp.get('uid')||qp.get('user')||qp.get('user_id')||'';
-const state={me:null,uid:null,profile:null,privacy:{},posts:[],following:false,friendship:'none',requestId:null,canSeePosts:false,canSeeMedia:false,canSeeFriends:true,canSeeOnline:false,canMessage:false};
+const state={me:null,uid:null,profile:null,privacy:{},posts:[],following:false,friendship:'none',requestId:null,followersCount:0,followingCount:0,canSeePosts:false,canSeeMedia:false,canSeeFriends:true,canSeeOnline:false,canMessage:false};
 const nameOf=p=>p?.display_name||p?.full_name||p?.name||p?.username||'SPIKE member';
 const avatarOf=p=>p?.avatar_url||p?.avatar||'';
 const ago=v=>{const d=new Date(v);if(!v||Number.isNaN(d.getTime()))return'Just now';const s=Math.max(0,(Date.now()-d.getTime())/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
@@ -75,6 +120,7 @@ async function boot(){
   accessCall('can_message_spike_user',{p_sender:state.me.id,p_recipient:state.uid})
  ]);state.canSeePosts=postsOk===true;state.canSeeMedia=mediaOk===true;state.canSeeFriends=friendsOk===true;state.canSeeOnline=onlineOk===true;state.canMessage=messageOk===true;
  await loadRelationship();
+ await loadFollowCounts();
  if(state.canSeePosts)await loadPosts();
  render();
  await setupRealtime();
@@ -91,12 +137,13 @@ async function loadRelationship(){
  state.requestId=x?.request_id||null;
 }
 async function loadPosts(){const r=await db.rpc('get_public_profile_posts',{p_owner:state.uid,p_limit:30});if(r.error)throw r.error;state.posts=(r.data||[]).map(x=>({id:x.id,authorUid:state.uid,content:x.content||'',createdAt:x.created_at,mediaUrl:x.media_url||'',mediaType:x.media_type||'',mediaItems:x.media_items||[]}));}
+async function loadFollowCounts(){const r=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});if(r.error)throw r.error;const x=Array.isArray(r.data)?r.data[0]:r.data;state.followersCount=Number(x?.followers_count||0);state.followingCount=Number(x?.following_count||0);}
 function mediaItems(p){if(Array.isArray(p.mediaItems)&&p.mediaItems.length)return p.mediaItems.map(x=>typeof x==='string'?{url:x,type:'image'}:x).filter(x=>x?.url);return p.mediaUrl?[{url:p.mediaUrl,type:p.mediaType||'image'}]:[]}
 function mediaType(x){const t=String(x?.type||x?.mediaType||'').toLowerCase(),u=String(x?.url||'');return t==='video'||/\.(mp4|webm|mov)(?:[?#].*)?$/i.test(u)?'video':'image'}
 function render(){renderIdentity();renderActions();renderStats();renderPosts();renderMedia();renderAbout()}
 function renderIdentity(){const p=state.profile,n=nameOf(p),a=avatarOf(p);$('headerTitle').textContent=n;$('displayName').textContent=n;$('username').textContent=p.username?'@'+String(p.username).replace(/^@/,''):'';$('bio').textContent=p.bio||p.about||'';$('verified').classList.toggle('hidden',p.verified!==true);if(a)$('avatar').innerHTML=`<img src="${esc(a)}" alt="" loading="eager" decoding="async">`;else $('avatar').textContent=n.charAt(0).toUpperCase();const cover=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(cover){$('coverImg').src=cover;$('coverImg').classList.remove('hidden')}$('meta').innerHTML=[p.location?`📍 ${esc(p.location)}`:'',p.website?`🔗 ${esc(String(p.website).replace(/^https?:\/\//i,''))}`:'',p.created_at?`◷ Joined ${esc(dateLabel(p.created_at))}`:''].filter(Boolean).map(x=>`<span>${x}</span>`).join('');const online=state.canSeeOnline&&/online/i.test(String(p.presence_status||p.presence||''));$('onlineDot').classList.toggle('on',online);$('onlineDot').title=state.canSeeOnline?(online?'Online':'Offline'):'Online status hidden';const sp=p.sp_id;if(sp){$('spidCard').classList.remove('hidden');$('spidValue').textContent=sp;$('copySpid').onclick=async()=>{try{await navigator.clipboard.writeText(sp);toast('SPIKE ID copied')}catch{toast(sp)}}}}
-function renderActions(){let html='';if(state.friendship==='friends'){html+='<button class="btn green" id="friendBtn">✓ Friends</button>'}else if(state.friendship==='incoming'){html+='<button class="btn green" id="acceptBtn">Accept</button><button class="btn" id="declineBtn">Decline</button>'}else if(state.friendship==='outgoing'){html+='<button class="btn" id="cancelRequestBtn">Request sent</button>'}else{html+='<button class="btn primary" id="friendBtn">Add friend</button>'}html+='<button class="btn '+(state.following?'':'primary')+'" id="followBtn">'+(state.following?'Following':'Follow')+'</button>';if(state.canMessage)html+='<button class="btn" id="messageBtn">💬 Message</button>';html+='<button class="btn" id="shareBtnInline">↗ Share</button>';$('actions').innerHTML=html;$('friendBtn')?.addEventListener('click',async()=>{if(state.friendship==='friends'){await unfriend()}else{await sendRequest()}});$('followBtn')?.addEventListener('click',toggleFollow);$('acceptBtn')?.addEventListener('click',acceptRequest);$('declineBtn')?.addEventListener('click',declineRequest);$('cancelRequestBtn')?.addEventListener('click',cancelRequest);$('messageBtn')?.addEventListener('click',()=>location.href=`messages.html?user=${encodeURIComponent(state.uid)}`);$('shareBtnInline')?.addEventListener('click',shareProfile)}
-function renderStats(){const p=state.profile;$('postCount').textContent=state.canSeePosts?state.posts.length:'—';$('followerCount').textContent=state.canSeeFriends?Number(p.followers_count||p.follower_count||0).toLocaleString():'—';$('followingCount').textContent=state.canSeeFriends?Number(p.following_count||0).toLocaleString():'—'}
+function renderActions(){let html='';if(state.friendship==='friends'){html+='<button class="btn green" id="friendBtn">✓ Friends</button>'}else if(state.friendship==='incoming'){html+='<button class="btn green" id="acceptBtn">Accept</button><button class="btn" id="declineBtn">Decline</button>'}else if(state.friendship==='outgoing'){html+='<button class="btn" id="cancelRequestBtn">Request sent</button>'}else{html+='<button class="btn primary" id="friendBtn">Add friend</button>'}html+='<button class="btn '+(state.following?'green following':'primary')+'" id="followBtn">'+(state.following?'✓ Following':'Follow')+'</button>';if(state.canMessage)html+='<button class="btn info message" id="messageBtn">💬 Message</button>';html+='<button class="btn warning share" id="shareBtnInline">↗ Share</button>';$('actions').innerHTML=html;$('friendBtn')?.addEventListener('click',async()=>{if(state.friendship==='friends'){await unfriend()}else{await sendRequest()}});$('followBtn')?.addEventListener('click',toggleFollow);$('acceptBtn')?.addEventListener('click',acceptRequest);$('declineBtn')?.addEventListener('click',declineRequest);$('cancelRequestBtn')?.addEventListener('click',cancelRequest);$('messageBtn')?.addEventListener('click',()=>location.href=`messages.html?user=${encodeURIComponent(state.uid)}`);$('shareBtnInline')?.addEventListener('click',shareProfile)}
+function renderStats(){$('postCount').textContent=state.canSeePosts?state.posts.length:'—';$('followerCount').textContent=state.canSeeFriends?state.followersCount.toLocaleString():'—';$('followingCount').textContent=state.canSeeFriends?state.followingCount.toLocaleString():'—'}
 function renderPosts(){const box=$('posts');if(!state.canSeePosts){box.innerHTML='<div class="empty"><div class="empty-icon">🔒</div><b>Posts are private</b><span>This member does not allow you to view their posts.</span></div>';return}if(!state.posts.length){box.innerHTML='<div class="empty"><div class="empty-icon">✦</div><b>No public posts</b><span>Posts shared publicly by this member will appear here.</span></div>';return}box.innerHTML=state.posts.map(p=>{const media=mediaItems(p),m=media[0];return `<article class="post"><div class="post-head"><div class="mini-avatar">${avatarOf(state.profile)?`<img src="${esc(avatarOf(state.profile))}" alt="">`:esc(nameOf(state.profile).charAt(0))}</div><div class="author"><div class="author-name">${esc(nameOf(state.profile))}</div><div class="post-time">${esc(ago(p.createdAt))}</div></div></div>${p.content?`<div class="post-body">${esc(p.content)}</div>`:''}${m?`<div class="post-media">${mediaType(m)==='video'?`<video src="${esc(m.url)}" controls playsinline preload="metadata"></video>`:`<img src="${esc(m.url)}" alt="" loading="lazy" decoding="async">`}</div>`:''}</article>`}).join('')}
 function renderMedia(){const box=$('mediaGrid');if(!state.canSeeMedia){box.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔒</div><b>Media is private</b><span>This member does not allow you to view profile media.</span></div>';return}const all=[];state.posts.forEach(p=>mediaItems(p).forEach(m=>all.push(m)));if(!all.length){box.innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-icon">▧</div><b>No media yet</b><span>Photos and videos shared on this profile will appear here.</span></div>';return}box.innerHTML=all.map(m=>mediaType(m)==='video'?`<div class="media-tile"><video src="${esc(m.url)}" muted playsinline preload="metadata"></video><span class="media-badge">▶</span></div>`:`<div class="media-tile"><img src="${esc(m.url)}" alt="" loading="lazy" decoding="async"></div>`).join('')}
 function renderAbout(){const p=state.profile;const rows=[['Username',p.username?'@'+String(p.username).replace(/^@/,''):'Not set'],['Display name',nameOf(p)],['Location',p.location||'Not provided'],['Website',p.website||'Not provided'],['Joined',dateLabel(p.created_at)],['Status',(p.disabled||p.suspended)?'Restricted':'Active']];$('about').innerHTML=rows.map(([a,b])=>`<div style="padding:10px;border:1px solid var(--line);border-radius:11px;background:var(--surface2)"><div class="eyebrow">${esc(a)}</div><div style="margin-top:3px;font-size:11px;font-weight:800;overflow-wrap:anywhere">${esc(b)}</div></div>`).join('')}
@@ -104,10 +151,70 @@ async function sendRequest(){const b=$('friendBtn');if(b)b.disabled=true;try{con
 async function acceptRequest(){try{const r=await db.rpc('accept_friend_request',{p_request_id:state.requestId});if(r.error)throw r.error;toast('Friend request accepted');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not accept request')}}
 async function declineRequest(){try{const r=await db.rpc('decline_friend_request',{p_request_id:state.requestId});if(r.error)throw r.error;toast('Friend request declined');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not decline request')}}
 async function cancelRequest(){try{const r=await db.rpc('cancel_friend_request',{p_recipient_id:state.uid});if(r.error)throw r.error;toast('Friend request cancelled');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not cancel request')}}
-async function unfriend(){if(!confirm(`Remove ${nameOf(state.profile)} from your friends?`))return;try{const r=await db.rpc('dm_unfriend',{p_other_user_id:state.uid});if(r.error)throw r.error;toast('Friend removed');await loadRelationship();renderActions()}catch(e){toast(e.message||'Could not remove friend')}}
-async function toggleFollow(){const b=$('followBtn');if(b)b.disabled=true;try{const me=await getDoc(`users/${state.me.id}`)||{};const f=new Set(Array.isArray(me.following)?me.following:[]);state.following?f.delete(state.uid):f.add(state.uid);const r=await db.from('app_documents').upsert({path:`users/${state.me.id}`,parent_path:'users',collection_name:'users',document_id:state.me.id,owner_id:state.me.id,data:{...me,following:[...f]},updated_at:new Date().toISOString(),created_at:me.created_at||new Date().toISOString()},{onConflict:'path'});if(r.error)throw r.error;state.following=f.has(state.uid);toast(state.following?'Following':'Unfollowed');renderActions()}catch(e){toast(e.message||'Could not update follow')}finally{if($('followBtn'))$('followBtn').disabled=false}}
+function closeConfirm(){const b=$('confirmBackdrop');if(b)b.classList.remove('open');document.body.style.overflow='';}
+function openConfirm(opts={}){
+  return new Promise(resolve=>{
+    const b=$('confirmBackdrop'),card=$('confirmCard'),icon=$('confirmIcon'),title=$('confirmTitle'),sub=$('confirmSubtitle'),body=$('confirmBody'),ok=$('confirmOk'),cancel=$('confirmCancel'),close=$('confirmClose');
+    if(!b||!card||!icon||!title||!sub||!body||!ok||!cancel||!close){resolve(false);return}
+    icon.textContent=opts.icon||'✦';
+    title.textContent=opts.title||'Confirm action';
+    sub.textContent=opts.subtitle||'Review this action before continuing.';
+    body.innerHTML=opts.body||'';
+    ok.textContent=opts.confirmText||'Continue';
+    cancel.textContent=opts.cancelText||'Cancel';
+    card.classList.toggle('danger',opts.danger===true);
+    ok.className='confirm-action '+(opts.danger?'danger':'primary');
+    b.classList.add('open');
+    document.body.style.overflow='hidden';
+    let settled=false;
+    const finish=value=>{
+      if(settled)return;
+      settled=true;
+      closeConfirm();
+      cleanup();
+      resolve(value);
+    };
+    const cleanup=()=>{
+      ok.onclick=null;cancel.onclick=null;close.onclick=null;b.onclick=null;
+      document.removeEventListener('keydown',onKey);
+    };
+    const onKey=e=>{if(e.key==='Escape')finish(false)};
+    ok.onclick=()=>finish(true);
+    cancel.onclick=()=>finish(false);
+    close.onclick=()=>finish(false);
+    b.onclick=e=>{if(e.target===b)finish(false)};
+    document.addEventListener('keydown',onKey);
+    setTimeout(()=>ok.focus(),30);
+  });
+}
+async function unfriend(){
+  const proceed=await openConfirm({
+    icon:'👥',
+    title:'Remove friend?',
+    subtitle:'This changes your connection with this member.',
+    body:`Remove <span class="confirm-name">${esc(nameOf(state.profile))}</span> from your friends? You can send a new request later.`,
+    confirmText:'Remove friend',
+    danger:true
+  });
+  if(!proceed)return;
+  try{const r=await db.rpc('dm_unfriend',{p_other_user_id:state.uid});if(r.error)throw r.error;toast('Friend removed');await loadRelationship();renderActions()}
+  catch(e){toast(e.message||'Could not remove friend')}
+}
+async function toggleFollow(){const b=$('followBtn');if(b)b.disabled=true;try{const me=await getDoc(`users/${state.me.id}`)||{};const f=new Set(Array.isArray(me.following)?me.following:[]);state.following?f.delete(state.uid):f.add(state.uid);const r=await db.from('app_documents').upsert({path:`users/${state.me.id}`,parent_path:'users',collection_name:'users',document_id:state.me.id,owner_id:state.me.id,data:{...me,following:[...f]},updated_at:new Date().toISOString(),created_at:me.created_at||new Date().toISOString()},{onConflict:'path'});if(r.error)throw r.error;state.following=f.has(state.uid);toast(state.following?'Following':'Unfollowed');await loadFollowCounts();renderStats();renderActions()}catch(e){toast(e.message||'Could not update follow')}finally{if($('followBtn'))$('followBtn').disabled=false}}
 async function shareProfile(){try{if(navigator.share){await navigator.share({title:`${nameOf(state.profile)} on SPIKE`,text:`Check out ${nameOf(state.profile)} on SPIKE`,url:location.href})}else{await navigator.clipboard.writeText(location.href);toast('Profile link copied')}}catch{}}
-async function blockUser(){if(!confirm(`Block ${nameOf(state.profile)}?`))return;try{const r=await db.rpc('dm_block_user',{p_other_user_id:state.uid});if(r.error)throw r.error;closeSheet();toast('User blocked');setTimeout(()=>location.href='feed.html',500)}catch(e){toast(e.message||'Could not block user')}}
+async function blockUser(){
+  const proceed=await openConfirm({
+    icon:'🚫',
+    title:'Block this member?',
+    subtitle:'SPIKE will protect your interactions with this account.',
+    body:`Block <span class="confirm-name">${esc(nameOf(state.profile))}</span>? They may no longer be able to message or interact with you through protected SPIKE features.`,
+    confirmText:'Block member',
+    danger:true
+  });
+  if(!proceed)return;
+  try{const r=await db.rpc('dm_block_user',{p_other_user_id:state.uid});if(r.error)throw r.error;closeSheet();toast('User blocked');setTimeout(()=>location.href='feed.html',500)}
+  catch(e){toast(e.message||'Could not block user')}
+}
 function setup(){
  $('backBtn').onclick=()=>{if(history.length>1)history.back();else location.href='feed.html'};
  $('menuBtn').onclick=()=>$('sheetBackdrop').classList.add('open');$('closeSheet').onclick=closeSheet;$('sheetBackdrop').onclick=e=>{if(e.target===$('sheetBackdrop'))closeSheet()};$('shareBtn').onclick=shareProfile;$('blockBtn').onclick=blockUser;

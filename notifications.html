@@ -189,7 +189,7 @@ h1{margin:5px 0 4px;font-size:30px;line-height:1.05}
 .notif-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;background:var(--spike-surface-2);font-size:20px}
 .notif-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
 .notif-text{font-size:14px;font-weight:720;line-height:1.35;overflow-wrap:anywhere}
-.notif-time{font-size:12px;color:var(--spike-muted)}
+.notif-time{font-size:12px;color:var(--spike-muted)}.notif-smart{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}.notif-smart-chip{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border-radius:999px;border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-muted)}.notif-smart-chip.immediate{color:#fff;background:#ef4444;border-color:transparent}.notif-smart-chip.important{color:#fff;background:#f59e0b;border-color:transparent}.notif-smart-chip.low{opacity:.72}.notif-group-count{font-variant-numeric:tabular-nums}
 .notif-details{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
 .notif-chip{font-size:9px;font-weight:850;letter-spacing:.04em;text-transform:uppercase;padding:3px 6px;border-radius:999px;background:var(--spike-surface-2);border:1px solid var(--spike-line);color:var(--spike-muted)}
 .notif-preview{font-size:11px;color:var(--spike-muted);line-height:1.35;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -576,6 +576,7 @@ video{contain:layout paint}
 }
 </style>
 <link rel="stylesheet" href="css/premium-back.css">
+<link rel="stylesheet" href="css/theme-v14.css">
 </head>
 <body>
 <div class="app">
@@ -715,7 +716,7 @@ return `<button class="notification ${n.read?'':'unread'}" data-id="${esc(n.id)}
 `<span class="notif-body"><span class="notif-text">${esc(titleOf(n))}</span>`+
 `<span class="notif-preview">${esc(notificationText(n))}</span>`+
 `${preview&&preview!==notificationText(n)?`<span class="notif-preview">${esc(preview)}</span>`:""}`+
-`<span class="notif-details">${actor?`<span class="notif-chip">From ${esc(actor)}</span>`:""}${target?`<span class="notif-chip">${esc(target)}</span>`:""}<span class="notif-time">${esc(formatTime(n.created_at))}</span></span></span>`+
+`<span class="notif-details">${actor?`<span class="notif-chip">From ${esc(actor)}</span>`:""}${target?`<span class="notif-chip">${esc(target)}</span>`:""}<span class="notif-time">${esc(formatTime(n.created_at))}</span></span>${n.smart_bucket?`<span class="notif-smart"><span class="notif-smart-chip ${esc(n.smart_bucket)}">${esc(n.smart_bucket)}</span>${n.smart_reason?`<span class="notif-smart-chip">${esc(n.smart_reason)}</span>`:""}${n.group_count>1?`<span class="notif-smart-chip notif-group-count">${esc(n.group_count)} related</span>`:""}</span>`:""}</span>`+
 `${n.read?'':'<span class="new">NEW</span>'}<span class="notif-arrow">${href?'›':''}</span></button>`;
 }).join("");
 }
@@ -724,14 +725,11 @@ return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(l
 }
 async function load(opts={}){
 if(!me) throw new Error("Not authenticated");
-const batch=200,all=[];
-for(let from=0;from<5000;from+=batch){
- const r=await withTimeout(sb.from("notifications").select("id,user_id,type,data,read,created_at").eq("user_id",me.id).order("created_at",{ascending:false}).range(from,from+batch-1),12000,"Notifications request timed out.");
- if(r.error)throw r.error;
- const chunk=r.data||[];all.push(...chunk);
- if(chunk.length<batch)break;
-}
-rows=all;render();return rows;
+const r=await withTimeout(sb.rpc("get_smart_notification_page",{p_limit:100,p_before_created_at:null,p_before_id:null}),12000,"Notifications request timed out.");
+if(r.error)throw r.error;
+rows=(r.data||[]).map(n=>({...n,smart_score:Number(n.smart_score||0),smart_rank:Number(n.smart_rank||0),group_count:Number(n.group_count||1)}));
+await hydrateNotificationActors(rows);
+render();return rows;
 }
 async function markRead(id){
 if(!me||!id)return;
@@ -829,21 +827,17 @@ const text=notificationText(n);
 if(!existed && !n.read){playNotificationTone();showBrowserNotification(n);}
 if(!n.read && window.spikePremiumToast) window.spikePremiumToast(text, /error|fail|denied/i.test(String(n.type||""))?"error":"info", 5200);
 }
-function subscribe(){
-if(channel)try{sb.removeChannel(channel)}catch(e){}
-channel=sb.channel("notifications-"+me.id)
-.on("postgres_changes",{event:"INSERT",schema:"public",table:"notifications",filter:"user_id=eq."+me.id},payload=>notifyLocal(payload.new))
-.on("postgres_changes",{event:"UPDATE",schema:"public",table:"notifications",filter:"user_id=eq."+me.id},payload=>upsertRow(payload.new))
-.on("postgres_changes",{event:"DELETE",schema:"public",table:"notifications",filter:"user_id=eq."+me.id},payload=>removeRow(payload.old))
-.subscribe((status)=>{if(status==="CHANNEL_ERROR"||status==="TIMED_OUT")console.warn("Notifications realtime channel status:",status)});
-// Pages in the same browser can also announce a just-created notification instantly.
-try{
-bc=new BroadcastChannel("spike-notifications");
-bc.onmessage=e=>{const n=e.data?.notification||e.data;if(n)notifyLocal(n)};
-}catch(e){}
-// Lightweight fallback: recover missed realtime events when the tab resumes or a websocket drops.
-clearInterval(pollTimer);
-pollTimer=setInterval(()=>{if(document.hidden)return;load({silent:true}).catch(()=>{})},30000);
+async function subscribe(){
+if(channel)try{await sb.removeChannel(channel)}catch(e){}
+try{const sr=await sb.auth.getSession();const token=sr.data?.session?.access_token;if(token)await sb.realtime.setAuth(token)}catch(e){console.warn("SPIKE realtime auth setup unavailable",e)}
+const topic="user:"+me.id+":notifications";
+channel=sb.channel(topic,{config:{private:true}})
+.on("broadcast",{event:"notification_created"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_updated"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_deleted"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.subscribe(status=>{if(status==="SUBSCRIBED"){lastRealtimeAt=Date.now();console.info("SPIKE notifications realtime connected")}if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){lastRealtimeAt=0;console.warn("Notifications realtime channel status:",status)}});
+try{if(bc)bc.close();bc=new BroadcastChannel("spike-notifications");bc.onmessage=e=>{const n=e.data?.notification||e.data;if(n)notifyLocal(n)}}catch(e){}
+clearInterval(pollTimer);pollTimer=setInterval(()=>{if(document.hidden)return;load({silent:true}).catch(()=>{})},60000);
 }
 let authReady=false;
 let authRecoveryInProgress=false;
@@ -902,10 +896,16 @@ if(!session?.user){
 }
 me=session.user;
 authReady=true;
+try{if(session.access_token)await sb.realtime.setAuth(session.access_token)}catch(e){console.warn("SPIKE realtime auth initialization unavailable",e)}
+sb.auth.onAuthStateChange((event,nextSession)=>{
+ if(event==="TOKEN_REFRESHED"&&nextSession?.access_token){
+   sb.realtime.setAuth(nextSession.access_token).then(()=>subscribe()).catch(e=>console.warn("SPIKE notification realtime reauth failed",e));
+ }
+});
 window.AppPresence?.start(sb);
 await loadAppPrefs();
 await load();
-subscribe();
+await subscribe();
 $("#loader").classList.add("hide");
 }catch(e){
 console.error("SPIKE notifications auth/load error:",e);
@@ -931,7 +931,7 @@ function valueForDisplay(v){
  if(typeof v==="string")return v;
  try{return JSON.stringify(v,null,2)}catch(e){return String(v)}
 }
-function openNotificationDetails(n){
+async function openNotificationDetails(n){
  if(!n)return;
  const d=dataOf(n),modal=$("#notificationModal");
  $("#notificationModalIcon").textContent=notificationIcon(n);
@@ -944,10 +944,55 @@ function openNotificationDetails(n){
  html+=`<div class="notif-modal-section"><div class="notif-modal-label">Full alert</div><div class="notif-modal-text">${esc(detail)}</div></div>`;
  if(fields.length)html+=`<div class="notif-modal-section"><div class="notif-modal-label">Details</div><div class="notif-modal-grid">${fields.map(([k,v])=>`<div class="notif-modal-field"><strong>${esc(k)}</strong><span>${esc(valueForDisplay(v))}</span></div>`).join('')}</div></div>`;
  
- if(href)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">Open related activity</button></div>`;
+ const nt=String(n?.type||"").toLowerCase();
+ const requestId=d.request_id||d.friend_request_id||d.requestId||"";
+ let friendRequestPending=nt==="friend_request"&&!!requestId;
+ // Never show Accept/Decline when the request has already been accepted.
+ // Re-check the relationship so this remains correct after a page refresh.
+ if(friendRequestPending){
+   const actorId=d.actor_id||d.from_user_id||d.sender_id||d.from_id||"";
+   if(actorId){
+     try{
+       const rel=await withTimeout(sb.rpc("get_spike_viewer_relationship",{p_other_user:actorId}),8000,"Relationship check timed out.");
+       if(!rel.error){
+         const relationship=Array.isArray(rel.data)?rel.data[0]:rel.data;
+         const status=String(relationship?.friendship||"").toLowerCase();
+         if(status==="friends"||status==="accepted") friendRequestPending=false;
+       }
+     }catch(_){/* Keep the normal pending state if the optional status check fails. */}
+   }
+ }
+ if(friendRequestPending)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationAccept" type="button">Accept</button><button class="notif-open-btn" id="notificationDecline" type="button" style="background:transparent;color:inherit">Decline</button>${href?`<button class="notif-open-btn" id="notificationOpenTarget" type="button" style="background:transparent;color:inherit">View profile</button>`:""}</div>`;
+ else if(nt==="friend_request")html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">View profile</button></div>`;
+ else if(href)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">Open related activity</button></div>`;
  $("#notificationModalBody").innerHTML=html;
  modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
  $("#notificationOpenTarget")?.addEventListener('click',()=>{location.href=href});
+ const requestIdForAction=d.request_id||d.friend_request_id||d.requestId||"";
+ const runFriendAction=async(fn,successText)=>{
+   const acceptBtn=$("#notificationAccept"),declineBtn=$("#notificationDecline");
+   [acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=true;b.setAttribute('aria-busy','true')}});
+   try{
+     const r=await withTimeout(sb.rpc(fn,{p_request_id:requestIdForAction}),12000,"Friend request action timed out.");
+     if(r.error)throw r.error;
+     // Convert this notification locally so the action buttons disappear immediately.
+     // The notification itself stays in the activity history.
+     n.type=fn==='accept_friend_request'?'friend_accepted':'friend_request';
+     if(n.data&&typeof n.data==='object'){
+       n.data={...n.data,status:fn==='accept_friend_request'?'accepted':'declined'};
+       if(fn==='accept_friend_request')n.data.message='accepted your friend request';
+     }
+     closeNotificationDetails();
+     render();
+     window.spikePremiumToast?.(successText,'success',2600);
+     await load({silent:true});
+   }catch(e){
+     console.error("SPIKE friend notification action error:",e);
+     window.spikePremiumToast?.(e?.message||"Could not update friend request.",'error',4200);
+   }finally{[acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=false;b.removeAttribute('aria-busy')}})}
+ };
+ $("#notificationAccept")?.addEventListener('click',()=>runFriendAction('accept_friend_request','Friend request accepted.'));
+ $("#notificationDecline")?.addEventListener('click',()=>runFriendAction('decline_friend_request','Friend request declined.'));
  $("#notificationModalClose").focus();
 }
 function closeNotificationDetails(){const modal=$("#notificationModal");modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';}
