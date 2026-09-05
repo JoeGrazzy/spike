@@ -1318,6 +1318,8 @@ video{contain:layout paint}
 <link rel="stylesheet" href="css/premium-back.css">
 
 <link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
 </head>
 <body>
 <header class="header">
@@ -1841,7 +1843,7 @@ id=String(id||'').trim();
 if(!validUuid(id)){ notice('Could not unfriend this person because their profile ID is unavailable. Refreshing your friends…',true); await loadFriends().catch(()=>{}); return; }
 const friend=state.friends.find(f=>personId(f)===id);
 const name=friend?.display_name||friend?.username||'this friend';
-const confirmed=window.confirm(`Unfriend ${name}?\n\nThey will be removed from your friends list.`);
+const confirmed=await window.spikePremiumConfirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',okText:'Unfriend',cancelText:'Keep friend',icon:'👋',danger:true});
 if(!confirmed) return;
 if(btn) btn.disabled=true;
 try {
@@ -2059,7 +2061,7 @@ else setTimeout(install,1500);
     const m=href.match(/[?&](?:user|user_id|id|uid)=([^&#]+)/i); if(!m) return;
     const owner=decodeURIComponent(m[1]); if(owner===u.id) return;
     const ok=await call('can_discover_spike_profile',{p_viewer:u.id,p_owner:owner});
-    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else alert('This profile is not available to you.');}
+    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else window.spikePremiumAlert('This profile is not available to you.',{title:'Profile unavailable',icon:'ⓘ'});}
   },true);
 })();
 </script>

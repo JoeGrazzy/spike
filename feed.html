@@ -2934,7 +2934,7 @@ function showProfileActions(id, relationship, name){
     renderPosts();
   })]);
   items.push(['⚠️','Report',()=>run(async()=>{
-    const reason=prompt(`Report ${name}. Please enter a reason:`, '');
+    const reason=await window.spikePremiumPrompt({title:'Report user',message:`Tell us what happened with ${name}.`,label:'Reason',placeholder:'Describe the issue…',okText:'Submit report',cancelText:'Cancel',icon:'⚑',maxLength:1000});
     if(!reason||!reason.trim()) return;
     toast('User reporting is not available in the current Supabase schema.','warning');
   })]);
@@ -3752,6 +3752,8 @@ else boot();
     }
   </style>
 <link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
 </head>
 <body>
 
