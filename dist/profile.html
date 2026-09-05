@@ -1,0 +1,1237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="css/perf.css">
+<script id="spike-performance-bootstrap">
+/* SPIKE performance bootstrap — no application logic changes */
+(()=>{try{
+const c=navigator.connection;
+if(c&&c.saveData) document.documentElement.dataset.saveData="1";
+if("contentVisibility" in document.documentElement.style){
+document.documentElement.classList.add("spike-cv-ready");
+}
+}catch(_){}})();
+</script>
+<script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);var t=(n===6||n===8)?"light":"dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b10">
+<meta name="description" content="SPIKE profile">
+<title>SPIKE — Profile</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<style>
+:root{--bg:#070b10;--surface:#0d131b;--surface2:#111923;--surface3:#17212c;--text:#f1f5f9;--muted:#8d9aaa;--line:rgba(255,255,255,.09);--primary:#8b5cf6;--primary2:#a78bfa;--danger:#fb7185;--shadow:0 14px 45px rgba(0,0,0,.28)}
+html[data-theme=light]{--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3:#eef2f7;--text:#111827;--muted:#64748b;--line:rgba(15,23,42,.1);--shadow:0 14px 45px rgba(15,23,42,.08)}
+*{box-sizing:border-box;margin:0;padding:0}html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{overflow-x:hidden}button,input,textarea{font:inherit}button{cursor:pointer;border:0;background:transparent;color:inherit}a{color:inherit;text-decoration:none}.hidden{display:none!important}
+.header{position:sticky;top:0;z-index:80;height:58px;display:flex;align-items:center;padding:6px 12px;border-bottom:1px solid var(--line);background:rgba(7,11,16,.9);backdrop-filter:blur(20px);gap:10px}.header-btn{width:38px;height:38px;border:1px solid var(--line);border-radius:11px;background:var(--surface);display:grid;place-items:center;font-size:17px}.header-title{flex:1;text-align:center;font-size:13px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.admin-btn-active{background:linear-gradient(135deg,rgba(236,72,153,.22),rgba(34,197,94,.18),rgba(249,115,22,.2));border-color:rgba(255,255,255,.22);box-shadow:0 0 14px rgba(236,72,153,.22),0 0 18px rgba(34,197,94,.12)}
+.main{width:min(100%,720px);margin:auto;padding:10px 8px 42px}.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;box-shadow:var(--shadow)}
+.cover{height:205px;position:relative;overflow:hidden;background:radial-gradient(circle at 18% 25%,rgba(167,139,250,.35),transparent 30%),radial-gradient(circle at 82% 25%,rgba(236,72,153,.2),transparent 32%),linear-gradient(135deg,#101827,#1d1231 55%,#0d131b)}.cover img{width:100%;height:100%;object-fit:cover}
+.cover-edit{position:absolute;right:12px;bottom:12px;z-index:4;padding:8px 11px;border-radius:10px;background:rgba(7,11,16,.78);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:10px;font-weight:850;backdrop-filter:blur(10px)}
+.cover-edit:disabled{opacity:.55;cursor:wait}
+.uploading{position:relative}
+.uploading:after{content:"Uploading…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(7,11,16,.62);color:#fff;font-size:11px;font-weight:900;z-index:10}
+.cover:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 38%,rgba(0,0,0,.6))}
+.profile{padding:0 16px 16px}.avatar-wrap{width:104px;height:104px;position:relative;margin-top:-52px;z-index:3}.avatar{width:104px;height:104px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#a78bfa,#6d28d9);border:5px solid var(--surface);font-size:31px;font-weight:950;box-shadow:0 10px 30px rgba(0,0,0,.3)}.avatar img{width:100%;height:100%;object-fit:cover}.avatar{padding:0;border:5px solid var(--surface);cursor:pointer}.profile-top{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;margin-top:8px}.identity{min-width:0;flex:1}.name-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.name{font-size:22px;font-weight:950}.verified{width:18px;height:18px;border-radius:50%;background:#7c3aed;color:#fff;display:grid;place-items:center;font-size:10px}.handle{color:var(--muted);font-size:11px;margin-top:4px}.bio{font-size:13px;line-height:1.55;margin-top:10px;white-space:pre-wrap;overflow-wrap:anywhere}.meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:9px;color:var(--muted);font-size:10px}.meta a{color:var(--primary2)}
+.spid-card{position:relative;margin-top:12px;padding:1px;border-radius:16px;overflow:hidden;background:linear-gradient(100deg,#ec4899,#22c55e,#f97316,#ec4899);background-size:300% 100%;animation:spidGradient 5s linear infinite;box-shadow:0 0 18px rgba(236,72,153,.18),0 0 28px rgba(34,197,94,.12)}.spid-inner{position:relative;background:var(--surface);border-radius:15px;padding:10px 11px;display:flex;align-items:center;gap:10px}.spid-spark{font-size:18px;animation:spidSpark 1.8s ease-in-out infinite}.spid-copy{min-width:0;flex:1}.spid-label{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:950}.spid-value{font-size:14px;font-weight:1000;letter-spacing:.06em;background:linear-gradient(90deg,#f472b6,#4ade80,#fb923c,#f472b6);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:spidGradient 4s linear infinite}.spid-sub{font-size:8px;color:var(--muted);margin-top:2px}.spid-actions{display:flex;gap:5px}.spid-btn{padding:7px 8px;border-radius:9px;background:var(--surface2);border:1px solid var(--line);font-size:9px;font-weight:900}.xp-card{margin-top:9px;padding:11px;background:var(--surface2);border:1px solid var(--line);border-radius:13px}.xp-head{display:flex;justify-content:space-between;gap:8px;align-items:center}.xp-title{font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}.xp-level{font-size:10px;font-weight:950}.xp-track{height:7px;margin-top:8px;border-radius:99px;background:var(--surface3);overflow:hidden}.xp-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#ec4899,#22c55e,#f97316);transition:width .6s ease}.xp-foot{display:flex;justify-content:space-between;margin-top:5px;font-size:8px;color:var(--muted)}.recommendations{margin-top:10px}.recommendations h3{font-size:11px;margin-bottom:7px}.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.rec-item{padding:10px;background:var(--surface2);border:1px solid var(--line);border-radius:11px}.rec-action{width:100%;color:inherit;text-align:left;font:inherit;cursor:pointer;transition:transform .16s ease,border-color .16s ease}.rec-action:hover{transform:translateY(-1px);border-color:rgba(124,58,237,.38)}.rec-icon{font-size:17px}.rec-item b{display:block;font-size:9px;margin-top:5px}.rec-item span{display:block;color:var(--muted);font-size:8px;line-height:1.4;margin-top:3px}@keyframes spidGradient{0%{background-position:0% 60%}100%{background-position:300% 60%}}@keyframes spidSpark{0%,100%{transform:scale(1) rotate(0);filter:drop-shadow(0 0 2px rgba(255,255,255,.3))}50%{transform:scale(1.18) rotate(8deg);filter:drop-shadow(0 0 7px rgba(255,255,255,.8))}}
+.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.btn{padding:9px 13px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);font-size:10px;font-weight:850}.btn.primary{border:0;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff}.btn.danger{color:#fda4af}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}.stat{background:var(--surface2);border:1px solid var(--line);border-radius:11px;padding:10px;text-align:center}.stat b{font-size:16px;display:block}.stat span{font-size:9px;color:var(--muted);font-weight:800;text-transform:uppercase}
+.tabs{position:sticky;top:58px;z-index:30;display:flex;gap:4px;padding:5px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}.tab{flex:1;padding:9px;border-radius:9px;font-size:10px;font-weight:850;color:var(--muted)}.tab.active{background:var(--surface3);color:var(--text)}
+.panel{padding:9px}.posts{display:grid;gap:8px}.post{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;overflow:hidden}.post-head{display:flex;align-items:center;gap:9px}.mini-avatar{width:35px;height:35px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#a78bfa,#6d28d9);font-size:11px;font-weight:900;flex:none}.mini-avatar img{width:100%;height:100%;object-fit:cover}.author{min-width:0;flex:1}.author-name{font-size:11px;font-weight:900}.post-time{font-size:9px;color:var(--muted);margin-top:2px}.post-menu{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;color:var(--muted)}.post-body{font-size:13px;line-height:1.6;margin:9px 0;white-space:pre-wrap;overflow-wrap:anywhere}.post-body a{color:var(--primary2)}.post-media{margin:8px -12px -12px;background:#05070a;overflow:hidden}.post-media img,.post-media video{width:100%;max-height:520px;display:block;object-fit:cover}.post-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:5px;padding-top:6px;border-top:1px solid var(--line)}.post-action{min-width:0;padding:8px 3px;border-radius:8px;color:var(--muted);font-size:10px;display:flex;align-items:center;justify-content:center;gap:4px}.post-action.active,.post-action:hover{background:var(--surface2);color:var(--text)}.post-action.liked{color:#fb7185}
+.comments{display:none;margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}.comments.open{display:block}.comment{display:flex;gap:7px;padding:7px 0}.comment-avatar{width:27px;height:27px;border-radius:50%;background:var(--surface3);display:grid;place-items:center;font-size:9px;overflow:hidden}.comment-avatar img{width:100%;height:100%;object-fit:cover}.comment-copy{font-size:10px;line-height:1.45;background:var(--surface2);border-radius:10px;padding:7px 9px;flex:1}.comment-copy b{display:block;font-size:9px;margin-bottom:2px}.comment-form{display:flex;gap:6px;margin-top:6px}.comment-form input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px;color:var(--text);font-size:10px}.comment-form button{width:34px;border-radius:10px;background:var(--primary);color:#fff}
+.about-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.about-item{padding:12px;background:var(--surface2);border:1px solid var(--line);border-radius:11px}.about-item small{font-size:8px;color:var(--muted);text-transform:uppercase;font-weight:850}.about-item div{font-size:11px;margin-top:5px;overflow-wrap:anywhere}.empty,.loading{padding:36px 15px;text-align:center;color:var(--muted);font-size:11px}
+.overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:none;place-items:center;padding:14px}.overlay.open{display:grid}.modal{width:min(100%,480px);max-height:90vh;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:19px;padding:17px;box-shadow:var(--shadow)}.modal h2{font-size:17px}.modal p{font-size:10px;color:var(--muted);line-height:1.5;margin-top:4px}.form{display:grid;gap:8px;margin-top:12px}.form label{font-size:9px;color:var(--muted);font-weight:850}.form input,.form textarea{width:100%;background:var(--surface2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px;font-size:11px;outline:0}.form textarea{min-height:88px;resize:vertical}.modal-actions{display:flex;justify-content:flex-end;gap:7px;margin-top:13px}
+.toast{position:fixed;left:50%;bottom:18px;z-index:300;transform:translate(-50%,18px);opacity:0;pointer-events:none;width:min(420px,calc(100vw - 24px));padding:11px 13px;border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:var(--shadow);font-size:10px;transition:.22s}.toast.show{opacity:1;transform:translate(-50%,0)}
+.loader{position:fixed;inset:0;z-index:400;display:grid;place-items:center;background:var(--bg);transition:.25s}.loader.hide{opacity:0;pointer-events:none}.loader-card{padding:18px 22px;border:1px solid var(--line);border-radius:17px;background:var(--surface);display:grid;justify-items:center;gap:9px;font-size:10px;color:var(--muted)}.spinner{width:22px;height:22px;border:2px solid var(--line);border-top-color:var(--primary2);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:600px){.header{height:54px}.main{padding:7px 5px 30px}.cover{height:175px}.profile{padding:0 12px 13px}.avatar-wrap{width:104px;height:104px;margin-top:-52px}.avatar{width:104px;height:104px;border-width:5px;font-size:30px}.profile-top{display:block}.actions{justify-content:flex-start;margin-top:11px}.name{font-size:20px}.tabs{top:54px}.about-grid{grid-template-columns:1fr}}
+/* ===== SPIKE UNIFIED THEME SYSTEM ===== */
+:root{
+--sp-bg:#f6f7fb;
+--sp-surface:rgba(255,255,255,.88);
+--sp-surface-solid:#ffffff;
+--sp-surface-2:rgba(248,249,253,.94);
+--sp-text:#172033;
+--sp-muted:#667085;
+--sp-line:rgba(17,24,39,.10);
+--sp-accent:#7c3aed;
+--sp-accent-2:#ec4899;
+--sp-accent-3:#4f46e5;
+--sp-good:#10b981;
+--sp-danger:#ef476f;
+--sp-shadow:0 18px 55px rgba(31,41,55,.10);
+--sp-shadow-soft:0 8px 28px rgba(31,41,55,.07);
+}
+html[data-theme="dark"]{
+--sp-bg:#080912;
+--sp-surface:rgba(18,20,31,.86);
+--sp-surface-solid:#12141f;
+--sp-surface-2:rgba(24,27,41,.92);
+--sp-text:#f7f8fc;
+--sp-muted:#9aa2b5;
+--sp-line:rgba(255,255,255,.095);
+--sp-shadow:0 22px 70px rgba(0,0,0,.38);
+--sp-shadow-soft:0 10px 32px rgba(0,0,0,.24);
+}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]){
+--sp-bg:#080912;--sp-surface:rgba(18,20,31,.86);--sp-surface-solid:#12141f;--sp-surface-2:rgba(24,27,41,.92);--sp-text:#f7f8fc;--sp-muted:#9aa2b5;--sp-line:rgba(255,255,255,.095);--sp-shadow:0 22px 70px rgba(0,0,0,.38);--sp-shadow-soft:0 10px 32px rgba(0,0,0,.24)
+}}
+html,body{background:var(--sp-bg)!important;color:var(--sp-text)}
+body{
+background-image:
+radial-gradient(circle at 8% 0%,rgba(124,58,237,.12),transparent 28%),
+radial-gradient(circle at 94% 8%,rgba(236,72,153,.09),transparent 24%),
+linear-gradient(180deg,transparent 0%,var(--sp-bg) 52%)!important;
+background-attachment:fixed;
+}
+html[data-theme="light"] body{background-image:radial-gradient(circle at 8% 0%,rgba(124,58,237,.08),transparent 28%),radial-gradient(circle at 94% 8%,rgba(236,72,153,.07),transparent 24%),linear-gradient(180deg,#fbfbff 0%,var(--sp-bg) 55%)!important}
+/* common surfaces */
+.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.room,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.cover,.room-hero,.roomgrid,.roomtab,.tabs{
+border-color:var(--sp-line)!important;
+}
+.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top,.room-overview-card{
+background:var(--sp-surface)!important;
+box-shadow:var(--sp-shadow-soft);
+color:var(--sp-text);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+}
+.hero,.room-hero{
+background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(236,72,153,.08),rgba(79,70,229,.08)),var(--sp-surface)!important;
+box-shadow:var(--sp-shadow);
+}
+.header,.top,.chathead,.fm-head,.rm-head{
+background:color-mix(in srgb,var(--sp-surface-solid) 82%,transparent)!important;
+border-color:var(--sp-line)!important;
+backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.header h1,.brand,.logo,.header-title{color:var(--sp-text)}
+.muted,.sub,.meta,.time,.preview,.status,.eyebrow,.role,.section-label,.form-note,.spid-sub,.spid-label,.xp-foot{color:var(--sp-muted)!important}
+input,textarea,select,.input,.search input,.field input,.field textarea,.field select{
+background:var(--sp-surface-solid)!important;color:var(--sp-text)!important;border-color:var(--sp-line)!important;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+input::placeholder,textarea::placeholder{color:var(--sp-muted)!important;opacity:.85}
+input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,237,.55)!important;box-shadow:0 0 0 3px rgba(124,58,237,.11)!important}
+.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.roomtab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
+border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:var(--sp-surface-2)!important;
+}
+.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.roomtab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
+.danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
+.active{border-color:rgba(124,58,237,.28)!important}
+html[data-theme="light"] .active,html[data-theme="light"] .tab.active,html[data-theme="light"] .filter.active{background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(236,72,153,.10))!important;color:#5b21b6!important}
+.avatar,.friend-avatar,.room-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.footer{color:var(--sp-muted)!important}
+.modal,.overlay,.modal-backdrop,.premium-media-modal{background:rgba(3,5,12,.64)!important;backdrop-filter:blur(8px)}
+html[data-theme="light"] .modal,html[data-theme="light"] .overlay,html[data-theme="light"] .modal-backdrop,html[data-theme="light"] .premium-media-modal{background:rgba(15,23,42,.30)!important}
+.toast,.notice{border-color:var(--sp-line)!important}
+.progress,.xp-track{background:var(--sp-surface-2)!important}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(124,58,237,.28);border-radius:99px}
+:focus-visible{outline:3px solid rgba(124,58,237,.30)!important;outline-offset:2px}
+@media(max-width:720px){
+.app{padding-left:12px!important;padding-right:12px!important}
+.card,.panel,.hero,.post,.composer,.friend-card,.request-card,.room-card{border-radius:20px!important}
+.header{padding-left:12px!important;padding-right:12px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+/* page-specific light corrections */
+html[data-theme="light"] .header-actions button,html[data-theme="light"] .icon-btn{background:rgba(255,255,255,.82)!important;color:#344054!important}
+html[data-theme="light"] .bubble{background:#eef1f7!important;color:#172033!important;border-color:var(--sp-line)!important}
+html[data-theme="light"] .bubble.mine{background:linear-gradient(135deg,#7c3aed,#ec4899)!important;color:#fff!important}
+html[data-theme="light"] .thread:hover,html[data-theme="light"] .thread.active{background:#f3f1ff!important}
+html[data-theme="light"] .post-actions,html[data-theme="light"] .feed-v2-nav,html[data-theme="light"] .feed-v2-panel{background:rgba(255,255,255,.82)!important}
+html[data-theme="light"] .story{box-shadow:0 10px 35px rgba(31,41,55,.08)!important}
+html[data-theme="light"] .cover{background:linear-gradient(135deg,#ede9fe,#fce7f3,#e0e7ff)!important}
+html[data-theme="light"] .glow{opacity:.12!important}
+
+.profile-tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.profile-feature-card{padding:16px;border:1px solid var(--sp-line);border-radius:18px;background:var(--sp-surface);box-shadow:var(--sp-shadow-soft)}.profile-feature-card h3{margin:0 0 10px;font-size:15px}.profile-feature-card .feature-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--sp-line)}.profile-feature-card .feature-row:first-of-type{border-top:0}.feature-muted{color:var(--sp-muted);font-size:12px}.badge-row{display:flex;flex-wrap:wrap;gap:8px}.profile-badge{padding:8px 10px;border-radius:999px;border:1px solid var(--sp-line);background:var(--sp-surface-2);font-size:12px;font-weight:700}.presence-line{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700}.presence-dot{width:8px;height:8px;border-radius:50%;background:#94a3b8}.presence-dot.online{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.12)}@media(max-width:720px){.profile-tools{grid-template-columns:1fr}}
+</style>
+<script id="spike-universal-theme">
+(function(){
+const KEY="spike-feed-style";
+const allowed=[1,2,3,4,5,6,7,8,9,10];
+let n=parseInt(localStorage.getItem(KEY)||"1",10);
+if(!allowed.includes(n)) n=1;
+function apply(style){
+style=allowed.includes(Number(style))?Number(style):1;
+document.documentElement.dataset.spikeStyle=String(style);
+document.documentElement.dataset.theme=(style===1||style===4)?"light":"dark";
+document.documentElement.style.colorScheme=(style===1||style===4)?"light":"dark";
+try{localStorage.setItem(KEY,String(style));localStorage.setItem("spike-theme",(style===1||style===4)?"light":"dark")}catch(e){}
+window.__SPIKE_STYLE__=style;
+}
+window.SPIKE_THEME={
+get:()=>window.__SPIKE_STYLE__||n,
+set:apply,
+next:()=>apply(((window.__SPIKE_STYLE__||n)%10)+1)
+};
+apply(n);
+})();
+</script>
+<style id="spike-universal-theme-css">
+/* ===== SPIKE UNIVERSAL FEED THEMES ===== */
+html[data-spike-style="1"]{
+--spike-bg:#f5f7fb;--spike-surface:#ffffff;--spike-surface-2:#f8faff;
+--spike-text:#111827;--spike-muted:#667085;--spike-line:rgba(15,23,42,.10);
+--spike-accent:#7c3aed;--spike-accent-2:#a855f7;--spike-glow:rgba(124,58,237,.18);
+}
+html[data-spike-style="2"]{
+--spike-bg:#060817;--spike-surface:#0c1022;--spike-surface-2:#121735;
+--spike-text:#f7f8ff;--spike-muted:#9da6c4;--spike-line:rgba(139,92,246,.22);
+--spike-accent:#8b5cf6;--spike-accent-2:#d946ef;--spike-glow:rgba(139,92,246,.35);
+}
+html[data-spike-style="3"]{
+--spike-bg:#0b416c;--spike-surface:rgba(255,255,255,.16);--spike-surface-2:rgba(255,255,255,.11);
+--spike-text:#fff;--spike-muted:rgba(255,255,255,.78);--spike-line:rgba(255,255,255,.28);
+--spike-accent:#48a8ff;--spike-accent-2:#7c5cff;--spike-glow:rgba(91,178,255,.35);
+}
+html[data-spike-style="4"]{
+--spike-bg:#d72668;--spike-surface:rgba(255,255,255,.91);--spike-surface-2:rgba(255,255,255,.18);
+--spike-text:#172033;--spike-muted:#5b6475;--spike-line:rgba(255,255,255,.42);
+--spike-accent:#ef315e;--spike-accent-2:#ff8b32;--spike-glow:rgba(255,94,145,.38);
+}
+html[data-spike-style="5"]{
+--spike-bg:#0b0d10;--spike-surface:#14171b;--spike-surface-2:#1b1f24;
+--spike-text:#f5f7fa;--spike-muted:#9ba2ad;--spike-line:rgba(255,255,255,.10);
+--spike-accent:#fff;--spike-accent-2:#cfd5dd;--spike-glow:rgba(255,255,255,.12);
+}
+/* page backgrounds */
+html[data-spike-style="1"] body{background:radial-gradient(circle at 8% 0,#ede9fe 0,transparent 34%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="2"] body{background:radial-gradient(circle at 12% 0,#26114e 0,transparent 34%),radial-gradient(circle at 92% 12%,#12275d 0,transparent 28%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="3"] body{background:radial-gradient(circle at 15% 0,#6cc7ff 0,transparent 32%),linear-gradient(145deg,#0a385d,#11679b 52%,#244f99)!important;color:var(--spike-text)!important}
+html[data-spike-style="4"] body{background:radial-gradient(circle at 8% 0,#ff8d38 0,transparent 35%),radial-gradient(circle at 94% 10%,#ff3d8b 0,transparent 34%),linear-gradient(145deg,#ff7b32,#e91e7a 52%,#8f2bd9)!important;color:var(--spike-text)!important}
+html[data-spike-style="5"] body{background:var(--spike-bg)!important;color:var(--spike-text)!important}
+/* surfaces per style */
+html[data-spike-style="1"] .card,html[data-spike-style="1"] .panel,html[data-spike-style="1"] .stat,
+html[data-spike-style="1"] .hero,html[data-spike-style="1"] .list,html[data-spike-style="1"] .post,
+html[data-spike-style="1"] .story-row,html[data-spike-style="1"] .composer,html[data-spike-style="1"] .announcement{
+background:var(--spike-surface)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 12px 36px rgba(31,41,55,.08)!important
+}
+html[data-spike-style="2"] .card,html[data-spike-style="2"] .panel,html[data-spike-style="2"] .stat,
+html[data-spike-style="2"] .hero,html[data-spike-style="2"] .list,html[data-spike-style="2"] .post,
+html[data-spike-style="2"] .story-row,html[data-spike-style="2"] .composer,html[data-spike-style="2"] .announcement{
+background:linear-gradient(145deg,rgba(17,20,43,.96),rgba(10,13,31,.96))!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 0 30px rgba(105,63,255,.12),0 14px 45px rgba(0,0,0,.32)!important
+}
+html[data-spike-style="3"] .card,html[data-spike-style="3"] .panel,html[data-spike-style="3"] .stat,
+html[data-spike-style="3"] .hero,html[data-spike-style="3"] .list,html[data-spike-style="3"] .post,
+html[data-spike-style="3"] .story-row,html[data-spike-style="3"] .composer,html[data-spike-style="3"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important;box-shadow:0 14px 45px rgba(0,32,72,.22),inset 0 1px rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important
+}
+html[data-spike-style="4"] .card,html[data-spike-style="4"] .panel,html[data-spike-style="4"] .stat,
+html[data-spike-style="4"] .hero,html[data-spike-style="4"] .list,html[data-spike-style="4"] .post,
+html[data-spike-style="4"] .story-row,html[data-spike-style="4"] .composer,html[data-spike-style="4"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,242,247,.84))!important;color:var(--spike-text)!important;border-color:rgba(255,255,255,.72)!important;box-shadow:0 14px 45px rgba(101,16,68,.18)!important
+}
+html[data-spike-style="5"] .card,html[data-spike-style="5"] .panel,html[data-spike-style="5"] .stat,
+html[data-spike-style="5"] .hero,html[data-spike-style="5"] .list,html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .story-row,html[data-spike-style="5"] .composer,html[data-spike-style="5"] .announcement{
+background:linear-gradient(145deg,#14171b,#1a1e23)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important
+}
+/* typography and controls */
+html[data-spike-style] .muted,html[data-spike-style] .sub,html[data-spike-style] .status,
+html[data-spike-style] .meta,html[data-spike-style] .time,html[data-spike-style] .preview{color:var(--spike-muted)!important}
+html[data-spike-style] input,html[data-spike-style] textarea,html[data-spike-style] select{
+border-color:var(--spike-line)!important;background:var(--spike-surface-2)!important;color:var(--spike-text)!important
+}
+html[data-spike-style="3"] input,html[data-spike-style="3"] textarea,html[data-spike-style="3"] select{background:rgba(255,255,255,.12)!important;color:#fff!important}
+html[data-spike-style="4"] input,html[data-spike-style="4"] textarea,html[data-spike-style="4"] select{background:rgba(255,255,255,.75)!important}
+html[data-spike-style] button:not(.spike-theme-switch){
+transition:transform .16s ease,box-shadow .16s ease,background .16s ease
+}
+html[data-spike-style] button:not(.spike-theme-switch):hover{transform:translateY(-1px)}
+html[data-spike-style="1"] .btn.primary,html[data-spike-style="1"] .primary,
+html[data-spike-style="2"] .btn.primary,html[data-spike-style="2"] .primary{
+background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;color:#fff!important;box-shadow:0 7px 20px var(--spike-glow)!important
+}
+html[data-spike-style="3"] .btn.primary,html[data-spike-style="3"] .primary{
+background:linear-gradient(135deg,#3aa8ff,#6d5dfc)!important;color:#fff!important;box-shadow:0 8px 22px rgba(38,154,255,.35)!important
+}
+html[data-spike-style="4"] .btn.primary,html[data-spike-style="4"] .primary{
+background:linear-gradient(135deg,#ff5c6c,#c92fff)!important;color:#fff!important;box-shadow:0 8px 22px rgba(231,42,127,.28)!important
+}
+html[data-spike-style="5"] .btn.primary,html[data-spike-style="5"] .primary{
+background:#f5f5f5!important;color:#111315!important;border-color:#f5f5f5!important;box-shadow:0 7px 20px rgba(255,255,255,.12)!important
+}
+/* Feed header switch */
+.spike-theme-switch{
+min-width:72px;height:34px;padding:0 11px;border-radius:12px!important;
+display:inline-flex!important;align-items:center;justify-content:center;gap:6px;
+font-size:11px!important;font-weight:900!important;letter-spacing:.02em;
+border:1px solid rgba(124,58,237,.28)!important;
+background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(168,85,247,.08))!important;
+color:var(--spike-text)!important;box-shadow:0 5px 16px var(--spike-glow)!important;
+}
+.spike-theme-switch .spike-theme-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+html[data-spike-style="2"] .spike-theme-switch{background:linear-gradient(135deg,#6d28d9,#c026d3)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="3"] .spike-theme-switch{background:linear-gradient(135deg,rgba(255,255,255,.25),rgba(80,168,255,.28))!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important}
+html[data-spike-style="4"] .spike-theme-switch{background:linear-gradient(135deg,#ff684a,#d62992)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="5"] .spike-theme-switch{background:#fff!important;color:#111!important;border-color:rgba(255,255,255,.2)!important}
+/* Headers */
+html[data-spike-style="3"] .header,html[data-spike-style="3"] .bottom-nav{background:rgba(16,91,143,.45)!important;border-color:rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .header,html[data-spike-style="4"] .bottom-nav{background:linear-gradient(90deg,rgba(255,105,66,.9),rgba(214,39,130,.88))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+html[data-spike-style="2"] .header,html[data-spike-style="2"] .bottom-nav{background:rgba(5,7,20,.92)!important;border-color:rgba(139,92,246,.18)!important;box-shadow:0 0 24px rgba(139,92,246,.12)!important}
+html[data-spike-style="1"] .header,html[data-spike-style="1"] .bottom-nav{background:rgba(255,255,255,.9)!important;border-color:var(--spike-line)!important}
+html[data-spike-style="5"] .header,html[data-spike-style="5"] .bottom-nav{background:rgba(12,15,19,.94)!important;border-color:rgba(255,255,255,.10)!important}
+html[data-spike-style="3"] .brand-title,html[data-spike-style="3"] .header-title,
+html[data-spike-style="3"] .header h1{color:#fff!important}
+html[data-spike-style="4"] .brand-title,html[data-spike-style="4"] .header-title,
+html[data-spike-style="4"] .header h1{color:#fff!important}
+html[data-spike-style="5"] .brand-title,html[data-spike-style="5"] .header-title,
+html[data-spike-style="5"] .header h1{color:#f7f7f8!important}
+.spike-theme-switch:focus-visible{outline:3px solid rgba(139,92,246,.35);outline-offset:2px}
+@media(max-width:520px){.spike-theme-switch{min-width:64px;padding:0 8px;font-size:10px!important}.header-actions{gap:7px!important}}
+</style>
+<style>
+/* SPIKE: stop page horizontal shake/layout shift */
+html { width:100%; max-width:100%; overflow-x:hidden; scrollbar-gutter:stable; }
+body { width:100%; max-width:100%; overflow-x:hidden; }
+*, *::before, *::after { box-sizing:border-box; }
+.app, main, header, section, article, .content, .main, .grid, .layout { min-width:0; max-width:100%; }
+img, video, iframe { max-width:100%; }
+</style>
+<style id="spike-premium-notices">:root{--spn-line:rgba(255,255,255,.13);--spn-text:#f7f8fb;--spn-muted:rgba(247,248,251,.62)}.spike-premium-stack{position:fixed;right:18px;bottom:18px;width:min(430px,calc(100vw - 28px));display:grid;gap:10px;z-index:99999;pointer-events:none}.spike-premium-toast{position:relative;display:grid;grid-template-columns:42px 1fr 30px;gap:11px;align-items:center;min-height:66px;padding:11px 12px;border:1px solid var(--spn-line);border-radius:20px;background:linear-gradient(145deg,rgba(27,31,43,.97),rgba(12,15,23,.96));box-shadow:0 24px 70px rgba(0,0,0,.46),0 0 34px rgba(124,92,255,.12);backdrop-filter:blur(22px);overflow:hidden;pointer-events:auto;animation:spnIn .28s cubic-bezier(.2,.8,.2,1)}.spike-premium-toast:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;transform-origin:left;animation:spnLife var(--spn-life,3600ms) linear forwards;background:linear-gradient(90deg,#8b5cf6,#22d3ee)}.spike-premium-toast.success{border-color:rgba(52,211,153,.34)}.spike-premium-toast.success:after{background:linear-gradient(90deg,#34d399,#10b981)}.spike-premium-toast.error{border-color:rgba(251,113,133,.38)}.spike-premium-toast.error:after{background:linear-gradient(90deg,#fb7185,#ef4444)}.spike-premium-toast.warning{border-color:rgba(251,191,36,.36)}.spike-premium-toast.warning:after{background:linear-gradient(90deg,#fbbf24,#f59e0b)}.spike-premium-toast.info{border-color:rgba(96,165,250,.34)}.spn-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:950;background:rgba(139,92,246,.13);border:1px solid rgba(167,139,250,.2)}.success .spn-icon{color:#6ee7b7;background:rgba(16,185,129,.12)}.error .spn-icon{color:#fda4af;background:rgba(239,68,68,.12)}.warning .spn-icon{color:#fcd34d;background:rgba(245,158,11,.12)}.info .spn-icon{color:#93c5fd}.spn-copy{min-width:0}.spn-title{font-size:12px;font-weight:950;color:var(--spn-text)}.spn-message{margin-top:3px;font-size:10.5px;line-height:1.4;color:var(--spn-muted);overflow-wrap:anywhere}.spn-close{width:30px;height:30px;border:0;border-radius:10px;background:transparent;color:rgba(255,255,255,.48);font-size:18px;cursor:pointer}.spn-close:hover{background:rgba(255,255,255,.08);color:#fff}@keyframes spnIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}@keyframes spnLife{from{transform:scaleX(1)}to{transform:scaleX(0)}}@media(max-width:600px){.spike-premium-stack{right:10px;left:10px;bottom:14px;width:auto}.spike-premium-toast{border-radius:18px}}</style>
+<style id="spike-global-presence-style">
+.spike-presence-target{position:relative!important}
+.spike-presence-target::after{content:attr(data-presence-status);position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;border-radius:999px;background:var(--card,#10141d);border:1px solid rgba(255,255,255,.10);color:var(--muted,#aab2c0);font:700 8px/1.1 system-ui,sans-serif;z-index:5;pointer-events:none}
+
+/* SPIKE Connect QR — intentionally secondary to the profile */
+.qr-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.qr-btn{border:1px solid var(--sp-line);background:var(--sp-surface-2);color:var(--sp-text);border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}.qr-overlay{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px}.qr-overlay.open{display:flex}.qr-sheet{width:min(440px,100%);border:1px solid rgba(255,255,255,.12);background:var(--sp-surface,#10141d);border-radius:28px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.45);color:var(--sp-text);text-align:center}.qr-head{display:flex;align-items:center;justify-content:space-between;text-align:left}.qr-close{border:0;background:transparent;color:inherit;font-size:28px;cursor:pointer}.qr-code-box{width:min(280px,78vw);height:min(280px,78vw);margin:22px auto 16px;background:#fff;border-radius:22px;display:grid;place-items:center;padding:14px}.qr-code-box img,.qr-code-box canvas{max-width:100%;max-height:100%}.qr-help{color:var(--sp-muted);font-size:13px;margin:0 0 14px}.scanner-overlay{position:fixed;inset:0;background:#05070b;z-index:10000;display:none;color:#fff}.scanner-overlay.open{display:block}.scanner-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.scanner-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.58),transparent 30%,transparent 70%,rgba(0,0,0,.65))}.scanner-top{position:absolute;top:0;left:0;right:0;padding:18px 18px;display:flex;align-items:center;justify-content:space-between}.scanner-title{font-weight:900;font-size:18px}.scanner-icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.28);color:#fff;font-size:22px;cursor:pointer}.scan-frame{position:absolute;left:50%;top:50%;width:min(76vw,300px);height:min(76vw,300px);transform:translate(-50%,-55%);border:2px solid rgba(255,255,255,.75);border-radius:24px;box-shadow:0 0 0 9999px rgba(0,0,0,.30)}.scan-corner{position:absolute;width:42px;height:42px;border-color:#fff;border-style:solid}.scan-c1{top:-2px;left:-2px;border-width:4px 0 0 4px;border-radius:20px 0 0 0}.scan-c2{top:-2px;right:-2px;border-width:4px 4px 0 0;border-radius:0 20px 0 0}.scan-c3{bottom:-2px;left:-2px;border-width:0 0 4px 4px;border-radius:0 0 0 20px}.scan-c4{bottom:-2px;right:-2px;border-width:0 4px 4px 0;border-radius:0 0 20px 0}.scan-line{position:absolute;left:14px;right:14px;top:20%;height:2px;background:linear-gradient(90deg,transparent,#fff,transparent);animation:scanline 2s ease-in-out infinite}@keyframes scanline{0%,100%{top:18%;opacity:.3}50%{top:82%;opacity:1}}.scanner-bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;padding:0 18px}.scanner-bottom p{margin:10px 0;color:rgba(255,255,255,.78);font-size:14px}.scanner-controls{display:flex;justify-content:center;gap:14px}.scanner-control{border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.34);color:#fff;border-radius:999px;padding:12px 18px;font-weight:800;cursor:pointer}.scanner-file{display:none}.connect-preview{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:10001;display:none;align-items:center;justify-content:center;padding:18px}.connect-preview.open{display:flex}.connect-card{width:min(390px,100%);background:var(--sp-surface,#10141d);color:var(--sp-text);border:1px solid var(--sp-line);border-radius:26px;padding:22px;text-align:center}.connect-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:auto;border:3px solid rgba(124,58,237,.28)}.connect-avatar-fallback{display:grid;place-items:center;background:var(--sp-surface-2);font-size:30px}.connect-card h2{margin:12px 0 4px}.connect-id{color:var(--sp-muted);font-weight:800}.connect-actions{display:flex;gap:10px;margin-top:20px}.connect-actions .btn{flex:1}
+</style>
+<link rel="stylesheet" href="css/theme.css">
+<script src="js/theme.js" defer></script>
+<link rel="stylesheet" href="css/ui-fix.css">
+
+<style id="spike-premium-privacy-ui">
+/* Premium privacy/access panel */
+.privacy-premium-panel{position:relative;margin-top:14px;padding:16px;border:1px solid rgba(139,92,246,.28);border-radius:24px;background:linear-gradient(145deg,rgba(20,23,48,.98),rgba(10,12,29,.98));box-shadow:0 18px 55px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.08),0 0 35px rgba(124,58,237,.08);overflow:hidden}
+.privacy-panel-glow{position:absolute;width:180px;height:180px;right:-90px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.24),transparent 68%);pointer-events:none}
+.privacy-panel-head{position:relative;display:flex;align-items:center;gap:11px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.privacy-panel-icon{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:linear-gradient(145deg,#a855f7,#7c3aed);color:#fff;font-size:19px;box-shadow:0 8px 25px rgba(124,58,237,.3)}
+.privacy-panel-head h3{font-size:15px;font-weight:950;letter-spacing:-.01em}.privacy-panel-head p{margin-top:3px;color:#9da7bd;font-size:10px;line-height:1.4}.privacy-secure{margin-left:auto;align-self:flex-start;padding:6px 8px;border-radius:999px;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.18);color:#86efac;font-size:8px;font-weight:900;white-space:nowrap}
+.privacy-grid{position:relative;display:grid;gap:8px;margin-top:12px}.privacy-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.065);transition:transform .18s ease,border-color .18s ease,background .18s ease}.privacy-row:hover{transform:translateY(-1px);border-color:rgba(167,139,250,.24);background:linear-gradient(145deg,rgba(139,92,246,.10),rgba(255,255,255,.025))}.privacy-copy{min-width:0}.privacy-copy b{display:block;font-size:11px;font-weight:900}.privacy-copy small{display:block;margin-top:3px;color:#8993aa;font-size:8.5px;line-height:1.35}.privacy-row select{width:148px;min-width:132px;padding:9px 30px 9px 10px;border:1px solid rgba(167,139,250,.22);border-radius:12px;background:rgba(9,12,28,.9);color:#f7f8ff;font-size:9px;font-weight:850;outline:none;box-shadow:inset 0 1px rgba(255,255,255,.04)}.privacy-row select:focus{border-color:#a78bfa;box-shadow:0 0 0 3px rgba(139,92,246,.13)}
+.premium-switch{position:relative;width:54px;height:31px;display:inline-block;flex:none}.premium-switch input{position:absolute;opacity:0;width:0;height:0}.premium-slider{position:absolute;inset:0;border-radius:999px;background:#24283b;border:1px solid rgba(255,255,255,.12);box-shadow:inset 0 2px 5px rgba(0,0,0,.3);transition:.22s ease}.premium-slider:before{content:"";position:absolute;width:23px;height:23px;left:3px;top:3px;border-radius:50%;background:#d5d8e4;box-shadow:0 3px 10px rgba(0,0,0,.35);transition:.22s cubic-bezier(.2,.8,.2,1)}.premium-switch input:checked+.premium-slider{background:linear-gradient(135deg,#a855f7,#7c3aed);border-color:rgba(192,132,252,.7);box-shadow:0 0 18px rgba(139,92,246,.3),inset 0 1px rgba(255,255,255,.2)}.premium-switch input:checked+.premium-slider:before{transform:translateX(23px);background:#fff;box-shadow:0 0 14px rgba(255,255,255,.55)}
+.privacy-panel-foot{position:relative;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:12px;color:#737e96;font-size:8px;line-height:1.4}.privacy-panel-foot span:first-child{color:#9da7bd}
+@media(max-width:520px){.privacy-premium-panel{padding:13px;border-radius:21px}.privacy-panel-head{align-items:flex-start}.privacy-secure{display:none}.privacy-row{padding:11px;border-radius:14px}.privacy-row select{width:128px;min-width:120px;font-size:8.5px}.privacy-copy b{font-size:10.5px}.privacy-copy small{font-size:8px}.privacy-panel-foot{font-size:7.5px}}
+/* Profile avatar is always a true circle and never participates in post text flow. */
+.avatar,.avatar img,.mini-avatar,.mini-avatar img{border-radius:50%!important}.avatar{position:relative!important;display:grid!important;place-items:center!important;overflow:hidden!important;flex:none!important}.avatar-wrap{position:relative!important;isolation:isolate}.post,.post-head,.post-body,.post-media{position:relative}.post-head{min-height:38px}.post-body{clear:both;display:block;position:relative;z-index:1}
+</style>
+
+<style id="spike-profile-premium-polish">
+/* Premium privacy controls: tactile, accessible and theme-friendly. */
+.privacy-premium-panel{backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.privacy-row{min-height:62px}.privacy-row:focus-within{border-color:rgba(192,132,252,.55);box-shadow:0 0 0 3px rgba(139,92,246,.10),inset 0 1px rgba(255,255,255,.08)}
+.privacy-row select{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,#b8b9ca 50%),linear-gradient(135deg,#b8b9ca 50%,transparent 50%);background-position:calc(100% - 15px) 50%,calc(100% - 10px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:30px}
+.privacy-toggle-row{cursor:pointer}.privacy-toggle-row .privacy-copy{cursor:pointer}
+.premium-switch{width:58px;height:32px}.premium-slider:before{width:24px;height:24px}.premium-switch input:checked+.premium-slider:before{transform:translateX(25px)}
+.avatar,.mini-avatar,.comment-avatar{border-radius:50%!important;aspect-ratio:1/1!important;overflow:hidden!important;isolation:isolate}.avatar img,.mini-avatar img,.comment-avatar img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:50% 50%!important;border-radius:50%!important}
+@media(max-width:520px){.privacy-row{align-items:center}.privacy-row select{width:142px;min-width:120px}.privacy-copy{padding-right:4px}.privacy-copy b{font-size:11px}.privacy-copy small{font-size:8.5px}}
+</style>
+
+<style id="spike-menu-nav-css-fixed">
+/* SPIKE menu-aware bottom navigation */
+.spike-menu-nav-hidden .spike-bottom-nav,
+.spike-menu-nav-hidden .bottom-nav,
+.spike-menu-nav-hidden #spikeBottomNav,
+.spike-menu-nav-hidden #bottomNav {
+  transform: translate3d(0, calc(100% + 24px), 0) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease !important;
+}
+.spike-bottom-nav, .bottom-nav, #spikeBottomNav, #bottomNav {
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease;
+}
+/* Premium, smart circular avatars; never cover adjacent post text. */
+.spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+.post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+#chatAvatar img, #profileAvatar img {
+  width: 48px; height: 48px; min-width: 48px; min-height: 48px;
+  aspect-ratio: 1 / 1; border-radius: 50% !important;
+  object-fit: cover !important; object-position: 50% 50%;
+  display: block; overflow: hidden; flex: 0 0 auto;
+}
+.post-header, .post-head, .user-row, .profile-head, .comment-head {
+  min-width: 0;
+}
+.post-header .avatar, .post-head .avatar, .user-row .avatar { position: static !important; }
+.post-header .user-info, .post-head .user-info, .user-row .user-info { min-width: 0; }
+@media (max-width:600px){
+ .spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+ .post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+ #chatAvatar img, #profileAvatar img { width:44px; height:44px; min-width:44px; min-height:44px; }
+}
+</style>
+<script src="js/presence.js"></script>
+<script src="js/call-receiver.js"></script>
+<link rel="stylesheet" href="css/premium-back.css">
+<style id="spike-profile-gallery">
+.media-gallery-head{display:flex;align-items:center;justify-content:space-between;padding:5px 2px 10px}
+.media-gallery-head h2{margin:0;font-size:14px;font-weight:950;letter-spacing:-.01em}
+.media-gallery-head span{display:block;margin-top:2px;color:var(--muted);font-size:9px}
+.media-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;overflow:hidden;border-radius:16px}
+.media-tile{position:relative;display:block;padding:0;border:0;min-width:0;aspect-ratio:3/4;background:#070912;overflow:hidden;cursor:pointer}
+.media-tile img,.media-tile video{width:100%;height:100%;display:block;object-fit:cover;transition:transform .24s ease,filter .24s ease}
+.media-tile:hover img,.media-tile:hover video{transform:scale(1.035);filter:brightness(1.06)}
+.media-tile:focus-visible{outline:2px solid var(--primary);outline-offset:-2px}
+.media-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.16),transparent 35%,rgba(0,0,0,.20));pointer-events:none}
+.media-tile-badge{position:absolute;right:7px;top:7px;z-index:2;width:26px;height:26px;border-radius:9px;display:grid;place-items:center;background:rgba(5,7,14,.62);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11px;backdrop-filter:blur(8px)}
+.media-tile-stack{left:7px;right:auto}
+.media-empty{grid-column:1/-1;padding:42px 18px;text-align:center;border:1px dashed var(--line);border-radius:16px;color:var(--muted);font-size:12px}
+.media-viewer{position:fixed;inset:0;z-index:100000;display:none}
+.media-viewer.open{display:block}
+.media-viewer-backdrop{position:absolute;inset:0;background:rgba(2,4,10,.88);backdrop-filter:blur(18px)}
+.media-viewer-shell{position:relative;width:100%;height:100%;display:grid;grid-template-rows:auto 1fr auto;pointer-events:none}
+.media-viewer-shell>*{pointer-events:auto}
+.media-viewer-top{height:58px;display:flex;align-items:center;justify-content:space-between;padding:8px 14px;color:#fff;font-size:11px;font-weight:850}
+.media-viewer-btn{width:38px;height:38px;border:1px solid rgba(255,255,255,.14);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:22px;display:grid;place-items:center}
+.media-viewer-stage{min-height:0;display:grid;place-items:center;padding:8px 42px}
+.media-viewer-stage img,.media-viewer-stage video{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+.media-viewer-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:40px;height:56px;border:0;border-radius:14px;background:rgba(255,255,255,.08);color:#fff;font-size:34px;display:grid;place-items:center}
+.media-viewer-nav.prev{left:10px}.media-viewer-nav.next{right:10px}.media-viewer-nav:disabled{opacity:.18}
+.media-viewer-info{padding:10px 16px 18px;background:linear-gradient(180deg,transparent,rgba(2,4,10,.92) 22%);color:#fff}
+.media-viewer-author{display:flex;align-items:center;gap:9px}
+.media-viewer-author .mini-avatar{width:34px;height:34px;background:linear-gradient(145deg,#a78bfa,#6d28d9)}
+.media-viewer-author small{display:block;color:rgba(255,255,255,.55);font-size:9px;margin-top:2px}
+.media-viewer-caption{max-width:720px;margin:9px auto 8px;line-height:1.45;font-size:12px;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere}
+.media-viewer-actions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+.media-viewer-actions button{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);color:#fff;border-radius:11px;padding:8px 11px;font-size:10px}
+.media-viewer-actions button.active{background:rgba(124,58,237,.28);border-color:rgba(167,139,250,.35)}
+@media(max-width:600px){.media-gallery{gap:3px;border-radius:13px}.media-gallery-head{padding-bottom:8px}.media-viewer-stage{padding:8px 16px}.media-viewer-nav{width:34px;height:48px;font-size:28px}.media-viewer-nav.prev{left:5px}.media-viewer-nav.next{right:5px}.media-viewer-info{padding:8px 11px 13px}.media-viewer-caption{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.media-tile img,.media-tile video{transition:none}}
+</style><style id="spike-profile-avatar-fix">
+/* Final profile-avatar sizing: override the generic 48px avatar rule. */
+.avatar-wrap{position:relative!important;width:88px!important;height:88px!important;display:block!important;flex:0 0 88px!important;margin-top:-44px!important;z-index:8!important}
+.avatar-wrap > .avatar{width:88px!important;height:88px!important;min-width:88px!important;min-height:88px!important;max-width:88px!important;max-height:88px!important;aspect-ratio:1/1!important;border-radius:50%!important;box-sizing:border-box!important}
+.avatar-wrap > .avatar img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;border-radius:50%!important}
+@media(max-width:600px){.avatar-wrap{width:88px!important;height:88px!important;flex-basis:88px!important;margin-top:-44px!important}.avatar-wrap > .avatar{width:88px!important;height:88px!important;min-width:88px!important;min-height:88px!important;max-width:88px!important;max-height:88px!important}}
+
+</style>
+<style id="spike-level-badge-profile">
+.level-progress-wrap{display:grid;grid-template-columns:72px 1fr;gap:12px;align-items:center}
+.level-badge-mini{width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(124,58,237,.28));cursor:pointer}
+.level-badge-mini:hover{transform:translateY(-2px);transition:transform .18s ease}
+.level-rank{font-size:10px;color:rgba(255,255,255,.6);margin-top:3px}
+.level-link{display:inline-flex;align-items:center;gap:5px;margin-top:7px;color:#c4b5fd;text-decoration:none;font-size:10px}
+.level-link:hover{text-decoration:underline}
+@media(max-width:600px){.level-progress-wrap{grid-template-columns:58px 1fr}.level-badge-mini{width:58px;height:58px}}
+</style>
+<link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
+</head>
+<body>
+<div class="loader" id="loader"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>
+<header class="header"><button class="header-btn spike-premium-back" id="backBtn" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back" type="button">‹</button><div class="header-title" id="headerTitle">Profile</div><button class="header-btn hidden" id="adminBtn" type="button" title="Admin" aria-label="Admin">⚙</button><button class="header-btn" id="menuBtn">⋯</button></header>
+<main class="main"><section class="card">
+<div class="cover" id="coverArea">
+<img id="coverImg" alt="" class="hidden" loading="lazy" decoding="async">
+<button class="cover-edit hidden" id="coverEdit" type="button" title="Choose cover photo">▣ <span>Change cover</span></button>
+<input id="coverFile" class="upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+</div>
+<div class="profile"><div class="avatar-wrap"><button class="avatar" id="avatar" type="button" aria-label="Change profile picture">U</button>
+<input id="avatarFile" class="upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></div>
+<div class="profile-top"><div class="identity"><div class="name-row"><h1 class="name" id="displayName">User</h1><span class="verified hidden" id="verified">✓</span></div><div class="handle" id="username">@spike</div><div class="bio" id="bio"></div><div class="meta" id="meta"></div>
+<div class="spid-card" id="spidCard"><div class="spid-inner"><div class="spid-spark">✦</div><div class="spid-copy"><div class="spid-label">SPIKE Lifetime ID</div><div class="spid-value" id="spidValue">SP-••••••</div><div class="spid-sub">Permanent account identity</div></div><div class="spid-actions"><button class="spid-btn" id="copySpid" type="button">Copy</button><button class="spid-btn" id="shareSpid" type="button">Share</button></div></div></div>
+<div class="xp-card"><div class="xp-head"><span class="xp-title">⭐ SPIKE Progress</span><span class="xp-level" id="levelValue">Level 1</span></div><div class="level-progress-wrap"><img class="level-badge-mini" id="levelBadge" src="assets/badges/01-Newcomer-level-1-10.png" alt="Newcomer badge" title="Open SPIKE Leveling" role="link" tabindex="0"><div><div class="xp-track"><div class="xp-fill" id="xpFill"></div></div><div class="xp-foot"><span id="xpValue">0 XP</span><span id="xpNext">100 XP to Level 2</span></div><div class="level-rank" id="levelRank">Newcomer · Levels 1–10</div><a class="level-link" href="leveling.html">🏅 View all levels & badges →</a></div></div></div>
+<div class="recommendations"><h3>Next steps</h3><div class="rec-grid"><button class="rec-item rec-action" type="button" id="findPeopleAction"><div class="rec-icon">🔎</div><b>Find people</b><span>Search and connect with SPIKE users.</span></button><button class="rec-item rec-action" type="button" id="earnXpAction"><div class="rec-icon">🏆</div><b>Earn XP</b><span>Post, connect and participate to grow your profile.</span></button></div></div></div><div class="actions" id="actions"></div></div>
+<div class="stats"><div class="stat"><b id="postCount">0</b><span>Posts</span></div><div class="stat"><b id="followerCount">0</b><span>Followers</span></div><div class="stat"><b id="followingCount">0</b><span>Following</span></div></div></div>
+<div class="profile-tools" id="profileTools"><div class="profile-feature-card"><h3>🏅 Achievements</h3><div class="badge-row" id="achievementList"></div><div class="feature-muted">Earn badges through real SPIKE activity.</div></div><div class="profile-feature-card"><h3>🟢 Presence</h3><div class="presence-line"><span class="presence-dot" id="profilePresenceDot"></span><span id="profilePresenceText">Checking status…</span></div><div class="feature-muted">Live status is shared across SPIKE.</div></div><div class="profile-feature-card"><h3>📊 Activity</h3><div class="feature-row"><span>Public posts</span><b id="activityPosts">0</b></div><div class="feature-row"><span>Media posts</span><b id="activityMedia">0</b></div><div class="feature-row"><span>Followers</span><b id="activityFollowers">0</b></div></div><div class="profile-feature-card" id="insightsCard"><h3>📈 Profile insights</h3><div class="feature-row"><span>Public posts</span><b id="insightPosts">0</b></div><div class="feature-row"><span>Media</span><b id="insightMedia">0</b></div><div class="feature-row"><span>Profile views</span><b id="insightViews">—</b></div><div class="feature-muted">Private to the profile owner.</div></div></div><nav class="tabs"><button class="tab active" data-tab="media">Media</button><button class="tab" data-tab="about">About</button></nav>
+<div class="panel" id="mediaPanel"><div class="media-gallery-head"><div><h2>Media</h2><span id="mediaCountLabel">0 items</span></div></div><div class="media-gallery" id="mediaPosts"></div></div><div class="panel hidden" id="aboutPanel"><div class="about-grid" id="aboutGrid"></div></div>
+<div class="media-viewer" id="mediaViewer" aria-hidden="true">
+  <div class="media-viewer-backdrop" data-media-close></div>
+  <div class="media-viewer-shell" role="dialog" aria-modal="true" aria-label="Media viewer">
+    <div class="media-viewer-top"><button class="media-viewer-btn" id="mediaViewerClose" type="button" aria-label="Close">×</button><span id="mediaViewerCount">1 / 1</span><span aria-hidden="true"></span></div>
+    <button class="media-viewer-nav prev" id="mediaViewerPrev" type="button" aria-label="Previous">‹</button>
+    <div class="media-viewer-stage" id="mediaViewerStage"></div>
+    <button class="media-viewer-nav next" id="mediaViewerNext" type="button" aria-label="Next">›</button>
+    <div class="media-viewer-info"><div class="media-viewer-author"><div class="mini-avatar" id="mediaViewerAvatar"></div><div><b id="mediaViewerAuthor">SPIKE</b><small id="mediaViewerTime">now</small></div></div><div class="media-viewer-caption" id="mediaViewerCaption"></div><div class="media-viewer-actions"><button type="button" id="mediaViewerLike">♥ <span>0</span></button><button type="button" id="mediaViewerComment">💬 <span>0</span></button><button type="button" id="mediaViewerShare">↗ Share</button><button type="button" id="mediaViewerSave">🔖 Save</button></div></div>
+  </div>
+</div>
+</section></main>
+<div class="overlay" id="editOverlay"><div class="modal"><h2>Edit profile</h2><p>Changes are saved to your SPIKE profile.</p><form class="form" id="editForm">
+<div><label>Display name</label><input id="editName" maxlength="80"></div><div><label>Username</label><input id="editUsername" maxlength="40"></div><div><label>Bio</label><textarea id="editBio" maxlength="500"></textarea></div><div><label>Avatar image</label><input id="editAvatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><input id="editAvatar" type="url" placeholder="or paste an image URL"></div><div><label>Cover image</label><input id="editCoverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><input id="editCover" type="url" placeholder="or paste an image URL"></div><div><label>Website</label><input id="editWebsite" type="url"></div><div><label>Location</label><input id="editLocation" maxlength="100"></div><div><label>Social links</label><input id="editSocial" maxlength="500" placeholder="Optional social links"></div><section class="privacy-premium-panel" aria-labelledby="privacyPanelTitle">
+  <div class="privacy-panel-glow"></div>
+  <div class="privacy-panel-head">
+    <div class="privacy-panel-icon">✦</div>
+    <div><h3 id="privacyPanelTitle">Privacy & access</h3><p>Choose who can see, discover and interact with you.</p></div>
+    <span class="privacy-secure">🔒 Protected</span>
+  </div>
+  <div class="privacy-grid">
+    <div class="privacy-row"><div class="privacy-copy"><b>Profile visibility</b><small>Who can open your profile</small></div><select id="editVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
+    <div class="privacy-row"><div class="privacy-copy"><b>Posts</b><small>Control who can see your posts</small></div><select id="editPostsVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
+    <div class="privacy-row"><div class="privacy-copy"><b>Media</b><small>Photos and videos on your profile</small></div><select id="editMediaVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
+    <div class="privacy-row"><div class="privacy-copy"><b>Friends & following</b><small>Who can view your connections</small></div><select id="editFriendsVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
+    <div class="privacy-row"><div class="privacy-copy"><b>Messages</b><small>Who can start a conversation</small></div><select id="editMessages"><option value="everyone">Everyone</option><option value="friends">Friends only</option><option value="nobody">Nobody</option></select></div>
+    <div class="privacy-row"><div class="privacy-copy"><b>Calls</b><small>Who can call you on SPIKE</small></div><select id="editCalls"><option value="everyone">Everyone</option><option value="friends">Friends only</option><option value="nobody">Nobody</option></select></div>
+    <div class="privacy-row privacy-toggle-row"><div class="privacy-copy"><b>Online status</b><small>Let permitted people see when you're online</small></div><label class="premium-switch"><input id="editOnline" type="checkbox" checked><span class="premium-slider"></span></label></div>
+    <div class="privacy-row privacy-toggle-row"><div class="privacy-copy"><b>Profile discovery</b><small>Allow your profile to appear in discovery</small></div><label class="premium-switch"><input id="editDiscovery" type="checkbox" checked><span class="premium-slider"></span></label></div>
+  </div>
+  <div class="privacy-panel-foot"><span>🛡️ Your choices are enforced by SPIKE's access controls.</span><span>Changes apply after saving.</span></div>
+</section>
+<div class="modal-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button class="btn primary">Save profile</button></div></form></div></div>
+<div class="overlay" id="menuOverlay"><div class="modal"><h2 id="profileMenuTitle">Profile options</h2><p id="profileMenuText">Quick actions for this profile.</p><div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="copyProfile">🔗 Copy profile link</button><button class="btn" id="showQr">▣ Show QR</button><button class="btn" id="scanQr">⌗ Scan QR</button><button class="btn" id="themeBtn">◐ Theme</button><button class="btn danger" id="signOutBtn">↪ Sign out</button></div><div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div></div></div>
+
+<div class="qr-overlay" id="qrOverlay"><div class="qr-sheet"><div class="qr-head"><div><h2 style="margin:0">My SPIKE QR</h2><div class="feature-muted">Scan to connect instantly</div></div><button class="qr-close" id="qrClose" aria-label="Close">×</button></div><div class="qr-code-box" id="qrCodeBox"></div><p class="qr-help">Show this code to someone nearby. They can scan it and connect with you without a friend request.</p><div class="qr-actions"><button class="qr-btn" id="qrShare">📤 Share</button><button class="qr-btn" id="qrCopy">🔗 Copy link</button></div></div></div><div class="scanner-overlay" id="scannerOverlay"><video class="scanner-video" id="scannerVideo" playsinline muted></video><div class="scanner-shade"></div><div class="scanner-top"><button class="scanner-icon-btn" id="scannerClose" aria-label="Close scanner">×</button><div class="scanner-title">Scan SPIKE QR</div></div><div class="scan-frame"><span class="scan-corner scan-c1"></span><span class="scan-corner scan-c2"></span><span class="scan-corner scan-c3"></span><span class="scan-corner scan-c4"></span><span class="scan-line"></span></div><div class="scanner-bottom"><p>Point your camera at a SPIKE QR code</p><div class="scanner-controls"><button class="scanner-control" id="galleryQr">🖼 Gallery</button></div><input class="scanner-file" id="qrFile" type="file" accept="image/*"></div></div><div class="connect-preview" id="connectPreview"><div class="connect-card"><div id="connectAvatarWrap"></div><h2 id="connectName">SPIKE member</h2><div class="connect-id" id="connectSpId"></div><p class="feature-muted">Connect instantly. No request or approval required.</p><div class="connect-actions"><button class="btn" id="connectCancel">Cancel</button><button class="btn primary" id="connectConfirm">⚡ Connect instantly</button></div></div></div><div class="toast" id="toast"></div>
+<script>
+"use strict";
+const CLOUDINARY_CONFIG = {
+cloudName: 'dxld01rcp',
+uploadPreset: 'Storage_preset'
+};
+const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_KEY="sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:"pkce"}});
+window.sb=db;
+window.supabaseClient=db;
+async function uploadToCloudinary(file, folder="spike"){
+if(!file) return null;
+const allowed=["image/jpeg","image/png","image/webp","image/gif"];
+if(!allowed.includes(file.type)) throw new Error("Use JPG, PNG, WEBP, or GIF.");
+if(file.size>10*1024*1024) throw new Error("Image must be 10MB or smaller.");
+const endpoint=`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/auto/upload`;
+const form=new FormData();
+form.append("file",file);
+form.append("upload_preset",CLOUDINARY_CONFIG.uploadPreset);
+form.append("folder",folder);
+const r=await Promise.race([fetch(endpoint,{method:"POST",body:form}),new Promise((_,rej)=>setTimeout(()=>rej(new Error("Cloudinary upload timed out. Please try again.")),30000))]);
+const data=await r.json().catch(()=>({}));
+if(!r.ok || !data.secure_url) throw new Error(data.error?.message||"Cloudinary upload failed");
+return data.secure_url;
+}
+const $=id=>document.getElementById(id),now=()=>new Date().toISOString();
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nameOf=u=>u?.display_name||u?.full_name||u?.name||u?.email||"User",avatarOf=u=>u?.avatar_url||u?.avatar||"";
+const profileLink=id=>`profile.html?uid=${encodeURIComponent(id)}`;
+const state={me:null,uid:null,profile:null,levelDefinitions:[],posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false};
+function toast(s,type,ms){spikePremiumToast(s,type,ms||3200)}
+function open(id){$(id).classList.add("open")}function close(id){$(id).classList.remove("open")}
+function initTheme(){const t=localStorage.getItem("spike-theme")||"dark";document.documentElement.dataset.theme=t}
+function toggleTheme(){const t=document.documentElement.dataset.theme==="light"?"dark":"light";localStorage.setItem("spike-theme",t);initTheme()}
+function ago(v){const d=new Date(v);if(!v||isNaN(d))return"Just now";const s=(Date.now()-d)/1000;if(s<60)return"now";if(s<3600)return Math.floor(s/60)+"m";if(s<86400)return Math.floor(s/3600)+"h";if(s<604800)return Math.floor(s/86400)+"d";return d.toLocaleDateString(undefined,{month:"short",day:"numeric"})}
+function dateLabel(v){const d=new Date(v);return v&&!isNaN(d)?d.toLocaleDateString(undefined,{month:"long",year:"numeric"}):""}
+function docPath(p){return db.from("app_documents").select("*").eq("path",p).maybeSingle()}
+async function getDoc(p){const r=await docPath(p);if(r.error)throw r.error;return r.data?.data||null}
+async function putDoc(path,data,parent=""){const old=await docPath(path);const row={path,parent_path:(parent&&parent!==path.split("/")[0])?parent:"",collection_name:path.split("/").slice(0,-1).join("/")||path.split("/")[0],document_id:path.split("/").pop(),owner_id:state.me?.id||null,data,updated_at:now(),created_at:old.data?.created_at||now()};const r=await db.from("app_documents").upsert(row,{onConflict:"path"});if(r.error)throw r.error}
+async function listCollection(c,p=""){let q=db.from("app_documents").select("*").eq("collection_name",c);if(p)q=q.eq("parent_path",p);const r=await q;if(r.error)throw r.error;return r.data||[]}
+async function bootAuth(){const r=await Promise.race([db.auth.getSession(),new Promise((_,rej)=>setTimeout(()=>rej(new Error("Session check timed out.")),15000))]);if(r.error||!r.data.session?.user){location.replace("index.html?reauth=1");return false}state.me=r.data.session.user;window.__SPIKE_ONLINE_ALLOWED__=true;state.uid=new URLSearchParams(location.search).get("uid")||state.me.id;return true}
+async function initAdminHeader(){
+const btn=$("adminBtn");
+if(!btn || !state.me) return;
+try {
+  const {data,is_error}=await (async()=>{const r=await db.rpc('is_super_admin',{p_user_id:state.me.id});return {data:r.data,is_error:!!r.error}})();
+  if(is_error||data!==true) return;
+  btn.classList.remove("hidden");
+  btn.classList.add("admin-btn-active");
+  btn.onclick=()=>location.href="admin.html";
+} catch(_) { /* fail closed: keep admin control hidden */ }
+}
+function openImagePicker(inputId){
+const input=$(inputId);
+if(!input) return;
+input.value="";
+input.click();
+}
+function validImage(file){
+if(!file) return false;
+const allowed=["image/jpeg","image/png","image/webp","image/gif"];
+if(!allowed.includes(file.type)) { toast("Use JPG, PNG, WEBP, or GIF."); return false; }
+if(file.size>10*1024*1024){ toast("Image must be 10MB or smaller."); return false; }
+return true;
+}
+async function persistProfileMedia(field,url){
+const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
+const userPatch={...(old||{}),[field]:url,updated_at:now(),id:state.me.id};
+// Only write columns that actually exist in public.profiles.
+// cover_url is stored in the users document because profiles has no cover_url column.
+if(field==="avatar_url"){
+const r=await db.from("profiles").upsert({id:state.me.id,avatar_url:url,updated_at:now()},{onConflict:"id"});
+if(r.error) throw r.error;
+}
+await putDoc(`users/${state.me.id}`,userPatch,"users");
+state.profile={...state.profile,[field]:url};
+renderIdentity();renderActions();renderAbout();
+}
+async function uploadProfileImage(file,type){
+if(!validImage(file)) return;
+const area=type==="avatar"?document.querySelector(".avatar-wrap"):$("coverArea");
+area?.classList.add("uploading");
+try{
+toast(type==="avatar"?"Uploading profile picture…":"Uploading cover photo…");
+const url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`);
+await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url);
+toast(type==="avatar"?"Profile picture updated":"Cover photo updated");
+}catch(err){
+console.error("[SPIKE PROFILE MEDIA]",err);
+toast(err.message||"Image upload failed");
+}finally{
+area?.classList.remove("uploading");
+}
+}
+async function loadProfile(){
+  const {data,error}=await db.rpc("get_public_profiles",{p_user_ids:[state.uid]});
+  if(error) throw error;
+  const relational=Array.isArray(data)?data[0]:null;
+  if(!relational?.id) throw new Error("SPIKE member not found.");
+
+  // The relational profile is the authoritative source for identity fields,
+  // especially verified. App-document data is only an optional source of
+  // profile extras that are not columns on public.profiles.
+  // Only the owner may read legacy app-document profile extras. For another
+  // member, the RPC result is the complete authorized public projection.
+  let extras={};
+  if(state.uid===state.me.id){
+    try{
+      const ext=await getDoc(`users/${state.uid}`);
+      if(ext && typeof ext==="object") extras=ext;
+    }catch(err){ console.warn("[SPIKE PROFILE EXTRAS]",err?.message||err); }
+  }
+
+  state.profile={
+    ...extras,
+    ...relational,
+    id:relational.id,
+    verified:relational.verified===true
+  };
+
+  const levels=await db.from("level_definitions").select("level,xp_required,rank,rank_description").order("level",{ascending:true});
+  if(levels.error) throw levels.error;
+  state.levelDefinitions=Array.isArray(levels.data)?levels.data:[];
+}
+
+async function loadPrivacy(){
+ if(!state.me?.id) return;
+ const own=state.uid===state.me.id;
+ let privacy=null;
+ if(own){
+   const r=await db.from("profile_privacy").select("user_id,profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,allow_calls,show_online_status,allow_profile_discovery").eq("user_id",state.uid).maybeSingle();
+   if(r.error && !/permission|row/i.test(r.error.message||"")) console.warn("[SPIKE PRIVACY LOAD]",r.error.message);
+   privacy=r.data;
+ }
+ state.privacy=privacy||{user_id:state.uid,profile_visibility:state.profile?.profile_visibility||"public",posts_visibility:"public",media_visibility:"public",friends_visibility:"public",allow_messages:"friends",allow_calls:"friends",show_online_status:true,allow_profile_discovery:true};
+ await (window.SPIKE_ACCESS?.ready||Promise.resolve());
+ if(own){
+   state.canSeePosts=state.privacy.posts_visibility!=="private";
+   state.canSeeMedia=state.privacy.media_visibility!=="private";
+   state.canSeeOnline=state.privacy.show_online_status!==false;
+ }else{
+   const access=window.SPIKE_ACCESS;
+   const profileAllowed=await access?.profile?.(state.uid);
+   if(profileAllowed===false){
+     document.body.innerHTML='<div style="min-height:100vh;display:grid;place-items:center;padding:24px;font-family:system-ui;background:#07110d;color:#fff;text-align:center"><div><div style="font-size:42px">🔒</div><h2>Private profile</h2><p style="color:#9aa7a0">You do not have permission to view this profile.</p><a href="feed.html" style="color:#58f29c">Back to Feed</a></div></div>';
+     throw new Error("Profile access denied");
+   }
+   // Access functions are authoritative for another member. Fail closed if unavailable.
+   state.canSeePosts=(await access?.posts?.(state.uid))===true;
+   state.canSeeMedia=(await access?.media?.(state.uid))===true;
+   state.canSeeOnline=(await access?.online?.(state.uid))===true;
+ }
+}
+function fillPrivacy(){const q=state.privacy||{}; $("editVisibility").value=q.profile_visibility||"public"; $("editPostsVisibility").value=q.posts_visibility||"public"; $("editMediaVisibility").value=q.media_visibility||"public"; $("editFriendsVisibility").value=q.friends_visibility||"public"; $("editMessages").value=q.allow_messages||"friends"; $("editCalls").value=q.allow_calls||"friends"; $("editOnline").checked=q.show_online_status!==false; $("editDiscovery").checked=q.allow_profile_discovery!==false}
+
+async function loadSocial(){
+  const meDoc=await getDoc(`users/${state.me.id}`).catch(err=>{
+    console.warn("[SPIKE SOCIAL LOAD]",err?.message||err);
+    return {};
+  });
+  const following=Array.isArray(meDoc?.following)?meDoc.following:[];
+  state.following=following.includes(state.uid);
+  state.profile.savedPosts=Array.isArray(meDoc?.savedPosts)?meDoc.savedPosts:(Array.isArray(meDoc?.saved)?meDoc.saved:[]);
+  const counts=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});
+  if(counts.error) throw counts.error;
+  const c=Array.isArray(counts.data)?counts.data[0]:counts.data;
+  state.followers=Number(c?.followers_count||0);
+  state.profile.following_count=Number(c?.following_count||0);
+  state.views=state.uid===state.me.id?Number(meDoc?.profileViews||0):0;
+}
+
+async function loadPosts(){
+  if(!state.canSeePosts){ state.posts=[]; return; }
+  if(state.uid!==state.me.id){
+    const r=await db.rpc('get_public_profile_posts',{p_owner:state.uid,p_limit:12});
+    if(r.error) throw r.error;
+    state.posts=(r.data||[]).map(x=>({
+      id:x.id, authorUid:state.uid, content:x.content||'',
+      createdAt:x.created_at, mediaUrl:x.media_url||'', mediaType:x.media_type||''
+    }));
+    return;
+  }
+  const rows=await listCollection("posts");
+  state.posts=rows.map(r=>({id:r.document_id,...(r.data||{})}))
+    .filter(p=>p.authorUid===state.uid&&!p.deleted)
+    .sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0));
+}
+function liked(p){return Array.isArray(p.likes)&&p.likes.includes(state.me.id)}function saved(p){return (state.profile.savedPosts||[]).includes(p.id)}
+function renderFeatures(){const own=state.uid===state.me.id,p=state.profile||{},media=state.posts.filter(x=>x.mediaUrl).length;$("activityPosts").textContent=state.posts.length;$("activityMedia").textContent=media;$("activityFollowers").textContent=state.followers;$("insightPosts").textContent=state.posts.length;$("insightMedia").textContent=media;$("insightViews").textContent=own?(state.views||0):"—";$("insightsCard").classList.toggle("hidden",!own);const badges=[];if(state.posts.length>=1)badges.push("✍️ Creator");if(state.posts.length>=10)badges.push("🔥 Active");if(state.followers>=10)badges.push("👥 Community");if(Number(p.xp||0)>=500)badges.push("🏆 XP Builder");if(p.sp_id)badges.push("🪪 Identity");$("achievementList").innerHTML=badges.length?badges.map(x=>`<span class="profile-badge">${esc(x)}</span>`).join(""):'<span class="feature-muted">No badges yet</span>';const visibleOnline=state.uid===state.me.id ? state.privacy?.show_online_status!==false : state.canSeeOnline!==false; const online=visibleOnline && String(p.presence_status||p.presence||"").toLowerCase()==="online";$("profilePresenceDot").classList.toggle("online",online);$("profilePresenceText").textContent=visibleOnline?(online?"Online":"Offline"):"Offline";}function openShareProfile(){const text=`Check out ${nameOf(state.profile)} on SPIKE`;if(navigator.share)navigator.share({title:"SPIKE Profile",text,url:location.href}).catch(()=>{});else navigator.clipboard?.writeText(location.href).then(()=>toast("Profile link copied","success")).catch(()=>toast(location.href,"info"))}
+function mediaItemsOf(p){
+  const items=Array.isArray(p?.mediaItems)&&p.mediaItems.length
+    ? p.mediaItems
+    : (p?.mediaUrl?[{url:p.mediaUrl,type:p.mediaType||"image",watermarked:!!p.mediaWatermarked}]:[]);
+  return items.map(x=>typeof x==="string"?{url:x,type:"image"}:x).filter(x=>x?.url);
+}
+function mediaTypeOfItem(item){
+  const t=String(item?.type||item?.mediaType||"").toLowerCase();
+  const u=String(item?.url||item?.mediaUrl||"");
+  return t==="video"||/\.(mp4|webm|mov)(?:[?#].*)?$/i.test(u)?"video":"image";
+}
+function galleryMedia(){
+  if(!state.canSeeMedia)return [];
+  const out=[];
+  state.posts.forEach(p=>mediaItemsOf(p).forEach((item,index)=>out.push({post:p,item,index})));
+  return out;
+}
+function renderMediaGallery(){
+  const items=galleryMedia();
+  $("mediaCountLabel").textContent=`${items.length} ${items.length===1?"item":"items"}`;
+  if(!items.length){$("mediaPosts").innerHTML='<div class="media-empty"><div style="font-size:26px;margin-bottom:8px">▧</div><b>No media yet</b><div style="margin-top:5px">Photos and videos shared on this profile will appear here.</div></div>';return}
+  $("mediaPosts").innerHTML=items.map((entry,i)=>{
+    const item=entry.item, type=mediaTypeOfItem(item), url=esc(item.url||item.mediaUrl), multi=mediaItemsOf(entry.post).length>1;
+    return `<button class="media-tile" type="button" data-gallery-index="${i}" aria-label="Open ${type} ${i+1} of ${items.length}">${type==="video"?`<video src="${url}" muted playsinline preload="metadata"></video>`:`<img src="${url}" alt="" loading="lazy" decoding="async">`}${type==="video"?'<span class="media-tile-badge">▶</span>':""}${multi?'<span class="media-tile-badge media-tile-stack">▣</span>':""}</button>`;
+  }).join("");
+}
+function render(){renderMediaGallery();$("postCount").textContent=state.posts.length;renderFeatures();$("followerCount").textContent=state.followers;$("followingCount").textContent=Array.isArray(state.profile.following)?state.profile.following.length:Number(state.profile.following_count||0)}
+function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc(n[0]||"U");const c=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(c){$("coverImg").src=c;$("coverImg").classList.remove("hidden")}const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.min(100,Math.max(1,Number(p.level||1))),defs=state.levelDefinitions||[],currentDef=defs.find(d=>Number(d.level)===level)||null,nextDef=defs.find(d=>Number(d.level)===level+1)||null;const currentXp=Number(currentDef?.xp_required??0),nextXp=Number(nextDef?.xp_required??currentXp+1),progress=level>=100?100:Math.max(0,Math.min(100,Math.round(((xp-currentXp)/Math.max(1,nextXp-currentXp))*100)));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=level>=100?"MAX LEVEL":`${Math.max(0,nextXp-xp).toLocaleString()} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";const ranks=["Newcomer","Explorer","Connector","Contributor","Influencer","Elite","Leader","Pioneer","Trailblazer","SPIKE Legend"],rankIndex=Math.min(9,Math.floor((level-1)/10));$("levelRank").textContent=`${ranks[rankIndex]} · Levels ${rankIndex*10+1}–${rankIndex*10+10}`;const badgeFiles=['01-Newcomer-level-1-10.png', '02-Exploer-level-11-20.png', '03-Connector-level-21-30.png', '04-Contributor-level-31-40.png', '05-Influencer-level-41-50.png', '06-elite-level-51-60.png', '07-Leader-level-61-70.png', '08-Pionner-level-71-80.png', '09-trailblazer-level-81-90.png', '10-spike-legend-level-91-100.png'];const badge=badgeFiles[rankIndex]?`assets/badges/${badgeFiles[rankIndex]}`:"assets/badges/01-Newcomer-level-1-10.png";$("levelBadge").src=badge;$("levelBadge").alt=`${ranks[rankIndex]} badge`;$("levelBadge").onclick=()=>location.href="leveling.html";$("levelBadge").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();location.href="leveling.html"}};$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
+function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverEdit").classList.toggle("hidden",!own);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
+function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
+function syncProfileToFeed(action,active){
+  const msg={id:String(state.uid),action,active:!!active,at:Date.now()};
+  try{localStorage.setItem('spike.profile.sync',JSON.stringify(msg));}catch(_){ }
+  try{window.dispatchEvent(new CustomEvent('spike:profile-sync',{detail:msg}));}catch(_){ }
+}
+async function toggleFollow(){
+  const me=await getDoc(`users/${state.me.id}`).catch(()=>({}));
+  const f=new Set(me?.following||[]); const wasFollowing=f.has(state.uid);
+  wasFollowing?f.delete(state.uid):f.add(state.uid);
+  await putDoc(`users/${state.me.id}`,{...(me||{}),following:[...f]},"users");
+  state.following=f.has(state.uid);
+  const counts=await db.rpc('get_spike_profile_follow_counts',{p_owner:state.uid});
+  if(counts.error) throw counts.error;
+  const c=Array.isArray(counts.data)?counts.data[0]:counts.data;
+  state.followers=Number(c?.followers_count||0);
+  state.profile.following_count=Number(c?.following_count||0);
+  syncProfileToFeed('follow',state.following);
+  renderActions();render();
+}
+function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
+async function saveProfile(e){
+  e.preventDefault();
+  const form=e.currentTarget;
+  const username=$("editUsername").value.trim().replace(/^@/,"");
+  if(username && !/^[A-Za-z0-9._-]{2,40}$/.test(username)){
+    toast("Invalid username format","error");
+    return;
+  }
+
+  const avatarFile=$("editAvatarFile")?.files?.[0]||null;
+  const coverFile=$("editCoverFile")?.files?.[0]||null;
+  if(avatarFile&&!validImage(avatarFile)) return;
+  if(coverFile&&!validImage(coverFile)) return;
+
+  const saveBtn=form.querySelector('button[type="submit"]');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.dataset.originalText=saveBtn.textContent;saveBtn.textContent="Saving…";}
+
+  try{
+    const current=state.profile||{};
+    let avatarUrl=$("editAvatar").value.trim()||avatarOf(current);
+    let coverUrl=$("editCover").value.trim()||(current.cover_url||current.coverUrl||current.banner_url||current.banner||"");
+
+    if(avatarFile){
+      toast("Uploading profile picture…");
+      avatarUrl=await uploadToCloudinary(avatarFile,`spike/profiles/${state.me.id}`);
+    }
+    if(coverFile){
+      toast("Uploading cover photo…");
+      coverUrl=await uploadToCloudinary(coverFile,`spike/profiles/${state.me.id}`);
+    }
+
+    const timestamp=now();
+    const next={
+      ...current,
+      id:state.me.id,
+      display_name:$("editName").value.trim(),
+      username,
+      bio:$("editBio").value.trim(),
+      avatar_url:avatarUrl,
+      cover_url:coverUrl,
+      website:$("editWebsite").value.trim(),
+      location:$("editLocation").value.trim(),
+      social_links:$("editSocial").value.trim(),
+      profile_visibility:$("editVisibility").value,
+      updated_at:timestamp
+    };
+
+    // Identity fields belong in public.profiles. Never update verified here:
+    // only the admin verification workflow may change that field.
+    const profilePatch={
+      id:state.me.id,
+      username:next.username,
+      display_name:next.display_name,
+      bio:next.bio,
+      avatar_url:next.avatar_url,
+      website:next.website,
+      updated_at:timestamp
+    };
+    const profileResult=await db.from("profiles").upsert(profilePatch,{onConflict:"id"});
+    if(profileResult.error) throw profileResult.error;
+
+    const privacyPatch={
+      user_id:state.me.id,
+      profile_visibility:$("editVisibility").value,
+      posts_visibility:$("editPostsVisibility").value,
+      media_visibility:$("editMediaVisibility").value,
+      friends_visibility:$("editFriendsVisibility").value,
+      allow_messages:$("editMessages").value,
+      allow_calls:$("editCalls").value,
+      show_online_status:$("editOnline").checked,
+      allow_profile_discovery:$("editDiscovery").checked,
+      updated_at:timestamp
+    };
+    const privacyResult=await db.from("profile_privacy").upsert(privacyPatch,{onConflict:"user_id"});
+    if(privacyResult.error) throw new Error("Privacy settings could not be saved: "+privacyResult.error.message);
+
+    const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
+    const userDoc={
+      ...(old||{}),
+      id:state.me.id,
+      display_name:next.display_name,
+      username:next.username,
+      bio:next.bio,
+      avatar_url:next.avatar_url,
+      cover_url:next.cover_url,
+      website:next.website,
+      location:next.location,
+      social_links:next.social_links,
+      profile_visibility:next.profile_visibility,
+      updated_at:timestamp
+    };
+    await putDoc(`users/${state.me.id}`,userDoc,"users");
+
+    state.profile={...state.profile,...next,verified:state.profile.verified===true};
+    state.privacy={...(state.privacy||{}),...privacyPatch};
+    window.__SPIKE_ONLINE_ALLOWED__=state.uid===state.me.id && privacyPatch.show_online_status===true;
+    if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db);
+    else window.AppPresence?.stop?.();
+
+    renderIdentity();
+    renderActions();
+    renderAbout();
+    render();
+    close("editOverlay");
+    toast("Profile updated","success");
+  }catch(err){
+    console.error("[SPIKE PROFILE SAVE]",err);
+    toast(err.message||"Could not save your profile.","error");
+  }finally{
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||"Save changes";}
+    $("editAvatarFile").value="";
+    $("editCoverFile").value="";
+  }
+}
+
+async function likePost(id){
+  const p=state.posts.find(x=>x.id===id); if(!p||!state.me?.id)return;
+  const before=Array.isArray(p.likes)?[...p.likes]:[];
+  const wasLiked=before.includes(state.me.id);
+  p.likes=wasLiked?before.filter(x=>x!==state.me.id):[...before,state.me.id];
+  render();
+  try{
+    const {data,error}=await db.rpc("mutate_post_interaction",{p_post_id:String(id),p_action:"like",p_emoji:null,p_comment:null});
+    if(error)throw error;
+    if(data&&typeof data==="object")Object.assign(p,data);
+    render();
+  }catch(err){p.likes=before;render();throw err;}
+}
+async function savePost(id){const me=await getDoc(`users/${state.me.id}`).catch(()=>({}));const s=new Set(me?.savedPosts||me?.saved||[]);s.has(id)?s.delete(id):s.add(id);await putDoc(`users/${state.me.id}`,{...(me||{}),savedPosts:[...s]},"users");state.profile.savedPosts=[...s];render();toast(s.has(id)?"Saved":"Removed from saved")}
+async function addComment(id,text){
+  const clean=String(text||"").trim();
+  if(!clean)return;
+  if(clean.length>500)throw new Error("Comment is limited to 500 characters.");
+  const p=state.posts.find(x=>x.id===id); if(!p||!state.me?.id)return;
+  const old=Array.isArray(p.comments)?[...p.comments]:[];
+  const comment={id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),postId:String(id),authorUid:state.me.id,authorName:nameOf(state.profile),authorAvatar:avatarOf(state.profile),text:clean,createdAt:now()};
+  p.comments=[...old,comment]; render();
+  try{
+    const {data,error}=await db.rpc("mutate_post_interaction",{p_post_id:String(id),p_action:"comment",p_emoji:null,p_comment:comment});
+    if(error)throw error;
+    if(data&&typeof data==="object")Object.assign(p,data);
+    render(); toast("Comment added","success");
+  }catch(err){p.comments=old;render();throw err;}
+}
+
+function bind(){
+initTheme();
+$("avatar").addEventListener("click",()=>state.uid===state.me.id&&openImagePicker("avatarFile"));
+$("coverEdit").addEventListener("click",e=>{e.stopPropagation();state.uid===state.me.id&&openImagePicker("coverFile")});
+$("coverArea").addEventListener("click",e=>{
+if(state.uid===state.me.id && !e.target.closest("button")) openImagePicker("coverFile");
+});
+$("avatarFile").addEventListener("change",e=>{
+const f=e.target.files?.[0];
+if(f) uploadProfileImage(f,"avatar");
+});
+$("coverFile").addEventListener("change",e=>{
+const f=e.target.files?.[0];
+if(f) uploadProfileImage(f,"cover");
+});
+$("backBtn").onclick=()=>{
+  const raw=sessionStorage.getItem('spike.feed.return');
+  if(raw){ sessionStorage.removeItem('spike.feed.return'); location.href='feed.html'; }
+  else if(history.length>1) history.back(); else location.href='feed.html';
+};
+$("menuBtn").onclick=()=>open("menuOverlay");$("closeMenu").onclick=()=>close("menuOverlay");$("cancelEdit").onclick=()=>close("editOverlay");$("editForm").addEventListener("submit",saveProfile);$("themeBtn").onclick=toggleTheme;$("shareProfileBtn")?.addEventListener("click",openShareProfile);$("signOutBtn").onclick=async()=>{try{await window.AppPresence?.stop?.();try{await db.removeAllChannels?.()}catch(_){}const {error}=await db.auth.signOut({scope:"local"});if(error)throw error;location.replace("index.html?logged_out=1")}catch(e){console.error("[SPIKE PROFILE SIGNOUT]",e);toast(e.message||"Could not sign out. Please try again.","error")}};$("copyProfile").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied")}catch{toast(location.href)}};document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(x=>x.classList.remove("open"))});document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));$("mediaPanel").classList.toggle("hidden",t.dataset.tab!=="media");$("aboutPanel").classList.toggle("hidden",t.dataset.tab!=="about")});$("mediaPosts").addEventListener("click",e=>{const tile=e.target.closest("[data-gallery-index]");if(tile)openMediaViewer(Number(tile.dataset.galleryIndex))});}
+let mediaViewerIndex=0;
+function openMediaViewer(index){
+  const items=galleryMedia();
+  if(!items.length)return;
+  mediaViewerIndex=Math.max(0,Math.min(index,items.length-1));
+  $("mediaViewer").classList.add("open");
+  $("mediaViewer").setAttribute("aria-hidden","false");
+  document.body.style.overflow="hidden";
+  renderMediaViewer();
+}
+function closeMediaViewer(){
+  $("mediaViewer").classList.remove("open");
+  $("mediaViewer").setAttribute("aria-hidden","true");
+  $("mediaViewerStage").innerHTML="";
+  document.body.style.overflow="";
+}
+function renderMediaViewer(){
+  const items=galleryMedia(), entry=items[mediaViewerIndex];
+  if(!entry)return;
+  const p=entry.post,item=entry.item,type=mediaTypeOfItem(item),url=esc(item.url||item.mediaUrl);
+  $("mediaViewerCount").textContent=`${mediaViewerIndex+1} / ${items.length}`;
+  $("mediaViewerPrev").disabled=mediaViewerIndex===0;
+  $("mediaViewerNext").disabled=mediaViewerIndex===items.length-1;
+  $("mediaViewerStage").innerHTML=type==="video"?`<video src="${url}" controls playsinline autoplay preload="metadata"></video>`:`<img src="${url}" alt="SPIKE media" decoding="async">`;
+  const n=esc(p.authorName||nameOf(state.profile)),a=avatarOf(state.profile);
+  $("mediaViewerAuthor").textContent=p.authorName||nameOf(state.profile);
+  $("mediaViewerTime").textContent=ago(p.createdAt||p.created_at);
+  $("mediaViewerCaption").textContent=p.content||"";
+  $("mediaViewerAvatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy">`:esc((p.authorName||nameOf(state.profile)||"S")[0]);
+  const likeBtn=$("mediaViewerLike"),saveBtn=$("mediaViewerSave");
+  likeBtn.innerHTML=`♥ <span>${Array.isArray(p.likes)?p.likes.length:0}</span>`;
+  likeBtn.classList.toggle("active",liked(p));
+  saveBtn.textContent=saved(p)?"🔖 Saved":"🔖 Save";
+  saveBtn.classList.toggle("active",saved(p));
+  $("mediaViewerComment").innerHTML=`💬 <span>${Array.isArray(p.comments)?p.comments.length:0}</span>`;
+  $("mediaViewerComment").onclick=()=>toast("Comments are available from the post in Feed.","info");
+  likeBtn.onclick=async()=>{await likePost(p.id);renderMediaViewer()};
+  saveBtn.onclick=async()=>{await savePost(p.id);renderMediaViewer()};
+  $("mediaViewerShare").onclick=async()=>{const u=location.origin+profileLink(state.uid)+"#post-"+p.id;try{if(navigator.share)await navigator.share({title:"SPIKE media",text:p.content||"SPIKE media",url:u});else{await navigator.clipboard.writeText(u);toast("Media link copied","success")}}catch{}};
+}
+function moveMediaViewer(delta){
+  const items=galleryMedia();
+  if(!items.length)return;
+  const next=mediaViewerIndex+delta;
+  if(next<0||next>=items.length)return;
+  mediaViewerIndex=next;renderMediaViewer();
+}
+$("mediaViewerClose").onclick=closeMediaViewer;
+$("mediaViewerPrev").onclick=()=>moveMediaViewer(-1);
+$("mediaViewerNext").onclick=()=>moveMediaViewer(1);
+$("mediaViewer").addEventListener("click",e=>{if(e.target.matches("[data-media-close]"))closeMediaViewer()});
+
+document.addEventListener("keydown",e=>{if(!$("mediaViewer").classList.contains("open"))return;if(e.key==="Escape")closeMediaViewer();else if(e.key==="ArrowLeft")moveMediaViewer(-1);else if(e.key==="ArrowRight")moveMediaViewer(1)});
+let mediaSwipeX=0;
+$("mediaViewerStage").addEventListener("touchstart",e=>{mediaSwipeX=e.changedTouches[0]?.clientX||0},{passive:true});
+$("mediaViewerStage").addEventListener("touchend",e=>{const x=e.changedTouches[0]?.clientX||0,d=x-mediaSwipeX;if(Math.abs(d)>55)moveMediaViewer(d<0?1:-1)},{passive:true});
+
+async function realtime(){if(state.realtime)await db.removeChannel(state.realtime);state.realtime=db.channel("profile:"+state.uid,{config:{private:true}}).on("broadcast",{event:"UPDATE"},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path?.startsWith("posts/")||r?.path===`users/${state.uid}`)loadPosts().then(render).catch(()=>{})}).subscribe()}
+window.addEventListener("pagehide",()=>{if(state.realtime){db.removeChannel(state.realtime);state.realtime=null;}});
+// Keep Feed and Profile state coherent across navigation and same-browser tabs.
+window.addEventListener('storage',e=>{
+  if(e.key!=='spike.profile.sync'||!e.newValue)return;
+  try{const m=JSON.parse(e.newValue);if(String(m.id)===String(state.uid)&&m.action==='follow'){state.following=!!m.active;renderActions();render();}}catch(_){ }
+});
+async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader();
+  try{ const raw=sessionStorage.getItem('spike.feed.return'); if(raw){ const x=JSON.parse(raw); if(x?.source==='feed' && Date.now()-Number(x.at||0)<30*60*1000) document.body.dataset.returnToFeed='1'; } }catch(_){ }
+  // QR identity controls are owner-only; a viewer must never be able to present
+  // another member's connect QR as if it were their own.
+  const ownerView=state.uid===state.me.id;
+  if($('showQr')) $('showQr').hidden=!ownerView;
+  if($('copyProfile')) $('copyProfile').textContent=ownerView?'🔗 Copy profile link':'🔗 Share profile link';
+await loadProfile();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
+
+// SPIKE Connect QR — scanner without flashlight.
+let qrStream=null,qrScanTimer=null,qrTargetUid=null,qrScanBusy=false,qrCanvas=null,qrCtx=null;
+
+function spikeQrPayload(){
+  return `${location.origin}${location.pathname}?uid=${encodeURIComponent(state.uid)}`;
+}
+function renderMyQr(){
+  const box=$("qrCodeBox"); box.innerHTML="";
+  if(!window.qrcode){box.textContent="QR generator unavailable. Please reload.";return}
+  const qr=qrcode(0,"M"); qr.addData(spikeQrPayload()); qr.make();
+  box.innerHTML=qr.createImgTag(6,0);
+}
+function openQr(){renderMyQr();open("qrOverlay")}
+
+function stopScanner(){
+  if(qrScanTimer)clearInterval(qrScanTimer);
+  qrScanTimer=null; qrScanBusy=false;
+  if(qrStream){qrStream.getTracks().forEach(t=>t.stop());qrStream=null}
+  const v=$("scannerVideo"); if(v) v.srcObject=null;
+  close("scannerOverlay");
+}
+
+function decodeVideoFrame(){
+  if(qrScanBusy || !qrStream || !window.jsQR) return;
+  const v=$("scannerVideo");
+  if(!v || !v.videoWidth || !v.videoHeight) return;
+  qrScanBusy=true;
+  try{
+    if(!qrCanvas) qrCanvas=document.createElement("canvas");
+    // Downscale large camera frames for faster, more reliable mobile decoding.
+    const max=1000, scale=Math.min(1,max/v.videoWidth);
+    qrCanvas.width=Math.max(1,Math.round(v.videoWidth*scale));
+    qrCanvas.height=Math.max(1,Math.round(v.videoHeight*scale));
+    if(!qrCtx) qrCtx=qrCanvas.getContext("2d",{willReadFrequently:true});
+    qrCtx.drawImage(v,0,0,qrCanvas.width,qrCanvas.height);
+    const image=qrCtx.getImageData(0,0,qrCanvas.width,qrCanvas.height);
+    const code=window.jsQR(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
+    if(code?.data) handleQrValue(code.data);
+  }catch(e){
+    console.warn("[SPIKE QR] frame decode failed",e);
+  }finally{
+    qrScanBusy=false;
+  }
+}
+
+async function startScanner(){
+  close("menuOverlay"); open("scannerOverlay");
+  const v=$("scannerVideo");
+  try{
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error("Camera access is not supported in this browser.");
+    qrStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},
+      audio:false
+    });
+    v.srcObject=qrStream;
+    await v.play();
+
+    // jsQR is the reliable fallback and also avoids browser-specific BarcodeDetector behavior.
+    if(window.jsQR){
+      qrScanTimer=setInterval(decodeVideoFrame,250);
+    }else if("BarcodeDetector" in window){
+      const detector=new BarcodeDetector({formats:["qr_code"]});
+      qrScanTimer=setInterval(async()=>{
+        if(qrScanBusy || !v.videoWidth)return;
+        qrScanBusy=true;
+        try{
+          const codes=await detector.detect(v);
+          if(codes?.[0]?.rawValue)handleQrValue(codes[0].rawValue);
+        }catch(e){console.warn("[SPIKE QR] native detector failed",e)}
+        finally{qrScanBusy=false}
+      },350);
+    }else{
+      throw new Error("QR scanner could not be loaded. Please reload the page.");
+    }
+  }catch(e){
+    toast(e.message||"Camera permission is required to scan QR codes.","error");
+    stopScanner();
+  }
+}
+
+function handleQrValue(raw){
+  let uid=null;
+  const value=String(raw||"").trim();
+  try{
+    const u=new URL(value);
+    if(u.protocol==="spike:"&&u.searchParams.get("uid")) uid=u.searchParams.get("uid");
+    else if(u.searchParams.get("uid")) uid=u.searchParams.get("uid");
+    else if(u.pathname.includes("profile.html")) uid=u.searchParams.get("uid");
+  }catch{}
+  if(!uid && /^[-0-9a-f]{36}$/i.test(value)) uid=value;
+  if(!uid||uid===state.uid){
+    toast(uid===state.uid?"That's your own QR code.":"Invalid SPIKE QR code.","warning");
+    return;
+  }
+  stopScanner(); prepareConnect(uid);
+}
+
+async function prepareConnect(uid){
+  qrTargetUid=uid;
+  try{
+    const {data:profiles,error}=await db.rpc("get_qr_connect_profile",{p_user_id:uid});
+    if(error)throw error;
+    const data=Array.isArray(profiles)?profiles[0]:null;
+    if(!data)throw new Error("SPIKE member not found");
+    $("connectName").textContent=nameOf(data);
+    $("connectSpId").textContent=data.sp_id?`SPIKE ID • ${data.sp_id}`:"SPIKE member";
+    const a=avatarOf(data);
+    $("connectAvatarWrap").innerHTML=a
+      ?`<img class="connect-avatar" src="${esc(a)}" alt="" loading="lazy" decoding="async">`
+      :`<div class="connect-avatar connect-avatar-fallback">${esc(nameOf(data)[0]||"U")}</div>`;
+    open("connectPreview");
+  }catch(e){
+    toast(e.message||"Could not load this SPIKE profile","error");
+  }
+}
+
+async function connectInstant(){
+  if(!qrTargetUid)return;
+  const b=$("connectConfirm"); b.disabled=true; b.textContent="Connecting…";
+  try{
+    const {error}=await db.rpc("connect_via_spike_qr",{p_user_id:qrTargetUid});
+    if(error)throw error;
+    close("connectPreview");
+    toast("You're now friends on SPIKE!","success");
+    state.following=true; renderActions();
+  }catch(e){
+    toast(e.message||"Could not connect","error");
+  }finally{
+    b.disabled=false; b.textContent="⚡ Connect instantly";
+  }
+}
+
+$("showQr")?.addEventListener("click",()=>{close("menuOverlay");openQr()});
+$("scanQr")?.addEventListener("click",startScanner);
+$("qrClose")?.addEventListener("click",()=>close("qrOverlay"));
+$("qrCopy")?.addEventListener("click",async()=>{
+  try{
+    await navigator.clipboard.writeText(spikeQrPayload());
+    toast("SPIKE QR link copied","success");
+  }catch{toast(spikeQrPayload(),"info")}
+});
+$("qrShare")?.addEventListener("click",async()=>{
+  try{
+    await navigator.share?.({
+      title:"Connect with me on SPIKE",
+      text:`Connect with ${nameOf(state.profile)} on SPIKE`,
+      url:spikeQrPayload()
+    });
+  }catch{}
+});
+$("qrOverlay")?.addEventListener("click",e=>{if(e.target.id==="qrOverlay")close("qrOverlay")});
+$("scannerClose")?.addEventListener("click",stopScanner);
+$("galleryQr")?.addEventListener("click",()=>$("qrFile").click());
+
+$("qrFile")?.addEventListener("change",async e=>{
+  const f=e.target.files?.[0]; if(!f)return;
+  try{
+    if(!window.jsQR) throw new Error("QR scanner could not be loaded. Please reload the page.");
+    const bitmap=await createImageBitmap(f);
+    const max=1800,scale=Math.min(1,max/Math.max(bitmap.width,bitmap.height));
+    const c=document.createElement("canvas");
+    c.width=Math.max(1,Math.round(bitmap.width*scale));
+    c.height=Math.max(1,Math.round(bitmap.height*scale));
+    const ctx=c.getContext("2d",{willReadFrequently:true});
+    ctx.drawImage(bitmap,0,0,c.width,c.height);
+    bitmap.close?.();
+    const image=ctx.getImageData(0,0,c.width,c.height);
+    const code=window.jsQR(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
+    if(code?.data) handleQrValue(code.data);
+    else throw new Error("No QR code found in that image.");
+  }catch(err){
+    toast(err.message||"Could not scan that QR image.","error");
+  }finally{e.target.value=""}
+});
+
+$("connectCancel")?.addEventListener("click",()=>{qrTargetUid=null;close("connectPreview")});
+$("connectConfirm")?.addEventListener("click",connectInstant);
+window.addEventListener("pagehide",stopScanner);
+boot();
+</script>
+<script id="spike-universal-theme-runtime">
+(function(){
+const names={1:"Style 1",2:"Style 2",3:"Style 3",4:"Style 4",5:"Style 5",6:"Predictor"};
+function label(btn){
+const n=window.SPIKE_THEME?.get?.()||1;
+btn.setAttribute("aria-label","Switch theme — "+names[n]);
+btn.setAttribute("title","Switch theme • "+names[n]);
+btn.innerHTML='<span class="spike-theme-dot" aria-hidden="true"></span><span>'+names[n]+'</span>';
+}
+function init(){
+const btn=document.getElementById("spikeThemeSwitch");
+if(!btn||!window.SPIKE_THEME)return;
+label(btn);
+btn.addEventListener("click",function(){
+window.SPIKE_THEME.next();
+label(btn);
+});
+window.addEventListener("storage",function(e){
+if(e.key==="spike-feed-style"){
+const n=parseInt(e.newValue||"1",10);
+window.SPIKE_THEME.set(n);
+label(btn);
+}
+});
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+})();
+</script>
+<script id="spike-sw-register">
+if("serviceWorker" in navigator){
+const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
+if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
+else setTimeout(install,1500);
+}
+</script>
+
+<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script><script src="js/ui-fix.js"></script>
+<script id="spike-privacy-bridge">
+(function(){
+  if(window.__SPIKE_PRIVACY_BRIDGE__) return; window.__SPIKE_PRIVACY_BRIDGE__=true;
+  const sb=window.supabase;
+  const state={};
+  async function call(fn,args){try{if(!sb?.rpc)return null; const r=await sb.rpc(fn,args||{}); if(r.error){console.warn('[SPIKE ACCESS]',fn,r.error.message);return null} return r.data;}catch(e){console.warn('[SPIKE ACCESS]',fn,e);return null}}
+  async function viewer(){try{return (await sb?.auth?.getUser())?.data?.user||null}catch(e){return null}}
+  window.SPIKE_ACCESS={
+    profile:(owner)=>call('can_view_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
+    discover:(owner)=>call('can_discover_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
+    posts:(owner)=>call('can_view_spike_posts',{p_viewer:state.viewerId,p_owner:owner}),
+    media:(owner)=>call('can_view_spike_media',{p_viewer:state.viewerId,p_owner:owner}),
+    friends:(owner)=>call('can_view_spike_friends',{p_viewer:state.viewerId,p_owner:owner}),
+    online:(owner)=>call('can_view_spike_online_status',{p_viewer:state.viewerId,p_owner:owner}),
+    message:(owner)=>call('can_message_spike_user',{p_sender:state.viewerId,p_recipient:owner}),
+    call:(owner)=>call('can_call_spike_user',{p_caller:state.viewerId,p_callee:owner}),
+    ready:null
+  };
+  state.ready=(async()=>{const u=await viewer(); state.viewerId=u?.id||null; return u})(); window.SPIKE_ACCESS.ready=state.ready;
+  // Guard profile/discovery links before navigation; privacy is still enforced server-side.
+  document.addEventListener('click',async function(e){
+    const a=e.target.closest?.('a[href]'); if(!a) return;
+    const href=a.getAttribute('href')||''; if(!/(^|\/)(profile|user-profile)(\.html)?([?#]|$)/i.test(href)) return;
+    const u=await state.ready; if(!u) return;
+    const m=href.match(/[?&](?:user|user_id|id|uid)=([^&#]+)/i); if(!m) return;
+    const owner=decodeURIComponent(m[1]); if(owner===u.id) return;
+    const ok=await call('can_discover_spike_profile',{p_viewer:u.id,p_owner:owner});
+    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else window.spikePremiumAlert('This profile is not available to you.',{title:'Profile unavailable',icon:'ⓘ'});}
+  },true);
+})();
+</script>
+<script id="spike-menu-nav-controller-fixed">
+(function(){
+  if(window.__SPIKE_MENU_NAV_FIXED__) return; window.__SPIKE_MENU_NAV_FIXED__=true;
+  const root=document.documentElement, body=document.body;
+  const menuButtonSelector='#menuBtn, #menuButton, .menu-btn, .spike-menu-left, [aria-label*="menu" i], [title*="menu" i]';
+  const closeSelector='[id*="menuClose" i], [id*="closeMenu" i], [data-close-menu], .spike-menu-close';
+  function navHidden(v){ body.classList.toggle('spike-menu-nav-hidden',!!v); root.classList.toggle('spike-menu-nav-hidden',!!v); }
+  function openDetected(){
+    return !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"], .overlay.open[id*="menu" i], [id*="menu" i].open, .side-menu.open, .drawer.open');
+  }
+  function sync(){ navHidden(openDetected()); }
+  document.addEventListener('click',function(e){
+    const menu=e.target.closest?.(menuButtonSelector);
+    if(menu){ navHidden(true); requestAnimationFrame(sync); setTimeout(sync,80); return; }
+    const close=e.target.closest?.(closeSelector);
+    if(close){ setTimeout(sync,40); return; }
+    const overlay=e.target.closest?.('.spike-menu-overlay, .overlay[id*="menu" i]');
+    if(overlay && e.target===overlay) setTimeout(sync,40);
+  },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') setTimeout(sync,40); });
+  const mo=new MutationObserver(()=>sync());
+  mo.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style','aria-hidden']});
+  sync();
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script src="js/premium-back.js" defer></script>
+<script src="js/telemetry.js" defer></script>
+</body>
+</html>

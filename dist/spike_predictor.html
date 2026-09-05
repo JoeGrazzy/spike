@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="css/perf.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07110d"><title>SPIKE Predictor</title>
+<style>
+:root{--bg:#07110d;--card:#0e1a15;--card2:#122119;--line:#20352a;--text:#f5faf7;--muted:#8fa69a;--green:#58f29c;--green2:#1ecb72;--yellow:#ffd66b;--red:#ff6b78}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% -20%,#153b29 0,#07110d 40%);color:var(--text);font:14px Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}.app{max-width:760px;margin:auto;padding-bottom:92px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:18px 16px 10px;position:sticky;top:0;z-index:5;background:rgba(7,17,13,.88);backdrop-filter:blur(15px)}
+.brand{font-weight:950;font-size:24px;letter-spacing:-1px}.brand span{color:var(--green)}.feed-btn{border:1px solid #2b4b39;background:#102119;color:var(--green);border-radius:10px;padding:8px 11px;font-weight:850;font-size:11px;margin-left:auto;margin-right:7px;cursor:pointer}.feed-btn:active{transform:scale(.96)}
+.live{display:flex;align-items:center;gap:7px;border:1px solid #245139;background:#0c2418;border-radius:99px;padding:7px 10px;color:#9fecc0;font-size:11px;font-weight:800}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.hero{margin:8px 14px 15px;padding:21px;border-radius:24px;border:1px solid #28513b;background:linear-gradient(145deg,#123522,#0b1b13);box-shadow:0 16px 45px rgba(0,0,0,.25)}
+.eyebrow{color:var(--green);font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:1.1px}.hero h1{font-size:29px;line-height:1.05;margin:7px 0}.hero p{margin:0;color:#a7bdb0}.hero-row{display:flex;gap:8px;margin-top:17px}.hero-stat{flex:1;background:#0b2015;border:1px solid #244634;border-radius:13px;padding:11px}.hero-stat b{display:block;font-size:19px}.hero-stat span{font-size:10px;color:var(--muted)}
+.tabs{display:flex;gap:7px;overflow:auto;padding:0 14px 11px;scrollbar-width:none}.tabs button,.market button{white-space:nowrap;background:#0d1914;color:#9fb2a7;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-weight:750}.tabs button.active,.market button.active{background:var(--green);color:#06120b;border-color:var(--green)}
+.section{padding:0 14px;margin-top:10px}.section-head{display:flex;justify-content:space-between;align-items:center;margin:17px 0 10px}.section-head h2{font-size:17px;margin:0}.section-head span{font-size:11px;color:var(--muted)}
+.market{display:flex;gap:6px;overflow:auto;padding-bottom:4px;scrollbar-width:none}.market button{font-size:11px}
+.feature{position:relative;overflow:hidden;background:linear-gradient(140deg,#152c20,#0d1914);border:1px solid #315c45;border-radius:19px;padding:16px;margin-bottom:12px}.feature:after{content:"";position:absolute;width:120px;height:120px;right:-50px;top:-55px;border-radius:50%;border:25px solid rgba(88,242,156,.08)}
+.rank{font-size:10px;color:var(--green);font-weight:900}.teams{display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;text-align:center;margin:13px 0}.team{font-weight:850;display:flex;flex-direction:column;align-items:center;gap:6px}.crest{width:42px;height:42px;object-fit:contain;border-radius:50%;background:#15251c;border:1px solid #294536;padding:5px}.flag{font-size:17px;margin-right:5px}.league-label{display:flex;align-items:center;gap:5px}.vs{color:#62776b;font-size:11px}.kick{font-size:10px;color:var(--muted);margin-top:4px}
+.pickline{display:flex;justify-content:space-between;align-items:center;border-top:1px solid #274535;padding-top:12px}.pick{font-size:18px;font-weight:950}.confidence{padding:7px 9px;border-radius:9px;background:#0a2919;color:var(--green);font-weight:900;font-size:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:14px;margin-bottom:9px}.card-top{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.card-top b{color:#71877a}.game{display:flex;align-items:center;gap:8px;margin:11px 0}.game .teams-mini{flex:1}.teams-mini{display:flex;flex-direction:column}.game .teams-mini div{font-weight:800;line-height:1.65}.time{text-align:right;color:#b7c7bf;font-size:11px}.prediction{display:flex;justify-content:space-between;align-items:center;background:#0a1510;border-radius:11px;padding:10px 11px}.prediction strong{font-size:15px}.prediction small{display:block;color:var(--muted);margin-top:2px}.bar{height:5px;background:#1e3328;border-radius:5px;margin-top:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--green)}
+.bottom{position:fixed;z-index:10;bottom:0;left:50%;transform:translateX(-50%);width:min(760px,100%);display:grid;grid-template-columns:repeat(4,1fr);padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(7,17,13,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line)}.nav{border:0;background:none;color:#71877a;padding:7px;font-size:10px;font-weight:800}.nav span{display:block;font-size:18px;margin-bottom:2px}.nav.active{color:var(--green)}
+.error,.empty{margin:14px;border-radius:14px;padding:15px;border:1px solid var(--line);color:var(--muted);background:var(--card)}.error{display:none;color:#ffb8c0;border-color:#63333b;background:#27151a}
+.modal{display:none;position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.7);padding:15px}.sheet{max-width:700px;margin:6vh auto 0;background:#0d1914;border:1px solid #2b4b39;border-radius:22px;padding:18px;max-height:82vh;overflow:auto}.close{float:right;border:0;background:#1b2a22;color:#fff;border-radius:9px;padding:8px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.detail{background:#101f17;border-radius:12px;padding:11px}.detail b{display:block;font-size:17px}.detail small{color:var(--muted)}
+@media(min-width:700px){.bottom{border-radius:18px 18px 0 0}.hero{margin-left:0;margin-right:0}.tabs,.section{padding-left:0;padding-right:0}}
+
+.loader-overlay{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(4,10,7,.96);backdrop-filter:blur(12px);transition:opacity .35s ease,visibility .35s ease}.loader-overlay.hide{opacity:0;visibility:hidden;pointer-events:none}.loader-box{text-align:center;width:min(330px,88vw)}.ball{width:68px;height:68px;margin:0 auto 20px;border:3px solid #20352a;border-top-color:var(--green);border-right-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;position:relative}.ball:after{content:'⚽';position:absolute;inset:0;display:grid;place-items:center;font-size:28px;animation:counter .8s linear infinite}.loader-title{font-size:20px;font-weight:950}.loader-sub{color:var(--muted);font-size:12px;margin-top:6px}.loader-bar{height:5px;background:#17281f;border-radius:5px;margin-top:18px;overflow:hidden}.loader-bar i{display:block;height:100%;width:35%;background:var(--green);animation:loadbar 1.2s ease-in-out infinite}@keyframes spin{to{transform:rotate(360deg)}}@keyframes counter{to{transform:rotate(-360deg)}}@keyframes loadbar{0%{transform:translateX(-110%)}50%{transform:translateX(130%)}100%{transform:translateX(330%)}} 
+.legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.legend div{background:#0a1510;border:1px solid var(--line);border-radius:11px;padding:10px}.legend b{display:block}.legend small{color:var(--muted);line-height:1.4}.risk{font-size:10px;font-weight:900;padding:5px 7px;border-radius:7px;background:#14271d;color:var(--green);margin-left:6px}.risk.medium{background:#2a2412;color:var(--yellow)}.risk.high{background:#2b171b;color:var(--red)}
+.view{display:none}.view.active{display:block}.nav{cursor:pointer}.saved-empty{padding:28px 14px;text-align:center;border:1px dashed #294536;border-radius:17px;background:#0e1a15;color:#8fa69a}.action-row{display:flex;gap:7px;margin-top:9px}.save-btn{border:1px solid var(--line);background:#101e17;color:#9fb2a7;border-radius:9px;padding:7px 10px;font-weight:800;font-size:11px}.save-btn.saved{color:var(--green);border-color:#326748;background:#10281a}</style><style id="spike-menu-nav-css-fixed">
+/* SPIKE menu-aware bottom navigation */
+.spike-menu-nav-hidden .spike-bottom-nav,
+.spike-menu-nav-hidden .bottom-nav,
+.spike-menu-nav-hidden #spikeBottomNav,
+.spike-menu-nav-hidden #bottomNav {
+  transform: translate3d(0, calc(100% + 24px), 0) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease !important;
+}
+.spike-bottom-nav, .bottom-nav, #spikeBottomNav, #bottomNav {
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease;
+}
+/* Premium, smart circular avatars; never cover adjacent post text. */
+.spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+.post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+#chatAvatar img, #profileAvatar img {
+  width: 48px; height: 48px; min-width: 48px; min-height: 48px;
+  aspect-ratio: 1 / 1; border-radius: 50% !important;
+  object-fit: cover !important; object-position: 50% 50%;
+  display: block; overflow: hidden; flex: 0 0 auto;
+}
+.post-header, .post-head, .user-row, .profile-head, .comment-head {
+  min-width: 0;
+}
+.post-header .avatar, .post-head .avatar, .user-row .avatar { position: static !important; }
+.post-header .user-info, .post-head .user-info, .user-row .user-info { min-width: 0; }
+@media (max-width:600px){
+ .spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+ .post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+ #chatAvatar img, #profileAvatar img { width:44px; height:44px; min-width:44px; min-height:44px; }
+}
+</style>
+<meta name="description" content="SPIKE Predictor.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0b0b10">
+<link rel="stylesheet" href="css/premium-back.css">
+  <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
+</head>
+<body>
+<div class="loader-overlay" id="footballLoader">
+  <div class="loader-box">
+    <div class="ball"></div>
+    <div class="loader-title">SPIKE Football Loader</div>
+    <div class="loader-sub" id="loaderSlogan">Predict smarter. Follow every fixture.</div>
+    <div class="loader-sub" id="loaderText">Loading today's fixtures & predictions…</div>
+    <div class="loader-bar"><i></i></div>
+  </div>
+</div>
+<div class="app">
+<header class="top">
+  <button type="button" class="spike-premium-back" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back"><span class="spike-back-icon" aria-hidden="true">←</span><span class="spike-back-label">Back</span></button><div class="brand">SPIKE<span>_PREDICTOR</span></div><button class="feed-btn" onclick="window.location.href='feed.html'" aria-label="Open SPIKE Feed">▣ Feed</button><div class="live"><i class="dot"></i><span id="status">LIVE</span></div></header>
+
+<section class="hero"><div class="eyebrow" id="predictorEyebrow">Today · Daily picks</div><h1>Find your strongest<br>football predictions.</h1><p>Today's fixtures ranked by the SPIKE model. Use the confidence signal to compare picks; no prediction is guaranteed.</p>
+<div class="hero-row"><div class="hero-stat"><b id="fixtureCount">—</b><span>FIXTURES</span></div><div class="hero-stat"><b id="pickCount">—</b><span>TOP PICKS</span></div><div class="hero-stat"><b id="bestConf">—</b><span>BEST CONFIDENCE</span></div></div></section>
+
+<div class="tabs" id="leagueTabs"><button class="active" data-league="all">All leagues</button></div>
+
+<div id="homeView" class="view active"><section class="section"><div class="section-head"><h2>Prediction markets</h2><span>Tap to filter</span></div><div class="market">
+<button class="active" data-market="all">All</button><button data-market="over_0_5">Over 0.5</button><button data-market="over_1_5">Over 1.5</button><button data-market="over_2_5">Over 2.5</button><button data-market="over_3_5">Over 3.5</button><button data-market="under_2_5">Under 2.5</button><button data-market="btts">BTTS</button><button data-market="double_chance">Double Chance</button><button data-market="draw_no_bet">Draw No Bet</button><button data-market="1x2">1X2</button><button data-market="ht_1x2">HT 1X2</button><button data-market="ht_over_0_5">HT O0.5</button><button data-market="ht_over_1_5">HT O1.5</button><button data-market="htft">HT/FT</button><button data-market="team_to_score">Team to Score</button><button data-market="clean_sheet">Clean Sheet</button><button data-market="win_either_half">Win Either Half</button><button data-market="correct_score">Correct Score</button>
+</div>
+<div class="legend">
+ <div><b>🟢 High confidence</b><small>Stronger model signal. Still not guaranteed.</small></div>
+ <div><b>🟡 Medium confidence</b><small>More uncertainty. Compare other markets.</small></div>
+ <div><b>🔴 High risk</b><small>Low-confidence or volatile market.</small></div>
+ <div><b>📊 Confidence</b><small>Model estimate, not probability of certainty.</small></div>
+</div>
+</section>
+
+<div id="error" class="error"></div>
+<section class="section"><div class="section-head"><h2>🔥 Top pick</h2><span>Highest confidence</span></div><div id="featured"></div></section>
+<section class="section"><div class="section-head"><h2>Today's fixtures</h2><span id="sortText">Ranked by confidence</span></div><div id="list"></div></section></div>
+<div id="fixturesView" class="view"></div><div id="topView" class="view"></div><div id="savedView" class="view"></div>
+<nav class="bottom"><button class="nav active" data-view="home"><span>⌂</span>Home</button><button class="nav" data-view="fixtures"><span>⚽</span>Fixtures</button><button class="nav" data-view="top"><span>🔥</span>Top Picks</button><button class="nav" data-view="saved"><span>☆</span>Saved</button></nav>
+</div>
+
+<div class="modal" id="modal"><div class="sheet"><button class="close" id="close">✕</button><div id="detail"></div></div></div>
+
+
+<script>
+const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const FUNCTION_URL=SUPABASE_URL+"/functions/v1/spike-predictor-sync";
+let rows=[], market="all", league="all", saved=JSON.parse(localStorage.getItem("spike_saved")||"[]"), currentView="home";
+const $=id=>document.getElementById(id);
+const esc=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=v=>{if(!v)return"Kickoff TBA";const d=new Date(v);return Number.isNaN(d.getTime())?"Kickoff TBA":d.toLocaleString([],{dateStyle:"short",timeStyle:"short"});};
+const flagFor=n=>{const x=String(n||"").toLowerCase();const m=[["premier league","🇬🇧"],["championship","🇬🇧"],["fa cup","🇬🇧"],["la liga","🇪🇸"],["serie a","🇮🇹"],["bundesliga","🇩🇪"],["ligue 1","🇫🇷"],["eredivisie","🇳🇱"],["primeira liga","🇵🇹"],["champions league","🇪🇺"],["europa league","🇪🇺"],["conference league","🇪🇺"],["nigeria","🇳🇬"]];for(const [k,f] of m)if(x.includes(k))return f;return"⚽";};
+const risk=c=>Number(c)>=75?"HIGH CONFIDENCE":Number(c)>=55?"MEDIUM":"HIGH RISK";
+const riskClass=c=>Number(c)>=75?"":Number(c)>=55?"medium":"high";
+function crest(x,id){const src=x?.home_logo_url||x?.home_crest_url||x?.away_logo_url||x?.away_crest_url||x?.logo_url||x?.crest_url||x?.team_logo||x?.team_crest||"";return src?`<img class="crest" src="${esc(src)}" alt="" loading="lazy" onerror="this.style.display='none'" decoding="async">`:`<div class="crest">⚽</div>`;}
+function filtered(){return rows.filter(x=>(market==="all"||x.market===market)&&(league==="all"||x.competition_name===league)).sort((a,b)=>(Number(b.confidence)||0)-(Number(a.confidence)||0));}
+function cardHTML(x,i){return `<article class="card" data-open="${esc(x.id)}"><div class="card-top"><span>${flagFor(x.competition_name)} ${esc(x.competition_name||"Football")}</span><b>#${i+1}</b></div><div class="game"><div class="teams-mini"><div>${esc(x.home_team_name)}</div><div>${esc(x.away_team_name)}</div></div><div class="time">${fmt(x.kickoff)}</div></div><div class="prediction"><div><strong>${esc(x.selection)}</strong><small>Projected score: ${esc(x.predicted_score||"—")}</small></div><div><strong>${Math.round(Number(x.confidence)||0)}%</strong><span class="risk ${riskClass(x.confidence)}">${risk(x.confidence)}</span></div></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,Number(x.confidence)||0))}%"></i></div><div class="action-row"><button class="save-btn ${saved.includes(x.id)?"saved":""}" data-save="${esc(x.id)}">${saved.includes(x.id)?"★ Saved":"☆ Save"}</button></div></article>`;}
+function bindCards(root){root.querySelectorAll("[data-open]").forEach(el=>el.onclick=e=>{if(e.target.closest("[data-save]"))return;openDetail(rows.find(x=>x.id===el.dataset.open));});root.querySelectorAll("[data-save]").forEach(b=>b.onclick=e=>{e.stopPropagation();toggleSaved(b.dataset.save);});}
+function toggleSaved(id){saved=saved.includes(id)?saved.filter(x=>x!==id):saved.concat(id);localStorage.setItem("spike_saved",JSON.stringify(saved));render();renderView(currentView);}
+function renderLeagues(){const ls=[...new Set(rows.map(x=>x.competition_name).filter(Boolean))];$("leagueTabs").innerHTML='<button class="active" data-league="all">⚽ All leagues</button>'+ls.map(x=>`<button data-league="${esc(x)}">${flagFor(x)} ${esc(x)}</button>`).join("");document.querySelectorAll("[data-league]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-league]").forEach(x=>x.classList.remove("active"));b.classList.add("active");league=b.dataset.league;render();});}
+function render(){const a=filtered(),best=a[0];$("fixtureCount").textContent=new Set(a.map(x=>x.fixture_id)).size;$("pickCount").textContent=a.length;$("bestConf").textContent=best?Math.round(Number(best.confidence)||0)+"%":"—";$("featured").innerHTML=best?`<article class="feature" data-open="${esc(best.id)}"><div class="rank">${flagFor(best.competition_name)} SPIKE #1 · ${esc(best.competition_name||"FOOTBALL")}</div><div class="teams"><div class="team">${esc(best.home_team_name)}</div><div class="vs">VS</div><div class="team">${esc(best.away_team_name)}</div></div><div class="pickline"><div><div class="pick">${esc(best.selection)}</div><div class="kick">${fmt(best.kickoff)}</div></div><div><span class="confidence">${Math.round(Number(best.confidence)||0)}%</span><span class="risk ${riskClass(best.confidence)}">${risk(best.confidence)}</span></div></div></article>`:'<div class="empty">No SPIKE predictions are available for this market yet.</div>';$("list").innerHTML=a.map(cardHTML).join("");bindCards($("homeView"));renderView(currentView);}
+function renderView(v){currentView=v;for(const name of ["home","fixtures","top","saved"]){const el=$(name==="home"?"homeView":name+"View");if(el)el.classList.toggle("active",name===v);}document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.view===v));if(v==="fixtures"){const a=[...rows].sort((x,y)=>String(x.kickoff||"").localeCompare(String(y.kickoff||"")));$("fixturesView").innerHTML=`<section class="section"><div class="section-head"><h2>⚽ Today's fixtures</h2><span>${new Set(a.map(x=>x.fixture_id)).size} matches</span></div>${a.length?a.map(cardHTML).join(""):'<div class="saved-empty">No fixtures available today.</div>'}</section>`;bindCards($("fixturesView"));}else if(v==="top"){const a=[...rows].sort((x,y)=>(Number(y.confidence)||0)-(Number(x.confidence)||0)).slice(0,30);$("topView").innerHTML=`<section class="section"><div class="section-head"><h2>🔥 SPIKE Top Picks</h2><span>Highest confidence</span></div>${a.length?a.map(cardHTML).join(""):'<div class="saved-empty">No top picks available yet.</div>'}</section>`;bindCards($("topView"));}else if(v==="saved"){const a=rows.filter(x=>saved.includes(x.id));$("savedView").innerHTML=`<section class="section"><div class="section-head"><h2>⭐ Saved picks</h2><span>${a.length} saved</span></div>${a.length?a.map(cardHTML).join(""):'<div class="saved-empty">No saved picks yet.<br><br>Tap ☆ Save on a prediction.</div>'}</section>`;bindCards($("savedView"));}}
+function openDetail(x){if(!x)return;$("detail").innerHTML=`<button class="close" id="detailClose">✕</button><div class="eyebrow">${flagFor(x.competition_name)} ${esc(x.competition_name||"Football")}</div><h2>${esc(x.home_team_name)} vs ${esc(x.away_team_name)}</h2><p style="color:#8fa69a">${fmt(x.kickoff)} · ${esc(x.status||"scheduled")}</p><div class="detail-grid"><div class="detail"><b>${esc(x.selection)}</b><small>Recommended pick</small></div><div class="detail"><b>${Math.round(Number(x.confidence)||0)}%</b><small>${risk(x.confidence)}</small></div><div class="detail"><b>${esc(x.predicted_score||"—")}</b><small>Projected score</small></div><div class="detail"><b>${x.estimated_odds?Number(x.estimated_odds).toFixed(2):"—"}</b><small>Estimated odds</small></div></div><h3>How to read this pick</h3><p style="color:#a7bdb0">${esc(x.rationale||"SPIKE ranking based on available fixture context.")}</p><p style="font-size:11px;color:#74897d">Confidence is an estimate, not a guarantee.</p>`;$("modal").style.display="block";$("detailClose").onclick=()=>$("modal").style.display="none";}
+$("close").onclick=()=>$("modal").style.display="none";$("modal").onclick=e=>{if(e.target.id==="modal")$("modal").style.display="none";};
+document.querySelectorAll("[data-market]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-market]").forEach(x=>x.classList.remove("active"));b.classList.add("active");market=b.dataset.market;render();});
+document.querySelectorAll(".nav").forEach(n=>n.onclick=()=>renderView(n.dataset.view));
+async function load(){const eyebrow=$("predictorEyebrow");if(eyebrow){eyebrow.textContent=new Intl.DateTimeFormat(undefined,{weekday:"long"}).format(new Date())+" · Daily picks";}const loader=$("footballLoader");$("status").textContent="SYNCING";if(loader)loader.classList.remove("hide");try{if($("loaderText"))$("loaderText").textContent="Connecting to SPIKE…";const r=await fetch(FUNCTION_URL,{method:"POST",headers:{"Authorization":"Bearer "+SUPABASE_ANON_KEY,"apikey":SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"});const sr=await r.json().catch(()=>({}));if(!r.ok||sr.ok===false)throw Error(sr.error||"Predictor sync failed");if($("loaderText"))$("loaderText").textContent="Loading predictions…";const date=new Date().toISOString().slice(0,10),h={"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY};const [pr,fr]=await Promise.all([fetch(SUPABASE_URL+"/rest/v1/spike_predictions?prediction_date=eq."+date+"&order=confidence.desc",{headers:h}),fetch(SUPABASE_URL+"/rest/v1/spike_fixtures?fixture_date=eq."+date,{headers:h})]);const ps=await pr.json(),fs=await fr.json();if(!pr.ok)throw Error(ps?.message||"Could not load predictions");const by=new Map((Array.isArray(fs)?fs:[]).map(f=>[String(f.id),f]));rows=(Array.isArray(ps)?ps:[]).map(x=>({...x,...(by.get(String(x.fixture_id))||{}),id:String(x.id)}));$("status").textContent="LIVE";renderLeagues();render();if(loader){$("loaderText").textContent="Predictions ready";setTimeout(()=>loader.classList.add("hide"),250);}}catch(e){$("status").textContent="OFFLINE";$("error").style.display="block";$("error").textContent=e.message||"Connection failed";if($("loaderText"))$("loaderText").textContent="SPIKE could not load today's data";setTimeout(()=>loader?.classList.add("hide"),800);}}
+load();setInterval(load,900000);
+</script><script id="spike-menu-nav-controller-fixed">
+(function(){
+  if(window.__SPIKE_MENU_NAV_FIXED__) return; window.__SPIKE_MENU_NAV_FIXED__=true;
+  const root=document.documentElement, body=document.body;
+  const menuButtonSelector='#menuBtn, #menuButton, .menu-btn, .spike-menu-left, [aria-label*="menu" i], [title*="menu" i]';
+  const closeSelector='[id*="menuClose" i], [id*="closeMenu" i], [data-close-menu], .spike-menu-close';
+  function navHidden(v){ body.classList.toggle('spike-menu-nav-hidden',!!v); root.classList.toggle('spike-menu-nav-hidden',!!v); }
+  function openDetected(){
+    return !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"], .overlay.open[id*="menu" i], [id*="menu" i].open, .side-menu.open, .drawer.open');
+  }
+  function sync(){ navHidden(openDetected()); }
+  document.addEventListener('click',function(e){
+    const menu=e.target.closest?.(menuButtonSelector);
+    if(menu){ navHidden(true); requestAnimationFrame(sync); setTimeout(sync,80); return; }
+    const close=e.target.closest?.(closeSelector);
+    if(close){ setTimeout(sync,40); return; }
+    const overlay=e.target.closest?.('.spike-menu-overlay, .overlay[id*="menu" i]');
+    if(overlay && e.target===overlay) setTimeout(sync,40);
+  },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') setTimeout(sync,40); });
+  const mo=new MutationObserver(()=>sync());
+  mo.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style','aria-hidden']});
+  sync();
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script src="js/premium-back.js" defer></script>
+<script src="js/telemetry.js" defer></script>
+  <script src="js/theme.js"></script>
+</body></html>

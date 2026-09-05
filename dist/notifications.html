@@ -1,0 +1,1185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="css/perf.css">
+<script id="spike-performance-bootstrap">
+/* SPIKE performance bootstrap — no application logic changes */
+(()=>{try{
+const c=navigator.connection;
+if(c&&c.saveData) document.documentElement.dataset.saveData="1";
+if("contentVisibility" in document.documentElement.style){
+document.documentElement.classList.add("spike-cv-ready");
+}
+}catch(_){}})();
+</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b10">
+<meta name="description" content="SPIKE notifications">
+<title>SPIKE — Notifications</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<audio id="notificationTone" src="assets/mp3/notifications.mp3" preload="auto"></audio>
+<script id="spike-universal-theme">
+(function(){
+const KEY="spike-feed-style";
+const allowed=[1,2,3,4,5,6,7,8,9,10];
+let n=parseInt(localStorage.getItem(KEY)||"1",10);
+if(!allowed.includes(n)) n=1;
+function apply(style){
+style=allowed.includes(Number(style))?Number(style):1;
+document.documentElement.dataset.spikeStyle=String(style);
+document.documentElement.dataset.theme=(style===6||style===8)?"light":"dark";
+document.documentElement.style.colorScheme=(style===6||style===8)?"light":"dark";
+try{localStorage.setItem(KEY,String(style));localStorage.setItem("spike-theme",(style===6||style===8)?"light":"dark")}catch(e){}
+window.__SPIKE_STYLE__=style;
+}
+window.SPIKE_THEME={
+get:()=>window.__SPIKE_STYLE__||n,
+set:apply,
+next:()=>apply(((window.__SPIKE_STYLE__||n)%10)+1)
+};
+apply(n);
+})();
+</script>
+<style id="spike-universal-theme-css">
+/* ===== SPIKE UNIVERSAL FEED THEMES ===== */
+html[data-spike-style="1"]{
+--spike-bg:#f5f7fb;--spike-surface:#ffffff;--spike-surface-2:#f8faff;
+--spike-text:#111827;--spike-muted:#667085;--spike-line:rgba(15,23,42,.10);
+--spike-accent:#7c3aed;--spike-accent-2:#a855f7;--spike-glow:rgba(124,58,237,.18);
+}
+html[data-spike-style="2"]{
+--spike-bg:#060817;--spike-surface:#0c1022;--spike-surface-2:#121735;
+--spike-text:#f7f8ff;--spike-muted:#9da6c4;--spike-line:rgba(139,92,246,.22);
+--spike-accent:#8b5cf6;--spike-accent-2:#d946ef;--spike-glow:rgba(139,92,246,.35);
+}
+html[data-spike-style="3"]{
+--spike-bg:#0b416c;--spike-surface:rgba(255,255,255,.16);--spike-surface-2:rgba(255,255,255,.11);
+--spike-text:#fff;--spike-muted:rgba(255,255,255,.78);--spike-line:rgba(255,255,255,.28);
+--spike-accent:#48a8ff;--spike-accent-2:#7c5cff;--spike-glow:rgba(91,178,255,.35);
+}
+html[data-spike-style="4"]{
+--spike-bg:#d72668;--spike-surface:rgba(255,255,255,.91);--spike-surface-2:rgba(255,255,255,.18);
+--spike-text:#172033;--spike-muted:#5b6475;--spike-line:rgba(255,255,255,.42);
+--spike-accent:#ef315e;--spike-accent-2:#ff8b32;--spike-glow:rgba(255,94,145,.38);
+}
+html[data-spike-style="5"]{
+--spike-bg:#0b0d10;--spike-surface:#14171b;--spike-surface-2:#1b1f24;
+--spike-text:#f5f7fa;--spike-muted:#9ba2ad;--spike-line:rgba(255,255,255,.10);
+--spike-accent:#fff;--spike-accent-2:#cfd5dd;--spike-glow:rgba(255,255,255,.12);
+}
+/* page background */
+html[data-spike-style="1"] body{background:radial-gradient(circle at 8% 0,#ede9fe 0,transparent 34%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="2"] body{background:radial-gradient(circle at 12% 0,#26114e 0,transparent 34%),radial-gradient(circle at 92% 12%,#12275d 0,transparent 28%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="3"] body{background:radial-gradient(circle at 15% 0,#6cc7ff 0,transparent 32%),linear-gradient(145deg,#0a385d,#11679b 52%,#244f99)!important;color:var(--spike-text)!important}
+html[data-spike-style="4"] body{background:radial-gradient(circle at 8% 0,#ff8d38 0,transparent 35%),radial-gradient(circle at 94% 10%,#ff3d8b 0,transparent 34%),linear-gradient(145deg,#ff7b32,#e91e7a 52%,#8f2bd9)!important;color:var(--spike-text)!important}
+html[data-spike-style="5"] body{background:var(--spike-bg)!important;color:var(--spike-text)!important}
+/* common surfaces */
+html[data-spike-style="1"] .card,html[data-spike-style="1"] .panel,html[data-spike-style="1"] .stat,
+html[data-spike-style="1"] .hero,html[data-spike-style="1"] .list,html[data-spike-style="1"] .post,
+html[data-spike-style="1"] .story-row,html[data-spike-style="1"] .composer,html[data-spike-style="1"] .announcement{
+background:var(--spike-surface)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 12px 36px rgba(31,41,55,.08)!important
+}
+html[data-spike-style="2"] .card,html[data-spike-style="2"] .panel,html[data-spike-style="2"] .stat,
+html[data-spike-style="2"] .hero,html[data-spike-style="2"] .list,html[data-spike-style="2"] .post,
+html[data-spike-style="2"] .story-row,html[data-spike-style="2"] .composer,html[data-spike-style="2"] .announcement{
+background:linear-gradient(145deg,rgba(17,20,43,.96),rgba(10,13,31,.96))!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 0 30px rgba(105,63,255,.12),0 14px 45px rgba(0,0,0,.32)!important
+}
+html[data-spike-style="3"] .card,html[data-spike-style="3"] .panel,html[data-spike-style="3"] .stat,
+html[data-spike-style="3"] .hero,html[data-spike-style="3"] .list,html[data-spike-style="3"] .post,
+html[data-spike-style="3"] .story-row,html[data-spike-style="3"] .composer,html[data-spike-style="3"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important;box-shadow:0 14px 45px rgba(0,32,72,.22),inset 0 1px rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important
+}
+html[data-spike-style="4"] .card,html[data-spike-style="4"] .panel,html[data-spike-style="4"] .stat,
+html[data-spike-style="4"] .hero,html[data-spike-style="4"] .list,html[data-spike-style="4"] .post,
+html[data-spike-style="4"] .story-row,html[data-spike-style="4"] .composer,html[data-spike-style="4"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,242,247,.84))!important;color:var(--spike-text)!important;border-color:rgba(255,255,255,.72)!important;box-shadow:0 14px 45px rgba(101,16,68,.18)!important
+}
+html[data-spike-style="5"] .card,html[data-spike-style="5"] .panel,html[data-spike-style="5"] .stat,
+html[data-spike-style="5"] .hero,html[data-spike-style="5"] .list,html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .story-row,html[data-spike-style="5"] .composer,html[data-spike-style="5"] .announcement{
+background:linear-gradient(145deg,#14171b,#1a1e23)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important
+}
+/* shared typography and controls */
+html[data-spike-style="1"] .muted,html[data-spike-style="1"] .sub,html[data-spike-style="1"] .status,
+html[data-spike-style="1"] .meta,html[data-spike-style="1"] .time,html[data-spike-style="1"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="2"] .muted,html[data-spike-style="2"] .sub,html[data-spike-style="2"] .status,
+html[data-spike-style="2"] .meta,html[data-spike-style="2"] .time,html[data-spike-style="2"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="3"] .muted,html[data-spike-style="3"] .sub,html[data-spike-style="3"] .status,
+html[data-spike-style="3"] .meta,html[data-spike-style="3"] .time,html[data-spike-style="3"] .preview{color:rgba(255,255,255,.78)!important}
+html[data-spike-style="4"] .muted,html[data-spike-style="4"] .sub,html[data-spike-style="4"] .status,
+html[data-spike-style="4"] .meta,html[data-spike-style="4"] .time,html[data-spike-style="4"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="5"] .muted,html[data-spike-style="5"] .sub,html[data-spike-style="5"] .status,
+html[data-spike-style="5"] .meta,html[data-spike-style="5"] .time,html[data-spike-style="5"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style] input,html[data-spike-style] textarea,html[data-spike-style] select{
+border-color:var(--spike-line)!important;background:var(--spike-surface-2)!important;color:var(--spike-text)!important
+}
+html[data-spike-style="3"] input,html[data-spike-style="3"] textarea,html[data-spike-style="3"] select{background:rgba(255,255,255,.12)!important;color:#fff!important}
+html[data-spike-style="4"] input,html[data-spike-style="4"] textarea,html[data-spike-style="4"] select{background:rgba(255,255,255,.75)!important}
+html[data-spike-style] button:not(.spike-theme-switch){
+transition:transform .16s ease,box-shadow .16s ease,background .16s ease
+}
+html[data-spike-style] button:not(.spike-theme-switch):hover{transform:translateY(-1px)}
+html[data-spike-style="1"] .btn.primary,html[data-spike-style="1"] .primary,
+html[data-spike-style="2"] .btn.primary,html[data-spike-style="2"] .primary{
+background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;color:#fff!important;box-shadow:0 7px 20px var(--spike-glow)!important
+}
+html[data-spike-style="3"] .btn.primary,html[data-spike-style="3"] .primary{
+background:linear-gradient(135deg,#3aa8ff,#6d5dfc)!important;color:#fff!important;box-shadow:0 8px 22px rgba(38,154,255,.35)!important
+}
+html[data-spike-style="4"] .btn.primary,html[data-spike-style="4"] .primary{
+background:linear-gradient(135deg,#ff5c6c,#c92fff)!important;color:#fff!important;box-shadow:0 8px 22px rgba(231,42,127,.28)!important
+}
+/* Feed header switch */
+.spike-theme-switch{
+min-width:72px;height:34px;padding:0 11px;border-radius:12px!important;
+display:inline-flex!important;align-items:center;justify-content:center;gap:6px;
+font-size:11px!important;font-weight:900!important;letter-spacing:.02em;
+border:1px solid rgba(124,58,237,.28)!important;
+background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(168,85,247,.08))!important;
+color:var(--spike-text)!important;box-shadow:0 5px 16px var(--spike-glow)!important;
+}
+.spike-theme-switch .spike-theme-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+html[data-spike-style="2"] .spike-theme-switch{background:linear-gradient(135deg,#6d28d9,#c026d3)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="3"] .spike-theme-switch{background:linear-gradient(135deg,rgba(255,255,255,.25),rgba(80,168,255,.28))!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important}
+html[data-spike-style="4"] .spike-theme-switch{background:linear-gradient(135deg,#ff684a,#d62992)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="5"] .spike-theme-switch{background:#fff!important;color:#111!important;border-color:rgba(255,255,255,.2)!important}
+/* Feed-specific surfaces */
+html[data-spike-style="3"] .header,html[data-spike-style="3"] .bottom-nav{background:rgba(16,91,143,.45)!important;border-color:rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .header,html[data-spike-style="4"] .bottom-nav{background:linear-gradient(90deg,rgba(255,105,66,.9),rgba(214,39,130,.88))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+html[data-spike-style="2"] .header,html[data-spike-style="2"] .bottom-nav{background:rgba(5,7,20,.92)!important;border-color:rgba(139,92,246,.18)!important;box-shadow:0 0 24px rgba(139,92,246,.12)!important}
+html[data-spike-style="1"] .header,html[data-spike-style="1"] .bottom-nav{background:rgba(255,255,255,.9)!important;border-color:var(--spike-line)!important}
+html[data-spike-style="3"] .brand-title,html[data-spike-style="3"] .header-title,
+html[data-spike-style="3"] .header h1{color:#fff!important}
+html[data-spike-style="4"] .brand-title,html[data-spike-style="4"] .header-title,
+html[data-spike-style="4"] .header h1{color:#fff!important}
+/* ===== SPIKE NOTIFICATIONS BASE / MOBILE ===== */
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;width:100%;max-width:100%;overflow-x:hidden;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;padding-bottom:92px}
+.header{position:sticky;top:0;z-index:20;min-height:72px;padding:12px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--spike-line);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.brand{display:flex;align-items:center;gap:8px;color:inherit;text-decoration:none;min-width:0}
+.brand-lockup{display:flex;flex-direction:column;line-height:1}
+.brand-title{font-size:24px;font-weight:950;letter-spacing:.12em}
+.brand-subtitle{font-size:7px;font-weight:800;letter-spacing:.12em;opacity:.72;margin-top:5px;white-space:nowrap}
+.header-title{font-size:17px;font-weight:850;white-space:nowrap;margin-left:4px}
+.header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+.icon-btn,.smart-back{border:1px solid var(--spike-line);background:var(--spike-surface);color:var(--spike-text);border-radius:12px;min-height:40px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 5px 16px var(--spike-glow)}
+.smart-back{font-weight:800}
+.smart-back-arrow{font-size:19px;line-height:1}
+.main{width:min(860px,calc(100% - 28px));margin:0 auto;padding:24px 0 32px}
+.card,.list{border:1px solid var(--spike-line);border-radius:22px}
+.hero{padding:20px;margin-bottom:16px}
+.hero-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.eyebrow{font-size:11px;font-weight:900;letter-spacing:.12em;opacity:.72}
+h1{margin:5px 0 4px;font-size:30px;line-height:1.05}
+.hero p{margin:0;color:var(--spike-muted);font-size:14px}
+.actions{display:flex;gap:8px}
+.btn{border:1px solid var(--spike-line);border-radius:12px;padding:11px 15px;background:var(--spike-surface);color:var(--spike-text);font-weight:800}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.list{overflow:hidden;padding:8px}
+.notification{width:100%;display:flex;align-items:center;gap:13px;text-align:left;border:1px solid transparent;border-radius:17px;padding:15px 14px;background:transparent;color:var(--spike-text);margin:2px 0}
+.notification:hover{background:var(--spike-surface-2)}
+.notification.unread{background:var(--spike-surface-2);border-color:var(--spike-line)}
+.notif-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;background:var(--spike-surface-2);font-size:20px}
+.notif-body{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.notif-text{font-size:14px;font-weight:720;line-height:1.35;overflow-wrap:anywhere}
+.notif-time{font-size:12px;color:var(--spike-muted)}.notif-smart{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}.notif-smart-chip{font-size:8px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;padding:3px 6px;border-radius:999px;border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-muted)}.notif-smart-chip.immediate{color:#fff;background:#ef4444;border-color:transparent}.notif-smart-chip.important{color:#fff;background:#f59e0b;border-color:transparent}.notif-smart-chip.low{opacity:.72}.notif-group-count{font-variant-numeric:tabular-nums}
+.notif-details{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.notif-chip{font-size:9px;font-weight:850;letter-spacing:.04em;text-transform:uppercase;padding:3px 6px;border-radius:999px;background:var(--spike-surface-2);border:1px solid var(--spike-line);color:var(--spike-muted)}
+.notif-preview{font-size:11px;color:var(--spike-muted);line-height:1.35;margin-top:1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.notification .notif-arrow{font-size:16px;color:var(--spike-muted);opacity:.55}
+.notification.unread .notif-arrow{opacity:.9}
+.new{font-size:9px;font-weight:950;letter-spacing:.08em;padding:5px 7px;border-radius:999px;background:var(--spike-accent);color:#fff;white-space:nowrap}
+.empty{text-align:center;padding:58px 20px;color:var(--spike-text);font-size:15px;min-height:180px;display:grid;place-content:center}
+.empty .muted{color:var(--spike-muted)}
+.error{color:#ef4444}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;border-top:1px solid var(--spike-line);padding:8px 10px calc(8px + env(safe-area-inset-bottom));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.bottom-nav-inner{width:min(560px,100%);margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.nav-item{border:0;background:transparent;color:var(--spike-text);border-radius:12px;min-height:54px;font-size:11px;font-weight:750;line-height:1.35;opacity:.78}
+.nav-item.active{background:var(--spike-surface-2);opacity:1;box-shadow:inset 0 0 0 1px var(--spike-line)}
+.loader{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:color-mix(in srgb,var(--spike-bg) 82%,transparent);backdrop-filter:blur(8px)}
+.loader.hide{display:none}
+.loader-card{padding:18px 22px;border:1px solid var(--spike-line);border-radius:18px;background:var(--spike-surface);color:var(--spike-text);font-weight:800;box-shadow:0 16px 50px rgba(0,0,0,.18)}
+.spinner{width:20px;height:20px;border:2px solid var(--spike-line);border-top-color:var(--spike-accent);border-radius:50%;display:inline-block;vertical-align:-5px;margin-right:8px;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:50%;bottom:92px;transform:translate(-50%,15px);opacity:0;pointer-events:none;z-index:120;padding:11px 14px;border-radius:12px;background:#111827;color:#fff;font-size:13px;font-weight:750;transition:.2s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+/* Full notification details */
+.notif-modal{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.notif-modal.open{display:flex}
+.notif-modal-card{width:min(720px,100%);max-height:min(88vh,760px);overflow:auto;border:1px solid var(--spike-line);border-radius:24px;background:var(--spike-surface);color:var(--spike-text);box-shadow:0 28px 100px rgba(0,0,0,.45)}
+.notif-modal-head{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;gap:12px;padding:18px;border-bottom:1px solid var(--spike-line);background:color-mix(in srgb,var(--spike-surface) 94%,transparent);backdrop-filter:blur(16px)}
+.notif-modal-icon{width:46px;height:46px;flex:0 0 46px;border-radius:14px;display:grid;place-items:center;background:var(--spike-surface-2);font-size:21px}
+.notif-modal-title{font-size:17px;font-weight:900;line-height:1.3;overflow-wrap:anywhere}.notif-modal-meta{margin-top:5px;color:var(--spike-muted);font-size:11px;line-height:1.5}
+.notif-modal-close{margin-left:auto;border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-text);border-radius:12px;width:40px;height:40px;font-size:21px;flex:0 0 40px}
+.notif-modal-body{padding:18px}.notif-modal-section{margin-bottom:18px}.notif-modal-label{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--spike-muted);margin-bottom:7px}.notif-modal-text{font-size:14px;line-height:1.6;overflow-wrap:anywhere;white-space:pre-wrap}.notif-modal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.notif-modal-field{padding:10px 11px;border:1px solid var(--spike-line);border-radius:13px;background:var(--spike-surface-2);min-width:0}.notif-modal-field strong{display:block;font-size:10px;color:var(--spike-muted);margin-bottom:3px}.notif-modal-field span{display:block;font-size:12px;overflow-wrap:anywhere}.notif-json{margin:0;padding:13px;border:1px solid var(--spike-line);border-radius:14px;background:rgba(0,0,0,.12);font:11px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow:auto;overflow-wrap:anywhere}.notif-modal-actions{display:flex;gap:8px;flex-wrap:wrap}.notif-open-btn{border:1px solid var(--spike-line);border-radius:12px;padding:10px 14px;background:var(--spike-accent);color:#fff;font-weight:850}.notif-modal-link{font-size:11px;color:var(--spike-muted);overflow-wrap:anywhere}
+@media(max-width:600px){.notif-modal{padding:10px}.notif-modal-card{max-height:92vh;border-radius:20px}.notif-modal-grid{grid-template-columns:1fr}}
+html[data-spike-style="5"] .btn.primary{background:#fff!important;color:#111!important}
+@media(max-width:600px){
+.app{padding-bottom:84px}
+.header{min-height:64px;padding:10px 12px;gap:8px}
+.brand-title{font-size:20px}.brand-subtitle{font-size:6px}.header-title{font-size:14px}
+.smart-back{min-width:40px;padding:0 9px}.smart-back-label{display:none}
+.main{width:calc(100% - 20px);padding:14px 0 22px}
+.hero{padding:16px;border-radius:18px}.hero-row{align-items:flex-start;flex-direction:column}.actions{width:100%}.actions .btn{width:100%}
+h1{font-size:26px}.list{padding:5px;border-radius:18px}
+.notification{padding:13px 9px;border-radius:14px}.notif-icon{width:38px;height:38px;flex-basis:38px;font-size:18px}.notif-text{font-size:13px}.new{font-size:8px}
+.nav-item{min-height:50px;font-size:10px}
+}
+</style>
+<style>
+/* === SPIKE FINAL THEME TEXTURE & CONTRAST POLISH === */
+html[data-spike-style]{
+--spike-shadow:0 14px 40px rgba(15,23,42,.10);
+--spike-shadow-soft:0 8px 24px rgba(15,23,42,.08);
+--spike-radius:18px;
+--spike-focus:rgba(124,58,237,.28);
+}
+html[data-spike-style="1"]{
+--texture-bg:
+radial-gradient(circle at 8% 0%,rgba(124,58,237,.10),transparent 30%),
+radial-gradient(circle at 92% 12%,rgba(236,72,153,.07),transparent 28%),
+linear-gradient(135deg,#f8fafc,#eef2f7);
+--texture-surface:rgba(255,255,255,.94);
+--texture-surface-strong:#fff;
+--texture-border:rgba(15,23,42,.09);
+--texture-text:#101828;
+--texture-muted:#667085;
+}
+html[data-spike-style="2"]{
+--texture-bg:
+radial-gradient(circle at 12% 0%,rgba(124,58,237,.25),transparent 32%),
+radial-gradient(circle at 92% 8%,rgba(217,70,239,.14),transparent 28%),
+linear-gradient(145deg,#050711,#090d1b 55%,#0b1020);
+--texture-surface:rgba(14,19,39,.92);
+--texture-surface-strong:#11172d;
+--texture-border:rgba(139,92,246,.22);
+--texture-text:#f8f9ff;
+--texture-muted:#aeb7d1;
+}
+html[data-spike-style="3"]{
+--texture-bg:
+radial-gradient(circle at 14% 0%,rgba(108,199,255,.42),transparent 30%),
+radial-gradient(circle at 90% 18%,rgba(124,92,255,.25),transparent 30%),
+linear-gradient(145deg,#07375b,#0d5f8f 52%,#1f478d);
+--texture-surface:rgba(255,255,255,.14);
+--texture-surface-strong:rgba(255,255,255,.18);
+--texture-border:rgba(255,255,255,.24);
+--texture-text:#fff;
+--texture-muted:rgba(255,255,255,.78);
+}
+html[data-spike-style="4"]{
+--texture-bg:
+radial-gradient(circle at 8% 0%,rgba(255,255,255,.22),transparent 27%),
+radial-gradient(circle at 92% 10%,rgba(255,255,255,.12),transparent 25%),
+linear-gradient(145deg,#ff7138,#e91e78 52%,#8f2bd9);
+--texture-surface:rgba(255,255,255,.88);
+--texture-surface-strong:rgba(255,255,255,.96);
+--texture-border:rgba(255,255,255,.58);
+--texture-text:#172033;
+--texture-muted:#586274;
+}
+html[data-spike-style="5"]{
+--texture-bg:
+radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 34%),
+linear-gradient(145deg,#090b0e,#0d1014 55%,#0a0c0f);
+--texture-surface:#14181d;
+--texture-surface-strong:#191d23;
+--texture-border:rgba(255,255,255,.10);
+--texture-text:#f6f7f9;
+--texture-muted:#a3a8b1;
+}
+html[data-spike-style] body{
+background:var(--texture-bg)!important;
+color:var(--texture-text)!important;
+min-height:100%;
+background-attachment:fixed;
+}
+html[data-spike-style] body,
+html[data-spike-style] .app,
+html[data-spike-style] .page,
+html[data-spike-style] main{
+color:var(--texture-text);
+}
+html[data-spike-style] .card,
+html[data-spike-style] .panel,
+html[data-spike-style] .post,
+html[data-spike-style] .story,
+html[data-spike-style] .composer,
+html[data-spike-style] .friend-card,
+html[data-spike-style] .request-card,
+html[data-spike-style] .room,
+html[data-spike-style] .room-card,
+html[data-spike-style] .notification-card,
+html[data-spike-style] .list,
+html[data-spike-style] .sheet,
+html[data-spike-style] .modal,
+html[data-spike-style] .modal-card,
+html[data-spike-style] .modalbox,
+html[data-spike-style] .drawer,
+html[data-spike-style] .ownerSection,
+html[data-spike-style] .premiumCard,
+html[data-spike-style] .about-item{
+background:var(--texture-surface)!important;
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+box-shadow:var(--spike-shadow-soft);
+-webkit-backdrop-filter:blur(18px);
+backdrop-filter:blur(18px);
+}
+html[data-spike-style="3"] .card,
+html[data-spike-style="3"] .panel,
+html[data-spike-style="3"] .post,
+html[data-spike-style="3"] .composer,
+html[data-spike-style="3"] .drawer,
+html[data-spike-style="3"] .modal-card{
+box-shadow:0 16px 42px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.16);
+}
+html[data-spike-style="4"] .card,
+html[data-spike-style="4"] .panel,
+html[data-spike-style="4"] .post,
+html[data-spike-style="4"] .composer,
+html[data-spike-style="4"] .drawer,
+html[data-spike-style="4"] .modal-card{
+box-shadow:0 16px 42px rgba(89,18,91,.18),inset 0 1px 0 rgba(255,255,255,.42);
+}
+html[data-spike-style="5"] .card,
+html[data-spike-style="5"] .panel,
+html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .composer,
+html[data-spike-style="5"] .drawer,
+html[data-spike-style="5"] .modal-card{
+box-shadow:0 16px 42px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.035);
+}
+html[data-spike-style] input,
+html[data-spike-style] textarea,
+html[data-spike-style] select{
+background:var(--texture-surface-strong)!important;
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+caret-color:var(--texture-text);
+}
+html[data-spike-style] input::placeholder,
+html[data-spike-style] textarea::placeholder{color:var(--texture-muted)!important;opacity:.85}
+html[data-spike-style] input:focus,
+html[data-spike-style] textarea:focus,
+html[data-spike-style] select:focus,
+html[data-spike-style] button:focus-visible,
+html[data-spike-style] a:focus-visible{
+outline:2px solid var(--spike-focus)!important;
+outline-offset:2px;
+}
+html[data-spike-style="3"] input,
+html[data-spike-style="3"] textarea,
+html[data-spike-style="3"] select{
+background:rgba(4,29,53,.30)!important;
+border-color:rgba(255,255,255,.28)!important;
+color:#fff!important;
+}
+html[data-spike-style="4"] input,
+html[data-spike-style="4"] textarea,
+html[data-spike-style="4"] select{
+background:rgba(255,255,255,.88)!important;
+color:#172033!important;
+}
+html[data-spike-style="5"] input,
+html[data-spike-style="5"] textarea,
+html[data-spike-style="5"] select{
+background:#101318!important;
+border-color:rgba(255,255,255,.11)!important;
+color:#f6f7f9!important;
+}
+html[data-spike-style] .muted,
+html[data-spike-style] .sub,
+html[data-spike-style] .meta,
+html[data-spike-style] .time,
+html[data-spike-style] .preview,
+html[data-spike-style] .status,
+html[data-spike-style] .eyebrow{
+color:var(--texture-muted)!important;
+}
+html[data-spike-style="3"] .muted,
+html[data-spike-style="3"] .sub,
+html[data-spike-style="3"] .meta,
+html[data-spike-style="3"] .time,
+html[data-spike-style="3"] .preview,
+html[data-spike-style="3"] .status{color:rgba(255,255,255,.80)!important}
+html[data-spike-style="4"] a{color:#a51d86}
+html[data-spike-style="4"] .muted,
+html[data-spike-style="4"] .sub,
+html[data-spike-style="4"] .meta,
+html[data-spike-style="4"] .time{color:#586274!important}
+html[data-spike-style="5"] a{color:#f2f3f5!important}
+html[data-spike-style] img{
+max-width:100%;
+}
+html[data-spike-style] svg{
+color:currentColor;
+}
+html[data-spike-style] hr{
+border-color:var(--texture-border)!important;
+}
+html[data-spike-style] ::selection{
+background:var(--spike-focus);
+color:var(--texture-text);
+}
+html[data-spike-style] ::-webkit-scrollbar{width:9px;height:9px}
+html[data-spike-style] ::-webkit-scrollbar-track{background:transparent}
+html[data-spike-style] ::-webkit-scrollbar-thumb{
+background:var(--texture-border);
+border-radius:999px;
+border:2px solid transparent;
+background-clip:padding-box;
+}
+html[data-spike-style="3"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);background-clip:padding-box}
+html[data-spike-style="5"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);background-clip:padding-box}
+html[data-spike-style] .header,
+html[data-spike-style] .top,
+html[data-spike-style] .chathead,
+html[data-spike-style] .fm-head,
+html[data-spike-style] .rm-head,
+html[data-spike-style] nav,
+html[data-spike-style] .sidebar,
+html[data-spike-style] .bottom-nav{
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+}
+html[data-spike-style="1"] .header,
+html[data-spike-style="1"] .top,
+html[data-spike-style="1"] .bottom-nav,
+html[data-spike-style="1"] nav{background:rgba(255,255,255,.92)!important}
+html[data-spike-style="2"] .header,
+html[data-spike-style="2"] .top,
+html[data-spike-style="2"] .bottom-nav,
+html[data-spike-style="2"] nav{background:rgba(6,8,23,.92)!important}
+html[data-spike-style="3"] .header,
+html[data-spike-style="3"] .top,
+html[data-spike-style="3"] .bottom-nav,
+html[data-spike-style="3"] nav{background:rgba(8,70,110,.52)!important;backdrop-filter:blur(20px)}
+html[data-spike-style="4"] .header,
+html[data-spike-style="4"] .top,
+html[data-spike-style="4"] .bottom-nav,
+html[data-spike-style="4"] nav{background:linear-gradient(90deg,rgba(255,105,66,.91),rgba(214,39,130,.89))!important;color:#fff!important}
+html[data-spike-style="5"] .header,
+html[data-spike-style="5"] .top,
+html[data-spike-style="5"] .bottom-nav,
+html[data-spike-style="5"] nav{background:rgba(12,15,19,.94)!important}
+html[data-spike-style="4"] .header *,
+html[data-spike-style="4"] .top *,
+html[data-spike-style="4"] .bottom-nav *,
+html[data-spike-style="4"] nav{color:#fff!important}
+html[data-spike-style="3"] .header *,
+html[data-spike-style="3"] .top *,
+html[data-spike-style="3"] .bottom-nav *{color:#fff!important}
+@media(max-width:700px){
+html[data-spike-style] body{background-attachment:scroll}
+html[data-spike-style] .card,
+html[data-spike-style] .panel,
+html[data-spike-style] .post,
+html[data-spike-style] .composer,
+html[data-spike-style] .drawer{box-shadow:var(--spike-shadow-soft)}
+}
+@media(prefers-reduced-motion:reduce){
+html[data-spike-style] *,html[data-spike-style] *::before,html[data-spike-style] *::after{
+scroll-behavior:auto!important;
+animation-duration:.01ms!important;
+transition-duration:.01ms!important;
+}
+}
+</style>
+<style id="spike-performance-css">
+/* Keep offscreen content from consuming layout/paint work. */
+@media (min-width:761px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 520px}
+}
+@media (max-width:760px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 360px}
+}
+img[loading="lazy"],video[preload="none"]{content-visibility:auto}
+</style>
+<style id="notifications-center-style">
+.notif-toolbar{display:flex;gap:10px;align-items:center;margin-top:16px;flex-wrap:wrap}.notif-tabs{display:flex;gap:6px;padding:4px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.035)}.notif-tab{border:0;background:transparent;color:var(--muted,#aab2c0);padding:8px 13px;border-radius:10px;font:800 11px system-ui,sans-serif;cursor:pointer}.notif-tab.active{background:rgba(139,92,246,.18);color:#fff}.notif-search{margin-left:auto;min-width:210px;flex:1;max-width:360px;display:flex;align-items:center;gap:7px;padding:0 12px;height:38px;border:1px solid rgba(255,255,255,.09);border-radius:12px;background:rgba(255,255,255,.035);color:var(--muted,#aab2c0)}.notif-search input{width:100%;border:0;outline:0;background:transparent;color:inherit;font:600 12px system-ui,sans-serif}.notif-search input::placeholder{color:rgba(255,255,255,.38)}@media(max-width:560px){.notif-search{max-width:none;min-width:0;flex-basis:100%;margin-left:0}}
+</style>
+<style id="spike-performance-layer">
+/* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
+.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .room,.spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
+img,video{max-width:100%}
+video{contain:layout paint}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+@media (hover:none){button,.btn,a{touch-action:manipulation}}
+</style>
+<script src="js/presence.js"></script>
+<style id="spike-premium-notices">:root{--spn-line:rgba(255,255,255,.13);--spn-text:#f7f8fb;--spn-muted:rgba(247,248,251,.62)}.spike-premium-stack{position:fixed;right:18px;bottom:18px;width:min(430px,calc(100vw - 28px));display:grid;gap:10px;z-index:99999;pointer-events:none}.spike-premium-toast{position:relative;display:grid;grid-template-columns:42px 1fr 30px;gap:11px;align-items:center;min-height:66px;padding:11px 12px;border:1px solid var(--spn-line);border-radius:20px;background:linear-gradient(145deg,rgba(27,31,43,.97),rgba(12,15,23,.96));box-shadow:0 24px 70px rgba(0,0,0,.46),0 0 34px rgba(124,92,255,.12);backdrop-filter:blur(22px);overflow:hidden;pointer-events:auto;animation:spnIn .28s cubic-bezier(.2,.8,.2,1)}.spike-premium-toast:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;transform-origin:left;animation:spnLife var(--spn-life,3600ms) linear forwards;background:linear-gradient(90deg,#8b5cf6,#22d3ee)}.spike-premium-toast.success{border-color:rgba(52,211,153,.34)}.spike-premium-toast.success:after{background:linear-gradient(90deg,#34d399,#10b981)}.spike-premium-toast.error{border-color:rgba(251,113,133,.38)}.spike-premium-toast.error:after{background:linear-gradient(90deg,#fb7185,#ef4444)}.spike-premium-toast.warning{border-color:rgba(251,191,36,.36)}.spike-premium-toast.warning:after{background:linear-gradient(90deg,#fbbf24,#f59e0b)}.spike-premium-toast.info{border-color:rgba(96,165,250,.34)}.spn-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:950;background:rgba(139,92,246,.13);border:1px solid rgba(167,139,250,.2)}.success .spn-icon{color:#6ee7b7;background:rgba(16,185,129,.12)}.error .spn-icon{color:#fda4af;background:rgba(239,68,68,.12)}.warning .spn-icon{color:#fcd34d;background:rgba(245,158,11,.12)}.info .spn-icon{color:#93c5fd}.spn-copy{min-width:0}.spn-title{font-size:12px;font-weight:950;color:var(--spn-text)}.spn-message{margin-top:3px;font-size:10.5px;line-height:1.4;color:var(--spn-muted);overflow-wrap:anywhere}.spn-close{width:30px;height:30px;border:0;border-radius:10px;background:transparent;color:rgba(255,255,255,.48);font-size:18px;cursor:pointer}.spn-close:hover{background:rgba(255,255,255,.08);color:#fff}@keyframes spnIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}@keyframes spnLife{from{transform:scaleX(1)}to{transform:scaleX(0)}}@media(max-width:600px){.spike-premium-stack{right:10px;left:10px;bottom:14px;width:auto}.spike-premium-toast{border-radius:18px}}</style>
+<style id="spike-global-presence-style">
+.spike-presence-target{position:relative!important}
+.spike-presence-target::after{content:attr(data-presence-status);position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;border-radius:999px;background:var(--card,#10141d);border:1px solid rgba(255,255,255,.10);color:var(--muted,#aab2c0);font:700 8px/1.1 system-ui,sans-serif;z-index:5;pointer-events:none}
+</style>
+<link rel="stylesheet" href="css/theme.css">
+<script src="js/theme.js" defer></script>
+<link rel="stylesheet" href="css/ui-fix.css">
+<style id="notifications-clear-style">#clearAll{margin-left:8px}#clearAll:disabled{opacity:.45;cursor:not-allowed}@media(max-width:560px){#clearAll{margin-left:0}}</style>
+<style id="spike-premium-clear-style">
+.premium-confirm-backdrop{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;padding:18px;z-index:100000;background:rgba(3,5,10,.68);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.premium-confirm-backdrop.open{display:flex;animation:spcFade .2s ease-out}
+.premium-confirm-card{width:min(460px,100%);border:1px solid rgba(255,255,255,.13);border-radius:28px;padding:22px;background:linear-gradient(145deg,rgba(29,33,46,.98),rgba(11,14,21,.98));box-shadow:0 30px 90px rgba(0,0,0,.58),0 0 45px rgba(139,92,246,.14);color:#f7f8fb;animation:spcUp .28s cubic-bezier(.2,.8,.2,1)}
+.premium-confirm-icon{width:58px;height:58px;border-radius:19px;display:grid;place-items:center;margin-bottom:15px;font-size:25px;background:linear-gradient(145deg,rgba(139,92,246,.2),rgba(34,211,238,.09));border:1px solid rgba(167,139,250,.22);box-shadow:inset 0 1px rgba(255,255,255,.08)}
+.premium-confirm-title{font-size:20px;font-weight:950;letter-spacing:-.02em}
+.premium-confirm-copy{margin-top:7px;color:rgba(247,248,251,.62);font-size:13px;line-height:1.55}
+.premium-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.premium-confirm-actions button{min-height:48px;border-radius:15px;border:1px solid rgba(255,255,255,.11);font:900 13px system-ui,sans-serif;cursor:pointer}
+.premium-confirm-cancel{background:rgba(255,255,255,.045);color:#e8ebf2}.premium-confirm-clear{background:linear-gradient(135deg,#8b5cf6,#a855f7);color:#fff;border-color:rgba(196,181,253,.35);box-shadow:0 12px 28px rgba(139,92,246,.25)}
+.premium-confirm-actions button:active{transform:translateY(1px)}
+@keyframes spcFade{from{opacity:0}to{opacity:1}}@keyframes spcUp{from{opacity:0;transform:translateY(22px) scale(.97)}to{opacity:1;transform:none}}
+@media(min-width:700px){.premium-confirm-backdrop{align-items:center}.premium-confirm-card{border-radius:30px}}
+@media(prefers-reduced-motion:reduce){.premium-confirm-backdrop,.premium-confirm-card{animation:none}}
+</style>
+
+<style id="spike-menu-nav-css-fixed">
+/* SPIKE menu-aware bottom navigation */
+.spike-menu-nav-hidden .spike-bottom-nav,
+.spike-menu-nav-hidden .bottom-nav,
+.spike-menu-nav-hidden #spikeBottomNav,
+.spike-menu-nav-hidden #bottomNav {
+  transform: translate3d(0, calc(100% + 24px), 0) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease !important;
+}
+.spike-bottom-nav, .bottom-nav, #spikeBottomNav, #bottomNav {
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease;
+}
+/* Premium, smart circular avatars; never cover adjacent post text. */
+.spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+.post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+#chatAvatar img, #profileAvatar img {
+  width: 48px; height: 48px; min-width: 48px; min-height: 48px;
+  aspect-ratio: 1 / 1; border-radius: 50% !important;
+  object-fit: cover !important; object-position: 50% 50%;
+  display: block; overflow: hidden; flex: 0 0 auto;
+}
+.post-header, .post-head, .user-row, .profile-head, .comment-head {
+  min-width: 0;
+}
+.post-header .avatar, .post-head .avatar, .user-row .avatar { position: static !important; }
+.post-header .user-info, .post-head .user-info, .user-row .user-info { min-width: 0; }
+@media (max-width:600px){
+ .spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+ .post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+ #chatAvatar img, #profileAvatar img { width:44px; height:44px; min-width:44px; min-height:44px; }
+}
+</style>
+<link rel="stylesheet" href="css/premium-back.css">
+<link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
+</head>
+<body>
+<div class="app">
+<header class="header">
+<button class="smart-back spike-premium-back" id="spikeSmartBack" type="button" aria-label="Go back to the previous SPIKE page" title="Go back" data-spike-premium-back="1" data-back-fallback="feed.html"><span class="smart-back-arrow" aria-hidden="true">←</span><span class="smart-back-label">Back</span></button>
+<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></span></a>
+<span class="header-title">Notifications</span>
+<div class="header-actions"><button class="icon-btn" id="refreshBtn" type="button" title="Refresh notifications">↻</button></div>
+</header>
+<main class="main">
+<section class="hero card">
+<div class="hero-row">
+<div><div class="eyebrow">SPIKE ACTIVITY</div><h1>Notifications</h1><p><span id="unreadCount">0</span> unread notification<span id="unreadPlural">s</span></p></div>
+<div class="actions"><button class="btn primary" id="markAll" type="button">Mark all read</button><button class="btn secondary" id="clearAll" type="button" aria-label="Clear all notifications">Clear all</button><button class="btn secondary" id="deleteRead" type="button" aria-label="Delete read notifications">Delete read</button></div>
+</div>
+<div class="notif-toolbar" role="toolbar" aria-label="Notification filters">
+<div class="notif-tabs" role="tablist" aria-label="Notification status">
+<button class="notif-tab active" id="tabAll" type="button" role="tab" aria-selected="true">All</button>
+<button class="notif-tab" id="tabUnread" type="button" role="tab" aria-selected="false">Unread</button><button class="notif-tab" id="tabAnnouncements" type="button" role="tab" aria-selected="false">Announcements</button><button class="notif-tab" id="tabMentions" type="button" role="tab" aria-selected="false">Mentions</button><button class="notif-tab" id="tabSystem" type="button" role="tab" aria-selected="false">System</button>
+</div>
+<label class="notif-search"><span aria-hidden="true">⌕</span><input id="notificationSearch" type="search" autocomplete="off" placeholder="Search notifications" aria-label="Search notifications"></label>
+</div>
+</section>
+<section class="list" id="notificationList"><div class="empty">Loading notifications…</div></section>
+</main>
+<nav class="bottom-nav" aria-label="SPIKE navigation"><div class="bottom-nav-inner">
+<button class="nav-item" id="feedNav">⌂<br>Feed</button>
+<button class="nav-item" id="friendsNav">♧<br>Friends</button>
+<button class="nav-item" id="chatNav">◌<br>Chat</button>
+<button class="nav-item active">🔔<br>Alerts</button>
+<button class="nav-item" id="profileNav">◯<br>Profile</button>
+</div></nav>
+</div>
+
+<div class="premium-confirm-backdrop" id="clearConfirm" role="dialog" aria-modal="true" aria-labelledby="clearConfirmTitle" aria-describedby="clearConfirmCopy" aria-hidden="true">
+  <div class="premium-confirm-card" role="document">
+    <div class="premium-confirm-icon" aria-hidden="true">🧹</div>
+    <div class="premium-confirm-title" id="clearConfirmTitle">Clear all notifications?</div>
+    <div class="premium-confirm-copy" id="clearConfirmCopy">This will remove all alerts from your notification list. This action cannot be undone.</div>
+    <div class="premium-confirm-actions">
+      <button class="premium-confirm-cancel" id="clearConfirmCancel" type="button">Keep notifications</button>
+      <button class="premium-confirm-clear" id="clearConfirmOk" type="button">Clear all</button>
+    </div>
+  </div>
+</div>
+<div class="notif-modal" id="notificationModal" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle" aria-hidden="true">
+<div class="notif-modal-card" role="document">
+<div class="notif-modal-head"><span class="notif-modal-icon" id="notificationModalIcon">🔔</span><div style="min-width:0;flex:1"><div class="notif-modal-title" id="notificationModalTitle">Notification</div><div class="notif-modal-meta" id="notificationModalMeta"></div></div><button class="notif-modal-close" id="notificationModalClose" type="button" aria-label="Close notification details">×</button></div>
+<div class="notif-modal-body" id="notificationModalBody"></div>
+</div></div>
+<div class="loader" id="loader"><div class="loader-card"><div class="spinner"></div>Loading SPIKE…</div></div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_KEY="sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:"pkce"}});
+window.sb=sb;
+window.supabaseClient=sb;
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+let me=null,rows=[],channel=null,profileCache=new Map(),appPrefs={message_tone:true,browser_notifications:false};
+function dataOf(n){return n&&n.data&&typeof n.data==="object"?n.data:{}}
+function firstValue(d,keys){for(const k of keys){const v=d?.[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v)}return ""}
+
+function targetOf(n){const d=dataOf(n);return firstValue(d,["target_name","post_title","room_name","conversation_name","recipient_name"]) }
+function detailOf(n){const d=dataOf(n);return firstValue(d,["body","description","detail","details","preview","content","message"])}
+function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",friend_request_declined:"Friend request declined",friend_declined:"Friend request declined",friend_request_resolved:"Friend request resolved",new_follower:"New follower",follow:"New follower",like:"New like",post_like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",room_purchase_verified:"Purchase approved",room_purchase_rejected:"Purchase rejected",broadcast:"SPIKE broadcast",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function notificationText(n){
+const d=dataOf(n);
+const explicit=firstValue(d,["message","body","description","detail","preview"]);
+if(explicit)return explicit;
+const actor=actorOf(n),target=targetOf(n);
+const amount=Number(d.amount||0).toLocaleString(),coins=Number(d.coins||0).toLocaleString();
+const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",friend_request_declined:"declined your friend request",friend_declined:"declined your friend request",friend_request_resolved:"this friend request is no longer pending",new_follower:"started following you",follow:"followed you",like:"liked your post",post_like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",room_purchase_verified:`purchase approved: ${d.item||"item"}`,room_purchase_rejected:`purchase rejected: ${d.item||"item"}`,broadcast:"published a SPIKE broadcast",announcement:"published a new announcement"};
+const action=map[String(n.type||"").toLowerCase()];
+if(action)return actor?`${actor} ${action}${target?` · ${target}`:""}`:action;
+return actor?`${actor}${target?` · ${target}`:""}`:String(n.type||"Notification").replaceAll("_"," ");
+}
+function notificationIcon(n){const t=String(n.type||"").toLowerCase();if(/coin/.test(t))return "🪙";if(/friend|follow/.test(t))return "👥";if(/like/.test(t))return "❤️";if(/comment|message|chat/.test(t))return "💬";if(/room/.test(t))return "🎙️";if(/announcement/.test(t))return "📢";if(/login|security|auth/.test(t))return "🔐";if(/error|fail/.test(t))return "⚠️";return "🔔"}
+function formatTime(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "";const diff=Math.max(0,Date.now()-d.getTime());if(diff<60000)return "Just now";if(diff<3600000)return Math.floor(diff/60000)+"m ago";if(diff<86400000)return Math.floor(diff/3600000)+"h ago";if(diff<604800000)return Math.floor(diff/86400000)+"d ago";return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:d.getFullYear()===new Date().getFullYear()?undefined:"numeric"})}
+function notificationHref(n){
+const d=dataOf(n),t=String(n?.type||"").toLowerCase();
+const actor=String(d.actor_id||d.from_user_id||d.sender_id||d.from_id||d.caller_id||"").trim();
+const postId=String(d.post_id||d.postId||d.target_post_id||d.targetPostId||d.content_id||d.contentId||"").trim();
+const roomId=String(d.room_id||d.roomId||d.target_room_id||d.targetRoomId||"").trim();
+const messageUser=String(
+  d.conversation_user_id||d.conversationUserId||d.other_user_id||d.otherUserId||
+  d.recipient_id||d.recipientId||d.sender_id||d.senderId||d.from_user_id||d.fromUserId||actor
+).trim();
+const explicit=String(d.url||d.href||d.link||d.activity_url||d.activityUrl||d.deep_link||d.deepLink||"").trim();
+const sourceRaw=d.source_page||d.sourcePage||d.page||d.route||d.source_url||d.sourceUrl||"";
+let source=String(sourceRaw||"").trim();
+let href="";
+
+const sameOriginUrl=(raw)=>{
+  try{
+    const u=new URL(String(raw),window.location.href);
+    return u.origin===window.location.origin?u:null;
+  }catch(_){return null}
+};
+const isMessagePage=(v)=>/(^|\/)(message|messages)(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+const isFeedPage=(v)=>/(^|\/)feed(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+const isRoomsPage=(v)=>/(^|\/)rooms?(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+
+if(explicit){
+  const u=sameOriginUrl(explicit);
+  if(u){
+    if(isMessagePage(u.pathname)){
+      if(messageUser && !u.searchParams.get("private_uid") && !u.searchParams.get("user"))
+        u.searchParams.set("private_uid",messageUser);
+    }else if(isFeedPage(u.pathname)){
+      if(postId && !u.searchParams.get("post")) u.searchParams.set("post",postId);
+    }
+    href=u.href;
+  }
+}
+
+if(!href && source){
+  const u=sameOriginUrl(source);
+  if(u){
+    if(isMessagePage(u.pathname)){
+      if(messageUser && !u.searchParams.get("private_uid") && !u.searchParams.get("user"))
+        u.searchParams.set("private_uid",messageUser);
+    }else if(isFeedPage(u.pathname)){
+      if(postId && !u.searchParams.get("post")) u.searchParams.set("post",postId);
+    }
+    href=u.href;
+  }else if(isMessagePage(source)){
+    href=source.split("?")[0]+(messageUser?"?private_uid="+encodeURIComponent(messageUser):"");
+  }else if(isFeedPage(source)){
+    href=source.split("?")[0]+(postId?"?post="+encodeURIComponent(postId):"");
+  }else if(isRoomsPage(source)){
+    href=source.split("?")[0]+(roomId?"?room="+encodeURIComponent(roomId):"");
+  }
+}
+
+if(!href && /message|chat|dm|private_message/.test(t) && messageUser)
+  href="message.html?private_uid="+encodeURIComponent(messageUser);
+if(!href && /like|post_like|comment|mention|mention_reply|reaction|repost|post/.test(t) && postId)
+  href="feed.html?post="+encodeURIComponent(postId);
+if(!href && postId) href="feed.html?post="+encodeURIComponent(postId);
+if(!href && roomId) href="rooms.html?room="+encodeURIComponent(roomId);
+if(!href && actor && UUID_RE.test(actor) && /follow|friend|story/.test(t))
+  href="view_user.html?uid="+encodeURIComponent(actor);
+if(!href && d.user_id && UUID_RE.test(String(d.user_id)) && String(d.user_id)!==String(me?.id||""))
+  href="view_user.html?uid="+encodeURIComponent(String(d.user_id));
+if(!href && /follow|friend/.test(t) && actor && UUID_RE.test(actor))
+  href="view_user.html?uid="+encodeURIComponent(actor);
+if(!href && /announcement|broadcast|system|security/.test(t)) href=null;
+if(!href)return null;
+
+const finalUrl=sameOriginUrl(href);
+return finalUrl?finalUrl.href:null;
+}
+let notificationFilter="all",notificationQuery="";
+async function hydrateNotificationActors(list){
+  const ids=[...new Set((list||[]).flatMap(n=>{
+    const d=dataOf(n),v=[d.actor_id,d.from_user_id,d.sender_id,d.from_id];
+    return v.filter(x=>x&&/^[0-9a-f-]{36}$/i.test(String(x))).map(String);
+  }))];
+  const missing=ids.filter(id=>!profileCache.has(id));
+  if(!missing.length)return;
+  try{
+    const r=await sb.rpc("get_public_profiles",{p_user_ids:missing});
+    if(r.error)throw r.error;
+    (r.data||[]).forEach(p=>{if(p?.id)profileCache.set(String(p.id),p)});
+  }catch(e){console.warn("SPIKE notification actor lookup unavailable",e)}
+}
+function actorOf(n){
+  const d=dataOf(n),explicit=firstValue(d,["actor_name","from_name","sender_name","username","name","display_name","actor"]);
+  if(explicit)return explicit;
+  for(const key of ["actor_id","from_user_id","sender_id","from_id"]){
+    const id=d?.[key],p=id&&profileCache.get(String(id));
+    if(p)return p.display_name||p.full_name||p.username||"SPIKE user";
+  }
+  return "";
+}
+function categoryOf(n){const t=String(n?.type||"").toLowerCase();if(t.includes("announcement")||t==="broadcast")return "announcements";if(t.includes("mention"))return "mentions";if(t.includes("system")||t.includes("security")||t.includes("auth")||t.startsWith("room_purchase_"))return "system";return "activity";}
+function render(){
+const box=$("#notificationList"); if(!box)return; const count=rows.filter(n=>!n.read).length;
+$("#unreadCount").textContent=count>99?"99+":String(count);$("#unreadPlural").textContent=count===1?"":"s";$("#markAll").disabled=!count;$("#clearAll").disabled=!rows.length;
+const q=notificationQuery.trim().toLowerCase();
+const visible=rows.filter(n=>{
+ if(notificationFilter==="unread"&&n.read)return false;
+  if(["announcements","mentions","system","activity"].includes(notificationFilter)&&categoryOf(n)!==notificationFilter)return false;
+ if(!q)return true;
+ const hay=[titleOf(n),notificationText(n),detailOf(n),actorOf(n),targetOf(n),n.type].join(" ").toLowerCase();
+ return hay.includes(q);
+});
+if(!visible.length){box.innerHTML='<div class="empty">🔔<br><br><strong>'+ (rows.length ? 'No matching notifications.' : 'No notifications yet.') +'</strong><br><span class="muted">'+(rows.length?'Try another search or switch to All.':'Activity from SPIKE will appear here automatically.')+'</span></div>';return}
+box.innerHTML=visible.map(n=>{
+const d=dataOf(n),actor=actorOf(n),target=targetOf(n),preview=detailOf(n);
+const href=notificationHref(n);
+return `<button class="notification ${n.read?'':'unread'}" data-id="${esc(n.id)}" type="button" aria-label="View full notification details">`+
+`<span class="notif-icon">${notificationIcon(n)}</span>`+
+`<span class="notif-body"><span class="notif-text">${esc(titleOf(n))}</span>`+
+`<span class="notif-preview">${esc(notificationText(n))}</span>`+
+`${preview&&preview!==notificationText(n)?`<span class="notif-preview">${esc(preview)}</span>`:""}`+
+`<span class="notif-details">${actor?`<span class="notif-chip">From ${esc(actor)}</span>`:""}${target?`<span class="notif-chip">${esc(target)}</span>`:""}<span class="notif-time">${esc(formatTime(n.created_at))}</span></span>${n.smart_bucket?`<span class="notif-smart"><span class="notif-smart-chip ${esc(n.smart_bucket)}">${esc(n.smart_bucket)}</span>${n.smart_reason?`<span class="notif-smart-chip">${esc(n.smart_reason)}</span>`:""}${n.group_count>1?`<span class="notif-smart-chip notif-group-count">${esc(n.group_count)} related</span>`:""}</span>`:""}</span>`+
+`${n.read?'':'<span class="new">NEW</span>'}<span class="notif-arrow">${href?'›':''}</span></button>`;
+}).join("");
+}
+function withTimeout(p,ms,label="Request timed out"){
+return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))]);
+}
+async function load(opts={}){
+if(!me) throw new Error("Not authenticated");
+const r=await withTimeout(sb.rpc("get_smart_notification_page",{p_limit:100,p_before_created_at:null,p_before_id:null}),12000,"Notifications request timed out.");
+if(r.error)throw r.error;
+rows=(r.data||[]).map(n=>({...n,smart_score:Number(n.smart_score||0),smart_rank:Number(n.smart_rank||0),group_count:Number(n.group_count||1)}));
+await hydrateNotificationActors(rows);
+render();return rows;
+}
+async function markRead(id){
+if(!me||!id)return;
+const r=await withTimeout(sb.rpc("mark_notification_read",{p_notification_id:id}),10000,"Could not mark notification as read.");
+if(r.error)throw r.error;
+const n=rows.find(x=>String(x.id)===String(id));if(n)n.read=true;render();
+}
+async function markAll(){
+if(!me)return;
+const btn=$("#markAll");btn.disabled=true;
+try{
+const r=await withTimeout(sb.rpc("mark_all_notifications_read"),10000,"Could not mark notifications as read.");
+if(r.error)throw r.error;
+rows.forEach(n=>n.read=true);render();
+if(window.spikePremiumToast)window.spikePremiumToast("All notifications marked as read.","success",2600);
+}finally{btn.disabled=!rows.some(n=>!n.read)}
+}
+function askClearAll(){
+  return new Promise(resolve=>{
+    const modal=$("#clearConfirm"),ok=$("#clearConfirmOk"),cancel=$("#clearConfirmCancel");
+    if(!modal){resolve(false);return;}
+    let done=false;
+    const finish=value=>{if(done)return;done=true;modal.classList.remove("open");modal.setAttribute("aria-hidden","true");document.body.style.overflow="";document.removeEventListener("keydown",onKey);resolve(value)};
+    const onKey=e=>{if(e.key==="Escape")finish(false)};
+    modal.classList.add("open");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+    ok.onclick=()=>finish(true);cancel.onclick=()=>finish(false);
+    modal.onclick=e=>{if(e.target===modal)finish(false)};
+    document.addEventListener("keydown",onKey);
+    requestAnimationFrame(()=>cancel.focus());
+  });
+}
+async function clearAllNotifications(){
+  if(!me||!rows.length)return;
+  const btn=$("#clearAll");
+  if(btn.dataset.busy==="1")return;
+  if(!await askClearAll())return;
+  btn.dataset.busy="1";btn.disabled=true;
+  try{
+    const r=await withTimeout(sb.rpc("clear_notifications"),12000,"Could not clear notifications.");
+    if(r.error)throw r.error;
+    rows=[];render();
+    window.spikePremiumToast?.("All notifications cleared.","success",2600);
+  }catch(err){
+    console.error("SPIKE clear notifications error:",err);
+    window.spikePremiumToast?.(err?.message||"Could not clear notifications.","error",4200);
+  }finally{
+    btn.dataset.busy="0";btn.disabled=!rows.length;
+  }
+}
+async function deleteReadNotifications(){
+ if(!me)return;
+ const btn=$("#deleteRead"); if(!btn||btn.disabled)return;
+ const readCount=rows.filter(n=>n.read).length; if(!readCount){window.spikePremiumToast?.("There are no read notifications to delete.","info",2200);return;}
+ if(!await window.spikePremiumConfirm({title:"Delete read notifications?",message:"All read notifications will be permanently removed. This cannot be undone.",okText:"Delete all",cancelText:"Cancel",icon:"🗑",danger:true}))return;
+ btn.disabled=true; btn.setAttribute("aria-busy","true");
+ try{
+  const r=await withTimeout(sb.rpc("delete_read_notifications"),12000,"Could not delete read notifications.");
+  if(r.error)throw r.error;
+  rows=rows.filter(n=>!n.read); render();
+  window.spikePremiumToast?.("Read notifications deleted.","success",2200);
+ }catch(e){console.error(e);window.spikePremiumToast?.(e?.message||"Could not delete read notifications.","error",4200)}
+ finally{btn.disabled=!rows.some(n=>n.read);btn.removeAttribute("aria-busy");}
+}
+
+function upsertRow(n){if(!n||String(n.user_id)!==String(me.id))return;const i=rows.findIndex(x=>String(x.id)===String(n.id));if(i>=0)rows[i]=n;else rows.unshift(n);rows.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));rows=rows.slice(0,5000);render()}
+function removeRow(n){rows=rows.filter(x=>String(x.id)!==String(n.id));render()}
+let bc=null,pollTimer=null,lastRealtimeAt=0;
+function notificationToneEnabled(){
+  try{return localStorage.getItem("spike-setting-messageTone")!=="0";}catch(e){return true;}
+}
+async function loadAppPrefs(){
+  if(!me)return;
+  try{
+    const r=await sb.from("user_app_settings").select("message_tone,browser_notifications").eq("user_id",me.id).maybeSingle();
+    if(!r.error&&r.data){appPrefs={...appPrefs,...r.data};try{localStorage.setItem("spike-setting-messageTone",r.data.message_tone===false?"0":"1");localStorage.setItem("spike-setting-browser_notifications",r.data.browser_notifications?"true":"false")}catch(e){}}
+  }catch(e){console.warn("notification preferences unavailable",e)}
+}
+function playNotificationTone(){
+  if(appPrefs.message_tone===false||!notificationToneEnabled())return;
+  const a=$("notificationTone"); if(!a)return;
+  try{a.currentTime=0;const p=a.play();if(p?.catch)p.catch(()=>{});}catch(e){}
+}
+function showBrowserNotification(n){
+  if(appPrefs.browser_notifications!==true)return;
+  if(typeof Notification!=="function"||Notification.permission!=="granted")return;
+  if(!document.hidden)return;
+  try{new Notification("SPIKE",{body:notificationText(n),icon:"assets/icon/icon.png",tag:"spike-notification-"+n.id});}catch(e){}
+}
+function notifyLocal(n){
+if(!n||String(n.user_id)!==String(me.id))return;
+const existed=rows.some(x=>String(x.id)===String(n.id));
+upsertRow(n);
+lastRealtimeAt=Date.now();
+const text=notificationText(n);
+if(!existed && !n.read){playNotificationTone();showBrowserNotification(n);}
+if(!n.read && window.spikePremiumToast) window.spikePremiumToast(text, /error|fail|denied/i.test(String(n.type||""))?"error":"info", 5200);
+}
+async function subscribe(){
+if(channel)try{await sb.removeChannel(channel)}catch(e){}
+try{const sr=await sb.auth.getSession();const token=sr.data?.session?.access_token;if(token)await sb.realtime.setAuth(token)}catch(e){console.warn("SPIKE realtime auth setup unavailable",e)}
+const topic="user:"+me.id+":notifications";
+channel=sb.channel(topic,{config:{private:true}})
+.on("broadcast",{event:"notification_created"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_updated"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_deleted"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.subscribe(status=>{if(status==="SUBSCRIBED"){lastRealtimeAt=Date.now();console.info("SPIKE notifications realtime connected")}if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){lastRealtimeAt=0;console.warn("Notifications realtime channel status:",status)}});
+try{if(bc)bc.close();bc=new BroadcastChannel("spike-notifications");bc.onmessage=e=>{const n=e.data?.notification||e.data;if(n)notifyLocal(n)}}catch(e){}
+clearInterval(pollTimer);pollTimer=setInterval(()=>{if(document.hidden)return;load({silent:true}).catch(()=>{})},60000);
+}
+let authReady=false;
+let authRecoveryInProgress=false;
+const PROJECT_REF=new URL(SUPABASE_URL).hostname.split(".")[0];
+function isInvalidRefreshTokenError(e){
+const text=[e?.code,e?.name,e?.message].filter(Boolean).join(" ").toLowerCase();
+return text.includes("refresh_token_not_found") || text.includes("invalid refresh token") || text.includes("refresh token not found");
+}
+function clearSupabaseAuthStorage(){
+// Supabase stores the browser session under sb-<project-ref>-auth-token.
+// Remove only this project's auth state; keep SPIKE theme/preferences intact.
+try{
+const exact="sb-"+PROJECT_REF+"-auth-token";
+localStorage.removeItem(exact);
+for(let i=localStorage.length-1;i>=0;i--){
+const k=localStorage.key(i)||"";
+if(k===exact || k.startsWith("sb-"+PROJECT_REF+"-")){
+localStorage.removeItem(k);
+}
+}
+}catch(err){
+console.warn("SPIKE could not clear stale auth storage",err);
+}
+}
+function showAuthRecovery(){
+authReady=true;
+authRecoveryInProgress=true;
+clearSupabaseAuthStorage();
+if(channel){try{sb.removeChannel(channel)}catch(e){} channel=null;}
+$("#loader").classList.add("hide");
+$("#notificationList").innerHTML=''+
+'<div class="empty error">'+
+'<strong>Your SPIKE session has expired.</strong><br>'+
+'<span class="muted">The saved refresh token is no longer valid. Sign in again to continue.</span><br>'+
+'<button class="btn primary" id="reauthBtn" type="button" style="margin-top:14px">Sign in again</button>'+
+'</div>';
+$("#reauthBtn").onclick=()=>{
+const next=encodeURIComponent(location.pathname+location.search);
+location.href="index.html?reauth=1&next="+next;
+};
+}
+async function boot(){
+try{
+// Restore the persisted session first. Presence and realtime must wait until Auth is ready.
+const sessionResult=await withTimeout(sb.auth.getSession(),15000,"Session check timed out. Please try again.");
+if(sessionResult.error){
+if(isInvalidRefreshTokenError(sessionResult.error)){showAuthRecovery();return;}
+throw sessionResult.error;
+}
+const session=sessionResult.data?.session;
+if(!session?.user){
+ authReady=true;
+ $("#loader").classList.add("hide");
+ location.href="index.html?reauth=1";
+ return;
+}
+me=session.user;
+authReady=true;
+try{if(session.access_token)await sb.realtime.setAuth(session.access_token)}catch(e){console.warn("SPIKE realtime auth initialization unavailable",e)}
+sb.auth.onAuthStateChange((event,nextSession)=>{
+ if(event==="TOKEN_REFRESHED"&&nextSession?.access_token){
+   sb.realtime.setAuth(nextSession.access_token).then(()=>subscribe()).catch(e=>console.warn("SPIKE notification realtime reauth failed",e));
+ }
+});
+window.AppPresence?.start(sb);
+await loadAppPrefs();
+await load();
+await subscribe();
+$("#loader").classList.add("hide");
+}catch(e){
+console.error("SPIKE notifications auth/load error:",e);
+if(isInvalidRefreshTokenError(e)){showAuthRecovery();return;}
+authReady=true;
+$("#notificationList").innerHTML='<div class="empty error">Could not load notifications.<br><span class="muted">'+esc(e?.message||"Please try again.")+'</span><br><button class="btn" id="retryNotifications" type="button" style="margin-top:12px">Retry</button></div>';
+$("#loader").classList.add("hide");
+$("#retryNotifications")?.addEventListener("click",()=>{boot().catch(()=>{});});
+}
+}
+
+$("#notificationSearch").addEventListener("input",e=>{notificationQuery=e.target.value||"";render()});
+$("#markAll")?.addEventListener("click",()=>markAll().catch(e=>{console.error(e);window.spikePremiumToast?.(e?.message||"Could not mark notifications as read.","error",4200)}));
+$("#deleteRead")?.addEventListener("click",()=>deleteReadNotifications());
+$("#refreshBtn").onclick=async()=>{
+ const b=$("#refreshBtn");if(b.disabled||!me)return;b.disabled=true;b.setAttribute("aria-busy","true");
+ try{await load();window.spikePremiumToast?.("Notifications refreshed.","success",1800)}
+ catch(e){console.error(e);window.spikePremiumToast?.(e?.message||"Could not refresh notifications.","error",4200)}
+ finally{b.disabled=false;b.removeAttribute("aria-busy")}
+};
+function valueForDisplay(v){
+ if(v===null||v===undefined)return "";
+ if(typeof v==="string")return v;
+ try{return JSON.stringify(v,null,2)}catch(e){return String(v)}
+}
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function validUuid(v){return typeof v==="string"&&UUID_RE.test(v.trim())}
+function notificationRequestId(n){
+ const d=dataOf(n),id=String(d.request_id||d.friend_request_id||d.requestId||"").trim();
+ return validUuid(id)?id:"";
+}
+async function getIncomingPendingRequest(n){
+ const d=dataOf(n);
+ const actorId=String(d.actor_id||d.from_user_id||d.sender_id||d.from_id||"").trim();
+ const wanted=notificationRequestId(n);
+ const r=await withTimeout(sb.rpc("get_friend_requests"),10000,"Could not verify friend request state.");
+ if(r.error)throw r.error;
+ return (Array.isArray(r.data)?r.data:[]).find(x=>{
+   const rid=String(x?.request_id||x?.id||"");
+   const uid=String(x?.user_id||x?.sender_id||"");
+   return (wanted&&rid===wanted)||(!wanted&&actorId&&uid===actorId);
+ })||null;
+}
+
+async function openNotificationDetails(n){
+ if(!n)return;
+ const d=dataOf(n),modal=$("#notificationModal");
+ $("#notificationModalIcon").textContent=notificationIcon(n);
+ $("#notificationModalTitle").textContent=titleOf(n);
+ $("#notificationModalMeta").textContent=[formatTime(n.created_at),n.read?"Read":"Unread"].filter(Boolean).join(" • ");
+ const detail=detailOf(n)||notificationText(n);
+ const actor=actorOf(n),target=targetOf(n),href=notificationHref(n);
+ const fields=[['From',actor],['Created',n.created_at?new Date(n.created_at).toLocaleString():'']].filter(x=>x[1]);
+ let html='';
+ html+=`<div class="notif-modal-section"><div class="notif-modal-label">Full alert</div><div class="notif-modal-text">${esc(detail)}</div></div>`;
+ if(fields.length)html+=`<div class="notif-modal-section"><div class="notif-modal-label">Details</div><div class="notif-modal-grid">${fields.map(([k,v])=>`<div class="notif-modal-field"><strong>${esc(k)}</strong><span>${esc(valueForDisplay(v))}</span></div>`).join('')}</div></div>`;
+ 
+ const nt=String(n?.type||"").toLowerCase();
+ let pendingRequest=null,friendRequestPending=false;
+ if(nt==="friend_request"){
+   try{pendingRequest=await getIncomingPendingRequest(n);friendRequestPending=!!pendingRequest;}
+   catch(e){console.warn("SPIKE could not verify incoming friend request state",e);}
+ }
+ if(friendRequestPending)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationAccept" type="button">Accept</button><button class="notif-open-btn" id="notificationDecline" type="button" style="background:transparent;color:inherit">Decline</button>${href?`<button class="notif-open-btn" id="notificationOpenTarget" type="button" style="background:transparent;color:inherit">View profile</button>`:""}</div>`;
+ else if(nt==="friend_request")html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">View profile</button></div>`;
+ else if(href)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">Open related activity</button></div>`;
+ $("#notificationModalBody").innerHTML=html;
+ modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+ $("#notificationOpenTarget")?.addEventListener('click',()=>{location.href=href});
+ const requestIdForAction=String(pendingRequest?.request_id||pendingRequest?.id||notificationRequestId(n)||"").trim();
+ const runFriendAction=async(fn,successText)=>{
+   const acceptBtn=$("#notificationAccept"),declineBtn=$("#notificationDecline");
+   [acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=true;b.setAttribute('aria-busy','true')}});
+   try{
+     if(!requestIdForAction) throw new Error("This friend request notification is missing its request ID.");
+     const r=await withTimeout(sb.rpc(fn,{p_request_id:requestIdForAction}),12000,"Friend request action timed out.");
+     if(r.error)throw r.error;
+     // Null is an idempotent response: the request was already processed or removed.
+     // Convert this notification locally so the action buttons disappear immediately.
+     // The notification itself stays in the activity history.
+     n.type=fn==='accept_friend_request'?'friend_accepted':'friend_request_declined';
+     if(n.data&&typeof n.data==='object'){
+       n.data={...n.data,status:fn==='accept_friend_request'?'accepted':'declined'};
+       if(fn==='accept_friend_request')n.data.message='accepted your friend request';
+     }
+     closeNotificationDetails();
+     render();
+     window.spikePremiumToast?.(successText,'success',2600);
+     await load({silent:true});
+   }catch(e){
+     console.error("SPIKE friend notification action error:",e);
+     window.spikePremiumToast?.(e?.message||"Could not update friend request.",'error',4200);
+   }finally{[acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=false;b.removeAttribute('aria-busy')}})}
+ };
+ $("#notificationAccept")?.addEventListener('click',()=>runFriendAction('accept_friend_request','Friend request accepted.'));
+ $("#notificationDecline")?.addEventListener('click',()=>runFriendAction('decline_friend_request','Friend request declined.'));
+ $("#notificationModalClose").focus();
+}
+function closeNotificationDetails(){const modal=$("#notificationModal");modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+$("#notificationModalClose").onclick=closeNotificationDetails;
+$("#notificationModal").addEventListener('click',e=>{if(e.target.id==='notificationModal')closeNotificationDetails()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$("#notificationModal")?.classList.contains('open'))closeNotificationDetails()});
+$("#notificationList").addEventListener("click",async e=>{
+ const b=e.target.closest("[data-id]");if(!b)return;
+ const n=rows.find(x=>String(x.id)===String(b.dataset.id));
+ if(b.dataset.busy==="1")return;
+ b.dataset.busy="1";b.disabled=true;
+ try{
+   if(n&&!n.read) await markRead(b.dataset.id);
+   openNotificationDetails(n);
+   b.disabled=false;b.dataset.busy="0";
+ }catch(err){
+   console.error("SPIKE notification action error:",err);
+   window.spikePremiumToast?.(err?.message||"Could not update notification.","error",4200);
+   b.disabled=false;b.dataset.busy="0";
+ }
+});
+function setFilter(f){notificationFilter=f;document.querySelectorAll(".notif-tab").forEach(b=>b.classList.remove("active"));const map={all:"#tabAll",unread:"#tabUnread",announcements:"#tabAnnouncements",mentions:"#tabMentions",system:"#tabSystem"};$(map[f])?.classList.add("active");document.querySelectorAll(".notif-tab").forEach(b=>b.setAttribute("aria-selected",b.classList.contains("active")?"true":"false"));render();}
+["All","Unread","Announcements","Mentions","System"].forEach(x=>{const id="#tab"+x;$(id)?.addEventListener("click",()=>setFilter(x.toLowerCase()));});
+$("#clearAll").onclick=clearAllNotifications;
+
+$("#feedNav").onclick=()=>location.href="feed.html";$("#friendsNav").onclick=()=>location.href="friends.html";$("#chatNav").onclick=()=>location.href="messages.html";$("#profileNav").onclick=()=>location.href="profile.html";
+window.addEventListener("beforeunload",()=>{if(channel)sb.removeChannel(channel);if(bc)bc.close();clearInterval(pollTimer)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&me)load({silent:true}).catch(()=>{})});
+sb.auth.onAuthStateChange((event,session)=>{
+// INITIAL_SESSION is expected during startup. Never treat it as logout.
+if(event==="SIGNED_OUT" && authReady && !authRecoveryInProgress){
+location.href="index.html?reauth=1";
+}
+if(event==="TOKEN_REFRESHED" && session){
+// Supabase has persisted the rotated refresh token. No page reload needed.
+authRecoveryInProgress=false;
+}
+});
+// Absolute UI failsafe: a broken script/network condition must never leave the full-screen loader visible forever.
+setTimeout(()=>{
+ const loader=$("#loader");
+ if(loader&&!loader.classList.contains("hide")){
+   loader.classList.add("hide");
+   if(!me) $("#notificationList").innerHTML='<div class="empty error">SPIKE could not finish loading notifications.<br><button class="btn" id="retryNotificationsTimeout" type="button" style="margin-top:12px">Retry</button></div>';
+   $("#retryNotificationsTimeout")?.addEventListener("click",()=>location.reload());
+ }
+},20000);
+boot();
+</script>
+<script id="spike-sw-register">
+if("serviceWorker" in navigator){
+const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
+if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
+else setTimeout(install,1500);
+}
+</script>
+
+<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script><script src="js/ui-fix.js"></script>
+<script id="spike-privacy-bridge">
+(function(){
+  if(window.__SPIKE_PRIVACY_BRIDGE__) return; window.__SPIKE_PRIVACY_BRIDGE__=true;
+  const sb=window.supabase;
+  const state={};
+  async function call(fn,args){try{if(!sb?.rpc)return null; const r=await sb.rpc(fn,args||{}); if(r.error){console.warn('[SPIKE ACCESS]',fn,r.error.message);return null} return r.data;}catch(e){console.warn('[SPIKE ACCESS]',fn,e);return null}}
+  async function viewer(){try{return (await sb?.auth?.getUser())?.data?.user||null}catch(e){return null}}
+  window.SPIKE_ACCESS={
+    profile:(owner)=>call('can_view_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
+    discover:(owner)=>call('can_discover_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
+    posts:(owner)=>call('can_view_spike_posts',{p_viewer:state.viewerId,p_owner:owner}),
+    media:(owner)=>call('can_view_spike_media',{p_viewer:state.viewerId,p_owner:owner}),
+    friends:(owner)=>call('can_view_spike_friends',{p_viewer:state.viewerId,p_owner:owner}),
+    online:(owner)=>call('can_view_spike_online_status',{p_viewer:state.viewerId,p_owner:owner}),
+    message:(owner)=>call('can_message_spike_user',{p_sender:state.viewerId,p_recipient:owner}),
+    call:(owner)=>call('can_call_spike_user',{p_caller:state.viewerId,p_callee:owner}),
+    ready:null
+  };
+  state.ready=(async()=>{const u=await viewer(); state.viewerId=u?.id||null; return u})(); window.SPIKE_ACCESS.ready=state.ready;
+  // Guard profile/discovery links before navigation; privacy is still enforced server-side.
+  document.addEventListener('click',async function(e){
+    const a=e.target.closest?.('a[href]'); if(!a) return;
+    const href=a.getAttribute('href')||''; if(!/(^|\/)(profile|user-profile)(\.html)?([?#]|$)/i.test(href)) return;
+    const u=await state.ready; if(!u) return;
+    const m=href.match(/[?&](?:user|user_id|id|uid)=([^&#]+)/i); if(!m) return;
+    const owner=decodeURIComponent(m[1]); if(owner===u.id) return;
+    const ok=await call('can_discover_spike_profile',{p_viewer:u.id,p_owner:owner});
+    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else window.spikePremiumAlert('This profile is not available to you.',{title:'Profile unavailable',icon:'ⓘ'});}
+  },true);
+})();
+</script>
+<script id="spike-menu-nav-controller-fixed">
+(function(){
+  if(window.__SPIKE_MENU_NAV_FIXED__) return; window.__SPIKE_MENU_NAV_FIXED__=true;
+  const root=document.documentElement, body=document.body;
+  const menuButtonSelector='#menuBtn, #menuButton, .menu-btn, .spike-menu-left, [aria-label*="menu" i], [title*="menu" i]';
+  const closeSelector='[id*="menuClose" i], [id*="closeMenu" i], [data-close-menu], .spike-menu-close';
+  function navHidden(v){ body.classList.toggle('spike-menu-nav-hidden',!!v); root.classList.toggle('spike-menu-nav-hidden',!!v); }
+  function openDetected(){
+    return !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"], .overlay.open[id*="menu" i], [id*="menu" i].open, .side-menu.open, .drawer.open');
+  }
+  function sync(){ navHidden(openDetected()); }
+  document.addEventListener('click',function(e){
+    const menu=e.target.closest?.(menuButtonSelector);
+    if(menu){ navHidden(true); requestAnimationFrame(sync); setTimeout(sync,80); return; }
+    const close=e.target.closest?.(closeSelector);
+    if(close){ setTimeout(sync,40); return; }
+    const overlay=e.target.closest?.('.spike-menu-overlay, .overlay[id*="menu" i]');
+    if(overlay && e.target===overlay) setTimeout(sync,40);
+  },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') setTimeout(sync,40); });
+  const mo=new MutationObserver(()=>sync());
+  mo.observe(document.body,{subtree:true,attributes:true,attributeFilter:['class','style','aria-hidden']});
+  sync();
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script src="js/premium-back.js" defer></script>
+<script src="js/telemetry.js" defer></script>
+</body></html>

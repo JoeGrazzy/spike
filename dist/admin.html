@@ -1,0 +1,1493 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="stylesheet" href="css/perf.css">
+<script id="spike-performance-bootstrap">
+/* SPIKE performance bootstrap — no application logic changes */
+(()=>{try{
+const c=navigator.connection;
+if(c&&c.saveData) document.documentElement.dataset.saveData="1";
+if("contentVisibility" in document.documentElement.style){
+document.documentElement.classList.add("spike-cv-ready");
+}
+}catch(_){}})();
+</script>
+<script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);var t=(n===6||n===8)?"light":"dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPIKE Rooms Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<style>
+:root{--bg:#08090d;--panel:#11131a;--panel2:#171922;--line:#282b37;--text:#f7f8fc;--muted:#9296a7;--pink:#ff4fa3;--green:#54e39b;--orange:#ff9b4a;--danger:#ff6b7d}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0,#28152a 0,transparent 30%),radial-gradient(circle at 95% 8%,#173027 0,transparent 27%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif}.app{max-width:1250px;margin:auto;padding:18px 16px 90px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:24px;font-weight:950;letter-spacing:.08em}.brand b{background:linear-gradient(90deg,var(--pink),var(--green),var(--orange));-webkit-background-clip:text;color:transparent}.user{display:flex;align-items:center;gap:9px}.avatar{width:38px;height:38px;border-radius:13px;background:linear-gradient(135deg,#342038,#19382d);display:grid;place-items:center}.role{padding:7px 10px;border:1px solid #3a3d49;border-radius:11px;color:#c3c5cf;font-size:11px}.hero{margin-top:18px;padding:24px;border:1px solid #30323e;border-radius:25px;background:linear-gradient(135deg,#ff4fa313,#54e39b0e,#ff9b4a0e);box-shadow:0 20px 70px #0008}.eyebrow{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:#a9acb9}.hero h1{margin:5px 0;font-size:clamp(28px,5vw,43px)}.hero p{margin:0;color:var(--muted);max-width:800px;line-height:1.55}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}.stat,.panel{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:19px}.stat{padding:17px}.stat strong{font-size:24px;display:block;margin-top:5px}.layout{display:grid;grid-template-columns:220px 1fr;gap:15px;margin-top:17px}.side{padding:10px;height:max-content;position:sticky;top:12px}.side button{width:100%;text-align:left;padding:12px;border:0;background:transparent;color:#aeb1bd;border-radius:12px;cursor:pointer}.side button.active,.side button:hover{background:#252833;color:#fff}.content{min-width:0}.panel{padding:18px;margin-bottom:15px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.toolbar h2{margin:0;font-size:18px}.muted{color:var(--muted);font-size:13px}.primary,.ghost,.danger{padding:10px 13px;border:0;border-radius:12px;font-weight:800;cursor:pointer}.primary{background:linear-gradient(100deg,var(--pink),var(--orange));color:#fff}.ghost{background:#252833;color:#fff}.danger{background:#52222a;color:#ffb0b9}.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.package,.room,.usercard{padding:15px;border:1px solid var(--line);border-radius:16px;background:#15171f}.package{display:flex;justify-content:space-between;gap:12px;align-items:center}.package strong,.room strong{display:block;margin-bottom:4px}.pill{display:inline-block;padding:5px 8px;border-radius:9px;background:#203c30;color:#79e8ad;font-size:11px}.pill.off{background:#3e2529;color:#ff9ba5}
+.verified-admin-badge{display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;background:#7c3aed;color:#fff;font-size:10px;font-weight:950;margin-left:5px;vertical-align:-2px}.verify-btn{border:1px solid rgba(124,58,237,.35)!important}.actions{display:flex;gap:7px;flex-wrap:wrap}.search{display:flex;gap:8px}.search input,input,textarea,select{width:100%;background:#0d0f14;border:1px solid #30333e;color:#fff;border-radius:12px;padding:12px;outline:none}textarea{min-height:85px;resize:vertical}.search input{flex:1}.table{overflow:auto}.row{display:grid;grid-template-columns:1.4fr .65fr .7fr .75fr .7fr .9fr;gap:9px;align-items:center;padding:12px;border-bottom:1px solid #242731;min-width:760px}.head{color:#8f93a2;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.field label{display:block;color:#aeb1bd;font-size:11px;margin-bottom:5px}.full{grid-column:1/-1}.modal{position:fixed;inset:0;background:#000b;display:none;align-items:flex-end;justify-content:center;padding:14px;z-index:30}.modal.show{display:flex}.sheet{width:min(580px,100%);max-height:88vh;overflow:auto;background:#15171e;border:1px solid #363946;border-radius:25px;padding:19px}.sheethead{display:flex;justify-content:space-between;align-items:center}.close{width:38px;height:38px;border:0;border-radius:12px;background:#272a35;color:white;font-size:20px}.audit{max-height:420px;overflow:auto}.audititem{padding:12px;border-bottom:1px solid #252832}.empty{padding:20px;text-align:center;border:1px dashed var(--line);border-radius:15px;color:var(--muted)}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:#252833;border:1px solid #3a3d49;padding:11px 15px;border-radius:13px;display:none;z-index:50}
+/* ===== ROOM FEATURE PURCHASES ===== */
+.purchaseStats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0}.purchaseStat{padding:12px;border:1px solid var(--spike-line);border-radius:14px;background:var(--spike-surface-2);min-width:0}.purchaseStat strong{display:block;font-size:20px;margin-top:3px}.purchaseStat small{color:var(--spike-muted);font-size:10px}.purchaseToolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.purchaseFilters{display:flex;gap:6px;overflow:auto;padding:2px 0 8px;scrollbar-width:none}.purchaseFilters::-webkit-scrollbar{display:none}.purchaseFilters button{border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-text);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:850;white-space:nowrap;cursor:pointer}.purchaseFilters button.active{background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2));color:#fff;border-color:transparent}.purchaseGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.purchaseCard{padding:13px;border:1px solid var(--spike-line);border-radius:15px;background:var(--spike-surface-2);min-width:0}.purchaseTop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.purchaseRef{font-size:12px;font-weight:950;word-break:break-word}.purchaseStatus{font-size:9px;font-weight:900;padding:5px 7px;border-radius:999px;white-space:nowrap;background:rgba(124,58,237,.12);color:var(--spike-accent)}.purchaseStatus.pending{background:rgba(245,158,11,.14);color:#b45309}.purchaseStatus.paid_pending_approval{background:rgba(59,130,246,.14);color:#2563eb}.purchaseStatus.payment_instructions_sent{background:rgba(168,85,247,.14);color:#7e22ce}.purchaseStatus.approved{background:rgba(16,185,129,.14);color:#047857}.purchaseStatus.rejected{background:rgba(239,71,111,.14);color:#be123c}.purchaseMeta{margin-top:7px;color:var(--spike-muted);font-size:10px;line-height:1.55}.purchaseMeta b{color:var(--spike-text)}.purchaseValue{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid var(--spike-line)}.purchaseValue strong{font-size:13px}.purchaseActions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.purchaseActions button{border:1px solid var(--spike-line);background:var(--spike-surface);color:var(--spike-text);border-radius:9px;padding:7px 9px;font-size:10px;font-weight:900;cursor:pointer}.purchaseActions .approve{background:#10b981;color:#fff;border-color:transparent}.purchaseActions .reject{background:#ef476f;color:#fff;border-color:transparent}.purchaseActions .whats{background:#16a34a;color:#fff;border-color:transparent}.purchaseActions .paid{background:#2563eb;color:#fff;border-color:transparent}.purchaseSearch{min-width:190px;flex:1}.purchaseSearch input{padding:9px 11px}.purchaseOverview{display:grid;grid-template-columns:1.2fr .8fr;gap:11px}.purchaseOverviewList{display:grid;gap:7px}.purchaseMini{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 11px;border:1px solid var(--spike-line);border-radius:12px;background:var(--spike-surface-2)}.purchaseMini b{font-size:11px}.purchaseMini span{font-size:10px;color:var(--spike-muted)}.purchaseEmpty{padding:18px;text-align:center;color:var(--spike-muted);border:1px dashed var(--spike-line);border-radius:13px}.purchaseBanner{padding:11px 12px;border-radius:13px;background:linear-gradient(135deg,rgba(124,58,237,.12),rgba(236,72,153,.08));border:1px solid rgba(124,58,237,.18)}
+@media(max-width:800px){.purchaseStats{grid-template-columns:repeat(2,1fr)}.purchaseGrid,.purchaseOverview{grid-template-columns:1fr}}
+@media(max-width:520px){.purchaseToolbar{align-items:stretch}.purchaseSearch{min-width:100%}.purchaseStats{gap:7px}.purchaseStat{padding:10px}.purchaseStat strong{font-size:17px}}
+@media(max-width:800px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:6px}.side button{min-width:max-content}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.cards,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.hero{padding:19px}.search{flex-direction:column}}
+/* ===== SPIKE PREMIUM THEME SYSTEM ===== */
+:root{
+--sp-bg:#f6f7fb;
+--sp-surface:rgba(255,255,255,.88);
+--sp-surface-solid:#ffffff;
+--sp-surface-2:rgba(248,249,253,.94);
+--sp-text:#172033;
+--sp-muted:#667085;
+--sp-line:rgba(17,24,39,.10);
+--sp-accent:#7c3aed;
+--sp-accent-2:#ec4899;
+--sp-accent-3:#4f46e5;
+--sp-good:#10b981;
+--sp-danger:#ef476f;
+--sp-shadow:0 18px 55px rgba(31,41,55,.10);
+--sp-shadow-soft:0 8px 28px rgba(31,41,55,.07);
+}
+html[data-theme="dark"]{
+--sp-bg:#080912;
+--sp-surface:rgba(18,20,31,.86);
+--sp-surface-solid:#12141f;
+--sp-surface-2:rgba(24,27,41,.92);
+--sp-text:#f7f8fc;
+--sp-muted:#9aa2b5;
+--sp-line:rgba(255,255,255,.095);
+--sp-shadow:0 22px 70px rgba(0,0,0,.38);
+--sp-shadow-soft:0 10px 32px rgba(0,0,0,.24);
+}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]){
+--sp-bg:#080912;--sp-surface:rgba(18,20,31,.86);--sp-surface-solid:#12141f;--sp-surface-2:rgba(24,27,41,.92);--sp-text:#f7f8fc;--sp-muted:#9aa2b5;--sp-line:rgba(255,255,255,.095);--sp-shadow:0 22px 70px rgba(0,0,0,.38);--sp-shadow-soft:0 10px 32px rgba(0,0,0,.24)
+}}
+html,body{background:var(--sp-bg)!important;color:var(--sp-text)}
+body{
+background-image:
+radial-gradient(circle at 8% 0%,rgba(124,58,237,.12),transparent 28%),
+radial-gradient(circle at 94% 8%,rgba(236,72,153,.09),transparent 24%),
+linear-gradient(180deg,transparent 0%,var(--sp-bg) 52%)!important;
+background-attachment:fixed;
+}
+html[data-theme="light"] body{background-image:radial-gradient(circle at 8% 0%,rgba(124,58,237,.08),transparent 28%),radial-gradient(circle at 94% 8%,rgba(236,72,153,.07),transparent 24%),linear-gradient(180deg,#fbfbff 0%,var(--sp-bg) 55%)!important}
+/* common surfaces */
+.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.room,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.cover,.room-hero,.roomgrid,.roomtab,.tabs{
+border-color:var(--sp-line)!important;
+}
+.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top,.room-overview-card{
+background:var(--sp-surface)!important;
+box-shadow:var(--sp-shadow-soft);
+color:var(--sp-text);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+}
+.hero,.room-hero{
+background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(236,72,153,.08),rgba(79,70,229,.08)),var(--sp-surface)!important;
+box-shadow:var(--sp-shadow);
+}
+.header,.top,.chathead,.fm-head,.rm-head{
+background:color-mix(in srgb,var(--sp-surface-solid) 82%,transparent)!important;
+border-color:var(--sp-line)!important;
+backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.header h1,.brand,.logo,.header-title{color:var(--sp-text)}
+.muted,.sub,.meta,.time,.preview,.status,.eyebrow,.role,.section-label,.form-note,.spid-sub,.spid-label,.xp-foot{color:var(--sp-muted)!important}
+input,textarea,select,.input,.search input,.field input,.field textarea,.field select{
+background:var(--sp-surface-solid)!important;color:var(--sp-text)!important;border-color:var(--sp-line)!important;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+input::placeholder,textarea::placeholder{color:var(--sp-muted)!important;opacity:.85}
+input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,237,.55)!important;box-shadow:0 0 0 3px rgba(124,58,237,.11)!important}
+.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.roomtab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
+border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:var(--sp-surface-2)!important;
+}
+.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.roomtab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
+.danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
+.active{border-color:rgba(124,58,237,.28)!important}
+html[data-theme="light"] .active,html[data-theme="light"] .tab.active,html[data-theme="light"] .filter.active{background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(236,72,153,.10))!important;color:#5b21b6!important}
+.avatar,.friend-avatar,.room-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.footer{color:var(--sp-muted)!important}
+.modal,.overlay,.modal-backdrop,.premium-media-modal{background:rgba(3,5,12,.64)!important;backdrop-filter:blur(8px)}
+html[data-theme="light"] .modal,html[data-theme="light"] .overlay,html[data-theme="light"] .modal-backdrop,html[data-theme="light"] .premium-media-modal{background:rgba(15,23,42,.30)!important}
+.toast,.notice{border-color:var(--sp-line)!important}
+.progress,.xp-track{background:var(--sp-surface-2)!important}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(124,58,237,.28);border-radius:99px}
+:focus-visible{outline:3px solid rgba(124,58,237,.30)!important;outline-offset:2px}
+@media(max-width:720px){
+.app{padding-left:12px!important;padding-right:12px!important}
+.card,.panel,.hero,.post,.composer,.friend-card,.request-card,.room-card{border-radius:20px!important}
+.header{padding-left:12px!important;padding-right:12px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+/* page-specific light corrections */
+html[data-theme="light"] .header-actions button,html[data-theme="light"] .icon-btn{background:rgba(255,255,255,.82)!important;color:#344054!important}
+html[data-theme="light"] .bubble{background:#eef1f7!important;color:#172033!important;border-color:var(--sp-line)!important}
+html[data-theme="light"] .bubble.mine{background:linear-gradient(135deg,#7c3aed,#ec4899)!important;color:#fff!important}
+html[data-theme="light"] .thread:hover,html[data-theme="light"] .thread.active{background:#f3f1ff!important}
+html[data-theme="light"] .post-actions,html[data-theme="light"] .feed-v2-nav,html[data-theme="light"] .feed-v2-panel{background:rgba(255,255,255,.82)!important}
+html[data-theme="light"] .story{box-shadow:0 10px 35px rgba(31,41,55,.08)!important}
+html[data-theme="light"] .cover{background:linear-gradient(135deg,#ede9fe,#fce7f3,#e0e7ff)!important}
+html[data-theme="light"] .glow{opacity:.12!important}
+/* ===== SPIKE PREMIUM CONFIRM SHEET ===== */
+.spike-confirm-backdrop{position:fixed;inset:0;z-index:100;background:rgba(3,5,12,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);display:none;align-items:flex-end;justify-content:center;padding:12px}
+.spike-confirm-backdrop.show{display:flex;animation:spikeConfirmFade .18s ease-out}
+.spike-confirm-sheet{width:min(560px,100%);max-height:min(78vh,620px);overflow:auto;border:1px solid rgba(255,255,255,.12);border-radius:28px 28px 22px 22px;background:linear-gradient(155deg,rgba(25,28,39,.98),rgba(10,13,22,.99));box-shadow:0 28px 100px rgba(0,0,0,.58),0 0 50px rgba(145,72,255,.12);padding:22px 20px 18px;transform:translateY(12px);animation:spikeConfirmUp .22s cubic-bezier(.2,.8,.2,1) forwards}
+.spike-confirm-grip{width:42px;height:4px;border-radius:99px;background:rgba(255,255,255,.2);margin:0 auto 18px}
+.spike-confirm-icon{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;margin-bottom:14px;font-size:25px;background:linear-gradient(135deg,rgba(255,79,163,.18),rgba(132,82,255,.22));border:1px solid rgba(255,255,255,.1)}
+.spike-confirm-title{font-size:20px;font-weight:900;letter-spacing:-.02em;color:#fff;margin:0 0 7px}
+.spike-confirm-message{font-size:14px;line-height:1.6;color:#aeb4c3;white-space:pre-line;margin:0}
+.spike-confirm-actions{display:grid;grid-template-columns:1fr 1.15fr;gap:9px;margin-top:20px}
+.spike-confirm-actions button{min-height:48px;border:0;border-radius:15px;font:800 14px system-ui,sans-serif;cursor:pointer;transition:transform .12s ease,filter .12s ease}
+.spike-confirm-actions button:active{transform:scale(.98)}
+.spike-confirm-cancel{background:#202532;color:#e8ebf3;border:1px solid rgba(255,255,255,.08)!important}
+.spike-confirm-ok{background:linear-gradient(100deg,#9b4dff,#ff4fa3);color:#fff;box-shadow:0 10px 28px rgba(164,72,255,.25)}
+.spike-confirm-ok.danger{background:linear-gradient(100deg,#d93668,#ff536b)}
+@keyframes spikeConfirmFade{from{opacity:0}to{opacity:1}}
+@keyframes spikeConfirmUp{from{opacity:0;transform:translateY(28px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){.spike-confirm-backdrop{padding:0}.spike-confirm-sheet{border-radius:28px 28px 0 0;padding:20px 17px calc(18px + env(safe-area-inset-bottom))}.spike-confirm-actions{grid-template-columns:1fr 1fr}}
+
+</style>
+<style id="spike-universal-theme-css">
+/* ===== SPIKE UNIVERSAL FEED THEMES ===== */
+html[data-spike-style="1"]{
+--spike-bg:#f5f7fb;--spike-surface:#ffffff;--spike-surface-2:#f8faff;
+--spike-text:#111827;--spike-muted:#667085;--spike-line:rgba(15,23,42,.10);
+--spike-accent:#7c3aed;--spike-accent-2:#a855f7;--spike-glow:rgba(124,58,237,.18);
+}
+html[data-spike-style="2"]{
+--spike-bg:#060817;--spike-surface:#0c1022;--spike-surface-2:#121735;
+--spike-text:#f7f8ff;--spike-muted:#9da6c4;--spike-line:rgba(139,92,246,.22);
+--spike-accent:#8b5cf6;--spike-accent-2:#d946ef;--spike-glow:rgba(139,92,246,.35);
+}
+html[data-spike-style="3"]{
+--spike-bg:#0b416c;--spike-surface:rgba(255,255,255,.16);--spike-surface-2:rgba(255,255,255,.11);
+--spike-text:#fff;--spike-muted:rgba(255,255,255,.78);--spike-line:rgba(255,255,255,.28);
+--spike-accent:#48a8ff;--spike-accent-2:#7c5cff;--spike-glow:rgba(91,178,255,.35);
+}
+html[data-spike-style="4"]{
+--spike-bg:#d72668;--spike-surface:rgba(255,255,255,.91);--spike-surface-2:rgba(255,255,255,.18);
+--spike-text:#172033;--spike-muted:#5b6475;--spike-line:rgba(255,255,255,.42);
+--spike-accent:#ef315e;--spike-accent-2:#ff8b32;--spike-glow:rgba(255,94,145,.38);
+}
+html[data-spike-style="5"]{
+--spike-bg:#0b0d10;--spike-surface:#14171b;--spike-surface-2:#1b1f24;
+--spike-text:#f5f7fa;--spike-muted:#9ba2ad;--spike-line:rgba(255,255,255,.10);
+--spike-accent:#fff;--spike-accent-2:#cfd5dd;--spike-glow:rgba(255,255,255,.12);
+}
+/* page background */
+html[data-spike-style="1"] body{background:radial-gradient(circle at 8% 0,#ede9fe 0,transparent 34%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="2"] body{background:radial-gradient(circle at 12% 0,#26114e 0,transparent 34%),radial-gradient(circle at 92% 12%,#12275d 0,transparent 28%),var(--spike-bg)!important;color:var(--spike-text)!important}
+html[data-spike-style="3"] body{background:radial-gradient(circle at 15% 0,#6cc7ff 0,transparent 32%),linear-gradient(145deg,#0a385d,#11679b 52%,#244f99)!important;color:var(--spike-text)!important}
+html[data-spike-style="4"] body{background:radial-gradient(circle at 8% 0,#ff8d38 0,transparent 35%),radial-gradient(circle at 94% 10%,#ff3d8b 0,transparent 34%),linear-gradient(145deg,#ff7b32,#e91e7a 52%,#8f2bd9)!important;color:var(--spike-text)!important}
+html[data-spike-style="5"] body{background:var(--spike-bg)!important;color:var(--spike-text)!important}
+/* common surfaces */
+html[data-spike-style="1"] .card,html[data-spike-style="1"] .panel,html[data-spike-style="1"] .stat,
+html[data-spike-style="1"] .hero,html[data-spike-style="1"] .list,html[data-spike-style="1"] .post,
+html[data-spike-style="1"] .story-row,html[data-spike-style="1"] .composer,html[data-spike-style="1"] .announcement{
+background:var(--spike-surface)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 12px 36px rgba(31,41,55,.08)!important
+}
+html[data-spike-style="2"] .card,html[data-spike-style="2"] .panel,html[data-spike-style="2"] .stat,
+html[data-spike-style="2"] .hero,html[data-spike-style="2"] .list,html[data-spike-style="2"] .post,
+html[data-spike-style="2"] .story-row,html[data-spike-style="2"] .composer,html[data-spike-style="2"] .announcement{
+background:linear-gradient(145deg,rgba(17,20,43,.96),rgba(10,13,31,.96))!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important;box-shadow:0 0 30px rgba(105,63,255,.12),0 14px 45px rgba(0,0,0,.32)!important
+}
+html[data-spike-style="3"] .card,html[data-spike-style="3"] .panel,html[data-spike-style="3"] .stat,
+html[data-spike-style="3"] .hero,html[data-spike-style="3"] .list,html[data-spike-style="3"] .post,
+html[data-spike-style="3"] .story-row,html[data-spike-style="3"] .composer,html[data-spike-style="3"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important;box-shadow:0 14px 45px rgba(0,32,72,.22),inset 0 1px rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important
+}
+html[data-spike-style="4"] .card,html[data-spike-style="4"] .panel,html[data-spike-style="4"] .stat,
+html[data-spike-style="4"] .hero,html[data-spike-style="4"] .list,html[data-spike-style="4"] .post,
+html[data-spike-style="4"] .story-row,html[data-spike-style="4"] .composer,html[data-spike-style="4"] .announcement{
+background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,242,247,.84))!important;color:var(--spike-text)!important;border-color:rgba(255,255,255,.72)!important;box-shadow:0 14px 45px rgba(101,16,68,.18)!important
+}
+html[data-spike-style="5"] .card,html[data-spike-style="5"] .panel,html[data-spike-style="5"] .stat,
+html[data-spike-style="5"] .hero,html[data-spike-style="5"] .list,html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .story-row,html[data-spike-style="5"] .composer,html[data-spike-style="5"] .announcement{
+background:linear-gradient(145deg,#14171b,#1a1e23)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important
+}
+/* shared typography and controls */
+html[data-spike-style="1"] .muted,html[data-spike-style="1"] .sub,html[data-spike-style="1"] .status,
+html[data-spike-style="1"] .meta,html[data-spike-style="1"] .time,html[data-spike-style="1"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="2"] .muted,html[data-spike-style="2"] .sub,html[data-spike-style="2"] .status,
+html[data-spike-style="2"] .meta,html[data-spike-style="2"] .time,html[data-spike-style="2"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="3"] .muted,html[data-spike-style="3"] .sub,html[data-spike-style="3"] .status,
+html[data-spike-style="3"] .meta,html[data-spike-style="3"] .time,html[data-spike-style="3"] .preview{color:rgba(255,255,255,.78)!important}
+html[data-spike-style="4"] .muted,html[data-spike-style="4"] .sub,html[data-spike-style="4"] .status,
+html[data-spike-style="4"] .meta,html[data-spike-style="4"] .time,html[data-spike-style="4"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style="5"] .muted,html[data-spike-style="5"] .sub,html[data-spike-style="5"] .status,
+html[data-spike-style="5"] .meta,html[data-spike-style="5"] .time,html[data-spike-style="5"] .preview{color:var(--spike-muted)!important}
+html[data-spike-style] input,html[data-spike-style] textarea,html[data-spike-style] select{
+border-color:var(--spike-line)!important;background:var(--spike-surface-2)!important;color:var(--spike-text)!important
+}
+html[data-spike-style="3"] input,html[data-spike-style="3"] textarea,html[data-spike-style="3"] select{background:rgba(255,255,255,.12)!important;color:#fff!important}
+html[data-spike-style="4"] input,html[data-spike-style="4"] textarea,html[data-spike-style="4"] select{background:rgba(255,255,255,.75)!important}
+html[data-spike-style] button:not(.spike-theme-switch){
+transition:transform .16s ease,box-shadow .16s ease,background .16s ease
+}
+html[data-spike-style] button:not(.spike-theme-switch):hover{transform:translateY(-1px)}
+html[data-spike-style="1"] .btn.primary,html[data-spike-style="1"] .primary,
+html[data-spike-style="2"] .btn.primary,html[data-spike-style="2"] .primary{
+background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;color:#fff!important;box-shadow:0 7px 20px var(--spike-glow)!important
+}
+html[data-spike-style="3"] .btn.primary,html[data-spike-style="3"] .primary{
+background:linear-gradient(135deg,#3aa8ff,#6d5dfc)!important;color:#fff!important;box-shadow:0 8px 22px rgba(38,154,255,.35)!important
+}
+html[data-spike-style="4"] .btn.primary,html[data-spike-style="4"] .primary{
+background:linear-gradient(135deg,#ff5c6c,#c92fff)!important;color:#fff!important;box-shadow:0 8px 22px rgba(231,42,127,.28)!important
+}
+/* Feed header switch */
+.spike-theme-switch{
+min-width:72px;height:34px;padding:0 11px;border-radius:12px!important;
+display:inline-flex!important;align-items:center;justify-content:center;gap:6px;
+font-size:11px!important;font-weight:900!important;letter-spacing:.02em;
+border:1px solid rgba(124,58,237,.28)!important;
+background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(168,85,247,.08))!important;
+color:var(--spike-text)!important;box-shadow:0 5px 16px var(--spike-glow)!important;
+}
+.spike-theme-switch .spike-theme-dot{width:7px;height:7px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+html[data-spike-style="2"] .spike-theme-switch{background:linear-gradient(135deg,#6d28d9,#c026d3)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="3"] .spike-theme-switch{background:linear-gradient(135deg,rgba(255,255,255,.25),rgba(80,168,255,.28))!important;color:#fff!important;border-color:rgba(255,255,255,.35)!important}
+html[data-spike-style="4"] .spike-theme-switch{background:linear-gradient(135deg,#ff684a,#d62992)!important;color:#fff!important;border-color:transparent!important}
+html[data-spike-style="5"] .spike-theme-switch{background:#fff!important;color:#111!important;border-color:rgba(255,255,255,.2)!important}
+/* Feed-specific surfaces */
+html[data-spike-style="3"] .header,html[data-spike-style="3"] .bottom-nav{background:rgba(16,91,143,.45)!important;border-color:rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .header,html[data-spike-style="4"] .bottom-nav{background:linear-gradient(90deg,rgba(255,105,66,.9),rgba(214,39,130,.88))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+html[data-spike-style="2"] .header,html[data-spike-style="2"] .bottom-nav{background:rgba(5,7,20,.92)!important;border-color:rgba(139,92,246,.18)!important;box-shadow:0 0 24px rgba(139,92,246,.12)!important}
+html[data-spike-style="1"] .header,html[data-spike-style="1"] .bottom-nav{background:rgba(255,255,255,.9)!important;border-color:var(--spike-line)!important}
+html[data-spike-style="3"] .brand-title,html[data-spike-style="3"] .header-title,
+html[data-spike-style="3"] .header h1{color:#fff!important}
+html[data-spike-style="4"] .brand-title,html[data-spike-style="4"] .header-title,
+html[data-spike-style="4"] .header h1{color:#fff!important}
+/* Header actions remain compact */
+.spike-theme-switch:focus-visible{outline:3px solid rgba(139,92,246,.35);outline-offset:2px}
+@media(max-width:520px){.spike-theme-switch{min-width:64px;padding:0 8px;font-size:10px!important}.header-actions{gap:7px!important}}
+</style>
+<style>
+/* SPIKE: stop page horizontal shake/layout shift */
+html { width:100%; max-width:100%; overflow-x:hidden; scrollbar-gutter:stable; }
+body { width:100%; max-width:100%; overflow-x:hidden; }
+*, *::before, *::after { box-sizing:border-box; }
+.app, main, header, section, article, .content, .main, .grid, .layout { min-width:0; max-width:100%; }
+img, video, iframe { max-width:100%; }
+</style>
+<style id="spike-all-pages-theme-layer">
+/* SPIKE: universal Style 1-4 theme layer for every page */
+html[data-spike-style="1"] body{background:radial-gradient(circle at 8% 0,#ede9fe 0,transparent 34%),#f5f7fb!important;color:#111827!important}
+html[data-spike-style="2"] body{background:radial-gradient(circle at 12% 0,#26114e 0,transparent 34%),radial-gradient(circle at 92% 12%,#12275d 0,transparent 28%),#060817!important;color:#f7f8ff!important}
+html[data-spike-style="3"] body{background:radial-gradient(circle at 15% 0,#6cc7ff 0,transparent 32%),linear-gradient(145deg,#0a385d,#11679b 52%,#244f99)!important;color:#fff!important}
+html[data-spike-style="4"] body{background:radial-gradient(circle at 8% 0,#ff8d38 0,transparent 35%),radial-gradient(circle at 94% 10%,#ff3d8b 0,transparent 34%),linear-gradient(145deg,#ff7b32,#e91e7a 52%,#8f2bd9)!important;color:#172033!important}
+/* Headers / top bars */
+html[data-spike-style="1"] .header,html[data-spike-style="1"] .top,html[data-spike-style="1"] .chathead,html[data-spike-style="1"] .fm-head,html[data-spike-style="1"] .rm-head{background:rgba(255,255,255,.92)!important;color:#111827!important;border-color:rgba(15,23,42,.10)!important}
+html[data-spike-style="2"] .header,html[data-spike-style="2"] .top,html[data-spike-style="2"] .chathead,html[data-spike-style="2"] .fm-head,html[data-spike-style="2"] .rm-head{background:rgba(5,7,20,.94)!important;color:#f7f8ff!important;border-color:rgba(139,92,246,.20)!important;box-shadow:0 0 24px rgba(139,92,246,.12)!important}
+html[data-spike-style="3"] .header,html[data-spike-style="3"] .top,html[data-spike-style="3"] .chathead,html[data-spike-style="3"] .fm-head,html[data-spike-style="3"] .rm-head{background:rgba(16,91,143,.48)!important;color:#fff!important;border-color:rgba(255,255,255,.24)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .header,html[data-spike-style="4"] .top,html[data-spike-style="4"] .chathead,html[data-spike-style="4"] .fm-head,html[data-spike-style="4"] .rm-head{background:linear-gradient(90deg,rgba(255,105,66,.92),rgba(214,39,130,.90))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+html[data-spike-style="1"] .header h1,html[data-spike-style="1"] .brand,html[data-spike-style="1"] .logo,html[data-spike-style="1"] .header-title{color:#111827!important}
+html[data-spike-style="2"] .header h1,html[data-spike-style="2"] .brand,html[data-spike-style="2"] .logo,html[data-spike-style="2"] .header-title,html[data-spike-style="3"] .header h1,html[data-spike-style="3"] .brand,html[data-spike-style="3"] .logo,html[data-spike-style="3"] .header-title,html[data-spike-style="4"] .header h1,html[data-spike-style="4"] .brand,html[data-spike-style="4"] .logo,html[data-spike-style="4"] .header-title{color:#fff!important}
+/* Common page surfaces */
+html[data-spike-style="1"] .card,html[data-spike-style="1"] .panel,html[data-spike-style="1"] .post,html[data-spike-style="1"] .story,html[data-spike-style="1"] .composer,html[data-spike-style="1"] .friend-card,html[data-spike-style="1"] .request-card,html[data-spike-style="1"] .room,html[data-spike-style="1"] .room-card,html[data-spike-style="1"] .usercard,html[data-spike-style="1"] .list,html[data-spike-style="1"] .chat,html[data-spike-style="1"] .sheet,html[data-spike-style="1"] .modalbox,html[data-spike-style="1"] .profile-top,html[data-spike-style="1"] .about-item{background:rgba(255,255,255,.92)!important;color:#111827!important;border-color:rgba(15,23,42,.10)!important;box-shadow:0 12px 36px rgba(31,41,55,.08)!important}
+html[data-spike-style="2"] .card,html[data-spike-style="2"] .panel,html[data-spike-style="2"] .post,html[data-spike-style="2"] .story,html[data-spike-style="2"] .composer,html[data-spike-style="2"] .friend-card,html[data-spike-style="2"] .request-card,html[data-spike-style="2"] .room,html[data-spike-style="2"] .room-card,html[data-spike-style="2"] .usercard,html[data-spike-style="2"] .list,html[data-spike-style="2"] .chat,html[data-spike-style="2"] .sheet,html[data-spike-style="2"] .modalbox,html[data-spike-style="2"] .profile-top,html[data-spike-style="2"] .about-item{background:linear-gradient(145deg,rgba(17,20,43,.96),rgba(10,13,31,.96))!important;color:#f7f8ff!important;border-color:rgba(139,92,246,.22)!important;box-shadow:0 0 30px rgba(105,63,255,.12),0 14px 45px rgba(0,0,0,.32)!important}
+html[data-spike-style="3"] .card,html[data-spike-style="3"] .panel,html[data-spike-style="3"] .post,html[data-spike-style="3"] .story,html[data-spike-style="3"] .composer,html[data-spike-style="3"] .friend-card,html[data-spike-style="3"] .request-card,html[data-spike-style="3"] .room,html[data-spike-style="3"] .room-card,html[data-spike-style="3"] .usercard,html[data-spike-style="3"] .list,html[data-spike-style="3"] .chat,html[data-spike-style="3"] .sheet,html[data-spike-style="3"] .modalbox,html[data-spike-style="3"] .profile-top,html[data-spike-style="3"] .about-item{background:linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.08))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important;box-shadow:0 14px 45px rgba(0,32,72,.22),inset 0 1px rgba(255,255,255,.22)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .card,html[data-spike-style="4"] .panel,html[data-spike-style="4"] .post,html[data-spike-style="4"] .story,html[data-spike-style="4"] .composer,html[data-spike-style="4"] .friend-card,html[data-spike-style="4"] .request-card,html[data-spike-style="4"] .room,html[data-spike-style="4"] .room-card,html[data-spike-style="4"] .usercard,html[data-spike-style="4"] .list,html[data-spike-style="4"] .chat,html[data-spike-style="4"] .sheet,html[data-spike-style="4"] .modalbox,html[data-spike-style="4"] .profile-top,html[data-spike-style="4"] .about-item{background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(255,242,247,.84))!important;color:#172033!important;border-color:rgba(255,255,255,.72)!important;box-shadow:0 14px 45px rgba(101,16,68,.18)!important}
+/* Text and controls */
+html[data-spike-style="1"] .muted,html[data-spike-style="1"] .sub,html[data-spike-style="1"] .meta,html[data-spike-style="1"] .time,html[data-spike-style="1"] .preview,html[data-spike-style="1"] .status{color:#667085!important}
+html[data-spike-style="2"] .muted,html[data-spike-style="2"] .sub,html[data-spike-style="2"] .meta,html[data-spike-style="2"] .time,html[data-spike-style="2"] .preview,html[data-spike-style="2"] .status{color:#9da6c4!important}
+html[data-spike-style="3"] .muted,html[data-spike-style="3"] .sub,html[data-spike-style="3"] .meta,html[data-spike-style="3"] .time,html[data-spike-style="3"] .preview,html[data-spike-style="3"] .status{color:rgba(255,255,255,.78)!important}
+html[data-spike-style="4"] .muted,html[data-spike-style="4"] .sub,html[data-spike-style="4"] .meta,html[data-spike-style="4"] .time,html[data-spike-style="4"] .preview,html[data-spike-style="4"] .status{color:#5b6475!important}
+html[data-spike-style] input,html[data-spike-style] textarea,html[data-spike-style] select{border-color:var(--spike-line)!important;color:var(--spike-text)!important;background:var(--spike-surface-2)!important}
+html[data-spike-style="3"] input,html[data-spike-style="3"] textarea,html[data-spike-style="3"] select{background:rgba(255,255,255,.12)!important;color:#fff!important}
+html[data-spike-style="4"] input,html[data-spike-style="4"] textarea,html[data-spike-style="4"] select{background:rgba(255,255,255,.75)!important;color:#172033!important}
+html[data-spike-style="1"] .btn,html[data-spike-style="1"] .ghost,html[data-spike-style="1"] .icon-btn,html[data-spike-style="1"] .header-btn,html[data-spike-style="1"] .tab,html[data-spike-style="1"] .filter,html[data-spike-style="1"] .pill{background:#f8faff!important;color:#111827!important;border-color:rgba(15,23,42,.10)!important}
+html[data-spike-style="2"] .btn,html[data-spike-style="2"] .ghost,html[data-spike-style="2"] .icon-btn,html[data-spike-style="2"] .header-btn,html[data-spike-style="2"] .tab,html[data-spike-style="2"] .filter,html[data-spike-style="2"] .pill{background:#121735!important;color:#f7f8ff!important;border-color:rgba(139,92,246,.22)!important}
+html[data-spike-style="3"] .btn,html[data-spike-style="3"] .ghost,html[data-spike-style="3"] .icon-btn,html[data-spike-style="3"] .header-btn,html[data-spike-style="3"] .tab,html[data-spike-style="3"] .filter,html[data-spike-style="3"] .pill{background:rgba(255,255,255,.12)!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+html[data-spike-style="4"] .btn,html[data-spike-style="4"] .ghost,html[data-spike-style="4"] .icon-btn,html[data-spike-style="4"] .header-btn,html[data-spike-style="4"] .tab,html[data-spike-style="4"] .filter,html[data-spike-style="4"] .pill{background:rgba(255,255,255,.74)!important;color:#172033!important;border-color:rgba(255,255,255,.55)!important}
+html[data-spike-style="1"] .primary,html[data-spike-style="1"] .btn.primary,html[data-spike-style="1"] .post-btn{background:linear-gradient(135deg,#7c3aed,#a855f7)!important;color:#fff!important}
+html[data-spike-style="2"] .primary,html[data-spike-style="2"] .btn.primary,html[data-spike-style="2"] .post-btn{background:linear-gradient(135deg,#6d28d9,#c026d3)!important;color:#fff!important}
+html[data-spike-style="3"] .primary,html[data-spike-style="3"] .btn.primary,html[data-spike-style="3"] .post-btn{background:linear-gradient(135deg,#3aa8ff,#6d5dfc)!important;color:#fff!important}
+html[data-spike-style="4"] .primary,html[data-spike-style="4"] .btn.primary,html[data-spike-style="4"] .post-btn{background:linear-gradient(135deg,#ff5c6c,#c92fff)!important;color:#fff!important}
+/* Sidebars / bottom navigation / common navigation */
+html[data-spike-style="1"] .bottom-nav,html[data-spike-style="1"] .sidebar,html[data-spike-style="1"] .side,html[data-spike-style="1"] nav{background:rgba(255,255,255,.92)!important;color:#111827!important;border-color:rgba(15,23,42,.10)!important}
+html[data-spike-style="2"] .bottom-nav,html[data-spike-style="2"] .sidebar,html[data-spike-style="2"] .side,html[data-spike-style="2"] nav{background:rgba(5,7,20,.94)!important;color:#f7f8ff!important;border-color:rgba(139,92,246,.20)!important}
+html[data-spike-style="3"] .bottom-nav,html[data-spike-style="3"] .sidebar,html[data-spike-style="3"] .side,html[data-spike-style="3"] nav{background:rgba(16,91,143,.48)!important;color:#fff!important;border-color:rgba(255,255,255,.24)!important;backdrop-filter:blur(18px)!important}
+html[data-spike-style="4"] .bottom-nav,html[data-spike-style="4"] .sidebar,html[data-spike-style="4"] .side,html[data-spike-style="4"] nav{background:linear-gradient(90deg,rgba(255,105,66,.90),rgba(214,39,130,.88))!important;color:#fff!important;border-color:rgba(255,255,255,.28)!important}
+/* Mobile safety */
+html,body{max-width:100%;overflow-x:hidden}
+*,*::before,*::after{box-sizing:border-box}
+img,video,iframe{max-width:100%}
+</style>
+<style id="spike-style-5-final">
+/* ===== SPIKE STYLE 5 — MINIMAL DARK (FINAL) ===== */
+html[data-spike-style="5"]{
+--spike-bg:#101214;--spike-surface:#17191d;--spike-surface-2:#1d2025;
+--spike-text:#f7f7f8;--spike-muted:#9da1a8;--spike-line:rgba(255,255,255,.10);
+--spike-accent:#f4f4f5;--spike-accent-2:#ffffff;--spike-glow:rgba(255,255,255,.08);
+color-scheme:dark;
+}
+html[data-spike-style="5"] body{
+background:radial-gradient(circle at 50% -10%,rgba(255,255,255,.055),transparent 34%),linear-gradient(180deg,#111315 0%,#0e1012 100%)!important;
+color:#f7f7f8!important;
+}
+html[data-spike-style="5"] .header,
+html[data-spike-style="5"] .top,
+html[data-spike-style="5"] .chathead,
+html[data-spike-style="5"] .fm-head,
+html[data-spike-style="5"] .rm-head{
+background:rgba(18,20,23,.96)!important;color:#f7f7f8!important;
+border-color:rgba(255,255,255,.10)!important;box-shadow:0 8px 24px rgba(0,0,0,.22)!important;
+}
+html[data-spike-style="5"] .header h1,html[data-spike-style="5"] .brand,html[data-spike-style="5"] .logo,html[data-spike-style="5"] .header-title{color:#f7f7f8!important}
+html[data-spike-style="5"] .card,
+html[data-spike-style="5"] .panel,
+html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .story,
+html[data-spike-style="5"] .composer,
+html[data-spike-style="5"] .friend-card,
+html[data-spike-style="5"] .request-card,
+html[data-spike-style="5"] .room,
+html[data-spike-style="5"] .room-card,
+html[data-spike-style="5"] .usercard,
+html[data-spike-style="5"] .list,
+html[data-spike-style="5"] .chat,
+html[data-spike-style="5"] .sheet,
+html[data-spike-style="5"] .modalbox,
+html[data-spike-style="5"] .profile-top,
+html[data-spike-style="5"] .about-item{
+background:linear-gradient(145deg,#181a1e,#141619)!important;color:#f7f7f8!important;
+border-color:rgba(255,255,255,.10)!important;box-shadow:0 10px 28px rgba(0,0,0,.28)!important;
+}
+html[data-spike-style="5"] .bottom-nav,
+html[data-spike-style="5"] .sidebar,
+html[data-spike-style="5"] .side,
+html[data-spike-style="5"] nav{
+background:rgba(16,18,20,.97)!important;color:#f7f7f8!important;border-color:rgba(255,255,255,.10)!important;
+}
+html[data-spike-style="5"] input,html[data-spike-style="5"] textarea,html[data-spike-style="5"] select{
+background:#15171a!important;color:#f7f7f8!important;border-color:rgba(255,255,255,.12)!important;
+}
+html[data-spike-style="5"] input::placeholder,html[data-spike-style="5"] textarea::placeholder{color:#777c84!important}
+html[data-spike-style="5"] .btn,html[data-spike-style="5"] .ghost,html[data-spike-style="5"] .icon-btn,
+html[data-spike-style="5"] .header-btn,html[data-spike-style="5"] .tab,html[data-spike-style="5"] .filter,html[data-spike-style="5"] .pill{
+background:#1c1f23!important;color:#f7f7f8!important;border-color:rgba(255,255,255,.11)!important;
+}
+html[data-spike-style="5"] .primary,html[data-spike-style="5"] .btn.primary,html[data-spike-style="5"] .post-btn{
+background:#f5f5f5!important;color:#111315!important;border-color:#f5f5f5!important;
+}
+html[data-spike-style="5"] a{color:#f5f5f5!important}
+html[data-spike-style="5"] .muted,html[data-spike-style="5"] .sub,html[data-spike-style="5"] .meta,
+html[data-spike-style="5"] .time,html[data-spike-style="5"] .preview,html[data-spike-style="5"] .status,
+html[data-spike-style="5"] .eyebrow{color:#9da1a8!important}
+html[data-spike-style="5"] .bubble{background:#202328!important;color:#f7f7f8!important;border-color:rgba(255,255,255,.08)!important}
+html[data-spike-style="5"] .bubble.mine{background:#f5f5f5!important;color:#111315!important}
+html[data-spike-style="5"] .active,html[data-spike-style="5"] .tab.active,html[data-spike-style="5"] .filter.active{
+background:#f5f5f5!important;color:#111315!important;border-color:#f5f5f5!important;
+}
+html[data-spike-style="5"] .spike-theme-switch{
+background:#f5f5f5!important;color:#111315!important;border-color:rgba(255,255,255,.22)!important;box-shadow:0 5px 18px rgba(0,0,0,.28)!important;
+}
+html[data-spike-style="5"] .spike-theme-switch .spike-theme-dot{background:#111315;box-shadow:0 0 8px rgba(255,255,255,.35)}
+html[data-spike-style="5"] .header-actions button,html[data-spike-style="5"] .icon-btn{background:#1c1f23!important;color:#f7f7f8!important}
+html[data-spike-style="5"] .cover{background:#1b1e22!important}
+html[data-spike-style="5"] .glow{opacity:.08!important}
+</style>
+<style id="spike-final-theme-hardening">
+/* SPIKE FINAL THEME HARDENING — shared by every page */
+*,*::before,*::after{box-sizing:border-box}
+html,body{width:100%;max-width:100%;margin:0}
+html{overflow-x:clip;scrollbar-gutter:stable}
+body{overflow-x:clip;min-width:0}
+img,video,svg,canvas{max-width:100%;height:auto}
+button,input,textarea,select{font:inherit;max-width:100%}
+input,textarea,select{color:var(--spike-text,#111827);background:var(--spike-surface,#fff)}
+::selection{background:var(--spike-accent,#7c3aed);color:#fff}
+/* The five canonical palettes */
+html[data-spike-style="1"]{
+--spike-bg:#f5f7fb;--spike-surface:#fff;--spike-surface-2:#f8faff;
+--spike-text:#111827;--spike-muted:#667085;--spike-line:rgba(15,23,42,.11);
+--spike-accent:#7c3aed;--spike-accent-2:#a855f7;--spike-glow:rgba(124,58,237,.20);
+--spike-gradient:radial-gradient(circle at 8% 0,#ede9fe 0,transparent 34%),#f5f7fb;
+}
+html[data-spike-style="2"]{
+--spike-bg:#060817;--spike-surface:#0c1022;--spike-surface-2:#121735;
+--spike-text:#f7f8ff;--spike-muted:#9da6c4;--spike-line:rgba(139,92,246,.24);
+--spike-accent:#8b5cf6;--spike-accent-2:#d946ef;--spike-glow:rgba(139,92,246,.35);
+--spike-gradient:radial-gradient(circle at 12% 0,#26114e 0,transparent 34%),radial-gradient(circle at 92% 12%,#12275d 0,transparent 28%),#060817;
+}
+html[data-spike-style="3"]{
+--spike-bg:#0b416c;--spike-surface:rgba(255,255,255,.15);--spike-surface-2:rgba(255,255,255,.10);
+--spike-text:#fff;--spike-muted:rgba(255,255,255,.80);--spike-line:rgba(255,255,255,.27);
+--spike-accent:#48a8ff;--spike-accent-2:#7c5cff;--spike-glow:rgba(91,178,255,.36);
+--spike-gradient:radial-gradient(circle at 15% 0,#6cc7ff 0,transparent 32%),linear-gradient(145deg,#0a385d,#11679b 52%,#244f99);
+}
+html[data-spike-style="4"]{
+--spike-bg:#d72668;--spike-surface:rgba(255,255,255,.92);--spike-surface-2:rgba(255,255,255,.22);
+--spike-text:#172033;--spike-muted:#5b6475;--spike-line:rgba(255,255,255,.52);
+--spike-accent:#ef315e;--spike-accent-2:#ff8b32;--spike-glow:rgba(255,94,145,.38);
+--spike-gradient:radial-gradient(circle at 8% 0,#ff8d38 0,transparent 35%),radial-gradient(circle at 94% 10%,#ff3d8b 0,transparent 34%),linear-gradient(145deg,#ff7b32,#e91e7a 52%,#8f2bd9);
+}
+html[data-spike-style="5"]{
+--spike-bg:#0b0d10;--spike-surface:#14171b;--spike-surface-2:#1b1f24;
+--spike-text:#f5f7fa;--spike-muted:#9ba2ad;--spike-line:rgba(255,255,255,.11);
+--spike-accent:#fff;--spike-accent-2:#cfd5dd;--spike-glow:rgba(255,255,255,.13);
+--spike-gradient:#0b0d10;
+}
+/* Stable page canvas */
+html[data-spike-style="1"] body,
+html[data-spike-style="2"] body,
+html[data-spike-style="3"] body,
+html[data-spike-style="4"] body,
+html[data-spike-style="5"] body{
+background:var(--spike-gradient)!important;
+color:var(--spike-text)!important;
+}
+/* Common SPIKE surfaces. Existing page-specific styling still wins where it is more specific. */
+.panel,.card,.room-card,.friend-card,.notification-card,.post,.composer,.section,.box,.stat,.room,.room-item,
+.ownerSection,.premiumCard,.modal,.modal-card,.dialog,.drawer,.sheet,.toolbar,.field,.mediaField,.mediaPreview,
+.feed-v2-panel,.rec-item,.notice,.empty,.oauth-btn,.tab,.tabs,.nav-item{
+color:var(--spike-text);
+border-color:var(--spike-line);
+}
+.panel,.card,.room-card,.friend-card,.notification-card,.post,.composer,.section,.box,.room-item,
+.ownerSection,.premiumCard,.modal-card,.dialog,.drawer,.sheet,.field,.mediaField,.mediaPreview,
+.feed-v2-panel,.rec-item,.notice,.empty{
+background:var(--spike-surface);
+}
+html[data-spike-style="3"] .panel,html[data-spike-style="3"] .card,html[data-spike-style="3"] .room-card,
+html[data-spike-style="3"] .friend-card,html[data-spike-style="3"] .notification-card,
+html[data-spike-style="3"] .post,html[data-spike-style="3"] .composer,html[data-spike-style="3"] .ownerSection,
+html[data-spike-style="3"] .premiumCard,html[data-spike-style="3"] .modal-card,html[data-spike-style="3"] .drawer{
+background:rgba(255,255,255,.13);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+}
+html[data-spike-style="4"] .panel,html[data-spike-style="4"] .card,html[data-spike-style="4"] .room-card,
+html[data-spike-style="4"] .friend-card,html[data-spike-style="4"] .notification-card,
+html[data-spike-style="4"] .post,html[data-spike-style="4"] .composer,html[data-spike-style="4"] .ownerSection,
+html[data-spike-style="4"] .premiumCard,html[data-spike-style="4"] .modal-card,html[data-spike-style="4"] .drawer{
+background:rgba(255,255,255,.92);color:#172033;
+}
+html[data-spike-style="5"] .panel,html[data-spike-style="5"] .card,html[data-spike-style="5"] .room-card,
+html[data-spike-style="5"] .friend-card,html[data-spike-style="5"] .notification-card,
+html[data-spike-style="5"] .post,html[data-spike-style="5"] .composer,html[data-spike-style="5"] .ownerSection,
+html[data-spike-style="5"] .premiumCard,html[data-spike-style="5"] .modal-card,html[data-spike-style="5"] .drawer{
+background:#14171b;color:#f5f7fa;
+}
+/* Typography and controls */
+.muted,.sub,.meta,.time,.hint,.label,.description,.roomMeta,.friend-meta{color:var(--spike-muted)}
+.btn,.iconbtn,.icon-btn,.header-btn,.request-btn,.friend-action,.tool,.tab,.nav-item,.roomTab{
+color:var(--spike-text);border-color:var(--spike-line);
+}
+.btn.primary,.primary,.accept,.send,.createBtn,.roomTab.active,.tab.active{
+background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;
+color:#fff!important;border-color:transparent!important;
+box-shadow:0 8px 24px var(--spike-glow);
+}
+input,textarea,select,.input,.field input,.field textarea,.field select,.search input{
+border-color:var(--spike-line)!important;background:var(--spike-surface-2)!important;color:var(--spike-text)!important;
+}
+input::placeholder,textarea::placeholder{color:var(--spike-muted)!important;opacity:.9}
+input:focus,textarea:focus,select:focus{
+outline:2px solid color-mix(in srgb,var(--spike-accent) 28%,transparent);
+border-color:var(--spike-accent)!important;
+}
+a{color:var(--spike-accent)}
+hr{border-color:var(--spike-line)}
+/* Prevent the mobile side-to-side shake/overflow */
+@media (max-width:760px){
+html,body{overflow-x:clip!important}
+.app,.page,.shell,.main,.rooms,.content,.container{max-width:100%!important;min-width:0!important}
+.row,.toolbar,.header,.actions,.tabs,.roomTabs{min-width:0}
+.tabs,.roomTabs,.roomTabBar{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.tabs::-webkit-scrollbar,.roomTabs::-webkit-scrollbar,.roomTabBar::-webkit-scrollbar{display:none}
+table{max-width:100%;display:block;overflow-x:auto}
+}
+@media (prefers-reduced-motion:reduce){
+*,*::before,*::after{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
+<style>
+/* === SPIKE FINAL THEME TEXTURE & CONTRAST POLISH === */
+html[data-spike-style]{
+--spike-shadow:0 14px 40px rgba(15,23,42,.10);
+--spike-shadow-soft:0 8px 24px rgba(15,23,42,.08);
+--spike-radius:18px;
+--spike-focus:rgba(124,58,237,.28);
+}
+html[data-spike-style="1"]{
+--texture-bg:
+radial-gradient(circle at 8% 0%,rgba(124,58,237,.10),transparent 30%),
+radial-gradient(circle at 92% 12%,rgba(236,72,153,.07),transparent 28%),
+linear-gradient(135deg,#f8fafc,#eef2f7);
+--texture-surface:rgba(255,255,255,.94);
+--texture-surface-strong:#fff;
+--texture-border:rgba(15,23,42,.09);
+--texture-text:#101828;
+--texture-muted:#667085;
+}
+html[data-spike-style="2"]{
+--texture-bg:
+radial-gradient(circle at 12% 0%,rgba(124,58,237,.25),transparent 32%),
+radial-gradient(circle at 92% 8%,rgba(217,70,239,.14),transparent 28%),
+linear-gradient(145deg,#050711,#090d1b 55%,#0b1020);
+--texture-surface:rgba(14,19,39,.92);
+--texture-surface-strong:#11172d;
+--texture-border:rgba(139,92,246,.22);
+--texture-text:#f8f9ff;
+--texture-muted:#aeb7d1;
+}
+html[data-spike-style="3"]{
+--texture-bg:
+radial-gradient(circle at 14% 0%,rgba(108,199,255,.42),transparent 30%),
+radial-gradient(circle at 90% 18%,rgba(124,92,255,.25),transparent 30%),
+linear-gradient(145deg,#07375b,#0d5f8f 52%,#1f478d);
+--texture-surface:rgba(255,255,255,.14);
+--texture-surface-strong:rgba(255,255,255,.18);
+--texture-border:rgba(255,255,255,.24);
+--texture-text:#fff;
+--texture-muted:rgba(255,255,255,.78);
+}
+html[data-spike-style="4"]{
+--texture-bg:
+radial-gradient(circle at 8% 0%,rgba(255,255,255,.22),transparent 27%),
+radial-gradient(circle at 92% 10%,rgba(255,255,255,.12),transparent 25%),
+linear-gradient(145deg,#ff7138,#e91e78 52%,#8f2bd9);
+--texture-surface:rgba(255,255,255,.88);
+--texture-surface-strong:rgba(255,255,255,.96);
+--texture-border:rgba(255,255,255,.58);
+--texture-text:#172033;
+--texture-muted:#586274;
+}
+html[data-spike-style="5"]{
+--texture-bg:
+radial-gradient(circle at 50% -10%,rgba(255,255,255,.045),transparent 34%),
+linear-gradient(145deg,#090b0e,#0d1014 55%,#0a0c0f);
+--texture-surface:#14181d;
+--texture-surface-strong:#191d23;
+--texture-border:rgba(255,255,255,.10);
+--texture-text:#f6f7f9;
+--texture-muted:#a3a8b1;
+}
+html[data-spike-style] body{
+background:var(--texture-bg)!important;
+color:var(--texture-text)!important;
+min-height:100%;
+background-attachment:fixed;
+}
+html[data-spike-style] body,
+html[data-spike-style] .app,
+html[data-spike-style] .page,
+html[data-spike-style] main{
+color:var(--texture-text);
+}
+html[data-spike-style] .card,
+html[data-spike-style] .panel,
+html[data-spike-style] .post,
+html[data-spike-style] .story,
+html[data-spike-style] .composer,
+html[data-spike-style] .friend-card,
+html[data-spike-style] .request-card,
+html[data-spike-style] .room,
+html[data-spike-style] .room-card,
+html[data-spike-style] .notification-card,
+html[data-spike-style] .list,
+html[data-spike-style] .sheet,
+html[data-spike-style] .modal,
+html[data-spike-style] .modal-card,
+html[data-spike-style] .modalbox,
+html[data-spike-style] .drawer,
+html[data-spike-style] .ownerSection,
+html[data-spike-style] .premiumCard,
+html[data-spike-style] .about-item{
+background:var(--texture-surface)!important;
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+box-shadow:var(--spike-shadow-soft);
+-webkit-backdrop-filter:blur(18px);
+backdrop-filter:blur(18px);
+}
+html[data-spike-style="3"] .card,
+html[data-spike-style="3"] .panel,
+html[data-spike-style="3"] .post,
+html[data-spike-style="3"] .composer,
+html[data-spike-style="3"] .drawer,
+html[data-spike-style="3"] .modal-card{
+box-shadow:0 16px 42px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.16);
+}
+html[data-spike-style="4"] .card,
+html[data-spike-style="4"] .panel,
+html[data-spike-style="4"] .post,
+html[data-spike-style="4"] .composer,
+html[data-spike-style="4"] .drawer,
+html[data-spike-style="4"] .modal-card{
+box-shadow:0 16px 42px rgba(89,18,91,.18),inset 0 1px 0 rgba(255,255,255,.42);
+}
+html[data-spike-style="5"] .card,
+html[data-spike-style="5"] .panel,
+html[data-spike-style="5"] .post,
+html[data-spike-style="5"] .composer,
+html[data-spike-style="5"] .drawer,
+html[data-spike-style="5"] .modal-card{
+box-shadow:0 16px 42px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.035);
+}
+html[data-spike-style] input,
+html[data-spike-style] textarea,
+html[data-spike-style] select{
+background:var(--texture-surface-strong)!important;
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+caret-color:var(--texture-text);
+}
+html[data-spike-style] input::placeholder,
+html[data-spike-style] textarea::placeholder{color:var(--texture-muted)!important;opacity:.85}
+html[data-spike-style] input:focus,
+html[data-spike-style] textarea:focus,
+html[data-spike-style] select:focus,
+html[data-spike-style] button:focus-visible,
+html[data-spike-style] a:focus-visible{
+outline:2px solid var(--spike-focus)!important;
+outline-offset:2px;
+}
+html[data-spike-style="3"] input,
+html[data-spike-style="3"] textarea,
+html[data-spike-style="3"] select{
+background:rgba(4,29,53,.30)!important;
+border-color:rgba(255,255,255,.28)!important;
+color:#fff!important;
+}
+html[data-spike-style="4"] input,
+html[data-spike-style="4"] textarea,
+html[data-spike-style="4"] select{
+background:rgba(255,255,255,.88)!important;
+color:#172033!important;
+}
+html[data-spike-style="5"] input,
+html[data-spike-style="5"] textarea,
+html[data-spike-style="5"] select{
+background:#101318!important;
+border-color:rgba(255,255,255,.11)!important;
+color:#f6f7f9!important;
+}
+html[data-spike-style] .muted,
+html[data-spike-style] .sub,
+html[data-spike-style] .meta,
+html[data-spike-style] .time,
+html[data-spike-style] .preview,
+html[data-spike-style] .status,
+html[data-spike-style] .eyebrow{
+color:var(--texture-muted)!important;
+}
+html[data-spike-style="3"] .muted,
+html[data-spike-style="3"] .sub,
+html[data-spike-style="3"] .meta,
+html[data-spike-style="3"] .time,
+html[data-spike-style="3"] .preview,
+html[data-spike-style="3"] .status{color:rgba(255,255,255,.80)!important}
+html[data-spike-style="4"] a{color:#a51d86}
+html[data-spike-style="4"] .muted,
+html[data-spike-style="4"] .sub,
+html[data-spike-style="4"] .meta,
+html[data-spike-style="4"] .time{color:#586274!important}
+html[data-spike-style="5"] a{color:#f2f3f5!important}
+html[data-spike-style] img{
+max-width:100%;
+}
+html[data-spike-style] svg{
+color:currentColor;
+}
+html[data-spike-style] hr{
+border-color:var(--texture-border)!important;
+}
+html[data-spike-style] ::selection{
+background:var(--spike-focus);
+color:var(--texture-text);
+}
+html[data-spike-style] ::-webkit-scrollbar{width:9px;height:9px}
+html[data-spike-style] ::-webkit-scrollbar-track{background:transparent}
+html[data-spike-style] ::-webkit-scrollbar-thumb{
+background:var(--texture-border);
+border-radius:999px;
+border:2px solid transparent;
+background-clip:padding-box;
+}
+html[data-spike-style="3"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.28);background-clip:padding-box}
+html[data-spike-style="5"] ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);background-clip:padding-box}
+html[data-spike-style] .header,
+html[data-spike-style] .top,
+html[data-spike-style] .chathead,
+html[data-spike-style] .fm-head,
+html[data-spike-style] .rm-head,
+html[data-spike-style] nav,
+html[data-spike-style] .sidebar,
+html[data-spike-style] .bottom-nav{
+color:var(--texture-text)!important;
+border-color:var(--texture-border)!important;
+}
+html[data-spike-style="1"] .header,
+html[data-spike-style="1"] .top,
+html[data-spike-style="1"] .bottom-nav,
+html[data-spike-style="1"] nav{background:rgba(255,255,255,.92)!important}
+html[data-spike-style="2"] .header,
+html[data-spike-style="2"] .top,
+html[data-spike-style="2"] .bottom-nav,
+html[data-spike-style="2"] nav{background:rgba(6,8,23,.92)!important}
+html[data-spike-style="3"] .header,
+html[data-spike-style="3"] .top,
+html[data-spike-style="3"] .bottom-nav,
+html[data-spike-style="3"] nav{background:rgba(8,70,110,.52)!important;backdrop-filter:blur(20px)}
+html[data-spike-style="4"] .header,
+html[data-spike-style="4"] .top,
+html[data-spike-style="4"] .bottom-nav,
+html[data-spike-style="4"] nav{background:linear-gradient(90deg,rgba(255,105,66,.91),rgba(214,39,130,.89))!important;color:#fff!important}
+html[data-spike-style="5"] .header,
+html[data-spike-style="5"] .top,
+html[data-spike-style="5"] .bottom-nav,
+html[data-spike-style="5"] nav{background:rgba(12,15,19,.94)!important}
+html[data-spike-style="4"] .header *,
+html[data-spike-style="4"] .top *,
+html[data-spike-style="4"] .bottom-nav *,
+html[data-spike-style="4"] nav{color:#fff!important}
+html[data-spike-style="3"] .header *,
+html[data-spike-style="3"] .top *,
+html[data-spike-style="3"] .bottom-nav *{color:#fff!important}
+@media(max-width:700px){
+html[data-spike-style] body{background-attachment:scroll}
+html[data-spike-style] .card,
+html[data-spike-style] .panel,
+html[data-spike-style] .post,
+html[data-spike-style] .composer,
+html[data-spike-style] .drawer{box-shadow:var(--spike-shadow-soft)}
+}
+@media(prefers-reduced-motion:reduce){
+html[data-spike-style] *,html[data-spike-style] *::before,html[data-spike-style] *::after{
+scroll-behavior:auto!important;
+animation-duration:.01ms!important;
+transition-duration:.01ms!important;
+}
+}
+</style>
+<style id="spike-performance-css">
+/* Keep offscreen content from consuming layout/paint work. */
+@media (min-width:761px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 520px}
+}
+@media (max-width:760px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 360px}
+}
+img[loading="lazy"],video[preload="none"]{content-visibility:auto}
+</style>
+<style id="spike-performance-layer">
+/* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
+.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .room,.spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
+img,video{max-width:100%}
+video{contain:layout paint}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+@media (hover:none){button,.btn,a{touch-action:manipulation}}
+</style>
+<!-- Presence disabled on the admin dashboard: admin RPC/network failures must not create a realtime reconnect loop. -->
+
+<style id="spike-premium-notices">:root{--spn-line:rgba(255,255,255,.13);--spn-text:#f7f8fb;--spn-muted:rgba(247,248,251,.62)}.spike-premium-stack{position:fixed;right:18px;bottom:18px;width:min(430px,calc(100vw - 28px));display:grid;gap:10px;z-index:99999;pointer-events:none}.spike-premium-toast{position:relative;display:grid;grid-template-columns:42px 1fr 30px;gap:11px;align-items:center;min-height:66px;padding:11px 12px;border:1px solid var(--spn-line);border-radius:20px;background:linear-gradient(145deg,rgba(27,31,43,.97),rgba(12,15,23,.96));box-shadow:0 24px 70px rgba(0,0,0,.46),0 0 34px rgba(124,92,255,.12);backdrop-filter:blur(22px);overflow:hidden;pointer-events:auto;animation:spnIn .28s cubic-bezier(.2,.8,.2,1)}.spike-premium-toast:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;transform-origin:left;animation:spnLife var(--spn-life,3600ms) linear forwards;background:linear-gradient(90deg,#8b5cf6,#22d3ee)}.spike-premium-toast.success{border-color:rgba(52,211,153,.34)}.spike-premium-toast.success:after{background:linear-gradient(90deg,#34d399,#10b981)}.spike-premium-toast.error{border-color:rgba(251,113,133,.38)}.spike-premium-toast.error:after{background:linear-gradient(90deg,#fb7185,#ef4444)}.spike-premium-toast.warning{border-color:rgba(251,191,36,.36)}.spike-premium-toast.warning:after{background:linear-gradient(90deg,#fbbf24,#f59e0b)}.spike-premium-toast.info{border-color:rgba(96,165,250,.34)}.spn-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:950;background:rgba(139,92,246,.13);border:1px solid rgba(167,139,250,.2)}.success .spn-icon{color:#6ee7b7;background:rgba(16,185,129,.12)}.error .spn-icon{color:#fda4af;background:rgba(239,68,68,.12)}.warning .spn-icon{color:#fcd34d;background:rgba(245,158,11,.12)}.info .spn-icon{color:#93c5fd}.spn-copy{min-width:0}.spn-title{font-size:12px;font-weight:950;color:var(--spn-text)}.spn-message{margin-top:3px;font-size:10.5px;line-height:1.4;color:var(--spn-muted);overflow-wrap:anywhere}.spn-close{width:30px;height:30px;border:0;border-radius:10px;background:transparent;color:rgba(255,255,255,.48);font-size:18px;cursor:pointer}.spn-close:hover{background:rgba(255,255,255,.08);color:#fff}@keyframes spnIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}@keyframes spnLife{from{transform:scaleX(1)}to{transform:scaleX(0)}}@media(max-width:600px){.spike-premium-stack{right:10px;left:10px;bottom:14px;width:auto}.spike-premium-toast{border-radius:18px}}</style>
+<style id="spike-global-presence-style">
+.spike-presence-target{position:relative!important}
+.spike-presence-target::after{content:attr(data-presence-status);position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;border-radius:999px;background:var(--card,#10141d);border:1px solid rgba(255,255,255,.10);color:var(--muted,#aab2c0);font:700 8px/1.1 system-ui,sans-serif;z-index:5;pointer-events:none}
+</style>
+<link rel="stylesheet" href="css/theme.css">
+
+<link rel="stylesheet" href="css/ui-fix.css">
+<meta name="description" content="SPIKE administration dashboard for authorized room and community management.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0b0b10">
+<link rel="stylesheet" href="css/premium-back.css">
+<link rel="stylesheet" href="css/theme-v14.css">
+<link rel="stylesheet" href="css/premium-dialog.css">
+<script src="js/premium-dialog.js"></script>
+</head>
+<body>
+
+<div class="app">
+<header class="top"><button class="smart-back spike-premium-back" id="spikeSmartBack" type="button" aria-label="Go back to the previous SPIKE page" title="Go back" data-spike-premium-back="1" data-back-fallback="feed.html"><span class="smart-back-arrow" aria-hidden="true">←</span><span class="smart-back-label">Back</span></button><div class="brand"><b>SPIKE</b> ROOMS ADMIN</div><div class="user"><span class="role" id="role">VERIFYING</span><div class="avatar">👑</div></div></header>
+<section class="stats">
+<div class="stat"><span class="muted">Users</span><strong id="sUsers">—</strong></div><div class="stat"><span class="muted">Coins in wallets</span><strong id="sCoins">—</strong></div><div class="stat"><span class="muted">Active packages</span><strong id="sPackages">—</strong></div><div class="stat"><span class="muted">Room feature requests</span><strong id="sFeaturePurchases">—</strong></div>
+</section>
+<div class="layout">
+<aside class="panel side">
+<button class="active" data-page="overview">📊 Overview</button><button data-page="roomPurchases">🛒 Feature Purchases <span id="navPendingFeaturePurchases" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="packages">🪙 Coin Store</button><button data-page="gems">💎 SPIKE Wallet</button><button data-page="gamification">🎮 Gamification</button><button data-page="rooms">🏠 Rooms</button><button data-page="users">👥 Users</button><button data-page="broadcasts">📣 Announcements & Messages</button><button data-page="maintenance">🛠️ Maintenance</button><button data-page="admins">👑 Admin Access</button><button data-page="audit">🛡️ Audit Log</button>
+</aside>
+
+
+
+<main class="content">
+<section id="overview" class="page">
+<div class="panel"><div class="toolbar"><div><h2>Control center</h2><span class="muted">Live backend health and economy snapshot.</span></div><button class="ghost" id="refresh">↻ Refresh</button></div><div class="cards">
+<div class="room"><strong>🪙 Economy</strong><span class="muted">Wallet balances are backend-controlled.</span></div><div class="room"><strong>🔐 Security</strong><span class="muted">Admin actions use protected Supabase functions.</span></div><div class="room"><strong>🏠 Rooms</strong><span class="muted">Create and feature rooms from this panel.</span></div><div class="room"><strong>💳 Payments</strong><span class="muted">Orders stay pending until payment verification is connected.</span></div>
+
+</div></div>
+</section>
+<section id="roomPurchases" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>🛒 Room Feature Purchases</h2><span class="muted">Every cash-purchasable feature is submitted here as a request. Contact the user on WhatsApp, send the official bank details, verify the payment transaction, then approve to unlock or credit the purchase.</span></div><div class="actions"><button class="ghost" id="refreshRoomPurchases">↻ Refresh</button></div></div>
+<div class="purchaseToolbar" style="margin-top:4px"><div class="purchaseFilters" id="roomPurchaseFilters"><button class="active" data-purchase-status="pending">Pending</button><button data-purchase-status="paid_review">Paid / Review</button><button data-purchase-status="approved">Approved</button><button data-purchase-status="rejected">Rejected</button></div></div>
+<div id="roomPurchasesList" class="purchaseGrid" style="margin-top:10px"><div class="purchaseEmpty" style="grid-column:1/-1">Loading feature purchases…</div></div></div>
+</section>
+<section id="gems" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>💎 SPIKE Wallet Control</h2><span class="muted">Coins, Gems, revenue-gated earning, ranking, streaks, pool and monthly cashouts.</span></div><button class="ghost" id="refreshGems">↻ Refresh</button></div><div class="cards"><div class="room"><strong id="gRevenueState">—</strong><span class="muted">Revenue today</span></div><div class="room"><strong id="gPool">—</strong><span class="muted">Today’s streak pool</span></div><div class="room"><strong id="gPending">—</strong><span class="muted">Pending cashouts</span></div><div class="room"><strong id="gPayout">—</strong><span class="muted">Pending payout value</span></div></div><div class="panel" style="margin-top:14px"><div class="toolbar"><div><h3 style="margin:0">🔥 Daily Streak Pool</h3><span class="muted">Distribute the accumulated 15% pool to active users by streak multiplier.</span></div><button class="primary" id="distributeGems">Distribute today</button></div><div id="gDistributeStatus" class="muted" style="margin-top:8px"></div></div><div class="panel" style="margin-top:14px"><div class="toolbar"><div><h3 style="margin:0">💸 Cashout Queue</h3><span class="muted">Minimum 3 Gems · maximum 5 Gems/month · 10% fee · payout on the 1st.</span></div></div><div id="gPayoutsList" class="cards" style="margin-top:10px"><div class="empty">Loading cashouts…</div></div></div></div></section><section id="packages" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🪙 Coin Store</h2><span class="muted">Only active packages appear in Rooms.</span></div><button class="primary" id="addPackage">+ Package</button></div><div id="packagesList"></div></div></section>
+<section id="rooms" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🏠 Rooms</h2><span class="muted">Create, feature, activate and deactivate Rooms.</span></div><button class="primary" id="addRoom">+ Room</button></div><div id="roomsList"></div></div></section>
+<section id="gamification" class="page" hidden>
+<style>.gadmin-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.gadmin-card{padding:13px;border:1px solid var(--spike-line);border-radius:15px;background:var(--spike-surface-2)}.gadmin-card strong{display:block;font-size:20px}.gadmin-card span{font-size:10px;color:var(--spike-muted)}.gadmin-tabs{display:flex;gap:7px;overflow:auto;margin:12px 0;padding-bottom:3px}.gadmin-tabs button{white-space:nowrap;border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-text);border-radius:10px;padding:9px 11px;font-size:11px;font-weight:900;cursor:pointer}.gadmin-tabs button.active{background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2));color:#fff;border-color:transparent}.gadmin-panel{display:none}.gadmin-panel.active{display:block}.gtable{width:100%;border-collapse:collapse;font-size:10px}.gtable th,.gtable td{padding:8px;border-bottom:1px solid var(--spike-line);text-align:left;vertical-align:middle}.gtable input,.gtable textarea{width:100%;min-width:70px;padding:7px;border:1px solid var(--spike-line);border-radius:8px;background:var(--spike-surface);color:var(--spike-text)}.gscroll{overflow:auto;max-height:540px}.gactions{display:flex;gap:6px;flex-wrap:wrap}.gadmin-user{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px;border:1px solid var(--spike-line);border-radius:12px;margin-top:7px}.gsmall{font-size:10px;color:var(--spike-muted)}@media(max-width:900px){.gadmin-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.gadmin-grid{grid-template-columns:1fr}.gtable{min-width:720px}}</style>
+<div class="panel"><div class="toolbar"><div><h2>🎮 Gamification Control Center</h2><span class="muted">Control XP, 100 levels, ranks, badges, tasks, achievements, streak rules and anti-abuse signals.</span><div class="gauto-hint">✨ Don’t want to build everything manually? Auto Generate can safely fill missing gamification content without replacing your custom items.</div></div><div class="actions"><button class="ghost" id="gadminRefresh">↻ Refresh</button><button class="ghost" id="gadminAutoGenerate">✨ Auto Generate</button><button class="primary" id="gadminRecalc">Recalculate levels</button></div></div>
+<div class="gadmin-grid" id="gadminStats" style="margin-top:12px"></div>
+<div class="gadmin-tabs" id="gadminTabs"><button class="active" data-gtab="users">👤 XP & Users</button><button data-gtab="levels">📈 Levels</button><button data-gtab="tasks">🎯 Daily Tasks</button><button data-gtab="weekly">📅 Weekly</button><button data-gtab="achievements">🏆 Achievements</button><button data-gtab="rules">⚙️ Rules</button><button data-gtab="leaderboard">👑 Leaderboard</button><button data-gtab="abuse">🛡️ Anti-abuse</button></div>
+<div class="gadmin-panel active" data-gpanel="users"><div class="search"><input id="gadminUserSearch" placeholder="Search email, username, display name or SP_ID"><button class="primary" id="gadminUserSearchBtn">Search</button></div><div id="gadminUsers" style="margin-top:10px"></div></div>
+<div class="gadmin-panel" data-gpanel="levels"><div class="notice">Authoritative progression: Level 10 = 5,000 XP and Level 100 = 100,000 XP. Thresholds must remain strictly increasing.</div><div class="gscroll" style="margin-top:10px"><table class="gtable"><thead><tr><th>Level</th><th>XP Required</th><th>Rank</th><th>Description</th><th></th></tr></thead><tbody id="gadminLevels"></tbody></table></div></div>
+<div class="gadmin-panel" data-gpanel="tasks"><div class="actions"><button class="ghost" id="gadminAutoTasks">✨ Auto Generate Tasks</button><button class="primary" id="gadminAddTask">+ Task</button></div><div class="gscroll" style="margin-top:10px"><table class="gtable"><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>XP</th><th>Active</th><th>Order</th><th></th></tr></thead><tbody id="gadminTasks"></tbody></table></div></div>
+<div class="gadmin-panel" data-gpanel="weekly"><div class="actions"><button class="ghost" id="gadminAutoWeekly">✨ Auto Generate Weekly</button><button class="primary" id="gadminAddWeekly">+ Weekly challenge</button></div><div class="gscroll" style="margin-top:10px"><table class="gtable"><thead><tr><th>ID</th><th>Name</th><th>Description</th><th>XP</th><th>Starts</th><th>Ends</th><th>Active</th><th></th></tr></thead><tbody id="gadminWeekly"></tbody></table></div></div>
+<div class="gadmin-panel" data-gpanel="achievements"><div class="actions"><button class="ghost" id="gadminAutoAchievements">✨ Auto Generate Achievements</button><button class="primary" id="gadminAddAchievement">+ Achievement</button></div><div class="gscroll" style="margin-top:10px"><table class="gtable"><thead><tr><th>Icon</th><th>Code</th><th>Name</th><th>Category</th><th>XP</th><th>Unlocks</th><th></th></tr></thead><tbody id="gadminAchievements"></tbody></table></div></div>
+<div class="gadmin-panel" data-gpanel="rules"><div class="formgrid"><div class="field"><label>XP rewards JSON</label><textarea id="gadminXpRules" rows="8"></textarea></div><div class="field"><label>Anti-abuse caps JSON</label><textarea id="gadminCapsRules" rows="8"></textarea></div><div class="field"><label>Streak rewards JSON</label><textarea id="gadminStreakRewards" rows="8"></textarea></div><div class="field"><label>Streak multipliers JSON</label><textarea id="gadminMultipliers" rows="8"></textarea></div></div><button class="primary" id="gadminSaveRules" style="margin-top:10px">Save rules</button></div>
+<div class="gadmin-panel" data-gpanel="leaderboard"><div id="gadminLeaderboard"></div></div>
+<div class="gadmin-panel" data-gpanel="abuse"><div class="notice">Users generating more than 500 net XP from recorded transactions today are surfaced here for review. This is a signal, not an automatic punishment.</div><div id="gadminAbuse" style="margin-top:10px"></div></div>
+</div></section>
+<section id="users" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>👥 User Directory</h2><span class="muted">All Supabase Auth-registered users with their SPIKE profile, SP_ID, wallet and Rooms membership.</span></div><div class="actions"><button class="ghost" id="refreshUsers">↻ Refresh</button><button class="primary" id="registerUser">＋ Register user</button></div></div>
+<div class="search" style="margin-top:12px"><input id="usersSearch" placeholder="Search email, username, display name or SP_ID"><button class="primary" id="searchUsers">Search</button></div>
+<div id="usersList" style="margin-top:12px"></div><div class="actions" style="justify-content:center;margin-top:12px"><button class="ghost" id="usersPrev">← Previous</button><span class="muted" id="usersPage">Page 1</span><button class="ghost" id="usersNext">Next →</button></div></div>
+<div class="panel" style="margin-top:14px"><div class="toolbar"><div><h2>🏠 Room Members</h2><span class="muted">Select a Room to inspect everyone registered in that Room.</span></div><button class="ghost" id="refreshRoomMembers">↻ Refresh</button></div><div class="formgrid" style="margin-top:12px"><div class="field"><label>Room</label><select id="memberRoom"><option value="">Choose a Room</option></select></div><div class="field"><label>Member search</label><input id="memberSearch" placeholder="SP_ID, username, email or name"></div></div><div id="roomMembersList" style="margin-top:12px"></div></div>
+<div class="panel" style="margin-top:14px"><div class="toolbar"><div><h2>🔐 Auth Registration</h2><span class="muted">Create a real Supabase Auth account from the Admin Center. The service credential never enters this browser.</span></div></div><div class="notice" style="margin-top:10px">Registration is owner-only. The new account automatically receives its SPIKE profile, wallet and generated SP_ID through the existing Auth triggers.</div></div>
+</section>
+<section id="broadcasts" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>📣 Announcements & Bulk Private Messages</h2><span class="muted">Send a controlled announcement, notification, private message, or both to registered SPIKE users.</span></div><button class="ghost" id="refreshBroadcasts">↻ Refresh</button></div>
+<div class="formgrid" style="margin-top:14px"><div class="field"><label>Title</label><input id="broadcastTitle" maxlength="160" placeholder="Important SPIKE update"></div><div class="field"><label>Channel</label><select id="broadcastChannel"><option value="notification">Notification</option><option value="private_message">Private message</option><option value="both">Both</option></select></div><div class="field"><label>Audience</label><select id="broadcastAudience"><option value="all">All registered Auth users</option><option value="active">Active users (last 30 days)</option><option value="room_members">Members of a Room</option></select></div><div class="field"><label>Global banner</label><select id="broadcastBanner"><option value="false">No</option><option value="true">Yes — show as app announcement</option></select></div><div class="field" id="broadcastEndsWrap" hidden><label>Banner ends at (optional)</label><input id="broadcastEnds" type="datetime-local"></div><div class="field" id="broadcastRoomWrap" hidden><label>Room</label><select id="broadcastRoom"><option value="">Choose a Room</option></select></div><div class="field full"><label>Message</label><textarea id="broadcastBody" maxlength="4000" rows="7" placeholder="Write the message..."></textarea></div></div>
+<div class="actions" style="margin-top:12px"><button class="primary" id="queueBroadcast">Queue & Send</button></div><div id="broadcastStatus" class="notice" style="display:none;margin-top:12px"></div></div>
+<div class="panel" style="margin-top:14px"><div class="toolbar"><div><h2>Recent Broadcasts</h2><span class="muted">Every broadcast is queued, batched, and audited.</span></div></div><div id="broadcastsList" class="audit" style="margin-top:10px"></div></div>
+</section>
+<section id="maintenance" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>🛠️ Maintenance Mode</h2><span class="muted">Stop normal app access during deployments or incidents. The setting is server-controlled.</span></div><button class="ghost" id="refreshMaintenance">↻ Refresh</button></div>
+<div id="maintenanceState" class="notice" style="margin-top:12px"></div>
+<div class="formgrid" style="margin-top:14px"><div class="field"><label>Title</label><input id="maintTitle" maxlength="160" value="SPIKE is under maintenance"></div><div class="field"><label>Ends at (optional)</label><input id="maintEnds" type="datetime-local"></div><div class="field full"><label>Message</label><textarea id="maintMessage" maxlength="2000" rows="5">We will be back shortly.</textarea></div></div>
+<div class="actions" style="margin-top:12px"><button class="primary" id="enableMaintenance">Enable Maintenance</button><button class="danger" id="disableMaintenance">Disable Maintenance</button></div></div>
+<div class="panel" style="margin-top:14px"><h2>Recommended safety behavior</h2><p class="muted" style="margin-top:8px">Keep login, payment confirmation, admin access, and emergency support paths available while the main application is in maintenance mode.</p></div>
+</section>
+<section id="admins" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>👑 Admin Access</h2><span class="muted">Grant or revoke controlled roles.</span></div><button class="ghost" id="loadAdmins">Refresh admins</button></div><div id="adminsList" style="margin-bottom:12px"></div><div class="formgrid"><div class="field"><label>User email</label><input id="adminEmail" type="email" placeholder="User email"></div><div class="field"><label>Role</label><select id="adminRole"><option value="super_admin">Super Admin</option><option value="finance_admin">Finance Admin</option><option value="content_admin">Content Admin</option><option value="moderation_admin">Moderation Admin</option><option value="support_admin">Support Admin</option></select></div></div><button class="primary" style="margin-top:11px" id="findAdmin">Find account</button><div id="adminResult" style="margin-top:12px"></div></div></section>
+<section id="audit" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>🛡️ Audit Log</h2><span class="muted">Sensitive admin actions.</span></div><button class="ghost" id="loadAudit">Refresh</button></div><div class="audit" id="auditList"></div></div></section>
+</main></div></div>
+<div class="modal" id="modal"><div class="sheet"><div class="sheethead"><h2 id="modalTitle">Create</h2><button class="close" id="close">×</button></div><form id="modalForm"></form></div></div>
+
+<div class="spike-confirm-backdrop" id="spikeInputModal" aria-hidden="true">
+  <div class="spike-confirm-sheet spike-input-sheet" role="dialog" aria-modal="true" aria-labelledby="spikeInputTitle">
+    <div class="spike-confirm-grip" aria-hidden="true"></div>
+    <div class="spike-confirm-icon" id="spikeInputIcon">🔐</div>
+    <div class="spike-input-kicker">SPIKE SECURITY</div>
+    <h3 class="spike-confirm-title" id="spikeInputTitle">Secure entry</h3>
+    <p class="spike-confirm-message" id="spikeInputMessage"></p>
+    <input id="spikeInputField" class="spike-premium-input" type="text" autocomplete="off">
+    <div class="spike-confirm-actions">
+      <button type="button" class="spike-confirm-cancel" id="spikeInputCancel">Cancel</button>
+      <button type="button" class="spike-confirm-ok" id="spikeInputOk">Continue</button>
+    </div>
+  </div>
+</div>
+
+
+<style id="spike-gamification-auto-style">.gauto-hint{margin-top:7px;font-size:10px;color:rgba(255,255,255,.5);max-width:720px;line-height:1.45}.gauto-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid rgba(167,139,250,.2);border-radius:999px;background:linear-gradient(135deg,rgba(139,92,246,.1),rgba(236,72,153,.08));color:#d8ccff;font-size:10px;font-weight:900}.gauto-preview{display:grid;gap:8px;margin-top:12px}.gauto-item{display:flex;gap:10px;align-items:flex-start;padding:11px 12px;border:1px solid rgba(255,255,255,.09);border-radius:14px;background:rgba(255,255,255,.035)}.gauto-item strong{display:block;color:#fff;font-size:11px}.gauto-item span{display:block;color:rgba(255,255,255,.5);font-size:9px;margin-top:2px}.gauto-status{margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(139,92,246,.08);border:1px solid rgba(167,139,250,.15);font-size:10px;color:#d8ccff}</style>
+<style id="spike-gamification-dialog-style">
+.spike-gf-backdrop{position:fixed;inset:0;z-index:100001;display:none;align-items:flex-end;justify-content:center;padding:18px;background:rgba(2,4,10,.72);backdrop-filter:blur(14px)}
+.spike-gf-backdrop.show{display:flex}
+.spike-gf-sheet{width:min(620px,100%);max-height:min(88vh,760px);overflow:auto;border:1px solid rgba(255,255,255,.13);border-radius:28px;background:linear-gradient(145deg,rgba(25,29,42,.98),rgba(10,13,21,.99));box-shadow:0 35px 110px rgba(0,0,0,.58),0 0 60px rgba(139,92,246,.14);padding:22px;animation:spikeGfIn .24s cubic-bezier(.2,.8,.2,1)}
+.spike-gf-grip{width:42px;height:4px;border-radius:99px;background:rgba(255,255,255,.22);margin:0 auto 18px}.spike-gf-head{display:flex;align-items:flex-start;gap:13px}.spike-gf-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,rgba(139,92,246,.22),rgba(236,72,153,.16));border:1px solid rgba(167,139,250,.22);font-size:21px}.spike-gf-kicker{font-size:9px;letter-spacing:.16em;font-weight:950;color:#bca8ff}.spike-gf-title{margin:3px 0 0;font-size:19px;font-weight:950;color:#fff}.spike-gf-sub{margin:5px 0 0;font-size:11px;line-height:1.45;color:rgba(255,255,255,.58)}.spike-gf-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:18px}.spike-gf-field{display:grid;gap:6px}.spike-gf-field.full{grid-column:1/-1}.spike-gf-field label{font-size:10px;font-weight:900;color:rgba(255,255,255,.72)}.spike-gf-field input,.spike-gf-field textarea,.spike-gf-field select{width:100%;border:1px solid rgba(255,255,255,.12);border-radius:13px;background:rgba(255,255,255,.045);color:#fff;padding:11px 12px;outline:none;font:inherit;font-size:12px}.spike-gf-field textarea{min-height:86px;resize:vertical}.spike-gf-field input:focus,.spike-gf-field textarea:focus,.spike-gf-field select:focus{border-color:rgba(167,139,250,.72);box-shadow:0 0 0 3px rgba(139,92,246,.11)}.spike-gf-help{font-size:9px;color:rgba(255,255,255,.42)}.spike-gf-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.spike-gf-btn{border:1px solid rgba(255,255,255,.12);border-radius:13px;padding:11px 15px;font-weight:900;cursor:pointer;color:#fff;background:rgba(255,255,255,.05)}.spike-gf-btn.primary{border:0;background:linear-gradient(135deg,#8b5cf6,#ec4899);box-shadow:0 10px 28px rgba(139,92,246,.22)}.spike-gf-btn:disabled{opacity:.55;cursor:wait}@keyframes spikeGfIn{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}@media(max-width:600px){.spike-gf-backdrop{padding:0}.spike-gf-sheet{border-radius:28px 28px 0 0;max-height:92vh;padding:19px 15px 16px}.spike-gf-grid{grid-template-columns:1fr}.spike-gf-field.full{grid-column:auto}.spike-gf-title{font-size:18px}}
+</style>
+<div class="spike-gf-backdrop" id="spikeGamificationForm" aria-hidden="true">
+  <div class="spike-gf-sheet" role="dialog" aria-modal="true" aria-labelledby="spikeGfTitle">
+    <div class="spike-gf-grip"></div>
+    <div class="spike-gf-head"><div class="spike-gf-icon" id="spikeGfIcon">🎮</div><div><div class="spike-gf-kicker">SPIKE GAMIFICATION</div><h3 class="spike-gf-title" id="spikeGfTitle">Edit</h3><p class="spike-gf-sub" id="spikeGfSub"></p></div></div>
+    <form id="spikeGfForm"><div class="spike-gf-grid" id="spikeGfFields"></div><div class="spike-gf-actions"><button type="button" class="spike-gf-btn" id="spikeGfCancel">Cancel</button><button type="submit" class="spike-gf-btn primary" id="spikeGfSubmit">Save changes</button></div></form>
+  </div>
+</div>
+<div class="spike-confirm-backdrop" id="spikeConfirm" aria-hidden="true">
+<div class="spike-confirm-sheet" role="dialog" aria-modal="true" aria-labelledby="spikeConfirmTitle">
+<div class="spike-confirm-grip" aria-hidden="true"></div>
+<div class="spike-confirm-icon" id="spikeConfirmIcon">✦</div>
+<h3 class="spike-confirm-title" id="spikeConfirmTitle">Please confirm</h3>
+<p class="spike-confirm-message" id="spikeConfirmMessage"></p>
+<div class="spike-confirm-actions"><button type="button" class="spike-confirm-cancel" id="spikeConfirmCancel">Cancel</button><button type="button" class="spike-confirm-ok" id="spikeConfirmOk">Continue</button></div>
+</div></div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
+const SUPABASE_ANON_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+window.sb=sb;
+window.supabaseClient=sb;
+// Presence is intentionally disabled on the admin dashboard. This page does not require realtime presence.
+const $=s=>document.querySelector(s), esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const toast=(m,type,ms)=>spikePremiumToast(m,type,ms||2500);
+let spikeConfirmResolver=null;
+function spikePremiumInput(title,message,opts={}){
+  const modal=document.getElementById('spikeInputModal');
+  if(!modal)return Promise.resolve(null);
+  const titleEl=document.getElementById('spikeInputTitle');
+  const msg=document.getElementById('spikeInputMessage');
+  const icon=document.getElementById('spikeInputIcon');
+  const field=document.getElementById('spikeInputField');
+  const ok=document.getElementById('spikeInputOk');
+  const cancel=document.getElementById('spikeInputCancel');
+  titleEl.textContent=title||'Secure entry';
+  msg.textContent=String(message||'');
+  icon.textContent=opts.icon||'🔐';
+  ok.textContent=opts.ok||'Continue';
+  field.type=opts.inputType||'text';
+  field.value='';
+  field.maxLength=Number(opts.maxLength||200);
+  field.inputMode=opts.numeric?'numeric':'text';
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  return new Promise(resolve=>{
+    let finished=false;
+    const finish=value=>{
+      if(finished)return;
+      finished=true;
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+      document.removeEventListener('keydown',onKey);
+      resolve(value);
+    };
+    const submit=()=>{
+      const value=field.value;
+      if(opts.pattern && !(new RegExp(opts.pattern).test(value))){
+        field.animate([{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:180});
+        field.focus();
+        return;
+      }
+      finish(value);
+    };
+    const onKey=e=>{
+      if(e.key==='Escape')finish(null);
+      else if(e.key==='Enter')submit();
+    };
+    field.oninput=()=>{
+      if(opts.numeric)field.value=field.value.replace(/\D/g,'').slice(0,Number(opts.maxLength||200));
+    };
+    ok.onclick=submit;
+    cancel.onclick=()=>finish(null);
+    modal.onclick=e=>{if(e.target===modal)finish(null)};
+    document.addEventListener('keydown',onKey);
+    setTimeout(()=>field.focus(),70);
+  });
+}
+
+function spikePremiumConfirm(message,opts={}){
+  const backdrop=document.getElementById('spikeConfirm');
+  if(!backdrop)return Promise.resolve(false);
+  if(spikeConfirmResolver)spikeConfirmResolver(false);
+  const title=document.getElementById('spikeConfirmTitle'),msg=document.getElementById('spikeConfirmMessage'),icon=document.getElementById('spikeConfirmIcon'),ok=document.getElementById('spikeConfirmOk'),cancel=document.getElementById('spikeConfirmCancel');
+  title.textContent=opts.title||'Please confirm';
+  msg.textContent=String(message||'');
+  icon.textContent=opts.icon||'✦';
+  ok.textContent=opts.ok||'Continue';
+  ok.classList.toggle('danger',!!opts.danger);
+  backdrop.classList.add('show');
+  backdrop.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  return new Promise(resolve=>{
+    spikeConfirmResolver=value=>{
+      if(!spikeConfirmResolver)return;
+      spikeConfirmResolver=null;
+      backdrop.classList.remove('show');
+      backdrop.setAttribute('aria-hidden','true');
+      document.body.style.overflow='';
+      resolve(value);
+    };
+    ok.onclick=()=>spikeConfirmResolver?.(true);
+    cancel.onclick=()=>spikeConfirmResolver?.(false);
+    backdrop.onclick=e=>{if(e.target===backdrop)spikeConfirmResolver?.(false)};
+    const onKey=e=>{if(e.key==='Escape'){spikeConfirmResolver?.(false);document.removeEventListener('keydown',onKey)}};
+    document.addEventListener('keydown',onKey);
+    setTimeout(()=>ok.focus(),30);
+  });
+}
+
+const money=(v,c)=>new Intl.NumberFormat(undefined,{style:'currency',currency:c}).format(Number(v)/100);
+const SPIKE_NETWORK_RETRIES=2;
+let spikeNetworkNoticeAt=0;
+const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+function isNetworkFailure(err){
+  const m=String(err?.message||err?.details||err||'').toLowerCase();
+  return !navigator.onLine || /failed to fetch|networkerror|network request failed|load failed|fetch failed/.test(m);
+}
+function showNetworkIssue(context,err){
+  console.warn('[SPIKE network]',context,err);
+  const now=Date.now();
+  if(now-spikeNetworkNoticeAt>5000 && typeof spikePremiumToast==='function'){
+    spikeNetworkNoticeAt=now;
+    spikePremiumToast(navigator.onLine?'SPIKE could not reach Supabase. Check your connection and try Refresh.':'You are offline. Connect to the internet and try again.','warning',5000);
+  }
+}
+async function safeRpc(name,args,context=name){
+  let lastError=null;
+  for(let attempt=0;attempt<=SPIKE_NETWORK_RETRIES;attempt++){
+    if(!navigator.onLine){
+      lastError=new Error('You are offline.');
+      break;
+    }
+    try{
+      const r=await sb.rpc(name,args||{});
+      if(!r?.error)return r;
+      if(!isNetworkFailure(r.error))return r;
+      lastError=r.error;
+    }catch(e){
+      lastError=e;
+      if(!isNetworkFailure(e))return {data:null,error:e};
+    }
+    if(attempt<SPIKE_NETWORK_RETRIES) await sleep(700*(attempt+1));
+  }
+  showNetworkIssue(context,lastError);
+  return {data:null,error:lastError||new Error('Supabase is unavailable.')};
+}
+let me=null;
+let adminAuthReady=false;
+async function auth(){
+const {data,error}=await sb.auth.getUser();
+if(error||!data.user){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Sign in required</h2><p>Please sign in to SPIKE.</p></div>';return false}
+me=data.user;
+const {data:isSuper,error:superErr}=await sb.rpc('is_super_admin',{p_user_id:me.id});
+let isAdmin=isSuper===true; window.__SPIKE_IS_SUPER_ADMIN=(isSuper===true);
+if(!isAdmin){
+  const {data:guard,error:guardErr}=await sb.rpc('admin_guard');
+  isAdmin=guard===true;
+  if(superErr) console.warn('[SPIKE ADMIN] is_super_admin check:',superErr);
+  if(guardErr) console.warn('[SPIKE ADMIN] admin_guard check:',guardErr);
+}
+if(!isAdmin){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Access denied</h2><p>Administrator authorization is required for this account.</p></div>';return false}
+const {data:profile}=await sb.from('profiles').select('role').eq('id',me.id).maybeSingle();
+$('#role').textContent=String(profile?.role||(isSuper===true?'SUPER ADMIN':'ADMIN')).replace(/_/g,' ').toUpperCase(); return true;
+}
+
+async function stats(){
+  const {data,error}=await safeRpc('admin_dashboard_stats',{},'Dashboard stats');
+  if(error){console.warn('[SPIKE stats unavailable]',error);return null}
+  $('#sUsers').textContent=Number(data?.users||0).toLocaleString();
+  $('#sCoins').textContent=Number(data?.coins||0).toLocaleString();
+  $('#sPackages').textContent=Number(data?.active_packages||0).toLocaleString();
+  $('#sFeaturePurchases').textContent=Number(data?.pending_room_purchases||0).toLocaleString();
+  const featureBadge=$('#navPendingFeaturePurchases');
+  if(featureBadge) featureBadge.textContent=Number(data?.pending_room_purchases||0).toLocaleString();
+  return data;
+}
+function showAdminPage(page, button){
+  const target=document.getElementById(page);
+  if(!target){ console.error('[SPIKE ADMIN] Missing page:',page); return; }
+  document.querySelectorAll('.side button[data-page]').forEach(x=>x.classList.toggle('active', x===button || x.dataset.page===page));
+  document.querySelectorAll('.page').forEach(x=>x.hidden=true);
+  target.hidden=false;
+  if(!adminAuthReady) return;
+  try{
+    if(page==='overview'){ stats(); }
+    else if(page==='roomPurchases'){ loadRoomPurchases(roomPurchaseStatus||'pending'); }
+    else if(page==='packages') loadPackages();
+    else if(page==='gems') loadSpikeGems();
+    else if(page==='rooms') loadRooms();
+        else if(page==='users'){ loadUsers(); loadRoomChoices(); }
+    else if(page==='broadcasts'){ loadBroadcastRooms(); loadBroadcasts(); }
+    else if(page==='maintenance') loadMaintenance();
+    else if(page==='admins') loadAdmins();
+    else if(page==='audit') loadAudit();
+  }catch(e){ console.error('[SPIKE ADMIN NAV]',page,e); if(typeof spikePremiumToast==='function') spikePremiumToast(e?.message||('Could not load '+page),'error',4500); }
+}
+function nav(){
+  const buttons=[...document.querySelectorAll('.side button[data-page]')];
+  buttons.forEach(b=>{ b.type='button'; });
+  const side=document.querySelector('.side');
+  if(side && !window.__SPIKE_ADMIN_NAV_DELEGATED){
+    window.__SPIKE_ADMIN_NAV_DELEGATED=true;
+    side.addEventListener('click',e=>{
+      const b=e.target.closest('button[data-page]');
+      if(!b || !side.contains(b)) return;
+      e.preventDefault();
+      showAdminPage(b.dataset.page,b);
+    });
+  }
+  const initial=buttons.find(b=>b.classList.contains('active'))||buttons[0];
+  if(initial) showAdminPage(initial.dataset.page,initial);
+}
+
+async function loadSpikeGems(){
+ const dash=await safeRpc('admin_spike_gems_dashboard',{},'SPIKE Gems dashboard');
+ if(dash.error){$('#gRevenueState').textContent='Unavailable';return}
+ const d=dash.data||{};$('#gRevenueState').textContent=(d.revenue_active?'🟢 ACTIVE · ':'⏸ PAUSED · ')+'₦'+(Number(d.revenue_today_minor||0)/100).toLocaleString();$('#gPool').textContent=(Number(d.today_pool_microgems||0)/1000000).toLocaleString(undefined,{maximumFractionDigits:6})+' 💎';$('#gPending').textContent=Number(d.pending_cashouts||0).toLocaleString();$('#gPayout').textContent='₦'+(Number(d.pending_cashout_minor||0)/100).toLocaleString();
+ const r=await safeRpc('admin_list_spike_payouts',{p_status:'pending'},'SPIKE Gems cashouts');if(r.error){$('#gPayoutsList').innerHTML='<div class="empty">'+esc(r.error.message||'Could not load cashouts.')+'</div>';return}
+ const rows=r.data||[];$('#gPayoutsList').innerHTML=rows.length?rows.map(x=>'<div class="room" style="margin-bottom:8px"><strong>'+esc(x.display_name||x.username||'SPIKE User')+' · '+(Number(x.gem_count)/1000000).toLocaleString()+' 💎</strong><div class="muted">Payout: ₦'+(Number(x.payout_amount_minor||0)/100).toLocaleString()+' · Fee: ₦'+(Number(x.fee_minor||0)/100).toLocaleString()+' · '+esc(x.bank_name||'Bank not set')+' · '+esc(x.account_name||'')+' · ****'+esc(String(x.account_number||'').slice(-4))+'</div><div class="actions" style="margin-top:8px"><input id="payref_'+x.id+'" placeholder="Bank reference" style="flex:1;min-width:180px"><button class="primary" data-gem-paid="'+x.id+'">Mark paid</button></div></div>').join(''):'<div class="empty">No pending cashouts.</div>';
+ $('#gPayoutsList').querySelectorAll('[data-gem-paid]').forEach(b=>b.onclick=async()=>{const ref=$('#payref_'+b.dataset.gemPaid)?.value.trim()||'';if(ref.length<3)return toast('Enter the bank reference.');b.disabled=true;const q=await safeRpc('spike_mark_payout_paid',{p_payout_id:b.dataset.gemPaid,p_bank_reference:ref},'Mark SPIKE Gems payout paid');b.disabled=false;if(q.error){toast(q.error.message);return}toast('Payout marked paid.');loadSpikeGems()});
+}
+async function distributeSpikeGems(){const b=$('#distributeGems');b.disabled=true;const r=await safeRpc('spike_distribute_streak_pool',{p_distribution_date:new Date().toISOString().slice(0,10)},'Distribute streak pool');b.disabled=false;if(r.error){toast(r.error.message);return}$('#gDistributeStatus').textContent='✓ '+Number(r.data?.recipients||0)+' recipients · '+(Number(r.data?.microgems_distributed||0)/1000000).toLocaleString(undefined,{maximumFractionDigits:6})+' Gems distributed.';loadSpikeGems()}
+async function loadPackages(){const {data,error}=await safeRpc('admin_list_coin_packages');if(error){toast(error.message);return}const rows=Array.isArray(data)?data:[];$('#packagesList').innerHTML=rows.length?rows.map((p,i)=>`<div class="package" style="margin-bottom:9px"><div><strong>${esc(p.name)}</strong><div class="muted">🪙 ${Number(p.coins).toLocaleString()} + ${Number(p.bonus_coins).toLocaleString()} bonus · ${money(p.amount_minor,p.currency)}</div><span class="pill ${p.active?'':'off'}">${p.active?'ACTIVE':'INACTIVE'}</span></div><button class="ghost" type="button" data-edit-package="${i}">Edit</button></div>`).join(''):'<div class="empty">No packages created yet.</div>';$('#packagesList').querySelectorAll('[data-edit-package]').forEach(b=>b.addEventListener('click',()=>openPackage(rows[Number(b.dataset.editPackage)]||{})));}
+function packageForm(p={}){return `<div class="formgrid"><div class="field"><label>Name</label><input id="fName" required value="${esc(p.name)}"></div><div class="field"><label>Currency</label><input id="fCurrency" maxlength="3" required value="${esc(p.currency||'NGN')}"></div><div class="field"><label>Coins</label><input id="fCoins" type="number" min="1" required value="${p.coins||500}"></div><div class="field"><label>Bonus coins</label><input id="fBonus" type="number" min="0" required value="${p.bonus_coins||0}"></div><div class="field"><label>Price in minor units</label><input id="fPrice" type="number" min="1" required value="${p.amount_minor||50000}"></div><div class="field full"><label>Status</label><select id="fActive"><option value="true" ${p.active!==false?'selected':''}>Active</option><option value="false" ${p.active===false?'selected':''}>Inactive</option></select></div></div><div class="actions" style="justify-content:flex-end;margin-top:14px"><button type="button" class="ghost" id="cancelModal">Cancel</button><button class="primary">Save</button></div>`}
+function openPackage(p){$('#modalTitle').textContent=p?.id?'Edit coin package':'New coin package';$('#modalForm').innerHTML=packageForm(p||{});$('#modal').classList.add('show');$('#cancelModal').onclick=()=>$('#modal').classList.remove('show');$('#modalForm').onsubmit=async e=>{e.preventDefault();const a={p_name:$('#fName').value,p_coins:+$('#fCoins').value,p_bonus_coins:+$('#fBonus').value,p_price_minor:+$('#fPrice').value,p_currency:$('#fCurrency').value,p_display_order:0};const r=p?.id?await safeRpc('admin_update_coin_package',{p_id:p.id,...a,p_active:$('#fActive').value==='true'}):await safeRpc('admin_create_coin_package',a);if(r.error){toast(r.error.message);return}$('#modal').classList.remove('show');toast('Package saved');await loadPackages();stats()}}
+function editPackage(p){openPackage(p)} $('#addPackage').onclick=()=>openPackage();
+let roomsCache=[];
+async function loadRooms(){
+const box=$('#roomsList');
+box.innerHTML='<div class="empty">Loading Rooms…</div>';
+const {data,error}=await safeRpc('admin_list_rooms');
+if(error){box.innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}
+roomsCache=data||[];
+if(!roomsCache.length){box.innerHTML='<div class="empty">No rooms yet. Create the first Room.</div>';return}
+box.innerHTML=roomsCache.map(r=>`<div class="room" style="margin-bottom:9px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+<div style="min-width:0"><strong>${esc(r.emoji||'🏠')} ${esc(r.name)}</strong><span class="muted">${esc(r.description||'No description')}</span>
+<div style="margin-top:6px"><span class="pill ${r.active?'':'off'}">${r.active?'ACTIVE':'INACTIVE'}</span> ${r.featured?'<span class="pill">FEATURED</span>':'<span class="pill off">NOT FEATURED</span>'}</div>
+</div>
+<div class="actions">
+<button class="ghost room-edit" data-id="${esc(r.id)}">Edit</button>
+<button class="${r.featured?'ghost':'primary'} room-feature" data-id="${esc(r.id)}">${r.featured?'Unfeature':'Feature'}</button>
+<button class="${r.active?'danger':'primary'} room-active" data-id="${esc(r.id)}">${r.active?'Deactivate':'Activate'}</button>
+</div>
+</div>`).join('');
+box.querySelectorAll('.room-edit').forEach(b=>b.onclick=()=>editRoom(roomsCache.find(r=>r.id===b.dataset.id)));
+box.querySelectorAll('.room-feature').forEach(b=>b.onclick=()=>setRoomFlags(b.dataset.id,{featured:!roomsCache.find(r=>r.id===b.dataset.id)?.featured}));
+box.querySelectorAll('.room-active').forEach(b=>b.onclick=()=>toggleRoomActive(b.dataset.id));
+}
+async function updateRoom(id,patch){
+const r=roomsCache.find(x=>x.id===id); if(!r)return;
+const result=await safeRpc('admin_update_room',{
+p_id:id,p_name:r.name,p_description:r.description||'',p_emoji:r.emoji||'🏠',
+p_active:patch.active??r.active,p_featured:patch.featured??r.featured
+});
+if(result.error){toast(result.error.message);return false}
+await loadRooms(); await stats(); return true;
+}
+async function setRoomFlags(id,patch){await updateRoom(id,patch)}
+async function toggleRoomActive(id){
+const r=roomsCache.find(x=>x.id===id); if(!r)return;
+const next=!r.active;
+if(!next && !(await spikePremiumConfirm(`Deactivate “${r.name}”? It will remain in the admin list but will no longer be active.`,{title:'Deactivate room',icon:'🏠',danger:true,ok:'Deactivate'})))return;
+if(next && !(await spikePremiumConfirm(`Activate “${r.name}”?`,{title:'Activate room',icon:'🏠',ok:'Activate'})))return;
+await updateRoom(id,{active:next});
+}
+function roomForm(r={}){
+return `<div class="field"><label>Name</label><input id="rName" maxlength="120" required value="${esc(r.name)}"></div>
+<div class="field"><label>Description</label><textarea id="rDesc" maxlength="1000">${esc(r.description)}</textarea></div>
+<div class="formgrid">
+<div class="field"><label>Emoji</label><input id="rEmoji" maxlength="8" value="${esc(r.emoji||'🏠')}"></div>
+<div class="field"><label>Featured</label><select id="rFeatured"><option value="true" ${r.featured?'selected':''}>Featured</option><option value="false" ${!r.featured?'selected':''}>Normal</option></select></div>
+</div>
+${r.id?'<div class="field"><label>Status</label><select id="rActive"><option value="true" '+(r.active?'selected':'')+'>Active</option><option value="false" '+(!r.active?'selected':'')+'>Inactive</option></select></div>':''}
+<div class="actions" style="justify-content:flex-end;margin-top:14px"><button type="button" class="ghost" id="cancelModal">Cancel</button><button class="primary">Save</button></div>`;
+}
+function openRoom(r){
+const modal=$('#modal'), title=$('#modalTitle'), form=$('#modalForm');
+if(!modal||!title||!form){console.error('Room modal markup is missing', {modal:!!modal,title:!!title,form:!!form});toast('Room editor is unavailable. Reload the admin page.');return}
+title.textContent=r?.id?'Edit room':'New room';
+form.innerHTML=roomForm(r||{});
+modal.classList.add('show');
+const cancel=$('#cancelModal');
+if(cancel) cancel.onclick=()=>modal.classList.remove('show');
+form.onsubmit=async e=>{
+e.preventDefault();
+const name=$('#rName').value.trim();
+if(!name)return toast('Room name is required');
+const payload={p_name:name,p_description:$('#rDesc').value.trim(),p_emoji:$('#rEmoji').value.trim(),p_featured:$('#rFeatured').value==='true'};
+const r2=r?.id
+?await safeRpc('admin_update_room',{p_id:r.id,...payload,p_active:$('#rActive').value==='true'})
+:await safeRpc('admin_create_room',payload);
+if(r2.error){toast(r2.error.message);return}
+$('#modal').classList.remove('show'); toast(r?.id?'Room updated':'Room created'); await loadRooms(); await stats();
+};
+}
+function editRoom(r){if(r)openRoom(r)}
+on('addRoom','click',()=>openRoom());
+let usersOffset=0;const USERS_PAGE_SIZE=50;
+function userCard(u,room=false){
+  const verified=u.verified===true;
+  const uid=String(u.user_id||u.id||'');
+  const isMe=uid && uid===String(me?.id||'');
+  const isAdmin=!!u.is_admin || ['admin','super_admin'].includes(String(u.role||''));
+  const canDelete=!room && !isMe && !(isAdmin && !window.__SPIKE_IS_SUPER_ADMIN);
+  return `<div class="usercard" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><div><strong>${esc(u.display_name||u.username||'SPIKE User')}${verified?'<span class="verified-admin-badge" title="Verified account" aria-label="Verified account">✓</span>':''}</strong><div class="muted">${esc(u.username?'@'+u.username+' · ':'')}${esc(u.email||'No email')}</div></div><span class="pill">${esc(u.sp_id||'No SP_ID')}</span></div><div style="margin-top:7px">🪙 ${Number(u.coin_balance??u.coins??u.balance??0).toLocaleString()} coins · ⭐ Level ${Number(u.level||1)}${room?' · '+esc(u.role||'member'):''}</div><div class="muted" style="margin-top:4px">${room?`Joined ${u.joined_at?new Date(u.joined_at).toLocaleString():'—'} · Last seen ${u.last_seen_at?new Date(u.last_seen_at).toLocaleString():'—'}${u.banned_until?' · Banned until '+new Date(u.banned_until).toLocaleString():''}`:`Registered ${u.created_at?new Date(u.created_at).toLocaleString():'—'} · ${Number(u.room_count||0)} room(s) · ${u.is_admin?'👑 Admin':''}`}</div><div class="actions" style="margin-top:8px"><button class="ghost verify-btn" type="button" data-verify-user="${esc(uid)}" data-verify-next="${verified?'false':'true'}">${verified?'✓ Verified · Remove':'✓ Verify account'}</button>${canDelete?`<button class="danger" type="button" data-delete-user="${esc(uid)}" data-delete-name="${esc(u.display_name||u.username||u.email||'this user')}">🗑 Delete</button>`:(isMe?'<span class="pill">Current account</span>':(isAdmin?'<span class="pill off">Admin protected</span>':''))}${u.sp_id_public?'<span class="pill">Public SP_ID</span>':''}</div></div>`
+}
+let registerBusy=false;
+function generateTempPassword(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%^&*';
+  const a=new Uint32Array(18); crypto.getRandomValues(a);
+  return Array.from(a,x=>chars[x%chars.length]).join('');
+}
+function ensureRegisterModal(){
+  if(document.getElementById('registerUserModal')) return;
+  const d=document.createElement('div');
+  d.id='registerUserModal'; d.className='modal';
+  d.innerHTML=`<div class="sheet" style="width:min(620px,100%);"><div class="sheethead"><div><h2 style="margin:0">Register SPIKE user</h2><div class="muted">Creates a Supabase Auth account and lets SPIKE generate the profile, wallet and SP_ID.</div></div><button class="close" id="registerUserClose" type="button">×</button></div><form id="registerUserForm" style="margin-top:16px"><div class="formgrid"><div class="field full"><label>Email</label><input id="registerEmail" type="email" autocomplete="off" required maxlength="254" placeholder="member@example.com"></div><div class="field"><label>Display name</label><input id="registerDisplayName" maxlength="100" placeholder="SPIKE Member"></div><div class="field"><label>Username <span class="muted">(optional)</span></label><input id="registerUsername" maxlength="30" autocomplete="off" placeholder="spike_member"></div><div class="field"><label>Temporary password</label><div style="display:flex;gap:7px"><input id="registerPassword" type="password" minlength="8" maxlength="128" required autocomplete="new-password" placeholder="At least 8 characters"><button class="ghost" id="registerGeneratePassword" type="button">Generate</button></div></div><div class="field"><label>Email status</label><select id="registerAutoConfirm"><option value="false">Require email verification</option><option value="true">Admin-confirm email now</option></select></div></div><div class="notice" style="margin-top:12px">Use <b>Admin-confirm</b> only when you have verified the email address yourself. Otherwise leave verification required.</div><div id="registerUserStatus" class="notice" style="display:none;margin-top:12px"></div><div class="actions" style="justify-content:flex-end;margin-top:15px"><button class="ghost" id="registerCancel" type="button">Cancel</button><button class="primary" id="registerSubmit" type="submit">Create account</button></div></form></div>`;
+  document.body.appendChild(d);
+  const close=()=>d.classList.remove('show');
+  document.getElementById('registerUserClose').onclick=close;
+  document.getElementById('registerCancel').onclick=close;
+  d.addEventListener('click',e=>{if(e.target===d)close()});
+  document.getElementById('registerGeneratePassword').onclick=()=>{const x=document.getElementById('registerPassword');x.value=generateTempPassword();x.type='text';setTimeout(()=>x.type='password',1400)};
+  document.getElementById('registerUserForm').onsubmit=registerUser;
+}
+function openRegisterUser(){
+  ensureRegisterModal();
+  const d=document.getElementById('registerUserModal');
+  const f=document.getElementById('registerUserForm');
+  f.reset(); document.getElementById('registerUserStatus').style.display='none';
+  d.classList.add('show'); setTimeout(()=>document.getElementById('registerEmail')?.focus(),50);
+}
+async function registerUser(e){
+  e.preventDefault(); if(registerBusy)return;
+  const email=document.getElementById('registerEmail').value.trim();
+  const displayName=document.getElementById('registerDisplayName').value.trim();
+  const username=document.getElementById('registerUsername').value.trim();
+  const password=document.getElementById('registerPassword').value;
+  const autoConfirm=document.getElementById('registerAutoConfirm').value==='true';
+  if(!email||!password)return toast('Email and password are required','warning');
+  if(password.length<8)return toast('Password must be at least 8 characters','warning');
+  const confirmed=await spikePremiumConfirm(`Create a new SPIKE account for ${email}?\n\nA profile, wallet and SP_ID will be generated automatically.`,{title:'Register user',icon:'👤',ok:'Create account'});
+  if(!confirmed)return;
+  registerBusy=true;
+  const submit=document.getElementById('registerSubmit'); const status=document.getElementById('registerUserStatus');
+  submit.disabled=true; submit.textContent='Creating…'; status.style.display='block'; status.textContent='Creating secure Auth account…';
+  try{
+    const {data,error}=await sb.functions.invoke('admin-register-user',{body:{email,display_name:displayName,username,password,auto_confirm:autoConfirm}});
+    if(error) throw error;
+    if(!data?.ok) throw new Error(data?.error||'Registration failed');
+    status.textContent=`✓ Account created · ${data.user?.sp_id||'SP_ID pending'} · ${data.user?.email_confirmed?'email confirmed':'verification required'}`;
+    toast('SPIKE user registered successfully','success');
+    await loadUsers(); await stats();
+    setTimeout(()=>document.getElementById('registerUserModal')?.classList.remove('show'),900);
+  }catch(err){
+    console.error('[SPIKE ADMIN] register user',err);
+    status.textContent=err?.message||'Could not register user.';
+    toast(err?.message||'Could not register user','error');
+  }finally{registerBusy=false;submit.disabled=false;submit.textContent='Create account';}
+}
+
+async function deleteAdminUser(id,name,button){
+  if(!id||id===me?.id)return toast('You cannot delete your own account','error');
+  const typed=await spikePremiumInput('Permanent account deletion',`This permanently deletes ${name||'this user'} from SPIKE.\n\nType DELETE to confirm.`,{icon:'🗑️',ok:'Delete account',inputType:'text',maxLength:6,pattern:'^DELETE$'});
+  if(typed!=='DELETE')return;
+  const confirmed=await spikePremiumConfirm(`Delete ${name||'this user'} permanently?\n\nThis action cannot be undone.`,{title:'Final deletion confirmation',icon:'⚠️',ok:'Delete permanently',danger:true});
+  if(!confirmed)return;
+  if(button) {button.disabled=true;button.textContent='Deleting…';}
+  const r=await safeRpc('admin_delete_user',{p_user_id:id},'Delete user');
+  if(r.error){if(button){button.disabled=false;button.textContent='🗑 Delete'};toast(r.error.message||'Could not delete user','error');return;}
+  toast('User deleted permanently','success');
+  await loadUsers(); await stats();
+}
+
+async function syncVerification(rows){const ids=(rows||[]).map(u=>u.user_id||u.id).filter(id=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(id)));if(!ids.length)return rows||[];const r=await safeRpc('admin_list_user_verification',{p_user_ids:ids});const map=new Map((r.data||[]).map(x=>[String(x.user_id),x.verified===true]));return (rows||[]).map(u=>({...u,verified:map.get(String(u.user_id||u.id))===true}));}
+document.addEventListener('click',async e=>{const v=e.target.closest?.('[data-verify-user]');if(v){const id=v.dataset.verifyUser;if(!id)return;const next=v.dataset.verifyNext==='true';v.disabled=true;const r=await safeRpc('admin_set_user_verified',{p_target_user_id:id,p_verified:next});if(r.error){toast(r.error.message);v.disabled=false;return}toast(next?'✓ Account verified':'Verification removed');loadUsers();return}const d=e.target.closest?.('[data-delete-user]');if(d){return deleteAdminUser(d.dataset.deleteUser,d.dataset.deleteName,d);}});
+async function loadUsers(){const box=$('#usersList');box.innerHTML='<div class="empty">Loading registered users…</div>';const q=$('#usersSearch').value.trim()||null;const {data,error}=await safeRpc('admin_list_users',{p_search:q,p_limit:USERS_PAGE_SIZE,p_offset:usersOffset});if(error){box.innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}const rows=await syncVerification(data||[]);box.innerHTML=rows.length?rows.map(u=>userCard(u)).join(''):'<div class="empty">No registered users found.</div>';$('#usersPage').textContent='Page '+(Math.floor(usersOffset/USERS_PAGE_SIZE)+1);$('#usersPrev').disabled=usersOffset===0;$('#usersNext').disabled=rows.length<USERS_PAGE_SIZE}
+async function loadRoomChoices(){const {data,error}=await safeRpc('admin_list_rooms');if(error){toast(error.message);return}$('#memberRoom').innerHTML='<option value="">Choose a Room</option>'+(data||[]).map(r=>`<option value="${r.id}">${esc(r.emoji||'🏠')} ${esc(r.name)}</option>`).join('')}
+async function loadRoomMembers(){const room=$('#memberRoom').value;const box=$('#roomMembersList');if(!room){box.innerHTML='<div class="empty">Choose a Room to view its members.</div>';return}box.innerHTML='<div class="empty">Loading members…</div>';const q=$('#memberSearch').value.trim()||null;const {data,error}=await safeRpc('admin_list_room_members',{p_room_id:room,p_search:q,p_limit:100,p_offset:0});if(error){box.innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}const rows=await syncVerification(data||[]);box.innerHTML=rows.length?rows.map(u=>userCard(u,true)).join(''):'<div class="empty">No members found.</div>'}
+async function loadBroadcastRooms(){const {data,error}=await safeRpc('admin_list_rooms');if(error){toast(error.message);return}$('#broadcastRoom').innerHTML='<option value="">Choose a Room</option>'+(data||[]).map(r=>`<option value="${r.id}">${esc(r.emoji||'🏠')} ${esc(r.name)}</option>`).join('')}
+async function loadBroadcasts(){const {data,error}=await safeRpc('admin_list_broadcasts',{p_limit:50});if(error){toast(error.message);return}$('#broadcastsList').innerHTML=data?.length?data.map(x=>`<div class="audititem"><strong>${esc(x.title)}</strong><div class="muted">${esc(x.channel)} · ${esc(x.audience)} · ${Number(x.recipient_count||0).toLocaleString()} recipients · ${esc(x.status)} · ${new Date(x.created_at).toLocaleString()}</div></div>`).join(''):'<div class="empty">No broadcasts yet.</div>'}
+async function queueBroadcast(){const title=$('#broadcastTitle').value.trim(),body=$('#broadcastBody').value.trim(),channel=$('#broadcastChannel').value,audience=$('#broadcastAudience').value,room=$('#broadcastRoom').value||null;if(!title||!body)return toast('Title and message are required');if(audience==='room_members'&&!room)return toast('Choose a Room');const st=$('#broadcastStatus');st.style.display='block';st.textContent='Queueing recipients…';const r=await safeRpc('admin_queue_broadcast',{p_title:title,p_body:body,p_channel:channel,p_audience:audience,p_room_id:room});if(r.error){st.textContent=r.error.message;return}const id=r.data;if($('#broadcastBanner').value==='true'){const rawEnds=$('#broadcastEnds').value;const ends=rawEnds?new Date(rawEnds).toISOString():null;const a=await safeRpc('admin_set_announcement',{p_title:title,p_body:body,p_severity:'info',p_active:true,p_ends_at:ends});if(a.error){st.textContent=a.error.message;return}}let total=0,loops=0;while(loops++<100){const x=await safeRpc('admin_process_broadcast',{p_broadcast_id:id,p_batch_size:250});if(x.error){st.textContent=x.error.message;break}total+=Number(x.data||0);if(Number(x.data||0)<250){st.textContent=`Sent to ${total.toLocaleString()} users.`;break}st.textContent=`Sending… ${total.toLocaleString()} processed`;await new Promise(res=>setTimeout(res,100));}await loadBroadcasts()}
+let purchaseStatus='pending';
+let roomPurchaseStatus='pending';
+let roomPurchaseRows=[];
+function roomPurchaseMoney(o){return o.fiat_amount_minor>0?new Intl.NumberFormat(undefined,{style:'currency',currency:o.currency||'NGN'}).format(Number(o.fiat_amount_minor)/100):'🪙 '+Number(o.coin_amount||0).toLocaleString()+' coins'}
+function roomPurchaseCard(o){const can=['pending','paid_review'].includes(String(o.status||''));const method='💳 WhatsApp / Bank';const wa=String(o.whatsapp_handle||'');return `<article class="purchaseCard"><div class="purchaseTop"><div><div class="purchaseRef">${esc(o.item_name||'Room purchase')}</div><div class="purchaseMeta"><b>User ID:</b> ${esc(o.user_id||'User')} · ${method}<br>${esc(o.purchase_option||'')}</div></div><span class="purchaseStatus ${esc(o.status||'pending')}">${esc(String(o.status||'pending').replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase()))}</span></div><div class="purchaseMeta"><b>${esc(roomPurchaseMoney(o))}</b><br>WhatsApp: ${esc(wa||'Not supplied')}<br>Created ${o.created_at?new Date(o.created_at).toLocaleString():'—'}${o.transaction_id?'<br>Transaction ID: '+esc(o.transaction_id):'<br><span class="muted">Waiting for payment transaction ID</span>'}${o.admin_note?'<br>Admin note: '+esc(o.admin_note):''}</div>${can?`<div class="purchaseActions">${wa?`<button class="whats" data-room-purchase-whats="${esc(o.id)}">WhatsApp User</button>`:''}<button class="approve" data-room-purchase-approve="${esc(o.id)}">Approve & Unlock</button><button class="reject" data-room-purchase-reject="${esc(o.id)}">Reject</button></div>`:''}</article>`}
+async function loadRoomPurchases(status=roomPurchaseStatus){roomPurchaseStatus=status||'pending';const box=$('#roomPurchasesList');if(box)box.innerHTML='<div class="purchaseEmpty" style="grid-column:1/-1">Loading feature purchases…</div>';const r=await safeRpc('admin_list_room_purchase_requests',{p_status:roomPurchaseStatus,p_limit:200},'Room feature purchases');if(r.error){if(box)box.innerHTML='<div class="purchaseEmpty" style="grid-column:1/-1">'+esc(r.error.message||'Could not load feature purchases.')+'</div>';return}roomPurchaseRows=r.data||[];if(box)box.innerHTML=roomPurchaseRows.length?roomPurchaseRows.map(roomPurchaseCard).join(''):'<div class="purchaseEmpty" style="grid-column:1/-1">No purchases in this status.</div>';
+  const badge=$('#navPendingFeaturePurchases');
+  if(badge){
+    const pending=await safeRpc('admin_list_room_purchase_requests',{p_status:null,p_limit:500},'Pending feature purchase count');
+    if(!pending.error) badge.textContent=String((pending.data||[]).length);
+  }
+}
+async function reviewRoomPurchase(id,approve){const note=approve?'Approved after payment/purchase verification.':(await spikePremiumInput('Reject Room Purchase','Enter the reason this purchase cannot be approved.',{icon:'🔒',ok:'Reject purchase',inputType:'text',maxLength:500})||'Payment not confirmed.');if(!approve && !String(note).trim())return;const r=await safeRpc('admin_review_room_purchase',{p_request_id:id,p_approve:approve,p_note:String(note||'')},'Room purchase review');if(r.error){toast(r.error.message);return}toast(approve?'✓ Purchase approved and unlocked.':'Purchase rejected.');await loadRoomPurchases(roomPurchaseStatus)}
+function openRoomPurchaseWhats(o){const raw=String(o?.whatsapp_handle||'').trim();if(!raw){toast('User has not supplied a WhatsApp handle.');return}const digits=raw.replace(/[^0-9]/g,'');const text=`Hello SPIKE User, this is SPIKE Admin regarding your purchase request.\n\nFeature: ${o.item_name||'Purchase'}\nAmount: ${roomPurchaseMoney(o)}\nRequest: ${o.id}\n\nI will send the official bank payment details here. Please pay only using the details supplied by SPIKE Admin, then submit your transaction/reference ID in the app for verification.`;const url=digits.length>=7?'https://wa.me/'+digits+'?text='+encodeURIComponent(text):'https://wa.me/?text='+encodeURIComponent(text+'\nWhatsApp handle: '+raw);window.open(url,'_blank','noopener')}
+function handleRoomPurchaseAction(e){const a=e.target.closest('[data-room-purchase-approve]');const r=e.target.closest('[data-room-purchase-reject]');const w=e.target.closest('[data-room-purchase-whats]');if(a)return reviewRoomPurchase(a.dataset.roomPurchaseApprove,true);if(r)return reviewRoomPurchase(r.dataset.roomPurchaseReject,false);if(w){const o=roomPurchaseRows.find(x=>String(x.id)===String(w.dataset.roomPurchaseWhats));if(o)return openRoomPurchaseWhats(o)}}
+async function loadMaintenance(){const {data,error}=await sb.from('app_maintenance').select('*').eq('id',true).maybeSingle();if(error){toast(error.message);return}$('#maintenanceState').textContent=data?.enabled?`🛠️ MAINTENANCE ACTIVE${data.ends_at?' · ends '+new Date(data.ends_at).toLocaleString():''}`:'✅ Maintenance mode is OFF';$('#maintTitle').value=data?.title||'SPIKE is under maintenance';$('#maintMessage').value=data?.message||'We will be back shortly';if(data?.ends_at){const d=new Date(data.ends_at);$('#maintEnds').value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,16)}else $('#maintEnds').value=''}
+async function setMaintenance(enabled){const ends=$('#maintEnds').value?new Date($('#maintEnds').value).toISOString():null;const r=await safeRpc('admin_set_maintenance',{p_enabled:enabled,p_title:$('#maintTitle').value.trim(),p_message:$('#maintMessage').value.trim(),p_starts_at:null,p_ends_at:ends});if(r.error){toast(r.error.message);return}toast(enabled?'Maintenance enabled':'Maintenance disabled');loadMaintenance()}
+async function loadAdmins(){const {data,error}=await safeRpc('admin_list_admins');if(error){toast(error.message);return}$('#adminsList').innerHTML=data?.length?data.map(a=>`<div class="usercard" style="margin-bottom:8px"><strong>${esc(a.display_name||'SPIKE User')}</strong><div class="muted">${esc(a.email)} · ${esc(a.sp_id||'No SP ID')}</div><div style="margin-top:5px">👑 ${esc(a.role)}</div></div>`).join(''):'<div class="empty">No admins found.</div>'}
+async function findAdmin(){const email=$('#adminEmail').value.trim();if(!email)return toast('Enter an email');const {data,error}=await safeRpc('admin_find_user',{p_email:email});if(error){toast(error.message);return}const u=data?.[0];if(!u){$('#adminResult').innerHTML='<div class="empty">Account not found.</div>';return}$('#adminResult').innerHTML=`<div class="usercard"><strong>${esc(u.display_name||'SPIKE User')}</strong><div class="muted">${esc(u.email)} · ${esc(u.sp_id||'No SP ID')}</div><p>Current role: <b>${esc(u.role||'User')}</b></p><div class="actions"><button class="primary" onclick="grant('${u.user_id}')">Grant / update role</button>${u.role?`<button class="danger" onclick="revoke('${u.user_id}')">Revoke</button>`:''}</div></div>`}
+async function grant(id){const r=await safeRpc('admin_grant_role',{p_target_user_id:id,p_role:$('#adminRole').value});if(r.error){toast(r.error.message);return}toast('Admin role updated');findAdmin();stats()}
+async function revoke(id){if(!(await spikePremiumConfirm('Revoke this admin role?',{title:'Revoke admin access',icon:'🛡️',danger:true,ok:'Revoke access'})))return;const r=await safeRpc('admin_revoke_role',{p_target_user_id:id});if(r.error){toast(r.error.message);return}toast('Admin access revoked');findAdmin();stats()}
+async function loadAudit(){const {data,error}=await safeRpc('admin_list_audit',{p_limit:100});if(error){toast(error.message);return}$('#auditList').innerHTML=data?.length?data.map(x=>`<div class="audititem"><strong>${esc(x.action)}</strong>${x.role?' · '+esc(x.role):''}<div class="muted">${new Date(x.created_at).toLocaleString()} · ${esc(x.target_user_id||'system')}</div></div>`).join(''):'<div class="empty">No audit events yet.</div>'}
+
+/* ===== GAMIFICATION CONTROL CENTER ===== */
+let gadminData=null;
+function gadminJson(v){try{return JSON.stringify(v??{},null,2)}catch{return '{}'}}
+async function loadGamificationAdmin(){const r=await safeRpc('admin_gamification_overview');if(r.error){toast(r.error.message);return}gadminData=r.data||{};const st=gadminData.stats||{};$('#gadminStats').innerHTML=[['Users',st.users||0],['Total XP',Number(st.total_xp||0).toLocaleString()],['XP today',Number(st.xp_today||0).toLocaleString()],['Avg XP',Number(st.avg_xp||0).toLocaleString()],['Max level',st.max_level||1],['Active streaks',st.active_streaks||0],['Achievement unlocks',st.achievement_unlocks||0]].map(x=>`<div class="gadmin-card"><strong>${esc(x[1])}</strong><span>${esc(x[0])}</span></div>`).join('');renderGAdminLevels();renderGAdminTasks();renderGAdminWeekly();renderGAdminAchievements();renderGAdminLeaderboard();renderGAdminAbuse();const settings=gadminData.settings||{};$('#gadminXpRules').value=gadminJson(settings.xp_rewards);$('#gadminCapsRules').value=gadminJson(settings.anti_abuse_caps);$('#gadminStreakRewards').value=gadminJson(settings.streak_rewards);$('#gadminMultipliers').value=gadminJson(settings.streak_multipliers);}
+function renderGAdminLevels(){const rows=gadminData?.levels||[];$('#gadminLevels').innerHTML=rows.map(x=>`<tr><td><b>L${x.level}</b></td><td><input type="number" data-gl-xp="${x.level}" value="${Number(x.xp_required)}"></td><td><input data-gl-rank="${x.level}" value="${esc(x.rank)}"></td><td><input data-gl-desc="${x.level}" value="${esc(x.rank_description||'')}"></td><td><button class="primary" data-save-level="${x.level}">Save</button></td></tr>`).join('')}
+function renderGAdminTasks(){const rows=gadminData?.tasks||[];$('#gadminTasks').innerHTML=rows.map(x=>`<tr><td>${esc(x.id)}</td><td><input data-gt-name="${esc(x.id)}" value="${esc(x.name)}"></td><td><input data-gt-desc="${esc(x.id)}" value="${esc(x.description)}"></td><td><input type="number" data-gt-xp="${esc(x.id)}" value="${Number(x.xp_reward)}"></td><td><input type="checkbox" data-gt-active="${esc(x.id)}" ${x.active?'checked':''}></td><td><input type="number" data-gt-sort="${esc(x.id)}" value="${Number(x.sort_order||0)}"></td><td><button class="primary" data-save-task="${esc(x.id)}">Save</button></td></tr>`).join('')||'<tr><td colspan="7">No tasks.</td></tr>'}
+function renderGAdminWeekly(){const rows=gadminData?.weekly||[];$('#gadminWeekly').innerHTML=rows.map(x=>`<tr><td>${esc(x.id)}</td><td><input data-gw-name="${esc(x.id)}" value="${esc(x.name)}"></td><td><input data-gw-desc="${esc(x.id)}" value="${esc(x.description)}"></td><td><input type="number" data-gw-xp="${esc(x.id)}" value="${Number(x.xp_reward)}"></td><td><input type="date" data-gw-start="${esc(x.id)}" value="${esc(x.starts_on)}"></td><td><input type="date" data-gw-end="${esc(x.id)}" value="${esc(x.ends_on)}"></td><td><input type="checkbox" data-gw-active="${esc(x.id)}" ${x.active?'checked':''}></td><td><button class="primary" data-save-weekly="${esc(x.id)}">Save</button></td></tr>`).join('')||'<tr><td colspan="8">No weekly challenges.</td></tr>'}
+function renderGAdminAchievements(){const rows=gadminData?.achievements||[];$('#gadminAchievements').innerHTML=rows.map(x=>`<tr><td>${esc(x.icon||'🏆')}</td><td>${esc(x.code)}</td><td>${esc(x.name)}</td><td>${esc(x.category)}</td><td>${Number(x.xp_reward||0)}</td><td>${Number(x.unlock_count||0)}</td><td><button class="ghost" data-edit-ach="${esc(x.id)}">Edit</button></td></tr>`).join('')||'<tr><td colspan="7">No achievements.</td></tr>'}
+function renderGAdminLeaderboard(){const rows=gadminData?.top_users||[];$('#gadminLeaderboard').innerHTML=rows.length?rows.map((x,i)=>`<div class="gadmin-user"><div><b>#${i+1} ${esc(x.display_name||'SPIKE User')}</b><div class="gsmall">${esc(x.sp_id||'')} · ${esc(x.rank||'')} · Level ${Number(x.level||1)} · streak ${Number(x.current_streak||0)}d</div></div><strong>${Number(x.xp||0).toLocaleString()} XP</strong></div>`).join(''):'<div class="empty">No leaderboard data.</div>'}
+function renderGAdminAbuse(){const rows=gadminData?.abuse_flags||[];$('#gadminAbuse').innerHTML=rows.length?rows.map(x=>`<div class="gadmin-user"><div><b>${esc(x.display_name||'SPIKE User')}</b><div class="gsmall">${esc(x.user_id)}</div></div><strong>${Number(x.xp_today||0).toLocaleString()} XP today</strong></div>`).join(''):'<div class="empty">No high-XP signals today.</div>'}
+async function gadminFindUsers(){const q=$('#gadminUserSearch').value.trim();const r=await safeRpc('admin_gamification_find_users',{p_query:q});if(r.error){toast(r.error.message);return}const rows=r.data||[];$('#gadminUsers').innerHTML=rows.length?rows.map(u=>`<div class="gadmin-user"><div><b>${esc(u.display_name||'SPIKE User')}</b><div class="gsmall">${esc(u.email||'')} · ${esc(u.sp_id||'')} · Level ${Number(u.level||1)} · ${esc(u.rank||'')}</div><div class="gsmall">${Number(u.xp||0).toLocaleString()} XP · streak ${Number(u.current_streak||0)}d · longest ${Number(u.longest_streak||0)}d · ${Number(u.achievements||0)} achievements</div></div><div class="gactions"><button class="ghost" data-adjust-xp="${u.user_id}">Adjust XP</button><button class="ghost" data-grant-ach="${u.user_id}">Grant achievement</button></div></div>`).join(''):'<div class="empty">No matching users.</div>'}
+let spikeGfResolver=null;
+function spikeGamificationForm(title,subtitle,fields,opts={}){
+ const modal=document.getElementById('spikeGamificationForm'); if(!modal)return Promise.resolve(null);
+ const form=document.getElementById('spikeGfForm'), box=document.getElementById('spikeGfFields');
+ document.getElementById('spikeGfIcon').textContent=opts.icon||'🎮'; document.getElementById('spikeGfTitle').textContent=title||'Edit'; document.getElementById('spikeGfSub').textContent=subtitle||''; document.getElementById('spikeGfSubmit').textContent=opts.submit||'Save changes';
+ box.innerHTML=fields.map((f,i)=>{const id='spikeGf_'+i; const val=f.value??''; const common=`id="${id}" name="${esc(f.name||f.key)}" ${f.required===false?'':'required'}`; if(f.type==='select')return `<div class="spike-gf-field ${f.full?'full':''}"><label for="${id}">${esc(f.label)}</label><select ${common}>${(f.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(o.value)===String(val)?'selected':''}>${esc(o.label)}</option>`).join('')}</select>${f.help?`<span class="spike-gf-help">${esc(f.help)}</span>`:''}</div>`; if(f.type==='textarea')return `<div class="spike-gf-field ${f.full?'full':''}"><label for="${id}">${esc(f.label)}</label><textarea ${common} ${f.maxLength?`maxlength="${f.maxLength}"`:''}>${esc(val)}</textarea>${f.help?`<span class="spike-gf-help">${esc(f.help)}</span>`:''}</div>`; return `<div class="spike-gf-field ${f.full?'full':''}"><label for="${id}">${esc(f.label)}</label><input ${common} type="${f.type||'text'}" value="${esc(val)}" ${f.min!=null?`min="${f.min}"`:''} ${f.max!=null?`max="${f.max}"`:''} ${f.step?`step="${f.step}"`:''} ${f.maxLength?`maxlength="${f.maxLength}"`:''}>${f.help?`<span class="spike-gf-help">${esc(f.help)}</span>`:''}</div>`}).join('');
+ modal.classList.add('show');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+ return new Promise(resolve=>{let done=false;const finish=v=>{if(done)return;done=true;modal.classList.remove('show');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';document.removeEventListener('keydown',key);spikeGfResolver=null;resolve(v)};const key=e=>{if(e.key==='Escape')finish(null)};form.onsubmit=e=>{e.preventDefault();if(!form.reportValidity())return;const out={};fields.forEach((f,i)=>{const el=document.getElementById('spikeGf_'+i);out[f.key||f.name]=f.type==='number'?Number(el.value):el.value});finish(out)};document.getElementById('spikeGfCancel').onclick=()=>finish(null);modal.onclick=e=>{if(e.target===modal)finish(null)};document.addEventListener('keydown',key);spikeGfResolver=finish;setTimeout(()=>box.querySelector('input,textarea,select')?.focus(),50)});
+}
+async function gadminAdjustXP(id){const v=await spikeGamificationForm('Adjust user XP','Make a transparent, audited XP correction. Positive adds XP; negative removes XP.',[{key:'amount',label:'XP adjustment',type:'number',value:100,step:1,help:'Example: 250 or -100.'},{key:'reason',label:'Reason',type:'text',value:'Manual correction',full:true,help:'This reason is stored with the admin action.'}],{icon:'⚡',submit:'Apply XP change'});if(!v||!v.reason)return; if(!Number.isFinite(v.amount)||v.amount===0)return toast('Enter a non-zero XP adjustment.');const r=await safeRpc('admin_gamification_adjust_xp',{p_target_user_id:id,p_amount:Math.trunc(v.amount),p_reason:v.reason});if(r.error){toast(r.error.message);return}toast(`XP updated: ${Number(r.data?.xp||0).toLocaleString()} · Level ${r.data?.level||1}`,'success');gadminFindUsers();loadGamificationAdmin()}
+async function gadminGrantAch(id){const ach=gadminData?.achievements||[];if(!ach.length)return toast('No achievements available.','warning');const v=await spikeGamificationForm('Grant achievement','Choose the milestone to award to this member.',[{key:'achievement',label:'Achievement',type:'select',value:String(ach[0].id),options:ach.map(a=>({value:String(a.id),label:`${a.icon||'🏆'} ${a.name} · +${a.xp_reward} XP`}))}],{icon:'🏆',submit:'Grant achievement'});if(!v)return;const r=await safeRpc('admin_gamification_grant_achievement',{p_target_user_id:id,p_achievement_id:v.achievement});if(r.error){toast(r.error.message);return}toast('Achievement granted','success');gadminFindUsers();loadGamificationAdmin()}
+async function gadminEditAch(id){const a=(gadminData.achievements||[]).find(x=>String(x.id)===String(id));if(!a)return;const v=await spikeGamificationForm('Edit achievement','Refine the milestone without leaving the premium admin workspace.',[{key:'name',label:'Achievement name',value:a.name},{key:'xp',label:'XP reward',type:'number',value:a.xp_reward,min:0,step:1},{key:'description',label:'Description',type:'textarea',value:a.description,full:true},{key:'icon',label:'Icon',value:a.icon||'🏆'},{key:'category',label:'Category',value:a.category||'General'}],{icon:a.icon||'🏆',submit:'Save achievement'});if(!v)return;const r=await safeRpc('admin_gamification_save_achievement',{p_id:a.id,p_code:a.code,p_name:v.name,p_description:v.description,p_icon:v.icon||'🏆',p_category:v.category||'General',p_requirement:a.requirement||{},p_xp:Math.trunc(v.xp)});if(r.error){toast(r.error.message);return}toast('Achievement saved','success');loadGamificationAdmin()}
+async function gadminSaveRules(){const fields=[['xp_rewards','gadminXpRules'],['anti_abuse_caps','gadminCapsRules'],['streak_rewards','gadminStreakRewards'],['streak_multipliers','gadminMultipliers']];for(const [key,id] of fields){let value;try{value=JSON.parse($('#'+id).value||'{}')}catch{toast('Invalid JSON in '+key);return}const r=await safeRpc('admin_gamification_save_setting',{p_key:key,p_value:value});if(r.error){toast(r.error.message);return}}toast('Gamification rules saved');loadGamificationAdmin()}
+function gadminAutoTemplates(){
+ const tasks=[
+  {id:'profile_daily',name:'Polish your profile',description:'Update your bio, profile photo, interests or profile details.',xp:20,sort:1},
+  {id:'connection_daily',name:'Make a connection',description:'Connect with someone new on SPIKE.',xp:20,sort:2},
+  {id:'post_daily',name:'Share something valuable',description:'Publish one useful, thoughtful or creative post.',xp:25,sort:3},
+  {id:'comment_daily',name:'Join the conversation',description:'Leave a meaningful comment on a community post.',xp:15,sort:4},
+  {id:'reaction_daily',name:'Show some love',description:'Give reactions to posts you genuinely enjoy.',xp:10,sort:5},
+  {id:'room_daily',name:'Visit a Room',description:'Participate in a Room conversation or activity.',xp:30,sort:6},
+  {id:'challenge_daily',name:'Take on the challenge',description:'Complete one available challenge or activity.',xp:40,sort:7},
+  {id:'checkin_daily',name:'Keep your streak alive',description:'Complete your daily SPIKE check-in.',xp:10,sort:8}
+ ];
+ const weekly=[
+  {id:'weekly_connections',name:'Network Week',description:'Build 10 new connections this week.',xp:100,requirement:{type:'connections',target:10}},
+  {id:'weekly_creator',name:'Creator Week',description:'Publish 5 quality posts this week.',xp:125,requirement:{type:'posts',target:5}},
+  {id:'weekly_engagement',name:'Community Week',description:'Leave 15 meaningful comments this week.',xp:100,requirement:{type:'comments',target:15}},
+  {id:'weekly_rooms',name:'Room Explorer',description:'Participate in 5 Room activities this week.',xp:150,requirement:{type:'room_activity',target:5}}
+ ];
+ const achievements=[
+  {code:'network_25',name:'Connector in Training',description:'Build a network of 25 connections.',icon:'🤝',category:'Social',requirement:{type:'connections',target:25},xp:75},
+  {code:'network_250',name:'Community Builder',description:'Reach 250 connections.',icon:'🌐',category:'Social',requirement:{type:'connections',target:250},xp:500},
+  {code:'creator_25',name:'Rising Creator',description:'Publish 25 posts.',icon:'✍️',category:'Creator',requirement:{type:'posts',target:25},xp:100},
+  {code:'creator_250',name:'Creator Powerhouse',description:'Publish 250 posts.',icon:'🚀',category:'Creator',requirement:{type:'posts',target:250},xp:500},
+  {code:'likes_500',name:'Loved by the Community',description:'Receive 500 reactions on your content.',icon:'❤️',category:'Engagement',requirement:{type:'likes_received',target:500},xp:500},
+  {code:'comments_500',name:'Conversation Leader',description:'Receive or create 500 meaningful comments.',icon:'💬',category:'Engagement',requirement:{type:'comments',target:500},xp:500},
+  {code:'streak_14',name:'Two-Week Fire',description:'Maintain a 14-day daily streak.',icon:'🔥',category:'Streaks',requirement:{type:'streak',target:14},xp:100},
+  {code:'streak_60',name:'Unstoppable',description:'Maintain a 60-day daily streak.',icon:'⚡',category:'Streaks',requirement:{type:'streak',target:60},xp:500},
+  {code:'level_20',name:'Explorer Plus',description:'Reach Level 20.',icon:'🧭',category:'Levels',requirement:{type:'level',target:20},xp:150},
+  {code:'level_40',name:'Contributor Rank',description:'Reach Level 40.',icon:'🏅',category:'Levels',requirement:{type:'level',target:40},xp:300},
+  {code:'level_60',name:'Elite Rank',description:'Reach Level 60.',icon:'💎',category:'Levels',requirement:{type:'level',target:60},xp:600},
+  {code:'level_80',name:'Pioneer Rank',description:'Reach Level 80.',icon:'🚀',category:'Levels',requirement:{type:'level',target:80},xp:900},
+  {code:'level_90',name:'Trailblazer Rank',description:'Reach Level 90.',icon:'🌟',category:'Levels',requirement:{type:'level',target:90},xp:1200}
+ ];
+ return {tasks,weekly,achievements};
+}
+async function gadminAutoGenerate(scope='all'){
+ const data=gadminData||{}; const tpl=gadminAutoTemplates();
+ const existingTasks=new Set((data.tasks||[]).map(x=>String(x.id))); const existingWeekly=new Set((data.weekly||[]).map(x=>String(x.id))); const existingAch=new Set((data.achievements||[]).map(x=>String(x.code)));
+ const addTasks=scope==='tasks'||scope==='all'; const addWeekly=scope==='weekly'||scope==='all'; const addAch=scope==='achievements'||scope==='all';
+ const missingTasks=addTasks?tpl.tasks.filter(x=>!existingTasks.has(x.id)):[];
+ const missingWeekly=addWeekly?tpl.weekly.filter(x=>!existingWeekly.has(x.id)):[];
+ const missingAch=addAch?tpl.achievements.filter(x=>!existingAch.has(x.code)):[];
+ if(!missingTasks.length&&!missingWeekly.length&&!missingAch.length){toast('Your gamification setup is already complete. Nothing was overwritten.','success');return}
+ const total=missingTasks.length+missingWeekly.length+missingAch.length;
+ const confirm=await spikePremiumConfirm(`Auto Generate will add ${total} missing item${total===1?'':'s'} and will not replace your existing custom content.`,{title:'Build SPIKE gamification',icon:'✨',ok:'Generate safely'});
+ if(!confirm)return;
+ const errors=[]; let done=0;
+ const save=async(fn,args,label)=>{const r=await safeRpc(fn,args);if(r.error)errors.push(label+': '+(r.error.message||'failed'));else done++};
+ if(missingTasks.length){for(const x of missingTasks)await save('admin_gamification_save_task',{p_id:x.id,p_name:x.name,p_description:x.description,p_xp:x.xp,p_active:true,p_sort:x.sort},x.name)}
+ if(missingWeekly.length){const d=new Date(); const day=d.getDay(); const monday=new Date(d); monday.setDate(d.getDate()-(day===0?6:day-1)); const end=new Date(monday); end.setDate(monday.getDate()+6); const iso=x=>x.toISOString().slice(0,10); for(const x of missingWeekly)await save('admin_gamification_save_weekly',{p_id:x.id,p_name:x.name,p_description:x.description,p_requirement:x.requirement,p_xp:x.xp,p_active:true,p_starts:iso(monday),p_ends:iso(end)},x.name)}
+ if(missingAch.length){for(const x of missingAch)await save('admin_gamification_save_achievement',{p_id:null,p_code:x.code,p_name:x.name,p_description:x.description,p_icon:x.icon,p_category:x.category,p_requirement:x.requirement,p_xp:x.xp},x.name)}
+ await loadGamificationAdmin();
+ if(errors.length)toast(`Generated ${done}/${total}. ${errors.length} item${errors.length===1?'':'s'} need attention.`,'warning'); else toast(`✨ Generated ${done} missing gamification item${done===1?'':'s'} — existing content was preserved.`,'success');
+}
+async function gadminAutoGenerateDialog(defaultScope='all'){
+ const tpl=gadminAutoTemplates(), data=gadminData||{};
+ const missing={tasks:tpl.tasks.filter(x=>!(data.tasks||[]).some(y=>String(y.id)===x.id)).length,weekly:tpl.weekly.filter(x=>!(data.weekly||[]).some(y=>String(y.id)===x.id)).length,achievements:tpl.achievements.filter(x=>!(data.achievements||[]).some(y=>String(y.code)===x.code)).length};
+ const v=await spikeGamificationForm('✨ Auto Generate','Let SPIKE build sensible defaults for anything missing. Existing items are never overwritten.',[{key:'scope',label:'What should SPIKE generate?',type:'select',value:defaultScope,options:[{value:'all',label:`Complete starter pack · ${missing.tasks+missing.weekly+missing.achievements} missing`},{value:'tasks',label:`Daily tasks · ${missing.tasks} missing`},{value:'weekly',label:`Weekly challenges · ${missing.weekly} missing`},{value:'achievements',label:`Achievements · ${missing.achievements} missing`}]},{key:'style',label:'Generation style',type:'select',value:'balanced',options:[{value:'balanced',label:'Balanced · recommended'},{value:'engagement',label:'Engagement focused'},{value:'creator',label:'Creator focused'}],help:'The balanced preset is designed for normal SPIKE community activity.'}],{icon:'✨',submit:'Preview & generate'});if(!v)return; await gadminAutoGenerate(v.scope)}
+async function gadminAddTask(){const v=await spikeGamificationForm('Create daily task','Give members a clear, repeatable action with a fair XP reward.',[{key:'id',label:'Task ID',value:'custom_'+Date.now(),help:'Lowercase, unique ID.'},{key:'name',label:'Task name',value:'New daily task'},{key:'description',label:'Description',type:'textarea',value:'Complete this task',full:true},{key:'xp',label:'XP reward',type:'number',value:25,min:0,step:1},{key:'sort',label:'Display order',type:'number',value:(gadminData.tasks||[]).length+1,min:0,step:1}],{icon:'🎯',submit:'Create task'});if(!v)return;const r=await safeRpc('admin_gamification_save_task',{p_id:v.id,p_name:v.name,p_description:v.description,p_xp:Math.trunc(v.xp),p_active:true,p_sort:Math.trunc(v.sort)});if(r.error){toast(r.error.message);return}toast('Task created','success');loadGamificationAdmin()}
+async function gadminAddWeekly(){const today=new Date().toISOString().slice(0,10),end=new Date(Date.now()+6*864e5).toISOString().slice(0,10);const v=await spikeGamificationForm('Create weekly challenge','Set a focused weekly goal and its reward window.',[{key:'id',label:'Challenge ID',value:'weekly_'+Date.now()},{key:'name',label:'Challenge name',value:'New weekly challenge'},{key:'description',label:'Description',type:'textarea',value:'Complete the weekly goal',full:true},{key:'xp',label:'XP reward',type:'number',value:100,min:0,step:1},{key:'start',label:'Start date',type:'date',value:today},{key:'end',label:'End date',type:'date',value:end}],{icon:'📅',submit:'Create challenge'});if(!v)return;if(v.end<v.start)return toast('End date must be on or after the start date.','warning');const r=await safeRpc('admin_gamification_save_weekly',{p_id:v.id,p_name:v.name,p_description:v.description,p_requirement:{},p_xp:Math.trunc(v.xp),p_active:true,p_starts:v.start,p_ends:v.end});if(r.error){toast(r.error.message);return}toast('Weekly challenge created','success');loadGamificationAdmin()}
+async function gadminAddAch(){const v=await spikeGamificationForm('Create achievement','Add a polished, one-time milestone to the SPIKE progression system.',[{key:'code',label:'Achievement code',value:'custom_'+Date.now(),help:'Unique internal code.'},{key:'name',label:'Name',value:'New achievement'},{key:'xp',label:'XP reward',type:'number',value:100,min:0,step:1},{key:'icon',label:'Icon',value:'🏆'},{key:'category',label:'Category',value:'General'},{key:'description',label:'Description',type:'textarea',value:'A new SPIKE milestone',full:true}],{icon:'🏆',submit:'Create achievement'});if(!v)return;const r=await safeRpc('admin_gamification_save_achievement',{p_id:null,p_code:v.code,p_name:v.name,p_description:v.description,p_icon:v.icon||'🏆',p_category:v.category||'General',p_requirement:{},p_xp:Math.trunc(v.xp)});if(r.error){toast(r.error.message);return}toast('Achievement created','success');loadGamificationAdmin()}
+async function gadminSaveLevel(level){const xp=Number(document.querySelector(`[data-gl-xp="${level}"]`).value);const rr=document.querySelector(`[data-gl-rank="${level}"]`).value;const desc=document.querySelector(`[data-gl-desc="${level}"]`).value;const r=await safeRpc('admin_gamification_save_level',{p_level:Number(level),p_xp_required:Math.trunc(xp),p_rank:rr,p_description:desc});if(r.error){toast(r.error.message);return}toast('Level '+level+' saved');loadGamificationAdmin()}
+async function gadminSaveTask(id){const r=await safeRpc('admin_gamification_save_task',{p_id:id,p_name:document.querySelector(`[data-gt-name="${id}"]`).value,p_description:document.querySelector(`[data-gt-desc="${id}"]`).value,p_xp:Math.trunc(Number(document.querySelector(`[data-gt-xp="${id}"]`).value)),p_active:document.querySelector(`[data-gt-active="${id}"]`).checked,p_sort:Math.trunc(Number(document.querySelector(`[data-gt-sort="${id}"]`).value))});if(r.error){toast(r.error.message);return}toast('Task saved');loadGamificationAdmin()}
+async function gadminSaveWeekly(id){const r=await safeRpc('admin_gamification_save_weekly',{p_id:id,p_name:document.querySelector(`[data-gw-name="${id}"]`).value,p_description:document.querySelector(`[data-gw-desc="${id}"]`).value,p_requirement:{},p_xp:Math.trunc(Number(document.querySelector(`[data-gw-xp="${id}"]`).value)),p_active:document.querySelector(`[data-gw-active="${id}"]`).checked,p_starts:document.querySelector(`[data-gw-start="${id}"]`).value,p_ends:document.querySelector(`[data-gw-end="${id}"]`).value});if(r.error){toast(r.error.message);return}toast('Weekly challenge saved');loadGamificationAdmin()}
+document.addEventListener('click',e=>{const t=e.target.closest('[data-gtab]');if(t){document.querySelectorAll('[data-gtab]').forEach(x=>x.classList.toggle('active',x===t));document.querySelectorAll('[data-gpanel]').forEach(x=>x.classList.toggle('active',x.dataset.gpanel===t.dataset.gtab))}const su=e.target.closest('[data-save-level]');if(su)gadminSaveLevel(su.dataset.saveLevel);const st=e.target.closest('[data-save-task]');if(st)gadminSaveTask(st.dataset.saveTask);const sw=e.target.closest('[data-save-weekly]');if(sw)gadminSaveWeekly(sw.dataset.saveWeekly);const eu=e.target.closest('[data-edit-ach]');if(eu)gadminEditAch(eu.dataset.editAch);const au=e.target.closest('[data-adjust-xp]');if(au)gadminAdjustXP(au.dataset.adjustXp);const ga=e.target.closest('[data-grant-ach]');if(ga)gadminGrantAch(ga.dataset.grantAch)});
+
+function on(id,event,fn){const el=$('#'+id);if(!el){console.warn('Admin UI element missing:',id);return null}el.addEventListener(event,fn);return el}
+const modal=$('#modal'), close=$('#close');
+if(close) close.onclick=()=>modal?.classList.remove('show');
+if(modal) modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.remove('show')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')modal?.classList.remove('show')});
+on('refresh','click',()=>{stats();toast('Refreshed')});on('gadminRefresh','click',loadGamificationAdmin);on('gadminRecalc','click',async()=>{const r=await safeRpc('admin_gamification_recalculate_all');if(r.error)toast(r.error.message);else{toast('Recalculated '+r.data+' profiles');loadGamificationAdmin()}});on('gadminUserSearchBtn','click',gadminFindUsers);on('gadminUserSearch','keydown',e=>{if(e.key==='Enter'){e.preventDefault();gadminFindUsers()}});on('gadminAddTask','click',gadminAddTask);on('gadminAddWeekly','click',gadminAddWeekly);on('gadminAddAchievement','click',gadminAddAch);on('gadminAutoGenerate','click',()=>gadminAutoGenerateDialog('all'));on('gadminAutoTasks','click',()=>gadminAutoGenerateDialog('tasks'));on('gadminAutoWeekly','click',()=>gadminAutoGenerateDialog('weekly'));on('gadminAutoAchievements','click',()=>gadminAutoGenerateDialog('achievements'));on('gadminSaveRules','click',gadminSaveRules);
+on('findAdmin','click',findAdmin);on('loadAudit','click',loadAudit);on('loadAdmins','click',loadAdmins);
+on('registerUser','click',openRegisterUser);on('searchUsers','click',()=>{usersOffset=0;loadUsers()});
+on('usersSearch','keydown',e=>{if(e.key==='Enter'){e.preventDefault();usersOffset=0;loadUsers()}});
+on('refreshUsers','click',()=>{usersOffset=0;loadUsers()});
+on('usersPrev','click',()=>{usersOffset=Math.max(0,usersOffset-USERS_PAGE_SIZE);loadUsers()});
+on('usersNext','click',()=>{usersOffset+=USERS_PAGE_SIZE;loadUsers()});
+on('memberRoom','change',loadRoomMembers);
+on('memberSearch','input',()=>{clearTimeout(window.memberSearchTimer);window.memberSearchTimer=setTimeout(loadRoomMembers,350)});
+on('refreshRoomMembers','click',loadRoomMembers);
+on('refreshBroadcasts','click',()=>{loadBroadcastRooms();loadBroadcasts()});
+on('queueBroadcast','click',queueBroadcast);
+on('broadcastAudience','change',()=>{const x=$('#broadcastRoomWrap');if(x)x.hidden=$('#broadcastAudience').value!=='room_members'});
+on('broadcastBanner','change',()=>{const x=$('#broadcastEndsWrap');if(x)x.hidden=$('#broadcastBanner').value!=='true'});
+on('refreshRoomPurchases','click',()=>loadRoomPurchases(roomPurchaseStatus));
+on('roomPurchaseFilters','click',e=>{const b=e.target.closest('[data-purchase-status]');if(!b)return;document.querySelectorAll('#roomPurchaseFilters [data-purchase-status]').forEach(x=>x.classList.toggle('active',x===b));loadRoomPurchases(b.dataset.purchaseStatus)});
+on('refreshGems','click',loadSpikeGems);on('distributeGems','click',distributeSpikeGems);on('refreshMaintenance','click',loadMaintenance);on('enableMaintenance','click',()=>setMaintenance(true));on('disableMaintenance','click',()=>setMaintenance(false));
+nav();
+(async()=>{
+  if(await auth()){
+    adminAuthReady=true;
+    window.__SPIKE_ADMIN_AUTH_READY=true;
+    window.dispatchEvent(new CustomEvent('spike:admin-auth-ready'));
+    const active=document.querySelector('.side button[data-page].active')||document.querySelector('.side button[data-page]');
+    if(active) showAdminPage(active.dataset.page,active);loadGamificationAdmin();
+  }
+})();
+</script>
+<script id="spike-final-theme-controller">
+(function(){
+"use strict";
+const KEY="spike-feed-style", allowed=new Set([1,2,3,4,5,6,7,8,9,10]);
+const prefersLight=n=>n===1||n===4;
+function read(){
+try{
+const n=Number.parseInt(localStorage.getItem(KEY)||"1",10);
+return allowed.has(n)?n:1;
+}catch(_){return 1}
+}
+function apply(value, persist){
+const n=allowed.has(Number(value))?Number(value):1;
+const root=document.documentElement;
+root.dataset.spikeStyle=String(n);
+root.dataset.theme=prefersLight(n)?"light":"dark";
+root.style.colorScheme=prefersLight(n)?"light":"dark";
+root.style.setProperty("--spike-style",String(n));
+window.__SPIKE_STYLE__=n;
+if(persist!==false){
+try{
+localStorage.setItem(KEY,String(n));
+localStorage.setItem("spike-theme",prefersLight(n)?"light":"dark");
+}catch(_){}
+}
+return n;
+}
+const initial=apply(read(),false);
+window.SPIKE_THEME={
+get:()=>window.__SPIKE_STYLE__||initial,
+set:(n)=>apply(n,true),
+next:()=>apply(((window.__SPIKE_STYLE__||initial)%10)+1,true)
+};
+window.addEventListener("storage",e=>{
+if(e.key===KEY && e.newValue!=null) apply(e.newValue,false);
+});
+// Keep the attribute valid even if another script changes it accidentally.
+const observer=new MutationObserver(()=>{
+const n=Number.parseInt(document.documentElement.dataset.spikeStyle||"0",10);
+if(!allowed.has(n)) apply(initial,false);
+});
+observer.observe(document.documentElement,{attributes:true,attributeFilter:["data-spike-style"]});
+})();
+
+</script>
+<script id="spike-sw-register">
+if("serviceWorker" in navigator){
+const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
+if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
+else setTimeout(install,1500);
+}
+</script>
+
+<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script>
+
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script src="js/premium-back.js" defer></script>
+<script src="js/telemetry.js" defer></script>
+
+<!-- SPIKE ADMIN RUNTIME HARDENING: removed economy page compatibility -->
+<script id="spike-admin-runtime-compat">
+(() => {
+  // The old Room Rewards/Economy page was removed. Keep a harmless compatibility
+  // entry point so stale cached markup cannot crash the whole admin runtime.
+  if (typeof window.loadFinalRoomEconomyCatalog !== 'function') {
+    window.loadFinalRoomEconomyCatalog = async () => null;
+  }
+})();
+</script>
+
+  <script src="js/theme.js"></script>
+</body></html>
