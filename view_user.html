@@ -111,7 +111,14 @@ async function boot(){
  const access=await accessCall('can_view_spike_profile',{p_viewer:state.me.id,p_owner:state.uid});
  if(access===false){renderPrivate();return false}
  if(access===null)throw new Error('Unable to verify profile visibility. Please sign in again or try again later.')
- const r=await db.rpc('get_spike_view_profile',{p_owner:state.uid});if(r.error)throw r.error;const p=Array.isArray(r.data)?r.data[0]:null;if(!p?.id)throw new Error('SPIKE member not found or this profile is not available to you.');state.profile=p;
+ const r=await db.rpc('get_spike_view_profile',{p_owner:state.uid});if(r.error)throw r.error;let p=Array.isArray(r.data)?r.data[0]:r.data;
+ if(!p?.id){
+   const direct=await db.from('profiles').select('*').eq('id',state.uid).maybeSingle();
+   if(direct.error)console.warn('[SPIKE VIEW PROFILE] direct profile fallback',direct.error);
+   p=direct.data||null;
+ }
+ if(!p?.id)throw new Error('SPIKE member not found or this profile is not available to you.');
+ state.uid=String(p.id);state.profile=p;
  const [postsOk,mediaOk,friendsOk,onlineOk,messageOk]=await Promise.all([
   accessCall('can_view_spike_posts',{p_viewer:state.me.id,p_owner:state.uid}),
   accessCall('can_view_spike_media',{p_viewer:state.me.id,p_owner:state.uid}),
