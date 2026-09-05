@@ -1040,7 +1040,7 @@ function handleQrValue(raw){
 async function prepareConnect(uid){
   qrTargetUid=uid;
   try{
-    const {data:profiles,error}=await db.rpc("get_public_profiles",{p_user_ids:[uid]});
+    const {data:profiles,error}=await db.rpc("get_qr_connect_profile",{p_user_id:uid});
     if(error)throw error;
     const data=Array.isArray(profiles)?profiles[0]:null;
     if(!data)throw new Error("SPIKE member not found");
