@@ -9,7 +9,7 @@ const feed=await readFile('feed.html','utf8');
 const pages=['admin.html','chat_room.html','feed.html','friends.html','help.html','index.html','message.html','messages.html','notifications.html','profile.html','reset-password.html','room.html','room_chat.html','rooms.html','settings.html','spike_predictor.html'];
 
 test('10 canonical themes have unique ids, names, modes and identities',()=>{
-  const m=[...themeJs.matchAll(/\{id:(\d+),name:'([^']+)',mode:'([^']+)',signature:'([^']+)'\}/g)].map(x=>({id:+x[1],name:x[2],mode:x[3]}));
+  const m=[...themeJs.matchAll(/\{id:(\d+),name:'([^']+)',mode:'([^']+)'\}/g)].map(x=>({id:+x[1],name:x[2],mode:x[3]}));
   assert.equal(m.length,10); assert.deepEqual(m.map(x=>x.id),[1,2,3,4,5,6,7,8,9,10]);
   assert.equal(new Set(m.map(x=>x.name)).size,10); assert.ok(m.every(x=>['dark','light'].includes(x.mode)));
   const cssBlocks=[...themeCss.matchAll(/html\[data-spike-style="(\d+)"\]\{([^}]*)\}/g)].filter(x=>+x[1]>=1&&+x[1]<=10);

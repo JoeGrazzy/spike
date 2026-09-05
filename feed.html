@@ -356,7 +356,7 @@ function initTheme() { if (window.SPIKE_THEME) window.SPIKE_THEME.set(window.SPI
 
 async function requireUser() {
   const { data, error } = await withTimeout(db.auth.getSession(), 15000, "Session check");
-  if (error || !data.session?.user) { location.replace("index.html?reauth=1"); return false; }
+  if (error || !data.session?.user) { location.replace("login.html?reauth=1"); return false; }
   state.user = data.session.user;
   db.auth.getUser().then(({data})=>{ if(data?.user) window.AppPresence?.start(db); });
   const p = await withTimeout(db.rpc('get_public_profiles', { p_user_ids: [state.user.id] }), 8000, "Profile loading");
@@ -2934,7 +2934,7 @@ function showProfileActions(id, relationship, name){
     renderPosts();
   })]);
   items.push(['⚠️','Report',()=>run(async()=>{
-    const reason=await window.spikePremiumPrompt({title:'Report user',message:`Tell us what happened with ${name}.`,label:'Reason',placeholder:'Describe the issue…',okText:'Submit report',cancelText:'Cancel',icon:'⚑',maxLength:1000});
+    const reason=prompt(`Report ${name}. Please enter a reason:`, '');
     if(!reason||!reason.trim()) return;
     toast('User reporting is not available in the current Supabase schema.','warning');
   })]);
@@ -3080,7 +3080,9 @@ function bindEvents() {
   $('menuAudience').onclick = async () => { closeOverlay('menuOverlay'); try { await openCloseFriends(); } catch (e) { console.error('Close Friends', e); toast(e.message || 'Unable to open Close Friends'); } };
   $('menuSafety').onclick = async () => { closeOverlay('menuOverlay'); try { await openSafetyCenter(); } catch (e) { console.error('Safety Center', e); toast(e.message || 'Unable to open Safety Center'); } };
   $('menuRoom').onclick = () => go('rooms.html');
-  $('menuGuide').onclick = () => go('help.html');
+  $('menuGuide').onclick = () => go('guide.html');
+
+
   $('menuAdmin')?.addEventListener('click', async e => {
     e.preventDefault();
     const allowed = await verifyAdminUid();
@@ -3094,7 +3096,7 @@ function bindEvents() {
   $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
   $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
   $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
+  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('login.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
 
   // Composer
   $('imageBtn').onclick = () => $('imageInput').click();
@@ -3752,8 +3754,17 @@ else boot();
     }
   </style>
 <link rel="stylesheet" href="css/theme-v14.css">
-<link rel="stylesheet" href="css/premium-dialog.css">
-<script src="js/premium-dialog.js"></script>
+
+<style id="spike-coffee-header-style">
+.spike-coffee-link{
+  appearance:none;border:0;background:transparent;color:inherit;
+  opacity:.34;font-size:15px;line-height:1;padding:7px 3px;
+  border-radius:10px;cursor:pointer;transition:opacity .2s,transform .2s;
+}
+.spike-coffee-link:hover,.spike-coffee-link:focus-visible{opacity:.72;transform:translateY(-1px);outline:none}
+@media (max-width:520px){.spike-coffee-link{font-size:14px;padding:6px 2px;opacity:.3}}
+</style>
+
 </head>
 <body>
 
@@ -3800,6 +3811,7 @@ else boot();
 <header class="header">
 <a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title"><img class="spike-official-logo" src="assets/icon/icon.png" data-spike-brand="responsive" alt="SPIKE" decoding="async" loading="lazy"></span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></span></a>
 <div class="header-actions spike-header-actions">
+<button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
 <button class="icon" id="notificationBtn" title="Notifications" aria-label="Notifications">🔔<span class="badge" id="notificationBadge"></span></button>
@@ -3923,6 +3935,9 @@ else boot();
 </nav>
 
 <!-- OVERLAYS -->
+  </section>
+</div>
+
 <div class="overlay spike-menu-overlay" id="menuOverlay">
   <section class="spike-menu-sheet" role="dialog" aria-modal="true" aria-labelledby="spikeMenuTitle">
     <div class="spike-menu-handle" aria-hidden="true"></div>
@@ -3937,7 +3952,7 @@ else boot();
       <button id="menuSafety"><span>🛡️</span><strong>Safety Center</strong><small>Privacy & protection</small></button>
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
-      <a id="menuSbet" href="spike_predictor.html">⚽ Predictor</a>
+<a id="menuSbet" href="spike_predictor.html">⚽ Predictor</a>
       <a id="menuAdmin" href="admin.html" hidden><span>⚡</span><strong>Admin</strong><small>Administration</small></a>
     </div>
     <div class="spike-menu-footer"><button id="menuSignOut" class="danger"><span>↪</span><strong>Sign out</strong></button></div>
@@ -4157,5 +4172,15 @@ else boot();
 <script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 <script src="js/telemetry.js" defer></script>
   <script src="js/theme.js"></script>
+
+<script>
+(() => {
+  const coffee = document.getElementById("spikeCoffeeBtn");
+  if (coffee) coffee.addEventListener("click", () => {
+    window.location.href = "coffee.html";
+  });
+})();
+</script>
+
 </body>
 </html>
