@@ -643,14 +643,14 @@ function firstValue(d,keys){for(const k of keys){const v=d?.[k];if(v!==undefined
 
 function targetOf(n){const d=dataOf(n);return firstValue(d,["target_name","post_title","room_name","conversation_name","recipient_name"]) }
 function detailOf(n){const d=dataOf(n);return firstValue(d,["body","description","detail","details","preview","content","message"])}
-function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",new_follower:"New follower",follow:"New follower",like:"New like",post_like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",room_purchase_verified:"Purchase approved",room_purchase_rejected:"Purchase rejected",broadcast:"SPIKE broadcast",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",friend_request_declined:"Friend request declined",friend_declined:"Friend request declined",friend_request_resolved:"Friend request resolved",new_follower:"New follower",follow:"New follower",like:"New like",post_like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",room_purchase_verified:"Purchase approved",room_purchase_rejected:"Purchase rejected",broadcast:"SPIKE broadcast",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
 function notificationText(n){
 const d=dataOf(n);
 const explicit=firstValue(d,["message","body","description","detail","preview"]);
 if(explicit)return explicit;
 const actor=actorOf(n),target=targetOf(n);
 const amount=Number(d.amount||0).toLocaleString(),coins=Number(d.coins||0).toLocaleString();
-const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",new_follower:"started following you",follow:"followed you",like:"liked your post",post_like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",room_purchase_verified:`purchase approved: ${d.item||"item"}`,room_purchase_rejected:`purchase rejected: ${d.item||"item"}`,broadcast:"published a SPIKE broadcast",announcement:"published a new announcement"};
+const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",friend_request_declined:"declined your friend request",friend_declined:"declined your friend request",friend_request_resolved:"this friend request is no longer pending",new_follower:"started following you",follow:"followed you",like:"liked your post",post_like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",room_purchase_verified:`purchase approved: ${d.item||"item"}`,room_purchase_rejected:`purchase rejected: ${d.item||"item"}`,broadcast:"published a SPIKE broadcast",announcement:"published a new announcement"};
 const action=map[String(n.type||"").toLowerCase()];
 if(action)return actor?`${actor} ${action}${target?` · ${target}`:""}`:action;
 return actor?`${actor}${target?` · ${target}`:""}`:String(n.type||"Notification").replaceAll("_"," ");
@@ -931,6 +931,25 @@ function valueForDisplay(v){
  if(typeof v==="string")return v;
  try{return JSON.stringify(v,null,2)}catch(e){return String(v)}
 }
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function validUuid(v){return typeof v==="string"&&UUID_RE.test(v.trim())}
+function notificationRequestId(n){
+ const d=dataOf(n),id=String(d.request_id||d.friend_request_id||d.requestId||"").trim();
+ return validUuid(id)?id:"";
+}
+async function getIncomingPendingRequest(n){
+ const d=dataOf(n);
+ const actorId=String(d.actor_id||d.from_user_id||d.sender_id||d.from_id||"").trim();
+ const wanted=notificationRequestId(n);
+ const r=await withTimeout(sb.rpc("get_friend_requests"),10000,"Could not verify friend request state.");
+ if(r.error)throw r.error;
+ return (Array.isArray(r.data)?r.data:[]).find(x=>{
+   const rid=String(x?.request_id||x?.id||"");
+   const uid=String(x?.user_id||x?.sender_id||"");
+   return (wanted&&rid===wanted)||(!wanted&&actorId&&uid===actorId);
+ })||null;
+}
+
 async function openNotificationDetails(n){
  if(!n)return;
  const d=dataOf(n),modal=$("#notificationModal");
@@ -945,22 +964,10 @@ async function openNotificationDetails(n){
  if(fields.length)html+=`<div class="notif-modal-section"><div class="notif-modal-label">Details</div><div class="notif-modal-grid">${fields.map(([k,v])=>`<div class="notif-modal-field"><strong>${esc(k)}</strong><span>${esc(valueForDisplay(v))}</span></div>`).join('')}</div></div>`;
  
  const nt=String(n?.type||"").toLowerCase();
- const requestId=d.request_id||d.friend_request_id||d.requestId||"";
- let friendRequestPending=nt==="friend_request"&&!!requestId;
- // Never show Accept/Decline when the request has already been accepted.
- // Re-check the relationship so this remains correct after a page refresh.
- if(friendRequestPending){
-   const actorId=d.actor_id||d.from_user_id||d.sender_id||d.from_id||"";
-   if(actorId){
-     try{
-       const rel=await withTimeout(sb.rpc("get_spike_viewer_relationship",{p_other_user:actorId}),8000,"Relationship check timed out.");
-       if(!rel.error){
-         const relationship=Array.isArray(rel.data)?rel.data[0]:rel.data;
-         const status=String(relationship?.friendship||"").toLowerCase();
-         if(status==="friends"||status==="accepted") friendRequestPending=false;
-       }
-     }catch(_){/* Keep the normal pending state if the optional status check fails. */}
-   }
+ let pendingRequest=null,friendRequestPending=false;
+ if(nt==="friend_request"){
+   try{pendingRequest=await getIncomingPendingRequest(n);friendRequestPending=!!pendingRequest;}
+   catch(e){console.warn("SPIKE could not verify incoming friend request state",e);}
  }
  if(friendRequestPending)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationAccept" type="button">Accept</button><button class="notif-open-btn" id="notificationDecline" type="button" style="background:transparent;color:inherit">Decline</button>${href?`<button class="notif-open-btn" id="notificationOpenTarget" type="button" style="background:transparent;color:inherit">View profile</button>`:""}</div>`;
  else if(nt==="friend_request")html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">View profile</button></div>`;
@@ -968,16 +975,18 @@ async function openNotificationDetails(n){
  $("#notificationModalBody").innerHTML=html;
  modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
  $("#notificationOpenTarget")?.addEventListener('click',()=>{location.href=href});
- const requestIdForAction=d.request_id||d.friend_request_id||d.requestId||"";
+ const requestIdForAction=String(pendingRequest?.request_id||pendingRequest?.id||notificationRequestId(n)||"").trim();
  const runFriendAction=async(fn,successText)=>{
    const acceptBtn=$("#notificationAccept"),declineBtn=$("#notificationDecline");
    [acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=true;b.setAttribute('aria-busy','true')}});
    try{
+     if(!requestIdForAction) throw new Error("This friend request notification is missing its request ID.");
      const r=await withTimeout(sb.rpc(fn,{p_request_id:requestIdForAction}),12000,"Friend request action timed out.");
      if(r.error)throw r.error;
+     // Null is an idempotent response: the request was already processed or removed.
      // Convert this notification locally so the action buttons disappear immediately.
      // The notification itself stays in the activity history.
-     n.type=fn==='accept_friend_request'?'friend_accepted':'friend_request';
+     n.type=fn==='accept_friend_request'?'friend_accepted':'friend_request_declined';
      if(n.data&&typeof n.data==='object'){
        n.data={...n.data,status:fn==='accept_friend_request'?'accepted':'declined'};
        if(fn==='accept_friend_request')n.data.message='accepted your friend request';
