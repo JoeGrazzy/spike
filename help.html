@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+
 <link rel="stylesheet" href="css/perf.css">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -2483,7 +2485,6 @@ video{contain:layout paint}
 }
 </style>
 <link rel="stylesheet" href="css/premium-back.css">
-  <link rel="stylesheet" href="css/theme.css">
 
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
@@ -2681,19 +2682,8 @@ video{contain:layout paint}
 
 <script>
 (function(){
-  const root=document.documentElement, sw=document.getElementById('spikeThemeSwitch'), label=document.getElementById('styleLabel');
-  let style=parseInt(localStorage.getItem('spike-feed-style')||'1',10);
-  if(!Number.isFinite(style)||style<1||style>5) style=1;
-  function apply(){
-    root.dataset.spikeStyle=String(style);
-    root.dataset.theme=(style===1||style===4)?'light':'dark';
-    root.style.colorScheme=root.dataset.theme;
-    label.textContent='Style '+style;
-    localStorage.setItem('spike-feed-style',String(style));
-  }
-  apply();
-  sw.addEventListener('click',()=>{style=style>=5?1:style+1;apply()});
-  document.getElementById('menuBtn').addEventListener('click',()=>document.getElementById('helpNav').scrollIntoView({behavior:'smooth',block:'start'}));
+  const menu=document.getElementById('menuBtn');
+  if(menu) menu.addEventListener('click',()=>document.getElementById('helpNav')?.scrollIntoView({behavior:'smooth',block:'start'}));
 })();
 
   const helpAnswers=[
@@ -2801,5 +2791,6 @@ video{contain:layout paint}
 <script src="js/telemetry.js" defer></script>
   <script src="js/theme.js"></script>
 <script src="js/spike-adaptive-nav.js" defer></script>
+<link rel="stylesheet" href="css/theme.css">
 </body>
 </html>

@@ -17,3 +17,6 @@ The feature schema/RPCs were applied to the connected Supabase project. New tabl
 
 ## Validation
 The existing project syntax/static audits were run after the implementation. The historical full-suite contains two pre-existing baseline failures unrelated to SPIKE World: the Feed core CSS size budget and the theme-registry count assertion. Inline JavaScript and the new World page itself pass syntax/UI checks.
+
+### Production hardening note
+Season-point issuance is server-authoritative, includes `mission_progress` in the approved source set, and serializes reward issuance per user/source/day so concurrent requests cannot bypass the 100-point daily source cap.

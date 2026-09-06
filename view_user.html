@@ -48,7 +48,8 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:#fff;--surface2:#f8fafc;--surface3
 @media(max-width:600px){.header{height:54px}.main{padding:5px}.cover{height:175px}.profile{padding:0 12px 13px}.profile-top{display:block}.actions{justify-content:flex-start;margin-top:11px}.name{font-size:20px}.tabs{top:54px}.stats{grid-template-columns:repeat(3,1fr)}}
 </style>
 
-<script src="js/spike-dialog.js"></script></head>
+<script src="js/spike-dialog.js"></script>
+</head>
 <body>
 <div class="loader" id="loader"><div class="loader-box"><div class="spinner"></div><b>Loading SPIKE profile</b><span id="loaderText">Checking profile access…</span></div></div>
 <header class="header"><button class="icon" id="backBtn" aria-label="Back">←</button><div class="title" id="headerTitle">SPIKE profile</div><button class="icon" id="menuBtn" aria-label="Profile options">⋮</button></header>
@@ -230,5 +231,7 @@ function setup(){
 async function setupRealtime(){try{const ch=db.channel(`view-profile:${state.uid}`,{config:{private:true}}).on('broadcast',{event:'UPDATE'},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path===`users/${state.uid}`||r?.collection_name==='posts')loadPosts().then(render).catch(()=>{})}).subscribe();state.channel=ch}catch(e){console.warn('[SPIKE VIEW PROFILE REALTIME]',e)}}
 setup();boot().then(()=>{$('menuBtn').disabled=false}).catch(e=>{console.error('[SPIKE VIEW PROFILE]',{message:e?.message||'',code:e?.code||'',details:e?.details||'',hint:e?.hint||'',error:e});$('loaderText').textContent=e?.message||e?.details||'Could not load profile';setTimeout(()=>{$('loader').classList.add('hidden');$('posts').innerHTML='<div class="empty"><div class="empty-icon">⚠</div><b>Profile unavailable</b><span>Please return to Feed and try again.</span></div>'},350)});
 </script>
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/theme.css">
 </body>
 </html>

@@ -6,7 +6,7 @@ const themeJs=await readFile('js/theme.js','utf8');
 const themeCss=await readFile('css/theme.css','utf8');
 const settings=await readFile('settings.html','utf8');
 const feed=await readFile('feed.html','utf8');
-const pages=['admin.html','chat_room.html','feed.html','friends.html','help.html','index.html','message.html','messages.html','notifications.html','profile.html','reset-password.html','room.html','room_chat.html','rooms.html','settings.html','spike_predictor.html','spike_world.html'];
+const pages=['admin.html','chat_room.html','feed.html','friends.html','help.html','index.html','message.html','messages.html','notifications.html','profile.html','reset-password.html','room.html','room_chat.html','rooms.html','settings.html','spike_predictor.html','spike_world.html','view_user.html','coffee.html'];
 
 test('10 canonical themes have unique ids, names, modes and identities',()=>{
   const m=[...themeJs.matchAll(/\{id:(\d+),name:'([^']+)',mode:'([^']+)',signature:'([^']+)'\}/g)].map(x=>({id:+x[1],name:x[2],mode:x[3],signature:x[4]}));

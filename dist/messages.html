@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+
 <link rel="stylesheet" href="css/perf.css">
 <style id="spike-speed-css">
 /* fast paint: preserve appearance while reducing offscreen work */
@@ -28,7 +30,7 @@ img{content-visibility:auto;}
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
-<script>(function(){try{var n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(e){}})();</script>
+
 <style>
 :root{--bg:#f6f7fb;--surface:rgba(255,255,255,.9);--solid:#fff;--text:#172033;--muted:#667085;--line:rgba(17,24,39,.1);--a:#7c3aed;--a2:#ec4899;--good:#10b981;--danger:#ef476f;--shadow:0 18px 55px rgba(31,41,55,.1)}
 html[data-theme=dark]{--bg:#080912;--surface:rgba(18,20,31,.9);--solid:#12141f;--text:#f7f8fc;--muted:#9aa2b5;--line:rgba(255,255,255,.095);--shadow:0 22px 70px rgba(0,0,0,.38)}
@@ -40,8 +42,6 @@ html[data-spike-style="5"]{--bg:#090b0e;--surface:#14181d;--solid:#191d23;--text
 @media(max-width:760px){html,body{height:100%;min-height:100%;overflow:hidden}.app{height:100dvh;min-height:100dvh;padding:0;overflow:hidden}.main{width:100%;height:calc(100dvh - 70px);margin:0;overflow:hidden}.layout{display:block;height:100%;min-height:0;overflow:hidden}.panel{border-radius:0;border-left:0;border-right:0}.sidebar{height:100%;overflow:hidden}.list{min-height:0}.chat{position:fixed;left:0;right:0;top:70px;bottom:calc(69px + env(safe-area-inset-bottom));height:auto;z-index:35;display:none;border-radius:0;overflow:hidden}.layout.chat-open .sidebar{display:none}.layout.chat-open .chat{display:flex}.mobile-back{display:grid}.head-title{display:none}.brand{font-size:18px}.chat-head{min-height:70px;height:70px;flex:0 0 70px;padding:10px 8px;gap:8px;overflow:hidden}.chat-head>#chatAvatar{flex:0 0 48px}.chat-user{flex:1 1 auto;min-width:72px;max-width:calc(100% - 48px - 38px - 8px)}.chat-name,.chat-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chat-head-actions{flex:0 0 auto;max-width:52vw;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.chat-head-actions::-webkit-scrollbar{display:none}.chat-head-actions .icon{flex:0 0 40px}.chat-view{height:100%;min-height:0;overflow:hidden}.messages{min-height:0;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:12px}.composer{position:relative;flex:0 0 auto;min-height:0;padding-bottom:calc(9px + env(safe-area-inset-bottom));z-index:2}.typing{flex:0 0 16px}.bubble-wrap{max-width:84%}.header{height:70px;flex:0 0 70px}.bottom-nav{display:block;height:69px;padding-bottom:calc(7px + env(safe-area-inset-bottom));box-sizing:border-box}.desktop-only{display:none!important}}
 
 .call-overlay{display:none;position:fixed;inset:0;z-index:120;background:rgba(2,5,14,.86);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:18px}.call-overlay.show{display:flex}.call-card{width:min(520px,100%);min-height:430px;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:rgba(18,20,31,.96);color:#fff;display:flex;flex-direction:column;align-items:center;padding:24px;box-shadow:0 30px 90px rgba(0,0,0,.45)}.call-avatar{margin:5px 0 12px}.call-card>strong{font-size:20px}.call-card>span{font-size:11px;opacity:.7;margin-top:5px}.call-video-wrap{position:relative;width:100%;height:250px;margin:18px 0;border-radius:18px;overflow:hidden;background:#05060a}.call-video-wrap video{width:100%;height:100%;object-fit:cover}.call-video-wrap #localVideo{position:absolute;width:110px;height:150px;right:12px;bottom:12px;border-radius:14px;border:2px solid rgba(255,255,255,.45);object-fit:cover}.call-actions{display:flex;gap:12px}.call-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.1);color:#fff}.call-btn.end{background:#ef476f;border-color:transparent}.search-hit{outline:2px solid var(--a);outline-offset:3px}.upload-preview{display:flex;gap:8px;align-items:center;overflow:auto}.upload-chip{padding:5px 8px;border-radius:9px;background:rgba(124,58,237,.1);font-size:9px;white-space:nowrap}.friend-tabs{display:flex;gap:5px;margin-top:9px}.</style>
-
-<link rel="stylesheet" href="css/theme.css">
 <script src="js/theme.js" defer></script>
 <link rel="stylesheet" href="css/ui-fix.css">
 
@@ -1072,4 +1072,5 @@ async function subscribeCalls(){const ch=sb.channel('spike-calls-'+me.id)
 <script src="js/telemetry.js" defer></script>
 <script src="js/spike-adaptive-nav.js" defer></script>
 <script src="js/spike-surface-controls.js"></script>
+<link rel="stylesheet" href="css/theme.css">
 </body></html>

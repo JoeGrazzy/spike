@@ -23,6 +23,8 @@
     root.dataset.spikeStyle=String(n);
     root.dataset.theme=theme.mode;
     root.dataset.spikeTheme=theme.name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    root.dataset.spikeThemeId=String(n);
+    root.style.setProperty('--spike-theme-id',String(n));
     root.style.colorScheme=theme.mode;
     root.style.setProperty('--spike-style',String(n));
     window.__SPIKE_STYLE__=n;
@@ -32,7 +34,7 @@
   }
   function next(){return apply(read()%THEMES.length+1);}
   window.SPIKE_THEMES=Object.freeze(THEMES.map(t=>Object.freeze({...t})));
-  window.SPIKE_THEME={get:()=>clamp(window.__SPIKE_STYLE__||read()),set:apply,next,hasStored};
+  window.SPIKE_THEME={get:()=>clamp(window.__SPIKE_STYLE__||read()),set:apply,next,cycle:next,hasStored};
   apply(read(),false);
   window.addEventListener('storage',event=>{
     if(event.key!==KEY)return;
@@ -40,22 +42,35 @@
     apply(n,false);
   });
 })();
-/* Harden the Feed theme pill: one atomic click -> one full theme change. */
+/* Shared theme controls: one atomic click -> one canonical theme change. */
 (function(){
   function wire(){
-    const btn=document.getElementById('spikeThemeIcon'), glyph=document.getElementById('spikeThemeGlyph');
-    if(!btn||!glyph||btn.dataset.spikeThemeHardened==='1') return;
-    btn.dataset.spikeThemeHardened='1';
-    const sync=()=>{
-      const n=window.SPIKE_THEME?.get?.()||1, t=window.SPIKE_THEMES?.[n-1];
-      glyph.textContent=t?.name?.charAt(0)||'✦';
-      btn.title=`Change theme · ${t?.name||'Theme'} · ${n} of 10`;
-      btn.setAttribute('aria-label',`Change theme · ${t?.name||'Theme'} · ${n} of 10`);
-      btn.dataset.themeId=String(n);
-    };
-    btn.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();window.SPIKE_THEME.next();sync();},true);
-    document.addEventListener('spike:theme-change',sync,{passive:true});
-    sync();
+    const buttons=[...document.querySelectorAll('#spikeThemeIcon,#spikeThemeSwitch,#themeBtn,[data-spike-theme-switch]')];
+    for(const btn of buttons){
+      if(btn.dataset.spikeThemeWired==='1') continue;
+      btn.dataset.spikeThemeWired='1';
+      if(btn.id==='spikeThemeIcon') btn.dataset.spikeThemeHardened='1';
+      const sync=()=>{
+        const n=window.SPIKE_THEME?.get?.()||1, t=window.SPIKE_THEMES?.[n-1];
+        if(btn.id==='spikeThemeIcon'){
+          const glyph=document.getElementById('spikeThemeGlyph');
+          if(glyph) glyph.textContent=t?.name?.charAt(0)||'✦';
+        }
+        const label=t?.name||'Theme';
+        btn.title=`Change theme · ${label} · ${n} of 10`;
+        btn.setAttribute('aria-label',`Change theme · ${label} · ${n} of 10`);
+        const text=btn.querySelector('[data-theme-label],#styleLabel');
+        if(text) text.textContent=t?.name||`Theme ${n}`;
+      };
+      btn.addEventListener('click',e=>{
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        window.SPIKE_THEME.next();
+        sync();
+      },true);
+      document.addEventListener('spike:theme-change',sync,{passive:true});
+      sync();
+    }
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire,{once:true}); else wire();
 })();

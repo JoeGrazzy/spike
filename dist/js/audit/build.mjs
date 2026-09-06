@@ -1,5 +1,16 @@
-import { mkdir, cp, rm } from 'node:fs/promises';
+import { mkdir, cp, rm, readdir, access } from 'node:fs/promises';
+
 await rm('dist', { recursive: true, force: true });
 await mkdir('dist', { recursive: true });
-for (const item of ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html','css','js','assets']) await cp(item, `dist/${item}`, { recursive: true });
-console.log('Production artifact generated in dist/.');
+
+// Production artifact: every root application page plus shared runtime assets
+// and Cloudflare Pages headers. Keep the page list dynamic so new pages cannot
+// silently disappear from the deployable artifact.
+const htmlPages = (await readdir('.')).filter(name => name.endsWith('.html')).sort();
+for (const page of htmlPages) await cp(page, `dist/${page}`);
+for (const item of ['css', 'js', 'assets']) await cp(item, `dist/${item}`, { recursive: true });
+for (const optional of ['_headers', '_redirects']) {
+  try { await access(optional); await cp(optional, `dist/${optional}`); } catch (_) {}
+}
+
+console.log(`Production artifact generated in dist/: ${htmlPages.length} HTML pages + css/js/assets + deployment config.`);

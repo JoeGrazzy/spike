@@ -1,13 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14">
 <meta name="description" content="The complete member guide to SPIKE — connect, share, discover, message, create, grow, and participate safely.">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>SPIKE — The Complete Member Guide</title>
-<link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/ui-fix.css">
 <link rel="stylesheet" href="css/premium-back.css">
 
@@ -25,7 +26,8 @@
 /* Founder & Support route */
 .founderBtn{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(167,139,250,.28);background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(236,72,153,.12));color:var(--g-text);border-radius:13px;padding:9px 11px;font-weight:850;font-size:11px;text-decoration:none;box-shadow:0 8px 28px rgba(0,0,0,.16)}.founderBtn:hover{transform:translateY(-1px);border-color:rgba(196,181,253,.45)}.header-icon{width:17px;height:17px;object-fit:contain;border-radius:5px}
 </style>
-<script src="js/spike-dialog.js"></script></head>
+<script src="js/spike-dialog.js"></script>
+</head>
 <body>
 <div class="page">
 <header class="top">
@@ -112,11 +114,11 @@
  const normalize=s=>String(s||'').toLowerCase().replace(/\s+/g,' ').trim();
  function applySearch(){const q=normalize(search.value);items.forEach(sec=>{if(!q){sec.classList.remove('hiddenSearch');return}const text=normalize(sec.innerText);sec.classList.toggle('hiddenSearch',!text.includes(q));});}
  search.addEventListener('input',applySearch);
- $('themeBtn').onclick=()=>{if(window.SPIKE_THEME?.next)window.SPIKETheme.next();else if(window.nextTheme)window.nextTheme();};
  const links=[...document.querySelectorAll('.toc a')];
  const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-150px 0px -60% 0px',threshold:0});
  items.forEach(x=>observer.observe(x));
 })();
 </script>
+<link rel="stylesheet" href="css/theme.css">
 </body>
 </html>

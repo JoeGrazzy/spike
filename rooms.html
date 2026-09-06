@@ -2,6 +2,8 @@
 
 <html lang="en">
 <head>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+
 <link href="css/perf.css" rel="stylesheet"/>
 <script id="spike-performance-bootstrap">
 /* SPIKE performance bootstrap — no application logic changes */
@@ -125,7 +127,6 @@ video{contain:layout paint}
 .creatorQualification.show{display:block}.cqHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cqTitle{font-size:15px;font-weight:900}.cqSub{font-size:11px;color:var(--muted);margin-top:3px}.cqProgress{height:7px;border-radius:999px;background:rgba(127,127,127,.18);overflow:hidden;margin:12px 0}.cqProgress span{display:block;height:100%;width:0;border-radius:inherit;background:currentColor}.cqGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.cqItem{padding:9px;border:1px solid var(--line);border-radius:13px;background:rgba(127,127,127,.06);font-size:11px}.cqItem b{display:block}.cqItem small{display:block;color:var(--muted);margin-top:3px}.cqDone{color:#16a34a}.cqLock{color:var(--muted)}.cqAction{margin-top:10px;width:100%}.cqModal .sheet{max-height:88vh;overflow:auto}.challengeQ{padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:9px}.challengeQ b{display:block;margin-bottom:8px}.challengeOpt{display:block;padding:7px 0;font-size:12px}.challengeResult{padding:12px;border-radius:14px;background:rgba(127,127,127,.08);margin-bottom:10px;display:none}.challengeResult.show{display:block}
 @media(max-width:680px){.cqGrid{grid-template-columns:1fr}.cqHead{align-items:center}}
 </style>
-<link href="css/theme.css" rel="stylesheet"/>
 <script defer="" src="js/theme.js"></script>
 <link href="css/ui-fix.css" rel="stylesheet"/>
 
@@ -205,91 +206,6 @@ video{contain:layout paint}
 <meta content="#0b0b10" name="theme-color"/>
 <link href="css/premium-back.css" rel="stylesheet"/>
 
-<style id="spike-rooms-all-themes">
-/* SPIKE Rooms — consume the project's single 10-theme token system. */
-html[data-spike-style] .rooms-v2,
-html[data-spike-style] .rooms-v2-main,
-html[data-spike-style] .room-view{color:var(--spike-text)!important}
-html[data-spike-style] .rooms-v2-hero,
-html[data-spike-style] .creator-v2-intro{color:var(--spike-text)!important}
-html[data-spike-style] .rooms-v2-mark,
-html[data-spike-style] .roomAccountCard,
-html[data-spike-style] .trendStrip,
-html[data-spike-style] .creatorStrip,
-html[data-spike-style] .creatorQualification,
-html[data-spike-style] .roomTabs,
-html[data-spike-style] .room,
-html[data-spike-style] .trendCard,
-html[data-spike-style] .sheet,
-html[data-spike-style] .challengeQ,
-html[data-spike-style] .challengeResult,
-html[data-spike-style] .racRule,
-html[data-spike-style] .mediaPreview,
-html[data-spike-style] .empty{
-  background:linear-gradient(145deg,var(--spike-surface),var(--spike-surface-2))!important;
-  color:var(--spike-text)!important;
-  border-color:var(--spike-line)!important;
-  box-shadow:var(--spike-shadow)!important;
-  -webkit-backdrop-filter:blur(var(--glass-blur,22px)) saturate(135%);
-  backdrop-filter:blur(var(--glass-blur,22px)) saturate(135%);
-}
-html[data-spike-style] .rooms-v2-tabs,
-html[data-spike-style] .spike-rooms-primary-tabs{background:color-mix(in srgb,var(--spike-surface) 94%,transparent)!important}
-html[data-spike-style] .search,
-html[data-spike-style] .field input,
-html[data-spike-style] .field textarea,
-html[data-spike-style] .field select,
-html[data-spike-style] .mediaField input[type=file]{
-  background:var(--spike-surface-2)!important;
-  color:var(--spike-text)!important;
-  border-color:var(--spike-line)!important;
-}
-html[data-spike-style] .search::placeholder,
-html[data-spike-style] .field input::placeholder,
-html[data-spike-style] .field textarea::placeholder{color:var(--spike-muted)!important;opacity:.9}
-html[data-spike-style] .roomTab{color:var(--spike-muted)!important}
-html[data-spike-style] .roomTab.active{background:linear-gradient(135deg,var(--btn-primary),var(--btn-primary-2))!important;color:#fff!important;border-color:transparent!important}
-html[data-spike-style] .roomMeta,
-html[data-spike-style] .trendMeta,
-html[data-spike-style] .trendHead span,
-html[data-spike-style] .creatorCopy span,
-html[data-spike-style] .creator-v2-intro p,
-html[data-spike-style] .cqSub,
-html[data-spike-style] .racIdentity span,
-html[data-spike-style] .racLevel span,
-html[data-spike-style] .racNext,
-html[data-spike-style] .muted{color:var(--spike-muted)!important}
-html[data-spike-style] .trendScore,
-html[data-spike-style] .creator-eyebrow,
-html[data-spike-style] .racLevel b{color:var(--spike-accent)!important}
-html[data-spike-style] .roomAvatar,
-html[data-spike-style] .trendEmoji,
-html[data-spike-style] .racIcon,
-html[data-spike-style] .racPreview{background:linear-gradient(135deg,color-mix(in srgb,var(--spike-accent) 28%,var(--spike-surface)),color-mix(in srgb,var(--spike-accent-2) 24%,var(--spike-surface)))!important;border-color:var(--spike-line)!important}
-html[data-spike-style] .racBar{background:color-mix(in srgb,var(--spike-text) 12%,transparent)!important}
-html[data-spike-style] .racBar span{background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important}
-html[data-spike-style] .btn:not(.primary){background:color-mix(in srgb,var(--spike-surface-2) 84%,transparent)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important}
-html[data-spike-style] .btn.primary,
-html[data-spike-style] .creatorBtn,
-html[data-spike-style] .cqAction{background:linear-gradient(135deg,var(--btn-primary),var(--btn-primary-2))!important;color:#fff!important;border-color:transparent!important}
-html[data-spike-style] .iconbtn,
-html[data-spike-style] .back{background:color-mix(in srgb,var(--spike-surface) 92%,transparent)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important}
-html[data-spike-style] .trendCard:hover,
-html[data-spike-style] .room:hover{box-shadow:var(--spike-shadow),0 0 28px var(--spike-glow)!important}
-html[data-spike-style="6"] .btn:not(.primary),
-html[data-spike-style="8"] .btn:not(.primary){color:var(--spike-text)!important}
-html[data-spike-style="3"] .roomAvatar,
-html[data-spike-style="4"] .roomAvatar,
-html[data-spike-style="5"] .roomAvatar,
-html[data-spike-style="9"] .roomAvatar,
-html[data-spike-style="10"] .roomAvatar{color:var(--spike-text)!important}
-@media(max-width:680px){
-  html[data-spike-style] .rooms-v2-tabs{top:env(safe-area-inset-top,8px)!important}
-  html[data-spike-style] .room{min-height:68px}
-  html[data-spike-style] .sheet{background:linear-gradient(145deg,var(--spike-surface),var(--spike-surface-2))!important}
-}
-@media(prefers-reduced-motion:reduce){html[data-spike-style] .room,html[data-spike-style] .trendCard{transition:none!important}}
-</style>
 <!-- SPIKE ROOMS ALL-THEME FINAL OVERRIDES -->
 <script id="spike-rooms-theme-sync">
 /* Keep the browser chrome aligned with the active SPIKE theme. */
@@ -306,7 +222,8 @@ html[data-spike-style="10"] .roomAvatar{color:var(--spike-text)!important}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',sync,{once:true});else sync();
 })();
 </script>
-<script src="js/spike-dialog.js"></script></head>
+<script src="js/spike-dialog.js"></script>
+</head>
 <body>
 <div class="app rooms-v2">
 <header class="header rooms-v2-header">
@@ -1013,4 +930,5 @@ else setTimeout(install,1500);
 </script>
 <script defer="" src="js/premium-back.js"></script>
 <script defer="" src="js/telemetry.js"></script>
+<link rel="stylesheet" href="css/theme.css">
 </body></html>
