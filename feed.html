@@ -366,8 +366,12 @@ async function requireUser() {
   if (p.error) throw p.error;
   const ext = await withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null);
   state.profile = { ...(p.data?.[0] || {}), ...(ext || {}), id: state.user.id };
-  if (avatarOf(state.profile)) $("headerAvatar").innerHTML = `<img src="${esc(avatarOf(state.profile))}" alt="" loading="lazy" decoding="async">`;
-  else $("headerAvatar").textContent = nameOf(state.profile).charAt(0).toUpperCase();
+  const composerAvatar = $("composerAvatar");
+  if (composerAvatar) {
+    const avatar = avatarOf(state.profile);
+    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async">`;
+    else composerAvatar.textContent = nameOf(state.profile).charAt(0).toUpperCase();
+  }
   return true;
 }
 
@@ -2855,14 +2859,92 @@ function initModernApp(){
   const composer = document.querySelector('.spike-signal-composer');
   const text = $('signalText');
   if(composer && text){
-    composer.classList.add('spike-collapsed');
-    const expand = () => { composer.classList.remove('spike-collapsed'); composer.classList.add('spike-expanded'); };
-    const collapseIfEmpty = () => { if(!text.value.trim()){ composer.classList.add('spike-collapsed'); composer.classList.remove('spike-expanded'); } };
-    text.addEventListener('focus', expand);
-    text.addEventListener('input', () => { try{ localStorage.setItem(DRAFT_KEY, text.value); }catch(_){} expand(); });
-    text.addEventListener('blur', () => setTimeout(collapseIfEmpty, 160));
-    try{ const draft = localStorage.getItem(DRAFT_KEY); if(draft){ text.value = draft; expand(); } }catch(_){}
-    $('releaseSignalBtn')?.addEventListener('click', () => { setTimeout(() => { try{ localStorage.removeItem(DRAFT_KEY); }catch(_){} }, 300); });
+    let collapseTimer = null;
+    const setComposerOpen = (open, focusField = false) => {
+      if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
+      composer.classList.toggle('spike-expanded', open);
+      composer.classList.toggle('spike-collapsed', !open);
+      composer.setAttribute('data-composer-open', String(open));
+      if (open && focusField) {
+        requestAnimationFrame(() => {
+          text.focus({preventScroll:true});
+          setTimeout(() => {
+            try { composer.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
+          }, 90);
+        });
+      }
+    };
+    const expand = () => setComposerOpen(true, false);
+    const collapse = (delay = 80) => {
+      if (collapseTimer) clearTimeout(collapseTimer);
+      collapseTimer = setTimeout(() => {
+        const active = document.activeElement;
+        const inside = active && composer.contains(active);
+        if (!inside) setComposerOpen(false, false);
+      }, delay);
+    };
+
+    // The composer is intentionally compact until the writing field is actually in use.
+    setComposerOpen(false, false);
+
+    // A tap/focus on the writing field immediately reveals every composer feature.
+    text.addEventListener('pointerdown', () => {
+      if (!composer.classList.contains('spike-expanded')) setComposerOpen(true, false);
+    });
+    text.addEventListener('focus', () => {
+      expand();
+      setTimeout(() => {
+        try { composer.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
+      }, 80);
+    });
+    text.addEventListener('input', () => {
+      try{ localStorage.setItem(DRAFT_KEY, text.value); }catch(_){}
+      expand();
+    });
+
+    // Keep the expanded state while any composer control is being used.
+    composer.addEventListener('focusin', expand);
+    composer.addEventListener('focusout', () => {
+      setTimeout(() => {
+        if (!composer.contains(document.activeElement)) collapse();
+      }, 0);
+    });
+    composer.addEventListener('pointerdown', e => {
+      if (e.target.closest('button,input,select,label,textarea')) expand();
+    }, true);
+    document.addEventListener('pointerdown', e => {
+      if (!composer.contains(e.target)) collapse(40);
+    }, true);
+
+    // When the writing field is no longer focused and no composer control is active,
+    // return automatically to the compact state.
+    text.addEventListener('blur', () => collapse(100));
+
+    try{
+      const draft = localStorage.getItem(DRAFT_KEY);
+      if(draft){ text.value = draft; }
+    }catch(_){}
+    $('releaseSignalBtn')?.addEventListener('click', () => {
+      setTimeout(() => {
+        try{ localStorage.removeItem(DRAFT_KEY); }catch(_){}
+        setComposerOpen(false, false);
+      }, 300);
+    });
+
+    // Mobile keyboards can resize the viewport after focus. Re-center the composer
+    // so the revealed tools are not hidden behind the keyboard/bottom navigation.
+    if (window.visualViewport) {
+      let lastHeight = window.visualViewport.height;
+      window.visualViewport.addEventListener('resize', () => {
+        const h = window.visualViewport.height;
+        if (composer.classList.contains('spike-expanded') && document.activeElement === text && Math.abs(h-lastHeight) > 40) {
+          setTimeout(() => {
+            try { composer.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
+          }, 120);
+        }
+        lastHeight = h;
+      });
+    }
   }
 
   // Pin posts via shift+click on more button
@@ -2945,6 +3027,9 @@ function handleCaptionToggle(button) {
   button.setAttribute('aria-label', collapsed ? 'See more of this Signal' : 'See less of this Signal');
 }
 
+function bindClick(id, handler) { const el = $(id); if (el) el.onclick = handler; }
+function bindChange(id, handler) { const el = $(id); if (el) el.onchange = handler; }
+
 function bindEvents() {
   bindLongpressMedia();
   $('spikeMediaLongpress')?.addEventListener('click',e=>{ if(e.target.id==='spikeMediaLongpress'||e.target.closest('[data-longpress-close]')) closeMediaLongpress(); const action=e.target.closest('[data-longpress-action]')?.dataset.longpressAction; if(action) useLongpressMedia(action); });
@@ -2960,23 +3045,24 @@ function bindEvents() {
     if($('feedImageViewer')?.classList.contains('open')){ if(e.key==='Escape') closeFeedImageViewer(); else if(e.key==='ArrowLeft') stepFeedImageViewer(-1); else if(e.key==='ArrowRight') stepFeedImageViewer(1); }
   });
   // Navigation
-  $('notificationBtn').onclick = () => go('notifications.html');
-  $('profileBtn').onclick = () => go(profileLink(state.user.id));
-  $('menuBtn').onclick = () => openOverlay('menuOverlay');
+  bindClick('notificationBtn', () => go('notifications.html'));
+  // Header profile control removed; profile remains available from the menu/bottom navigation.
+  bindClick('menuBtn', () => openOverlay('menuOverlay'));
   $('menuClose')?.addEventListener('click', () => closeOverlay('menuOverlay'));
   $('menuOverlay')?.addEventListener('click', e => { if (e.target.id === 'menuOverlay') closeOverlay('menuOverlay'); });
-  $('closeAnnouncement').onclick = () => { $('announcement').classList.remove('show'); sessionStorage.setItem('spikeAnnouncementClosed', '1'); };
+  bindClick('closeAnnouncement', () => { $('announcement').classList.remove('show'); sessionStorage.setItem('spikeAnnouncementClosed', '1'); });
 
   // Menu items
-  $('menuProfile').onclick = () => go(profileLink(state.user.id));
-  $('menuFriends').onclick = () => go('friends.html');
-  $('menuMessages').onclick = () => go('messages.html');
-  $('menuSettings').onclick = () => go('settings.html');
-  $('menuSaved').onclick = async () => { closeOverlay('menuOverlay'); try { await openSavedCollections(); } catch (e) { console.error('Saved & Collections', e); toast(e.message || 'Unable to open Saved & Collections'); } };
-  $('menuAudience').onclick = async () => { closeOverlay('menuOverlay'); try { await openCloseFriends(); } catch (e) { console.error('Close Friends', e); toast(e.message || 'Unable to open Close Friends'); } };
-  $('menuSafety').onclick = async () => { closeOverlay('menuOverlay'); try { await openSafetyCenter(); } catch (e) { console.error('Safety Center', e); toast(e.message || 'Unable to open Safety Center'); } };
-  $('menuRoom').onclick = () => go('rooms.html');
-  $('menuGuide').onclick = () => go('guide.html');
+  bindClick('menuProfile', () => go(profileLink(state.user.id)));
+  bindClick('menuFriends', () => go('friends.html'));
+  bindClick('menuMessages', () => go('messages.html'));
+  bindClick('menuSettings', () => go('settings.html'));
+  bindClick('menuSaved', async () => { closeOverlay('menuOverlay'); try { await openSavedCollections(); } catch (e) { console.error('Saved & Collections', e); toast(e.message || 'Unable to open Saved & Collections'); } });
+  bindClick('menuAudience', async () => { closeOverlay('menuOverlay'); try { await openCloseFriends(); } catch (e) { console.error('Close Friends', e); toast(e.message || 'Unable to open Close Friends'); } });
+  bindClick('menuSafety', async () => { closeOverlay('menuOverlay'); try { await openSafetyCenter(); } catch (e) { console.error('Safety Center', e); toast(e.message || 'Unable to open Safety Center'); } });
+  bindClick('menuRoom', () => go('rooms.html'));
+  bindClick('menuGuide', () => go('guide.html'));
+  bindClick('menuWorld', () => go('spike_world.html'));
 
 
   $('menuAdmin')?.addEventListener('click', async e => {
@@ -2989,23 +3075,24 @@ function bindEvents() {
     }
     location.href = 'admin.html';
   });
-  $('menuSignOut').onclick = () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); };
-  $('logoutCancel').onclick = () => $('logoutConfirmOverlay').classList.remove('show');
-  $('logoutConfirmOverlay').onclick = e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); };
-  $('logoutYes').onclick = async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } };
+  bindClick('menuSignOut', () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); });
+  bindClick('logoutCancel', () => $('logoutConfirmOverlay').classList.remove('show'));
+  bindClick('logoutConfirmOverlay', e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); });
+  bindClick('logoutYes', async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } });
 
   // Composer
-  $('imageBtn').onclick = () => $('imageInput').click();
-  $('videoBtn').onclick = () => $('videoInput').click();
-  $('mediaAddMore').onclick = openMediaPicker;
-  $('imageInput').onchange = e => { addMediaFiles(e.target.files); e.target.value=''; };
-  $('videoInput').onchange = e => { addMediaFiles(e.target.files); e.target.value=''; };   $('mediaInput').onchange = e => { addMediaFiles(e.target.files); e.target.value=''; };
-  $('removeMedia').onclick = clearMedia;
-  $('scheduleBtn').onclick = () => $('scheduleRow').classList.toggle('show');
-  $('linkBtn').onclick = () => openOverlay('linkOverlay');
-  $('addLink').onclick = () => { const u = $('linkInput').value.trim(); if (u) { $('signalText').value += `${$('signalText').value?'\n':''}${u}`; closeOverlay('linkOverlay'); } };
-  $('cancelLink').onclick = () => closeOverlay('linkOverlay');
-  $('releaseSignalBtn').onclick = releaseSignal;
+  bindClick('imageBtn', () => $('imageInput').click());
+  bindClick('videoBtn', () => $('videoInput').click());
+  bindClick('mediaAddMore', openMediaPicker);
+  bindChange('imageInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
+  bindChange('videoInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
+  bindChange('mediaInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
+  bindClick('removeMedia', clearMedia);
+  bindClick('scheduleBtn', () => $('scheduleRow').classList.toggle('show'));
+  bindClick('linkBtn', () => openOverlay('linkOverlay'));
+  bindClick('addLink', () => { const u = $('linkInput').value.trim(); if (u) { $('signalText').value += `${$('signalText').value?'\n':''}${u}`; closeOverlay('linkOverlay'); } });
+  bindClick('cancelLink', () => closeOverlay('linkOverlay'));
+  bindClick('releaseSignalBtn', releaseSignal);
   $('signalText')?.addEventListener('input',()=>{const c=$('signalCharCount');if(c)c.textContent=`${$('signalText').value.length} / 5000`;});
   $('saveDraftBtn')?.addEventListener('click',saveCurrentDraft);
   $('contentCenterBtn')?.addEventListener('click',()=>openContentCenter('drafts'));
@@ -3018,18 +3105,18 @@ function bindEvents() {
   $('mediaLayoutSelect')?.addEventListener('change',e=>{state.mediaLayout=e.target.value;renderMediaStudio()});
 
   // Story
-  $('storyBtn').onclick = () => openOverlay('storyOverlay');
-  $('cancelStory').onclick = () => closeOverlay('storyOverlay');
-  $('publishStory').onclick = publishStory;
-  $('storyMediaBtn').onclick = () => $('storyMediaInput').click();
-  $('storyAudioBtn').onclick = () => $('storyAudioInput').click();
-  $('storyMediaInput').onchange = e => { const f = e.target.files?.[0]; if (f) $('storyMediaName').textContent = `Selected: ${f.name}`; };
-  $('storyAudioInput').onchange = e => { const f = e.target.files?.[0]; if (f) $('storyAudioName').textContent = `Selected: ${f.name}`; };
+  bindClick('storyBtn', () => openOverlay('storyOverlay'));
+  bindClick('cancelStory', () => closeOverlay('storyOverlay'));
+  bindClick('publishStory', publishStory);
+  bindClick('storyMediaBtn', () => $('storyMediaInput').click());
+  bindClick('storyAudioBtn', () => $('storyAudioInput').click());
+  bindChange('storyMediaInput', e => { const f = e.target.files?.[0]; if (f) $('storyMediaName').textContent = `Selected: ${f.name}`; });
+  bindChange('storyAudioInput', e => { const f = e.target.files?.[0]; if (f) $('storyAudioName').textContent = `Selected: ${f.name}`; });
 
   // Story actions
-  $('cancelStoryActions').onclick = () => closeOverlay('storyActionsOverlay');
-  $('storyActionShare').onclick = () => { const s = storyFor(activeStoryActionId); if (s) shareStoryToFriends(s); };
-  $('storyActionDelete').onclick = () => deleteStory(activeStoryActionId);
+  bindClick('cancelStoryActions', () => closeOverlay('storyActionsOverlay'));
+  bindClick('storyActionShare', () => { const s = storyFor(activeStoryActionId); if (s) shareStoryToFriends(s); });
+  bindClick('storyActionDelete', () => deleteStory(activeStoryActionId));
 
   // Story viewer
   $('storyViewerClose')?.addEventListener('click', storyViewerClose);
@@ -3073,9 +3160,9 @@ function bindEvents() {
     if (b.dataset.v2 === 'discover') setTimeout(() => renderDiscover($('v2DiscoverSearch')?.value||''), 0);
   });
 
-  $('v2SaveSafety').onclick = saveSettings;
-  $('v2NearbyEnable').onclick = findNearby;
-  $('v2NearbyReset').onclick = () => { $('v2NearbyList').innerHTML = '<div class="empty">Nearby discovery is opt-in.</div>'; };
+  bindClick('v2SaveSafety', saveSettings);
+  bindClick('v2NearbyEnable', findNearby);
+  bindClick('v2NearbyReset', () => { $('v2NearbyList').innerHTML = '<div class="empty">Nearby discovery is opt-in.</div>'; });
   document.querySelectorAll('[data-trend-window]').forEach(b => b.onclick = renderTrending);
   $('v2DiscoverGo').addEventListener('click', () => renderDiscover($('v2DiscoverSearch')?.value||''));
   $('v2DiscoverSearch')?.addEventListener('keydown', e => { if(e.key==='Enter') renderDiscover(e.target.value); });
@@ -3103,7 +3190,7 @@ function bindEvents() {
     $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video src="${esc(signalVideoPlaybackUrl({url:x.mediaUrl,playbackUrl:x.mediaUrl,watermarked:!!x.mediaWatermarked,normalized:!!x.mediaNormalized}))}" controls autoplay muted playsinline loop style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${videoWatermarkForSignal({watermarked:!!x.mediaWatermarked},x)}</div>`).join('');
     openOverlay('reelsShell');
   }, true);
-  $('reelsClose').onclick = () => closeOverlay('reelsShell');
+  bindClick('reelsClose', () => closeOverlay('reelsShell'));
 
   // Signal reading controls
   $('posts').addEventListener('click', e => {
@@ -3131,8 +3218,8 @@ function bindEvents() {
   startSignalAutoRefresh();
 
   // Report overlay
-  $('confirmReport').onclick = () => reportSignal(state.activePost, $('reportReason').value);
-  $('cancelReport').onclick = () => closeOverlay('reportOverlay');
+  bindClick('confirmReport', () => reportSignal(state.activePost, $('reportReason').value));
+  bindClick('cancelReport', () => closeOverlay('reportOverlay'));
 
   // Premium sheet
   $('spikePremiumClose')?.addEventListener('click', closePremiumSheet);
@@ -3741,8 +3828,8 @@ else boot();
 
 <!-- SPIKE compact composer: keeps the composer small by default while preserving every tool on focus. -->
 <style id="spike-compact-composer-style">
-.spike-signal-composer{margin:10px 0 14px;padding:12px;border-radius:18px;box-shadow:0 10px 28px rgba(0,0,0,.14)}
-.spike-signal-composer .signal-composer-top{gap:9px;margin-bottom:9px}
+.spike-signal-composer{margin:10px 0 14px;padding:11px 12px;border-radius:18px;box-shadow:0 10px 28px rgba(0,0,0,.14)}
+.spike-signal-composer .signal-composer-top{gap:9px;margin-bottom:8px}
 .spike-signal-composer .signal-orb{width:34px;height:34px;border-radius:11px;font-size:15px}
 .spike-signal-composer .signal-kicker{font-size:8px}
 .spike-signal-composer .signal-composer-top h2{font-size:16px;margin:1px 0}
@@ -3763,9 +3850,15 @@ else boot();
 .spike-signal-composer .media-layout-select{min-height:28px!important;padding:4px 7px!important;font-size:9px!important}
 .spike-signal-composer.spike-collapsed{padding:9px 10px;margin:8px 0 12px}
 .spike-signal-composer.spike-collapsed .signal-composer-top{margin-bottom:7px}
-.spike-signal-composer.spike-collapsed .signal-writing-surface textarea{min-height:46px;height:46px;resize:none;padding:12px 14px;font-size:13px;border-radius:999px}
-.spike-signal-composer.spike-collapsed .signal-writing-footer{display:none}
+.spike-signal-composer.spike-collapsed .signal-writing-surface textarea{min-height:46px;height:46px;resize:none;padding:11px 14px;font-size:12.5px;line-height:1.25;border-radius:999px}
+.spike-signal-composer.spike-expanded .signal-writing-surface textarea{min-height:64px;height:64px;resize:vertical}
+.spike-signal-composer.spike-collapsed .signal-writing-footer{display:none!important}
 .spike-signal-composer.spike-collapsed .media-studio,.spike-signal-composer.spike-collapsed .media-editbar,.spike-signal-composer.spike-collapsed .media-adjust,.spike-signal-composer.spike-collapsed .signal-tools,.spike-signal-composer.spike-collapsed .schedule,.spike-signal-composer.spike-collapsed .signal-creator-row,.spike-signal-composer.spike-collapsed .ai-compose-panel,.spike-signal-composer.spike-collapsed .signal-release-row{display:none!important}
+.spike-signal-composer.spike-collapsed .signal-writing-surface{border-color:rgba(255,255,255,.10)}
+.spike-signal-composer.spike-expanded .signal-tools,.spike-signal-composer.spike-expanded .signal-creator-row{display:flex!important}
+.spike-signal-composer.spike-expanded .signal-tools,.spike-signal-composer.spike-expanded .signal-creator-row{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+.spike-signal-composer.spike-expanded .signal-tools::-webkit-scrollbar,.spike-signal-composer.spike-expanded .signal-creator-row::-webkit-scrollbar{display:none}
+.spike-signal-composer.spike-expanded .signal-tool,.spike-signal-composer.spike-expanded .creator-tool{flex:0 0 auto;white-space:nowrap}
 @media(max-width:560px){
   .spike-signal-composer{padding:10px;margin:8px 0 12px}
   .spike-signal-composer .signal-composer-top{margin-bottom:7px}
@@ -3777,6 +3870,84 @@ else boot();
   .spike-signal-composer.spike-expanded .signal-release{width:auto;white-space:nowrap}
   .spike-signal-composer.spike-expanded .signal-release-note{min-width:0}
   .spike-signal-composer.spike-expanded .signal-audience{width:auto;margin-left:auto}
+}
+</style>
+<style id="spike-composer-smart-compact">
+.spike-signal-composer{padding:12px 13px!important;margin:8px 0 12px!important;border-radius:18px!important;overflow:hidden}
+.spike-signal-composer .signal-composer-top{min-height:38px!important;margin-bottom:8px!important;gap:9px!important}
+.spike-signal-composer .composer-avatar{width:36px!important;height:36px!important;min-width:36px!important;border-radius:11px!important}
+.spike-signal-composer .signal-kicker{font-size:7px!important;letter-spacing:.13em!important;margin-bottom:2px!important}
+.spike-signal-composer .signal-composer-top h2{font-size:15px!important;line-height:1.05!important;margin:0!important}
+.spike-signal-composer .signal-composer-top p{font-size:9px!important;line-height:1.15!important;margin:3px 0 0!important}
+.spike-signal-composer .signal-writing-surface{border-radius:14px!important}
+.spike-signal-composer .signal-writing-surface textarea{min-height:58px!important;height:58px!important;padding:11px 12px!important;font-size:12.5px!important;line-height:1.35!important;border-radius:14px!important}
+.spike-signal-composer .signal-writing-footer{padding:5px 10px!important;font-size:8px!important}
+.spike-signal-composer .signal-tools,.spike-signal-composer .signal-creator-row{gap:5px!important;margin-top:7px!important}
+.spike-signal-composer .signal-tool,.spike-signal-composer .creator-tool{min-height:30px!important;padding:6px 9px!important;border-radius:10px!important;font-size:9px!important;font-weight:750!important}
+@media(max-width:600px){.spike-signal-composer{padding:10px!important;border-radius:16px!important}.spike-signal-composer .signal-composer-top{gap:8px!important}.spike-signal-composer .composer-avatar{width:34px!important;height:34px!important;min-width:34px!important;border-radius:10px!important}.spike-signal-composer .signal-composer-top h2{font-size:14px!important}.spike-signal-composer .signal-composer-top p{font-size:8.5px!important}.spike-signal-composer .signal-writing-surface textarea{min-height:54px!important;height:54px!important;font-size:12px!important}.spike-signal-composer .signal-tools,.spike-signal-composer .signal-creator-row{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}.spike-signal-composer .signal-tools::-webkit-scrollbar,.spike-signal-composer .signal-creator-row::-webkit-scrollbar{display:none}}
+
+/* Smart compact mode: controls remain available without making the composer tall. */
+.spike-signal-composer.spike-expanded .signal-tools,.spike-signal-composer.spike-expanded .signal-creator-row{display:flex!important;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+.spike-signal-composer.spike-expanded .signal-tools::-webkit-scrollbar,.spike-signal-composer.spike-expanded .signal-creator-row::-webkit-scrollbar{display:none}
+.spike-signal-composer.spike-expanded .signal-tool,.spike-signal-composer.spike-expanded .creator-tool{flex:0 0 auto;white-space:nowrap}
+</style>
+<style id="spike-composer-focus-mode">
+/* Interaction model: inactive composer is compact; focusing the writing field reveals every available composer control. */
+.spike-signal-composer.spike-collapsed .signal-writing-surface textarea{cursor:text}
+.spike-signal-composer.spike-expanded .signal-tools,.spike-signal-composer.spike-expanded .signal-creator-row,.spike-signal-composer.spike-expanded .signal-release-row{visibility:visible;opacity:1}
+.spike-signal-composer.spike-expanded .signal-tools,.spike-signal-composer.spike-expanded .signal-creator-row{display:flex!important}
+.spike-signal-composer.spike-expanded .signal-release-row{display:flex!important}
+@media(max-width:600px){
+  .spike-signal-composer.spike-expanded .signal-release-row{flex-direction:row!important;align-items:center!important}
+  .spike-signal-composer.spike-expanded .signal-release{width:auto!important;min-width:max-content}
+}
+
+/* Final focus behavior: compact when idle, fully revealed while the writing field is in use. */
+.spike-signal-composer.spike-collapsed .signal-tools,
+.spike-signal-composer.spike-collapsed .signal-creator-row,
+.spike-signal-composer.spike-collapsed .signal-release-row,
+.spike-signal-composer.spike-collapsed .media-studio,
+.spike-signal-composer.spike-collapsed .media-editbar,
+.spike-signal-composer.spike-collapsed .media-adjust,
+.spike-signal-composer.spike-collapsed .schedule,
+.spike-signal-composer.spike-collapsed .ai-compose-panel{display:none!important}
+.spike-signal-composer.spike-expanded .signal-tools,
+.spike-signal-composer.spike-expanded .signal-creator-row,
+.spike-signal-composer.spike-expanded .signal-release-row{display:flex!important;visibility:visible!important;opacity:1!important}
+.spike-signal-composer.spike-expanded .signal-tools,
+.spike-signal-composer.spike-expanded .signal-creator-row{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+.spike-signal-composer.spike-expanded .signal-tools::-webkit-scrollbar,
+.spike-signal-composer.spike-expanded .signal-creator-row::-webkit-scrollbar{display:none}
+.spike-signal-composer.spike-expanded .signal-tool,
+.spike-signal-composer.spike-expanded .creator-tool{flex:0 0 auto;white-space:nowrap}
+</style>
+<style id="spike-composer-avatar-fix">
+/* Screenshot-matched composer: account identity lives here, never in the header. */
+.spike-signal-composer .signal-composer-top{position:relative;display:flex;align-items:center;gap:9px;min-height:40px;padding:0 2px;overflow:visible}
+.spike-signal-composer .signal-composer-top .composer-avatar{position:relative;flex:0 0 40px;margin:0;z-index:1}
+.spike-signal-composer .signal-composer-top>div:last-child{position:relative;z-index:2;min-width:0;flex:1;overflow:visible}
+.spike-signal-composer .signal-kicker{display:block;margin:0 0 2px;line-height:1;font-size:8px;letter-spacing:.14em}
+.spike-signal-composer .signal-composer-top h2{display:block;position:relative;margin:0;font-size:16px;line-height:1.12;white-space:nowrap;overflow:visible;text-overflow:clip;z-index:2}
+.spike-signal-composer .signal-composer-top p{display:block;position:relative;margin:3px 0 0;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spike-signal-composer .composer-avatar{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);box-sizing:border-box}
+.spike-signal-composer .composer-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.spike-profile-action{display:grid;place-items:center;min-width:42px}
+.spike-profile-action>span{font-size:22px;line-height:1}
+.signal-composer-top{align-items:flex-start}
+.signal-composer-top>div:last-child{min-width:0;flex:1}
+.signal-composer-top h2{line-height:1.12;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.signal-composer-top p{line-height:1.25}
+.signal-orb.composer-avatar{width:40px;height:40px;min-width:40px;border-radius:13px;overflow:hidden;display:grid;place-items:center;font-size:15px;font-weight:800}
+.signal-orb.composer-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+@media(max-width:560px){
+  .signal-composer-top{gap:8px;align-items:center}
+  .spike-signal-composer .signal-composer-top>div:last-child{min-width:0;overflow:visible}
+  .spike-signal-composer .signal-composer-top h2{font-size:15px;line-height:1.1}
+  .spike-signal-composer .signal-composer-top p{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+  .signal-orb.composer-avatar{width:34px;height:34px;min-width:34px;border-radius:10px;font-size:13px}
+  .signal-composer-top h2{font-size:15px}
+  .signal-composer-top p{font-size:9px}
+  .signal-kicker{font-size:7px}
 }
 </style>
 <script src="js/spike-dialog.js"></script>
@@ -3833,7 +4004,7 @@ else boot();
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
 <button class="icon" id="notificationBtn" title="Notifications" aria-label="Notifications">🔔<span class="badge" id="notificationBadge"></span></button>
 <button class="icon" id="menuBtn" title="Menu" aria-label="Open menu">☰</button>
-<button class="icon" id="profileBtn" title="Profile" aria-label="Profile"><span class="avatar" id="headerAvatar">U</span></button>
+
 </div>
 </header>
 
@@ -3891,7 +4062,7 @@ else boot();
 
 <section class="spike-signal-composer" id="spikeComposer" aria-labelledby="spikeComposerTitle">
   <div class="signal-composer-top">
-    <div class="signal-orb" aria-hidden="true">SPIKE</div>
+    <div class="signal-orb composer-avatar" id="composerAvatar" aria-hidden="true">S</div>
     <div><span class="signal-kicker">CREATE YOUR SIGNAL</span><h2 id="spikeComposerTitle">Start a SPIKE</h2><p>Put something into the world. Make it worth hearing.</p></div>
   </div>
   <div class="signal-writing-surface">
@@ -3962,6 +4133,7 @@ else boot();
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
 <a id="menuSbet" href="spike_predictor.html">⚽ Predictor</a>
+      <a id="menuWorld" href="spike_world.html">🌐 World<strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
       <a id="menuAdmin" href="admin.html" hidden><span>SPIKE</span><strong>Admin</strong><small>Administration</small></a>
     </div>
     <div class="spike-menu-footer"><button id="menuSignOut" class="danger"><span>↪</span><strong>Sign out</strong></button></div>

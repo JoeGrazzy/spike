@@ -12,7 +12,7 @@ const nodeCheck = file => new Promise((resolve, reject) => {
   child.on('error', reject); child.on('close', code => resolve({ code, stderr }));
 });
 
-const pages = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html'];
+const pages = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html','spike_world.html'];
 
 test('development dependencies are explicitly pinned', async () => {
   const pkg = JSON.parse(await readTextFile('package.json', 'utf8'));

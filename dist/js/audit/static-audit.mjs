@@ -1,6 +1,6 @@
 import { readdir, readFile } from 'node:fs/promises';
 
-const expected = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html'];
+const expected = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html','spike_world.html'];
 const actual = (await readdir('.')).filter(x => x.endsWith('.html')).sort();
 const missing = expected.filter(x => !actual.includes(x));
 if (missing.length) throw new Error(`Missing pages: ${missing.join(', ')}`);

@@ -30,6 +30,12 @@ Triggers evaluate gamification after genuine inserts into:
 
 The evaluation is idempotent: the same activity cannot award the same mission, weekly reward, or achievement twice.
 
+## Leveling V3
+- The level roadmap now uses a progressively harder curve from Level 1 through Level 100.
+- Key milestones are Level 10 = 6,000 XP, Level 20 = 18,000 XP, Level 50 = 105,000 XP, and Level 100 = 310,000 XP.
+- Existing member XP is never removed by the curve change, and existing levels cannot regress solely because thresholds were raised.
+- Future XP awards remain server-authoritative and use the new thresholds.
+
 ## Admin Control Center
 `admin.html` now exposes a premium V2 control surface for:
 - engine health
