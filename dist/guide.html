@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/ui-fix.css">
 <link rel="stylesheet" href="css/premium-back.css">
-<link rel="stylesheet" href="css/theme-v14.css">
+
 <style>
 :root{--g-bg:#070b14;--g-card:rgba(17,24,39,.78);--g-card2:rgba(255,255,255,.045);--g-line:rgba(255,255,255,.11);--g-text:#f8fafc;--g-muted:rgba(248,250,252,.64);--g-accent:#8b5cf6;--g-accent2:#ec4899;--g-good:#34d399;--g-warn:#fbbf24}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(139,92,246,.15),transparent 30%),radial-gradient(circle at 90% 8%,rgba(236,72,153,.12),transparent 28%),var(--g-bg);color:var(--g-text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.55}.page{min-height:100vh}.top{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;padding:12px max(14px,calc((100vw - 1060px)/2));border-bottom:1px solid var(--g-line);background:rgba(7,11,20,.82);backdrop-filter:blur(22px)}.back,.themeBtn{border:1px solid var(--g-line);background:rgba(255,255,255,.05);color:var(--g-text);border-radius:13px;padding:9px 12px;font-weight:800;cursor:pointer}.topTitle{min-width:0;flex:1}.topTitle b{display:block;font-size:14px}.topTitle span{display:block;color:var(--g-muted);font-size:10px}.themeBtn{width:42px;padding:9px;text-align:center}.wrap{width:min(1060px,100%);margin:0 auto;padding:24px 16px 70px}.hero{display:grid;grid-template-columns:1.35fr .65fr;gap:14px;align-items:stretch}.heroCard,.card{border:1px solid var(--g-line);background:linear-gradient(145deg,rgba(19,25,41,.9),rgba(9,13,23,.86));border-radius:24px;box-shadow:0 22px 80px rgba(0,0,0,.22);backdrop-filter:blur(18px)}.heroCard{padding:26px}.eyebrow{font-size:10px;letter-spacing:1.7px;color:#c4b5fd;font-weight:900}.hero h1{font-size:clamp(31px,6vw,58px);line-height:1.02;margin:8px 0 12px;letter-spacing:-1.8px}.hero p{color:var(--g-muted);max-width:680px;margin:0;font-size:14px}.spikeAppIcon{width:76px;height:76px;border-radius:20px;object-fit:cover;display:block;margin:0 auto 18px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
@@ -22,23 +22,8 @@
 .section-icon{width:1.05em;height:1.05em;display:inline-block;vertical-align:-0.12em;object-fit:contain;border-radius:0;margin-right:.28em;flex:none}
 .guide-quicklinks .section-icon{width:1em;height:1em;vertical-align:-.16em;margin-right:.25em}
 
-/* Premium founder panel */
-.founderBtn{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(167,139,250,.28);background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(236,72,153,.12));color:var(--g-text);border-radius:13px;padding:9px 11px;font-weight:850;font-size:11px;cursor:pointer;box-shadow:0 8px 28px rgba(0,0,0,.16)}
-.founderBtn:hover{transform:translateY(-1px);border-color:rgba(196,181,253,.45)}
-.header-icon{width:17px;height:17px;object-fit:contain;border-radius:5px}
-.founderOverlay{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:18px;background:rgba(2,5,12,.72);backdrop-filter:blur(16px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
-.founderOverlay.open{opacity:1;visibility:visible}
-.founderPanel{width:min(760px,100%);max-height:min(88vh,850px);overflow:auto;border:1px solid rgba(255,255,255,.14);border-radius:30px;background:linear-gradient(145deg,rgba(20,25,43,.98),rgba(8,12,23,.98));box-shadow:0 35px 120px rgba(0,0,0,.55),0 0 0 1px rgba(139,92,246,.08);transform:translateY(18px) scale(.985);transition:transform .25s ease;padding:24px}
-.founderOverlay.open .founderPanel{transform:translateY(0) scale(1)}
-.founderTop{display:flex;align-items:flex-start;gap:15px;margin-bottom:18px}
-.founderPortrait{width:78px;height:78px;object-fit:cover;border-radius:23px;border:1px solid rgba(255,255,255,.15);box-shadow:0 14px 40px rgba(0,0,0,.35);flex:none}
-.founderKicker{font-size:9px;letter-spacing:1.5px;color:#c4b5fd;font-weight:900;text-transform:uppercase}
-.founderPanel h2{font-size:clamp(25px,5vw,38px);line-height:1.05;margin:4px 0 4px;letter-spacing:-1px}
-.founderRole{color:#ddd6fe;font-size:12px;font-weight:850}
-.founderClose{margin-left:auto;border:1px solid var(--g-line);background:rgba(255,255,255,.06);color:var(--g-text);width:38px;height:38px;border-radius:12px;font-size:20px;cursor:pointer;flex:none}
-.founderQuote{padding:16px 17px;margin:12px 0 18px;border:1px solid rgba(167,139,250,.22);border-radius:18px;background:linear-gradient(135deg,rgba(139,92,246,.11),rgba(236,72,153,.07));font-size:13px;font-weight:750;color:#f5f3ff}
-.founderPanel h3{font-size:14px;margin:18px 0 6px}.founderPanel p{font-size:11.5px;color:var(--g-muted);margin:6px 0}.founderGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.founderMini{padding:13px;border:1px solid var(--g-line);background:rgba(255,255,255,.035);border-radius:16px}.founderMini b{font-size:11px}.founderMini p{margin-top:4px}.founderVision{margin-top:13px;padding:14px;border-radius:17px;border:1px solid rgba(52,211,153,.22);background:rgba(52,211,153,.06);color:#bbf7d0;font-size:11px}.founderActions{display:flex;flex-wrap:wrap;gap:8px;margin-top:15px}.founderActions a{display:inline-flex;align-items:center;gap:6px;text-decoration:none}.founderPanel::-webkit-scrollbar{width:8px}.founderPanel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:99px}
-@media(max-width:520px){.founderBtn{padding:9px}.founderBtn{font-size:0}.founderBtn .header-icon{width:19px;height:19px;margin:0}.founderPanel{padding:18px;border-radius:24px}.founderTop{gap:11px}.founderPortrait{width:64px;height:64px;border-radius:18px}.founderGrid{grid-template-columns:1fr}}
+/* Founder & Support route */
+.founderBtn{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(167,139,250,.28);background:linear-gradient(135deg,rgba(139,92,246,.18),rgba(236,72,153,.12));color:var(--g-text);border-radius:13px;padding:9px 11px;font-weight:850;font-size:11px;text-decoration:none;box-shadow:0 8px 28px rgba(0,0,0,.16)}.founderBtn:hover{transform:translateY(-1px);border-color:rgba(196,181,253,.45)}.header-icon{width:17px;height:17px;object-fit:contain;border-radius:5px}
 </style>
 <script src="js/spike-dialog.js"></script></head>
 <body>
@@ -46,7 +31,7 @@
 <header class="top">
 <button class="back spike-premium-back" data-spike-premium-back="1" data-back-fallback="feed.html" type="button">← Back</button>
 <div class="topTitle"><b>SPIKE Complete Guide</b><span>CONNECT • SHARE • DISCOVER</span></div>
-<button class="founderBtn" id="founderBtn" type="button" aria-haspopup="dialog" aria-controls="founderPanel"><img src="assets/icon/icon.png" alt="" class="header-icon"> About Me</button>
+<a class="founderBtn" href="coffee.html" aria-label="Founder and Support"><img src="assets/icon/icon.png" alt="" class="header-icon"> Founder &amp; Support</a>
 <button class="themeBtn" id="themeBtn" type="button" aria-label="Change theme">◐</button>
 </header>
 <main class="wrap">
@@ -114,48 +99,11 @@
 </main>
 </div>
 
-<div class="founderOverlay" id="founderOverlay" role="dialog" aria-modal="true" aria-labelledby="founderPanelTitle" aria-hidden="true">
-  <article class="founderPanel" id="founderPanel" tabindex="-1">
-    <div class="founderTop">
-      <img class="founderPortrait" src="assets/icon/me.jpg" alt="ELECHI OSOUNDU JOSHUA">
-      <div style="min-width:0;flex:1">
-        <div class="founderKicker">SPIKE • About the Founder</div>
-        <h2 id="founderPanelTitle">ELECHI OSOUNDU JOSHUA</h2>
-        <div class="founderRole">Founder &amp; Creator of SPIKE</div>
-      </div>
-      <button class="founderClose" id="founderClose" type="button" aria-label="Close About Me panel">×</button>
-    </div>
-    <div class="founderQuote">“You can always achieve whatever you wish to know by putting effort into it.”</div>
-    <div class="founderGrid">
-      <div class="founderMini"><b>Where it began</b><p>Nigerian, born and raised in Ondo State, western Nigeria.</p></div>
-      <div class="founderMini"><b>The beginning</b><p>Started at age 15 while in school, determined to become a web developer and create something the world would acknowledge.</p></div>
-    </div>
-    <h3>My Story</h3>
-    <p>The journey did not happen overnight. I took many steps, learned through setbacks, kept building, and continued moving forward even when the results were not what I hoped for.</p>
-    <h3>Why I Created SPIKE</h3>
-    <p>I wanted to bring people together and create a place where everyone can connect, communicate, speak out, and be heard. I also wanted a platform where people could speak about corruption and the challenges facing Nigeria without feeling that their voice had to disappear into the crowd.</p>
-    <h3>Why the Name “SPIKE”</h3>
-    <p>SPIKE was inspired by the word <strong>“Speak.”</strong> The name represents connection, communication, expression, and the courage to give people a voice.</p>
-    <h3>The 9-Year Journey</h3>
-    <p>Building SPIKE represents <strong>9 years of experience, learning, persistence, and dedication.</strong></p>
-    <div class="chips"><span class="chip">Connect people.</span><span class="chip">Encourage expression.</span><span class="chip">Give everyone a voice.</span><span class="chip">Build something the world can acknowledge.</span></div>
-    <div class="founderVision"><b>Founder vision:</b> Connect people. Encourage expression. Give everyone a voice. Build something the world can acknowledge.</div>
-    <div class="founderActions"><a class="chip" href="mailto:eletexjoeytex@gmail.com">✉ Contact Founder</a><a class="chip" href="https://wa.me/2349159096952" target="_blank" rel="noopener">◉ WhatsApp</a></div>
-  </article>
-</div>
+
 <script src="js/theme.js"></script>
 <script src="js/premium-back.js"></script>
 
-<script>
-(()=>{
- const openBtn=document.getElementById('founderBtn'), overlay=document.getElementById('founderOverlay'), closeBtn=document.getElementById('founderClose'), panel=document.getElementById('founderPanel');
- if(!openBtn||!overlay)return;
- let previousFocus=null;
- const open=()=>{previousFocus=document.activeElement;overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';setTimeout(()=>panel.focus(),20)};
- const close=()=>{overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';if(previousFocus)previousFocus.focus()};
- openBtn.addEventListener('click',open);closeBtn.addEventListener('click',close);overlay.addEventListener('click',e=>{if(e.target===overlay)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))close()});
-})();
-</script>
+
 <script>
 (()=>{
  const $=id=>document.getElementById(id);
