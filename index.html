@@ -172,6 +172,9 @@ button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allow
 </style>
 
 <script src="js/spike-dialog.js"></script>
+<style>
+.device-conflict-note{margin:10px 0 0;color:var(--muted,#6b7280);line-height:1.55;font-size:.92rem}.device-conflict-modal{}
+</style>
 </head>
 <body>
 
@@ -269,6 +272,7 @@ button,input{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allow
 </div></section>
 </main>
 <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="false"></div>
+<div class="modal-backdrop" id="deviceConflictModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="deviceConflictTitle" aria-describedby="deviceConflictText"><h2 id="deviceConflictTitle">This account is already in use</h2><p id="deviceConflictText">Your SPIKE account is currently signed in on another device.</p><p class="device-conflict-note">If you continue here, SPIKE will automatically sign out the other device and keep this device signed in.</p><div class="modal-actions"><button class="secondary" id="deviceConflictCancel" type="button">Cancel</button><button class="primary" id="deviceConflictContinue" type="button">Continue here</button></div></div></div>
 <div class="modal-backdrop" id="successModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle" aria-describedby="welcomeIntro"><h2 id="welcomeTitle">Welcome to SPIKE! 🎉</h2><p id="welcomeIntro">Your account is verified and your permanent SPIKE identity is ready.</p><div class="spid-label">YOUR LIFETIME SP ID</div><div class="spid" id="spidValue">SP-XXXXXX</div><p id="welcomeDetails">Your SP ID is your unique SPIKE account identification number.</p><p id="welcomeNote"><strong>Keep it handy:</strong> your SP ID stays connected to your SPIKE account for its lifetime.</p><div class="modal-actions"><button class="secondary" id="copySpid" type="button">Copy SP ID</button><button class="primary" id="continueBtn" type="button">Continue</button></div></div></div>
 <script>
 "use strict";
@@ -350,7 +354,9 @@ signupOtpBusy: false,
   authListenerReady: false,
   sessionResolutionPromise: null,
   loginPromise: null,
-  lastRequestId: null
+  lastRequestId: null,
+  deviceGateActive: false,
+  deviceGatePromise: null
 };
 const toastHistory = new Map();
 function toast(message, type = "info", ms = 4800) {
@@ -551,6 +557,64 @@ await new Promise(resolve => setTimeout(resolve, 300));
 }
 return ensureProfile(user);
 }
+function getDeviceId(){
+  const key="spike_device_id_v1";
+  try{
+    let id=localStorage.getItem(key);
+    if(!id){ id=crypto.randomUUID(); localStorage.setItem(key,id); }
+    return id;
+  }catch{
+    try{return sessionStorage.getItem(key)||crypto.randomUUID()}catch{return crypto.randomUUID()}
+  }
+}
+function closeDeviceConflictModal(){
+  const m=$("deviceConflictModal");
+  if(m) m.classList.remove("show");
+}
+function askDeviceConflict(){
+  const m=$("deviceConflictModal");
+  if(!m) return Promise.resolve(window.confirm("Your SPIKE account is already signed in on another device. Continue here and automatically sign out the other device?"));
+  m.classList.add("show");
+  return new Promise(resolve=>{
+    const yes=$("deviceConflictContinue"), no=$("deviceConflictCancel");
+    const done=value=>{closeDeviceConflictModal();yes?.removeEventListener("click",onYes);no?.removeEventListener("click",onNo);resolve(value)};
+    const onYes=()=>done(true), onNo=()=>done(false);
+    yes?.addEventListener("click",onYes,{once:true}); no?.addEventListener("click",onNo,{once:true});
+    yes?.focus();
+  });
+}
+async function ensureDeviceSession(session,{interactive=false}={}){
+  if(!session?.user) return true;
+  if(state.deviceGatePromise) return state.deviceGatePromise;
+  state.deviceGateActive=true;
+  state.deviceGatePromise=(async()=>{
+    const db=await ensureClient();
+    const deviceId=getDeviceId();
+    const {data,status,error}=await db.rpc("spike_device_session_status",{p_device_id:deviceId});
+    if(error) throw error;
+    const conflict=!!data?.has_other_device;
+    if(conflict){
+      const proceed=interactive ? await askDeviceConflict() : false;
+      if(!proceed){
+        await db.auth.signOut({scope:"local"}).catch(()=>{});
+        state.currentUser=null; state.profile=null; state.redirecting=false;
+        if(interactive){
+          status("Sign in was cancelled because this account is already active on another device.","info");
+          setAuthPhase("LOGIN");
+        } else {
+          location.replace("index.html?device=active");
+        }
+        return false;
+      }
+      const {error:signoutError}=await db.auth.signOut({scope:"others"});
+      if(signoutError) throw signoutError;
+    }
+    const {error:claimError}=await db.rpc("spike_device_session_claim",{p_device_id:deviceId});
+    if(claimError) throw claimError;
+    return true;
+  })().finally(()=>{state.deviceGatePromise=null;state.deviceGateActive=false});
+  return state.deviceGatePromise;
+}
 async function completeLogin(user) {
   if (!user?.id) return false;
   if (state.redirecting) return true;
@@ -613,6 +677,8 @@ async function resolveSession(session, source = "session") {
     return false;
   }
   const user = session.user;
+  const deviceReady = await ensureDeviceSession(session,{interactive:source === "signin" || source === "signed_in"});
+  if (!deviceReady) return false;
   if (!user.email_confirmed_at) {
     state.currentUser = user;
     const pendingEmail = state.signupOtpEmail || user.email || "";
@@ -643,17 +709,19 @@ const btn = $("loginBtn");
 state.busy = true; clearStatus(); setBusy(btn, true, "Signing in…");
 const id = requestId("LOGIN");
 try {
+state.deviceGateActive = true;
 const db = await ensureClient();
 const { data, error } = await db.auth.signInWithPassword({ email, password });
 if (error) throw error;
 if (!data.user) throw new Error("Sign in did not return an account session.");
-const completed = await resolveSessionOnce(data.session || { user: data.user }, "signin");
+const session = data.session || { user: data.user };
+const completed = await resolveSessionOnce(session, "signin");
 if (completed) toast("Signed in successfully.", "success", 2500);
 } catch (err) {
 logAuthError("LOGIN", err, id);
 const friendly = friendlyError(err, "login");
 status(friendly, "error"); toast(friendly, "error");
-} finally { state.busy = false; setBusy(btn, false, ""); }
+} finally { state.deviceGateActive = false; state.busy = false; setBusy(btn, false, ""); }
 }
 // ─── sign up ───
 async function signUp(e) {
@@ -732,7 +800,7 @@ function updateOtpCooldown() { const btn=$("otpResendBtn"), label=$("otpCountdow
 function startOtpCooldown(ms=60000){ startEmailCooldown(ms); if(otpCooldownTimer) clearInterval(otpCooldownTimer); otpCooldownTimer=setInterval(updateOtpCooldown,1000); updateOtpCooldown(); }
 function showOtpScreen(email){ state.signupOtpEmail=String(email||"").trim(); if(!state.signupOtpEmail)return switchPanel("register"); $("otpEmail").textContent=state.signupOtpEmail; $("otpInput").value=""; switchPanel("otp"); updateOtpCooldown(); requestAnimationFrame(()=>$("otpInput")?.focus()); }
 function leaveOtpScreen(){ try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; switchPanel("register"); }
-async function verifySignupOtp(e){ e.preventDefault(); if(state.signupOtpBusy)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; const token=$("otpInput")?.value.replace(/\D/g,"").slice(0,6)||""; if(!email){status("Your verification session is missing. Create the account again.","error");return;} if(!/^\d{6}$/.test(token)){toast("Enter the 6-digit code from your email.","warning");$("otpInput")?.focus();return;} state.signupOtpBusy=true; const btn=$("otpVerifyBtn"); setBusy(btn,true,"Confirming…"); clearStatus(); try{const db=await ensureClient(); const {data,error}=await db.auth.verifyOtp({email,token,type:"signup"}); if(error)throw error; if(!data?.user)throw new Error("Email confirmation did not return an account."); try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; toast("Email confirmed successfully.","success"); await completeLogin(data.user);}catch(err){console.error("[SPIKE SIGNUP OTP]",{status:err?.status,code:err?.code,message:err?.message}); const msg=String(err?.message||"").toLowerCase(); const friendly=/expired|invalid|token|otp/.test(msg)?"That code is invalid or expired. Check the newest SPIKE email, then enter its 6-digit code.":isEmailRateLimit(err)?"Too many verification attempts. Please wait a little before trying again.":friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;setBusy(btn,false,"");updateOtpCooldown();} }
+async function verifySignupOtp(e){ e.preventDefault(); if(state.signupOtpBusy)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; const token=$("otpInput")?.value.replace(/\D/g,"").slice(0,6)||""; if(!email){status("Your verification session is missing. Create the account again.","error");return;} if(!/^\d{6}$/.test(token)){toast("Enter the 6-digit code from your email.","warning");$("otpInput")?.focus();return;} state.signupOtpBusy=true; const btn=$("otpVerifyBtn"); setBusy(btn,true,"Confirming…"); clearStatus(); try{const db=await ensureClient(); const {data,error}=await db.auth.verifyOtp({email,token,type:"signup"}); if(error)throw error; if(!data?.user)throw new Error("Email confirmation did not return an account."); try{sessionStorage.removeItem("spike_signup_otp_email");}catch{} state.signupOtpEmail=""; toast("Email confirmed successfully.","success"); await resolveSessionOnce(data.session || {user:data.user}, "signin");}catch(err){console.error("[SPIKE SIGNUP OTP]",{status:err?.status,code:err?.code,message:err?.message}); const msg=String(err?.message||"").toLowerCase(); const friendly=/expired|invalid|token|otp/.test(msg)?"That code is invalid or expired. Check the newest SPIKE email, then enter its 6-digit code.":isEmailRateLimit(err)?"Too many verification attempts. Please wait a little before trying again.":friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;setBusy(btn,false,"");updateOtpCooldown();} }
 async function resendSignupOtp(){ if(state.signupOtpBusy||otpCooldownRemaining()>0)return; const email=state.signupOtpEmail||sessionStorage.getItem("spike_signup_otp_email")||""; if(!email)return status("Your verification session is missing. Create the account again.","error"); state.signupOtpBusy=true; const btn=$("otpResendBtn"); if(btn)btn.disabled=true; try{const db=await ensureClient(); const {error}=await db.auth.resend({type:"signup",email}); if(error)throw error; startOtpCooldown(60000); status("A new 6-digit verification code has been sent.","success"); toast("New verification code sent.","success");}catch(err){if(isEmailRateLimit(err))startOtpCooldown(90000); const friendly=friendlyError(err,"signup"); status(friendly,"error"); toast(friendly,"error");}finally{state.signupOtpBusy=false;updateOtpCooldown();} }
 
 // ─── reset password ───
@@ -912,6 +980,13 @@ function routeRecoveryCallbackToDedicatedPage(callback) {
 }
 
 async function boot() {
+  try {
+    const params = new URLSearchParams(location.search);
+    if (params.get("device") === "revoked") {
+      toast("Your account was signed in on another device, so this device has been logged out.","warning",6500);
+      history.replaceState({},"",location.pathname + location.hash);
+    }
+  } catch {}
   setAuthPhase("BOOTING");
   try {
     const callback = handleAuthCallback();
@@ -946,6 +1021,7 @@ async function boot() {
           logAuthError("AUTH COMPLETE", err, requestId("AUTH"));
         }));
       }
+
     });
     state.authListenerReady = true;
   } catch (err) { logAuthError("AUTH LISTENER", err, requestId("LISTENER")); }

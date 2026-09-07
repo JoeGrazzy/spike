@@ -6,7 +6,7 @@ await mkdir('dist', { recursive: true });
 // Production artifact: every root application page plus shared runtime assets
 // and Cloudflare Pages headers. Keep the page list dynamic so new pages cannot
 // silently disappear from the deployable artifact.
-const htmlPages = (await readdir('.')).filter(name => name.endsWith('.html')).sort();
+const htmlPages = (await readdir('.')).filter(name => name.endsWith('.html') && !name.includes('.pre-')).sort();
 for (const page of htmlPages) await cp(page, `dist/${page}`);
 for (const item of ['css', 'js', 'assets']) await cp(item, `dist/${item}`, { recursive: true });
 for (const optional of ['_headers', '_redirects']) {
