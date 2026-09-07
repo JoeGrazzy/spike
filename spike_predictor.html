@@ -70,6 +70,7 @@
 
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/auth/device-session.js"></script>
 </head>
 <body>
@@ -144,7 +145,36 @@ async function fetchWithTimeout(url, options={}, ms=12000){
 }
 async function load(){
   if(__predictorLoading)return;
-  __predictorLoading=true;const eyebrow=$("predictorEyebrow");if(eyebrow){eyebrow.textContent=new Intl.DateTimeFormat(undefined,{weekday:"long"}).format(new Date())+" · Daily picks";}const loader=$("footballLoader");$("status").textContent="SYNCING";if(loader)loader.classList.remove("hide");try{if($("loaderText"))$("loaderText").textContent="Connecting to SPIKE…";const r=await fetchWithTimeout(FUNCTION_URL,{method:"POST",headers:{"Authorization":"Bearer "+SUPABASE_ANON_KEY,"apikey":SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"},12000);const sr=await r.json().catch(()=>({}));if(!r.ok||sr.ok===false)throw Error(sr.error||"Predictor sync failed");if($("loaderText"))$("loaderText").textContent="Loading predictions…";const date=new Date().toISOString().slice(0,10),h={"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY};const [pr,fr]=await Promise.all([fetchWithTimeout(SUPABASE_URL+"/rest/v1/spike_predictions?prediction_date=eq."+date+"&order=confidence.desc",{headers:h},12000),fetchWithTimeout(SUPABASE_URL+"/rest/v1/spike_fixtures?fixture_date=eq."+date,{headers:h},12000)]);const ps=await pr.json(),fs=await fr.json();if(!pr.ok)throw Error(ps?.message||"Could not load predictions");const by=new Map((Array.isArray(fs)?fs:[]).map(f=>[String(f.id),f]));rows=(Array.isArray(ps)?ps:[]).map(x=>({...x,...(by.get(String(x.fixture_id))||{}),id:String(x.id)}));$("status").textContent="LIVE";renderLeagues();render();if(loader){$("loaderText").textContent="Predictions ready";setTimeout(()=>loader.classList.add("hide"),250);}}catch(e){$("status").textContent="OFFLINE";$("error").style.display="block";$("error").textContent=e.message||"Connection failed";if($("loaderText"))$("loaderText").textContent="SPIKE could not load today's data";setTimeout(()=>loader?.classList.add("hide"),800);}finally{__predictorLoading=false;}}
+  __predictorLoading=true;const eyebrow=$("predictorEyebrow");if(eyebrow){eyebrow.textContent=new Intl.DateTimeFormat(undefined,{weekday:"long"}).format(new Date())+" · Daily picks";}const loader=$("footballLoader");$("status").textContent="SYNCING";if(loader)loader.classList.remove("hide");
+  const date=new Date().toISOString().slice(0,10);
+  const h={"apikey":SUPABASE_ANON_KEY};
+  async function readData(){
+    const [pr,fr]=await Promise.all([fetchWithTimeout(SUPABASE_URL+"/rest/v1/spike_predictions?prediction_date=eq."+date+"&order=confidence.desc",{headers:h},12000),fetchWithTimeout(SUPABASE_URL+"/rest/v1/spike_fixtures?fixture_date=eq."+date,{headers:h},12000)]);
+    const ps=await pr.json().catch(()=>[]),fs=await fr.json().catch(()=>[]);
+    if(!pr.ok)throw Error(ps?.message||"Could not load predictions");
+    const by=new Map((Array.isArray(fs)?fs:[]).map(f=>[String(f.id),f]));
+    rows=(Array.isArray(ps)?ps:[]).map(x=>({...x,...(by.get(String(x.fixture_id))||{}),id:String(x.id)}));
+    return rows.length;
+  }
+  try{
+    if($("loaderText"))$("loaderText").textContent="Loading predictions…";
+    let count=await readData();
+    // Only synchronize when today's public cache is empty. A failed sync must not hide
+    // already-available predictions from users.
+    if(!count){
+      if($("loaderText"))$("loaderText").textContent="Refreshing today's predictions…";
+      const r=await fetchWithTimeout(FUNCTION_URL,{method:"POST",headers:{"apikey":SUPABASE_ANON_KEY,"Content-Type":"application/json"},body:"{}"},12000);
+      const sr=await r.json().catch(()=>({}));
+      if(!r.ok||sr.ok===false)throw Error(sr.error||"Predictor sync failed");
+      count=await readData();
+    }
+    if(!count)throw Error("No SPIKE predictions are available for today yet.");
+    $("status").textContent="LIVE";$("error").style.display="none";renderLeagues();render();
+    if(loader){$("loaderText").textContent="Predictions ready";setTimeout(()=>loader.classList.add("hide"),250);}
+  }catch(e){
+    $("status").textContent="OFFLINE";$("error").style.display="block";$("error").textContent=e.message||"Connection failed";if($("loaderText"))$("loaderText").textContent="SPIKE could not load today's data";setTimeout(()=>loader?.classList.add("hide"),800);
+  }finally{__predictorLoading=false;}
+}
 load();setInterval(load,900000);
 </script><script id="spike-menu-nav-controller-fixed">
 (function(){
