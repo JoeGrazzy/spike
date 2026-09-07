@@ -46,7 +46,7 @@ html[data-theme=light]{--bg:#f4f7fb;--surface:rgba(255,255,255,.9);--surface2:rg
 'use strict';
 const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
 const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);
+const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);let authSubscription=null,destroyed=false,saveBusy=false;
 const DEFAULTS={messageTone:true,incomingTone:true,outgoingTone:true,browser_notifications:false,theme_style:1};
 const PRIVACY_DEFAULTS={profile_visibility:'public',posts_visibility:'public',media_visibility:'public',friends_visibility:'public',allow_messages:'friends',allow_calls:'friends',show_online_status:true,allow_profile_discovery:true};
 const ALLOWED_THEMES=[1,2,3,4,5,6,7,8,9,10];
@@ -59,7 +59,7 @@ function applyTheme(n){n=Number(n);if(!ALLOWED_THEMES.includes(n))n=1;document.d
 function setStatus(text){$('status').textContent=text}
 function setPrivacy(q){$('online').checked=q.show_online_status!==false;$('messages').value=q.allow_messages||'friends';$('calls').value=q.allow_calls||'friends';$('profile').value=q.profile_visibility||'public';$('posts').value=q.posts_visibility||'public';$('media').value=q.media_visibility||'public';$('friends').value=q.friends_visibility||'public';$('discovery').checked=q.allow_profile_discovery!==false}
 async function getSession(){const r=await db.auth.getSession();if(r.error)throw r.error;return r.data?.session||null}
-async function load(){const session=await getSession();if(!session?.user){location.replace('index.html');return}const uid=session.user.id;$('account').textContent=session.user.email||uid;
+async function load(){if(destroyed)return;const session=await getSession();if(!session?.user){location.replace('index.html');return}const uid=session.user.id;$('account').textContent=session.user.email||uid;
 const [privacyResult,appResult]=await Promise.all([
  db.from('profile_privacy').select('profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,allow_calls,show_online_status,allow_profile_discovery').eq('user_id',uid).maybeSingle(),
  db.from('user_app_settings').select('theme_style,message_tone,incoming_call_tone,outgoing_call_tone,browser_notifications').eq('user_id',uid).maybeSingle()
@@ -76,16 +76,18 @@ $('theme').onchange=e=>{const n=Number(e.target.value);if(window.SPIKE_THEME)win
 document.addEventListener('spike:theme-change',e=>{const n=Number(e.detail?.id);if(ALLOWED_THEMES.includes(n)&&$('theme').value!==String(n))$('theme').value=String(n)},{passive:true});
 ['messageTone','incomingTone','outgoingTone'].forEach(k=>$(k).onchange=e=>{setTone(k,e.target.checked);setStatus('Changes ready to save.')});
 $('notify').onclick=async()=>{if(!('Notification' in window)){setStatus('Browser notifications are not supported.');return}try{const p=await Notification.requestPermission();const enabled=p==='granted';$('notify').textContent=enabled?'Enabled':'Retry';setLocal('browser_notifications',enabled);const session=await getSession();if(!session?.user)return location.replace('index.html');const r=await db.from('user_app_settings').upsert({user_id:session.user.id,browser_notifications:enabled,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(r.error)throw r.error;setStatus('Browser notifications: '+p)}catch(e){console.error('[SPIKE SETTINGS NOTIFICATIONS]',e);setStatus(e.message||'Could not update browser notifications.')}};
-$('save').onclick=async()=>{const session=await getSession();if(!session?.user)return location.replace('index.html');const uid=session.user.id;$('save').disabled=true;setStatus('Saving…');try{
+$('save').onclick=async()=>{if(saveBusy)return;saveBusy=true;const session=await getSession();if(!session?.user)return location.replace('index.html');const uid=session.user.id;$('save').disabled=true;setStatus('Saving…');try{
 const privacyPatch={user_id:uid,profile_visibility:$('profile').value,posts_visibility:$('posts').value,media_visibility:$('media').value,friends_visibility:$('friends').value,allow_messages:$('messages').value,allow_calls:$('calls').value,show_online_status:$('online').checked,allow_profile_discovery:$('discovery').checked,updated_at:new Date().toISOString()};
 const appPatch={user_id:uid,theme_style:Number($('theme').value),message_tone:$('messageTone').checked,incoming_call_tone:$('incomingTone').checked,outgoing_call_tone:$('outgoingTone').checked,browser_notifications:('Notification' in window&&Notification.permission==='granted')&&getLocal('browser_notifications','false')==='true',updated_at:new Date().toISOString()};
 const [pr,ar]=await Promise.all([db.from('profile_privacy').upsert(privacyPatch,{onConflict:'user_id'}),db.from('user_app_settings').upsert(appPatch,{onConflict:'user_id'})]);
 if(pr.error)throw pr.error;if(ar.error)throw ar.error;
 setLocal('theme_style',String(appPatch.theme_style));['messageTone','incomingTone','outgoingTone'].forEach(k=>setTone(k,$(k).checked));setLocal('browser_notifications',appPatch.browser_notifications);window.__SPIKE_ONLINE_ALLOWED__=privacyPatch.show_online_status;if(window.AppPresence){if(privacyPatch.show_online_status)await window.AppPresence.start(db);else await window.AppPresence.stop()}
 setStatus('Saved.');
-}catch(e){console.error('[SPIKE SETTINGS SAVE]',e);setStatus(e.message||'Could not save settings.')}finally{$('save').disabled=false}};
+}catch(e){console.error('[SPIKE SETTINGS SAVE]',e);setStatus(e.message||'Could not save settings.')}finally{$('save').disabled=false;saveBusy=false}};
 $('signout').onclick=async()=>{try{await window.AppPresence?.stop?.();if(db.removeAllChannels)await db.removeAllChannels();const r=await db.auth.signOut({scope:'local'});if(r.error)throw r.error;location.replace('index.html?logged_out=1')}catch(e){setStatus(e.message||'Sign out failed')}};
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.href=b.dataset.go);
+authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
+window.addEventListener('pagehide',()=>{destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{window.AppPresence?.stop?.()}catch{};});
 load().catch(e=>{console.error('[SPIKE SETTINGS LOAD]',e);setStatus(e.message||'Settings failed to load')});
 </script><script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 

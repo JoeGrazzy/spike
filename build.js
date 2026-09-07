@@ -8,13 +8,14 @@ fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 
 const skip = new Set(["dist", ".git", "node_modules"]);
+const skipFile = name => /^.*\.pre-rebuild\.html$/i.test(name);
 
 function copy(src, dest) {
   const stat = fs.statSync(src);
   if (stat.isDirectory()) {
     fs.mkdirSync(dest, { recursive: true });
     for (const entry of fs.readdirSync(src)) {
-      if (skip.has(entry)) continue;
+      if (skip.has(entry) || skipFile(entry)) continue;
       copy(path.join(src, entry), path.join(dest, entry));
     }
   } else {
@@ -23,7 +24,7 @@ function copy(src, dest) {
 }
 
 for (const entry of fs.readdirSync(root)) {
-  if (skip.has(entry)) continue;
+  if (skip.has(entry) || skipFile(entry)) continue;
   copy(path.join(root, entry), path.join(dist, entry));
 }
 

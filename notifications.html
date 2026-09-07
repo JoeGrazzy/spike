@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#070b10">
 <meta name="description" content="SPIKE notifications">
 <title>SPIKE — Notifications</title>
-<script>(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=n;document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
 <link rel="stylesheet" href="css/perf.css">
 <link rel="stylesheet" href="css/ui-fix.css">
 <link rel="stylesheet" href="css/premium-back.css">
@@ -16,74 +16,515 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/presence.js"></script>
 <script src="js/theme.js" defer></script>
-<script src="js/premium-back.js" defer></script>
-<script src="js/telemetry.js" defer></script>
-<script src="js/spike-adaptive-nav.js" defer></script>
+<script src="js/spike-dialog.js"></script>
 <style>
-:root{--bg:#070b10;--surface:#111827;--surface2:#172033;--border:rgba(255,255,255,.12);--text:#f8fafc;--muted:#aab4c5;--accent:#8b5cf6;--cyan:#22d3ee;--danger:#fb7185}
-*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}body{padding-bottom:calc(82px + env(safe-area-inset-bottom));overflow-x:hidden}.app{min-height:100vh;min-height:100dvh}.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:calc(12px + env(safe-area-inset-top)) 14px 12px;background:rgba(7,11,16,.96);border-bottom:1px solid var(--border)}.back{height:40px;padding:0 12px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-weight:800;cursor:pointer}.brand{min-width:0;flex:1;color:inherit;text-decoration:none}.brand strong{display:block;font-size:18px;letter-spacing:-.04em}.brand small{color:var(--muted);font-weight:700}.refresh{height:40px;width:40px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-size:20px;cursor:pointer}.main{width:min(780px,100%);margin:auto;padding:16px 12px 28px}.hero{padding:20px;border:1px solid var(--border);border-radius:22px;background:linear-gradient(145deg,#111827,#0f172a);margin-bottom:12px}.eyebrow{font-size:11px;font-weight:900;letter-spacing:.12em;color:var(--cyan)}h1{margin:4px 0;font-size:30px;letter-spacing:-.04em}.sub{margin:0;color:var(--muted);font-size:13px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.btn{min-height:40px;padding:0 13px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--text);font-weight:800;cursor:pointer}.btn.primary{border-color:transparent;background:linear-gradient(135deg,var(--accent),#a855f7)}.btn:disabled{opacity:.45;cursor:not-allowed}.toolbar{display:grid;gap:10px;margin-top:16px}.tabs{display:flex;gap:5px;overflow:auto;padding:4px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.03)}.tab{flex:0 0 auto;border:0;border-radius:10px;padding:10px 12px;background:transparent;color:var(--muted);font-weight:800;cursor:pointer}.tab.active{background:rgba(139,92,246,.23);color:var(--text)}.search{height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface2)}.search input{width:100%;border:0;outline:0;background:transparent;color:var(--text);font:inherit}.list{display:grid;gap:10px}.item{position:relative;display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:12px;align-items:start;width:100%;padding:15px;border:1px solid var(--border);border-radius:18px;background:var(--surface);color:inherit;text-align:left;cursor:pointer}.item.unread{border-color:rgba(139,92,246,.48);background:linear-gradient(145deg,rgba(45,35,76,.8),var(--surface))}.icon{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:rgba(139,92,246,.18);font-size:22px}.copy{min-width:0}.title{font-size:14px;font-weight:900;line-height:1.3;overflow-wrap:anywhere}.text{margin-top:5px;color:var(--muted);font-size:13px;line-height:1.45;overflow-wrap:anywhere}.meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;color:var(--muted);font-size:11px}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.07);font-weight:800}.new{align-self:start;padding:4px 7px;border-radius:999px;background:rgba(139,92,246,.22);color:#ddd6fe;font-size:9px;font-weight:900}.empty{padding:34px 18px;border:1px dashed var(--border);border-radius:18px;text-align:center;color:var(--muted)}.empty strong{display:block;color:var(--text);margin-bottom:5px}.error strong{color:#fecdd3}.sentinel{height:1px}.nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:8px 8px calc(8px + env(safe-area-inset-bottom));background:rgba(7,11,16,.98);border-top:1px solid var(--border)}.navin{width:min(520px,100%);margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.nav button{min-height:48px;border:1px solid var(--border);border-radius:12px;background:var(--surface2);color:var(--muted);font:800 10px/1.2 inherit;cursor:pointer}.nav button.active{color:#fff;border-color:rgba(139,92,246,.55);background:linear-gradient(145deg,rgba(139,92,246,.5),rgba(34,211,238,.18))}.modal{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.72)}.modal.open{display:flex}.card{width:min(540px,100%);max-height:min(82dvh,700px);overflow:auto;padding:20px;border:1px solid var(--border);border-radius:22px;background:#111827}.modalhead{display:flex;gap:12px;align-items:center}.modalicon{font-size:27px}.modaltitle{font-size:18px;font-weight:900}.modalmeta{margin-top:3px;color:var(--muted);font-size:12px}.close{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:28px;cursor:pointer}.modalbody{margin-top:18px;color:var(--muted);line-height:1.6;overflow-wrap:anywhere}.modalactions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.loader{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;background:rgba(0,0,0,.55)}.loader.hide{display:none}.loaderbox{padding:16px 20px;border:1px solid var(--border);border-radius:16px;background:#111827;font-weight:800}.spin{display:inline-block;width:15px;height:15px;margin-right:8px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:s .8s linear infinite;vertical-align:-3px}@keyframes s{to{transform:rotate(360deg)}}@media(max-width:560px){h1{font-size:26px}.hero{padding:16px}.item{grid-template-columns:42px minmax(0,1fr) auto;padding:13px}.icon{width:42px;height:42px}}
+:root{--page-bg:#070b10;--surface:#111827;--surface-2:#172033;--border:rgba(255,255,255,.12);--text:#f8fafc;--muted:#aab4c5;--accent:#8b5cf6;--accent-2:#22d3ee;--danger:#fb7185}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--page-bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{padding-bottom:calc(88px + env(safe-area-inset-bottom));overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:auto;-webkit-overflow-scrolling:touch}.app{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}.header{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;min-height:72px;padding:calc(12px + env(safe-area-inset-top)) 16px 12px;background:rgba(7,11,16,.96);border-bottom:1px solid var(--border);backdrop-filter:none}.header .brand{min-width:0;flex:1;text-decoration:none;color:inherit}.brand-title{display:block;font-size:18px;font-weight:900;letter-spacing:-.04em}.brand-subtitle{display:block;margin-top:2px;color:var(--muted);font-size:11px;font-weight:700}.header-title{font-size:15px;font-weight:800;white-space:nowrap}.header-actions{display:flex;gap:8px}.icon-btn,.smart-back{border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:12px;min-width:40px;height:40px;display:inline-grid;place-items:center;cursor:pointer}.smart-back{padding:0 12px;display:flex;gap:7px;font-weight:800}.main{width:min(760px,100%);margin:0 auto;padding:18px 14px 28px;flex:1;min-width:0}.hero{background:linear-gradient(145deg,rgba(17,24,39,.98),rgba(15,23,42,.92));border:1px solid var(--border);border-radius:24px;padding:20px;margin-bottom:14px}.eyebrow{color:var(--accent-2);font-size:11px;font-weight:900;letter-spacing:.12em}.hero h1{margin:5px 0 4px;font-size:30px;letter-spacing:-.04em}.hero p{margin:0;color:var(--muted);font-size:14px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.btn{min-height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--border);background:var(--surface-2);color:var(--text);font-weight:800;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--accent),#a855f7);border-color:transparent}.btn:disabled{opacity:.5;cursor:not-allowed}.notif-toolbar{display:grid;gap:12px;margin-top:18px}.notif-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px;border:1px solid var(--border);border-radius:14px;background:rgba(255,255,255,.035)}.notif-tab{flex:0 0 auto;border:0;background:transparent;color:var(--muted);padding:10px 12px;border-radius:10px;font-weight:800;cursor:pointer}.notif-tab.active{background:rgba(139,92,246,.22);color:var(--text)}.notif-search{display:flex;align-items:center;gap:8px;height:44px;padding:0 12px;border:1px solid var(--border);border-radius:13px;background:var(--surface-2);color:var(--muted)}.notif-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--text);font:inherit}.list{display:flex;flex-direction:column;gap:12px;min-width:0;contain:layout style}.notification{display:grid;grid-template-columns:48px minmax(0,1fr) 24px;gap:12px;align-items:start;padding:16px;border:1px solid var(--border);border-radius:20px;background:var(--surface);box-shadow:none;cursor:pointer;touch-action:pan-y;content-visibility:auto;contain-intrinsic-size:112px}.notification.unread{border-color:rgba(139,92,246,.48);background:linear-gradient(145deg,rgba(45,35,76,.96),rgba(17,24,39,.98))}.notif-icon,.notification-icon{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;background:rgba(139,92,246,.18);font-size:23px}.notif-body{min-width:0}.notif-title{font-size:15px;font-weight:900;line-height:1.25;overflow-wrap:anywhere}.notif-preview{margin-top:6px;color:var(--muted);font-size:13px;line-height:1.45;overflow-wrap:anywhere}.notif-details{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.notif-details span{display:inline-flex;align-items:center;max-width:100%;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted);font-size:11px;font-weight:750;overflow-wrap:anywhere}.notif-arrow{align-self:center;color:var(--muted);font-size:24px}.empty{padding:28px 18px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px}.empty.error{color:#fecdd3}.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(7,11,16,.97);border-top:1px solid var(--border);backdrop-filter:none}.bottom-nav-inner{width:min(520px,100%);margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.nav-item{min-height:48px;border:1px solid var(--border);border-radius:12px;background:var(--surface-2);color:var(--muted);font:700 11px/1.3 inherit;cursor:pointer}.nav-item.active{color:#fff;background:linear-gradient(145deg,rgba(139,92,246,.5),rgba(34,211,238,.18));border-color:rgba(139,92,246,.55)}.notif-modal,.premium-confirm-backdrop{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));background:rgba(0,0,0,.7);backdrop-filter:none}.notif-modal.open,.premium-confirm-backdrop.open{display:flex}.notif-modal-card,.premium-confirm-card{width:min(520px,100%);max-height:min(80dvh,680px);overflow:auto;padding:20px;border:1px solid var(--border);border-radius:24px;background:#111827;color:var(--text);box-shadow:0 24px 80px rgba(0,0,0,.5)}.notif-modal-head{display:flex;align-items:center;gap:12px}.notif-modal-icon{font-size:26px}.notif-modal-title{font-weight:900;font-size:18px}.notif-modal-meta{margin-top:4px;color:var(--muted);font-size:12px}.notif-modal-close{margin-left:auto;border:0;background:transparent;color:var(--muted);font-size:28px;cursor:pointer}.notif-modal-body{margin-top:18px;line-height:1.6;color:var(--muted);overflow-wrap:anywhere}.loader{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.58);backdrop-filter:none}.loader.hide{display:none}.loader-card{padding:18px 22px;border:1px solid var(--border);border-radius:18px;background:#111827;color:var(--text);font-weight:800}.spinner{display:inline-block;width:16px;height:16px;margin-right:8px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;vertical-align:-3px;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));z-index:3000;transform:translateX(-50%);max-width:calc(100% - 28px);padding:12px 16px;border:1px solid var(--border);border-radius:14px;background:#111827;color:var(--text);display:none}.toast.show{display:block}@media(max-width:560px){.header-title{display:none}.main{padding:12px 10px 24px}.hero{padding:16px;border-radius:20px}.hero h1{font-size:26px}.notification{grid-template-columns:44px minmax(0,1fr) 18px;padding:14px;border-radius:17px}.notif-icon,.notification-icon{width:44px;height:44px}.notif-title{font-size:14px}.notif-preview{font-size:12px}.notif-details span{font-size:10px}.bottom-nav{padding-left:6px;padding-right:6px}}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="top"><button class="back spike-premium-back" id="backBtn" type="button" data-spike-premium-back="1" data-back-fallback="feed.html">← Back</button><a class="brand" href="feed.html"><strong>SPIKE</strong><small>CONNECT • SHARE • DISCOVER</small></a><button class="refresh" id="refreshBtn" type="button" aria-label="Refresh notifications">↻</button></header>
-<main class="main">
-<section class="hero">
-<div class="eyebrow">ACTIVITY CENTER</div><h1>Notifications</h1><p class="sub"><span id="unreadCount">0</span> unread</p>
-<div class="actions"><button class="btn primary" id="markAllBtn" type="button">Mark all read</button><button class="btn" id="deleteReadBtn" type="button">Delete read</button><button class="btn" id="clearBtn" type="button">Clear all</button></div>
-<div class="toolbar"><div class="tabs" role="tablist" aria-label="Notification filters"><button class="tab active" data-filter="all" role="tab" aria-selected="true">All</button><button class="tab" data-filter="unread" role="tab" aria-selected="false">Unread</button><button class="tab" data-filter="activity" role="tab" aria-selected="false">Activity</button><button class="tab" data-filter="mentions" role="tab" aria-selected="false">Mentions</button><button class="tab" data-filter="system" role="tab" aria-selected="false">System</button></div><label class="search">⌕<input id="searchInput" type="search" autocomplete="off" placeholder="Search notifications" aria-label="Search notifications"></label></div>
-</section>
-<section id="list" class="list" aria-live="polite"><div class="empty"><strong>Loading notifications…</strong>Please wait.</div></section><div id="sentinel" class="sentinel"></div>
-</main>
-<nav class="nav" aria-label="SPIKE navigation"><div class="navin"><button type="button" data-nav="feed.html">⌂<br>Feed</button><button type="button" data-nav="friends.html">♧<br>Friends</button><button type="button" data-nav="messages.html">◌<br>Chat</button><button class="active" type="button" aria-current="page">🔔<br>Alerts</button><button type="button" data-nav="profile.html">◯<br>Profile</button></div></nav>
+<header class="header"><button class="smart-back" id="spikeSmartBack" type="button" data-spike-premium-back="1" data-back-fallback="feed.html"><span aria-hidden="true">←</span><span>Back</span></button><a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></a><span class="header-title">Notifications</span><div class="header-actions"><button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh notifications">↻</button></div></header>
+<main class="main"><section class="hero"><div class="eyebrow">SPIKE ACTIVITY</div><h1>Notifications</h1><p><span id="unreadCount">0</span> unread notification<span id="unreadPlural">s</span></p><div class="actions"><button class="btn primary" id="markAll" type="button">Mark all read</button><button class="btn" id="clearAll" type="button">Clear all</button><button class="btn" id="deleteRead" type="button">Delete read</button></div><div class="notif-toolbar" role="toolbar" aria-label="Notification filters"><div class="notif-tabs" role="tablist"><button class="notif-tab active" id="tabAll" type="button" role="tab" aria-selected="true">All</button><button class="notif-tab" id="tabUnread" type="button" role="tab" aria-selected="false">Unread</button><button class="notif-tab" id="tabAnnouncements" type="button" role="tab" aria-selected="false">Announcements</button><button class="notif-tab" id="tabMentions" type="button" role="tab" aria-selected="false">Mentions</button><button class="notif-tab" id="tabSystem" type="button" role="tab" aria-selected="false">System</button></div><label class="notif-search"><span aria-hidden="true">⌕</span><input id="notificationSearch" type="search" autocomplete="off" placeholder="Search notifications" aria-label="Search notifications"></label></div></section><section class="list" id="notificationList"><div class="empty">Loading notifications…</div></section></main>
+<nav class="bottom-nav" aria-label="SPIKE navigation"><div class="bottom-nav-inner"><button class="nav-item" id="feedNav" type="button">⌂<br>Feed</button><button class="nav-item" id="friendsNav" type="button">♧<br>Friends</button><button class="nav-item" id="chatNav" type="button">◌<br>Chat</button><button class="nav-item active" type="button" aria-current="page">🔔<br>Alerts</button><button class="nav-item" id="profileNav" type="button">◯<br>Profile</button></div></nav>
 </div>
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true"><div class="card"><div class="modalhead"><span class="modalicon" id="modalIcon">🔔</span><div><div class="modaltitle" id="modalTitle">Notification</div><div class="modalmeta" id="modalMeta"></div></div><button class="close" id="modalClose" type="button" aria-label="Close">×</button></div><div class="modalbody" id="modalBody"></div><div class="modalactions" id="modalActions"></div></div></div>
-<div class="loader" id="loader"><div class="loaderbox"><span class="spin"></span>Loading SPIKE…</div></div>
+<div class="notif-modal" id="notificationModal" role="dialog" aria-modal="true" aria-hidden="true"><div class="notif-modal-card"><div class="notif-modal-head"><span class="notif-modal-icon" id="notificationModalIcon">🔔</span><div><div class="notif-modal-title" id="notificationModalTitle">Notification</div><div class="notif-modal-meta" id="notificationModalMeta"></div></div><button class="notif-modal-close" id="notificationModalClose" type="button" aria-label="Close notification details">×</button></div><div class="notif-modal-body" id="notificationModalBody"></div></div></div>
+<div class="loader" id="loader"><div class="loader-card"><span class="spinner" aria-hidden="true"></span>Loading SPIKE…</div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="js/premium-back.js" defer></script><script src="js/telemetry.js" defer></script><script src="js/spike-adaptive-nav.js" defer></script><script src="js/ui-fix.js"></script>
 <script>
-'use strict';
-const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
-const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-const $=s=>document.querySelector(s);const $$=s=>[...document.querySelectorAll(s)];
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const state={user:null,items:new Map(),filter:'all',query:'',loading:false,loadingMore:false,hasMore:true,before:null,channel:null,observer:null,booted:false};
-const typeMap={friend_request:['👥','Friend request','sent you a friend request'],friend_accepted:['🤝','Friend request accepted','accepted your friend request'],new_follower:['👤','New follower','started following you'],follow:['👤','New follower','followed you'],like:['❤️','New like','liked your post'],post_like:['❤️','New like','liked your post'],comment:['💬','New comment','commented on your post'],mention:['📣','You were mentioned','mentioned you'],mention_reply:['📣','Mention reply','replied to a mention'],message:['💬','New message','sent you a message'],coin_received:['🪙','Coins received','sent you coins'],coin_topup_completed:['🪙','Coin top-up complete','completed a coin top-up'],room_invite:['🎙️','Room invitation','invited you to a room'],room_purchase_verified:['✅','Purchase approved','your room purchase was approved'],room_purchase_rejected:['⚠️','Purchase rejected','your room purchase was rejected'],announcement:['📢','SPIKE announcement','published an announcement'],broadcast:['📢','SPIKE broadcast','published a broadcast'],security:['🔐','Security alert','reported a security event'],system:['⚙️','System update','posted a system update']};
-function data(n){return n&&n.data&&typeof n.data==='object'?n.data:{}};
-function val(d,keys){for(const k of keys){if(d[k]!==undefined&&d[k]!==null&&String(d[k]).trim())return String(d[k]).trim()}return ''}
-function typeInfo(n){const t=String(n?.type||'').toLowerCase();return typeMap[t]||['🔔',t.replaceAll('_',' ').replace(/\b\w/g,x=>x.toUpperCase())||'Notification',''];}
-function actor(n){return val(data(n),['actor_name','from_name','sender_name','display_name','username','actor'])}
-function target(n){return val(data(n),['target_name','post_title','room_name','conversation_name','item'])}
-function message(n){const d=data(n),explicit=val(d,['message','body','description','detail','preview','content']);if(explicit)return explicit;const [,,fallback]=typeInfo(n),a=actor(n),t=target(n);const amount=d.amount||d.coins;const extra=amount?` (${Number(amount).toLocaleString()})`:'';return a?`${a} ${fallback||''}${extra}${t?' · '+t:''}`:(fallback||'');}
-function category(n){const t=String(n?.type||'').toLowerCase();if(/mention/.test(t))return'mentions';if(/announcement|broadcast|system|security|auth/.test(t))return'system';return'activity'}
-function timeAgo(v){const d=new Date(v),diff=Date.now()-d.getTime();if(!Number.isFinite(diff))return'';if(diff<60000)return'just now';if(diff<3600000)return`${Math.floor(diff/60000)}m ago`;if(diff<86400000)return`${Math.floor(diff/3600000)}h ago`;if(diff<604800000)return`${Math.floor(diff/86400000)}d ago`;return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'})}
-function hrefFor(n){const d=data(n),t=String(n?.type||'').toLowerCase();const explicit=val(d,['url','href','link','activity_url','deep_link']);const actorId=val(d,['actor_id','from_user_id','sender_id','from_id']);const post=val(d,['post_id','postId','target_post_id','content_id']);const room=val(d,['room_id','roomId','target_room_id']);const user=val(d,['conversation_user_id','other_user_id','recipient_id','sender_id','from_user_id'])||actorId;const safe=raw=>{try{const u=new URL(raw,location.href);return u.origin===location.origin?u:null}catch(_){return null}};if(explicit){const u=safe(explicit);if(u)return u.href}if(/message|chat|dm|private_message/.test(t)&&UUID.test(user))return`message.html?private_uid=${encodeURIComponent(user)}`;if((post||/like|comment|mention|reaction|repost/.test(t))&&post)return`feed.html?post=${encodeURIComponent(post)}`;if(room)return`rooms.html?room=${encodeURIComponent(room)}`;if(UUID.test(actorId)&&/friend|follow|story/.test(t))return`view_user.html?uid=${encodeURIComponent(actorId)}`;return null}
-function uniqueSort(rows){const seen=new Set();return(rows||[]).filter(n=>{const id=String(n?.id||'').trim();if(!UUID.test(id)||seen.has(id))return false;seen.add(id);return true}).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
-function merge(rows){for(const n of uniqueSort(rows)){const id=String(n.id);const old=state.items.get(id);state.items.set(id,old?{...old,...n}:n)}}
-function filtered(){const q=state.query.trim().toLowerCase();return [...state.items.values()].filter(n=>{if(state.filter==='unread'&&n.read)return false;if(['activity','mentions','system'].includes(state.filter)&&category(n)!==state.filter)return false;if(!q)return true;return[...typeInfo(n),message(n),actor(n),target(n),n.type].join(' ').toLowerCase().includes(q)}).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))}
-function render(){const list=$('#list'),items=filtered(),unread=[...state.items.values()].filter(n=>!n.read).length;$('#unreadCount').textContent=unread>99?'99+':unread;$('#markAllBtn').disabled=!unread;$('#deleteReadBtn').disabled=!([...state.items.values()].some(n=>n.read));$('#clearBtn').disabled=!state.items.size;if(!items.length){list.innerHTML=`<div class="empty"><strong>${state.items.size?'No matching notifications.':'No notifications yet.'}</strong><span>${state.items.size?'Try another filter or search.':'New SPIKE activity will appear here.'}</span></div>`;return}list.innerHTML=items.map(n=>{const [icon,title]=typeInfo(n),a=actor(n),t=target(n),h=hrefFor(n);return`<button class="item ${n.read?'':'unread'}" type="button" data-notification-id="${esc(n.id)}"><span class="icon" aria-hidden="true">${icon}</span><span class="copy"><span class="title">${esc(n.data?.title||title)}</span><span class="text">${esc(message(n))}</span><span class="meta">${a?`<span class="badge">${esc(a)}</span>`:''}${t?`<span class="badge">${esc(t)}</span>`:''}<span>${esc(timeAgo(n.created_at))}</span>${n.group_count>1?`<span class="badge">${esc(n.group_count)} related</span>`:''}</span></span>${n.read?'':'<span class="new">NEW</span>'}</button>`}).join('')}
-async function call(name,args={},ms=12000){const result=await Promise.race([db.rpc(name,args),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Request timed out.')),ms))]);if(result.error)throw result.error;return result.data}
-async function load({reset=false}={}){if(!state.user||state.loading||state.loadingMore)return;const more=!reset;if(more&&!state.hasMore)return;more?state.loadingMore=true:state.loading=true;try{const data=await call('get_smart_notification_page',{p_limit:40,p_before_created_at:more&&state.before?state.before.created_at:null,p_before_id:more&&state.before?state.before.id:null});const rows=uniqueSort(data);if(reset){state.items.clear();state.before=null;state.hasMore=true}merge(rows);if(rows.length<40)state.hasMore=false;if(rows.length)state.before=rows[rows.length-1];render()}finally{state.loading=false;state.loadingMore=false}}
-async function markRead(id){const n=state.items.get(id);if(!n||n.read)return;await call('mark_notification_read',{p_notification_id:id});n.read=true;state.items.set(id,n);render()}
-async function markAll(){if(!state.user)return;$('#markAllBtn').disabled=true;try{await call('mark_all_notifications_read');for(const n of state.items.values())n.read=true;render();toast('All notifications marked as read.')}catch(e){toast(e.message||'Could not mark notifications as read.',true)}}
-async function deleteRead(){try{await call('delete_read_notifications');for(const [id,n] of state.items)if(n.read)state.items.delete(id);render();toast('Read notifications deleted.')}catch(e){toast(e.message||'Could not delete read notifications.',true)}}
-async function clearAll(){if(!state.items.size)return;if(!confirm('Clear all notifications? This cannot be undone.'))return;try{await call('clear_notifications');state.items.clear();state.before=null;state.hasMore=false;render();toast('All notifications cleared.')}catch(e){toast(e.message||'Could not clear notifications.',true)}}
-function toast(msg,error=false){if(window.spikePremiumToast){window.spikePremiumToast(msg,error?'error':'success',3000);return}const old=$('#toast');if(old)old.remove();const t=document.createElement('div');t.id='toast';t.textContent=msg;t.style.cssText='position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:4000;padding:12px 16px;border:1px solid rgba(255,255,255,.15);border-radius:12px;background:#111827;color:#fff;max-width:calc(100% - 24px)';document.body.appendChild(t);setTimeout(()=>t.remove(),3000)}
-function openModal(n){const [icon,title]=typeInfo(n),d=data(n),h=hrefFor(n);$('#modalIcon').textContent=icon;$('#modalTitle').textContent=d.title||title;$('#modalMeta').textContent=[timeAgo(n.created_at),n.read?'Read':'Unread'].join(' • ');const fields=[['Message',message(n)],['From',actor(n)],['Target',target(n)],['Type',n.type]].filter(([,v])=>v);$('#modalBody').innerHTML=fields.map(([k,v])=>`<p><strong style="color:#f8fafc">${esc(k)}</strong><br>${esc(v)}</p>`).join('');const actions=$('#modalActions');actions.innerHTML=h?`<button class="btn primary" type="button" id="openRelated">Open related activity</button>`:'';$('#modal').classList.add('open');$('#modal').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';$('#openRelated')?.addEventListener('click',()=>location.href=h);$('#modalClose').focus()}
-function closeModal(){$('#modal').classList.remove('open');$('#modal').setAttribute('aria-hidden','true');document.body.style.overflow=''}
-async function subscribe(){if(state.channel)await db.removeChannel(state.channel);state.channel=db.channel(`spike-notifications:${state.user.id}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${state.user.id}`},payload=>{merge([payload.new]);render()}).on('postgres_changes',{event:'UPDATE',schema:'public',table:'notifications',filter:`user_id=eq.${state.user.id}`},payload=>{merge([payload.new]);render()}).on('postgres_changes',{event:'DELETE',schema:'public',table:'notifications',filter:`user_id=eq.${state.user.id}`},payload=>{const id=String(payload.old?.id||'');if(id)state.items.delete(id);render()}).subscribe(status=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){setTimeout(()=>state.user&&subscribe().catch(()=>{}),3000)}})}
-async function boot(){try{const {data,error}=await db.auth.getSession();if(error)throw error;state.user=data.session?.user||null;if(!state.user){location.replace('index.html?reauth=1');return}window.AppPresence?.start(db);await load({reset:true});await subscribe();state.booted=true;$('#loader').classList.add('hide')}catch(e){console.error('SPIKE notifications boot failed',e);$('#loader').classList.add('hide');$('#list').innerHTML=`<div class="empty error"><strong>Could not load notifications.</strong><span>${esc(e.message||'Please try again.')}</span><br><button class="btn primary" id="retry" type="button" style="margin-top:12px">Retry</button></div>`;$('#retry').onclick=()=>location.reload()}}
-$$('.tab').forEach(b=>b.addEventListener('click',()=>{state.filter=b.dataset.filter;$$('.tab').forEach(x=>{const active=x===b;x.classList.toggle('active',active);x.setAttribute('aria-selected',active?'true':'false')});render()}));
-$('#searchInput').addEventListener('input',e=>{state.query=e.target.value||'';render()});
-$('#refreshBtn').addEventListener('click',async()=>{if(!state.user)return;try{await load({reset:true});toast('Notifications refreshed.')}catch(e){toast(e.message||'Could not refresh notifications.',true)}});
-$('#markAllBtn').addEventListener('click',markAll);$('#deleteReadBtn').addEventListener('click',deleteRead);$('#clearBtn').addEventListener('click',clearAll);
-$('#list').addEventListener('click',async e=>{const b=e.target.closest('[data-notification-id]');if(!b)return;const n=state.items.get(b.dataset.notificationId);if(!n)return;b.disabled=true;try{await markRead(n.id);openModal(n)}catch(err){toast(err.message||'Could not update notification.',true)}finally{b.disabled=false}});
-$('#modalClose').addEventListener('click',closeModal);$('#modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
-$$('[data-nav]').forEach(b=>b.addEventListener('click',()=>location.href=b.dataset.nav));
-state.observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting)&&state.hasMore&&!state.loadingMore)load().catch(e=>toast(e.message||'Could not load more notifications.',true))},{rootMargin:'500px'});state.observer.observe($('#sentinel'));
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.user)load({reset:true}).catch(()=>{})});
-db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&state.booted)location.replace('index.html?reauth=1');if(event==='TOKEN_REFRESHED'&&session)state.user=session.user});
-window.addEventListener('beforeunload',()=>{state.observer?.disconnect();if(state.channel)db.removeChannel(state.channel)});
+"use strict";
+const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_KEY="sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:"pkce"}});
+window.sb=sb;
+window.supabaseClient=sb;
+const $=s=>document.querySelector(s), esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+let me=null,rows=[],channel=null,profileCache=new Map(),appPrefs={message_tone:true,browser_notifications:false};
+function dataOf(n){return n&&n.data&&typeof n.data==="object"?n.data:{}}
+function firstValue(d,keys){for(const k of keys){const v=d?.[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v)}return ""}
+
+function targetOf(n){const d=dataOf(n);return firstValue(d,["target_name","post_title","room_name","conversation_name","recipient_name"]) }
+function detailOf(n){const d=dataOf(n);return firstValue(d,["body","description","detail","details","preview","content","message"])}
+function titleOf(n){const d=dataOf(n);if(d.title)return String(d.title);const t=String(n.type||"").toLowerCase();const map={friend_request:"Friend request",friend_accepted:"Friend request accepted",friend_request_declined:"Friend request declined",friend_declined:"Friend request declined",friend_request_resolved:"Friend request resolved",new_follower:"New follower",follow:"New follower",like:"New like",post_like:"New like",comment:"New comment",mention:"You were mentioned",message:"New message",coin_received:"Coins received",coin_topup_completed:"Coin top-up completed",room_invite:"Room invitation",room_purchase_verified:"Purchase approved",room_purchase_rejected:"Purchase rejected",broadcast:"SPIKE broadcast",announcement:"SPIKE announcement",login:"Login activity",security:"Security alert",system:"System update",friend_removed:"Friend removed",friend_unfriended:"Friend removed",call_incoming:"Incoming call",call_missed:"Missed call",call_ended:"Call ended",message_deleted:"Message deleted",mention_reply:"Mention reply"};return map[t]||String(n.type||"Notification").replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase())}
+function notificationText(n){
+const d=dataOf(n);
+const explicit=firstValue(d,["message","body","description","detail","preview"]);
+if(explicit)return explicit;
+const actor=actorOf(n),target=targetOf(n);
+const amount=Number(d.amount||0).toLocaleString(),coins=Number(d.coins||0).toLocaleString();
+const map={friend_request:"sent you a friend request",friend_accepted:"accepted your friend request",friend_request_declined:"declined your friend request",friend_declined:"declined your friend request",friend_request_resolved:"this friend request is no longer pending",new_follower:"started following you",follow:"followed you",like:"liked your post",post_like:"liked your post",comment:"commented on your post",mention:"mentioned you",message:"sent you a message",coin_received:`sent you ${amount} coins`,coin_topup_completed:`your ${coins} coin top-up is complete`,room_invite:"invited you to a room",room_purchase_verified:`purchase approved: ${d.item||"item"}`,room_purchase_rejected:`purchase rejected: ${d.item||"item"}`,broadcast:"published a SPIKE broadcast",announcement:"published a new announcement"};
+const action=map[String(n.type||"").toLowerCase()];
+if(action)return actor?`${actor} ${action}${target?` · ${target}`:""}`:action;
+return actor?`${actor}${target?` · ${target}`:""}`:String(n.type||"Notification").replaceAll("_"," ");
+}
+function notificationIcon(n){const t=String(n.type||"").toLowerCase();if(/coin/.test(t))return "🪙";if(/friend|follow/.test(t))return "👥";if(/like/.test(t))return "❤️";if(/comment|message|chat/.test(t))return "💬";if(/room/.test(t))return "🎙️";if(/announcement/.test(t))return "📢";if(/login|security|auth/.test(t))return "🔐";if(/error|fail/.test(t))return "⚠️";return "🔔"}
+function formatTime(v){const d=new Date(v);if(Number.isNaN(d.getTime()))return "";const diff=Math.max(0,Date.now()-d.getTime());if(diff<60000)return "Just now";if(diff<3600000)return Math.floor(diff/60000)+"m ago";if(diff<86400000)return Math.floor(diff/3600000)+"h ago";if(diff<604800000)return Math.floor(diff/86400000)+"d ago";return d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:d.getFullYear()===new Date().getFullYear()?undefined:"numeric"})}
+function notificationHref(n){
+const d=dataOf(n),t=String(n?.type||"").toLowerCase();
+const actor=String(d.actor_id||d.from_user_id||d.sender_id||d.from_id||d.caller_id||"").trim();
+const postId=String(d.post_id||d.postId||d.target_post_id||d.targetPostId||d.content_id||d.contentId||"").trim();
+const roomId=String(d.room_id||d.roomId||d.target_room_id||d.targetRoomId||"").trim();
+const messageUser=String(
+  d.conversation_user_id||d.conversationUserId||d.other_user_id||d.otherUserId||
+  d.recipient_id||d.recipientId||d.sender_id||d.senderId||d.from_user_id||d.fromUserId||actor
+).trim();
+const explicit=String(d.url||d.href||d.link||d.activity_url||d.activityUrl||d.deep_link||d.deepLink||"").trim();
+const sourceRaw=d.source_page||d.sourcePage||d.page||d.route||d.source_url||d.sourceUrl||"";
+let source=String(sourceRaw||"").trim();
+let href="";
+
+const sameOriginUrl=(raw)=>{
+  try{
+    const u=new URL(String(raw),window.location.href);
+    return u.origin===window.location.origin?u:null;
+  }catch(_){return null}
+};
+const isMessagePage=(v)=>/(^|\/)(message|messages)(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+const isFeedPage=(v)=>/(^|\/)feed(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+const isRoomsPage=(v)=>/(^|\/)rooms?(?:\.html)?$/i.test(String(v||"").split("?")[0]);
+
+if(explicit){
+  const u=sameOriginUrl(explicit);
+  if(u){
+    if(isMessagePage(u.pathname)){
+      if(messageUser && !u.searchParams.get("private_uid") && !u.searchParams.get("user"))
+        u.searchParams.set("private_uid",messageUser);
+    }else if(isFeedPage(u.pathname)){
+      if(postId && !u.searchParams.get("post")) u.searchParams.set("post",postId);
+    }
+    href=u.href;
+  }
+}
+
+if(!href && source){
+  const u=sameOriginUrl(source);
+  if(u){
+    if(isMessagePage(u.pathname)){
+      if(messageUser && !u.searchParams.get("private_uid") && !u.searchParams.get("user"))
+        u.searchParams.set("private_uid",messageUser);
+    }else if(isFeedPage(u.pathname)){
+      if(postId && !u.searchParams.get("post")) u.searchParams.set("post",postId);
+    }
+    href=u.href;
+  }else if(isMessagePage(source)){
+    href=source.split("?")[0]+(messageUser?"?private_uid="+encodeURIComponent(messageUser):"");
+  }else if(isFeedPage(source)){
+    href=source.split("?")[0]+(postId?"?post="+encodeURIComponent(postId):"");
+  }else if(isRoomsPage(source)){
+    href=source.split("?")[0]+(roomId?"?room="+encodeURIComponent(roomId):"");
+  }
+}
+
+if(!href && /message|chat|dm|private_message/.test(t) && messageUser)
+  href="message.html?private_uid="+encodeURIComponent(messageUser);
+if(!href && /like|post_like|comment|mention|mention_reply|reaction|repost|post/.test(t) && postId)
+  href="feed.html?post="+encodeURIComponent(postId);
+if(!href && postId) href="feed.html?post="+encodeURIComponent(postId);
+if(!href && roomId) href="rooms.html?room="+encodeURIComponent(roomId);
+if(!href && actor && UUID_RE.test(actor) && /follow|friend|story/.test(t))
+  href="view_user.html?uid="+encodeURIComponent(actor);
+if(!href && d.user_id && UUID_RE.test(String(d.user_id)) && String(d.user_id)!==String(me?.id||""))
+  href="view_user.html?uid="+encodeURIComponent(String(d.user_id));
+if(!href && /follow|friend/.test(t) && actor && UUID_RE.test(actor))
+  href="view_user.html?uid="+encodeURIComponent(actor);
+if(!href && /announcement|broadcast|system|security/.test(t)) href=null;
+if(!href)return null;
+
+const finalUrl=sameOriginUrl(href);
+return finalUrl?finalUrl.href:null;
+}
+let notificationFilter="all",notificationQuery="";
+async function hydrateNotificationActors(list){
+  const ids=[...new Set((list||[]).flatMap(n=>{
+    const d=dataOf(n),v=[d.actor_id,d.from_user_id,d.sender_id,d.from_id];
+    return v.filter(x=>x&&/^[0-9a-f-]{36}$/i.test(String(x))).map(String);
+  }))];
+  const missing=ids.filter(id=>!profileCache.has(id));
+  if(!missing.length)return;
+  try{
+    const r=await sb.rpc("get_public_profiles",{p_user_ids:missing});
+    if(r.error)throw r.error;
+    (r.data||[]).forEach(p=>{if(p?.id)profileCache.set(String(p.id),p)});
+  }catch(e){console.warn("SPIKE notification actor lookup unavailable",e)}
+}
+function actorOf(n){
+  const d=dataOf(n),explicit=firstValue(d,["actor_name","from_name","sender_name","username","name","display_name","actor"]);
+  if(explicit)return explicit;
+  for(const key of ["actor_id","from_user_id","sender_id","from_id"]){
+    const id=d?.[key],p=id&&profileCache.get(String(id));
+    if(p)return p.display_name||p.full_name||p.username||"SPIKE user";
+  }
+  return "";
+}
+function categoryOf(n){const t=String(n?.type||"").toLowerCase();if(t.includes("announcement")||t==="broadcast")return "announcements";if(t.includes("mention"))return "mentions";if(t.includes("system")||t.includes("security")||t.includes("auth")||t.startsWith("room_purchase_"))return "system";return "activity";}
+let isUserScrolling=false;
+let pendingSilentRefresh=false;
+let scrollEndTimer=null;
+function render(){
+const box=$("#notificationList"); if(!box)return; const count=rows.filter(n=>!n.read).length;
+$("#unreadCount").textContent=count>99?"99+":String(count);$("#unreadPlural").textContent=count===1?"":"s";$("#markAll").disabled=!count;$("#clearAll").disabled=!rows.length;
+const q=notificationQuery.trim().toLowerCase();
+const visible=rows.filter(n=>{
+ if(notificationFilter==="unread"&&n.read)return false;
+  if(["announcements","mentions","system","activity"].includes(notificationFilter)&&categoryOf(n)!==notificationFilter)return false;
+ if(!q)return true;
+ const hay=[titleOf(n),notificationText(n),detailOf(n),actorOf(n),targetOf(n),n.type].join(" ").toLowerCase();
+ return hay.includes(q);
+});
+if(!visible.length){box.innerHTML='<div class="empty">🔔<br><br><strong>'+ (rows.length ? 'No matching notifications.' : 'No notifications yet.') +'</strong><br><span class="muted">'+(rows.length?'Try another search or switch to All.':'Activity from SPIKE will appear here automatically.')+'</span></div>';return}
+box.innerHTML=visible.map(n=>{
+const d=dataOf(n),actor=actorOf(n),target=targetOf(n),preview=detailOf(n);
+const href=notificationHref(n);
+return `<button class="notification ${n.read?'':'unread'}" data-id="${esc(n.id)}" type="button" aria-label="View full notification details">`+
+`<span class="notif-icon">${notificationIcon(n)}</span>`+
+`<span class="notif-body"><span class="notif-title">${esc(titleOf(n))}</span>`+
+`<span class="notif-preview">${esc(notificationText(n))}</span>`+
+`${preview&&preview!==notificationText(n)?`<span class="notif-preview">${esc(preview)}</span>`:""}`+
+`<span class="notif-details">${actor?`<span class="notif-chip">From ${esc(actor)}</span>`:""}${target?`<span class="notif-chip">${esc(target)}</span>`:""}<span class="notif-time">${esc(formatTime(n.created_at))}</span></span>${n.smart_bucket?`<span class="notif-smart"><span class="notif-smart-chip ${esc(n.smart_bucket)}">${esc(n.smart_bucket)}</span>${n.smart_reason?`<span class="notif-smart-chip">${esc(n.smart_reason)}</span>`:""}${n.group_count>1?`<span class="notif-smart-chip notif-group-count">${esc(n.group_count)} related</span>`:""}</span>`:""}</span>`+
+`${n.read?'':'<span class="new">NEW</span>'}<span class="notif-arrow">${href?'›':''}</span></button>`;
+}).join("");
+}
+function withTimeout(p,ms,label="Request timed out"){
+return Promise.race([p,new Promise((_,reject)=>setTimeout(()=>reject(new Error(label)),ms))]);
+}
+async function load(opts={}){
+if(!me) throw new Error("Not authenticated");
+if(opts.silent && isUserScrolling){pendingSilentRefresh=true;return rows;}
+const r=await withTimeout(sb.rpc("get_smart_notification_page",{p_limit:100,p_before_created_at:null,p_before_id:null}),12000,"Notifications request timed out.");
+if(r.error)throw r.error;
+const seen=new Set();
+rows=(r.data||[]).map(n=>({...n,smart_score:Number(n.smart_score||0),smart_rank:Number(n.smart_rank||0),group_count:Number(n.group_count||1)})).filter(n=>{
+  const d=dataOf(n);
+  const key=String(n.id||d.event_id||d.notification_id||d.delivery_id||"").trim();
+  if(!key||seen.has(key))return false;
+  seen.add(key);
+  return true;
+});
+await hydrateNotificationActors(rows);
+render();return rows;
+}
+async function markRead(id){
+if(!me||!id)return;
+const r=await withTimeout(sb.rpc("mark_notification_read",{p_notification_id:id}),10000,"Could not mark notification as read.");
+if(r.error)throw r.error;
+const n=rows.find(x=>String(x.id)===String(id));if(n)n.read=true;render();
+}
+async function markAll(){
+if(!me)return;
+const btn=$("#markAll");btn.disabled=true;
+try{
+const r=await withTimeout(sb.rpc("mark_all_notifications_read"),10000,"Could not mark notifications as read.");
+if(r.error)throw r.error;
+rows.forEach(n=>n.read=true);render();
+if(window.spikePremiumToast)window.spikePremiumToast("All notifications marked as read.","success",2600);
+}finally{btn.disabled=!rows.some(n=>!n.read)}
+}
+async function confirmClearAll(){
+  if(!window.SPIKEPremiumDialog?.confirm)return window.confirm("Clear all notifications? This cannot be undone.");
+  return window.SPIKEPremiumDialog.confirm({
+    title:"Clear all notifications?",
+    message:"All notifications will be permanently removed. This cannot be undone.",
+    confirmText:"Clear all",
+    cancelText:"Keep notifications",
+    danger:true,
+    kicker:"SPIKE ACTIVITY"
+  });
+}
+async function clearAllNotifications(){
+  if(!me||!rows.length)return;
+  const btn=$("#clearAll");
+  if(btn.dataset.busy==="1")return;
+  if(!await confirmClearAll())return;
+  btn.dataset.busy="1";btn.disabled=true;
+  try{
+    const r=await withTimeout(sb.rpc("clear_notifications"),12000,"Could not clear notifications.");
+    if(r.error)throw r.error;
+    rows=[];render();
+    window.spikePremiumToast?.("All notifications cleared.","success",2600);
+  }catch(err){
+    console.error("SPIKE clear notifications error:",err);
+    window.spikePremiumToast?.(err?.message||"Could not clear notifications.","error",4200);
+  }finally{
+    btn.dataset.busy="0";btn.disabled=!rows.length;
+  }
+}
+async function deleteReadNotifications(){
+ if(!me)return;
+ const btn=$("#deleteRead"); if(!btn||btn.disabled)return;
+ const readCount=rows.filter(n=>n.read).length; if(!readCount){window.spikePremiumToast?.("There are no read notifications to delete.","info",2200);return;}
+ if(!await window.SPIKEPremiumDialog.confirm({title:"Delete read notifications?",message:"All read notifications will be permanently removed. This cannot be undone.",confirmText:"Delete read",cancelText:"Keep notifications",danger:true,kicker:"SPIKE ACTIVITY"}))return;
+ btn.disabled=true; btn.setAttribute("aria-busy","true");
+ try{
+  const r=await withTimeout(sb.rpc("delete_read_notifications"),12000,"Could not delete read notifications.");
+  if(r.error)throw r.error;
+  rows=rows.filter(n=>!n.read); render();
+  window.spikePremiumToast?.("Read notifications deleted.","success",2200);
+ }catch(e){console.error(e);window.spikePremiumToast?.(e?.message||"Could not delete read notifications.","error",4200)}
+ finally{btn.disabled=!rows.some(n=>n.read);btn.removeAttribute("aria-busy");}
+}
+
+function upsertRow(n){
+ if(!n||String(n.user_id)!==String(me.id))return;
+ const id=String(n.id||"").trim();
+ if(!id)return;
+ const i=rows.findIndex(x=>String(x.id)===id);
+ if(i>=0)rows[i]={...rows[i],...n};
+ else rows.unshift(n);
+ rows.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+ rows=rows.slice(0,5000);
+ render();
+}
+function removeRow(n){rows=rows.filter(x=>String(x.id)!==String(n.id));render()}
+let bc=null,pollTimer=null,lastRealtimeAt=0;
+function notificationToneEnabled(){
+  try{return localStorage.getItem("spike-setting-messageTone")!=="0";}catch(e){return true;}
+}
+async function loadAppPrefs(){
+  if(!me)return;
+  try{
+    const r=await sb.from("user_app_settings").select("message_tone,browser_notifications").eq("user_id",me.id).maybeSingle();
+    if(!r.error&&r.data){appPrefs={...appPrefs,...r.data};try{localStorage.setItem("spike-setting-messageTone",r.data.message_tone===false?"0":"1");localStorage.setItem("spike-setting-browser_notifications",r.data.browser_notifications?"true":"false")}catch(e){}}
+  }catch(e){console.warn("notification preferences unavailable",e)}
+}
+function playNotificationTone(){
+  if(appPrefs.message_tone===false||!notificationToneEnabled())return;
+  const a=$("notificationTone"); if(!a)return;
+  try{a.currentTime=0;const p=a.play();if(p?.catch)p.catch(()=>{});}catch(e){}
+}
+function showBrowserNotification(n){
+  if(appPrefs.browser_notifications!==true)return;
+  if(typeof Notification!=="function"||Notification.permission!=="granted")return;
+  if(!document.hidden)return;
+  try{new Notification("SPIKE",{body:notificationText(n),icon:"assets/icon/icon.png",tag:"spike-notification-"+n.id});}catch(e){}
+}
+function notifyLocal(n){
+if(!n||String(n.user_id)!==String(me.id))return;
+const existed=rows.some(x=>String(x.id)===String(n.id));
+upsertRow(n);
+lastRealtimeAt=Date.now();
+const text=notificationText(n);
+if(!existed && !n.read){playNotificationTone();showBrowserNotification(n);}
+if(!n.read && window.spikePremiumToast) window.spikePremiumToast(text, /error|fail|denied/i.test(String(n.type||""))?"error":"info", 5200);
+}
+async function subscribe(){
+if(channel)try{await sb.removeChannel(channel)}catch(e){}
+try{const sr=await sb.auth.getSession();const token=sr.data?.session?.access_token;if(token)await sb.realtime.setAuth(token)}catch(e){console.warn("SPIKE realtime auth setup unavailable",e)}
+const topic="user:"+me.id+":notifications";
+channel=sb.channel(topic,{config:{private:true}})
+.on("broadcast",{event:"notification_created"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_updated"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.on("broadcast",{event:"notification_deleted"},()=>{lastRealtimeAt=Date.now();load({silent:true}).catch(e=>console.warn("notification realtime refresh failed",e))})
+.subscribe(status=>{if(status==="SUBSCRIBED"){lastRealtimeAt=Date.now();console.info("SPIKE notifications realtime connected")}if(status==="CHANNEL_ERROR"||status==="TIMED_OUT"){lastRealtimeAt=0;console.warn("Notifications realtime channel status:",status)}});
+try{if(bc)bc.close();bc=new BroadcastChannel("spike-notifications");bc.onmessage=e=>{const n=e.data?.notification||e.data;if(n)notifyLocal(n)}}catch(e){}
+clearInterval(pollTimer);pollTimer=setInterval(()=>{if(document.hidden||isUserScrolling)return;load({silent:true}).catch(()=>{})},60000);
+}
+let authReady=false;
+let authRecoveryInProgress=false;
+let authListenerBound=false;
+const PROJECT_REF=new URL(SUPABASE_URL).hostname.split(".")[0];
+function isInvalidRefreshTokenError(e){
+const text=[e?.code,e?.name,e?.message].filter(Boolean).join(" ").toLowerCase();
+return text.includes("refresh_token_not_found") || text.includes("invalid refresh token") || text.includes("refresh token not found");
+}
+function clearSupabaseAuthStorage(){
+// Supabase stores the browser session under sb-<project-ref>-auth-token.
+// Remove only this project's auth state; keep SPIKE theme/preferences intact.
+try{
+const exact="sb-"+PROJECT_REF+"-auth-token";
+localStorage.removeItem(exact);
+for(let i=localStorage.length-1;i>=0;i--){
+const k=localStorage.key(i)||"";
+if(k===exact || k.startsWith("sb-"+PROJECT_REF+"-")){
+localStorage.removeItem(k);
+}
+}
+}catch(err){
+console.warn("SPIKE could not clear stale auth storage",err);
+}
+}
+function showAuthRecovery(){
+authReady=true;
+authRecoveryInProgress=true;
+clearSupabaseAuthStorage();
+if(channel){try{sb.removeChannel(channel)}catch(e){} channel=null;}
+$("#loader").classList.add("hide");
+$("#notificationList").innerHTML=''+
+'<div class="empty error">'+
+'<strong>Your SPIKE session has expired.</strong><br>'+
+'<span class="muted">The saved refresh token is no longer valid. Sign in again to continue.</span><br>'+
+'<button class="btn primary" id="reauthBtn" type="button" style="margin-top:14px">Sign in again</button>'+
+'</div>';
+$("#reauthBtn").onclick=()=>{
+const next=encodeURIComponent(location.pathname+location.search);
+location.href="index.html?reauth=1&next="+next;
+};
+}
+async function boot(){
+try{
+// Restore the persisted session first. Presence and realtime must wait until Auth is ready.
+const sessionResult=await withTimeout(sb.auth.getSession(),15000,"Session check timed out. Please try again.");
+if(sessionResult.error){
+if(isInvalidRefreshTokenError(sessionResult.error)){showAuthRecovery();return;}
+throw sessionResult.error;
+}
+const session=sessionResult.data?.session;
+if(!session?.user){
+ authReady=true;
+ $("#loader").classList.add("hide");
+ location.href="index.html?reauth=1";
+ return;
+}
+me=session.user;
+authReady=true;
+try{if(session.access_token)await sb.realtime.setAuth(session.access_token)}catch(e){console.warn("SPIKE realtime auth initialization unavailable",e)}
+if(!authListenerBound){
+ authListenerBound=true;
+ sb.auth.onAuthStateChange((event,nextSession)=>{
+   if(event==="TOKEN_REFRESHED"&&nextSession?.access_token){
+     authRecoveryInProgress=false;
+     sb.realtime.setAuth(nextSession.access_token).then(()=>subscribe()).catch(e=>console.warn("SPIKE notification realtime reauth failed",e));
+   }
+   if(event==="SIGNED_OUT"&&authReady&&!authRecoveryInProgress){
+     location.href="index.html?reauth=1";
+   }
+ });
+}
+window.AppPresence?.start(sb);
+await loadAppPrefs();
+await load();
+await subscribe();
+$("#loader").classList.add("hide");
+}catch(e){
+console.error("SPIKE notifications auth/load error:",e);
+if(isInvalidRefreshTokenError(e)){showAuthRecovery();return;}
+authReady=true;
+$("#notificationList").innerHTML='<div class="empty error">Could not load notifications.<br><span class="muted">'+esc(e?.message||"Please try again.")+'</span><br><button class="btn" id="retryNotifications" type="button" style="margin-top:12px">Retry</button></div>';
+$("#loader").classList.add("hide");
+$("#retryNotifications")?.addEventListener("click",()=>{boot().catch(()=>{});});
+}
+}
+
+$("#notificationSearch").addEventListener("input",e=>{notificationQuery=e.target.value||"";render()});
+$("#markAll")?.addEventListener("click",()=>markAll().catch(e=>{console.error(e);window.spikePremiumToast?.(e?.message||"Could not mark notifications as read.","error",4200)}));
+$("#deleteRead")?.addEventListener("click",()=>deleteReadNotifications());
+$("#refreshBtn").onclick=async()=>{
+ const b=$("#refreshBtn");if(b.disabled||!me)return;b.disabled=true;b.setAttribute("aria-busy","true");
+ try{await load();window.spikePremiumToast?.("Notifications refreshed.","success",1800)}
+ catch(e){console.error(e);window.spikePremiumToast?.(e?.message||"Could not refresh notifications.","error",4200)}
+ finally{b.disabled=false;b.removeAttribute("aria-busy")}
+};
+function valueForDisplay(v){
+ if(v===null||v===undefined)return "";
+ if(typeof v==="string")return v;
+ try{return JSON.stringify(v,null,2)}catch(e){return String(v)}
+}
+const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function validUuid(v){return typeof v==="string"&&UUID_RE.test(v.trim())}
+function notificationRequestId(n){
+ const d=dataOf(n),id=String(d.request_id||d.friend_request_id||d.requestId||"").trim();
+ return validUuid(id)?id:"";
+}
+async function getIncomingPendingRequest(n){
+ const d=dataOf(n);
+ const actorId=String(d.actor_id||d.from_user_id||d.sender_id||d.from_id||"").trim();
+ const wanted=notificationRequestId(n);
+ const r=await withTimeout(sb.rpc("get_friend_requests"),10000,"Could not verify friend request state.");
+ if(r.error)throw r.error;
+ return (Array.isArray(r.data)?r.data:[]).find(x=>{
+   const rid=String(x?.request_id||x?.id||"");
+   const uid=String(x?.user_id||x?.sender_id||"");
+   return (wanted&&rid===wanted)||(!wanted&&actorId&&uid===actorId);
+ })||null;
+}
+
+async function openNotificationDetails(n){
+ if(!n)return;
+ const d=dataOf(n),modal=$("#notificationModal");
+ $("#notificationModalIcon").textContent=notificationIcon(n);
+ $("#notificationModalTitle").textContent=titleOf(n);
+ $("#notificationModalMeta").textContent=[formatTime(n.created_at),n.read?"Read":"Unread"].filter(Boolean).join(" • ");
+ const detail=detailOf(n)||notificationText(n);
+ const actor=actorOf(n),target=targetOf(n),href=notificationHref(n);
+ const fields=[['From',actor],['Created',n.created_at?new Date(n.created_at).toLocaleString():'']].filter(x=>x[1]);
+ let html='';
+ html+=`<div class="notif-modal-section"><div class="notif-modal-label">Full alert</div><div class="notif-modal-text">${esc(detail)}</div></div>`;
+ if(fields.length)html+=`<div class="notif-modal-section"><div class="notif-modal-label">Details</div><div class="notif-modal-grid">${fields.map(([k,v])=>`<div class="notif-modal-field"><strong>${esc(k)}</strong><span>${esc(valueForDisplay(v))}</span></div>`).join('')}</div></div>`;
+ 
+ const nt=String(n?.type||"").toLowerCase();
+ let pendingRequest=null,friendRequestPending=false;
+ if(nt==="friend_request"){
+   try{pendingRequest=await getIncomingPendingRequest(n);friendRequestPending=!!pendingRequest;}
+   catch(e){console.warn("SPIKE could not verify incoming friend request state",e);}
+ }
+ if(friendRequestPending)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationAccept" type="button">Accept</button><button class="notif-open-btn" id="notificationDecline" type="button" style="background:transparent;color:inherit">Decline</button>${href?`<button class="notif-open-btn" id="notificationOpenTarget" type="button" style="background:transparent;color:inherit">View profile</button>`:""}</div>`;
+ else if(nt==="friend_request")html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">View profile</button></div>`;
+ else if(href)html+=`<div class="notif-modal-actions"><button class="notif-open-btn" id="notificationOpenTarget" type="button">Open related activity</button></div>`;
+ $("#notificationModalBody").innerHTML=html;
+ modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+ $("#notificationOpenTarget")?.addEventListener('click',()=>{location.href=href});
+ const requestIdForAction=String(pendingRequest?.request_id||pendingRequest?.id||notificationRequestId(n)||"").trim();
+ const runFriendAction=async(fn,successText)=>{
+   const acceptBtn=$("#notificationAccept"),declineBtn=$("#notificationDecline");
+   [acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=true;b.setAttribute('aria-busy','true')}});
+   try{
+     if(!requestIdForAction) throw new Error("This friend request notification is missing its request ID.");
+     const r=await withTimeout(sb.rpc(fn,{p_request_id:requestIdForAction}),12000,"Friend request action timed out.");
+     if(r.error)throw r.error;
+     // Null is an idempotent response: the request was already processed or removed.
+     // Convert this notification locally so the action buttons disappear immediately.
+     // The notification itself stays in the activity history.
+     n.type=fn==='accept_friend_request'?'friend_accepted':'friend_request_declined';
+     if(n.data&&typeof n.data==='object'){
+       n.data={...n.data,status:fn==='accept_friend_request'?'accepted':'declined'};
+       if(fn==='accept_friend_request')n.data.message='accepted your friend request';
+     }
+     closeNotificationDetails();
+     render();
+     window.spikePremiumToast?.(successText,'success',2600);
+     await load({silent:true});
+   }catch(e){
+     console.error("SPIKE friend notification action error:",e);
+     window.spikePremiumToast?.(e?.message||"Could not update friend request.",'error',4200);
+   }finally{[acceptBtn,declineBtn].forEach(b=>{if(b){b.disabled=false;b.removeAttribute('aria-busy')}})}
+ };
+ $("#notificationAccept")?.addEventListener('click',()=>runFriendAction('accept_friend_request','Friend request accepted.'));
+ $("#notificationDecline")?.addEventListener('click',()=>runFriendAction('decline_friend_request','Friend request declined.'));
+ $("#notificationModalClose").focus();
+}
+function closeNotificationDetails(){const modal=$("#notificationModal");modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';}
+$("#notificationModalClose").onclick=closeNotificationDetails;
+$("#notificationModal").addEventListener('click',e=>{if(e.target.id==='notificationModal')closeNotificationDetails()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$("#notificationModal")?.classList.contains('open'))closeNotificationDetails()});
+$("#notificationList").addEventListener("click",async e=>{
+ const b=e.target.closest("[data-id]");if(!b)return;
+ const n=rows.find(x=>String(x.id)===String(b.dataset.id));
+ if(b.dataset.busy==="1")return;
+ b.dataset.busy="1";b.disabled=true;
+ try{
+   if(n&&!n.read) await markRead(b.dataset.id);
+   openNotificationDetails(n);
+   b.disabled=false;b.dataset.busy="0";
+ }catch(err){
+   console.error("SPIKE notification action error:",err);
+   window.spikePremiumToast?.(err?.message||"Could not update notification.","error",4200);
+   b.disabled=false;b.dataset.busy="0";
+ }
+});
+function setFilter(f){notificationFilter=f;document.querySelectorAll(".notif-tab").forEach(b=>b.classList.remove("active"));const map={all:"#tabAll",unread:"#tabUnread",announcements:"#tabAnnouncements",mentions:"#tabMentions",system:"#tabSystem"};$(map[f])?.classList.add("active");document.querySelectorAll(".notif-tab").forEach(b=>b.setAttribute("aria-selected",b.classList.contains("active")?"true":"false"));render();}
+["All","Unread","Announcements","Mentions","System"].forEach(x=>{const id="#tab"+x;$(id)?.addEventListener("click",()=>setFilter(x.toLowerCase()));});
+$("#clearAll").onclick=clearAllNotifications;
+
+$("#feedNav").onclick=()=>location.href="feed.html";$("#friendsNav").onclick=()=>location.href="friends.html";$("#chatNav").onclick=()=>location.href="messages.html";$("#profileNav").onclick=()=>location.href="profile.html";
+window.addEventListener("beforeunload",()=>{if(channel)sb.removeChannel(channel);if(bc)bc.close();clearInterval(pollTimer)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&me)load({silent:true}).catch(()=>{})});
+// Absolute UI failsafe: a broken script/network condition must never leave the full-screen loader visible forever.
+setTimeout(()=>{
+ const loader=$("#loader");
+ if(loader&&!loader.classList.contains("hide")){
+   loader.classList.add("hide");
+   if(!me) $("#notificationList").innerHTML='<div class="empty error">SPIKE could not finish loading notifications.<br><button class="btn" id="retryNotificationsTimeout" type="button" style="margin-top:12px">Retry</button></div>';
+   $("#retryNotificationsTimeout")?.addEventListener("click",()=>location.reload());
+ }
+},20000);
 boot();
 </script>
 </body>

@@ -362,7 +362,7 @@ const form=new FormData();
 form.append("file",file);
 form.append("upload_preset",CLOUDINARY_CONFIG.uploadPreset);
 form.append("folder",folder);
-const r=await Promise.race([fetch(endpoint,{method:"POST",body:form}),new Promise((_,rej)=>setTimeout(()=>rej(new Error("Cloudinary upload timed out. Please try again.")),30000))]);
+const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),30000); let r; try{r=await fetch(endpoint,{method:"POST",body:form,signal:controller.signal})}catch(e){if(e?.name==="AbortError")throw new Error("Cloudinary upload timed out. Please try again.");throw e}finally{clearTimeout(timeout)}
 const data=await r.json().catch(()=>({}));
 if(!r.ok || !data.secure_url) throw new Error(data.error?.message||"Cloudinary upload failed");
 return data.secure_url;
@@ -371,7 +371,8 @@ const $=id=>document.getElementById(id),now=()=>new Date().toISOString();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nameOf=u=>u?.display_name||u?.full_name||u?.name||u?.email||"User",avatarOf=u=>u?.avatar_url||u?.avatar||"";
 const profileLink=id=>`profile.html?uid=${encodeURIComponent(id)}`;
-const state={me:null,uid:null,profile:null,levelDefinitions:[],posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false};
+const state={me:null,uid:null,profile:null,levelDefinitions:[],posts:[],following:false,followers:0,activePost:null,realtime:null,realtimeRetryTimer:null,realtimeRetryAttempt:0,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false,booting:false};
+function safeHttpUrl(raw){try{const u=new URL(String(raw||''),location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch{return''}}
 function toast(s,type,ms){spikePremiumToast(s,type,ms||3200)}
 function open(id){$(id).classList.add("open")}function close(id){$(id).classList.remove("open")}
 function initTheme(){const t=localStorage.getItem("spike-theme")||"dark";document.documentElement.dataset.theme=t}
@@ -558,7 +559,7 @@ function renderMediaGallery(){
   }).join("");
 }
 function render(){renderMediaGallery();$("postCount").textContent=state.posts.length;renderFeatures();$("followerCount").textContent=state.followers;$("followingCount").textContent=Array.isArray(state.profile.following)?state.profile.following.length:Number(state.profile.following_count||0)}
-function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc(n[0]||"U");const c=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(c){$("coverImg").src=c;$("coverImg").classList.remove("hidden")}const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.min(100,Math.max(1,Number(p.level||1))),defs=state.levelDefinitions||[],currentDef=defs.find(d=>Number(d.level)===level)||null,nextDef=defs.find(d=>Number(d.level)===level+1)||null;const currentXp=Number(currentDef?.xp_required??0),nextXp=Number(nextDef?.xp_required??currentXp+1),progress=level>=100?100:Math.max(0,Math.min(100,Math.round(((xp-currentXp)/Math.max(1,nextXp-currentXp))*100)));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=level>=100?"MAX LEVEL":`${Math.max(0,nextXp-xp).toLocaleString()} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";const ranks=["Newcomer","Explorer","Connector","Contributor","Influencer","Elite","Leader","Pioneer","Trailblazer","SPIKE Legend"],rankIndex=Math.min(9,Math.floor((level-1)/10));$("levelRank").textContent=`${ranks[rankIndex]} · Levels ${rankIndex*10+1}–${rankIndex*10+10}`;const badgeFiles=['01-Newcomer-level-1-10.webp', '02-Exploer-level-11-20.webp', '03-Connector-level-21-30.webp', '04-Contributor-level-31-40.webp', '05-Influencer-level-41-50.webp', '06-elite-level-51-60.webp', '07-Leader-level-61-70.webp', '08-Pionner-level-71-80.webp', '09-trailblazer-level-81-90.webp', '10-spike-legend-level-91-100.webp'];const badge=badgeFiles[rankIndex]?`assets/badges/${badgeFiles[rankIndex]}`:"assets/badges/01-Newcomer-level-1-10.webp";$("levelBadge").src=badge;$("levelBadge").alt=`${ranks[rankIndex]} badge`;$("levelBadge").onclick=()=>location.href="leveling.html";$("levelBadge").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();location.href="leveling.html"}};$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
+function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=a?`<img src="${esc(safeHttpUrl(a))}" alt="" loading="lazy" decoding="async">`:esc(n[0]||"U");const c=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(c){$("coverImg").src=safeHttpUrl(c);$("coverImg").classList.remove("hidden")}const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.min(100,Math.max(1,Number(p.level||1))),defs=state.levelDefinitions||[],currentDef=defs.find(d=>Number(d.level)===level)||null,nextDef=defs.find(d=>Number(d.level)===level+1)||null;const currentXp=Number(currentDef?.xp_required??0),nextXp=Number(nextDef?.xp_required??currentXp+1),progress=level>=100?100:Math.max(0,Math.min(100,Math.round(((xp-currentXp)/Math.max(1,nextXp-currentXp))*100)));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=level>=100?"MAX LEVEL":`${Math.max(0,nextXp-xp).toLocaleString()} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";const ranks=["Newcomer","Explorer","Connector","Contributor","Influencer","Elite","Leader","Pioneer","Trailblazer","SPIKE Legend"],rankIndex=Math.min(9,Math.floor((level-1)/10));$("levelRank").textContent=`${ranks[rankIndex]} · Levels ${rankIndex*10+1}–${rankIndex*10+10}`;const badgeFiles=['01-Newcomer-level-1-10.webp', '02-Exploer-level-11-20.webp', '03-Connector-level-21-30.webp', '04-Contributor-level-31-40.webp', '05-Influencer-level-41-50.webp', '06-elite-level-51-60.webp', '07-Leader-level-61-70.webp', '08-Pionner-level-71-80.webp', '09-trailblazer-level-81-90.webp', '10-spike-legend-level-91-100.webp'];const badge=badgeFiles[rankIndex]?`assets/badges/${badgeFiles[rankIndex]}`:"assets/badges/01-Newcomer-level-1-10.webp";$("levelBadge").src=badge;$("levelBadge").alt=`${ranks[rankIndex]} badge`;$("levelBadge").onclick=()=>location.href="leveling.html";$("levelBadge").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();location.href="leveling.html"}};$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
 function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverEdit").classList.toggle("hidden",!own);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
 function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
 function syncProfileToFeed(action,active){
@@ -775,7 +776,7 @@ function renderMediaViewer(){
   $("mediaViewerAuthor").textContent=p.authorName||nameOf(state.profile);
   $("mediaViewerTime").textContent=ago(p.createdAt||p.created_at);
   $("mediaViewerCaption").textContent=p.content||"";
-  $("mediaViewerAvatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy">`:esc((p.authorName||nameOf(state.profile)||"S")[0]);
+  $("mediaViewerAvatar").innerHTML=a?`<img src="${esc(safeHttpUrl(a))}" alt="" loading="lazy">`:esc((p.authorName||nameOf(state.profile)||"S")[0]);
   const likeBtn=$("mediaViewerLike"),saveBtn=$("mediaViewerSave");
   likeBtn.innerHTML=`♥ <span>${Array.isArray(p.likes)?p.likes.length:0}</span>`;
   likeBtn.classList.toggle("active",liked(p));
@@ -804,14 +805,34 @@ let mediaSwipeX=0;
 $("mediaViewerStage").addEventListener("touchstart",e=>{mediaSwipeX=e.changedTouches[0]?.clientX||0},{passive:true});
 $("mediaViewerStage").addEventListener("touchend",e=>{const x=e.changedTouches[0]?.clientX||0,d=x-mediaSwipeX;if(Math.abs(d)>55)moveMediaViewer(d<0?1:-1)},{passive:true});
 
-async function realtime(){if(state.realtime)await db.removeChannel(state.realtime);state.realtime=db.channel("profile:"+state.uid,{config:{private:true}}).on("broadcast",{event:"UPDATE"},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path?.startsWith("posts/")||r?.path===`users/${state.uid}`)loadPosts().then(render).catch(()=>{})}).subscribe()}
-window.addEventListener("pagehide",()=>{if(state.realtime){db.removeChannel(state.realtime);state.realtime=null;}});
+async function realtime(){
+  if(state.realtimeRetryTimer){clearTimeout(state.realtimeRetryTimer);state.realtimeRetryTimer=null}
+  if(state.realtime){await db.removeChannel(state.realtime);state.realtime=null}
+  const channelName=`profile:${state.uid}:${state.me?.id||"anon"}`;
+  const ch=db.channel(channelName,{config:{private:true}}).on("broadcast",{event:"UPDATE"},p=>{
+    const r=p.payload?.record||p.payload?.new;
+    if(r?.path?.startsWith("posts/")||r?.path===`users/${state.uid}`)loadPosts().then(render).catch(()=>{});
+  }).subscribe(status=>{
+    if(status==="SUBSCRIBED"){state.realtimeRetryAttempt=0;return}
+    if(status!=="CHANNEL_ERROR"&&status!=="TIMED_OUT")return;
+    if(state.realtime===ch){state.realtime=null;db.removeChannel(ch).catch(()=>{});}
+    const delay=Math.min(30000,1000*Math.pow(2,state.realtimeRetryAttempt++));
+    if(!state.realtimeRetryTimer)state.realtimeRetryTimer=setTimeout(()=>{state.realtimeRetryTimer=null;if(document.visibilityState!=="hidden")realtime().catch(()=>{})},delay);
+  });
+  state.realtime=ch;
+}
+function cleanupProfileRealtime(){
+  if(state.realtimeRetryTimer){clearTimeout(state.realtimeRetryTimer);state.realtimeRetryTimer=null}
+  state.realtimeRetryAttempt=0;
+  if(state.realtime){const ch=state.realtime;state.realtime=null;db.removeChannel(ch).catch(()=>{})}
+}
+window.addEventListener("pagehide",()=>{stopScanner();window.AppPresence?.stop?.();cleanupProfileRealtime()});
 // Keep Feed and Profile state coherent across navigation and same-browser tabs.
 window.addEventListener('storage',e=>{
   if(e.key!=='spike.profile.sync'||!e.newValue)return;
   try{const m=JSON.parse(e.newValue);if(String(m.id)===String(state.uid)&&m.action==='follow'){state.following=!!m.active;renderActions();render();}}catch(_){ }
 });
-async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader();
+async function boot(){if(state.booting)return;state.booting=true;bind();try{if(!(await bootAuth()))return;initAdminHeader();
   try{ const raw=sessionStorage.getItem('spike.feed.return'); if(raw){ const x=JSON.parse(raw); if(x?.source==='feed' && Date.now()-Number(x.at||0)<30*60*1000) document.body.dataset.returnToFeed='1'; } }catch(_){ }
   // QR identity controls are owner-only; a viewer must never be able to present
   // another member's connect QR as if it were their own.
@@ -928,7 +949,7 @@ async function prepareConnect(uid){
     $("connectSpId").textContent=data.sp_id?`SPIKE ID • ${data.sp_id}`:"SPIKE member";
     const a=avatarOf(data);
     $("connectAvatarWrap").innerHTML=a
-      ?`<img class="connect-avatar" src="${esc(a)}" alt="" loading="lazy" decoding="async">`
+      ?`<img class="connect-avatar" src="${esc(safeHttpUrl(a))}" alt="" loading="lazy" decoding="async">`
       :`<div class="connect-avatar connect-avatar-fallback">${esc(nameOf(data)[0]||"U")}</div>`;
     open("connectPreview");
   }catch(e){
@@ -1061,7 +1082,8 @@ else setTimeout(install,1500);
   },true);
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') setTimeout(sync,40); });
   sync();
-  window.setInterval(sync, 750);
+  const menuSyncTimer=window.setInterval(sync, 750);
+  window.addEventListener("pagehide",()=>clearInterval(menuSyncTimer),{once:true});
 })();
 </script>
 <script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>

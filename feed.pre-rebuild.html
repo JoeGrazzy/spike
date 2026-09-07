@@ -2034,21 +2034,8 @@ function updateAdminVisibility() {
 
 if (db?.auth?.onAuthStateChange) {
   db.auth.onAuthStateChange((_event, session) => {
-    const nextUser = session?.user || null;
-    const uid = String(nextUser?.id || '').trim().toLowerCase();
+    const uid = String(session?.user?.id || '').trim().toLowerCase();
     setAdminVisibility(uid === SPIKE_ADMIN_UID);
-    if (_event === 'SIGNED_OUT' || !nextUser) {
-      state.user = null;
-      try { feedSentinelObserver?.disconnect(); } catch (_) {}
-      try { feedObserver?.disconnect(); } catch (_) {}
-      if (state.realtimeRefreshTimer) { clearTimeout(state.realtimeRefreshTimer); state.realtimeRefreshTimer = null; }
-      if (state.realtimeRetryTimer) { clearTimeout(state.realtimeRetryTimer); state.realtimeRetryTimer = null; }
-      try { if (state.realtime) db.removeChannel(state.realtime); } catch (_) {}
-      state.realtime = null;
-      if (!/index\.html(?:$|\?)/i.test(location.pathname)) location.replace('index.html?reauth=1');
-      return;
-    }
-    if (!state.user || String(state.user.id) !== String(nextUser.id)) state.user = nextUser;
   });
 }
 
@@ -3624,22 +3611,6 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible' && state.user?.id && !state.realtime) initRealtime({ immediate: true }).catch(e => console.warn('[SPIKE REALTIME VISIBILITY]', e));
 });
 
-// ─── PAGE LIFECYCLE CLEANUP ────────────────────────────
-// Feed creates timers, observers and a realtime channel. Clean them up when the
-// document leaves the foreground so returning to the page does not accumulate
-// stale callbacks or duplicate realtime work.
-window.addEventListener('pagehide', () => {
-  try { feedSentinelObserver?.disconnect(); } catch (_) {}
-  try { feedObserver?.disconnect(); } catch (_) {}
-  if (state.realtimeRefreshTimer) { clearTimeout(state.realtimeRefreshTimer); state.realtimeRefreshTimer = null; }
-  if (state.realtimeRetryTimer) { clearTimeout(state.realtimeRetryTimer); state.realtimeRetryTimer = null; }
-  state.realtimeRetryAttempt = 0;
-  if (state.realtime) {
-    try { db.removeChannel(state.realtime); } catch (_) {}
-    state.realtime = null;
-  }
-}, {passive:true});
-
 // ─── BOOT ──────────────────────────────────────────────
 async function boot() {
   try {
@@ -3698,10 +3669,7 @@ async function boot() {
 if (!window.__SPIKE_FEED_STARTUP_WATCHDOG__) {
   window.__SPIKE_FEED_STARTUP_WATCHDOG__ = true;
   const __spikeBootCore = boot;
-  let __spikeBootStarted = false;
   boot = async function(){
-    if (__spikeBootStarted) return;
-    __spikeBootStarted = true;
     try {
       await withTimeout(__spikeBootCore(), 20000, 'SPIKE startup');
     } catch (e) {

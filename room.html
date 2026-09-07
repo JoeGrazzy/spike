@@ -204,6 +204,7 @@ const state={roomId:null,room:null,me:null,account:null,joined:null,inflight:new
 window.SPIKE_DIAG=state.diagnostics;
 
 function diag(event,extra={}){state.diagnostics.push({at:new Date().toISOString(),event,...extra});if(state.diagnostics.length>100)state.diagnostics.shift();}
+function safeHttpUrl(raw){try{const u=new URL(String(raw||''),location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch{return''}}
 function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(window._toastT);window._toastT=setTimeout(()=>el.classList.remove('show'),3200);}
 function setConnection(text,problem=false){$ ('#connectionState').textContent=text;const box=$('#networkStatus');$('#networkText').textContent=text;box.classList.toggle('show',problem);}
 function isNetworkError(e){const t=String(e?.message||e||'').toLowerCase();return !navigator.onLine||t.includes('failed to fetch')||t.includes('network')||t.includes('timeout')||t.includes('abort');}
@@ -226,7 +227,7 @@ function invalidate(prefix=''){for(const k of [...state.cache.keys()])if(!prefix
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function validUuid(v){return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v||'');}
 function num(v){const n=Number(v);return Number.isFinite(n)?n:0;}
-function roomAvatar(r){const a=r.avatar_url||r.avatar||r.image_url;return a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc(r.icon||r.emoji||'🏠');}
+function roomAvatar(r){const a=r.avatar_url||r.avatar||r.image_url;return a?`<img src="${esc(safeHttpUrl(a))}" alt="" loading="lazy" decoding="async">`:esc(r.icon||r.emoji||'🏠');}
 function roomCover(r){return r.cover_url||r.cover||r.banner_url||'';}
 function normalizeRoom(r){return r&&typeof r==='object'?r:null;}
 let authReadyResolve;let authReadySettled=false;const authReady=new Promise(r=>authReadyResolve=r);let authSubscription=null;
