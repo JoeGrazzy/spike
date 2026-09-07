@@ -60,4 +60,6 @@ async function loadCircleMessages(){if(!selectedCircle)return;const d=await rpc(
 $('circleMessageForm').onsubmit=async e=>{e.preventDefault();try{await rpc('spike_circle_send_message',{p_circle_id:selectedCircle,p_content:$('circleMessage').value});$('circleMessage').value='';await loadCircleMessages();await loadSeason()}catch(err){toast(err.message||'Message failed')}};
 init().catch(e=>{console.error(e);toast(e.message||'SPIKE World could not load')});
 </script><link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<script src="js/spike-mobile-safe-area.js" defer></script>
 </body></html>

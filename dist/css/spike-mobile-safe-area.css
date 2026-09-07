@@ -1,0 +1,49 @@
+/* SPIKE Android edge-to-edge safe-area authority.
+   Keeps page chrome clear of display cutouts while preserving fullscreen. */
+:root{
+  --spike-safe-top:max(8px,env(safe-area-inset-top,0px));
+  --spike-safe-right:max(8px,env(safe-area-inset-right,0px));
+  --spike-safe-bottom:max(8px,env(safe-area-inset-bottom,0px));
+  --spike-safe-left:max(8px,env(safe-area-inset-left,0px));
+  --spike-top-gap:8px;
+}
+html{width:100%;min-height:100%;overflow-x:clip;scroll-padding-top:calc(var(--spike-safe-top) + 12px)}
+body{width:100%;min-height:100%;max-width:100%;overflow-x:clip}
+
+@media (max-width:900px){
+  /* Flow chrome gets safe space inside itself. */
+  :where(.spike-safe-flow-header){
+    top:auto !important;
+    padding-top:calc(var(--spike-flow-padding-top,8px) + var(--spike-safe-top)) !important;
+  }
+
+  /* Sticky/fixed chrome keeps its original dimensions and moves below the
+     display cutout. The JS classifier records the original top/padding. */
+  :where(.spike-safe-sticky){
+    padding-top:var(--spike-original-padding-top,initial) !important;
+    top:calc(var(--spike-original-top,0px) + var(--spike-safe-top) + var(--spike-top-gap)) !important;
+  }
+
+  /* Fullscreen media/camera surfaces may cover the cutout; their controls
+     must remain below it. */
+  :where(.scanner-top,.story-viewer-topbar,.media-viewer-top,.call-top,.call-header,.video-topbar){
+    padding-top:calc(8px + var(--spike-safe-top)) !important;
+  }
+
+  /* Bottom interactive chrome gets gesture/navigation-bar clearance. */
+  :where(.bottom-nav,.spike-bottom-nav,nav.bottom-nav){
+    padding-bottom:calc(8px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  :where(.composer,.composerWrap,.composer-wrap,.roomComposer){
+    padding-bottom:calc(8px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  :where(.toast,.spike-premium-stack){
+    bottom:calc(12px + env(safe-area-inset-bottom,0px)) !important;
+  }
+
+  :where(.app,.page,.main,.layout,.wrap,.content,.shell){max-width:100vw}
+}
+
+@media (prefers-reduced-motion:reduce){
+  :where(.header,.top,.topbar,.chathead,.fm-head,.rm-head,.chat-head){transition:none!important}
+}
