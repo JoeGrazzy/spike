@@ -82,7 +82,7 @@ html[data-spike-style="5"]{--bg:#090b0e;--surface:#14181d;--solid:#191d23;--text
     flex-direction:column!important;
     overflow:hidden!important;
   }
-  .chat-head{flex:0 0 70px!important;height:70px!important;min-height:70px!important;}
+  .chat-head{flex:0 0 calc(70px + env(safe-area-inset-top,0px))!important;height:calc(70px + env(safe-area-inset-top,0px))!important;min-height:calc(70px + env(safe-area-inset-top,0px))!important;padding-top:calc(10px + env(safe-area-inset-top,0px))!important;box-sizing:border-box!important;}
   .messages{
     flex:1 1 auto!important;
     min-height:0!important;
