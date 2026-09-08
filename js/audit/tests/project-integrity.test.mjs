@@ -50,7 +50,7 @@ test('Feed has no private duplicate theme registry', async () => {
 
 test('all inline HTML JavaScript blocks are syntactically valid', async () => {
   const { readdir: readDir } = await import('node:fs/promises');
-  const files = (await readDir('.')).filter(x => x.endsWith('.html'));
+  const files = (await readDir('.')).filter(x => x.endsWith('.html') && !x.endsWith('.pre-rebuild.html'));
   const root = tmpdir();
   let checked = 0;
   for (const page of files) {
