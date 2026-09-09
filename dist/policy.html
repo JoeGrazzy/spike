@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="SPIKE Community Policy — the canonical policy reference for safety, moderation, enforcement and appeals.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#071018">
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/policy.css">
+<script src="js/theme.js" defer></script>
+<title>SPIKE Policy</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+
+</head>
+<body>
+<header class="top"><div class="wrap topin"><a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brandmark">S</span><span>SPIKE POLICY</span></a><div class="actions"><a class="btn" href="policy_appeals.html">Policy & Appeals</a><button class="btn" id="themeBtn" type="button" data-spike-theme-switch="1" aria-label="Change theme">Theme</button><button class="btn" id="printBtn" type="button"><span>Print</span> PDF</button><button class="btn" id="backBtn" type="button"><span>Back</span> ←</button></div></div></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Canonical Policy Center</div><h1>SPIKE Community Policy</h1><p>This is the policy source of truth for SPIKE safety, content moderation, enforcement, recommendations and appeals. Product systems should reference policy IDs and policy versions rather than duplicating rules.</p><div class="meta"><span class="pill" id="policyVersionPill">Policy version 1.0</span><span class="pill" id="policyStatusPill">Status: Checking…</span><span class="pill">Last reviewed: September 2026</span><span class="pill">Policy IDs are stable references</span></div>
+<div class="live-status" id="policyLiveStatus" aria-live="polite"><strong>Policy Core</strong><span id="policyLiveText">Connecting to the canonical SPIKE Policy Core…</span><span class="live-dot" id="policyLiveDot" aria-hidden="true"></span></div></section>
+<div class="grid">
+<nav class="card toc" aria-label="Policy sections"><h2>Sections</h2><a href="#principles">Principles</a><a href="#safety">Safety</a><a href="#content">Content</a><a href="#conduct">Community conduct</a><a href="#privacy">Privacy</a><a href="#platform">Platform abuse</a><a href="#enforcement">Enforcement</a><a href="#appeals">Appeals</a><a href="#recommendations">Recommendations</a><a href="#copyright">Copyright</a><a href="#transparency">Transparency</a><a href="#changes">Policy changes</a></nav>
+<section class="card content" id="policyContent">
+<div class="toolbar"><input class="search" id="policySearch" type="search" autocomplete="off" placeholder="Search SPIKE Policy…" aria-label="Search SPIKE Policy"><button class="btn" id="expandBtn" type="button">Expand all</button></div>
+<div id="empty" class="empty">No policy section matches your search.</div>
+
+<article class="section" id="principles" data-search="principles safety fairness context consistency transparency appeal"><span class="tag">POL-CORE</span><h2>1. Policy principles</h2><p>SPIKE applies its rules consistently, with context and proportionality where appropriate.</p><details class="rule"><summary>Source of truth <span class="policy-id" data-copy="POL-CORE-001">POL-CORE-001</span></summary><div class="rulebody">Moderation, recommendation safety, notifications, appeals and administrative tools should reference this policy framework and its version rather than maintaining conflicting copies of the rules.</div></details><details class="rule"><summary>Context and proportionality <span class="policy-id" data-copy="POL-CORE-002">POL-CORE-002</span></summary><div class="rulebody">A detection signal is not automatically proof of a violation. Systems should distinguish clear violations from context-dependent cases and route uncertain cases to review when appropriate.</div></details><details class="rule"><summary>Safety and fairness <span class="policy-id" data-copy="POL-CORE-003">POL-CORE-003</span></summary><div class="rulebody">SPIKE should prioritize user safety while minimizing unnecessary removals, discriminatory enforcement and avoidable false positives.</div></details></article>
+
+<article class="section" id="safety" data-search="safety violence threats child sexual exploitation self harm terrorism extremist dangerous"><span class="tag">POL-SAFETY</span><h2>2. Safety</h2><p>Content that creates serious safety risks may be removed immediately or escalated for review.</p><details class="rule"><summary>Violence and credible threats <span class="policy-id" data-copy="POL-SAFETY-001">POL-SAFETY-001</span></summary><div class="rulebody">Threats of serious physical harm, targeted incitement of violence and credible plans to harm people are prohibited. Immediate-risk cases may receive priority escalation.</div></details><details class="rule"><summary>Child safety <span class="policy-id" data-copy="POL-SAFETY-002">POL-SAFETY-002</span></summary><div class="rulebody">Child sexual exploitation and sexualization of minors are prohibited. Suspected material should be handled through the highest-safety moderation path and appropriate escalation procedures.</div></details><details class="rule"><summary>Self-harm encouragement <span class="policy-id" data-copy="POL-SAFETY-003">POL-SAFETY-003</span></summary><div class="rulebody">Encouraging, glorifying or facilitating self-harm or suicide is prohibited. Supportive discussion and requests for help are not treated as equivalent to encouragement.</div></details><details class="rule"><summary>Terrorism and extremist violence <span class="policy-id" data-copy="POL-SAFETY-004">POL-SAFETY-004</span></summary><div class="rulebody">Recruitment, operational support, credible praise intended to advance violent extremist activity and instructions that facilitate violent extremist acts are prohibited.</div></details></article>
+
+<article class="section" id="content" data-search="content hate slurs harassment sexual nudity drugs illegal fraud scams misinformation prohibited words phrases"><span class="tag">POL-CONTENT</span><h2>3. Prohibited content</h2><p>SPIKE may restrict or remove content that falls within defined prohibited categories.</p><details class="rule"><summary>Hateful conduct <span class="policy-id" data-copy="POL-CONTENT-001">POL-CONTENT-001</span></summary><div class="rulebody">Attacks, dehumanization or calls for harm targeting people because of protected characteristics are prohibited. Discussion, criticism, reporting or educational context can require contextual review.</div></details><details class="rule"><summary>Targeted harassment <span class="policy-id" data-copy="POL-CONTENT-002">POL-CONTENT-002</span></summary><div class="rulebody">Sustained targeted abuse, threats, humiliation campaigns and coordinated harassment are prohibited. Ordinary disagreement or criticism is not automatically harassment.</div></details><details class="rule"><summary>Sexual exploitation <span class="policy-id" data-copy="POL-CONTENT-003">POL-CONTENT-003</span></summary><div class="rulebody">Sexual exploitation, non-consensual sexual imagery and sexual content involving minors are prohibited. Some adult sexual content may also be restricted under product-specific rules.</div></details><details class="rule"><summary>Fraud and harmful deception <span class="policy-id" data-copy="POL-CONTENT-004">POL-CONTENT-004</span></summary><div class="rulebody">Scams, impersonation for fraud, credential theft, malicious payment schemes and deceptive activity designed to cause material harm are prohibited.</div></details><details class="rule"><summary>Prohibited words and phrases <span class="policy-id" data-copy="POL-CONTENT-005">POL-CONTENT-005</span></summary><div class="rulebody">SPIKE may maintain a server-side prohibited-term policy list. Terms are detection signals mapped to policy IDs; a match may trigger automatic blocking when the rule is unambiguous, or contextual review when meaning depends on surrounding content.</div></details></article>
+
+<article class="section" id="conduct" data-search="community conduct impersonation spam bullying manipulation abuse doxxing"><span class="tag">POL-CONDUCT</span><h2>4. Community conduct</h2><p>Users are expected to participate without abusing people or the platform.</p><details class="rule"><summary>Impersonation and deceptive identity <span class="policy-id" data-copy="POL-CONDUCT-001">POL-CONDUCT-001</span></summary><div class="rulebody">Impersonating another person, organization or SPIKE administrator in a way that deceives or harms others is prohibited.</div></details><details class="rule"><summary>Spam and manipulation <span class="policy-id" data-copy="POL-CONDUCT-002">POL-CONDUCT-002</span></summary><div class="rulebody">Coordinated spam, artificial engagement, automated abuse, recommendation manipulation and attempts to evade enforcement are prohibited.</div></details><details class="rule"><summary>Doxxing and privacy abuse <span class="policy-id" data-copy="POL-CONDUCT-003">POL-CONDUCT-003</span></summary><div class="rulebody">Publishing or soliciting highly sensitive personal information for harassment, intimidation or harm is prohibited.</div></details></article>
+
+<article class="section" id="privacy" data-search="privacy personal data sensitive information private messages consent"><span class="tag">POL-PRIVACY</span><h2>5. Privacy</h2><p>SPIKE should protect private information and respect access boundaries.</p><details class="rule"><summary>Private information <span class="policy-id" data-copy="POL-PRIVACY-001">POL-PRIVACY-001</span></summary><div class="rulebody">Users must not expose another person's sensitive personal information without an appropriate lawful and legitimate basis. Admin access to private moderation data must be permission-controlled and audited.</div></details><details class="rule"><summary>Private communications <span class="policy-id" data-copy="POL-PRIVACY-002">POL-PRIVACY-002</span></summary><div class="rulebody">Private messages and private community data should not be exposed through public recommendation, search or administrative interfaces except where an authorized safety or legal workflow requires access.</div></details></article>
+
+<article class="section" id="platform" data-search="platform abuse security hacking malware credential theft evasion fake accounts"><span class="tag">POL-PLATFORM</span><h2>6. Platform abuse</h2><p>Attempts to compromise SPIKE or evade its controls are prohibited.</p><details class="rule"><summary>Security abuse <span class="policy-id" data-copy="POL-PLATFORM-001">POL-PLATFORM-001</span></summary><div class="rulebody">Unauthorized access, credential theft, malware distribution, exploitation of security controls and deliberate disruption of SPIKE are prohibited.</div></details><details class="rule"><summary>Enforcement evasion <span class="policy-id" data-copy="POL-PLATFORM-002">POL-PLATFORM-002</span></summary><div class="rulebody">Creating or using accounts, content or technical mechanisms primarily to evade a valid SPIKE enforcement action may result in additional restrictions.</div></details></article>
+
+<article class="section" id="enforcement" data-search="enforcement removal warning restriction suspension ban takedown moderation action"><span class="tag">POL-ENFORCEMENT</span><h2>7. Enforcement</h2><p>Enforcement is tied to the policy violation and the severity, confidence and history of the case.</p><div class="flow"><div class="step"><b>Detect</b><span>Signals from rules, reports or systems.</span></div><div class="step"><b>Classify</b><span>Map to a policy ID.</span></div><div class="step"><b>Act</b><span>Remove, restrict or review.</span></div><div class="step"><b>Notify</b><span>Explain the decision.</span></div><div class="step"><b>Appeal</b><span>Allow eligible review.</span></div></div><details class="rule"><summary>Possible actions <span class="policy-id" data-copy="POL-ENFORCEMENT-001">POL-ENFORCEMENT-001</span></summary><div class="rulebody"><ul><li>Warning or educational notice</li><li>Content restriction or removal</li><li>Temporary feature restriction</li><li>Temporary account suspension</li><li>Permanent account enforcement for severe or repeated violations</li></ul></div></details><details class="rule"><summary>Automatic takedown <span class="policy-id" data-copy="POL-ENFORCEMENT-002">POL-ENFORCEMENT-002</span></summary><div class="rulebody">Automatic removal should be reserved for rules with sufficiently high confidence. The moderation event should preserve the matched policy ID, policy version, decision source, timestamp and relevant evidence.</div></details></article>
+
+<article class="section" id="appeals" data-search="appeal appeals review restore rejected pending admin moderation dispute"><span class="tag">POL-APPEALS</span><h2>8. Appeals</h2><p>Eligible users can challenge an enforcement decision through the SPIKE appeal workflow.</p><details class="rule"><summary>Appeal eligibility <span class="policy-id" data-copy="POL-APPEALS-001">POL-APPEALS-001</span></summary><div class="rulebody">The removal or restriction notice should identify whether an appeal is available. An appeal should reference the original moderation case rather than creating an unrelated case.</div></details><details class="rule"><summary>Review states <span class="policy-id" data-copy="POL-APPEALS-002">POL-APPEALS-002</span></summary><div class="rulebody">The canonical workflow is pending → under review → approved or rejected. The system should prevent duplicate active appeals for the same moderation case.</div></details><details class="rule"><summary>Appeal decisions <span class="policy-id" data-copy="POL-APPEALS-003">POL-APPEALS-003</span></summary><div class="rulebody">An approved appeal can restore eligible content and overturn the original decision. A rejected appeal leaves the enforcement in place. Both outcomes must be recorded in an immutable audit trail.</div></details><div class="note">Appeals are a separate decision layer. An appeal should never silently edit or erase the original moderation record.</div></article>
+
+<article class="section" id="recommendations" data-search="recommendations feed ranking algorithm safety prohibited content muted words candidate ranking"><span class="tag">POL-RECOMMENDATIONS</span><h2>9. Recommendation safety</h2><p>Recommendation systems must apply policy safety before ranking content for distribution.</p><details class="rule"><summary>Safety before ranking <span class="policy-id" data-copy="POL-RECOMMENDATIONS-001">POL-RECOMMENDATIONS-001</span></summary><div class="rulebody">Removed or restricted content must not enter recommendation candidates. Policy eligibility is checked before personalization and ranking signals are applied.</div></details><details class="rule"><summary>Personal mute vs platform prohibition <span class="policy-id" data-copy="POL-RECOMMENDATIONS-002">POL-RECOMMENDATIONS-002</span></summary><div class="rulebody">A user's personal muted-word preference changes that user's feed. A platform prohibited-content rule changes content eligibility for everyone. These systems must remain separate.</div></details><div class="note">Recommended pipeline: publish/edit → server moderation → remove or review when required → privacy/access checks → personal mute filtering → candidate generation → safety eligibility → ranking → feed.</div></article>
+
+<article class="section" id="copyright" data-search="copyright intellectual property dmca media ownership music images videos user content"><span class="tag">POL-COPYRIGHT</span><h2>10. Copyright and intellectual property</h2><p>Users are responsible for having appropriate rights to content they upload or share.</p><details class="rule"><summary>Rights to uploaded material <span class="policy-id" data-copy="POL-COPYRIGHT-001">POL-COPYRIGHT-001</span></summary><div class="rulebody">Users should not upload material they do not have permission or a lawful basis to use. SPIKE should provide an appropriate copyright complaint and takedown process.</div></details><details class="rule"><summary>Repeat infringement <span class="policy-id" data-copy="POL-COPYRIGHT-002">POL-COPYRIGHT-002</span></summary><div class="rulebody">Repeated valid copyright violations may result in escalating account enforcement under applicable law and SPIKE's terms.</div></details></article>
+
+<article class="section" id="transparency" data-search="transparency moderation audit logs evidence notice reason admin accountability"><span class="tag">POL-TRANSPARENCY</span><h2>11. Transparency and accountability</h2><p>Moderation decisions should be explainable and auditable.</p><details class="rule"><summary>Decision records <span class="policy-id" data-copy="POL-TRANSPARENCY-001">POL-TRANSPARENCY-001</span></summary><div class="rulebody">Every enforcement action should retain its policy ID, policy version, action, decision source, timestamp and sufficient evidence for authorized review.</div></details><details class="rule"><summary>User notices <span class="policy-id" data-copy="POL-TRANSPARENCY-002">POL-TRANSPARENCY-002</span></summary><div class="rulebody">When content is removed or restricted, the user notification should provide a clear reason and identify the applicable policy category when safe and appropriate to disclose.</div></details><details class="rule"><summary>Administrative accountability <span class="policy-id" data-copy="POL-TRANSPARENCY-003">POL-TRANSPARENCY-003</span></summary><div class="rulebody">Administrative moderation decisions should be permission-controlled and logged. Privileged tools should not bypass the policy record.</div></details></article>
+
+<article class="section" id="changes" data-search="policy changes version versioning effective date updates notice"><span class="tag">POL-GOVERNANCE</span><h2>12. Policy changes</h2><p>Policy changes must be versioned so historical decisions remain interpretable.</p><details class="rule"><summary>Versioning <span class="policy-id" data-copy="POL-GOVERNANCE-001">POL-GOVERNANCE-001</span></summary><div class="rulebody">Each published policy revision receives a version identifier and effective date. Moderation decisions reference the version that governed the decision.</div></details><details class="rule"><summary>Change control <span class="policy-id" data-copy="POL-GOVERNANCE-002">POL-GOVERNANCE-002</span></summary><div class="rulebody">Changes to enforcement-critical rules should be reviewed, logged and propagated to dependent moderation and recommendation systems before being treated as active.</div></details></article>
+
+<footer><strong>SPIKE Policy v1.0</strong><br>Policy IDs shown here are canonical references for future SPIKE moderation, recommendation-safety, notification, appeal and administration systems. This page is the canonical SPIKE policy reference. Enforcement is implemented server-side and this page does not replace applicable law or the SPIKE Terms of Service.</footer>
+</section></div></main>
+<script>
+(() => {
+  const content=document.getElementById('policyContent');
+  const search=document.getElementById('policySearch');
+  const empty=document.getElementById('empty');
+  const expand=document.getElementById('expandBtn');
+  const sections=[...content.querySelectorAll('.section')];
+  let expanded=false;
+  function filter(){
+    const q=(search.value||'').trim().toLowerCase(); let visible=0;
+    sections.forEach(s=>{const match=!q || (s.textContent+' '+(s.dataset.search||'')).toLowerCase().includes(q);s.classList.toggle('hidden',!match);if(match)visible++;});
+    empty.style.display=visible?'none':'block';
+  }
+  search.addEventListener('input',filter);
+  expand.addEventListener('click',()=>{expanded=!expanded;content.querySelectorAll('details.rule').forEach(d=>{d.open=expanded});expand.textContent=expanded?'Collapse all':'Expand all';});
+  document.getElementById('printBtn').addEventListener('click',()=>window.print());
+  document.getElementById('backBtn').addEventListener('click',()=>{if(history.length>1)history.back();else location.href='feed.html'});
+  document.querySelectorAll('[data-copy]').forEach(el=>el.addEventListener('click',async e=>{e.preventDefault();e.stopPropagation();const id=el.dataset.copy;try{await navigator.clipboard.writeText(id);const old=el.textContent;el.textContent='Copied';setTimeout(()=>el.textContent=old,900)}catch(_){}}));
+
+  const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
+  const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
+  async function syncPolicyCore(){
+    const live=document.getElementById('policyLiveStatus');
+    const text=document.getElementById('policyLiveText');
+    const dot=document.getElementById('policyLiveDot');
+    const version=document.getElementById('policyVersionPill');
+    const status=document.getElementById('policyStatusPill');
+    try{
+      if(!window.supabase?.createClient) throw new Error('Policy client unavailable');
+      const client=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+      const [catalogRes,healthRes]=await Promise.all([
+        client.rpc('get_spike_policy_catalog'),
+        client.rpc('get_spike_policy_health')
+      ]);
+      if(catalogRes.error) throw catalogRes.error;
+      const catalog=typeof catalogRes.data==='string'?JSON.parse(catalogRes.data):catalogRes.data;
+      const health=healthRes.error?null:(typeof healthRes.data==='string'?JSON.parse(healthRes.data):healthRes.data);
+      const rules=Array.isArray(catalog?.rules)?catalog.rules:[];
+      const ids=new Set(rules.map(r=>String(r.id)));
+      const rendered=[...document.querySelectorAll('[data-copy]')].map(el=>el.dataset.copy);
+      const missing=rendered.filter(id=>!ids.has(id));
+      const extra=rules.filter(r=>!rendered.includes(String(r.id)));
+      const v=Number(catalog?.version||1);
+      version.textContent=`Policy version ${v}.0`;
+      if(missing.length){
+        live.className='live-status error';
+        text.textContent=`Policy Core connected, but ${missing.length} page reference(s) need reconciliation.`;
+        status.textContent='Status: Needs reconciliation';
+        return;
+      }
+      live.className='live-status ok';
+      text.textContent=`Live and verified: ${rules.length} active policy rules • ${health?.governed_terms??0} governed terms • server-authoritative enforcement • ${extra.length} backend-only rule(s).`;
+      status.textContent='Status: Active';
+      dot.title='Connected to SPIKE Policy Core';
+    }catch(err){
+      live.className='live-status error';
+      text.textContent='Policy Core could not be reached. The page is showing its bundled policy reference.';
+      status.textContent='Status: Offline';
+      dot.title=String(err?.message||err||'Connection error');
+    }
+  }
+  syncPolicyCore();
+  const links=[...document.querySelectorAll('.toc a')];
+  const obs=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id))}}),{rootMargin:'-25% 0px -65% 0px'});
+  sections.forEach(s=>obs.observe(s));
+})();
+</script>
+</body>
+</html>

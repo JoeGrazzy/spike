@@ -8,7 +8,7 @@ const budgets = {
   css: 60_000,
   js: 180_000
 };
-const htmlFiles = (await readdir('.')).filter(x => x.endsWith('.html'));
+const htmlFiles = (await readdir('.')).filter(x => x.endsWith('.html') && !x.endsWith('.pre-rebuild.html'));
 for (const file of htmlFiles) test(`HTML budget: ${file}`, async () => {
   const max = budgets.pageOverrides[file] ?? budgets.html;
   assert.ok((await stat(file)).size <= max, `${file} exceeds ${max} bytes`);

@@ -305,7 +305,12 @@ async function putDoc(path, data, parent = "") {
   return data;
 }
 async function listCollection(collection, parent = "") {
-  let q = db.from("app_documents").select("document_id,data,created_at").eq("collection_name", collection);
+  let q;
+  if(collection === 'posts' && !parent){
+    q = db.from('spike_recommendation_eligible_posts').select('document_id,data,created_at');
+  } else {
+    q = db.from("app_documents").select("document_id,data,created_at").eq("collection_name", collection);
+  }
   if (parent) q = q.eq("parent_path", parent);
   const r = await q;
   if (r.error) throw r.error;
@@ -372,7 +377,7 @@ async function requireUser() {
   const composerAvatar = $("composerAvatar");
   if (composerAvatar) {
     const avatar = avatarOf(state.profile);
-    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async" loading="lazy">`;
+    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async">`;
     else composerAvatar.textContent = nameOf(state.profile).charAt(0).toUpperCase();
   }
   return true;
@@ -728,7 +733,7 @@ async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).
 function rankingContext(posts){return{userId:state.user?.id||'',following:state.following||new Set(),signals:Object.fromEntries(Object.entries(readSignalStore()).map(([id,v])=>[id,{...(serverSignalProfile[id]||{}),...v}])),creatorAffinity:{},topicAffinity:{},explorationIds:new Set(),recentEngagement:trendingFeatureCache,now:Date.now(),posts}}
 function rankSignals(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function signalRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
-function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankSignals(x,mode)}
+function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&String(p?.moderation?.status||'').toLowerCase()!=='removed'&&String(p?.moderation?.status||'').toLowerCase()!=='blocked'&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankSignals(x,mode)}
 function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>`<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${signalScore(p)} out of 100"><span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#${i+1}</span><strong class="signal-pick-score">${signalScore(p)}<em>/100</em></strong></span><span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(String(p.content||'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${signalScore(p)}%"></i></span></button>`).join('')}
 function refreshSignalRanking({render=true,force=false}={}){
   const mode=state.filter==='following'?'following':state.filter==='saved'?'saved':(state.filter||'forYou');
@@ -990,8 +995,6 @@ async function loadBadges() {
     if (n?.error) throw n.error;
     nc = Number(n?.count || 0);
   } catch (e) { console.warn('loadBadges notifications', e); }
-  const el = $('notificationBadge');
-  if (el) { el.textContent = nc > 99 ? '99+' : String(nc); el.classList.toggle('show', nc > 0); }
 }
 
 // ─── ANNOUNCEMENT ──────────────────────────────────────
@@ -1009,6 +1012,15 @@ async function writeSignal({ content = '', mediaUrl = null, mediaType = null, me
   if (!state.user) return;
   const text = String(content || '').trim();
   if (!text && !mediaUrl && !mediaItems.length && !linkUrl) { toast('Write something first'); return null; }
+  // UX-only preflight. NEVER stop the write here: the database trigger is authoritative and
+  // must be allowed to create the policy case + notification before it marks the Signal removed.
+  let preflightDecision = 'allow';
+  if(text){
+    try{
+      const moderation=await db.rpc('moderate_spike_content',{p_content:text,p_content_type:'post'});
+      if(!moderation.error) preflightDecision=String(moderation.data?.decision||'allow');
+    }catch(e){ console.warn('SPIKE policy preflight unavailable; database enforcement remains authoritative.',e); }
+  }
   const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
   const data = {
     authorUid: state.user.id, authorName: nameOf(state.profile), authorAvatar: avatarOf(state.profile),
@@ -1016,7 +1028,17 @@ async function writeSignal({ content = '', mediaUrl = null, mediaType = null, me
     comments: [], reactions: { like: 0, like_users: [] }, views: 0, createdAt: now(), updatedAt: null, deleted: false
   };
   await putDoc(`posts/${id}`, data, 'posts');
-  state.posts.unshift(normalizeSignalModel({ id, ...data })); rankingDirty=true; rankingCache.clear();
+  // Read back the row after the server trigger has run. This is important: the trigger may
+  // have changed deleted/content/moderation and created the user's policy case + notification.
+  const serverData = await getDoc(`posts/${id}`).catch(() => data);
+  const serverRemoved = !!serverData?.deleted || String(serverData?.moderation?.status||'') === 'removed';
+  if(serverRemoved){
+    rankingDirty=true; rankingCache.clear();
+    toast(preflightDecision==='remove' ? 'Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.' : 'Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.','error');
+    renderSignals();
+    return id;
+  }
+  state.posts.unshift(normalizeSignalModel({ id, ...serverData })); rankingDirty=true; rankingCache.clear();
   renderSignals();
   return id;
 }
@@ -1024,10 +1046,27 @@ async function writeSignal({ content = '', mediaUrl = null, mediaType = null, me
 async function updateSignal(id, patch) {
   const p = state.posts.find(x => x.id === id);
   if (!p) throw new Error('Post not found');
+  if(String(patch?.content??'').trim()){
+    try{
+      const moderation=await db.rpc('moderate_spike_content',{p_content:String(patch.content).trim(),p_content_type:'post_edit'});
+      if(!moderation.error && moderation.data?.decision==='remove'){ toast('This Signal edit was blocked by SPIKE Policy.','error'); return false; }
+    }catch(e){ console.warn('SPIKE policy edit preflight unavailable; database enforcement remains authoritative.',e); }
+  }
   const next = { ...p, ...patch, updatedAt: now() };
   await putDoc(`posts/${id}`, next, 'posts');
-  Object.assign(p, next); rankingDirty=true; rankingCache.clear();
+  // Read back server-enforced moderation state so a blocked edit cannot remain visible locally.
+  const serverData = await getDoc(`posts/${id}`).catch(() => next);
+  const serverRemoved = !!serverData?.deleted || String(serverData?.moderation?.status||'') === 'removed';
+  if(serverRemoved){
+    state.posts = state.posts.filter(x => String(x.id) !== String(id));
+    rankingDirty=true; rankingCache.clear();
+    toast('Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.','error');
+    renderSignals();
+    return false;
+  }
+  Object.assign(p, serverData); rankingDirty=true; rankingCache.clear();
   renderSignals();
+  return true;
 }
 
 async function deleteSignal(id) {
@@ -2969,50 +3008,20 @@ function initModernApp(){
     });
   }
 
-  // Bottom nav — route-aware and resilient.
-  // The dock is intentionally a single source of navigation truth: in-page
-  // actions stay in-page, while Activity/Profile use real routes so they do
-  // not depend on a legacy button existing elsewhere in the DOM.
+  // Bottom nav
   const nav = $('spikeBottomNav');
   if(nav){
-    const setActive = target => {
-      nav.querySelectorAll('[data-spike-nav]').forEach(x => x.classList.toggle('active', x.dataset.spikeNav === target));
-    };
-    const openProfile = () => {
-      const uid = String(state.user?.id || "");
-      window.location.href = uid ? `profile.html?uid=${encodeURIComponent(uid)}` : "profile.html";
-    };
     nav.addEventListener('click', e => {
       const b = e.target.closest('[data-spike-nav]');
-      if(!b || !nav.contains(b)) return;
+      if(!b) return;
+      nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
       const target = b.dataset.spikeNav;
-      setActive(target);
-      if(target === 'home'){
-        window.scrollTo({top:0,behavior:'smooth'});
-        return;
-      }
-      if(target === 'discover'){
-        document.querySelector('[data-v2="discover"]')?.click();
-        const hub=$('feedV2Hub');
-        if(hub) hub.scrollIntoView({behavior:'smooth',block:'start'});
-        return;
-      }
-      if(target === 'create'){
-        const c=document.querySelector('.spike-signal-composer');
-        const t=$('signalText');
-        c?.classList.remove('spike-collapsed');
-        c?.classList.add('spike-expanded');
-        c?.scrollIntoView({behavior:'smooth',block:'center'});
-        setTimeout(()=>t?.focus(),250);
-        return;
-      }
-      if(target === 'activity'){
-        window.location.href = "notifications.html";
-        return;
-      }
-      if(target === 'profile'){
-        openProfile();
-      }
+      if(target === 'home'){ window.scrollTo({top:0,behavior:'smooth'}); }
+      if(target === 'discover'){ document.querySelector('[data-v2="discover"]')?.click(); $('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'}); }
+      if(target === 'create'){ const c=document.querySelector('.spike-signal-composer'); const t=$('signalText'); c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded'); c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250); }
+      if(target === 'activity'){ window.location.href='notifications.html'; }
+      if(target === 'profile'){ $('profileBtn')?.click(); }
     });
   }
 }
@@ -3094,6 +3103,8 @@ function bindEvents() {
   bindClick('menuSettings', () => go('settings.html'));
   bindClick('menuSaved', async () => { closeOverlay('menuOverlay'); try { await openSavedCollections(); } catch (e) { console.error('Saved & Collections', e); toast(e.message || 'Unable to open Saved & Collections'); } });
   bindClick('menuAudience', async () => { closeOverlay('menuOverlay'); try { await openCloseFriends(); } catch (e) { console.error('Close Friends', e); toast(e.message || 'Unable to open Close Friends'); } });
+  bindClick('menuPolicy', () => go('policy.html'));
+  bindClick('menuPolicyAppeals', () => go('policy_appeals.html'));
   bindClick('menuSafety', async () => { closeOverlay('menuOverlay'); try { await openSafetyCenter(); } catch (e) { console.error('Safety Center', e); toast(e.message || 'Unable to open Safety Center'); } });
   bindClick('menuRoom', () => go('rooms.html'));
   bindClick('menuGuide', () => go('guide.html'));
@@ -3664,7 +3675,7 @@ async function boot() {
     await loadSignals();
     await loadStories();
     await loadAux();
-    await Promise.allSettled([loadBadges(), loadAnnouncement(), loadServerSignalProfile()]);
+    await Promise.allSettled([loadAnnouncement(), loadServerSignalProfile()]);
     refreshSignalRanking();
     initModernApp();
     initAISearch();
@@ -3987,16 +3998,6 @@ else boot();
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <link rel="stylesheet" href="css/spike-surface-controls.css">
-<style id="spike-owner-insights-mobile-fix">
-.owner-insights-wrap{width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;clear:both}
-.owner-insights-wrap .owner-insights{flex:0 0 100%;width:100%;min-width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:2px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);box-sizing:border-box}
-.owner-insights-wrap .owner-insights[hidden]{display:none!important}
-.owner-insights-wrap .owner-insights span{min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.25;color:var(--muted);font-weight:800}
-@media(max-width:560px){.owner-insights-wrap{gap:6px;padding-left:8px;padding-right:8px}.owner-insights-wrap .insights-toggle{flex:1 1 0}.owner-insights-wrap .owner-insights{grid-template-columns:repeat(2,minmax(0,1fr));padding:7px}.owner-insights-wrap .owner-insights span{font-size:9px;min-height:24px}}
-</style>
-<link rel="stylesheet" href="css/spike-debugger.css">
-<script src="js/spike-debugger.js"></script>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 
@@ -4046,7 +4047,6 @@ else boot();
 <button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
-
 <button class="icon" id="menuBtn" title="Menu" aria-label="Open menu">☰</button>
 
 </div>
@@ -4174,6 +4174,8 @@ else boot();
       <button id="menuSaved"><span>🔖</span><strong>Saved</strong><small>Collections & bookmarks</small></button>
       <button id="menuAudience"><span>👥</span><strong>Close Friends</strong><small>Private audience</small></button>
       <button id="menuSafety"><span>🛡️</span><strong>Safety Center</strong><small>Privacy & protection</small></button>
+      <a id="menuPolicy" href="policy.html"><span aria-hidden="true">📜</span><strong>SPIKE Policy</strong><small>Rules & platform standards</small></a>
+      <a id="menuPolicyAppeals" href="policy_appeals.html"><span aria-hidden="true">⚖️</span><strong>Policy & Appeals</strong><small>View a case and submit an appeal</small></a>
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
 <a id="menuSbet" href="spike_predictor.html"><span aria-hidden="true">⚽</span><strong>Predictor</strong><small>Predictions & matches</small></a>
@@ -4380,7 +4382,7 @@ else boot();
 })();
 </script>
 
-<script src="js/spike-ui-runtime.js"></script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 <script src="js/telemetry.js" defer></script>
   <script src="js/theme.js"></script>
 
