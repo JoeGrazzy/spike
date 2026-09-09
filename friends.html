@@ -919,6 +919,8 @@ video{contain:layout paint}
 
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
+<link rel="stylesheet" href="css/spike-debugger.css">
+<script src="js/spike-debugger.js"></script>
 </head>
 <body>
 <header class="header">
@@ -1248,6 +1250,16 @@ html[data-theme="light"] .glow{opacity:.12!important}
     refresh() {
       collectPresence();
       paint();
+    },
+
+    async stop() {
+      state.started = false;
+      state.userId = null;
+      state.onlineIds.clear();
+      try { if (state.channel) await state.channel.untrack(); } catch (_) {}
+      try { if (state.db && state.channel) await state.db.removeChannel(state.channel); } catch (_) {}
+      state.channel = null;
+      paint();
     }
   };
 })();
@@ -1261,7 +1273,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 window.sb = db;
 window.supabaseClient = db;
 const $ = id => document.getElementById(id);
-const state = { friends: [], people: [], requests: [], suggestions: [], tab: 'all', query: '', user: null };
+const state = { friends: [], people: [], requests: [], suggestions: [], tab: 'all', query: '', user: null, booting: false, booted: false, authTimer: null, searchTimer: null };
 function esc(v) { const d=document.createElement('div'); d.textContent=v ?? ''; return d.innerHTML; }
 // UUID guard: never send an empty/invalid id to a Supabase UUID parameter.
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -1505,11 +1517,10 @@ const msg=e.target.closest('[data-message]'); if(msg){location.href='messages.ht
 if(e.target.closest('#requestsButton')) setTab('pending');
 if(e.target.closest('#searchButton')) $('searchInput').focus();
 });
-let timer;
 $('searchInput').addEventListener('input',e=>{
-clearTimeout(timer);
+clearTimeout(state.searchTimer);
 const q=e.target.value;
-timer=setTimeout(async()=>{
+state.searchTimer=setTimeout(async()=>{
 try{
 state.query=q.trim().toLowerCase();
 if(state.tab==='suggestions'){
@@ -1530,95 +1541,56 @@ window.addEventListener('app-presence-sync', () => {
 // friendships is intentionally not subscribed here: it is not part of the live Realtime publication.
 // The page refreshes after supported friend actions and on auth changes.
 state.friendsRealtime = null;
-db.auth.onAuthStateChange((_event,session)=>{
-  state.user=session?.user||null;
-  if(state.user) {
-    refresh().catch(async err=>{
-      if(window.__isJwtFutureError?.(err)) {
-        await window.__clearBadSupabaseSession(db,err);
-        return;
-      }
-      notice(err.message||'Could not load friends.',true);
-    });
+let authReady = false;
+let refreshSeq = 0;
+async function guardedRefresh(){
+  const seq=++refreshSeq;
+  try { await refresh(); }
+  catch(err){
+    if(seq!==refreshSeq) return;
+    if(window.__isJwtFutureError?.(err)) { await window.__clearBadSupabaseSession(db,err); return; }
+    notice(err.message||'Could not load friends.',true);
   }
-});
-(async()=>{try{const user=await requireUser();if(!user){notice('Please sign in to manage friends.',true);return;}await refresh();}catch(err){
-  console.error(err);
-  if(window.__isJwtFutureError?.(err)){
-    await window.__clearBadSupabaseSession(db,err);
+}
+db.auth.onAuthStateChange((event,session)=>{
+  state.user=session?.user||null;
+  if(event==='SIGNED_OUT' || !state.user){
+    refreshSeq++;
+    state.friends=[]; state.requests=[]; state.people=[]; state.suggestions=[];
+    if(event==='SIGNED_OUT') location.replace('index.html?reauth=1');
     return;
   }
-  notice(err.message||'Could not load your friends.',true);
-}})();
+  if(!authReady){ authReady=true; return; }
+  clearTimeout(state.authTimer);
+  state.authTimer=setTimeout(()=>guardedRefresh(),250);
+});
+(async()=>{
+  if(state.booting || state.booted) return;
+  state.booting=true;
+  try{
+    const user=await requireUser();
+    if(!user){notice('Please sign in to manage friends.',true);return;}
+    authReady=true;
+    await guardedRefresh();
+    state.booted=true;
+  }catch(err){
+    console.error(err);
+    if(window.__isJwtFutureError?.(err)){ await window.__clearBadSupabaseSession(db,err); return; }
+    notice(err.message||'Could not load your friends.',true);
+  }finally{ state.booting=false; }
+})();
+window.addEventListener('pagehide',()=>{
+  clearTimeout(state.authTimer);
+  clearTimeout(state.searchTimer);
+  refreshSeq++;
+  try { if(state.friendsRealtime) db.removeChannel(state.friendsRealtime); } catch(_) {}
+  try { if(window.AppPresence?.stop) window.AppPresence.stop(); } catch(_) {}
+});
 })();
 </script>
-<script id="spike-sw-register">
-if("serviceWorker" in navigator){
-const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
-if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
-else setTimeout(install,1500);
-}
-</script>
-
-<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script><script src="js/ui-fix.js"></script>
-<script id="spike-privacy-bridge">
-(function(){
-  if(window.__SPIKE_PRIVACY_BRIDGE__) return; window.__SPIKE_PRIVACY_BRIDGE__=true;
-  const sb=window.supabase;
-  const state={};
-  async function call(fn,args){try{if(!sb?.rpc)return null; const r=await sb.rpc(fn,args||{}); if(r.error){console.warn('[SPIKE ACCESS]',fn,r.error.message);return null} return r.data;}catch(e){console.warn('[SPIKE ACCESS]',fn,e);return null}}
-  async function viewer(){try{return (await sb?.auth?.getUser())?.data?.user||null}catch(e){return null}}
-  window.SPIKE_ACCESS={
-    profile:(owner)=>call('can_view_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
-    discover:(owner)=>call('can_discover_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
-    posts:(owner)=>call('can_view_spike_posts',{p_viewer:state.viewerId,p_owner:owner}),
-    media:(owner)=>call('can_view_spike_media',{p_viewer:state.viewerId,p_owner:owner}),
-    friends:(owner)=>call('can_view_spike_friends',{p_viewer:state.viewerId,p_owner:owner}),
-    online:(owner)=>call('can_view_spike_online_status',{p_viewer:state.viewerId,p_owner:owner}),
-    message:(owner)=>call('can_message_spike_user',{p_sender:state.viewerId,p_recipient:owner}),
-    call:(owner)=>call('can_call_spike_user',{p_caller:state.viewerId,p_callee:owner}),
-    ready:null
-  };
-  state.ready=(async()=>{const u=await viewer(); state.viewerId=u?.id||null; return u})(); window.SPIKE_ACCESS.ready=state.ready;
-  // Guard profile/discovery links before navigation; privacy is still enforced server-side.
-  document.addEventListener('click',async function(e){
-    const a=e.target.closest?.('a[href]'); if(!a) return;
-    const href=a.getAttribute('href')||''; if(!/(^|\/)(profile|user-profile)(\.html)?([?#]|$)/i.test(href)) return;
-    const u=await state.ready; if(!u) return;
-    const m=href.match(/[?&](?:user|user_id|id|uid)=([^&#]+)/i); if(!m) return;
-    const owner=decodeURIComponent(m[1]); if(owner===u.id) return;
-    const ok=await call('can_discover_spike_profile',{p_viewer:u.id,p_owner:owner});
-    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else void window.SPIKEPremiumDialog.alert('This profile is not available to you.',{title:'Profile unavailable',kicker:'SPIKE NOTICE'});}
-  },true);
-})();
-</script>
-<script id="spike-menu-nav-controller-fixed">
-(function(){
-  if(window.__SPIKE_MENU_NAV_FIXED__) return; window.__SPIKE_MENU_NAV_FIXED__=true;
-  const root=document.documentElement, body=document.body;
-  const menuButtonSelector='#menuBtn, #menuButton, .menu-btn, .spike-menu-left, [aria-label*="menu" i], [title*="menu" i]';
-  const closeSelector='[id*="menuClose" i], [id*="closeMenu" i], [data-close-menu], .spike-menu-close';
-  function navHidden(v){ body.classList.toggle('spike-menu-nav-hidden',!!v); root.classList.toggle('spike-menu-nav-hidden',!!v); }
-  function openDetected(){
-    return !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"], .overlay.open[id*="menu" i], [id*="menu" i].open, .side-menu.open, .drawer.open');
-  }
-  function sync(){ navHidden(openDetected()); }
-  document.addEventListener('click',function(e){
-    const menu=e.target.closest?.(menuButtonSelector);
-    if(menu){ navHidden(true); requestAnimationFrame(sync); setTimeout(sync,80); return; }
-    const close=e.target.closest?.(closeSelector);
-    if(close){ setTimeout(sync,40); return; }
-    const overlay=e.target.closest?.('.spike-menu-overlay, .overlay[id*="menu" i]');
-    if(overlay && e.target===overlay) setTimeout(sync,40);
-  },true);
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape') setTimeout(sync,40); });
-  sync();
-  window.setInterval(sync, 750);
-})();
-</script>
-<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
-
-
+<script src="js/ui-fix.js"></script>
+<script src="js/spike-privacy-bridge.js"></script>
+<script src="js/spike-ui-runtime.js"></script>
 <script src="js/premium-back.js" defer></script>
 <script src="js/telemetry.js" defer></script>
 <script src="js/spike-adaptive-nav.js" defer></script>

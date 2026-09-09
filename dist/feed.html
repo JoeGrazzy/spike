@@ -372,7 +372,7 @@ async function requireUser() {
   const composerAvatar = $("composerAvatar");
   if (composerAvatar) {
     const avatar = avatarOf(state.profile);
-    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async">`;
+    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async" loading="lazy">`;
     else composerAvatar.textContent = nameOf(state.profile).charAt(0).toUpperCase();
   }
   return true;
@@ -719,6 +719,8 @@ const feedEventQueue=[];const feedSessionId=crypto.randomUUID();let feedFlushTim
 function queueFeedEvent(postId,eventType,extra={}){if(!postId||!state.user?.id)return;const ev={post_id:String(postId),event_type:eventType,occurred_at:new Date().toISOString(),session_id:feedSessionId,position:Number.isFinite(extra.position)?extra.position:null,dwell_ms:Number.isFinite(extra.dwell_ms)?extra.dwell_ms:null,metadata:{...(extra.metadata||{}),ranking_version:FEED_RANKING_CONFIG.version,experiment:FEED_RANKING_CONFIG.experiment},client_event_id:crypto.randomUUID()};feedEventQueue.push(ev);if(feedEventQueue.length>feedCfg.telemetry.maxQueue)feedEventQueue.splice(0,feedEventQueue.length-feedCfg.telemetry.maxQueue);const l=readSignalStore(),r=l[postId]||{};if(eventType==='impression')r.impressions=Number(r.impressions||0)+1;if(eventType==='viewed')r.lastViewedAt=Date.now();r[eventType]=Number(r[eventType]||0)+1;l[postId]=r;writeSignalStore(l);scheduleFeedFlush()}
 async function flushFeedEvents(){if(!navigator.onLine||!state.user?.id||!feedEventQueue.length)return;const batch=feedEventQueue.splice(0,feedCfg.telemetry.batchSize);try{const {error}=await db.rpc('record_feed_recommendation_events',{p_events:batch});if(error)throw error}catch(e){feedEventQueue.unshift(...batch)}}
 function scheduleFeedFlush(){if(feedFlushTimer)return;feedFlushTimer=setTimeout(async()=>{feedFlushTimer=null;await flushFeedEvents();if(feedEventQueue.length)scheduleFeedFlush()},feedCfg.telemetry.flushMs)}window.addEventListener('online',()=>flushFeedEvents().catch(()=>{}));
+const creatorEngagementViewSessions=new Set();
+async function recordCreatorEngagement(id,action){if(!id||!state.user?.id)return false;try{const {error}=await db.rpc('mutate_post_interaction',{p_post_id:String(id),p_action:action,p_emoji:null,p_comment:null});if(error)throw error;return true}catch(e){console.warn('[SPIKE creator engagement]',action,e);return false}}
 function recordSignal(signalId,type,delta=1){const map={opens:'open',likes:delta>0?'like':'unlike',saves:delta>0?'save':'unsave',comments:'comment',reactions:'reaction'};if(map[type])queueFeedEvent(signalId,map[type],{metadata:{delta}})}
 let trendingFeatureCache={},serverSignalProfile={};
 async function loadServerSignalProfile(){if(!navigator.onLine||!state.user?.id)return;try{const {data,error}=await withTimeout(db.rpc('get_feed_signal_profile',{p_days:90}),8000,'Signal profile');if(error)throw error;const out={...serverSignalProfile};(data||[]).forEach(r=>{out[String(r.post_id)]={...r,opens:Number(r.opens||0),viewed:Number(r.viewed||0),impressions:Number(r.impressions||0),likes:Number(r.likes||0),saves:Number(r.saves||0),comments:Number(r.comments||0),reactions:Number(r.reactions||0),not_interested:Number(r.not_interested||0),show_fewer:Number(r.show_fewer||0),mute_creator:Number(r.mute_creator||0),hides:Number(r.hides||0),hide:Number(r.hide??r.hides??0),lastViewedAt:r.last_viewed_at?new Date(r.last_viewed_at).getTime():0}});serverSignalProfile=out}catch(e){console.warn('[FEED SIGNAL PROFILE]',e)}}
@@ -748,7 +750,7 @@ function scheduleSignalRefresh({render=false}={}){
   signalRefreshQueued=true;
   queueMicrotask(()=>{signalRefreshQueued=false;refreshSignalRanking({render:true})});
 }function startSignalAutoRefresh(){clearInterval(signalRefreshTimer);signalRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSignalRanking({render:false})},300000)}
-const feedVisibility=new Map();let feedObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}})}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
+const feedVisibility=new Map();let feedObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}});if(!creatorEngagementViewSessions.has(id)){creatorEngagementViewSessions.add(id);recordCreatorEngagement(id,'view').catch(()=>{})}}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
 function feedbackMenu(p){const old=$('feedFeedbackOverlay');old?.remove();const o=document.createElement('div');o.id='feedFeedbackOverlay';o.className='feed-feedback-overlay';const topics=FeedRankingEngine.topics(p),type=FeedRankingEngine.type(p);o.innerHTML=`<section class="feed-feedback-sheet" role="dialog" aria-modal="true"><div class="feed-feedback-head"><b>Tune your feed</b><button data-feedback-close type="button">×</button></div><button data-feedback="not_interested" type="button">Not interested<small>Show fewer Signals of this content type.</small></button><button data-feedback="show_fewer" type="button">Show fewer like this<small>${topics.length?'Reduce posts about '+topics.slice(0,2).join(', '):'Reduce similar topics.'}</small></button><button data-feedback="mute_creator" type="button">Mute creator<small>Stop recommendations from this creator.</small></button><button data-feedback="hide" type="button">Hide this post<small>Remove this Signal from your feed.</small></button></section>`;document.body.appendChild(o);o.onclick=async e=>{if(e.target===o||e.target.closest('[data-feedback-close]'))return o.remove();const b=e.target.closest('[data-feedback]');if(!b)return;const k=b.dataset.feedback;try{const {error}=await db.rpc('record_feed_negative_feedback',{p_post_id:p.id,p_event_type:k,p_metadata:{content_type:type,topics:Object.fromEntries(topics.map(t=>[t,1]))}});if(error)throw error;const l=readSignalStore(),r=l[p.id]||{};r[k]=Number(r[k]||0)+1;l[p.id]=r;writeSignalStore(l);if(k==='hide')state.posts=state.posts.filter(x=>x.id!==p.id);if(k==='mute_creator')state.muted.add(p.authorUid);renderSignalsFromRanked(filteredPosts());toast(k==='mute_creator'?'Creator muted':k==='hide'?'Signal hidden':'Feed preference saved','success');o.remove()}catch(err){queueFeedEvent(p.id,k,{metadata:{content_type:type,topics,offline:true}});toast('Saved locally; it will sync when you are back online','success');o.remove()}}}
 function ago(v) {
   const d = new Date(v);
@@ -896,17 +898,17 @@ ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl
 <span>${m.saves ? `🔖 ${m.saves}` : ""}</span>
 </div>
 <div class="post-actions">
-<button class="${liked?"active":""}" data-like="${esc(p.id)}">❤️</button>
-<button data-comments="${esc(p.id)}">💬</button>
+<button class="${liked?"active":""}" data-like="${esc(p.id)}" aria-label="${liked?"Unlike Signal":"Like Signal"}" title="${liked?"Unlike":"Like"}">❤️</button>
+<button data-comments="${esc(p.id)}" aria-label="Open comments" title="Comments">💬</button>
 <button data-pass="${esc(p.id)}" aria-label="Pass this Signal">↗</button>
-<button class="${saved?"active":""}" data-save="${esc(p.id)}">🔖</button>
+<button class="${saved?"active":""}" data-save="${esc(p.id)}" aria-label="${saved?"Unsave Signal":"Save Signal"}" title="${saved?"Unsave":"Save"}">🔖</button>
 ${p.mediaType === "video" ? `<button type="button" class="spike-video-download" data-download-video="${esc(p.id)}" aria-label="Download watermarked video" title="Download watermarked video">⬇️</button>` : ""}
 </div>
 <div class="reaction-picker">
 <button class="react-trigger" data-react-menu="${esc(p.id)}" aria-label="Choose reaction">☺ React</button>
 ${reactionSummary}
 </div>
-${isOwner ? `<div class="owner-insights-wrap"><button type="button" class="insights-toggle" data-insights="${esc(p.id)}">📊 Insights</button><div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div></div>` : ""}
+${isOwner ? `<div class="owner-insights-wrap"><button type="button" class="insights-toggle" data-insights="${esc(p.id)}">📊 Insights</button><a class="insights-toggle engagement-link" href="engagement.html" aria-label="Open your engagement dashboard">📈 Engagement</a><div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div></div>` : ""}
 <div class="comments" id="comments-${esc(p.id)}" data-comments-panel="${esc(p.id)}">
   <div class="comments-head">
     <span class="comments-title">Echoes</span>
@@ -1408,7 +1410,7 @@ function spikePassRenderLink(url){
   const panel=$('spikePassPanel'); if(!panel)return;
   panel.innerHTML=`<div class="spike-pass-link-card"><span class="spike-pass-label">PASS OUTSIDE SPIKE</span><div class="spike-pass-link-url">${esc(url)}</div><button type="button" class="spike-pass-primary" id="spikeCopySignalLink">COPY SIGNAL LINK</button><button type="button" class="tool" id="spikeNativeSignalShare" style="width:100%;margin-top:8px">Use device sharing…</button></div>`;
   panel.querySelector('#spikeCopySignalLink')?.addEventListener('click',async()=>{try{await copyTextSafe(url);toast('Signal link copied','success')}catch{toast('Copy unavailable — press and hold the link.')}});
-  panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{const p=state.posts.find(x=>x.id===state.activePost);try{if(navigator.share)await navigator.share({title:'SPIKE Signal',text:p?.content||'A Signal from SPIKE',url});toast('Device sharing opened','success')}catch(e){if(e?.name!=='AbortError')toast('Device sharing unavailable','error')}});
+  panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{const p=state.posts.find(x=>x.id===state.activePost);try{if(navigator.share){await navigator.share({title:'SPIKE Signal',text:p?.content||'A Signal from SPIKE',url});await recordCreatorEngagement(p?.id,'share');toast('Device sharing opened','success')}}catch(e){if(e?.name!=='AbortError')toast('Device sharing unavailable','error')}});
 }
 async function spikePassSendFriends(){
   const p=state.posts.find(x=>x.id===state.activePost); if(!p||!spikePassSelected.size)return;
@@ -1417,6 +1419,7 @@ async function spikePassSendFriends(){
   const btn=$('spikePassSend'); if(btn){btn.disabled=true;btn.textContent='PASSING…';}
   let sent=0;
   try{for(const recipient of spikePassSelected){const {error}=await db.from('private_messages').insert({sender_id:state.user.id,recipient_id:recipient,body:body.slice(0,10000),message_type:'text',read:false});if(error)throw error;sent++;}
+    await recordCreatorEngagement(p.id,'share');
     renderSignals(); scheduleSignalRefresh();
     const panel=$('spikePassPanel'); if(panel)panel.innerHTML=`<div class="spike-pass-success"><div class="ok">✓</div><b>Signal passed</b><small>Your voice was added and sent to ${sent} connection${sent===1?'':'s'}.</small></div>`;
   }catch(e){console.error('[SPIKE PASS FRIENDS]',e);toast(e?.message||'Could not pass the Signal','error');if(btn){btn.disabled=false;btn.textContent='TRY AGAIN';}}
@@ -2966,20 +2969,50 @@ function initModernApp(){
     });
   }
 
-  // Bottom nav
+  // Bottom nav — route-aware and resilient.
+  // The dock is intentionally a single source of navigation truth: in-page
+  // actions stay in-page, while Activity/Profile use real routes so they do
+  // not depend on a legacy button existing elsewhere in the DOM.
   const nav = $('spikeBottomNav');
   if(nav){
+    const setActive = target => {
+      nav.querySelectorAll('[data-spike-nav]').forEach(x => x.classList.toggle('active', x.dataset.spikeNav === target));
+    };
+    const openProfile = () => {
+      const uid = String(state.user?.id || "");
+      window.location.href = uid ? `profile.html?uid=${encodeURIComponent(uid)}` : "profile.html";
+    };
     nav.addEventListener('click', e => {
       const b = e.target.closest('[data-spike-nav]');
-      if(!b) return;
-      nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
+      if(!b || !nav.contains(b)) return;
       const target = b.dataset.spikeNav;
-      if(target === 'home'){ window.scrollTo({top:0,behavior:'smooth'}); }
-      if(target === 'discover'){ document.querySelector('[data-v2="discover"]')?.click(); $('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'}); }
-      if(target === 'create'){ const c=document.querySelector('.spike-signal-composer'); const t=$('signalText'); c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded'); c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250); }
-      if(target === 'activity'){ $('notificationBtn')?.click(); }
-      if(target === 'profile'){ $('profileBtn')?.click(); }
+      setActive(target);
+      if(target === 'home'){
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(target === 'discover'){
+        document.querySelector('[data-v2="discover"]')?.click();
+        const hub=$('feedV2Hub');
+        if(hub) hub.scrollIntoView({behavior:'smooth',block:'start'});
+        return;
+      }
+      if(target === 'create'){
+        const c=document.querySelector('.spike-signal-composer');
+        const t=$('signalText');
+        c?.classList.remove('spike-collapsed');
+        c?.classList.add('spike-expanded');
+        c?.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>t?.focus(),250);
+        return;
+      }
+      if(target === 'activity'){
+        window.location.href = "notifications.html";
+        return;
+      }
+      if(target === 'profile'){
+        openProfile();
+      }
     });
   }
 }
@@ -3955,6 +3988,16 @@ else boot();
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <link rel="stylesheet" href="css/spike-surface-controls.css">
+<style id="spike-owner-insights-mobile-fix">
+.owner-insights-wrap{width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;clear:both}
+.owner-insights-wrap .owner-insights{flex:0 0 100%;width:100%;min-width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:2px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);box-sizing:border-box}
+.owner-insights-wrap .owner-insights[hidden]{display:none!important}
+.owner-insights-wrap .owner-insights span{min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.25;color:var(--muted);font-weight:800}
+@media(max-width:560px){.owner-insights-wrap{gap:6px;padding-left:8px;padding-right:8px}.owner-insights-wrap .insights-toggle{flex:1 1 0}.owner-insights-wrap .owner-insights{grid-template-columns:repeat(2,minmax(0,1fr));padding:7px}.owner-insights-wrap .owner-insights span{font-size:9px;min-height:24px}}
+</style>
+<link rel="stylesheet" href="css/spike-debugger.css">
+<script src="js/spike-debugger.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 
@@ -4134,9 +4177,9 @@ else boot();
       <button id="menuSafety"><span>🛡️</span><strong>Safety Center</strong><small>Privacy & protection</small></button>
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
-<a id="menuSbet" href="spike_predictor.html">⚽ Predictor</a>
-      <a id="menuWorld" href="spike_world.html">🌐 World<strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
-      <a id="menuAdmin" href="admin.html" hidden><span>SPIKE</span><strong>Admin</strong><small>Administration</small></a>
+<a id="menuSbet" href="spike_predictor.html"><span aria-hidden="true">⚽</span><strong>Predictor</strong><small>Predictions & matches</small></a>
+      <a id="menuWorld" href="spike_world.html"><span aria-hidden="true">🌐</span><strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
+      <a id="menuAdmin" href="admin.html" hidden><span aria-hidden="true">🛠️</span><strong>Admin</strong><small>Administration</small></a>
     </div>
     <div class="spike-menu-footer"><button id="menuSignOut" class="danger"><span>↪</span><strong>Sign out</strong></button></div>
   </section>
@@ -4338,7 +4381,7 @@ else boot();
 })();
 </script>
 
-<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+<script src="js/spike-ui-runtime.js"></script>
 <script src="js/telemetry.js" defer></script>
   <script src="js/theme.js"></script>
 
@@ -4354,5 +4397,6 @@ else boot();
 <script src="js/spike-surface-controls.js"></script>
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/feed-polish-mobile.css">
 </body>
 </html>

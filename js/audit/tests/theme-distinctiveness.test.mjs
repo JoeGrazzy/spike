@@ -17,7 +17,7 @@ test('V17 has exactly 10 canonical theme identities with deliberately distinct g
 
 test('No obsolete embedded theme systems remain in production pages',async()=>{
   const {readdir,readFile}=await import('node:fs/promises');
-  const pages=(await readdir('.')).filter(x=>x.endsWith('.html') && !x.endsWith('.pre-rebuild.html'));
+  const pages=(await readdir('.')).filter(x=>x.endsWith('.html'));
   for(const p of pages){
     const s=await readFile(p,'utf8');
     assert.doesNotMatch(s,/id=["'](?:spike-universal-theme-css|spike-all-pages-theme-layer|spike-style-5-final|spike-final-theme-hardening|spike-friends-theme-fix|spike-rooms-all-themes|spike-theme-safe-ui|message-premium-clean-theme)["']/i,p);

@@ -447,6 +447,8 @@ video{contain:layout paint}
 <link rel="stylesheet" href="css/premium-back.css">
 
 <script src="js/spike-dialog.js"></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+<link rel="stylesheet" href="css/spike-debugger.css">
+<script src="js/spike-debugger.js"></script>
 </head>
 <body>
 
@@ -692,7 +694,13 @@ async function safeRpc(name,args,context=name){
 }
 let me=null;
 let adminAuthReady=false;
+let adminAuthSubscription=null;
+let adminBooted=false;
+let adminSigningOut=false;
+let adminServiceWorkerTimer=null;
+
 async function auth(){
+if(adminSigningOut)return false;
 const {data,error}=await sb.auth.getUser();
 if(error||!data.user){document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>Sign in required</h2><p>Please sign in to SPIKE.</p></div>';return false}
 me=data.user;
@@ -995,8 +1003,41 @@ on('broadcastBanner','change',()=>{const x=$('#broadcastEndsWrap');if(x)x.hidden
 on('refreshRoomPurchases','click',()=>loadRoomPurchases(roomPurchaseStatus));
 on('roomPurchaseFilters','click',e=>{const b=e.target.closest('[data-purchase-status]');if(!b)return;document.querySelectorAll('#roomPurchaseFilters [data-purchase-status]').forEach(x=>x.classList.toggle('active',x===b));loadRoomPurchases(b.dataset.purchaseStatus)});
 on('refreshGems','click',loadSpikeGems);on('distributeGems','click',distributeSpikeGems);on('refreshMaintenance','click',loadMaintenance);on('enableMaintenance','click',()=>setMaintenance(true));on('disableMaintenance','click',()=>setMaintenance(false));
+
+function showAdminGate(title,message){
+  document.body.innerHTML='<div style="padding:40px;color:white;background:#08090d;min-height:100vh"><h2>'+esc(title)+'</h2><p>'+esc(message)+'</p></div>';
+}
+function handleAdminSignedOut(){
+  if(adminSigningOut)return;
+  adminSigningOut=true;
+  adminAuthReady=false;
+  try{adminAuthSubscription?.unsubscribe?.()}catch{}
+  adminAuthSubscription=null;
+  showAdminGate('Session ended','Please sign in again to access the SPIKE administrator dashboard.');
+}
+
+try{
+  const authState=sb.auth.onAuthStateChange((event,session)=>{
+    if(event==='SIGNED_OUT'||!session?.user){ handleAdminSignedOut(); }
+    else if(event==='TOKEN_REFRESHED'&&adminAuthReady){ me=session.user; }
+  });
+  adminAuthSubscription=authState?.data?.subscription||null;
+}catch(e){console.warn('[SPIKE ADMIN] auth listener unavailable',e)}
+
+window.addEventListener('pagehide',()=>{
+  adminSigningOut=true;
+  adminAuthReady=false;
+  try{adminAuthSubscription?.unsubscribe?.()}catch{}
+  adminAuthSubscription=null;
+  clearTimeout(window.memberSearchTimer); window.memberSearchTimer=null;
+  if(adminServiceWorkerTimer){clearTimeout(adminServiceWorkerTimer);adminServiceWorkerTimer=null;}
+  document.body.style.overflow='';
+});
+
 nav();
 (async()=>{
+  if(adminBooted)return;
+  adminBooted=true;
   if(await auth()){
     adminAuthReady=true;
     window.__SPIKE_ADMIN_AUTH_READY=true;
@@ -1006,19 +1047,7 @@ nav();
   }
 })();
 </script>
-<script id="spike-sw-register">
-if("serviceWorker" in navigator){
-const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
-if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
-else setTimeout(install,1500);
-}
-</script>
-
-<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script>
-
-<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
-
-
+<script src="js/spike-ui-runtime.js"></script>
 <script src="js/premium-back.js" defer></script>
 <script src="js/telemetry.js" defer></script>
 
@@ -1037,4 +1066,5 @@ else setTimeout(install,1500);
 <script src="js/spike-surface-controls.js"></script>
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<a href="spike_debug_center.html" style="position:fixed;right:16px;bottom:16px;z-index:9999;padding:10px 13px;border-radius:999px;background:#111;color:#fff;text-decoration:none">🐛 Debug Center</a>
 </body></html>

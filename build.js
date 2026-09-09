@@ -7,38 +7,25 @@ const dist = path.join(root, "dist");
 fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 
-const copyFile = (src, dest) => {
-  fs.mkdirSync(path.dirname(dest), { recursive: true });
-  fs.copyFileSync(src, dest);
-};
+const skip = new Set(["dist", ".git", "node_modules", "docs", "audit"]);
+const skipFile = name => /^.*\.pre-rebuild\.html$/i.test(name) || /^(?:package\.json|build\.js|dom\.txt|remove_legacy\.sql)$/i.test(name);
 
-// Production is a strict allow-list: never publish audit code, SQL migrations,
-// package metadata, source backups, or internal/legal working files.
-for (const entry of fs.readdirSync(root)) {
-  if (/\.pre-rebuild\.html$/i.test(entry)) continue;
-  const src = path.join(root, entry);
+function copy(src, dest) {
   const stat = fs.statSync(src);
-  if (stat.isFile() && entry.endsWith(".html")) copyFile(src, path.join(dist, entry));
-}
-
-for (const dir of ["css", "assets"]) {
-  const srcDir = path.join(root, dir);
-  if (fs.existsSync(srcDir)) {
-    fs.cpSync(srcDir, path.join(dist, dir), { recursive: true });
+  if (stat.isDirectory()) {
+    fs.mkdirSync(dest, { recursive: true });
+    for (const entry of fs.readdirSync(src)) {
+      if (skip.has(entry) || skipFile(entry)) continue;
+      copy(path.join(src, entry), path.join(dest, entry));
+    }
+  } else {
+    fs.copyFileSync(src, dest);
   }
 }
 
-const jsDir = path.join(root, "js");
-if (fs.existsSync(jsDir)) {
-  fs.mkdirSync(path.join(dist, "js"), { recursive: true });
-  for (const entry of fs.readdirSync(jsDir)) {
-    if (entry === "audit") continue;
-    const src = path.join(jsDir, entry);
-    fs.cpSync(src, path.join(dist, "js", entry), { recursive: true });
-  }
+for (const entry of fs.readdirSync(root)) {
+  if (skip.has(entry) || skipFile(entry)) continue;
+  copy(path.join(root, entry), path.join(dist, entry));
 }
 
-if (fs.existsSync(path.join(root, "_headers"))) copyFile(path.join(root, "_headers"), path.join(dist, "_headers"));
-if (fs.existsSync(path.join(root, "404.html"))) copyFile(path.join(root, "404.html"), path.join(dist, "404.html"));
-
-console.log(`Built static SPIKE site to dist/ (${fs.readdirSync(dist).length} top-level entries)`);
+console.log("Built static SPIKE site to dist/");

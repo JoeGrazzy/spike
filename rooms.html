@@ -223,6 +223,9 @@ video{contain:layout paint}
 })();
 </script>
 <script src="js/spike-dialog.js"></script>
+<link rel="stylesheet" href="css/spike-debugger.css">
+<script src="js/spike-debugger.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 <div class="app rooms-v2">
@@ -378,7 +381,7 @@ async function uploadToCloudinary(file,folder='spike/rooms'){
   if(!file)return null;
   const endpoint=`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/auto/upload`;
   const form=new FormData(); form.append('file',file); form.append('upload_preset',CLOUDINARY_CONFIG.uploadPreset); form.append('folder',folder);
-  const response=await Promise.race([fetch(endpoint,{method:'POST',body:form}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Image upload timed out. Please try again.')),30000))]);
+  const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),30000); let response; try{response=await fetch(endpoint,{method:'POST',body:form,signal:controller.signal});}catch(error){if(error?.name==='AbortError')throw new Error('Image upload timed out. Please try again.');throw error;}finally{clearTimeout(timeout);}
   const data=await response.json().catch(()=>({}));
   if(!response.ok||!data.secure_url)throw new Error(data.error?.message||'Image upload failed.');
   return data.secure_url;
@@ -477,6 +480,7 @@ return null;
 throw e;
 }
 }
+function safeHttpUrl(raw){try{const u=new URL(String(raw||''),location.href);return /^https?:$/i.test(u.protocol)?u.href:''}catch{return''}}
 const $=s=>document.querySelector(s);
 const esc=x=>String(x??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const toast=(m,type,ms)=>spikePremiumToast(m,type,ms||2600);
@@ -490,6 +494,12 @@ let authReadyResolve;
 let authReadySettled=false;
 const authReady=new Promise(resolve=>{authReadyResolve=resolve});
 let authSubscription=null;
+let authRefreshTimer=null;
+let roomsBooted=false;
+let roomsBooting=false;
+let roomsDestroyed=false;
+let serviceWorkerInstallTimer=null;
+let serviceWorkerIdleId=null;
 function applyAuthSession(session){
   me=session?.user||null;
   if(me) window.AppPresence?.start(sb);
@@ -505,12 +515,14 @@ function beginAuthListener(){
       authReadyResolve(session||null);
     }
     if(event==='SIGNED_IN'||event==='TOKEN_REFRESHED'){
-      setTimeout(async()=>{
+      if(authRefreshTimer) clearTimeout(authRefreshTimer);
+      authRefreshTimer=setTimeout(async()=>{
         try{ await loadRoomAccount(); await loadJoinedRooms(); render(); }
         catch(e){ console.warn('SPIKE auth refresh failed:',e); }
       },0);
     }
     if(event==='SIGNED_OUT'){
+      if(authRefreshTimer){clearTimeout(authRefreshTimer);authRefreshTimer=null;}
       spikeRoomAccount=null;
       joinedRoomIds=new Set();
             renderRoomAccount(null);
@@ -608,8 +620,11 @@ function renderRoomAccount(a){
   if(progress)progress.style.width=Math.max(0,Math.min(100,Number(acct.progress_pct||0)))+'%';
   if(next)next.textContent=acct.next_level===false?'You reached the current Room Account milestone.':'Keep participating to reach '+(acct.next_title||'Builder')+'.'
 }
+let roomAccountLoading=false;
 async function loadRoomAccount(){
+  if(roomAccountLoading)return spikeRoomAccount;
   if(!me){renderRoomAccount(null);return null;}
+  roomAccountLoading=true;
   try{
     const {data,error}=await spikeRpcRead('room_account_progress');
     if(error)throw error;
@@ -643,7 +658,7 @@ window.loadRooms=loadRooms;
 function roomCard(r){
 const id=String(r?.id||r?.room_id||'').trim();
 const av=r.avatar_url
-? '<img src="'+esc(r.avatar_url)+'" alt="" loading="lazy" decoding="async">'
+? '<img src="'+esc(safeHttpUrl(r.avatar_url))+'" alt="" loading="lazy" decoding="async">'
 : esc(r.emoji||'🏠');
 const owner=!!me && String(r.owner_id||'')===String(me.id);
 const joined=!!me && joinedRoomIds.has(id);
@@ -676,7 +691,7 @@ const grid=$('#trendGrid'); if(!grid)return;
 const rows=(trendingRooms.length?trendingRooms:allRooms).slice(0,3);
 $('#trendSummary').textContent=rows.length?rows.length+' rooms ranked by activity':'No active rooms yet';
 grid.innerHTML=rows.length?rows.map((r,i)=>{
-const av=r.avatar_url?'<img src="'+esc(r.avatar_url)+'" alt="" loading="lazy" decoding="async">':esc(r.emoji||'🏠');
+const av=r.avatar_url?'<img src="'+esc(safeHttpUrl(r.avatar_url))+'" alt="" loading="lazy" decoding="async">':esc(r.emoji||'🏠');
 const score=r.trend_score!=null?Number(r.trend_score).toFixed(1):'—';
 const id=String(r.room_id||r.id||'').trim(); if(!isUuid(id)) return ''; return '<article class="trendCard" data-trend-id="'+esc(id)+'"><div class="trendTop"><div class="trendEmoji">'+av+'</div><div class="trendName">'+esc(r.name||'Room')+'</div></div><div class="trendMeta">'+esc(r.category||'General')+' · '+(r.members??0)+' members · '+(r.messages_24h??0)+' messages today</div><div class="trendScore">#'+(i+1)+' · score '+esc(score)+'</div></article>';
 }).join(''):'<div class="empty" style="min-height:80px;padding:15px;grid-column:1/-1">No trending rooms yet.</div>';
@@ -771,9 +786,12 @@ if(joinedRoomIds.has(roomId)){location.href='room_chat.html?id='+encodeURICompon
 await joinRoomFromRooms(roomId);
 }
 
+let creatorStatusLoading=false;
 async function loadCreatorStatus(){
+ if(creatorStatusLoading)return spikeCreatorStatus;
  if(!me){spikeCreatorStatus=null;renderCreatorQualification();return null;}
- try{const {data,error}=await spikeRpcRead('room_creator_status');if(error)throw error;spikeCreatorStatus=Array.isArray(data)?data[0]:data;renderCreatorQualification();return spikeCreatorStatus;}catch(e){console.warn('SPIKE creator status failed:',e);spikeCreatorStatus=null;renderCreatorQualification();return null;}
+ creatorStatusLoading=true;
+ try{const {data,error}=await spikeRpcRead('room_creator_status');if(error)throw error;spikeCreatorStatus=Array.isArray(data)?data[0]:data;renderCreatorQualification();return spikeCreatorStatus;}catch(e){console.warn('SPIKE creator status failed:',e);spikeCreatorStatus=null;renderCreatorQualification();return null;}finally{creatorStatusLoading=false;}
 }
 function renderCreatorQualification(){
  const box=$('#creatorQualification'),grid=$('#cqGrid'),count=$('#cqCount'),bar=$('#cqProgressBar'),sub=$('#cqSub'),btn=$('#cqChallengeBtn'),title=$('#creatorTitle'),creatorBtn=$('#creatorAction');
@@ -880,54 +898,32 @@ $('#coverMedia')?.addEventListener('change',()=>previewRoomImage('coverMedia','c
 $('#notif')?.addEventListener('click',()=>{location.href='notifications.html';});
 $('#avatar')?.addEventListener('click',()=>{if(me) location.href='profile.html?uid='+encodeURIComponent(me.id); else goToSignIn();});
 async function bootRooms(){
+  if(roomsBooted||roomsBooting||roomsDestroyed)return;
+  roomsBooting=true;
+  try{
   await auth();
   await Promise.all([loadRoomAccount(),loadCreatorStatus(),loadJoinedRooms(),loadRooms()]);
   renderRoomAccount(spikeRoomAccount);
   renderTrendingStrip();
   render();
+  roomsBooted=true;
+  }finally{roomsBooting=false;}
 }
+window.addEventListener('pagehide',()=>{
+  roomsDestroyed=true;
+  if(authRefreshTimer){clearTimeout(authRefreshTimer);authRefreshTimer=null;}
+  if(serviceWorkerInstallTimer){clearTimeout(serviceWorkerInstallTimer);serviceWorkerInstallTimer=null;}
+  if(serviceWorkerIdleId!=null && 'cancelIdleCallback' in window){try{cancelIdleCallback(serviceWorkerIdleId);}catch(_){}}
+  if(authSubscription){try{authSubscription.unsubscribe();}catch(_){ } authSubscription=null;}
+  window.AppPresence?.stop?.();
+  document.querySelectorAll('[data-object-url]').forEach(el=>{try{URL.revokeObjectURL(el.dataset.objectUrl);}catch(_){}});
+});
 bootRooms();
 });
 </script>
-<script id="spike-sw-register">
-if("serviceWorker" in navigator){
-const install=()=>navigator.serviceWorker.register("./sw.js",{scope:"./"}).catch(()=>{});
-if("requestIdleCallback" in window) requestIdleCallback(install,{timeout:2500});
-else setTimeout(install,1500);
-}
-</script>
-<script id="spike-premium-notice-js">(()=>{const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script><script src="js/ui-fix.js"></script>
-<script id="spike-privacy-bridge">
-(function(){
-  if(window.__SPIKE_PRIVACY_BRIDGE__) return; window.__SPIKE_PRIVACY_BRIDGE__=true;
-  const sb=window.supabase;
-  const state={};
-  async function call(fn,args){try{if(!sb?.rpc)return null; const r=await sb.rpc(fn,args||{}); if(r.error){console.warn('[SPIKE ACCESS]',fn,r.error.message);return null} return r.data;}catch(e){console.warn('[SPIKE ACCESS]',fn,e);return null}}
-  async function viewer(){try{return (await sb?.auth?.getUser())?.data?.user||null}catch(e){return null}}
-  window.SPIKE_ACCESS={
-    profile:(owner)=>call('can_view_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
-    discover:(owner)=>call('can_discover_spike_profile',{p_viewer:state.viewerId,p_owner:owner}),
-    posts:(owner)=>call('can_view_spike_posts',{p_viewer:state.viewerId,p_owner:owner}),
-    media:(owner)=>call('can_view_spike_media',{p_viewer:state.viewerId,p_owner:owner}),
-    friends:(owner)=>call('can_view_spike_friends',{p_viewer:state.viewerId,p_owner:owner}),
-    online:(owner)=>call('can_view_spike_online_status',{p_viewer:state.viewerId,p_owner:owner}),
-    message:(owner)=>call('can_message_spike_user',{p_sender:state.viewerId,p_recipient:owner}),
-    call:(owner)=>call('can_call_spike_user',{p_caller:state.viewerId,p_callee:owner}),
-    ready:null
-  };
-  state.ready=(async()=>{const u=await viewer(); state.viewerId=u?.id||null; return u})(); window.SPIKE_ACCESS.ready=state.ready;
-  // Guard profile/discovery links before navigation; privacy is still enforced server-side.
-  document.addEventListener('click',async function(e){
-    const a=e.target.closest?.('a[href]'); if(!a) return;
-    const href=a.getAttribute('href')||''; if(!/(^|\/)(profile|user-profile)(\.html)?([?#]|$)/i.test(href)) return;
-    const u=await state.ready; if(!u) return;
-    const m=href.match(/[?&](?:user|user_id|id|uid)=([^&#]+)/i); if(!m) return;
-    const owner=decodeURIComponent(m[1]); if(owner===u.id) return;
-    const ok=await call('can_discover_spike_profile',{p_viewer:u.id,p_owner:owner});
-    if(ok===false){e.preventDefault();e.stopPropagation(); if(typeof window.showToast==='function') window.showToast('This profile is not available to you.'); else toast('This profile is not available to you.','warning');}
-  },true);
-})();
-</script>
+<script src="js/ui-fix.js"></script>
+<script src="js/spike-privacy-bridge.js"></script>
+<script src="js/spike-ui-runtime.js"></script>
 <script defer="" src="js/premium-back.js"></script>
 <script defer="" src="js/telemetry.js"></script>
 <link rel="stylesheet" href="css/theme.css">

@@ -372,7 +372,7 @@ async function requireUser() {
   const composerAvatar = $("composerAvatar");
   if (composerAvatar) {
     const avatar = avatarOf(state.profile);
-    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async">`;
+    if (avatar) composerAvatar.innerHTML = `<img src="${esc(avatar)}" alt="" decoding="async" loading="lazy">`;
     else composerAvatar.textContent = nameOf(state.profile).charAt(0).toUpperCase();
   }
   return true;
@@ -898,10 +898,10 @@ ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl
 <span>${m.saves ? `🔖 ${m.saves}` : ""}</span>
 </div>
 <div class="post-actions">
-<button class="${liked?"active":""}" data-like="${esc(p.id)}">❤️</button>
-<button data-comments="${esc(p.id)}">💬</button>
+<button class="${liked?"active":""}" data-like="${esc(p.id)}" aria-label="${liked?"Unlike Signal":"Like Signal"}" title="${liked?"Unlike":"Like"}">❤️</button>
+<button data-comments="${esc(p.id)}" aria-label="Open comments" title="Comments">💬</button>
 <button data-pass="${esc(p.id)}" aria-label="Pass this Signal">↗</button>
-<button class="${saved?"active":""}" data-save="${esc(p.id)}">🔖</button>
+<button class="${saved?"active":""}" data-save="${esc(p.id)}" aria-label="${saved?"Unsave Signal":"Save Signal"}" title="${saved?"Unsave":"Save"}">🔖</button>
 ${p.mediaType === "video" ? `<button type="button" class="spike-video-download" data-download-video="${esc(p.id)}" aria-label="Download watermarked video" title="Download watermarked video">⬇️</button>` : ""}
 </div>
 <div class="reaction-picker">
@@ -2969,20 +2969,50 @@ function initModernApp(){
     });
   }
 
-  // Bottom nav
+  // Bottom nav — route-aware and resilient.
+  // The dock is intentionally a single source of navigation truth: in-page
+  // actions stay in-page, while Activity/Profile use real routes so they do
+  // not depend on a legacy button existing elsewhere in the DOM.
   const nav = $('spikeBottomNav');
   if(nav){
+    const setActive = target => {
+      nav.querySelectorAll('[data-spike-nav]').forEach(x => x.classList.toggle('active', x.dataset.spikeNav === target));
+    };
+    const openProfile = () => {
+      const uid = String(state.user?.id || "");
+      window.location.href = uid ? `profile.html?uid=${encodeURIComponent(uid)}` : "profile.html";
+    };
     nav.addEventListener('click', e => {
       const b = e.target.closest('[data-spike-nav]');
-      if(!b) return;
-      nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
+      if(!b || !nav.contains(b)) return;
       const target = b.dataset.spikeNav;
-      if(target === 'home'){ window.scrollTo({top:0,behavior:'smooth'}); }
-      if(target === 'discover'){ document.querySelector('[data-v2="discover"]')?.click(); $('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'}); }
-      if(target === 'create'){ const c=document.querySelector('.spike-signal-composer'); const t=$('signalText'); c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded'); c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250); }
-      if(target === 'activity'){ $('notificationBtn')?.click(); }
-      if(target === 'profile'){ $('profileBtn')?.click(); }
+      setActive(target);
+      if(target === 'home'){
+        window.scrollTo({top:0,behavior:'smooth'});
+        return;
+      }
+      if(target === 'discover'){
+        document.querySelector('[data-v2="discover"]')?.click();
+        const hub=$('feedV2Hub');
+        if(hub) hub.scrollIntoView({behavior:'smooth',block:'start'});
+        return;
+      }
+      if(target === 'create'){
+        const c=document.querySelector('.spike-signal-composer');
+        const t=$('signalText');
+        c?.classList.remove('spike-collapsed');
+        c?.classList.add('spike-expanded');
+        c?.scrollIntoView({behavior:'smooth',block:'center'});
+        setTimeout(()=>t?.focus(),250);
+        return;
+      }
+      if(target === 'activity'){
+        window.location.href = "notifications.html";
+        return;
+      }
+      if(target === 'profile'){
+        openProfile();
+      }
     });
   }
 }
@@ -3051,7 +3081,6 @@ function bindEvents() {
     if($('feedImageViewer')?.classList.contains('open')){ if(e.key==='Escape') closeFeedImageViewer(); else if(e.key==='ArrowLeft') stepFeedImageViewer(-1); else if(e.key==='ArrowRight') stepFeedImageViewer(1); }
   });
   // Navigation
-  bindClick('notificationBtn', () => go('notifications.html'));
   // Header profile control removed; profile remains available from the menu/bottom navigation.
   bindClick('menuBtn', () => openOverlay('menuOverlay'));
   $('menuClose')?.addEventListener('click', () => closeOverlay('menuOverlay'));
@@ -3958,6 +3987,16 @@ else boot();
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <link rel="stylesheet" href="css/spike-surface-controls.css">
+<style id="spike-owner-insights-mobile-fix">
+.owner-insights-wrap{width:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap;clear:both}
+.owner-insights-wrap .owner-insights{flex:0 0 100%;width:100%;min-width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:2px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.025);box-sizing:border-box}
+.owner-insights-wrap .owner-insights[hidden]{display:none!important}
+.owner-insights-wrap .owner-insights span{min-width:0;display:flex;align-items:center;justify-content:center;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:1.25;color:var(--muted);font-weight:800}
+@media(max-width:560px){.owner-insights-wrap{gap:6px;padding-left:8px;padding-right:8px}.owner-insights-wrap .insights-toggle{flex:1 1 0}.owner-insights-wrap .owner-insights{grid-template-columns:repeat(2,minmax(0,1fr));padding:7px}.owner-insights-wrap .owner-insights span{font-size:9px;min-height:24px}}
+</style>
+<link rel="stylesheet" href="css/spike-debugger.css">
+<script src="js/spike-debugger.js"></script>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 </head>
 <body>
 
@@ -4007,7 +4046,7 @@ else boot();
 <button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
-<button class="icon" id="notificationBtn" title="Notifications" aria-label="Notifications">🔔<span class="badge" id="notificationBadge"></span></button>
+
 <button class="icon" id="menuBtn" title="Menu" aria-label="Open menu">☰</button>
 
 </div>
@@ -4137,9 +4176,9 @@ else boot();
       <button id="menuSafety"><span>🛡️</span><strong>Safety Center</strong><small>Privacy & protection</small></button>
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
-<a id="menuSbet" href="spike_predictor.html">⚽ Predictor</a>
-      <a id="menuWorld" href="spike_world.html">🌐 World<strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
-      <a id="menuAdmin" href="admin.html" hidden><span>SPIKE</span><strong>Admin</strong><small>Administration</small></a>
+<a id="menuSbet" href="spike_predictor.html"><span aria-hidden="true">⚽</span><strong>Predictor</strong><small>Predictions & matches</small></a>
+      <a id="menuWorld" href="spike_world.html"><span aria-hidden="true">🌐</span><strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
+      <a id="menuAdmin" href="admin.html" hidden><span aria-hidden="true">🛠️</span><strong>Admin</strong><small>Administration</small></a>
     </div>
     <div class="spike-menu-footer"><button id="menuSignOut" class="danger"><span>↪</span><strong>Sign out</strong></button></div>
   </section>
@@ -4341,7 +4380,7 @@ else boot();
 })();
 </script>
 
-<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+<script src="js/spike-ui-runtime.js"></script>
 <script src="js/telemetry.js" defer></script>
   <script src="js/theme.js"></script>
 
@@ -4357,5 +4396,6 @@ else boot();
 <script src="js/spike-surface-controls.js"></script>
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/feed-polish-mobile.css">
 </body>
 </html>
