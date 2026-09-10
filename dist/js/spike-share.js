@@ -193,50 +193,109 @@
     }
   }
 
-  async function share({ title = 'SPIKE', text = '', url = location.href, mediaUrl = '', mediaType = '', author = '', kind = 'signal', fileName = 'spike-share.jpg', preferCard = true } = {}) {
+  function mediaForPost(post) {
+    const items = Array.isArray(post?.mediaItems) && post.mediaItems.length
+      ? post.mediaItems
+      : (post?.mediaUrl ? [{ url: post.mediaUrl, type: post.mediaType || 'image', originalUrl: post.mediaOriginalUrl }] : []);
+    const first = items[0] || null;
+    return {
+      mediaUrl: first?.url || post?.mediaUrl || '',
+      mediaType: first?.type || post?.mediaType || '',
+    };
+  }
+
+  async function prepare({ title = 'SPIKE', text = '', url = location.href, mediaUrl = '', mediaType = '', author = '', kind = 'signal', fileName = 'spike-share.jpg', preferCard = true } = {}) {
     const shareTitle = clean(title, 'SPIKE');
     const shareText = short(text || `Shared from SPIKE`, 420);
     const shareUrl = brandedShareUrl(url);
     let cardFile = null;
+    let card = null;
 
     if (preferCard) {
       try {
-        const card = await makeCard({ title: shareTitle, text: shareText, mediaUrl, mediaType, author, kind });
+        card = await makeCard({ title: shareTitle, text: shareText, mediaUrl, mediaType, author, kind });
         const blob = await canvasBlob(card);
         cardFile = new File([blob], fileName, { type: blob.type || 'image/jpeg', lastModified: Date.now() });
       } catch (e) {
-        console.warn('[SPIKE SHARE] branded card unavailable', e);
+        // Remote media can block canvas export when CORS is unavailable. Preserve
+        // the branded experience by generating a text-only card instead.
+        try {
+          card = await makeCard({ title: shareTitle, text: shareText, author, kind });
+          const blob = await canvasBlob(card);
+          cardFile = new File([blob], fileName, { type: blob.type || 'image/jpeg', lastModified: Date.now() });
+        } catch (fallbackError) {
+          console.warn('[SPIKE SHARE] branded card unavailable', fallbackError || e);
+        }
       }
     }
 
-    if (cardFile && navigator.share) {
-      try {
-        if (!navigator.canShare || navigator.canShare({ files: [cardFile] })) {
-          await navigator.share({ title: shareTitle, text: `${shareText}\n\nShared from SPIKE`, url: shareUrl, files: [cardFile] });
-          return { method: 'branded-file', file: cardFile };
-        }
-      } catch (e) {
-        if (e?.name === 'AbortError') throw e;
-        console.warn('[SPIKE SHARE] file share failed; trying link', e);
-      }
-    }
+    return Object.freeze({ title: shareTitle, text: shareText, url: shareUrl, file: cardFile, card });
+  }
+
+  async function sharePrepared(prepared) {
+    const payload = prepared || {};
+    const shareTitle = clean(payload.title, 'SPIKE');
+    const shareText = short(payload.text || `Shared from SPIKE`, 420);
+    const shareUrl = payload.url || location.href;
+    const cardFile = payload.file || null;
 
     if (navigator.share) {
-      await navigator.share({ title: shareTitle, text: `${shareText}\n\nShared from SPIKE`, url: shareUrl });
-      return { method: 'link' };
+      // IMPORTANT: when sharing the branded card, do NOT put the canonical URL
+      // in the Web Share `url` field. Some Android share targets (notably social
+      // apps) prioritize that field and drop the image attachment, producing
+      // the generic link preview seen in the old flow. Put the link in `text`
+      // instead so the actual SPIKE-branded image remains the primary payload.
+      if (cardFile) {
+        const fileSupported = !navigator.canShare || (() => {
+          try { return navigator.canShare({ files: [cardFile] }); } catch (_) { return false; }
+        })();
+        if (fileSupported) {
+          const brandedText = `${shareText}\n\nView this Signal on SPIKE: ${shareUrl}`;
+          try {
+            await navigator.share({
+              title: shareTitle,
+              text: brandedText,
+              files: [cardFile]
+            });
+            return { method: 'branded-file', file: cardFile, url: shareUrl };
+          } catch (e) {
+            if (e?.name === 'AbortError') throw e;
+            console.warn('[SPIKE SHARE] branded file share failed; trying file-only payload', e);
+          }
+          // A few Android targets reject the title/text combination with an
+          // image. Retry with the minimum valid file payload before falling
+          // back to a link-only share.
+          try {
+            await navigator.share({ files: [cardFile] });
+            return { method: 'branded-file-only', file: cardFile, url: shareUrl };
+          } catch (e) {
+            if (e?.name === 'AbortError') throw e;
+            console.warn('[SPIKE SHARE] file-only share failed; trying link', e);
+          }
+        }
+      }
+
+      try {
+        await navigator.share({ title: shareTitle, text: `${shareText}\n\nView this Signal on SPIKE: ${shareUrl}` });
+        return { method: 'link', url: shareUrl };
+      } catch (e) {
+        if (e?.name === 'AbortError') throw e;
+        console.warn('[SPIKE SHARE] link share failed', e);
+      }
     }
 
     try {
-      if (cardFile && navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        return { method: 'copied-link', file: cardFile };
-      }
       await navigator.clipboard?.writeText(shareUrl);
-      return { method: 'copied-link' };
+      return { method: 'copied-link', file: cardFile, url: shareUrl };
     } catch (_) {
-      return { method: 'none', file: cardFile };
+      return { method: 'none', file: cardFile, url: shareUrl };
     }
   }
 
-  window.SPIKEShare = Object.freeze({ share, makeCard, LOGO_URL, brandedShareUrl });
+  async function share({ title = 'SPIKE', text = '', url = location.href, mediaUrl = '', mediaType = '', author = '', kind = 'signal', fileName = 'spike-share.jpg', preferCard = true } = {}) {
+    const prepared = await prepare({ title, text, url, mediaUrl, mediaType, author, kind, fileName, preferCard });
+    return sharePrepared(prepared);
+  }
+
+  window.SPIKEShare = Object.freeze({ share, prepare, sharePrepared, makeCard, mediaForPost, LOGO_URL, brandedShareUrl });
 })();

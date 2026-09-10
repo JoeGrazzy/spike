@@ -12,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/presence.js"></script>
 <script src="js/call-receiver.js"></script>
+<script src="js/spike-share.js"></script>
 
 <!-- ===== SPIKE PERFORMANCE BOOTSTRAP ===== -->
 <script>
@@ -1419,13 +1420,60 @@ function openReactionTray(id, anchor){
 // ─── SPIKE PASS ─────────────────────────────────────────
 let spikePassFriends = [];
 let spikePassSelected = new Set();
-function spikePassUrl(id){ return `${location.origin}${location.pathname}?post=${encodeURIComponent(id)}`; }
+let spikePassSharePrepared = null;
+let spikePassSharePreviewUrl = '';
+let spikePassSharePrepareToken = 0;
+function spikePassUrl(id){ return new URL(`feed.html?post=${encodeURIComponent(id)}`, location.href).href; }
 function spikePassAvatar(p){
   const u=p?.avatar_url||p?.avatar||''; const n=p?.display_name||p?.name||p?.username||'S';
   return u?`<img src="${esc(u)}" alt="" loading="lazy" decoding="async">`:esc(String(n).trim().slice(0,1).toUpperCase()||'S');
 }
 function spikePassPersonId(p){return p?.user_id||p?.id||p?.owner_id||p?.document_id||null;}
 function spikePassPersonName(p){return p?.display_name||p?.name||p?.username||'SPIKE friend';}
+function spikePassCleanupSharePreview(){
+  if(spikePassSharePreviewUrl){try{URL.revokeObjectURL(spikePassSharePreviewUrl)}catch(_){} spikePassSharePreviewUrl='';}
+  spikePassSharePrepared=null;
+}
+function spikePassShareMedia(p){
+  const media=window.SPIKEShare?.mediaForPost?.(p)||{};
+  return {mediaUrl:media.mediaUrl||'',mediaType:media.mediaType||''};
+}
+async function spikePassPrepareShare(p, token){
+  if(!p||!window.SPIKEShare?.prepare)return;
+  try{
+    const media=spikePassShareMedia(p);
+    const prepared=await window.SPIKEShare.prepare({
+      title:`${nameOf(authorFor(p))} on SPIKE`,
+      text:String(p.content||'A Signal from SPIKE').trim(),
+      url:spikePassUrl(p.id),
+      mediaUrl:media.mediaUrl,
+      mediaType:media.mediaType,
+      author:nameOf(authorFor(p)),
+      kind:'signal',
+      fileName:`SPIKE-Signal-${String(p.id).slice(0,8)}.jpg`,
+      preferCard:true
+    });
+    if(token!==spikePassSharePrepareToken||String(p.id)!==String(state.activePost))return;
+    spikePassSharePrepared=prepared;
+    const preview=$('spikePassSharePreview');
+    if(preview&&prepared.file){
+      spikePassSharePreviewUrl=URL.createObjectURL(prepared.file);
+      preview.innerHTML=`<img src="${esc(spikePassSharePreviewUrl)}" alt="SPIKE branded share preview" loading="eager" decoding="async">`;
+      preview.classList.add('ready');
+    }else if(preview){
+      preview.innerHTML='<div class="spike-share-preview-empty">SPIKE branded image could not be prepared on this device.</div>';
+      preview.classList.remove('ready');
+    }
+    const shareButton=$('spikeNativeSignalShare');
+    if(shareButton){shareButton.disabled=false;shareButton.textContent=navigator.share?'SHARE TO APPS':'COPY SPIKE SIGNAL LINK';}
+    const status=$('spikeShareStatus'); if(status)status.textContent=prepared.file?'Branded card ready':'Link ready — branded card unavailable';
+  }catch(e){
+    console.warn('[SPIKE PASS] share preparation',e);
+    if(token!==spikePassSharePrepareToken)return;
+    const shareButton=$('spikeNativeSignalShare'); if(shareButton){shareButton.disabled=false;shareButton.textContent=navigator.share?'SHARE TO APPS':'COPY SIGNAL LINK';}
+    const status=$('spikeShareStatus'); if(status)status.textContent='Link ready';
+  }
+}
 async function spikeLoadPassFriends(){
   try{const {data,error}=await db.rpc('get_friends_public',{p_limit:500,p_offset:0});if(error)throw error;const seen=new Set();spikePassFriends=(data||[]).filter(f=>{const raw=spikePassPersonId(f)||f?.username||`${f?.display_name||f?.name||''}|${f?.avatar_url||''}`;const key=String(raw).trim().toLowerCase();if(!key||seen.has(key))return false;seen.add(key);return true;});}catch(e){console.warn('[SPIKE PASS] friends',e);spikePassFriends=[];}
 }
@@ -1434,6 +1482,7 @@ function spikePassPreview(p){
   return `<div class="spike-pass-original"><span class="spike-pass-label">ORIGINAL SIGNAL</span><div>${esc(text.slice(0,520))}${text.length>520?'…':''}</div><small>SPIKE ${esc(nameOf(authorFor(p)))}</small></div>`;
 }
 function spikePassRender(){
+  spikePassCleanupSharePreview();
   const panel=$('spikePassPanel'); if(!panel)return;
   const q=(panel.querySelector('.spike-pass-search')?.value||'').trim().toLowerCase();
   const rows=spikePassFriends.filter(f=>`${spikePassPersonName(f)} ${f.username||''}`.toLowerCase().includes(q));
@@ -1446,10 +1495,29 @@ function spikePassRender(){
   panel.querySelector('#spikePassSend')?.addEventListener('click',spikePassSendFriends);
 }
 function spikePassRenderLink(url){
-  const panel=$('spikePassPanel'); if(!panel)return;
-  panel.innerHTML=`<div class="spike-pass-link-card"><span class="spike-pass-label">PASS OUTSIDE SPIKE</span><div class="spike-pass-link-url">${esc(url)}</div><button type="button" class="spike-pass-primary" id="spikeCopySignalLink">COPY SIGNAL LINK</button><button type="button" class="tool" id="spikeNativeSignalShare" style="width:100%;margin-top:8px">Use device sharing…</button></div>`;
+  spikePassCleanupSharePreview();
+  const p=state.posts.find(x=>String(x.id)===String(state.activePost));
+  const panel=$('spikePassPanel'); if(!panel||!p)return;
+  const token=++spikePassSharePrepareToken;
+  panel.innerHTML=`<div class="spike-pass-link-card">
+    <span class="spike-pass-label">PASS OUTSIDE SPIKE</span>
+    <div class="spike-pass-share-copy"><b>Share this Signal outside SPIKE</b><span>SPIKE will attach your branded share image and the exact Signal link when supported by your device.</span></div>
+    <div class="spike-share-preview" id="spikePassSharePreview"><div class="spike-share-preview-loading">Preparing your SPIKE share card…</div></div>
+    <div class="spike-share-status" id="spikeShareStatus">Preparing branded share…</div>
+    <button type="button" class="spike-pass-primary spike-native-share" id="spikeNativeSignalShare" disabled>PREPARING SHARE…</button>
+    <button type="button" class="spike-pass-secondary" id="spikeCopySignalLink">COPY SIGNAL LINK</button>
+  </div>`;
   panel.querySelector('#spikeCopySignalLink')?.addEventListener('click',async()=>{try{await copyTextSafe(url);toast('Signal link copied','success')}catch{toast('Copy unavailable — press and hold the link.')}});
-  panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{const p=state.posts.find(x=>x.id===state.activePost);try{if(navigator.share){await navigator.share({title:'SPIKE Signal',text:p?.content||'A Signal from SPIKE',url});await recordCreatorEngagement(p?.id,'share');toast('Device sharing opened','success')}}catch(e){if(e?.name!=='AbortError')toast('Device sharing unavailable','error')}});
+  panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{
+    if(!spikePassSharePrepared){toast('Share card is still preparing.','warning');return;}
+    try{
+      const result=await window.SPIKEShare.sharePrepared(spikePassSharePrepared);
+      if(result.method==='copied-link')toast('Signal link copied','success');
+      else if(result.method!=='none'){await recordCreatorEngagement(p.id,'share');queueFeedEvent(p.id,'share',{metadata:{surface:'post_share',method:result.method}});toast('Share sheet opened','success');}
+      else toast('Sharing unavailable — copy the Signal link instead.','error');
+    }catch(e){if(e?.name!=='AbortError')toast(e?.message||'Device sharing unavailable','error');}
+  });
+  spikePassPrepareShare(p,token);
 }
 async function spikePassSendFriends(){
   const p=state.posts.find(x=>x.id===state.activePost); if(!p||!spikePassSelected.size)return;
@@ -1465,7 +1533,7 @@ async function spikePassSendFriends(){
 }
 async function passSignal(id){
   const p=state.posts.find(x=>x.id===id); if(!p)return;
-  state.activePost=id; spikePassSelected=new Set();
+  state.activePost=id; spikePassSelected=new Set(); spikePassCleanupSharePreview(); spikePassSharePrepareToken++;
   const title=$('spikePassTitle'); if(title)title.textContent='Pass this Signal';
   const sub=$('spikePassSubtitle'); if(sub)sub.textContent='Carry the message forward — with your own voice.';
   const content=$('spikePassContent'); if(content)content.innerHTML=spikePassPreview(p);
@@ -3219,7 +3287,7 @@ function bindEvents() {
 
   // SPIKE Pass overlay
   $('spikePassClose')?.addEventListener('click', () => closeOverlay('spikePassOverlay'));
-  document.querySelectorAll('[data-pass-mode]').forEach(b => b.addEventListener('click', async () => { document.querySelectorAll('[data-pass-mode]').forEach(x=>x.classList.toggle('active',x===b)); const p=state.posts.find(x=>x.id===state.activePost); if(!p)return; if(b.dataset.passMode==='friends'){await spikeLoadPassFriends();spikePassSelected=new Set();spikePassRender();}else spikePassRenderLink(spikePassUrl(p.id)); }));
+  document.querySelectorAll('[data-pass-mode]').forEach(b => b.addEventListener('click', async () => { document.querySelectorAll('[data-pass-mode]').forEach(x=>x.classList.toggle('active',x===b)); const p=state.posts.find(x=>x.id===state.activePost); if(!p)return; if(b.dataset.passMode==='friends'){spikePassSharePrepareToken++;await spikeLoadPassFriends();spikePassSelected=new Set();spikePassRender();}else spikePassRenderLink(spikePassUrl(p.id)); }));
 
   // Reels
   document.addEventListener('click', e => {
@@ -3867,7 +3935,7 @@ else boot();
 
 <style id="spike-signal-native-style">
 .spike-signal-composer{margin:16px 0 20px;padding:18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:0 18px 55px rgba(0,0,0,.18)}
-.signal-composer-top{display:flex;gap:12px;align-items:center;margin-bottom:14px}.signal-orb{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.08);font-size:20px}.signal-kicker,.spike-pass-kicker,.spike-pass-label{display:block;font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--muted)}.signal-composer-top h2{margin:2px 0 1px;font-size:19px}.signal-composer-top p{margin:0;color:var(--muted);font-size:11px}.signal-writing-surface{border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.13);overflow:hidden}.signal-writing-surface textarea{width:100%;min-height:145px;resize:vertical;border:0;outline:0;background:transparent;color:var(--text);padding:18px;font:inherit;font-size:16px;line-height:1.55}.signal-writing-footer{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}.signal-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.signal-tool,.creator-tool{border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--text);border-radius:11px;padding:8px 10px;font-size:10px;cursor:pointer}.signal-tool:hover,.creator-tool:hover{background:rgba(255,255,255,.08)}.signal-creator-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.signal-audience{margin-left:auto;font-size:9px;color:var(--muted)}.signal-release-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}.signal-release-note{font-size:10px;color:var(--muted)}.signal-release{border:0;border-radius:14px;padding:11px 16px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.06));color:var(--text);font-weight:950;letter-spacing:.08em;cursor:pointer;border:1px solid rgba(255,255,255,.13)}.signal-release:hover{transform:translateY(-1px)}.signal-release b{margin-left:5px}.spike-pass-modal{max-width:560px}.spike-pass-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.spike-pass-head h2{margin:3px 0;font-size:22px}.spike-pass-head p{margin:0;color:var(--muted);font-size:11px}.spike-pass-close{border:0;background:transparent;color:var(--muted);font-size:26px;cursor:pointer}.spike-pass-preview{margin-top:15px}.spike-pass-original{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.04)}.spike-pass-original>div{margin:8px 0;font-size:14px;line-height:1.5}.spike-pass-original small{color:var(--muted)}.spike-pass-mode{display:flex;gap:7px;margin-top:12px}.spike-pass-mode button{flex:1;border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--muted);border-radius:11px;padding:10px;font-size:10px;font-weight:800;cursor:pointer}.spike-pass-mode button.active{color:var(--text);background:rgba(255,255,255,.09)}.spike-pass-panel{margin-top:10px}.spike-pass-search,.spike-pass-message{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.12);color:var(--text);border-radius:11px;padding:10px;outline:0}.spike-pass-message{min-height:80px;resize:vertical;margin-top:8px}.spike-pass-list{max-height:240px;overflow:auto;margin-top:8px}.spike-pass-person{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:8px;border-radius:11px;cursor:pointer}.spike-pass-person:hover,.spike-pass-person.selected{background:rgba(255,255,255,.06);border-color:var(--line)}.spike-pass-person>span:nth-child(2){flex:1}.spike-pass-person small{display:block;color:var(--muted);font-size:9px}.spike-pass-check{width:20px;text-align:center}.spike-pass-primary{width:100%;margin-top:9px;border:0;border-radius:12px;padding:11px;background:rgba(255,255,255,.12);color:var(--text);font-weight:900;cursor:pointer}.spike-pass-primary:disabled{opacity:.4;cursor:not-allowed}.spike-pass-link-card{padding:13px;border:1px solid var(--line);border-radius:14px}.spike-pass-link-url{word-break:break-all;font-size:10px;color:var(--muted);margin:7px 0}.spike-pass-success{text-align:center;padding:24px}.spike-pass-success .ok{font-size:28px;margin-bottom:8px}.spike-pass-success b,.spike-pass-success small{display:block}.spike-pass-success small{color:var(--muted);margin-top:4px}
+.signal-composer-top{display:flex;gap:12px;align-items:center;margin-bottom:14px}.signal-orb{width:42px;height:42px;display:grid;place-items:center;border-radius:14px;background:rgba(255,255,255,.08);font-size:20px}.signal-kicker,.spike-pass-kicker,.spike-pass-label{display:block;font-size:9px;font-weight:900;letter-spacing:.16em;color:var(--muted)}.signal-composer-top h2{margin:2px 0 1px;font-size:19px}.signal-composer-top p{margin:0;color:var(--muted);font-size:11px}.signal-writing-surface{border:1px solid var(--line);border-radius:18px;background:rgba(0,0,0,.13);overflow:hidden}.signal-writing-surface textarea{width:100%;min-height:145px;resize:vertical;border:0;outline:0;background:transparent;color:var(--text);padding:18px;font:inherit;font-size:16px;line-height:1.55}.signal-writing-footer{display:flex;justify-content:space-between;gap:12px;padding:8px 12px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}.signal-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.signal-tool,.creator-tool{border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--text);border-radius:11px;padding:8px 10px;font-size:10px;cursor:pointer}.signal-tool:hover,.creator-tool:hover{background:rgba(255,255,255,.08)}.signal-creator-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:10px}.signal-audience{margin-left:auto;font-size:9px;color:var(--muted)}.signal-release-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}.signal-release-note{font-size:10px;color:var(--muted)}.signal-release{border:0;border-radius:14px;padding:11px 16px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.06));color:var(--text);font-weight:950;letter-spacing:.08em;cursor:pointer;border:1px solid rgba(255,255,255,.13)}.signal-release:hover{transform:translateY(-1px)}.signal-release b{margin-left:5px}.spike-pass-modal{max-width:560px}.spike-pass-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.spike-pass-head h2{margin:3px 0;font-size:22px}.spike-pass-head p{margin:0;color:var(--muted);font-size:11px}.spike-pass-close{border:0;background:transparent;color:var(--muted);font-size:26px;cursor:pointer}.spike-pass-preview{margin-top:15px}.spike-pass-original{padding:14px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.04)}.spike-pass-original>div{margin:8px 0;font-size:14px;line-height:1.5}.spike-pass-original small{color:var(--muted)}.spike-pass-mode{display:flex;gap:7px;margin-top:12px}.spike-pass-mode button{flex:1;border:1px solid var(--line);background:rgba(255,255,255,.035);color:var(--muted);border-radius:11px;padding:10px;font-size:10px;font-weight:800;cursor:pointer}.spike-pass-mode button.active{color:var(--text);background:rgba(255,255,255,.09)}.spike-pass-panel{margin-top:10px}.spike-pass-search,.spike-pass-message{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.12);color:var(--text);border-radius:11px;padding:10px;outline:0}.spike-pass-message{min-height:80px;resize:vertical;margin-top:8px}.spike-pass-list{max-height:240px;overflow:auto;margin-top:8px}.spike-pass-person{width:100%;display:flex;align-items:center;gap:10px;text-align:left;border:1px solid transparent;background:transparent;color:var(--text);padding:8px;border-radius:11px;cursor:pointer}.spike-pass-person:hover,.spike-pass-person.selected{background:rgba(255,255,255,.06);border-color:var(--line)}.spike-pass-person>span:nth-child(2){flex:1}.spike-pass-person small{display:block;color:var(--muted);font-size:9px}.spike-pass-check{width:20px;text-align:center}.spike-pass-primary{width:100%;margin-top:9px;border:0;border-radius:12px;padding:11px;background:rgba(255,255,255,.12);color:var(--text);font-weight:900;cursor:pointer}.spike-pass-primary:disabled{opacity:.4;cursor:not-allowed}.spike-pass-link-card{padding:13px;border:1px solid var(--line);border-radius:14px}.spike-pass-share-copy{display:grid;gap:4px;margin:9px 0 10px}.spike-pass-share-copy b{font-size:12px}.spike-pass-share-copy span{font-size:10px;line-height:1.45;color:var(--muted)}.spike-share-preview{min-height:190px;display:grid;place-items:center;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:rgba(0,0,0,.22)}.spike-share-preview img{display:block;width:100%;max-height:330px;object-fit:contain}.spike-share-preview-loading,.spike-share-preview-empty{padding:28px;text-align:center;color:var(--muted);font-size:10px}.spike-share-status{margin:7px 2px;font-size:9px;color:var(--muted);text-align:center}.spike-native-share{margin-top:7px}.spike-pass-secondary{width:100%;margin-top:8px;border:1px solid var(--line);border-radius:12px;padding:10px;background:transparent;color:var(--text);font-weight:850;cursor:pointer}.spike-pass-secondary:hover{background:rgba(255,255,255,.06)}.spike-pass-primary:disabled{opacity:.45}.spike-pass-link-url{display:none}.spike-pass-success{text-align:center;padding:24px}.spike-pass-success .ok{font-size:28px;margin-bottom:8px}.spike-pass-success b,.spike-pass-success small{display:block}.spike-pass-success small{color:var(--muted);margin-top:4px}
 @media(max-width:560px){.signal-audience{width:100%;margin-left:0}.signal-release-row{align-items:stretch;flex-direction:column}.signal-release{width:100%}.signal-writing-footer{flex-direction:column;gap:3px}}
 </style>
 
