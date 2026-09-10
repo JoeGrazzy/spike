@@ -4018,7 +4018,7 @@ else boot();
 
 
 <header class="header">
-<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title"><img class="spike-official-logo" src="assets/icon/icon.png" data-spike-brand="responsive" alt="SPIKE" decoding="async" loading="lazy"></span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
+<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
 <div class="header-actions spike-header-actions">
 <button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
@@ -4306,56 +4306,8 @@ else boot();
   </section>
 </div>
 
-<script id="spike-brand-assets-init">
-(function(){
-  function img(cls,src,alt){const i=document.createElement('img');i.className=cls;i.src=src;i.alt=alt;i.decoding='async';return i;}
-  function init(){
-    const base='assets/icon/';
-    document.querySelectorAll('head').forEach(h=>{
-      if(!h.querySelector('link[data-spike-favicon]')){
-        const l=document.createElement('link');l.rel='icon';l.type='image/png';l.href=base+'icon.png';l.dataset.spikeFavicon='1';h.appendChild(l);
-      }
-      if(!h.querySelector('link[data-spike-touch-icon]')){
-        const l=document.createElement('link');l.rel='apple-touch-icon';l.href=base+'icon.png';l.dataset.spikeTouchIcon='1';h.appendChild(l);
-      }
-    });
-    document.querySelectorAll('.brand-title').forEach(el=>{
-      if(!el.querySelector('.spike-official-logo')){el.textContent='';el.appendChild(img('spike-official-logo',base+'logo.png','SPIKE'));}
-    });
-    document.querySelectorAll('.brand').forEach(el=>{
-      if(el.querySelector('.brand-title,.spike-official-logo')) return;
-      if(/admin/i.test(location.pathname) && el.closest('.top')){}
-      el.textContent='';el.appendChild(img('spike-official-logo',base+'logo.png','SPIKE'));
-    });
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
-})();
-</script>
 
 
-<script id="spike-responsive-brand-final">
-(function(){
-  'use strict';
-  var base='assets/icon/';
-  function applyBrandMode(){
-    var mobile=window.matchMedia('(max-width: 600px)').matches;
-    document.querySelectorAll('.brand-title .spike-official-logo').forEach(function(img){
-      var next=base+(mobile?'icon.png':'logo.png');
-      if(!img.src.endsWith(next)) img.src=next;
-      img.alt='SPIKE';
-      img.decoding='async';
-    });
-  }
-  function init(){
-    applyBrandMode();
-    var mq=window.matchMedia('(max-width: 600px)');
-    if(mq.addEventListener) mq.addEventListener('change',applyBrandMode);
-    else if(mq.addListener) mq.addListener(applyBrandMode);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-})();
-</script>
 
 <script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 <script src="js/telemetry.js" defer></script>

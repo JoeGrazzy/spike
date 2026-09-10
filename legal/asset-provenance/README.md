@@ -4,7 +4,6 @@ Store evidence here for every asset whose ownership/license is not self-evident.
 
 Recommended files:
 
-- `logo.png.txt`
 - `icon.png.txt`
 - `badges.txt`
 - `incoming.mp3.txt`

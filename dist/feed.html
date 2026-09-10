@@ -1420,9 +1420,7 @@ function openReactionTray(id, anchor){
 // ─── SPIKE PASS ─────────────────────────────────────────
 let spikePassFriends = [];
 let spikePassSelected = new Set();
-let spikePassSharePrepared = null;
-let spikePassSharePreviewUrl = '';
-let spikePassSharePrepareToken = 0;
+let spikePassShareData = null;
 function spikePassUrl(id){ return new URL(`feed.html?post=${encodeURIComponent(id)}`, location.href).href; }
 function spikePassAvatar(p){
   const u=p?.avatar_url||p?.avatar||''; const n=p?.display_name||p?.name||p?.username||'S';
@@ -1430,49 +1428,8 @@ function spikePassAvatar(p){
 }
 function spikePassPersonId(p){return p?.user_id||p?.id||p?.owner_id||p?.document_id||null;}
 function spikePassPersonName(p){return p?.display_name||p?.name||p?.username||'SPIKE friend';}
-function spikePassCleanupSharePreview(){
-  if(spikePassSharePreviewUrl){try{URL.revokeObjectURL(spikePassSharePreviewUrl)}catch(_){} spikePassSharePreviewUrl='';}
-  spikePassSharePrepared=null;
-}
-function spikePassShareMedia(p){
-  const media=window.SPIKEShare?.mediaForPost?.(p)||{};
-  return {mediaUrl:media.mediaUrl||'',mediaType:media.mediaType||''};
-}
-async function spikePassPrepareShare(p, token){
-  if(!p||!window.SPIKEShare?.prepare)return;
-  try{
-    const media=spikePassShareMedia(p);
-    const prepared=await window.SPIKEShare.prepare({
-      title:`${nameOf(authorFor(p))} on SPIKE`,
-      text:String(p.content||'A Signal from SPIKE').trim(),
-      url:spikePassUrl(p.id),
-      mediaUrl:media.mediaUrl,
-      mediaType:media.mediaType,
-      author:nameOf(authorFor(p)),
-      kind:'signal',
-      fileName:`SPIKE-Signal-${String(p.id).slice(0,8)}.jpg`,
-      preferCard:true
-    });
-    if(token!==spikePassSharePrepareToken||String(p.id)!==String(state.activePost))return;
-    spikePassSharePrepared=prepared;
-    const preview=$('spikePassSharePreview');
-    if(preview&&prepared.file){
-      spikePassSharePreviewUrl=URL.createObjectURL(prepared.file);
-      preview.innerHTML=`<img src="${esc(spikePassSharePreviewUrl)}" alt="SPIKE branded share preview" loading="eager" decoding="async">`;
-      preview.classList.add('ready');
-    }else if(preview){
-      preview.innerHTML='<div class="spike-share-preview-empty">SPIKE branded image could not be prepared on this device.</div>';
-      preview.classList.remove('ready');
-    }
-    const shareButton=$('spikeNativeSignalShare');
-    if(shareButton){shareButton.disabled=false;shareButton.textContent=navigator.share?'SHARE TO APPS':'COPY SPIKE SIGNAL LINK';}
-    const status=$('spikeShareStatus'); if(status)status.textContent=prepared.file?'Branded card ready':'Link ready — branded card unavailable';
-  }catch(e){
-    console.warn('[SPIKE PASS] share preparation',e);
-    if(token!==spikePassSharePrepareToken)return;
-    const shareButton=$('spikeNativeSignalShare'); if(shareButton){shareButton.disabled=false;shareButton.textContent=navigator.share?'SHARE TO APPS':'COPY SIGNAL LINK';}
-    const status=$('spikeShareStatus'); if(status)status.textContent='Link ready';
-  }
+function spikePassResetShare(){
+  spikePassShareData=null;
 }
 async function spikeLoadPassFriends(){
   try{const {data,error}=await db.rpc('get_friends_public',{p_limit:500,p_offset:0});if(error)throw error;const seen=new Set();spikePassFriends=(data||[]).filter(f=>{const raw=spikePassPersonId(f)||f?.username||`${f?.display_name||f?.name||''}|${f?.avatar_url||''}`;const key=String(raw).trim().toLowerCase();if(!key||seen.has(key))return false;seen.add(key);return true;});}catch(e){console.warn('[SPIKE PASS] friends',e);spikePassFriends=[];}
@@ -1482,7 +1439,7 @@ function spikePassPreview(p){
   return `<div class="spike-pass-original"><span class="spike-pass-label">ORIGINAL SIGNAL</span><div>${esc(text.slice(0,520))}${text.length>520?'…':''}</div><small>SPIKE ${esc(nameOf(authorFor(p)))}</small></div>`;
 }
 function spikePassRender(){
-  spikePassCleanupSharePreview();
+  spikePassResetShare();
   const panel=$('spikePassPanel'); if(!panel)return;
   const q=(panel.querySelector('.spike-pass-search')?.value||'').trim().toLowerCase();
   const rows=spikePassFriends.filter(f=>`${spikePassPersonName(f)} ${f.username||''}`.toLowerCase().includes(q));
@@ -1495,29 +1452,27 @@ function spikePassRender(){
   panel.querySelector('#spikePassSend')?.addEventListener('click',spikePassSendFriends);
 }
 function spikePassRenderLink(url){
-  spikePassCleanupSharePreview();
+  spikePassResetShare();
   const p=state.posts.find(x=>String(x.id)===String(state.activePost));
   const panel=$('spikePassPanel'); if(!panel||!p)return;
-  const token=++spikePassSharePrepareToken;
   panel.innerHTML=`<div class="spike-pass-link-card">
     <span class="spike-pass-label">PASS OUTSIDE SPIKE</span>
-    <div class="spike-pass-share-copy"><b>Share this Signal outside SPIKE</b><span>SPIKE will attach your branded share image and the exact Signal link when supported by your device.</span></div>
-    <div class="spike-share-preview" id="spikePassSharePreview"><div class="spike-share-preview-loading">Preparing your SPIKE share card…</div></div>
-    <div class="spike-share-status" id="spikeShareStatus">Preparing branded share…</div>
-    <button type="button" class="spike-pass-primary spike-native-share" id="spikeNativeSignalShare" disabled>PREPARING SHARE…</button>
+    <div class="spike-pass-share-copy"><b>Share this Signal outside SPIKE</b><span>Choose an app from your device share sheet to pass this Signal on.</span></div>
+    <div class="spike-share-status" id="spikeShareStatus">Ready to share</div>
+    <button type="button" class="spike-pass-primary spike-native-share" id="spikeNativeSignalShare">${navigator.share?'SHARE TO APPS':'COPY SIGNAL LINK'}</button>
     <button type="button" class="spike-pass-secondary" id="spikeCopySignalLink">COPY SIGNAL LINK</button>
   </div>`;
+  spikePassShareData={title:`${nameOf(authorFor(p))} on SPIKE`,text:String(p.content||'A Signal from SPIKE').trim(),url:url};
   panel.querySelector('#spikeCopySignalLink')?.addEventListener('click',async()=>{try{await copyTextSafe(url);toast('Signal link copied','success')}catch{toast('Copy unavailable — press and hold the link.')}});
   panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{
-    if(!spikePassSharePrepared){toast('Share card is still preparing.','warning');return;}
+    if(!spikePassShareData){toast('Share is unavailable.','warning');return;}
     try{
-      const result=await window.SPIKEShare.sharePrepared(spikePassSharePrepared);
+      const result=await window.SPIKEShare.sharePrepared(spikePassShareData);
       if(result.method==='copied-link')toast('Signal link copied','success');
       else if(result.method!=='none'){await recordCreatorEngagement(p.id,'share');queueFeedEvent(p.id,'share',{metadata:{surface:'post_share',method:result.method}});toast('Share sheet opened','success');}
       else toast('Sharing unavailable — copy the Signal link instead.','error');
     }catch(e){if(e?.name!=='AbortError')toast(e?.message||'Device sharing unavailable','error');}
   });
-  spikePassPrepareShare(p,token);
 }
 async function spikePassSendFriends(){
   const p=state.posts.find(x=>x.id===state.activePost); if(!p||!spikePassSelected.size)return;
@@ -1533,7 +1488,7 @@ async function spikePassSendFriends(){
 }
 async function passSignal(id){
   const p=state.posts.find(x=>x.id===id); if(!p)return;
-  state.activePost=id; spikePassSelected=new Set(); spikePassCleanupSharePreview(); spikePassSharePrepareToken++;
+  state.activePost=id; spikePassSelected=new Set(); spikePassResetShare(); 
   const title=$('spikePassTitle'); if(title)title.textContent='Pass this Signal';
   const sub=$('spikePassSubtitle'); if(sub)sub.textContent='Carry the message forward — with your own voice.';
   const content=$('spikePassContent'); if(content)content.innerHTML=spikePassPreview(p);
@@ -3287,7 +3242,7 @@ function bindEvents() {
 
   // SPIKE Pass overlay
   $('spikePassClose')?.addEventListener('click', () => closeOverlay('spikePassOverlay'));
-  document.querySelectorAll('[data-pass-mode]').forEach(b => b.addEventListener('click', async () => { document.querySelectorAll('[data-pass-mode]').forEach(x=>x.classList.toggle('active',x===b)); const p=state.posts.find(x=>x.id===state.activePost); if(!p)return; if(b.dataset.passMode==='friends'){spikePassSharePrepareToken++;await spikeLoadPassFriends();spikePassSelected=new Set();spikePassRender();}else spikePassRenderLink(spikePassUrl(p.id)); }));
+  document.querySelectorAll('[data-pass-mode]').forEach(b => b.addEventListener('click', async () => { document.querySelectorAll('[data-pass-mode]').forEach(x=>x.classList.toggle('active',x===b)); const p=state.posts.find(x=>x.id===state.activePost); if(!p)return; if(b.dataset.passMode==='friends'){await spikeLoadPassFriends();spikePassSelected=new Set();spikePassRender();}else spikePassRenderLink(spikePassUrl(p.id)); }));
 
   // Reels
   document.addEventListener('click', e => {
@@ -4110,7 +4065,7 @@ else boot();
 
 
 <header class="header">
-<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title"><img class="spike-official-logo" src="assets/icon/icon.png" data-spike-brand="responsive" alt="SPIKE" decoding="async" loading="lazy"></span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
+<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
 <div class="header-actions spike-header-actions">
 <button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
@@ -4399,56 +4354,8 @@ else boot();
   </section>
 </div>
 
-<script id="spike-brand-assets-init">
-(function(){
-  function img(cls,src,alt){const i=document.createElement('img');i.className=cls;i.src=src;i.alt=alt;i.decoding='async';return i;}
-  function init(){
-    const base='assets/icon/';
-    document.querySelectorAll('head').forEach(h=>{
-      if(!h.querySelector('link[data-spike-favicon]')){
-        const l=document.createElement('link');l.rel='icon';l.type='image/png';l.href=base+'icon.png';l.dataset.spikeFavicon='1';h.appendChild(l);
-      }
-      if(!h.querySelector('link[data-spike-touch-icon]')){
-        const l=document.createElement('link');l.rel='apple-touch-icon';l.href=base+'icon.png';l.dataset.spikeTouchIcon='1';h.appendChild(l);
-      }
-    });
-    document.querySelectorAll('.brand-title').forEach(el=>{
-      if(!el.querySelector('.spike-official-logo')){el.textContent='';el.appendChild(img('spike-official-logo',base+'logo.png','SPIKE'));}
-    });
-    document.querySelectorAll('.brand').forEach(el=>{
-      if(el.querySelector('.brand-title,.spike-official-logo')) return;
-      if(/admin/i.test(location.pathname) && el.closest('.top')){}
-      el.textContent='';el.appendChild(img('spike-official-logo',base+'logo.png','SPIKE'));
-    });
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
-})();
-</script>
 
 
-<script id="spike-responsive-brand-final">
-(function(){
-  'use strict';
-  var base='assets/icon/';
-  function applyBrandMode(){
-    var mobile=window.matchMedia('(max-width: 600px)').matches;
-    document.querySelectorAll('.brand-title .spike-official-logo').forEach(function(img){
-      var next=base+(mobile?'icon.png':'logo.png');
-      if(!img.src.endsWith(next)) img.src=next;
-      img.alt='SPIKE';
-      img.decoding='async';
-    });
-  }
-  function init(){
-    applyBrandMode();
-    var mq=window.matchMedia('(max-width: 600px)');
-    if(mq.addEventListener) mq.addEventListener('change',applyBrandMode);
-    else if(mq.addListener) mq.addListener(applyBrandMode);
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init,{once:true});
-  else init();
-})();
-</script>
 
 <script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 <script src="js/telemetry.js" defer></script>
