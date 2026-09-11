@@ -390,6 +390,7 @@ background: rgba(255, 255, 255, 0.08);
 color: #fff;
 }
 /* ── suggestion card ── */
+.network-recommendation-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:9px;border-radius:17px;background:linear-gradient(135deg,rgba(233,69,96,.09),rgba(255,255,255,.025));border:1px solid rgba(233,69,96,.12);box-shadow:0 8px 28px rgba(0,0,0,.12);transition:transform .2s,border-color .2s,background .2s}.network-recommendation-card:hover{transform:translateY(-1px);border-color:rgba(233,69,96,.24);background:linear-gradient(135deg,rgba(233,69,96,.12),rgba(255,255,255,.04))}.network-recommendation-card .network-reason{margin-top:3px;font-size:10px;color:rgba(255,255,255,.42);display:flex;align-items:center;gap:5px}.network-recommendation-card .network-reason i{font-size:9px;color:#e94560}.network-score{position:absolute;top:9px;right:9px;font-size:9px;font-weight:800;letter-spacing:.4px;color:rgba(255,255,255,.28);text-transform:uppercase}.network-recommendation-card .friend-info{min-width:0;flex:1;padding-right:38px}.network-recommendation-card .request-btn{flex-shrink:0}
 .suggestion-card {
 display: flex;
 align-items: center;
@@ -949,7 +950,9 @@ video{contain:layout paint}
 <div id="friendsContainer"></div>
 </section>
 <section id="suggestionsSection" hidden>
-<div class="section-label">Registered People <span id="suggestionCount">0</span></div>
+<div class="section-label">For You <span id="networkCount">0</span></div>
+<div id="networkRecommendationsContainer"></div>
+<div class="section-label" style="margin-top:24px">Discover People <span id="suggestionCount">0</span></div>
 <div id="suggestionsContainer"></div>
 </section>
 </div>
@@ -1261,7 +1264,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 window.sb = db;
 window.supabaseClient = db;
 const $ = id => document.getElementById(id);
-const state = { friends: [], people: [], requests: [], suggestions: [], tab: 'all', query: '', user: null };
+const state = { friends: [], people: [], requests: [], suggestions: [], networkRecommendations: [], tab: 'all', query: '', user: null };
 function esc(v) { const d=document.createElement('div'); d.textContent=v ?? ''; return d.innerHTML; }
 // UUID guard: never send an empty/invalid id to a Supabase UUID parameter.
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -1340,6 +1343,13 @@ if(error) throw error;
 state.friends=uniqueBy((data||[]).map(f=>({...f,user_id:personId(f)})),friendKey);
 renderFriends();
 }
+async function loadNetworkRecommendations() {
+  if(state.tab==='suggestions') loading('networkRecommendationsContainer');
+  const {data,error}=await db.rpc('get_spike_network_recommendations',{p_limit:12});
+  if(error) throw error;
+  state.networkRecommendations=uniqueBy((data||[]).map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id) && p.user_id!==state.user?.id),friendKey);
+  if(state.tab==='suggestions') renderNetworkRecommendations();
+}
 async function loadRegisteredUsers(q='') {
 if(state.tab==='suggestions') loading('suggestionsContainer');
 const {data,error}=await db.rpc('get_registered_users_public',{
@@ -1353,8 +1363,25 @@ state.people=uniqueBy(
 friendKey
 );
 state.suggestions=state.people;
-if(state.tab==='suggestions') renderSuggestions();
+if(state.tab==='suggestions') { renderNetworkRecommendations(); renderSuggestions(); }
 }
+function renderNetworkRecommendations(){
+  const rows=state.query ? state.networkRecommendations.filter(p=>(p.display_name||'').toLowerCase().includes(state.query)||(p.username||'').toLowerCase().includes(state.query)) : state.networkRecommendations;
+  $('networkCount').textContent=rows.length;
+  if(!rows.length){ empty('networkRecommendationsContainer',state.query?'No personalized matches.':'No personalized recommendations yet.'); return; }
+  $('networkRecommendationsContainer').innerHTML=rows.map(p=>{
+    const uid=personId(p), name=esc(p.display_name||p.username||'User');
+    const reason=esc(p.reason_text||'A new person from your wider network');
+    const score=Number(p.network_score||0);
+    return `<div class="network-recommendation-card" data-user-id="${esc(uid)}">
+      <span class="network-score">${score} match</span>
+      <div class="friend-avatar spike-presence-target" data-presence-user="${esc(uid)}" data-presence-status="Offline">${avatar(p)}<span class="status-dot"></span></div>
+      <div class="friend-info"><div class="name">${name}</div><div class="sub">@${esc(p.username||'')}</div><div class="network-reason"><i class="fas fa-sparkles"></i>${reason}</div></div>
+      <div class="friend-action"><button class="request-btn accept" data-send="${esc(uid)}">Add</button></div>
+    </div>`;
+  }).join('');
+}
+
 async function loadRequests() {
 loading('requestsContainer');
 const {data,error}=await db.rpc('get_friend_requests');
@@ -1394,7 +1421,7 @@ $('friendsContainer').innerHTML=rows.map(f=>`
 }
 async function searchPeople(q) {
 state.query=q.trim().toLowerCase();
-await loadRegisteredUsers(q.trim());
+await Promise.all([loadRegisteredUsers(q.trim()), loadNetworkRecommendations()]);
 }
 function renderSuggestions() {
 state.suggestions=uniqueBy(state.suggestions.filter(p=>personId(p)),friendKey);
@@ -1475,7 +1502,7 @@ const {error}=await db.rpc('send_friend_request',{p_user_id:id});
 if(error){notice(error.message||'Could not send friend request.',true);if(btn)btn.disabled=false;return;}
 notice('Friend request sent.');
 if(btn){btn.textContent='Sent';btn.classList.remove('accept');btn.classList.add('cancel');}
-state.suggestions=state.suggestions.filter(p=>p.user_id!==id); renderSuggestions();
+state.suggestions=state.suggestions.filter(p=>p.user_id!==id); state.networkRecommendations=state.networkRecommendations.filter(p=>p.user_id!==id); renderNetworkRecommendations(); renderSuggestions();
 }
 function updateCounts(){
 const friends=uniqueBy(state.friends,friendKey);
@@ -1491,11 +1518,11 @@ function setTab(tab){
 state.tab=tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
 $('pendingSection').hidden=tab!=='all'&&tab!=='pending'; $('friendsSection').hidden=tab==='pending'||tab==='suggestions'; $('suggestionsSection').hidden=tab!=='suggestions';
 if(tab==='pending') $('pendingSection').hidden=false;
-if(tab==='suggestions'){ $('searchWrap').style.display='block'; loadRegisteredUsers(state.query).catch(err=>notice(err.message||'Could not load registered users.',true)); }
+if(tab==='suggestions'){ $('searchWrap').style.display='block'; Promise.all([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]).catch(err=>notice(err.message||'Could not load people recommendations.',true)); }
 else if(tab==='online'){ $('searchWrap').style.display='block'; renderFriends(); }
 else $('searchWrap').style.display='block';
 }
-async function refresh(){ await Promise.all([loadFriends(),loadRequests()]); if(state.tab==='suggestions') await loadRegisteredUsers(state.query); }
+async function refresh(){ await Promise.all([loadFriends(),loadRequests()]); if(state.tab==='suggestions') await Promise.all([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]); }
 document.addEventListener('click', async e=>{
 const tab=e.target.closest('.tab'); if(tab){setTab(tab.dataset.tab);return;}
 const a=e.target.closest('[data-action]'); if(a){await actRequest(a.dataset.id,a.dataset.action);return;}

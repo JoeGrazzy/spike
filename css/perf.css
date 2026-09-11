@@ -1,3 +1,40 @@
 /* SPIKE performance baseline */
 img[loading="lazy"]{content-visibility:auto;}
 @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}}
+
+/* SPIKE performance upgrade: keep long feeds cheap to render and scroll. */
+#posts > .post,
+#posts > .card.post,
+.posts > .post,
+.spike-profile-posts > .spike-profile-post,
+.moment-card,
+.v2-reel-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 360px;
+}
+
+/* Avoid expensive compositing on ordinary content; reserve GPU work for active UI. */
+.post,
+.moment-card,
+.v2-reel-card {
+  transform: none;
+}
+
+/* Low-bandwidth devices: don't spend resources on decorative blur/glow. */
+html[data-save-data="1"] .spike-premium-overlay,
+html[data-save-data="1"] .spike-menu-overlay,
+html[data-save-data="1"] .spike-surface-overlay {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Keep media from forcing horizontal layout growth. */
+.post-media,
+.post-media-grid,
+.post-video-inline,
+.post-content,
+.post-actions,
+.post-stats {
+  min-width: 0;
+  max-width: 100%;
+}

@@ -4,6 +4,8 @@
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
 
 <link rel="stylesheet" href="css/perf.css">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b10">
@@ -110,6 +112,7 @@
 <!-- ===== STYLES ===== -->
 <link rel="stylesheet" href="css/feed-core.css">
 <link rel="stylesheet" href="css/feed-features.css">
+<link rel="stylesheet" href="css/spike-feature-suite.css">
 
 <!-- ===== SCRIPTS ===== -->
 <script>
@@ -757,7 +760,7 @@ function scheduleSignalRefresh({render=false}={}){
   queueMicrotask(()=>{signalRefreshQueued=false;refreshSignalRanking({render:true})});
 }function startSignalAutoRefresh(){clearInterval(signalRefreshTimer);signalRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSignalRanking({render:false})},300000)}
 const feedVisibility=new Map();let feedObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}});if(!creatorEngagementViewSessions.has(id)){creatorEngagementViewSessions.add(id);recordCreatorEngagement(id,'view').catch(()=>{})}}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
-function feedbackMenu(p){const old=$('feedFeedbackOverlay');old?.remove();const o=document.createElement('div');o.id='feedFeedbackOverlay';o.className='feed-feedback-overlay';const topics=FeedRankingEngine.topics(p),type=FeedRankingEngine.type(p);o.innerHTML=`<section class="feed-feedback-sheet" role="dialog" aria-modal="true"><div class="feed-feedback-head"><b>Tune your feed</b><button data-feedback-close type="button">×</button></div><button data-feedback="not_interested" type="button">Not interested<small>Show fewer Signals of this content type.</small></button><button data-feedback="show_fewer" type="button">Show fewer like this<small>${topics.length?'Reduce posts about '+topics.slice(0,2).join(', '):'Reduce similar topics.'}</small></button><button data-feedback="mute_creator" type="button">Mute creator<small>Stop recommendations from this creator.</small></button><button data-feedback="hide" type="button">Hide this post<small>Remove this Signal from your feed.</small></button></section>`;document.body.appendChild(o);o.onclick=async e=>{if(e.target===o||e.target.closest('[data-feedback-close]'))return o.remove();const b=e.target.closest('[data-feedback]');if(!b)return;const k=b.dataset.feedback;try{const {error}=await db.rpc('record_feed_negative_feedback',{p_post_id:p.id,p_event_type:k,p_metadata:{content_type:type,topics:Object.fromEntries(topics.map(t=>[t,1]))}});if(error)throw error;const l=readSignalStore(),r=l[p.id]||{};r[k]=Number(r[k]||0)+1;l[p.id]=r;writeSignalStore(l);if(k==='hide')state.posts=state.posts.filter(x=>x.id!==p.id);if(k==='mute_creator')state.muted.add(p.authorUid);renderSignalsFromRanked(filteredPosts());toast(k==='mute_creator'?'Creator muted':k==='hide'?'Signal hidden':'Feed preference saved','success');o.remove()}catch(err){queueFeedEvent(p.id,k,{metadata:{content_type:type,topics,offline:true}});toast('Saved locally; it will sync when you are back online','success');o.remove()}}}
+function feedbackMenu(p){ openSignalMoreMenu(p, document.querySelector(`[data-more="${CSS.escape(String(p.id))}"]`)); }
 function ago(v) {
   const d = new Date(v);
   if (!v || isNaN(d)) return "Just now";
@@ -914,7 +917,7 @@ ${p.mediaType === "video" ? `<button type="button" class="spike-video-download" 
 <button class="react-trigger" data-react-menu="${esc(p.id)}" aria-label="Choose reaction">☺ React</button>
 ${reactionSummary}
 </div>
-${isOwner ? `<div class="owner-insights-wrap"><button type="button" class="insights-toggle" data-insights="${esc(p.id)}">📊 Insights</button><a class="insights-toggle engagement-link" href="engagement.html" aria-label="Open your engagement dashboard">📈 Engagement</a><div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div></div>` : ""}
+<div class="signal-activity-row" aria-label="Signal activity"><span>Signal activity</span><span>${Number(p.views||0)} views</span><span>${m.totalReactions} reactions</span><span>${m.comments} comments</span><span>${m.saves} saves</span></div>${isOwner ? `<div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div>` : ""}
 <div class="comments" id="comments-${esc(p.id)}" data-comments-panel="${esc(p.id)}">
   <div class="comments-head">
     <span class="comments-title">Echoes</span>
@@ -989,14 +992,31 @@ async function saveSettings() {
 }
 
 // ─── BADGES ────────────────────────────────────────────
-async function loadBadges() {
-  let nc = 0;
-  try {
-    const n = await withTimeout(db.from('notifications').select('*', { count: 'exact', head: true }).eq('user_id', state.user.id).eq('read', false), 8000, 'Notification badge');
-    if (n?.error) throw n.error;
-    nc = Number(n?.count || 0);
-  } catch (e) { console.warn('loadBadges notifications', e); }
+let notificationBadgeTimer = null;
+function setNotificationBadge(count){
+  const navBtn=document.querySelector('[data-spike-nav="activity"]');
+  if(!navBtn)return;
+  let badge=navBtn.querySelector('.spike-nav-badge');
+  const n=Math.max(0,Number(count)||0);
+  if(!n){badge?.remove();navBtn.removeAttribute('data-unread-count');return;}
+  if(!badge){badge=document.createElement('span');badge.className='spike-nav-badge';badge.setAttribute('aria-hidden','true');navBtn.appendChild(badge);}
+  badge.textContent=n>99?'99+':String(n);
+  navBtn.dataset.unreadCount=String(n);
+  navBtn.setAttribute('aria-label',`Activity, ${n} unread notification${n===1?'':'s'}`);
 }
+async function refreshNotificationBadge(){
+  if(!state.user?.id||!navigator.onLine)return;
+  try{
+    const n=await withTimeout(db.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',state.user.id).eq('read',false),8000,'Notification badge');
+    if(n?.error)throw n.error;
+    setNotificationBadge(n?.count||0);
+  }catch(e){console.debug('[SPIKE notification badge]',e);}
+}
+function startNotificationBadge(){
+  clearInterval(notificationBadgeTimer);refreshNotificationBadge();
+  notificationBadgeTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshNotificationBadge()},30000);
+}
+async function loadBadges(){await refreshNotificationBadge();}
 
 // ─── ANNOUNCEMENT ──────────────────────────────────────
 async function loadAnnouncement() {
@@ -1929,6 +1949,40 @@ function openStoryActions(id) {
 
 // ─── FEED V2 PANELS ────────────────────────────────────
 function renderTrending(){const ranked=filteredPosts('trending').slice(0,8),list=$('v2TrendingList');list.innerHTML=ranked.length?ranked.map(p=>{const b=p.__signalBreakdown||{};return `<div class="stat" style="margin-bottom:7px"><b>${signalScore(p)}</b><span>${esc((p.content||'Untitled').slice(0,100))}<small style="display:block;color:var(--muted)">${b.acceleration>.65?'↑ Accelerating':'↑ Rising'} · ${Math.round((b.recentVelocity||0)*100)}% momentum</small></span></div>`}).join(''):'<div class="empty">No trends yet.</div>'}
+function momentTopicTokens(p){
+  const text=String(p?.content||'').toLowerCase();
+  const tags=[...(text.match(/#[a-z0-9_]+/g)||[])].map(x=>x.slice(1));
+  const words=text.replace(/https?:\/\/\S+/g,' ').match(/\b[a-z][a-z0-9]{4,}\b/g)||[];
+  const stop=new Set(['about','after','again','could','every','first','going','great','have','their','there','these','think','those','today','where','which','would','really','should','because','people','something','things','still','being','this','that','with','from','your','just','what','when','will','into','more','than','they','them','then','here','some','only','also','like','make','want','know','very','over','under','using','while']);
+  const counts=new Map();
+  [...tags,...words.filter(w=>!stop.has(w))].forEach(w=>counts.set(w,(counts.get(w)||0)+1));
+  return [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4).map(([w])=>w);
+}
+function renderMoments(){
+  const list=$('v2MomentsList'); if(!list)return;
+  const nowMs=Date.now(), windowMs=72*60*60*1000;
+  const eligible=(state.posts||[]).filter(p=>{const t=new Date(p.createdAt||p.created_at||0).getTime();return p&&!p.deleted&&Number.isFinite(t)&&nowMs-t<=windowMs&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid)});
+  const groups=new Map();
+  eligible.forEach(p=>{
+    const tokens=momentTopicTokens(p);
+    const key=tokens.length?tokens[0]:'community';
+    const g=groups.get(key)||{key,posts:[],tokens:new Set()}; g.posts.push(p); tokens.forEach(x=>g.tokens.add(x)); groups.set(key,g);
+  });
+  const moments=[...groups.values()].filter(g=>g.posts.length>=2).map(g=>{
+    const latest=Math.max(...g.posts.map(p=>new Date(p.createdAt||p.created_at||0).getTime()));
+    const authors=new Set(g.posts.map(p=>p.authorUid).filter(Boolean));
+    const media=g.posts.filter(p=>p.mediaUrl||p.mediaItems?.length).length;
+    const score=g.posts.length*8+authors.size*5+media*2+Math.max(0,24-(nowMs-latest)/3600000);
+    return {...g,authors:authors.size,media,latest,score};
+  }).sort((a,b)=>b.score-a.score).slice(0,6);
+  if(!moments.length){list.innerHTML='<div class="empty">No Moments are forming yet. Moments appear when multiple recent posts naturally connect around a topic.</div>';return;}
+  list.innerHTML=moments.map((m,i)=>{
+    const top=m.posts.sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0))[0];
+    const topic=m.key==='community'?'Community pulse':`#${m.key}`;
+    const age=SPIKETime?.relativeTime?.(m.latest)||'now';
+    return `<article class="moment-card" data-moment-key="${esc(m.key)}"><div class="moment-kicker"><span>✨ MOMENT ${i+1}</span><small>${esc(age)}</small></div><h3>${esc(topic)}</h3><p>${m.posts.length} recent posts · ${m.authors} people${m.media?` · ${m.media} with media`:''}</p><div class="moment-posts">${m.posts.slice(0,3).map(p=>`<button type="button" class="moment-post" data-moment-post="${esc(p.id)}"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc((p.content||'Untitled').slice(0,96))}</span></button>`).join('')}</div><div class="moment-footer"><span>${[...m.tokens].slice(0,3).map(x=>`#${esc(x)}`).join(' · ')}</span><button type="button" class="moment-open" data-moment-post="${esc(top.id)}">Open</button></div></article>`;
+  }).join('');
+}
 function renderAnalytics() {
   const mine = state.posts.filter(p => p.authorUid === state.user.id);
   const likes = mine.reduce((n, p) => n + reactionLikeCount(p), 0);
@@ -1979,10 +2033,11 @@ let spikePremiumMode = '';
 let spikePremiumData = { me:{}, collections:[], closeFriends:[], safety:{}, editingCollectionId:'', safetyQuery:'' };
 function openPremiumSheet(mode,title,subtitle,icon,body){
   spikePremiumMode=mode;
+  document.documentElement.classList.add('spike-modal-open'); document.body.classList.add('spike-modal-open');
   $('spikePremiumIcon').textContent=icon; $('spikePremiumTitle').textContent=title; $('spikePremiumSubtitle').textContent=subtitle||'';
-  $('spikePremiumBody').innerHTML=body; $('spikePremiumOverlay').classList.add('open'); $('spikePremiumOverlay').setAttribute('aria-hidden','false');
+  $('spikePremiumBody').innerHTML=body; $('spikePremiumOverlay').style.display='flex'; $('spikePremiumOverlay').classList.add('open'); $('spikePremiumOverlay').setAttribute('aria-hidden','false');
 }
-function closePremiumSheet(){ $('spikePremiumOverlay')?.classList.remove('open'); $('spikePremiumOverlay')?.setAttribute('aria-hidden','true'); spikePremiumMode=''; }
+function closePremiumSheet(){ document.documentElement.classList.remove('spike-modal-open'); document.body.classList.remove('spike-modal-open'); $('spikePremiumOverlay')?.classList.remove('open'); $('spikePremiumOverlay')?.style.removeProperty('display'); $('spikePremiumOverlay')?.setAttribute('aria-hidden','true'); spikePremiumMode=''; }
 function premiumUserCard(u,selected=false){
   const id=u.id, name=esc(nameOf(u)), av=avatarOf(u);
   return `<div class="spike-premium-card"><div class="spike-premium-avatar">${av?`<img src="${esc(av)}" alt="" loading="lazy" decoding="async">`:esc(nameOf(u).charAt(0).toUpperCase())}</div><div class="spike-premium-card-main"><b>${name}</b><small>@${esc(u.username||u.handle||'user')}</small></div><button class="spike-premium-btn ${selected?'primary':''}" data-cf-toggle="${esc(id)}">${selected?'✓ Added':'Add'}</button></div>`;
@@ -3043,7 +3098,7 @@ function initModernApp(){
       if(target === 'home'){ window.scrollTo({top:0,behavior:'smooth'}); }
       if(target === 'discover'){ document.querySelector('[data-v2="discover"]')?.click(); $('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'}); }
       if(target === 'create'){ const c=document.querySelector('.spike-signal-composer'); const t=$('signalText'); c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded'); c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250); }
-      if(target === 'activity'){ window.location.href='notifications.html'; }
+      if(target === 'activity'){ refreshNotificationBadge(); window.location.href='notifications.html'; }
       if(target === 'profile'){ $('profileBtn')?.click(); }
     });
   }
@@ -3227,11 +3282,14 @@ function bindEvents() {
     if (b.dataset.v2 === 'gamify') renderGamify();
     if (b.dataset.v2 === 'reels') renderReels();
     if (b.dataset.v2 === 'discover') setTimeout(() => renderDiscover($('v2DiscoverSearch')?.value||''), 0);
+    if (b.dataset.v2 === 'moments') renderMoments();
   });
 
   bindClick('v2SaveSafety', saveSettings);
   bindClick('v2NearbyEnable', findNearby);
   bindClick('v2NearbyReset', () => { $('v2NearbyList').innerHTML = '<div class="empty">Nearby discovery is opt-in.</div>'; });
+  bindClick('v2MomentsRefresh', renderMoments);
+  $('v2MomentsList')?.addEventListener('click', e => { const b=e.target.closest('[data-moment-post]'); if(!b)return; const p=state.posts.find(x=>String(x.id)===String(b.dataset.momentPost)); if(!p)return; queueFeedEvent(p.id,'moment_open',{metadata:{surface:'moments'}}); const article=document.querySelector(`[data-post="${CSS.escape(String(p.id))}"]`); if(article){article.scrollIntoView({behavior:'smooth',block:'center'}); article.classList.add('moment-focus'); setTimeout(()=>article.classList.remove('moment-focus'),1600);} });
   document.querySelectorAll('[data-trend-window]').forEach(b => b.onclick = renderTrending);
   $('v2DiscoverGo').addEventListener('click', () => renderDiscover($('v2DiscoverSearch')?.value||''));
   $('v2DiscoverSearch')?.addEventListener('keydown', e => { if(e.key==='Enter') renderDiscover(e.target.value); });
@@ -3513,6 +3571,98 @@ function showReactionUsers(id, anchor){
   const close=e=>{if(!box.contains(e.target)&&e.target!==anchor){box.remove();document.removeEventListener('pointerdown',close,true);}};setTimeout(()=>document.addEventListener('pointerdown',close,true),0);
 }
 
+function closeSignalMoreMenu(){
+  const menu=document.getElementById('spikeSignalMoreMenu');
+  if(menu) menu.remove();
+  document.removeEventListener('pointerdown',closeSignalMoreMenuOutside,true);
+  document.removeEventListener('keydown',closeSignalMoreMenuKey,true);
+  window.removeEventListener('resize',positionSignalMoreMenu);
+  window.removeEventListener('scroll',positionSignalMoreMenu,true);
+}
+function closeSignalMoreMenuOutside(e){
+  const menu=document.getElementById('spikeSignalMoreMenu');
+  if(!menu) return;
+  if(!menu.contains(e.target) && !e.target.closest('[data-more]')) closeSignalMoreMenu();
+}
+function closeSignalMoreMenuKey(e){ if(e.key==='Escape') closeSignalMoreMenu(); }
+let signalMoreMenuAnchor=null;
+function positionSignalMoreMenu(){
+  const menu=document.getElementById('spikeSignalMoreMenu'), a=signalMoreMenuAnchor;
+  if(!menu||!a) return;
+  const r=a.getBoundingClientRect(), gap=8, margin=10;
+  const w=Math.min(250,window.innerWidth-margin*2);
+  menu.style.width=`${w}px`;
+  menu.style.left=`${Math.max(margin,Math.min(window.innerWidth-w-margin,r.right-w))}px`;
+  menu.style.visibility='hidden';
+  menu.style.top='0px';
+  const h=menu.offsetHeight;
+  const below=r.bottom+gap;
+  const above=r.top-gap-h;
+  const top=(below+h<=window.innerHeight-margin||above<margin)?Math.min(below,window.innerHeight-h-margin):above;
+  menu.style.top=`${Math.max(margin,top)}px`;
+  menu.style.visibility='visible';
+}
+function openSignalMoreMenu(p,anchor){
+  closeSignalMoreMenu();
+  signalMoreMenuAnchor=anchor;
+  const owner=p.authorUid===state.user?.id;
+  const menu=document.createElement('div');
+  menu.id='spikeSignalMoreMenu';
+  menu.className='spike-signal-more-menu';
+  menu.setAttribute('role','menu');
+  const items=owner ? [
+    ['insights','Insights','View activity for this Signal','◉'],
+    ['engagement','Engagement','Open creator engagement','↗'],
+    ['delete','Delete Signal','Remove your Signal from SPIKE','×']
+  ] : [
+    ['not_interested','Not interested','Show fewer Signals like this','−'],
+    ['show_fewer','Show fewer like this','Tune similar recommendations','⌁'],
+    ['mute_creator','Mute creator','Stop recommendations from this creator','⊘'],
+    ['hide','Hide this Signal','Remove this Signal from your Feed','⌁']
+  ];
+  menu.innerHTML=`<div class="spike-signal-more-head"><b>${owner?'Signal controls':'Tune this Signal'}</b><button type="button" data-more-close aria-label="Close">×</button></div><div class="spike-signal-more-list">${items.map(([action,title,desc,icon])=>`<button type="button" role="menuitem" data-more-action="${action}" class="${action==='delete'?'is-danger':''}"><span class="more-action-icon" aria-hidden="true">${icon}</span><span><strong>${title}</strong><small>${desc}</small></span></button>`).join('')}</div>`;
+  document.body.appendChild(menu);
+  positionSignalMoreMenu();
+  menu.addEventListener('click',async e=>{
+    const close=e.target.closest('[data-more-close]'); if(close){closeSignalMoreMenu();return;}
+    const b=e.target.closest('[data-more-action]'); if(!b)return;
+    const action=b.dataset.moreAction;
+    closeSignalMoreMenu();
+    if(owner){
+      if(action==='insights'){
+        const article=getSignalArticle(p.id), panel=article?.querySelector('.owner-insights');
+        if(panel){panel.hidden=!panel.hidden; panel.classList.toggle('is-open',!panel.hidden);}
+        return;
+      }
+      if(action==='engagement'){location.href='engagement.html';return;}
+      if(action==='delete'){await deleteSignal(p.id);return;}
+    } else {
+      const fake=document.createElement('button'); fake.dataset.feedback=action;
+      await applySignalFeedback(p,action,fake);
+    }
+  });
+  document.addEventListener('pointerdown',closeSignalMoreMenuOutside,true);
+  document.addEventListener('keydown',closeSignalMoreMenuKey,true);
+  window.addEventListener('resize',positionSignalMoreMenu);
+  window.addEventListener('scroll',positionSignalMoreMenu,true);
+  setTimeout(()=>menu.querySelector('[data-more-close]')?.focus(),30);
+}
+async function applySignalFeedback(p,k,b=null){
+  const topics=FeedRankingEngine.topics(p),type=FeedRankingEngine.type(p);
+  try{
+    const {error}=await db.rpc('record_feed_negative_feedback',{p_post_id:p.id,p_event_type:k,p_metadata:{content_type:type,topics:Object.fromEntries(topics.map(t=>[t,1]))}});
+    if(error) throw error;
+    const l=readSignalStore(),r=l[p.id]||{};r[k]=Number(r[k]||0)+1;l[p.id]=r;writeSignalStore(l);
+    if(k==='hide') state.posts=state.posts.filter(x=>x.id!==p.id);
+    if(k==='mute_creator') state.muted.add(p.authorUid);
+    renderSignalsFromRanked(filteredPosts());
+    toast(k==='mute_creator'?'Creator muted':k==='hide'?'Signal hidden':'Feed preference saved','success');
+  }catch(err){
+    queueFeedEvent(p.id,k,{metadata:{content_type:type,topics,offline:true}});
+    toast('Saved locally; it will sync when you are back online','success');
+  }
+}
+
 function handleSignalClick(e) {
   const b = e.target.closest('button');
   if (!b) return;
@@ -3525,7 +3675,7 @@ function handleSignalClick(e) {
   if (b.dataset.comments) { recordSignal(id, 'opens', 1); window.SPIKEComments?.toggle(id); scheduleSignalRefresh(); return; }
   if (b.dataset.insights) { const panel = $(`insights-${id}`); if(panel){ const opening=panel.hidden; panel.hidden=!opening; b.textContent=opening?'📊 Hide insights':'📊 Insights'; } return; }
   if (b.dataset.pass) { lock(); return Promise.resolve(passSignal(id)).catch(x => toast(x?.message || 'Could not open Pass','error')).finally(unlock); }
-  if (b.dataset.more) { state.activePost = id; const p = state.posts.find(x => x.id === id); if (p?.authorUid === state.user.id) deleteSignal(id); else if (p) feedbackMenu(p); return; }
+  if (b.dataset.more) { state.activePost = id; const p = state.posts.find(x => x.id === id); if (p) openSignalMoreMenu(p, b); return; }
   if (b.dataset.reactMenu) {
     state.activePost = id;
     if(b.classList.contains('reaction-summary') && getSignalState(id)?.reactions){ showReactionUsers(id,b); }
@@ -3653,7 +3803,7 @@ async function initRealtime({ immediate = true } = {}) {
           return;
         }
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          console.warn('[SPIKE FEED REALTIME]', status, err || null);
+          console.debug('[SPIKE FEED REALTIME]', status, err || null);
           setStatus('Live updates reconnecting…');
           scheduleReconnect();
         }
@@ -3690,6 +3840,7 @@ async function boot() {
     initTheme();
     $("posts").innerHTML = skeletonSignals(4);
     bindEvents();
+    startNotificationBadge();
     $("v2PersonalStatus").textContent = `Personalized feed for ${nameOf(state.profile)}.`;
 
     // Critical hydration is sequential: posts must exist before public profiles are
@@ -4021,6 +4172,7 @@ else boot();
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <link rel="stylesheet" href="css/spike-surface-controls.css">
+<style id="spike-modal-scroll-lock">html.spike-modal-open,html.spike-modal-open body{overflow:hidden!important;overscroll-behavior:none!important}</style>
 </head>
 <body>
 
@@ -4065,15 +4217,85 @@ else boot();
 
 
 <header class="header">
-<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-lockup"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
+<a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-logo-wrap"><img class="brand-logo" src="assets/icon/icon.png" alt="SPIKE logo" width="54" height="54" decoding="async"></span><span class="brand-lockup"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • PASS • DISCOVER</span></span></a>
 <div class="header-actions spike-header-actions">
 <button class="spike-coffee-link" id="spikeCoffeeBtn" type="button" title="Support SPIKE" aria-label="Support SPIKE">☕</button>
 <button class="spike-ask-ai" id="spikeAiSearchBtn" type="button" title="Ask SPIKE AI" aria-label="Ask SPIKE AI"><span class="ask-ai-spark" aria-hidden="true">✦</span><span class="ask-ai-label">Ask AI</span></button>
 <button class="spike-theme-pill spike-theme-circle" id="spikeThemeIcon" type="button" title="Change theme" aria-label="Change theme"><span id="spikeThemeGlyph" aria-hidden="true">⭕</span></button>
+<button class="spike-pulse-button" id="spikePulseBtn" type="button" title="Open SPIKE Feature Center" aria-label="Open SPIKE Feature Center"><span aria-hidden="true">◈</span><i class="spike-pulse-dot" id="spikePulseDot" hidden></i></button>
 <button class="icon" id="menuBtn" title="Menu" aria-label="Open menu">☰</button>
 
 </div>
 </header>
+
+
+<div class="spike-feature-hub" id="spikeFeatureHub" aria-hidden="true" hidden>
+  <section class="spike-feature-card" role="dialog" aria-modal="true" aria-labelledby="spikeFeatureTitle">
+    <div class="spike-feature-head">
+      <div class="spike-feature-head-copy"><strong id="spikeFeatureTitle">SPIKE Feature Center</strong><small>New SPIKE-native tools. Existing Feed features stay unchanged.</small></div>
+      <button class="spike-feature-close" type="button" data-feature-close aria-label="Close Feature Center">×</button>
+    </div>
+    <div class="spike-feature-tabs" role="tablist" aria-label="SPIKE new features">
+      <button class="active" type="button" data-feature-tab="overview">Overview</button>
+      <button type="button" data-feature-tab="feeds">Custom Feeds</button>
+      <button type="button" data-feature-tab="polls">Polls</button>
+      <button type="button" data-feature-tab="series">Series</button>
+      <button type="button" data-feature-tab="collab">Collaborate</button>
+      <button type="button" data-feature-tab="creator">Creator</button>
+      <button type="button" data-feature-tab="search">Search</button>
+      <button type="button" data-feature-tab="reputation">Reputation</button>
+      <button type="button" data-feature-tab="resume">Resume</button>
+      <button type="button" data-feature-tab="dashboard">Dashboard</button>
+    </div>
+    <div class="spike-feature-body">
+      <div class="spike-feature-panel" data-feature-panel="overview">
+        <div class="spike-feature-intro"><strong>Built on SPIKE, not copied from another platform.</strong><p>These additions use the existing Feed, composer, creator, notifications, profile and navigation systems. They do not replace your current buttons or routes.</p></div>
+        <div class="spike-feature-row"><div><b>Custom Feeds</b><small>Build personal Feeds from topics you choose.</small></div><button class="spike-feature-mini" data-feature-tab="feeds" type="button">Open</button></div>
+        <div class="spike-feature-row"><div><b>Polls</b><small>Turn a Signal into a simple vote.</small></div><button class="spike-feature-mini" data-feature-tab="polls" type="button">Open</button></div>
+        <div class="spike-feature-row"><div><b>Signal Series</b><small>Group related Signals into numbered parts.</small></div><button class="spike-feature-mini" data-feature-tab="series" type="button">Open</button></div>
+        <div class="spike-feature-row"><div><b>Collaborative Signals</b><small>Invite another SPIKE user to co-create a Signal.</small></div><button class="spike-feature-mini" data-feature-tab="collab" type="button">Open</button></div>
+        <div class="spike-feature-row"><div><b>Creator Memberships & Store</b><small>Offer recurring memberships and digital resources.</small></div><button class="spike-feature-mini" data-feature-tab="creator" type="button">Open</button></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="feeds" hidden>
+        <div class="spike-feature-form"><input id="featureFeedName" placeholder="Feed name" maxlength="60"><input id="featureFeedTopics" placeholder="Topics, comma separated"><textarea id="featureFeedDescription" placeholder="What should this Feed focus on?"></textarea><button type="button" data-feature-action="feed">Create Custom Feed</button></div>
+        <div class="spike-feature-list" id="featureFeedsList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="polls" hidden>
+        <div class="spike-feature-form"><input id="featurePollQuestion" placeholder="Ask a question" maxlength="500"><textarea id="featurePollOptions" placeholder="One option per line&#10;Option A&#10;Option B&#10;Option C"></textarea><button type="button" data-feature-action="poll">Create Poll</button></div>
+        <div class="spike-feature-list" id="featurePollsList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="series" hidden>
+        <div class="spike-feature-form"><input id="featureSeriesTitle" placeholder="Series title" maxlength="120"><textarea id="featureSeriesDescription" placeholder="Series description"></textarea><input id="featureSeriesPosts" placeholder="Post IDs, comma separated"><button type="button" data-feature-action="series">Create Signal Series</button></div>
+        <div class="spike-feature-list" id="featureSeriesList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="collab" hidden>
+        <div class="spike-feature-form"><input id="featureCollabPost" placeholder="Signal/Post ID"><input id="featureCollabUser" placeholder="Collaborator user ID"><button type="button" data-feature-action="collab">Send Collaboration Invite</button></div>
+        <div class="spike-feature-list" id="featureCollabList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="creator" hidden>
+        <div class="spike-feature-form"><strong>Membership</strong><input id="featureMembershipName" placeholder="Membership name"><textarea id="featureMembershipDescription" placeholder="Member benefits and description"></textarea><input id="featureMembershipCoins" type="number" min="1" placeholder="Monthly Coins"><button type="button" data-feature-action="membership">Create Membership</button></div>
+        <div class="spike-feature-list" id="featureMembershipList"></div>
+        <div class="spike-feature-form"><strong>Creator Store</strong><input id="featureProductTitle" placeholder="Product title"><textarea id="featureProductDescription" placeholder="What is included?"></textarea><select id="featureProductType"><option value="digital">Digital</option><option value="resource">Resource</option><option value="course">Course</option><option value="collection">Collection</option></select><input id="featureProductCoins" type="number" min="1" placeholder="Price in Coins"><button type="button" data-feature-action="product">Create Product</button></div>
+        <div class="spike-feature-list" id="featureProductList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="search" hidden>
+        <div class="spike-feature-search"><input id="featureSearchInput" placeholder="Search current Signals and people…" autocomplete="off"></div>
+        <div class="spike-feature-list" id="featureSearchResults"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="reputation" hidden>
+        <div id="featureReputationBody" class="spike-feature-intro"><div class="spike-feature-loading">Open to load your Reputation.</div></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="resume" hidden>
+        <div class="spike-feature-intro"><strong>Resume Center</strong><p>Return to unfinished SPIKE work without losing your place.</p></div>
+        <div class="spike-feature-list" id="featureResumeList"></div>
+      </div>
+      <div class="spike-feature-panel" data-feature-panel="dashboard" hidden>
+        <div class="spike-feature-intro"><strong>My SPIKE Dashboard</strong><p>A simple view of your current Feed and feature activity.</p></div>
+        <div class="spike-dashboard-grid" id="featureDashboardGrid"></div>
+      </div>
+    </div>
+  </section>
+</div>
 
 <div class="spike-ai-search-overlay" id="spikeAiSearchOverlay" aria-hidden="true">
  <section class="spike-ai-search-modal" role="dialog" aria-modal="true" aria-labelledby="spikeAiTitle">
@@ -4091,6 +4313,7 @@ else boot();
 <div class="feed-v2-nav" id="feedV2Nav">
 <button class="active" data-v2="forYou">✨ For You</button>
 <button data-v2="discover">🔎 Discover</button>
+<button data-v2="moments">✨ Moments</button>
 <button data-v2="trending">🔥 Trending</button>
 <button data-v2="reels">🎬 Reels</button>
 <details class="feed-v2-more"><summary>More</summary><div class="feed-v2-more-menu">
@@ -4106,6 +4329,10 @@ else boot();
 <div class="feed-v2-panel" data-v2-panel="discover">
   <div class="discover-search-row"><input class="v2-input" id="v2DiscoverSearch" placeholder="Search posts or #hashtags…"><button class="post-btn" id="v2DiscoverGo">Search</button></div>
   <div id="v2DiscoverResults" style="margin-top:9px"></div>
+</div>
+<div class="feed-v2-panel" data-v2-panel="moments">
+  <div class="moments-head"><div><b>✨ Moments</b><small>Live clusters of conversations forming around the same topic.</small></div><button class="feed-v2-actions-btn" id="v2MomentsRefresh" type="button">↻ Refresh</button></div>
+  <div id="v2MomentsList" class="moments-list"><div class="empty">Loading Moments…</div></div>
 </div>
 <div class="feed-v2-panel" data-v2-panel="trending"><div class="feed-v2-actions"><button data-trend-window="15">15m</button><button data-trend-window="60">1h</button><button data-trend-window="1440">24h</button></div><div id="v2TrendingList" class="empty">Loading trends…</div></div>
 <div class="feed-v2-panel" data-v2-panel="reels"><div id="v2ReelsList" class="empty">Loading reels…</div></div>
@@ -4202,6 +4429,7 @@ else boot();
       <button id="menuRoom"><span>🚪</span><strong>Room</strong><small>Join your room</small></button>
       <button id="menuGuide"><span>📖</span><strong>Guide</strong><small>Learn SPIKE</small></button>
 <a id="menuSbet" href="spike_predictor.html"><span aria-hidden="true">⚽</span><strong>Predictor</strong><small>Predictions & matches</small></a>
+      <a id="menuIntelligence" href="spike_intelligence.html"><span aria-hidden="true">🧠</span><strong>SPIKE Intelligence</strong><small>Reputation, discovery, memory & insights</small></a>
       <a id="menuWorld" href="spike_world.html"><span aria-hidden="true">🌐</span><strong>SPIKE World</strong><small>Battles, Chains, Missions, Seasons & Circles</small></a>
       <a id="menuAdmin" href="admin.html" hidden><span aria-hidden="true">🛠️</span><strong>Admin</strong><small>Administration</small></a>
     </div>
@@ -4209,8 +4437,8 @@ else boot();
   </section>
 </div>
 
-<div class="spike-premium-overlay" id="spikePremiumOverlay" aria-hidden="true">
-  <section class="spike-premium-sheet" role="dialog" aria-modal="true" aria-labelledby="spikePremiumTitle">
+<div class="spike-premium-overlay" id="spikePremiumOverlay" aria-hidden="true" style="position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;min-height:100vh!important;display:none!important;align-items:center!important;justify-content:center!important;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;overflow:hidden!important;z-index:100000!important;box-sizing:border-box!important;">
+  <section class="spike-premium-sheet" role="dialog" aria-modal="true" aria-labelledby="spikePremiumTitle" style="position:relative!important;margin:0!important;width:min(680px,calc(100vw - 24px))!important;max-width:680px!important;height:auto!important;max-height:86dvh!important;overflow:hidden!important;box-sizing:border-box!important;flex:0 1 auto!important;">
     <div class="spike-premium-head"><div class="spike-premium-icon" id="spikePremiumIcon">✨</div><div class="spike-premium-title"><b id="spikePremiumTitle">SPIKE</b><small id="spikePremiumSubtitle">Your controls</small></div><button class="spike-premium-close" id="spikePremiumClose" aria-label="Close">×</button></div>
     <div class="spike-premium-body" id="spikePremiumBody"></div>
   </section>
@@ -4369,8 +4597,10 @@ else boot();
   });
 })();
 </script>
+<script src="js/spike-feature-suite.js" defer></script>
 <script src="js/spike-adaptive-nav.js" defer></script>
 <script src="js/spike-surface-controls.js"></script>
+<link rel="stylesheet" href="css/spike-final-polish.css">
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 <link rel="stylesheet" href="css/feed-polish-mobile.css">
