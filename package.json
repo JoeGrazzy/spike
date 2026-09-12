@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "node build.js",
-    "test": "node js/audit/typecheck.mjs && node js/audit/static-audit.mjs",
+    "test": "node js/audit/typecheck.mjs && node js/audit/static-audit.mjs && node --test js/audit/tests/navigation-restoration.test.mjs js/audit/tests/safety-center.test.mjs",
     "audit": "node js/audit/typecheck.mjs && node js/audit/static-audit.mjs && node js/audit/build.mjs"
   },
   "devDependencies": {

@@ -8,7 +8,7 @@
   /** @type {string} */
   const FEED='feed.html';
   /** @type {Set<string>} */
-  const ENTRY=new Set(['index.html','feed.html']);
+  const ENTRY=new Set(['index.html']);
 
   /** @returns {string} */
   function currentPage(){

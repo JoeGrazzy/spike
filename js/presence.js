@@ -86,7 +86,7 @@
         onlineHandler=()=>{track();apply();}; window.addEventListener('online',onlineHandler);
         offlineHandler=()=>{watched.forEach(id=>{if(states.get(id)?.online)markOfflineLater(id);});}; window.addEventListener('offline',offlineHandler);
         visibilityHandler=()=>{if(document.visibilityState==='visible'){track(true);apply();}}; document.addEventListener('visibilitychange',visibilityHandler);
-        pagehideHandler=()=>{stop().catch(()=>{});}; window.addEventListener('pagehide',pagehideHandler,{once:true});
+        pagehideHandler=e=>{if(e.persisted)return;stop().catch(()=>{});}; window.addEventListener('pagehide',pagehideHandler);
       }
       return true;
     })().finally(()=>{starting=null;});

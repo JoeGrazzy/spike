@@ -3,6 +3,7 @@
 <head>
 <link rel="stylesheet" href="css/perf.css">
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);const t=(n===6||n===8)?'light':'dark';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch{}})();</script>
+<script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
@@ -235,7 +236,7 @@ function setup(){
 }
 async function setupRealtime(){if(destroyed)return;try{if(state.channel)try{await db.removeChannel(state.channel)}catch{};const ch=db.channel(`view-profile:${state.uid}:${state.me?.id||'anon'}`,{config:{private:true}}).on('broadcast',{event:'UPDATE'},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path===`users/${state.uid}`||r?.collection_name==='posts')loadPosts().then(render).catch(()=>{})}).subscribe();state.channel=ch}catch(e){console.warn('[SPIKE VIEW PROFILE REALTIME]',e)}}
 authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
-window.addEventListener('pagehide',()=>{destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{if(state.channel)db.removeChannel(state.channel)}catch{}});
+window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{if(state.channel)db.removeChannel(state.channel)}catch{}});
 setup();boot().then(()=>{$('menuBtn').disabled=false}).catch(e=>{console.error('[SPIKE VIEW PROFILE]',{message:e?.message||'',code:e?.code||'',details:e?.details||'',hint:e?.hint||'',error:e});$('loaderText').textContent=e?.message||e?.details||'Could not load profile';setTimeout(()=>{$('loader').classList.add('hidden');$('posts').innerHTML='<div class="empty"><div class="empty-icon">⚠</div><b>Profile unavailable</b><span>Please return to Feed and try again.</span></div>'},350)});
 </script>
 <script src="js/theme.js"></script>

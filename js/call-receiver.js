@@ -84,5 +84,5 @@
   window.SPIKECallReceiver={start:boot,stop};
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
   else boot();
-  window.addEventListener('pagehide',()=>{stop().catch(()=>{});});
+  window.addEventListener('pagehide',e=>{if(e.persisted)return;stop().catch(()=>{});});
 })();

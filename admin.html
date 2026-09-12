@@ -13,6 +13,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }catch(_){}})();
 </script>
 <script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);var t=(n===6||n===8)?"light":"dark";document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t}catch(e){}})();</script>
+<script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
@@ -469,7 +470,7 @@ video{contain:layout paint}
 </section>
 <div class="layout">
 <aside class="panel side">
-<button class="active" data-page="overview">📊 Overview</button><button data-page="roomPurchases">🛒 Feature Purchases <span id="navPendingFeaturePurchases" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="packages">🪙 Coin Store</button><button data-page="gems">💎 SPIKE Wallet</button><button data-page="gamification">🎮 Gamification</button><button data-page="rooms">🏠 Rooms</button><button data-page="users">👥 Users</button><button data-page="broadcasts">📣 Announcements & Messages</button><button data-page="maintenance">🛠️ Maintenance</button><button data-page="admins">👑 Admin Access</button><button data-page="audit">🛡️ Audit Log</button><button data-page="policyModeration">🛡️ Policy & Moderation <span id="policyPendingBadge" class="pill" style="float:right;padding:3px 6px">0</span></button>
+<button class="active" data-page="overview">📊 Overview</button><button data-page="roomPurchases">🛒 Feature Purchases <span id="navPendingFeaturePurchases" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="packages">🪙 Coin Store</button><button data-page="gems">💎 SPIKE Wallet</button><button data-page="gamification">🎮 Gamification</button><button data-page="rooms">🏠 Rooms</button><button data-page="users">👥 Users</button><button data-page="broadcasts">📣 Announcements & Messages</button><button data-page="maintenance">🛠️ Maintenance</button><button data-page="admins">👑 Admin Access</button><button data-page="audit">🛡️ Audit Log</button><button data-page="policyModeration">🛡️ Policy & Moderation <span id="policyPendingBadge" class="pill" style="float:right;padding:3px 6px">0</span></button><button data-page="safetyRecovery">🔐 Safety Recovery</button>
 
 </aside>
 
@@ -527,6 +528,13 @@ video{contain:layout paint}
 <div class="panel" style="margin-top:14px"><h2>Recommended safety behavior</h2><p class="muted" style="margin-top:8px">Keep login, payment confirmation, admin access, and emergency support paths available while the main application is in maintenance mode.</p></div>
 </section>
 <section id="admins" class="page" hidden><div class="panel"><div class="toolbar"><div><h2>👑 Admin Access</h2><span class="muted">Grant or revoke controlled roles.</span></div><button class="ghost" id="loadAdmins">Refresh admins</button></div><div id="adminsList" style="margin-bottom:12px"></div><div class="formgrid"><div class="field"><label>User email</label><input id="adminEmail" type="email" placeholder="User email"></div><div class="field"><label>Role</label><select id="adminRole"><option value="super_admin">Super Admin</option><option value="finance_admin">Finance Admin</option><option value="content_admin">Content Admin</option><option value="moderation_admin">Moderation Admin</option><option value="support_admin">Support Admin</option></select></div></div><button class="primary" style="margin-top:11px" id="findAdmin">Find account</button><div id="adminResult" style="margin-top:12px"></div></div></section>
+<section id="safetyRecovery" class="page" hidden>
+<div class="panel"><div class="toolbar"><div><h2>🔐 Safety Recovery Center</h2><span class="muted">Recover a member only with their current Personal Safety Code. Verification and recovery authorization are server-controlled.</span></div></div>
+<div class="notice" style="margin-top:10px">Never ask for a password. Enter only the 12-digit Personal Safety Code supplied by the account owner. Codes are verified as hashes and are never revealed back by the server.</div>
+<div class="formgrid" style="margin-top:14px"><div class="field full"><label>Personal Safety Code</label><input id="safetyRecoveryCode" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="0000-0000-0000"></div></div>
+<div class="actions" style="margin-top:10px"><button class="primary" id="verifySafetyCode">Verify code</button><button class="ghost" id="clearSafetyRecovery">Clear</button></div>
+<div id="safetyRecoveryResult" style="margin-top:14px"></div>
+</div></section>
 <section id="policyModeration" class="page" hidden>
   <div class="panel policy-center-shell">
     <div class="toolbar policy-center-head">
@@ -783,6 +791,7 @@ function showAdminPage(page, button){
     else if(page==='admins') loadAdmins();
     else if(page==='audit') loadAudit();
     else if(page==='policyModeration'){ showPolicyBucket('cases'); loadPolicyModeration(); }
+    else if(page==='safetyRecovery'){ initSafetyRecovery(); }
   }catch(e){ console.error('[SPIKE ADMIN NAV]',page,e); if(typeof spikePremiumToast==='function') spikePremiumToast(e?.message||('Could not load '+page),'error',4500); }
 }
 function nav(){
@@ -1113,6 +1122,47 @@ if(document.getElementById('policyModeration')){
   document.querySelectorAll('[data-policy-status]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-policy-status]').forEach(x=>x.classList.remove('active'));b.classList.add('active');policyAdminStatus=b.dataset.policyStatus||'';loadPolicyModeration().catch(e=>toast(e.message))}));
   document.getElementById('policyModerationList').addEventListener('click',async e=>{const b=e.target.closest('[data-policy-case-action]');if(!b)return;try{const r=await safeRpc('admin_spike_policy_decide_case',{p_case_id:b.dataset.policyCaseId,p_decision:b.dataset.policyCaseAction,p_note:'Reviewed in SPIKE Policy Moderation Center'});if(r.error)throw r.error;toast('Policy case updated');loadPolicyModeration()}catch(err){toast(err.message)}});
   document.getElementById('policyAppealsAdmin').addEventListener('click',async e=>{const b=e.target.closest('[data-policy-appeal]');if(!b)return;try{const r=await safeRpc('admin_spike_policy_decide_appeal',{p_appeal_id:b.dataset.policyAppealId,p_decision:b.dataset.policyAppeal,p_note:'Reviewed in SPIKE Policy Moderation Center'});if(r.error)throw r.error;toast('Appeal updated');loadPolicyModeration()}catch(err){toast(err.message)}});
+}
+
+let safetyRecoveryBusy=false;
+function formatSafetyCodeInput(value){return String(value||'').replace(/[^0-9]/g,'').slice(0,12).replace(/(\d{4})(?=\d)/g,'$1-')}
+function initSafetyRecovery(){
+  const input=$('#safetyRecoveryCode'); const verify=$('#verifySafetyCode'); const clear=$('#clearSafetyRecovery');
+  if(!input||input.dataset.ready==='1')return;
+  input.dataset.ready='1'; input.addEventListener('input',()=>{input.value=formatSafetyCodeInput(input.value)});
+  verify.addEventListener('click',verifySafetyRecoveryCode);
+  clear.addEventListener('click',()=>{$('#safetyRecoveryCode').value='';$('#safetyRecoveryResult').innerHTML='';});
+}
+async function verifySafetyRecoveryCode(){
+  if(safetyRecoveryBusy)return;
+  const input=$('#safetyRecoveryCode'), box=$('#safetyRecoveryResult'), code=String(input?.value||'').trim();
+  if(!/^\d{4}-\d{4}-\d{4}$/.test(code))return toast('Enter a valid 12-digit Safety Code.','warning');
+  safetyRecoveryBusy=true; $('#verifySafetyCode').disabled=true; box.innerHTML='<div class="notice">Verifying securely…</div>';
+  try{
+    const r=await safeRpc('admin_verify_safety_code',{p_code:code},'Verify Safety Code');
+    if(r.error)throw r.error;
+    const u=Array.isArray(r.data)?r.data[0]:null;
+    if(!u){box.innerHTML='<div class="empty">Safety Code not recognized. No account was exposed.</div>';return;}
+    box.innerHTML=`<div class="usercard"><strong>✓ Safety Code verified</strong><div class="muted">${esc(u.display_name||'SPIKE User')} · ${esc(u.email||'No email')} · ${esc(u.sp_id||'No SP_ID')}</div><p class="muted" style="margin:8px 0">Issue a one-time 15-minute recovery link. The link lets the account owner create a new password without exposing the current password.</p><button class="primary" id="issueSafetyRecovery">Issue recovery link</button></div>`;
+    $('#issueSafetyRecovery').onclick=()=>issueSafetyRecovery(code,u);
+  }catch(e){box.innerHTML='<div class="notice">'+esc(e?.message||'Safety Code verification failed.')+'</div>';}
+  finally{safetyRecoveryBusy=false;$('#verifySafetyCode').disabled=false;}
+}
+async function issueSafetyRecovery(code,u){
+  const confirmed=await spikePremiumConfirm(`Issue a one-time recovery link for ${u.display_name||u.email||'this account'}?\n\nThe link expires in 15 minutes and becomes invalid after one successful password change.`,{title:'Issue recovery link',icon:'🔐',ok:'Issue link'});
+  if(!confirmed)return;
+  const b=$('#issueSafetyRecovery');b.disabled=true;b.textContent='Issuing…';
+  try{
+    const r=await safeRpc('admin_issue_safety_recovery',{p_code:code},'Issue Safety recovery link');
+    if(r.error)throw r.error;
+    const token=r.data?.token; if(!token)throw new Error('The recovery service did not return a secure token.');
+    const url=new URL('reset-password.html',location.href);url.searchParams.set('safety_recovery',token);
+    const link=url.href;
+    $('#safetyRecoveryResult').innerHTML=`<div class="usercard"><strong>✓ Recovery link issued</strong><div class="muted">For ${esc(u.display_name||u.email||'SPIKE User')} · expires ${r.data?.expires_at?new Date(r.data.expires_at).toLocaleString():'in 15 minutes'}</div><textarea id="issuedRecoveryLink" readonly style="margin-top:9px;min-height:70px">${esc(link)}</textarea><div class="actions" style="margin-top:8px"><button class="primary" id="copyRecoveryLink">Copy recovery link</button><button class="ghost" id="openRecoveryLink">Open link</button></div><div class="notice" style="margin-top:9px">Send this link only through a verified channel to the account owner. It is single-use.</div></div>`;
+    $('#copyRecoveryLink').onclick=async()=>{try{await navigator.clipboard.writeText(link);toast('Recovery link copied','success')}catch{await spikePremiumInput('Recovery link','Copy this one-time link manually.',{icon:'🔐',ok:'Done',inputType:'text',maxLength:2000})}};
+    $('#openRecoveryLink').onclick=()=>window.open(link,'_blank','noopener');
+    toast('One-time recovery link issued','success');
+  }catch(e){toast(e?.message||'Could not issue recovery link','error');b.disabled=false;b.textContent='Issue recovery link';}
 }
 
 async function loadPolicyTerms(){const box=document.getElementById('policyTermsList');if(!box)return;const r=await safeRpc('admin_spike_policy_terms');if(r.error){box.innerHTML='<div class="empty">'+esc(r.error.message)+'</div>';return}const rows=r.data||[];box.innerHTML=rows.length?rows.map(x=>`<div class="usercard" style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><strong>${esc(x.term)}</strong><div class="muted">${esc(x.policy_id)} · ${esc(x.match_mode)} · ${esc(x.severity)} · ${esc(x.enforcement)} · ${x.enabled?'enabled':'disabled'}</div></div><button class="danger" data-policy-term-delete="${esc(x.id)}">Delete</button></div>${x.notes?`<div class="muted" style="margin-top:7px">${esc(x.notes)}</div>`:''}</div>`).join(''):'<div class="empty">No governed terms configured yet.</div>'}

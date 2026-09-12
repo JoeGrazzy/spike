@@ -113,7 +113,7 @@
     // DOM we mutate. This eliminates mutation feedback loops completely.
     const contextTimer=window.setInterval(contextCheck,750);
     const measureTimer=window.setInterval(measure,2000);
-    window.addEventListener('pagehide',()=>{clearInterval(contextTimer);clearInterval(measureTimer)},{once:true});
+    window.addEventListener('pagehide',e=>{if(e.persisted)return;clearInterval(contextTimer);clearInterval(measureTimer)});
 
     setTimeout(()=>{if(!state.contextHidden&&!state.keyboard){state.scrollHidden=false;state.lastScroll=window.scrollY||0;apply()}},1300);
     setTimeout(()=>{contextCheck();measure()},1600);

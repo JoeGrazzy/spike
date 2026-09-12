@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -605,7 +606,7 @@ $('#moderationBtn').onclick=()=>toast('Moderation UI requires verified backend R
 document.querySelectorAll('.tab[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 window.addEventListener('online',()=>{setConnection('Connection restored. Reloading room…',false);safeRetry();});
 window.addEventListener('offline',()=>setConnection('You are offline. Cached room data may still be visible.',true));
-window.addEventListener('pagehide',()=>{try{if(state.realtime)sb.removeChannel(state.realtime);}catch(e){}try{authSubscription?.unsubscribe?.()}catch(_){} });
+window.addEventListener('pagehide',e=>{if(e.persisted)return;try{if(state.realtime)sb.removeChannel(state.realtime);}catch(e){}try{authSubscription?.unsubscribe?.()}catch(_){} });
 $('#createAccountGateBtn').onclick=()=>location.href='rooms.html';
 
 boot();

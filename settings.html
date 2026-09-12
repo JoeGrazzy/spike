@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -89,7 +90,7 @@ setStatus('Saved.');
 $('signout').onclick=async()=>{try{await window.AppPresence?.stop?.();if(db.removeAllChannels)await db.removeAllChannels();const r=await db.auth.signOut({scope:'local'});if(r.error)throw r.error;location.replace('index.html?logged_out=1')}catch(e){setStatus(e.message||'Sign out failed')}};
 document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.href=b.dataset.go);
 authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
-window.addEventListener('pagehide',()=>{destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{window.AppPresence?.stop?.()}catch{};});
+window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{window.AppPresence?.stop?.()}catch{};});
 load().catch(e=>{console.error('[SPIKE SETTINGS LOAD]',e);setStatus(e.message||'Settings failed to load')});
 </script><script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 

@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -62,7 +63,7 @@ document.addEventListener('submit',async e=>{const f=e.target.closest('.chain-re
 async function loadCircleMessages(){if(!selectedCircle)return;const d=await rpc('spike_circle_messages_list',{p_circle_id:selectedCircle});const arr=asArray(d);$('circleMessages').innerHTML=arr.length?arr.reverse().map(m=>`<div class="bubble">${avatar(m.avatar_url,m.user_name)} <b>${esc(m.user_name)}</b><div style="margin-top:3px">${esc(m.content)}</div><div class="mini muted" style="margin-top:3px">${ago(m.created_at)}</div></div>`).join(''):'<div class="empty">No messages yet. Start the conversation.</div>';$('circleMessages').scrollTop=$('circleMessages').scrollHeight}
 $('circleMessageForm').onsubmit=async e=>{e.preventDefault();try{await rpc('spike_circle_send_message',{p_circle_id:selectedCircle,p_content:$('circleMessage').value});$('circleMessage').value='';await loadCircleMessages();await loadSeason()}catch(err){toast(err.message||'Message failed')}};
 authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
-window.addEventListener('pagehide',()=>{destroyed=true;try{authSubscription?.unsubscribe?.()}catch{}});
+window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{}});
 init().catch(e=>{console.error(e);toast(e.message||'SPIKE World could not load')});
 </script><link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">

@@ -13,6 +13,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }catch(_){}})();
 </script>
 <script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n)}catch(e){}})();</script>
+<script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
@@ -640,9 +641,7 @@ const f=e.target.files?.[0];
 if(f) uploadProfileImage(f,"cover");
 });
 $("backBtn").onclick=()=>{
-  const raw=sessionStorage.getItem('spike.feed.return');
-  if(raw){ sessionStorage.removeItem('spike.feed.return'); location.href='feed.html'; }
-  else if(history.length>1) history.back(); else location.href='feed.html';
+  if(history.length>1) history.back(); else location.href='feed.html';
 };
 $("menuBtn").onclick=()=>open("menuOverlay");$("closeMenu").onclick=()=>close("menuOverlay");$("cancelEdit").onclick=()=>close("editOverlay");$("editForm").addEventListener("submit",saveProfile);$("shareProfileBtn")?.addEventListener("click",openShareProfile);$("signOutBtn").onclick=async()=>{try{await window.AppPresence?.stop?.();try{await db.removeAllChannels?.()}catch(_){}const {error}=await db.auth.signOut({scope:"local"});if(error)throw error;location.replace("index.html?logged_out=1")}catch(e){console.error("[SPIKE PROFILE SIGNOUT]",e);toast(e.message||"Could not sign out. Please try again.","error")}};$("copyProfile").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied")}catch{toast(location.href)}};document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(x=>x.classList.remove("open"))});document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));$("mediaPanel").classList.toggle("hidden",t.dataset.tab!=="media");$("aboutPanel").classList.toggle("hidden",t.dataset.tab!=="about")});$("mediaPosts").addEventListener("click",e=>{const tile=e.target.closest("[data-gallery-index]");if(tile)openMediaViewer(Number(tile.dataset.galleryIndex))});}
 let mediaViewerIndex=0;
@@ -703,14 +702,13 @@ $("mediaViewerStage").addEventListener("touchstart",e=>{mediaSwipeX=e.changedTou
 $("mediaViewerStage").addEventListener("touchend",e=>{const x=e.changedTouches[0]?.clientX||0,d=x-mediaSwipeX;if(Math.abs(d)>55)moveMediaViewer(d<0?1:-1)},{passive:true});
 
 async function realtime(){if(state.realtime)await db.removeChannel(state.realtime);state.realtime=db.channel("profile:"+state.uid,{config:{private:true}}).on("broadcast",{event:"UPDATE"},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path?.startsWith("posts/")||r?.path===`users/${state.uid}`)loadPosts().then(render).catch(()=>{})}).subscribe()}
-window.addEventListener("pagehide",()=>{if(state.realtime){db.removeChannel(state.realtime);state.realtime=null;}});
+window.addEventListener("pagehide",e=>{if(e.persisted)return;if(state.realtime){db.removeChannel(state.realtime);state.realtime=null;}});
 // Keep Feed and Profile state coherent across navigation and same-browser tabs.
 window.addEventListener('storage',e=>{
   if(e.key!=='spike.profile.sync'||!e.newValue)return;
   try{const m=JSON.parse(e.newValue);if(String(m.id)===String(state.uid)&&m.action==='follow'){state.following=!!m.active;renderActions();render();}}catch(_){ }
 });
 async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader();
-  try{ const raw=sessionStorage.getItem('spike.feed.return'); if(raw){ const x=JSON.parse(raw); if(x?.source==='feed' && Date.now()-Number(x.at||0)<30*60*1000) document.body.dataset.returnToFeed='1'; } }catch(_){ }
   // QR identity controls are owner-only; a viewer must never be able to present
   // another member's connect QR as if it were their own.
   const ownerView=state.uid===state.me.id;
