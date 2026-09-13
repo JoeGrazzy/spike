@@ -85,6 +85,10 @@
   }
   function buildSelector(){
     if(location.pathname.split('/').pop()!=='settings.html') return;
+    // settings.html now contains the language control directly, so never inject
+    // a second selector. This also makes the control available even if i18n
+    // initialization is delayed or a translation pack fails to load.
+    if(document.getElementById('spike-language-select')) return;
     if(document.getElementById('spike-language-setting')) return;
     const host=document.createElement('section');
     host.id='spike-language-setting';
@@ -104,7 +108,22 @@
     catch(e){ console.error('[SPIKE i18n]',e); active=DEFAULT; localStorage.setItem(KEY,DEFAULT); pack={}; restore(); }
     buildSelector();
     if(location.pathname.split('/').pop()==='settings.html'){
-      const s=document.getElementById('spike-language-select'); if(s){ s.value=active; const card=document.getElementById('spike-language-setting'); if(card){const strong=card.querySelector('strong'), small=card.querySelector('small'); if(strong) strong.textContent=SELECTOR_UI[active].label; if(small) small.textContent=SELECTOR_UI[active].hint; }}
+      const s=document.getElementById('spike-language-select');
+      if(s){
+        s.value=active;
+        if(!s.dataset.spikeLanguageBound){
+          s.dataset.spikeLanguageBound='1';
+          s.addEventListener('change',async e=>{ active=e.target.value; localStorage.setItem(KEY,active); await boot(true); });
+        }
+        const card=s.closest('#language-settings') || document.getElementById('spike-language-setting');
+        if(card){
+          const section=card.querySelector('.section');
+          const strong=card.querySelector('strong'), small=card.querySelector('small');
+          if(section) section.textContent=SELECTOR_UI[active].label;
+          if(strong) strong.textContent=SELECTOR_UI[active].label;
+          if(small) small.textContent=SELECTOR_UI[active].hint;
+        }
+      }
     }
     document.documentElement.dataset.spikeI18nReady='1';
     watch();
