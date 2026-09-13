@@ -1,0 +1,31 @@
+-- RLS init-plan optimization for policies still invoking auth.uid() directly.
+alter policy coin_transactions_select_own on public.coin_transactions using (user_id=(select auth.uid()));
+alter policy comments_insert_own on public.comments with check (user_id=(select auth.uid()));
+alter policy gem_transactions_select_own on public.gem_transactions using (user_id=(select auth.uid()));
+alter policy monthly_payouts_select_own on public.monthly_payouts using (user_id=(select auth.uid()));
+alter policy room_entitlements_own on public.room_entitlements using (user_id=(select auth.uid()));
+alter policy room_event_tickets_own on public.room_event_tickets using (user_id=(select auth.uid()));
+alter policy room_profile_boost_credits_select_own on public.room_profile_boost_credits using (user_id=(select auth.uid()));
+alter policy room_purchase_requests_own on public.room_purchase_requests using (user_id=(select auth.uid()));
+alter policy user_streaks_select_own on public.user_streaks using (user_id=(select auth.uid()));
+
+create index if not exists gift_history_receiver_id_idx on public.gift_history(receiver_id);
+create index if not exists gift_history_sender_id_idx on public.gift_history(sender_id);
+create index if not exists referrals_referrer_id_idx on public.referrals(referrer_id);
+create index if not exists room_entitlements_item_id_idx on public.room_entitlements(item_id);
+create index if not exists room_entitlements_room_id_idx on public.room_entitlements(room_id);
+create index if not exists room_event_tickets_purchase_request_id_idx on public.room_event_tickets(purchase_request_id);
+create index if not exists room_event_tickets_user_id_idx on public.room_event_tickets(user_id);
+create index if not exists room_gift_history_item_id_idx on public.room_gift_history(item_id);
+create index if not exists room_gift_history_room_id_idx on public.room_gift_history(room_id);
+create index if not exists room_gift_history_sender_id_idx on public.room_gift_history(sender_id);
+create index if not exists room_profile_boost_credits_room_id_idx on public.room_profile_boost_credits(room_id);
+create index if not exists room_purchase_requests_event_id_idx on public.room_purchase_requests(event_id);
+create index if not exists room_purchase_requests_item_id_idx on public.room_purchase_requests(item_id);
+create index if not exists room_purchase_requests_room_id_idx on public.room_purchase_requests(room_id);
+create index if not exists spike_abuse_cases_assigned_to_idx on public.spike_abuse_cases(assigned_to);
+create index if not exists spike_abuse_cases_reporter_id_idx on public.spike_abuse_cases(reporter_id);
+create index if not exists spike_feature_flags_updated_by_idx on public.spike_feature_flags(updated_by);
+create index if not exists spike_revenue_user_id_idx on public.spike_revenue(user_id);
+create index if not exists spike_support_cases_assigned_to_idx on public.spike_support_cases(assigned_to);
+create index if not exists streak_pool_distribution_user_id_idx on public.streak_pool_distribution(user_id);
