@@ -5,13 +5,14 @@
   const LANGS={en:'English',fr:'Français',ig:'Igbo',yo:'Yorùbá',ha:'Hausa',pcm:'Nigerian Pidgin'};
   const DEFAULT='en';
   const SELECTOR_UI={en:{label:'Language',hint:'Choose your language'},fr:{label:'Langue',hint:'Choisissez votre langue'},ig:{label:'Asụsụ',hint:'Họrọ asụsụ gị'},yo:{label:'Èdè',hint:'Yan èdè rẹ'},ha:{label:'Harshe',hint:'Zaɓi harshenka'},pcm:{label:'Language',hint:'Choose your language'}};
-  const saved=localStorage.getItem(KEY);
-  let active=LANGS[saved]?saved:DEFAULT;
+  const readSaved=()=>{try{const v=localStorage.getItem(KEY);if(LANGS[v]) return v}catch{}; const m=document.cookie.match(/(?:^|;\s*)spike-language=([^;]+)/); const v=m&&decodeURIComponent(m[1]); return LANGS[v]?v:DEFAULT};
+  let active=readSaved();
   document.documentElement.lang=active;
   document.documentElement.dataset.spikeLang=active;
   document.documentElement.dataset.spikeI18nReady='0';
   const originals=new WeakMap(), attrOriginals=new WeakMap();
   let pack=null, observer=null;
+  const saveLanguage=l=>{try{localStorage.setItem(KEY,l)}catch{}; try{document.cookie='spike-language='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax'}catch{}};
 
   const userContent = el => {
     if(!el || !(el instanceof Element)) return false;
@@ -29,10 +30,9 @@
   const translateExact=(text,dict)=>dict[text] || text;
   async function loadPack(lang){
     if(lang==='en') return {};
-    const r=await fetch('locales/spike-i18n.json',{cache:'force-cache'});
-    if(!r.ok) throw new Error('Translation pack unavailable');
-    const all=await r.json();
-    return all[lang]||{};
+    const all=window.__SPIKE_I18N_PACK__;
+    if(!all || !all[lang]) throw new Error('Embedded translation pack unavailable');
+    return all[lang];
   }
   function restore(){
     const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
@@ -104,7 +104,7 @@
       const next=e.target.value;
       if(!LANGS[next]) return;
       active=next;
-      try{localStorage.setItem(KEY,next)}catch(err){console.error('[SPIKE i18n] Could not save language',err);return}
+      saveLanguage(next)
       document.documentElement.lang=next;
       document.documentElement.dataset.spikeLang=next;
       // Reload from the saved preference. This guarantees every page starts
@@ -115,7 +115,7 @@
   async function boot(reapply=false){
     if(reapply) restore();
     try { pack=await loadPack(active); apply(); }
-    catch(e){ console.error('[SPIKE i18n]',e); active=DEFAULT; localStorage.setItem(KEY,DEFAULT); pack={}; restore(); }
+    catch(e){ console.error('[SPIKE i18n]',e); active=DEFAULT; saveLanguage(DEFAULT); pack={}; restore(); }
     buildSelector();
     if(location.pathname.split('/').pop()==='settings.html'){
       const s=document.getElementById('spike-language-select');
@@ -127,7 +127,7 @@
             const next=e.target.value;
             if(!LANGS[next]) return;
             active=next;
-            try{localStorage.setItem(KEY,next)}catch(err){console.error('[SPIKE i18n] Could not save language',err);return}
+            saveLanguage(next)
             document.documentElement.lang=next;
             document.documentElement.dataset.spikeLang=next;
             location.reload();
@@ -150,7 +150,7 @@
   window.SPIKE_I18N={get language(){return active}, setLanguage:l=>{
     if(!LANGS[l]) return Promise.resolve(false);
     active=l;
-    try{localStorage.setItem(KEY,l)}catch(err){console.error('[SPIKE i18n] Could not save language',err);return Promise.resolve(false)}
+    saveLanguage(l)
     document.documentElement.lang=l;
     document.documentElement.dataset.spikeLang=l;
     location.reload();
