@@ -33,13 +33,3 @@ This package is the canonical, integrated SPIKE web project. It keeps the produc
 `npm run audit` runs JavaScript syntax, inline HTML script, static integrity, and production build checks.
 
 Live browser/device screenshot validation is not claimed in this package.
-
-## Cloudflare deployment
-
-Use the deploy script so the production `dist/` directory is built before Wrangler runs:
-
-```bash
-bun run deploy
-```
-
-For Cloudflare's **Deploy command**, use `bun run deploy`. The `wrangler.jsonc` file already points Wrangler at `./dist`.
