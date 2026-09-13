@@ -1,0 +1,40 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+REPO="JoeGrazzy/spike"
+BRANCH="main"
+LOCAL="/storage/emulated/0/Download/Spike"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+[ -d "$LOCAL" ] || { echo "Missing $LOCAL"; exit 1; }
+command -v git >/dev/null || { echo "git is not installed."; exit 1; }
+
+echo "Preparing GitHub sync..."
+if git clone --depth 1 --branch "$BRANCH" "https://github.com/$REPO.git" "$TMP/repo" >/dev/null 2>&1; then
+  echo "Using current GitHub repository."
+else
+  echo "GitHub repository is empty; creating the initial local clone."
+  mkdir -p "$TMP/repo"
+  git -C "$TMP/repo" init -q -b "$BRANCH"
+  git -C "$TMP/repo" remote add origin "https://github.com/$REPO.git"
+fi
+
+# Make the GitHub working tree an exact mirror of the CURRENT Spike folder.
+# Never use the user's custom 'cp' command here.
+find "$TMP/repo" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+( cd "$LOCAL" && tar --exclude='./.git' -cf - . ) | ( cd "$TMP/repo" && tar -xf - )
+
+# The temporary clone's .git directory is intentionally preserved.
+git -C "$TMP/repo" add -A
+git -C "$TMP/repo" config user.name "SPIKE Android Sync"
+git -C "$TMP/repo" config user.email "spike-sync@users.noreply.github.com"
+
+if git -C "$TMP/repo" diff --cached --quiet; then
+  echo "No changes to deploy."
+  exit 0
+fi
+
+git -C "$TMP/repo" commit -m "Sync SPIKE from Android" >/dev/null
+echo "Uploading to GitHub..."
+git -C "$TMP/repo" push -u origin "$BRANCH"
+echo "SPIKE deployed successfully."
