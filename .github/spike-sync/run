@@ -36,5 +36,5 @@ fi
 
 git -C "$TMP/repo" commit -m "Sync SPIKE from Android" >/dev/null
 echo "Uploading to GitHub..."
-git -C "$TMP/repo" push -u origin "$BRANCH"
+git -C "$TMP/repo" push --force -u origin "$BRANCH"
 echo "SPIKE deployed successfully."
