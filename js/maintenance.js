@@ -68,9 +68,10 @@
     try {
       // Prefer the authenticated Supabase session when the page has already loaded the SDK.
       if (window.supabase?.createClient) {
-        const client = window.__SPIKE_MAINTENANCE_CLIENT__ || (window.__SPIKE_MAINTENANCE_CLIENT__ = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-          auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
-        }));
+        const client = window.supabaseClient || window.__SPIKE_SUPABASE__ || window.sb || window.db ||
+          window.__SPIKE_MAINTENANCE_CLIENT__ || (window.__SPIKE_MAINTENANCE_CLIENT__ = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+          }));
         const { data: { user } = {} } = await client.auth.getUser();
         if (user?.email && ADMIN_EMAILS.has(String(user.email).trim().toLowerCase())) {
           adminBypass = true;
