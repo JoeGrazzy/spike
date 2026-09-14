@@ -1,0 +1,63 @@
+#!/data/data/com.termux/files/usr/bin/bash
+set -euo pipefail
+
+REPO="JoeGrazzy/spike"
+BRANCH="main"
+LOCAL="/storage/emulated/0/Download/Spike"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+[ -d "$LOCAL" ] || {
+  echo "Missing $LOCAL"
+  exit 1
+}
+
+command -v git >/dev/null || {
+  echo "git is not installed."
+  exit 1
+}
+
+echo "Preparing SAFE SPIKE sync..."
+
+git clone --depth 1 --branch "$BRANCH" \
+  "https://github.com/$REPO.git" "$TMP/repo" >/dev/null 2>&1 || {
+  echo "GitHub repository could not be cloned."
+  echo "Nothing was changed."
+  exit 1
+}
+
+# IMPORTANT:
+# Android files are ADDED/UPDATED in GitHub.
+# Existing GitHub files are NEVER deleted.
+# This prevents the Android folder from deleting backend/language files.
+
+(
+  cd "$LOCAL"
+  tar --exclude='./.git' -cf - .
+) | (
+  cd "$TMP/repo"
+  tar -xf -
+)
+
+git -C "$TMP/repo" add -A
+
+git -C "$TMP/repo" config user.name "SPIKE Android Sync"
+git -C "$TMP/repo" config user.email "spike-sync@users.noreply.github.com"
+
+if git -C "$TMP/repo" diff --cached --quiet; then
+  echo "No changes to deploy."
+  exit 0
+fi
+
+git -C "$TMP/repo" commit -m "Sync SPIKE from Android" >/dev/null
+
+echo "Uploading to GitHub..."
+
+# NEVER force-push.
+git -C "$TMP/repo" push -u origin "$BRANCH"
+
+echo ""
+echo "================================"
+echo " SPIKE SAFE SYNC SUCCESSFUL"
+echo " GitHub files were NOT deleted."
+echo "================================"
