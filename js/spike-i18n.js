@@ -1,169 +1,19 @@
-/* SPIKE i18n: Supabase-backed translation packs with local fallback for preference. */
-(() => {
-  'use strict';
-  const KEY='spike-language';
-  const LANGS={en:'English',fr:'Français',ig:'Igbo',yo:'Yorùbá',ha:'Hausa',pcm:'Nigerian Pidgin'};
-  const DEFAULT='en';
-  const SELECTOR_UI={en:{label:'Language',hint:'Choose your language'},fr:{label:'Langue',hint:'Choisissez votre langue'},ig:{label:'Asụsụ',hint:'Họrọ asụsụ gị'},yo:{label:'Èdè',hint:'Yan èdè rẹ'},ha:{label:'Harshe',hint:'Zaɓi harshenka'},pcm:{label:'Language',hint:'Choose your language'}};
-  const readSaved=()=>{try{const v=localStorage.getItem(KEY);if(LANGS[v]) return v}catch{}; const m=document.cookie.match(/(?:^|;\s*)spike-language=([^;]+)/); const v=m&&decodeURIComponent(m[1]); return LANGS[v]?v:DEFAULT};
-  let active=readSaved();
-  document.documentElement.lang=active;
-  document.documentElement.dataset.spikeLang=active;
-  document.documentElement.dataset.spikeI18nReady='0';
-  const originals=new WeakMap(), attrOriginals=new WeakMap();
-  let pack=null, observer=null;
-  const userContent = el => {
-    if(!el || !(el instanceof Element)) return false;
-    if(el.closest('input,textarea,select,option,[contenteditable="true"],[data-i18n-ignore],[data-i18n-user-content]')) return true;
-    const s=((el.id||'')+' '+(el.className||'')).toLowerCase();
-    return /(username|display[-_ ]?name|user[-_ ]?content|user[-_ ]?generated|message[-_ ]?(text|body)|chat[-_ ]?(text|body|message)|comment[-_ ]?(text|body)|post[-_ ]?(text|body|content)|feed[-_ ]?(text|content)|bio)/.test(s);
-  };
-  const shouldText=n=>{
-    const p=n.parentElement;
-    if(!p || userContent(p)) return false;
-    if(['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','PRE','CODE','TEXTAREA','INPUT','SELECT','OPTION'].includes(p.tagName)) return false;
-    const t=n.nodeValue.replace(/\s+/g,' ').trim();
-    return !!t && /[A-Za-zÀ-ÿ]/.test(t);
-  };
-  const translateExact=(text,dict)=>dict[text] || text;
-  const ALL_PACKS=null;
-  const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
-  const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
-  let backendClient=null;
-  function getBackend(){try{if(window.supabaseClient?.from)return window.supabaseClient;if(window.supabase?.createClient){backendClient ||= window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return backendClient}}catch(e){console.warn('[SPIKE i18n] backend unavailable',e)}return null;}
-  async function loadPack(lang){
-    if(lang==='en') return {};
-    const db=getBackend();
-    if(db){const r=await db.from('spike_i18n_packs').select('translations,version').eq('language_code',lang).maybeSingle();if(!r.error&&r.data?.translations)return r.data.translations;}
-    const r=await fetch(SUPABASE_URL+'/rest/v1/spike_i18n_packs?select=translations,version&language_code=eq.'+encodeURIComponent(lang),{headers:{apikey:SUPABASE_KEY,Accept:'application/json'},cache:'force-cache'});
-    if(!r.ok) throw new Error('Translation pack unavailable');
-    const rows=await r.json();
-    if(!rows[0]?.translations) throw new Error('Translation pack unavailable');
-    return rows[0].translations;
-  }
-  function restore(){
-    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    let n; while(n=w.nextNode()) if(originals.has(n)) n.nodeValue=originals.get(n);
-    document.querySelectorAll('[data-i18n-original]').forEach(el=>{
-      try{
-        const m=JSON.parse(el.getAttribute('data-i18n-original'));
-        for(const [a,v] of Object.entries(m)) el.setAttribute(a,v);
-        el.removeAttribute('data-i18n-original');
-      }catch{}
-    });
-  }
-  function apply(){
-    if(!pack) return;
-    if(active==='en'){ restore(); return; }
-    const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
-    let n;
-    while(n=w.nextNode()){
-      if(!shouldText(n)) continue;
-      if(!originals.has(n)) originals.set(n,n.nodeValue);
-      const original=originals.get(n);
-      const key=original.replace(/\s+/g,' ').trim();
-      const translated=translateExact(key,pack);
-      if(translated && translated!==key){
-        const lead=original.match(/^\s*/)?.[0]||'', trail=original.match(/\s*$/)?.[0]||'';
-        n.nodeValue=lead+translated+trail;
-      }
-    }
-    document.querySelectorAll('[placeholder],[title],[aria-label],[alt]').forEach(el=>{
-      if(userContent(el)) return;
-      let m={};
-      for(const a of ['placeholder','title','aria-label','alt']){
-        const v=el.getAttribute(a); if(!v||!/[A-Za-z]/.test(v)) continue;
-        if(!m[a]) m[a]=v;
-        const t=translateExact(v,pack);
-        if(t && t!==v) el.setAttribute(a,t);
-      }
-      if(Object.keys(m).length) el.setAttribute('data-i18n-original',JSON.stringify(m));
-    });
-    document.title=translateExact(document.title,pack);
-    document.documentElement.lang=active;
-  }
-  function watch(){
-    observer?.disconnect();
-    observer=new MutationObserver(ms=>{
-      if(document.documentElement.dataset.spikeI18nReady!=='1') return;
-      for(const m of ms) if(m.type==='childList' && m.addedNodes.length){ apply(); break; }
-    });
-    observer.observe(document.body,{subtree:true,childList:true});
-  }
-  const saveLanguage=async l=>{try{localStorage.setItem(KEY,l)}catch{};try{document.cookie='spike-language='+encodeURIComponent(l)+'; Max-Age=31536000; Path=/; SameSite=Lax'}catch{};try{const db=getBackend();const session=await db?.auth?.getSession?.();const uid=session?.data?.session?.user?.id;if(uid&&db){const r=await db.from('user_app_settings').upsert({user_id:uid,language_code:l,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(r.error)console.warn('[SPIKE i18n] account language save failed',r.error)}}catch(e){console.warn('[SPIKE i18n] account language save failed',e)}};
-  async function loadAccountLanguage(){try{const db=getBackend();if(!db)return;const session=await db.auth.getSession();const uid=session?.data?.session?.user?.id;if(!uid)return;const r=await db.from('user_app_settings').select('language_code').eq('user_id',uid).maybeSingle();const v=r.data?.language_code;if(LANGS[v]&&v!==active){active=v;try{localStorage.setItem(KEY,v)}catch{};try{document.cookie='spike-language='+encodeURIComponent(v)+'; Max-Age=31536000; Path=/; SameSite=Lax'}catch{}}}catch(e){console.warn('[SPIKE i18n] account language read failed',e)}}
-  function buildSelector(){
-    if(location.pathname.split('/').pop()!=='settings.html') return;
-    // settings.html now contains the language control directly, so never inject
-    // a second selector. This also makes the control available even if i18n
-    // initialization is delayed or a translation pack fails to load.
-    if(document.getElementById('spike-language-select')) return;
-    if(document.getElementById('spike-language-setting')) return;
-    const host=document.createElement('section');
-    host.id='spike-language-setting';
-    host.setAttribute('data-i18n-ignore','');
-    host.innerHTML=`<div class="spike-language-card"><div><strong>${SELECTOR_UI[active].label}</strong><small>${SELECTOR_UI[active].hint}</small></div><select id="spike-language-select" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ig">Igbo</option><option value="yo">Yorùbá</option><option value="ha">Hausa</option><option value="pcm">Nigerian Pidgin</option></select></div>`;
-    const style=document.createElement('style');
-    style.textContent='.spike-language-card{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px;margin:16px 0;border:1px solid var(--line,rgba(255,255,255,.1));border-radius:16px;background:var(--surface,rgba(255,255,255,.05))}.spike-language-card strong,.spike-language-card small{display:block}.spike-language-card small{opacity:.7;margin-top:4px}.spike-language-card select{padding:10px 12px;border-radius:10px;background:inherit;color:inherit;border:1px solid var(--line,rgba(255,255,255,.15))}';
-    document.head.appendChild(style);
-    const anchor=document.querySelector('main,.wrap,.container,body');
-    anchor.insertBefore(host,anchor.firstChild);
-    const sel=host.querySelector('select'); sel.value=active;
-    sel.addEventListener('change',e=>{
-      const next=e.target.value;
-      if(!LANGS[next]) return;
-      active=next;
-      saveLanguage(next)
-      document.documentElement.lang=next;
-      document.documentElement.dataset.spikeLang=next;
-      // Reload from the saved preference. This guarantees every page starts
-      // with the selected language instead of relying on in-place DOM state.
-      location.reload();
-    });
-  }
-  async function boot(reapply=false){
-    if(reapply) restore();
-    await loadAccountLanguage();
-    try { pack=await loadPack(active); apply(); }
-    catch(e){ console.error('[SPIKE i18n]',e); pack={}; if(active==='en') restore(); }
-    buildSelector();
-    if(location.pathname.split('/').pop()==='settings.html'){
-      const s=document.getElementById('spike-language-select');
-      if(s){
-        s.value=active;
-        if(!s.dataset.spikeLanguageBound){
-          s.dataset.spikeLanguageBound='1';
-          s.addEventListener('change',e=>{
-            const next=e.target.value;
-            if(!LANGS[next]) return;
-            active=next;
-            saveLanguage(next)
-            document.documentElement.lang=next;
-            document.documentElement.dataset.spikeLang=next;
-            location.reload();
-          });
-        }
-        const card=s.closest('#language-settings') || document.getElementById('spike-language-setting');
-        if(card){
-          const section=card.querySelector('.section');
-          const strong=card.querySelector('strong'), small=card.querySelector('small');
-          if(section) section.textContent=SELECTOR_UI[active].label;
-          if(strong) strong.textContent=SELECTOR_UI[active].label;
-          if(small) small.textContent=SELECTOR_UI[active].hint;
-        }
-      }
-    }
-    document.documentElement.dataset.spikeI18nReady='1';
-    watch();
-  }
-  document.addEventListener('DOMContentLoaded',()=>boot(false),{once:true});
-  window.SPIKE_I18N={get language(){return active}, setLanguage:l=>{
-    if(!LANGS[l]) return Promise.resolve(false);
-    active=l;
-    saveLanguage(l)
-    document.documentElement.lang=l;
-    document.documentElement.dataset.spikeLang=l;
-    location.reload();
-    return Promise.resolve(true);
-  }, languages:LANGS};
+/* SPIKE i18n: translation packs live in Supabase, not GitHub. */
+(()=>{
+'use strict';
+const URL='https://cjqpyndceqyqsijihxbb.supabase.co',KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw',STORE='spike-language';
+const client=()=>window.supabaseClient||window.db||window.sb||(window.supabase?.createClient?window.supabase.createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}}):null);
+const LANGS={en:'English',fr:'Français',ig:'Igbo',yo:'Yorùbá',ha:'Hausa',pcm:'Nigerian Pidgin'},UI={en:['Language','Choose your language'],fr:['Langue','Choisissez votre langue'],ig:['Asụsụ','Họrọ asụsụ gị'],yo:['Èdè','Yan èdè rẹ'],ha:['Harshe','Zaɓi harshenka'],pcm:['Language','Choose your language']};
+let active=LANGS[localStorage.getItem(STORE)]?localStorage.getItem(STORE):'en',pack={},originals=new WeakMap(),observer;
+document.documentElement.lang=active;document.documentElement.dataset.spikeLang=active;
+const user=el=>!!el?.closest?.('input,textarea,select,option,[contenteditable=true],[data-i18n-ignore],[data-i18n-user-content]');
+const ok=n=>{const p=n.parentElement;return !!p&&!user(p)&&!['SCRIPT','STYLE','NOSCRIPT','TEMPLATE','PRE','CODE'].includes(p.tagName)&&/[A-Za-zÀ-ÿ]/.test(n.nodeValue||'')};
+const norm=t=>t.replace(/\s+/g,' ').trim();
+function restore(){const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())if(originals.has(n))n.nodeValue=originals.get(n);document.querySelectorAll('[data-spike-i18n-attrs]').forEach(e=>{try{for(const[a,v]of Object.entries(JSON.parse(e.getAttribute('data-spike-i18n-attrs'))))e.setAttribute(a,v)}catch{}e.removeAttribute('data-spike-i18n-attrs')})}
+function apply(){if(active==='en'){restore();return}const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){if(!ok(n))continue;if(!originals.has(n))originals.set(n,n.nodeValue);const o=originals.get(n),t=pack[norm(o)];if(t&&t!==norm(o)){const a=o.match(/^\s*/)?.[0]||'',b=o.match(/\s*$/)?.[0]||'';n.nodeValue=a+t+b}}document.querySelectorAll('[placeholder],[title],[aria-label],[alt]').forEach(e=>{if(user(e))return;const old={};for(const a of ['placeholder','title','aria-label','alt']){const v=e.getAttribute(a),t=v&&pack[v];if(v&&t&&t!==v){old[a]=v;e.setAttribute(a,t)}}if(Object.keys(old).length)e.setAttribute('data-spike-i18n-attrs',JSON.stringify(old))});document.documentElement.lang=active}
+async function savePreference(lang){try{if(window.supabase?.createClient){const db=client();if(!db)return;const {data:{session}}=await db.auth.getSession();if(session?.user){await db.from('user_app_settings').upsert({user_id:session.user.id,language_code:lang,updated_at:new Date().toISOString()},{onConflict:'user_id'})}}}catch(e){console.warn('[SPIKE i18n preference]',e)}}
+async function load(lang){if(lang==='en')return {};try{const r=await fetch(URL+'/rest/v1/spike_i18n_packs?select=translations&language_code=eq.'+encodeURIComponent(lang),{headers:{apikey:KEY,Authorization:'Bearer '+KEY,Accept:'application/json'},cache:'no-store'});if(r.ok){const rows=await r.json();if(rows[0]?.translations)return rows[0].translations}}catch(e){}const local=await fetch('assets/i18n/'+encodeURIComponent(lang)+'.json',{cache:'force-cache'});if(!local.ok)throw Error('Translation pack unavailable');return await local.json()}
+function selector(){if(!location.pathname.endsWith('settings.html')||document.getElementById('spike-language-setting'))return;const s=document.createElement('section');s.id='spike-language-setting';s.className='card';s.setAttribute('data-i18n-ignore','');s.innerHTML='<div class="section">Language</div><div class="row"><div><strong id="spike-language-label">Language</strong><small id="spike-language-hint">Choose your language</small></div><select id="spike-language-select" class="control" aria-label="Language"><option value="en">English</option><option value="fr">Français</option><option value="ig">Igbo</option><option value="yo">Yorùbá</option><option value="ha">Hausa</option><option value="pcm">Nigerian Pidgin</option></select></div>';const m=document.querySelector('main');m?.insertBefore(s,m.firstChild);const q=s.querySelector('select');q.value=active;q.onchange=async()=>{active=q.value;localStorage.setItem(STORE,active);await savePreference(active);location.reload()}}
+async function boot(){try{if(window.supabase?.createClient){const db=client();if(!db)return;const {data:{session}}=await db.auth.getSession();if(session?.user){const r=await db.from('user_app_settings').select('language_code').eq('user_id',session.user.id).maybeSingle();if(r.data?.language_code&&LANGS[r.data.language_code]){active=r.data.language_code;localStorage.setItem(STORE,active)}}}}catch(e){console.warn('[SPIKE i18n preference load]',e)}try{pack=await load(active)}catch(e){console.warn('[SPIKE i18n]',e);active='en';localStorage.setItem(STORE,'en');pack={}}apply();selector();const q=document.getElementById('spike-language-select');if(q){q.value=active;const u=UI[active];document.getElementById('spike-language-label').textContent=u[0];document.getElementById('spike-language-hint').textContent=u[1]}document.documentElement.dataset.spikeI18nReady='1';observer=new MutationObserver(ms=>{if(ms.some(m=>m.addedNodes.length))apply()});observer.observe(document.body,{subtree:true,childList:true})}
+document.addEventListener('DOMContentLoaded',boot,{once:true});window.SPIKE_I18N={languages:LANGS,get language(){return active},setLanguage:l=>{if(!LANGS[l])return false;active=l;localStorage.setItem(STORE,l);location.reload();return true}};
 })();

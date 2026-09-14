@@ -21,7 +21,7 @@ for (const entry of fs.readdirSync(root)) {
   if (stat.isFile() && entry.endsWith(".html")) copyFile(src, path.join(dist, entry));
 }
 
-for (const dir of ["css", "assets", "locales"]) {
+for (const dir of ["css", "assets"]) {
   const srcDir = path.join(root, dir);
   if (fs.existsSync(srcDir)) {
     fs.cpSync(srcDir, path.join(dist, dir), { recursive: true });

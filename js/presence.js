@@ -6,7 +6,7 @@
   const MIN_TRACK_GAP_MS=20000;
   const GRACE_MS=10000;
   let sb=null, me=null, channel=null, timer=null, onlineHandler=null, offlineHandler=null, visibilityHandler=null, pagehideHandler=null, lastTrackAt=0;
-  let starting=null, publish=true;
+  let starting=null, publish=true, retryTimer=null, retryAttempt=0;
   const watched=new Set(), states=new Map(), timers=new Map(), listeners=new Set();
 
   function notify(row){
@@ -47,7 +47,14 @@
     if(!force && now-lastTrackAt<MIN_TRACK_GAP_MS)return true;
     try{await channel.track({user_id:me.id,online:true,ts:now});lastTrackAt=now;window.dispatchEvent(new CustomEvent('spike-presence-status',{detail:{status:'online'}}));return true;}catch(e){window.dispatchEvent(new CustomEvent('spike-presence-status',{detail:{status:'error',error:e}}));console.debug('[SPIKE PRESENCE track]',e);return false;}
   }
+  function scheduleRetry(){
+    if(retryTimer||navigator.onLine===false)return;
+    const attempt=Math.min(6,retryAttempt++);
+    const delay=Math.min(30000,1000*Math.pow(2,attempt))+Math.floor(Math.random()*500);
+    retryTimer=setTimeout(()=>{retryTimer=null; const c=sb||window.supabaseClient||window.db||window.sb; if(c) start(c,{publish});},delay);
+  }
   async function start(client,opts={}){
+    client=client||window.supabaseClient||window.db||window.sb;
     if(!client)return false;
     if(starting)return starting;
     publish=opts.publish!==false;
@@ -59,6 +66,10 @@
       if(!me)return false;
       if(channel){try{await sb.removeChannel(channel)}catch(_){} channel=null;}
       channel=sb.channel(CHANNEL_NAME,{config:{presence:{key:String(me.id)}}});
+      channel.on('system','*',payload=>{
+        const reason=payload?.message||payload?.reason||payload;
+        if(payload?.status==='error'||payload?.status==='timeout') console.warn('[SPIKE PRESENCE system]',reason);
+      });
       channel.on('presence',{event:'sync'},apply);
       channel.on('presence',{event:'join'},apply);
       channel.on('presence',{event:'leave'},payload=>{const id=payload?.key;if(id&&String(id)!==String(me.id)&&watched.has(String(id)))markOfflineLater(id);apply();});
@@ -68,8 +79,11 @@
           let done=false;
           const sub=channel.subscribe(async status=>{
             window.dispatchEvent(new CustomEvent('spike-presence-status',{detail:{status}}));
-            if(status==='SUBSCRIBED'&&!done){done=true;subscribed=true;await track();apply();resolve(true);}
-            else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){if(!done){done=true;reject(new Error('Presence channel '+status));}}
+            if(status==='SUBSCRIBED'&&!done){done=true;subscribed=true;retryAttempt=0;await track();apply();resolve(true);}
+            else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+              console.warn('[SPIKE PRESENCE subscribe]',status,err||null);
+              if(!done){done=true;reject(err||new Error('Presence channel '+status));}
+            }
           });
           Promise.resolve(sub).catch(reject);
         });
@@ -78,6 +92,7 @@
         try{await sb.removeChannel(channel)}catch(_){}
         channel=null;
         clearInterval(timer);
+        scheduleRetry();
         return false;
       }
       clearInterval(timer);
@@ -94,6 +109,8 @@
   }
   async function stop(){
     clearInterval(timer);timer=null;
+    if(retryTimer){clearTimeout(retryTimer);retryTimer=null;}
+    retryAttempt=0;
     if(channel&&sb){try{await sb.removeChannel(channel)}catch(_){} }
     channel=null; states.clear(); timers.forEach(t=>clearTimeout(t));timers.clear(); lastTrackAt=0;
   }

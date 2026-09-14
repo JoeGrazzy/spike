@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head>
+<!DOCTYPE html><html lang="en"><head>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -26,6 +26,5 @@ async function load(){const s=await sb.auth.getSession();if(!s.data?.session){lo
 function openAppeal(id){selected=cases.find(c=>String(c.id)===String(id));if(!selected)return;$('#selectedCase').textContent=`Case ${selected.policy_id||'Policy'} · ${fmt(selected.created_at)}`;$('#appealReason').value='';$('#appealStatus').textContent='';$('#appealPanel').hidden=false;$('#appealPanel').scrollIntoView({behavior:'smooth',block:'start'})}
 $('#cases').addEventListener('click',e=>{const b=e.target.closest('[data-appeal]');if(b)openAppeal(b.dataset.appeal)});$('#closeAppeal').onclick=()=>$('#appealPanel').hidden=true;$('#refreshCases').onclick=()=>load().catch(e=>{$('#caseStatus').textContent=e.message||'Could not load policy cases.'});$('#submitAppeal').onclick=async()=>{if(!selected)return;const reason=$('#appealReason').value.trim();if(reason.length<10){$('#appealStatus').textContent='Please provide at least 10 characters.';return}const b=$('#submitAppeal');b.disabled=true;try{const r=await sb.rpc('submit_spike_policy_appeal',{p_case_id:selected.id,p_reason:reason});if(r.error)throw r.error;$('#appealStatus').textContent='Appeal submitted.';$('#appealPanel').hidden=true;await load()}catch(e){$('#appealStatus').textContent=e.message||'Could not submit appeal.'}finally{b.disabled=false}};
 load().catch(e=>{$('#caseStatus').textContent=e.message||'Could not load policy cases.';$('#cases').innerHTML='<div class="empty" style="display:block;margin-top:10px">Could not load policy cases.</div>'});
-</script>
-  <script src="js/spike-i18n.js?v=20260914-4" defer></script>
+</script><script src="js/spike-i18n.js?v=20260914-4"></script>
 </body></html>
