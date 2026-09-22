@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -17,8 +17,11 @@
 
 .feature-guide{margin-top:10px;border:1px solid #ffffff18;border-radius:14px;background:#ffffff06;padding:0 12px}.feature-guide summary{cursor:pointer;list-style:none;padding:12px 0;font-weight:800}.feature-guide summary::-webkit-details-marker{display:none}.feature-guide summary:after{content:"＋";float:right;opacity:.7}.feature-guide[open] summary:after{content:"−"}.feature-guide .guide-grid{display:grid;gap:9px;padding:0 0 12px}.feature-guide h4{margin:7px 0 3px;font-size:12px}.feature-guide p,.feature-guide li{font-size:10px;line-height:1.55}.feature-guide ul,.feature-guide ol{margin:5px 0 0 17px;padding:0}.tier-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:8px}.tier-grid label{border:1px solid #ffffff18;border-radius:10px;padding:8px 5px;text-align:center;cursor:pointer;font-size:10px}.tier-grid input{accent-color:#a855f7;margin-right:3px}.tier-grid b{display:block;font-size:12px}.mission-tier-note{font-size:10px;line-height:1.45;margin-top:5px}
 </style>
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
-<body>
+<body data-spike-page="spike_world">
 <div class="wrap">
 <header class="top"><button class="btn back spike-premium-back" data-spike-premium-back="1" data-back-fallback="feed.html" type="button" aria-label="Go back to the previous SPIKE page">←</button><div class="brand">SPIKE <span>WORLD</span></div><button class="btn refresh" id="refreshBtn" type="button">↻ Refresh</button></header>
 <section class="hero"><div class="card"><div class="eyebrow">THE SOCIAL LAYER BEYOND THE FEED</div><h1>Make your mark together.</h1><p>Battles turn posts into competition. Chains turn ideas into journeys. Missions turn activity into teamwork. Seasons make progress matter. Circles give people a home.</p><div class="stats"><div class="stat"><b id="battleCount">0</b><span>Battles</span></div><div class="stat"><b id="chainCount">0</b><span>Chains</span></div><div class="stat"><b id="missionCount">0</b><span>Missions</span></div><div class="stat"><b id="circleCount">0</b><span>Circles</span></div><div class="stat"><b id="seasonPoints">0</b><span>Season pts</span></div></div></div><div class="card season"><small>LIVE SEASON</small><div class="big" id="seasonName">—</div><small id="seasonEnds">Loading…</small></div></section>
@@ -67,6 +70,6 @@ authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_
 window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{}});
 init().catch(e=>{console.error(e);toast(e.message||'SPIKE World could not load')});
 </script><link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body></html>

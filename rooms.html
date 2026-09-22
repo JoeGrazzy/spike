@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link href="css/perf.css" rel="stylesheet"/>
@@ -225,8 +225,11 @@ video{contain:layout paint}
 })();
 </script>
 <script src="js/spike-dialog.js"></script>
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+<link rel="stylesheet" href="css/spike-identity.css"><script src="js/spike-identity.js"></script>
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
-<body>
+<body data-spike-page="rooms">
 <div class="app rooms-v2">
 <header class="header rooms-v2-header">
 <button aria-label="Go back to the previous SPIKE page" class="back spike-premium-back" data-back-fallback="feed.html" data-spike-premium-back="1" id="back" title="Go back" type="button">‹</button>
@@ -549,9 +552,7 @@ async function auth(){
         .select('display_name,username,avatar_url')
         .eq('id',me.id)
         .maybeSingle();
-      if(profile?.avatar_url && $('#avatar')){
-        $('#avatar').innerHTML='<img src="'+esc(profile.avatar_url)+'" alt="" loading="lazy" decoding="async">';
-      }
+      if($('#avatar')) $('#avatar').innerHTML=window.SPIKE_IDENTITY.avatarMarkup({...profile,id:me.id},'spike-avatar',profile?.display_name||profile?.username||'You');
     }catch(e){ console.warn('SPIKE profile load failed:',e); }
     return true;
   }catch(err){
@@ -933,6 +934,6 @@ else setTimeout(install,1500);
 <script defer="" src="js/premium-back.js"></script>
 <script defer="" src="js/telemetry.js"></script>
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body></html>

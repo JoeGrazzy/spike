@@ -25,10 +25,11 @@ test('every local feature asset referenced by Feed exists', async()=>{
   }
 });
 
-test('production build contains feature assets and Feed integration', async()=>{
-  const feed=await readFile('dist/feed.html','utf8');
+test('source Feed contains feature assets and no dist build is required', async()=>{
+  const feed=await readFile('feed.html','utf8');
   assert.match(feed,/id="spikePulseBtn"/);
   assert.match(feed,/id="spikeFeatureHub"/);
   assert.match(feed,/js\/spike-feature-suite\.js/);
   assert.match(feed,/css\/spike-feature-suite\.css/);
+  await assert.rejects(() => readFile('dist/feed.html','utf8'));
 });

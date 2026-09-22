@@ -1,0 +1,86 @@
+/* SPIKE FEED — PRODUCT SURFACE V1
+   Visual-only shell upgrade. Existing feed IDs, controls and data flow remain intact. */
+:root{
+  --feed-max: 980px;
+  --feed-gutter: clamp(12px, 3vw, 24px);
+  --feed-card: color-mix(in srgb, var(--surface) 94%, transparent);
+  --feed-card-2: color-mix(in srgb, var(--surface2) 92%, transparent);
+  --feed-line: color-mix(in srgb, var(--text) 12%, transparent);
+  --feed-soft: color-mix(in srgb, var(--text) 6%, transparent);
+}
+html,body{overflow-x:hidden}
+body{padding-bottom:92px}
+.header{
+  height:68px!important;padding:8px max(var(--feed-gutter),14px)!important;
+  background:color-mix(in srgb,var(--bg) 90%,transparent)!important;
+  border-bottom:1px solid var(--feed-line)!important;
+  backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important;
+}
+.brand{justify-content:flex-start!important;gap:10px;overflow:visible!important}
+.brand-logo-wrap{width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--feed-line);border-radius:12px;background:var(--feed-soft);overflow:hidden}
+.brand-logo{width:30px!important;height:30px!important;object-fit:contain}
+.brand-title{font-size:1.05rem!important;letter-spacing:.16em!important}
+.brand-title::after{display:none}
+.brand-subtitle{font-size:6px!important;letter-spacing:.18em!important;text-align:left!important}
+.header-actions{gap:7px!important}
+.header-actions>button{border-color:var(--feed-line)!important;background:var(--feed-soft)!important;box-shadow:none!important}
+.spike-ask-ai{min-width:40px!important}
+.spike-pulse-button,.spike-coffee-link{width:40px!important;height:40px!important;border-radius:12px!important}
+.main{width:min(var(--feed-max),100%)!important;margin:0 auto!important;padding:18px var(--feed-gutter) 42px!important}
+.card,.spike-signal-composer{box-shadow:0 12px 40px rgba(0,0,0,.10)!important}
+.announcement{margin-bottom:14px!important;border-radius:14px!important;background:var(--feed-soft)!important;border-color:var(--feed-line)!important}
+.story-row{margin-bottom:14px!important;padding:12px!important;border-radius:18px!important;background:var(--feed-card)!important;border-color:var(--feed-line)!important}
+.story-preview{border-radius:15px!important}
+#feedV2Hub{margin-bottom:14px!important;padding:10px!important;border-radius:18px!important;background:var(--feed-card)!important;border-color:var(--feed-line)!important}
+.feed-v2-nav{gap:6px!important;padding:2px!important;overflow-x:auto!important;scrollbar-width:none}
+.feed-v2-nav::-webkit-scrollbar{display:none}
+.feed-v2-nav>button,.feed-v2-more>summary{border:1px solid transparent!important;background:transparent!important;border-radius:10px!important;padding:9px 12px!important;font-size:11px!important;white-space:nowrap}
+.feed-v2-nav>button.active{background:var(--surface2)!important;border-color:var(--feed-line)!important;color:var(--text)!important}
+.feed-v2-panel{padding:10px 4px 3px!important}
+.feed-status{margin:8px 2px 14px!important;opacity:.85}
+.spike-signal-composer{padding:18px!important;border:1px solid var(--feed-line)!important;border-radius:20px!important;background:var(--feed-card)!important}
+.signal-composer-top{gap:12px!important;margin-bottom:14px!important}
+.signal-kicker{letter-spacing:.14em!important;font-size:9px!important}
+#spikeComposerTitle{font-size:1.15rem!important;letter-spacing:-.02em}
+.signal-composer-top p{font-size:11px!important;color:var(--muted)!important}
+.signal-writing-surface{border:1px solid var(--feed-line)!important;background:var(--feed-card-2)!important;border-radius:15px!important}
+#signalText{min-height:126px!important;font-size:15px!important;line-height:1.55!important}
+.signal-writing-footer{border-top:1px solid var(--feed-line)!important}
+.signal-tools{display:flex!important;gap:7px!important;flex-wrap:wrap!important;margin-top:10px!important}
+.signal-tool,.creator-tool{border:1px solid var(--feed-line)!important;background:var(--feed-soft)!important;border-radius:10px!important;padding:8px 10px!important;font-size:11px!important}
+.signal-release-row{border-top:1px solid var(--feed-line)!important;margin-top:12px!important;padding-top:12px!important}
+.signal-release{border-radius:12px!important;box-shadow:none!important}
+.filters{margin:14px 0!important;padding:4px!important;border:1px solid var(--feed-line)!important;background:var(--feed-card)!important;border-radius:14px!important;display:flex!important;gap:4px!important;overflow-x:auto!important;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filters .filter{flex:1 0 auto!important;border-radius:10px!important;padding:9px 14px!important;font-size:11px!important}
+.filters .filter.active{background:var(--surface2)!important;border:1px solid var(--feed-line)!important}
+#signalTopPicks{margin-bottom:14px!important;border-radius:18px!important;border-color:var(--feed-line)!important}
+.posts{display:grid!important;gap:14px!important}
+.posts>.post,.posts>article,.posts>.card{border:1px solid var(--feed-line)!important;border-radius:18px!important;box-shadow:0 10px 34px rgba(0,0,0,.08)!important;background:var(--feed-card)!important;overflow:hidden}
+.spike-copyright-footer{max-width:var(--feed-max)!important;margin:0 auto!important;padding:0 var(--feed-gutter) 22px!important}
+.spike-copyright-link{opacity:.65!important;font-size:10px!important}
+.spike-bottom-nav{border-top:1px solid var(--feed-line)!important;background:color-mix(in srgb,var(--bg) 92%,transparent)!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+@media(min-width:900px){
+  .main{padding-top:22px!important}
+  .story-row{padding:14px 16px!important}
+  #spikeComposer{padding:22px!important}
+  #signalText{min-height:150px!important}
+}
+@media(max-width:600px){
+  .header{height:58px!important}
+  .brand-logo-wrap{width:34px;height:34px}
+  .brand-logo{width:27px!important;height:27px!important}
+  .brand-subtitle{display:none!important}
+  .header-actions{gap:4px!important}
+  .header-actions>button{width:36px!important;min-width:36px!important;height:36px!important}
+  .spike-ask-ai .ask-ai-label{display:none!important}
+  .main{padding-top:12px!important}
+  .spike-signal-composer{padding:14px!important;border-radius:17px!important}
+  .signal-tools{flex-wrap:nowrap!important;overflow-x:auto!important;scrollbar-width:none}
+  .signal-tools::-webkit-scrollbar{display:none}
+  .signal-tool{flex:0 0 auto!important}
+  .signal-creator-row{gap:6px!important;overflow-x:auto!important;white-space:nowrap!important}
+  .creator-tool{flex:0 0 auto!important}
+  .signal-audience{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

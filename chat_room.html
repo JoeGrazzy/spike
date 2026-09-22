@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <meta charset="utf-8">
@@ -13,8 +13,11 @@
 <link rel="stylesheet" href="css/premium-back.css">
 
 <script src="js/spike-dialog.js"></script>
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
-<body>
+<body data-spike-page="chat_room">
 <main>
   <p>Opening SPIKE Room Chat…</p>
   <p><a href="room_chat.html" class="spike-premium-back" data-spike-premium-back="1" data-back-fallback="rooms.html">Continue to room chat</a></p>
@@ -22,7 +25,7 @@
 <script src="js/premium-back.js" defer></script>
   <script src="js/theme.js"></script>
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body>
 </html>

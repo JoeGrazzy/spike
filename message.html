@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link href="css/perf.css" rel="stylesheet"/>
 <style id="spike-speed-css">
@@ -625,6 +625,9 @@ body.messages-page{background:
 <script src="js/spike-dialog.js"></script>
 <link href="css/spike-adaptive-nav.css" rel="stylesheet"/>
 <link href="css/spike-surface-controls.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+<link rel="stylesheet" href="css/spike-identity.css"><script src="js/spike-identity.js"></script>
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
 <body class="messages-page private-message-page">
 <div class="app">
@@ -677,7 +680,7 @@ $('emojiPop').innerHTML=emojis.map(e=>`<button type="button">${e}</button>`).joi
 const nameOf=p=>p?.display_name||p?.username||'SPIKE user';
 const initials=p=>nameOf(p).trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'?';
 const profileImage=p=>{const u=p?.avatar_url||p?.profile_image_url||p?.photo_url||p?.image_url||p?.picture||p?.avatar;return typeof u==='string'&&/^https?:\/\//i.test(u.trim())?u.trim():''};
-const avatar=p=>{const id=p?.id||p?.user_id||'';const url=profileImage(p);return `<div class="avatar spike-presence-target" data-presence-user="${esc(id)}" data-presence-status="Offline">${url?`<img src="${esc(url)}" alt="${esc(nameOf(p))}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='grid'">`:''}<span style="${url?'display:none;':''}">${esc(initials(p))}</span><i class="dot ${window.AppPresence?.isOnline(id)?'online':''}"></i></div>`};
+const avatar=p=>{const id=p?.id||p?.user_id||'';return `<div class="avatar spike-presence-target" data-presence-user="${esc(id)}" data-presence-status="Offline">${window.SPIKE_IDENTITY.avatarMarkup(p,'spike-avatar',nameOf(p))}<i class="dot ${window.AppPresence?.isOnline(id)?'online':''}"></i></div>`};
 function unlockNotificationAudio(){
   if(audioUnlocked)return;
   audioUnlocked=true;
@@ -1413,6 +1416,7 @@ window.SPIKE_MESSAGE_API={openChat,loadMessages,renderMessages,markRead,sendText
 <script defer="" src="js/spike-adaptive-nav.js"></script>
 <script src="js/spike-surface-controls.js"></script>
 <link href="css/theme.css" rel="stylesheet"/>
-<link href="css/spike-mobile-safe-area.css" rel="stylesheet"/>
+
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body></html>

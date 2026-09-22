@@ -5,7 +5,7 @@ import { readFile } from 'node:fs/promises';
 const css=await readFile('css/theme.css','utf8');
 
 test('V17 has exactly 10 canonical theme identities with deliberately distinct geometry/materials',()=>{
-  const blocks=[...css.matchAll(/html\[data-spike-style="(\d+)"\]\{color-scheme:(dark|light);\n\s*--spike-bg:([^;]+);--spike-surface:([^;]+);--spike-surface-2:([^;]+);--spike-surface-3:([^;]+);\n\s*--spike-text:([^;]+);--spike-muted:([^;]+);--spike-line:([^;]+);--spike-accent:([^;]+);--spike-accent-2:([^;]+);--spike-glow:([^;]+);\n\s*--spike-shadow:([^;]+);--spike-radius:([^;]+);--spike-control-radius:([^;]+);--spike-blur:([^;]+);--spike-font:([^;]+);\n\}/g)];
+  const blocks=[...css.matchAll(/html\[data-spike-style="(\d+)"\]\{color-scheme:(dark|light);\n\s*--spike-bg:([^;]+);--spike-surface:([^;]+);--spike-surface-2:([^;]+);--spike-surface-3:([^;]+);\n\s*--spike-text:([^;]+);--spike-muted:([^;]+);--spike-line:([^;]+);--spike-accent:([^;]+);--spike-accent-2:([^;]+);--spike-glow:([^;]+);(?:--spike-action-bg:[^;]+;--spike-action-bg-2:[^;]+;--spike-action-text:[^;]+;)?\n\s*--spike-shadow:([^;]+);--spike-radius:([^;]+);--spike-control-radius:([^;]+);--spike-blur:([^;]+);--spike-font:([^;]+);\n\}/g)];
   assert.equal(blocks.length,10);
   assert.deepEqual(blocks.map(m=>Number(m[1])),[1,2,3,4,5,6,7,8,9,10]);
   assert.equal(new Set(blocks.map(m=>m[14])).size,10,'all 10 card silhouettes must differ');

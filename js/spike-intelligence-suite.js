@@ -5,7 +5,7 @@ const esc=(v)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':
 const db=window.supabaseClient||window.db;
 let snap={};
 const $=(id)=>document.getElementById(id);
-function toast(msg){if(typeof window.toast==='function')window.toast(msg);else alert(msg)}
+function toast(msg){try{if(typeof window.spikePremiumToast==='function')return window.spikePremiumToast(msg,'info',3600);if(typeof window.toast==='function')return window.toast(msg)}catch(_){} }
 function scoreBar(label,value){const n=Math.max(0,Math.min(100,Number(value)||0));return `<div class="intel-bar"><span>${esc(label)}</span><div class="intel-track"><div class="intel-fill" style="width:${n}%"></div></div><b>${n}</b></div>`}
 async function load(){
  if(!db)return;

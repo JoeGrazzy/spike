@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark';document.documentElement.style.colorScheme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
@@ -74,8 +74,11 @@ button,input,textarea{font:inherit} button{cursor:pointer} button:focus-visible,
 
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+<link rel="stylesheet" href="css/spike-identity.css"><script src="js/spike-identity.js"></script>
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
-<body>
+<body data-spike-page="room">
 <header class="top">
   <button id="backBtn" class="iconbtn spike-premium-back" type="button" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back">← Rooms</button>
   <a class="iconbtn" href="guide.html#rooms" aria-label="SPIKE Room Guide" title="Room Guide">📖</a>
@@ -675,7 +678,7 @@ boot();
   <script src="js/theme.js"></script>
 <script src="js/spike-adaptive-nav.js" defer></script>
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body>
 </html>

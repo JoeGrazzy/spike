@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(function(){try{var n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n)}catch(e){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -66,6 +66,7 @@ img, video, iframe { max-width:100%; }
 .qr-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.qr-btn{border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-text);border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}.qr-overlay{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px}.qr-overlay.open{display:flex}.qr-sheet{width:min(440px,100%);border:1px solid rgba(255,255,255,.12);background:var(--spike-surface);border-radius:28px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.45);color:var(--spike-text);text-align:center}.qr-head{display:flex;align-items:center;justify-content:space-between;text-align:left}.qr-close{border:0;background:transparent;color:inherit;font-size:28px;cursor:pointer}.qr-code-box{width:min(280px,78vw);height:min(280px,78vw);margin:22px auto 16px;background:#fff;border-radius:22px;display:grid;place-items:center;padding:14px}.qr-code-box img,.qr-code-box canvas{max-width:100%;max-height:100%}.qr-help{color:var(--spike-muted);font-size:13px;margin:0 0 14px}.scanner-overlay{position:fixed;inset:0;background:#05070b;z-index:10000;display:none;color:#fff}.scanner-overlay.open{display:block}.scanner-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.scanner-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.58),transparent 30%,transparent 70%,rgba(0,0,0,.65))}.scanner-top{position:absolute;top:0;left:0;right:0;padding:18px 18px;display:flex;align-items:center;justify-content:space-between}.scanner-title{font-weight:900;font-size:18px}.scanner-icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.28);color:#fff;font-size:22px;cursor:pointer}.scan-frame{position:absolute;left:50%;top:50%;width:min(76vw,300px);height:min(76vw,300px);transform:translate(-50%,-55%);border:2px solid rgba(255,255,255,.75);border-radius:24px;box-shadow:0 0 0 9999px rgba(0,0,0,.30)}.scan-corner{position:absolute;width:42px;height:42px;border-color:#fff;border-style:solid}.scan-c1{top:-2px;left:-2px;border-width:4px 0 0 4px;border-radius:20px 0 0 0}.scan-c2{top:-2px;right:-2px;border-width:4px 4px 0 0;border-radius:0 20px 0 0}.scan-c3{bottom:-2px;left:-2px;border-width:0 0 4px 4px;border-radius:0 0 0 20px}.scan-c4{bottom:-2px;right:-2px;border-width:0 4px 4px 0;border-radius:0 0 20px 0}.scan-line{position:absolute;left:14px;right:14px;top:20%;height:2px;background:linear-gradient(90deg,transparent,#fff,transparent);animation:scanline 2s ease-in-out infinite}@keyframes scanline{0%,100%{top:18%;opacity:.3}50%{top:82%;opacity:1}}.scanner-bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;padding:0 18px}.scanner-bottom p{margin:10px 0;color:rgba(255,255,255,.78);font-size:14px}.scanner-controls{display:flex;justify-content:center;gap:14px}.scanner-control{border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.34);color:#fff;border-radius:999px;padding:12px 18px;font-weight:800;cursor:pointer}.scanner-file{display:none}.connect-preview{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:10001;display:none;align-items:center;justify-content:center;padding:18px}.connect-preview.open{display:flex}.connect-card{width:min(390px,100%);background:var(--spike-surface);color:var(--spike-text);border:1px solid var(--spike-line);border-radius:26px;padding:22px;text-align:center}.connect-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:auto;border:3px solid rgba(124,58,237,.28)}.connect-avatar-fallback{display:grid;place-items:center;background:var(--spike-surface-2);font-size:30px}.connect-card h2{margin:12px 0 4px}.connect-id{color:var(--spike-muted);font-weight:800}.connect-actions{display:flex;gap:10px;margin-top:20px}.connect-actions .btn{flex:1}
 </style>
 <script src="js/theme.js" defer></script>
+<script src="js/spike-identity.js" defer></script>
 <link rel="stylesheet" href="css/ui-fix.css">
 
 <style id="spike-premium-privacy-ui">
@@ -188,14 +189,49 @@ img, video, iframe { max-width:100%; }
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <link rel="stylesheet" href="css/spike-surface-controls.css">
 <link rel="stylesheet" href="css/theme.css">
+
+<style id="spike-profile-rebuild-v1">
+:root{--bg:#07090d;--surface:#0d1117;--surface2:#11161e;--surface3:#171d27;--line:rgba(255,255,255,.085);--text:#f5f7fb;--muted:#8f98a8;--primary2:#b9a4ff;--shadow:0 18px 50px rgba(0,0,0,.24)}
+html,body{background:var(--bg)!important;color:var(--text)!important}
+body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,58,237,.08),transparent 34%),var(--bg)!important}
+.header{height:64px;padding:8px 16px;border-bottom:1px solid var(--line);background:rgba(7,9,13,.92);backdrop-filter:blur(18px);gap:10px}
+.header-btn{width:40px;height:40px;border-radius:12px;background:var(--surface);border:1px solid var(--line);transition:.18s ease}.header-btn:hover{background:var(--surface2);border-color:rgba(255,255,255,.15);transform:translateY(-1px)}
+.header-title{font-size:13px;letter-spacing:.01em}.main{width:min(100%,760px);padding:18px 12px 52px}.card{background:transparent;border:0;box-shadow:none;overflow:visible}
+.cover{height:235px;border:1px solid var(--line);border-radius:20px 20px 0 0;background:linear-gradient(135deg,#111722,#15101f 58%,#0c1219);box-shadow:var(--shadow)}.cover:after{background:linear-gradient(180deg,transparent 35%,rgba(7,9,13,.72))}.cover-edit{right:14px;bottom:14px;border-radius:11px;background:rgba(7,9,13,.82);border-color:rgba(255,255,255,.13);padding:9px 12px}
+.profile{margin-top:0;padding:0 18px 18px;border:1px solid var(--line);border-top:0;border-radius:0 0 20px 20px;background:var(--surface);box-shadow:var(--shadow)}
+.avatar-wrap{width:112px;height:112px;margin-top:-56px}.avatar{width:112px;height:112px;border-width:5px;border-color:var(--surface);background:#171d27;box-shadow:0 12px 28px rgba(0,0,0,.35)}
+.profile-top{margin-top:14px;gap:18px}.name{font-size:24px;letter-spacing:-.025em}.handle{font-size:11px}.bio{max-width:610px;color:#dce1e9;font-size:13px}.meta{gap:12px;font-size:10px}
+.actions{min-width:145px}.btn{padding:9px 13px;border-radius:11px;background:var(--surface2);border-color:var(--line);font-size:10px}.btn.primary{background:#fff;color:#080a0e;border:0}.btn.primary:hover{background:#e9edf3}
+.spid-card{margin-top:15px;background:#171d27;border:1px solid var(--line);box-shadow:none;animation:none}.spid-inner{background:transparent;padding:11px 12px;border-radius:15px}.spid-spark{color:#c4b5fd;animation:none}.spid-value{background:none;color:#e9e4ff;animation:none}.spid-btn{background:var(--surface3);border-color:var(--line);padding:7px 9px}
+.xp-card{margin-top:9px;background:var(--surface2);border-color:var(--line)}.xp-fill{background:#a78bfa}.level-link{color:#b9a4ff!important}
+.recommendations{margin-top:12px}.recommendations h3{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em}.rec-grid{grid-template-columns:repeat(2,1fr);gap:8px}.rec-item{background:var(--surface2);border-color:var(--line);padding:11px}.rec-action:hover{transform:none;border-color:rgba(167,139,250,.28)}
+.stats{margin-top:14px;gap:8px}.stat{padding:12px;background:var(--surface2);border-color:var(--line);border-radius:12px}.stat b{font-size:17px}.stat span{font-size:8px;letter-spacing:.06em;color:var(--muted)}
+.profile-tools{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.profile-feature-card{background:var(--surface);border:1px solid var(--line);border-radius:14px!important;box-shadow:none!important;padding:13px!important}.profile-feature-card h3{font-size:11px!important}.feature-muted{color:var(--muted)!important}
+.tabs{position:sticky;top:64px;margin-top:10px;border:1px solid var(--line);border-radius:13px;padding:4px;background:rgba(13,17,23,.94);backdrop-filter:blur(16px)}.tab{padding:10px;border-radius:9px}.tab.active{background:#fff;color:#090b0f}
+.panel{padding:12px 0}.media-gallery-head{padding:0 2px 8px}.media-gallery-head h2{font-size:15px}.media-gallery-head span{font-size:9px;color:var(--muted)}
+.media-gallery{gap:7px!important}.media-gallery>*,.about-grid>*{border-color:var(--line)!important}
+.overlay .modal{background:var(--surface)!important;border-color:var(--line)!important;box-shadow:0 30px 80px rgba(0,0,0,.5)!important}
+@media(max-width:650px){.main{padding:8px 8px 40px}.header{padding-inline:10px}.cover{height:190px;border-radius:16px 16px 0 0}.profile{padding-inline:13px;border-radius:0 0 16px 16px}.profile-top{display:block}.actions{margin-top:13px;min-width:0;justify-content:flex-start}.actions .btn{flex:1}.profile-tools{grid-template-columns:1fr 1fr}.tabs{top:64px}.spid-inner{align-items:flex-start}.spid-actions{flex-wrap:wrap}.rec-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.name{font-size:21px}.avatar-wrap,.avatar{width:96px;height:96px}.avatar-wrap{margin-top:-48px}.profile-tools{grid-template-columns:1fr}.spid-sub{display:none}.spid-actions{margin-left:auto}.spid-btn{padding:7px 8px}.stats{gap:5px}.stat{padding:10px 5px}}
+@media(prefers-reduced-motion:reduce){.header-btn,.rec-action{transition:none}}
+</style>
+<style id="spike-cover-adjustment">
+.cover-actions{position:absolute;right:14px;bottom:14px;z-index:5;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.cover-actions .cover-edit{position:static}.cover-adjust{background:rgba(255,255,255,.1)}
+.cover-editor-overlay{position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(3,5,10,.78);backdrop-filter:blur(18px)}.cover-editor-overlay.open{display:flex}.cover-editor-modal{width:min(760px,100%);max-height:min(92vh,900px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:0 35px 100px rgba(0,0,0,.55);padding:18px}.cover-editor-head{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;margin-bottom:14px}.cover-editor-head h2{margin:0;font-size:19px}.cover-editor-head p{margin:5px 0 0;color:var(--muted);font-size:11px;line-height:1.5}.cover-editor-close{width:38px;height:38px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);color:var(--text);font-size:24px;cursor:pointer}.cover-editor-preview{position:relative;width:100%;height:300px;overflow:hidden;border-radius:18px;background:#080b10;border:1px solid var(--line);touch-action:none;cursor:grab}.cover-editor-preview.dragging{cursor:grabbing}.cover-editor-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 50%;transform-origin:center;user-select:none;-webkit-user-drag:none;will-change:transform}.cover-editor-safe{position:absolute;inset:0;pointer-events:none;border:1px dashed rgba(255,255,255,.25);border-radius:18px;display:flex;justify-content:space-between;align-items:flex-end;padding:10px;color:rgba(255,255,255,.7);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.cover-editor-controls{padding-top:16px}.cover-editor-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cover-editor-row b{display:block;font-size:12px}.cover-editor-row small{display:block;color:var(--muted);font-size:10px;margin-top:3px}.cover-editor-row output{font-size:12px;font-weight:900}.cover-editor-controls input[type=range]{width:100%;margin:15px 0 10px;accent-color:#a78bfa}.cover-editor-actions{display:flex;justify-content:flex-end;gap:8px}.cover-editor-actions .btn{min-width:90px}.cover-editor-overlay button:focus-visible{outline:2px solid #b9a4ff;outline-offset:2px}
+@media(max-width:650px){.cover-actions{right:10px;bottom:10px}.cover-actions .cover-edit{padding:8px 9px}.cover-actions .cover-edit span{display:none}.cover-editor-overlay{padding:8px}.cover-editor-modal{padding:13px;border-radius:20px}.cover-editor-preview{height:220px;border-radius:15px}.cover-editor-safe{border-radius:15px}.cover-editor-actions{display:grid;grid-template-columns:1fr 1fr 1.2fr}.cover-editor-actions .btn{min-width:0}.cover-editor-head h2{font-size:17px}}
+</style>
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 </head>
 <body class="spike-profile-page">
 <div class="loader" id="loader"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>
 <header class="header"><button class="header-btn spike-premium-back" id="backBtn" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back" type="button">‹</button><div class="header-title" id="headerTitle">Profile</div><button class="header-btn hidden" id="adminBtn" type="button" title="Admin" aria-label="Admin">⚙</button><button class="header-btn" id="menuBtn">⋯</button></header>
 <main class="main"><section class="card">
 <div class="cover" id="coverArea">
+<div id="generatedCover" aria-hidden="true"></div>
 <img id="coverImg" alt="" class="hidden" loading="lazy" decoding="async">
-<button class="cover-edit hidden" id="coverEdit" type="button" title="Choose cover photo">▣ <span>Change cover</span></button>
+<div class="cover-actions hidden" id="coverActions"><button class="cover-edit" id="coverEdit" type="button" title="Choose cover photo">▣ <span>Change cover</span></button><button class="cover-edit cover-adjust" id="coverAdjust" type="button" title="Adjust how your cover appears">⌗ <span>Adjust</span></button></div>
 <input id="coverFile" class="upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
 </div>
 <div class="profile"><div class="avatar-wrap"><button class="avatar" id="avatar" type="button" aria-label="Change profile picture">U</button>
@@ -239,6 +275,17 @@ img, video, iframe { max-width:100%; }
   <div class="privacy-panel-foot"><span>🛡️ Your choices are enforced by SPIKE's access controls.</span><span>Changes apply after saving.</span></div>
 </section>
 <div class="modal-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button class="btn primary">Save profile</button></div></form></div></div>
+<div class="cover-editor-overlay" id="coverEditorOverlay" aria-hidden="true">
+  <div class="cover-editor-modal" role="dialog" aria-modal="true" aria-labelledby="coverEditorTitle">
+    <div class="cover-editor-head"><div><h2 id="coverEditorTitle">Adjust your cover</h2><p>Drag to reposition and use the slider to control how large it appears.</p></div><button class="cover-editor-close" id="coverEditorClose" type="button" aria-label="Close">×</button></div>
+    <div class="cover-editor-preview" id="coverEditorPreview"><img id="coverEditorImg" alt="Cover preview"><div class="cover-editor-safe"><span>Desktop preview</span><span>Mobile-safe area</span></div></div>
+    <div class="cover-editor-controls">
+      <div class="cover-editor-row"><div><b>Size</b><small>Zoom the image without changing the cover frame.</small></div><output id="coverZoomValue">100%</output></div>
+      <input id="coverZoom" type="range" min="100" max="250" step="1" value="100" aria-label="Cover size">
+      <div class="cover-editor-actions"><button class="btn" id="coverReset" type="button">Reset</button><button class="btn" id="coverEditorCancel" type="button">Cancel</button><button class="btn primary" id="coverEditorSave" type="button">Save cover</button></div>
+    </div>
+  </div>
+</div>
 <div class="overlay" id="menuOverlay"><div class="modal"><h2 id="profileMenuTitle">Profile options</h2><p id="profileMenuText">Quick actions for this profile.</p><div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="copyProfile">🔗 Copy profile link</button><button class="btn" id="showQr">▣ Show QR</button><button class="btn" id="scanQr">⌗ Scan QR</button><button class="btn" id="themeBtn">◐ Theme</button><button class="btn danger" id="signOutBtn">↪ Sign out</button></div><div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div></div></div>
 
 <div class="qr-overlay" id="qrOverlay"><div class="qr-sheet"><div class="qr-head"><div><h2 style="margin:0">My SPIKE QR</h2><div class="feature-muted">Scan to connect instantly</div></div><button class="qr-close" id="qrClose" aria-label="Close">×</button></div><div class="qr-code-box" id="qrCodeBox"></div><p class="qr-help">Show this code to someone nearby. They can scan it and connect with you without a friend request.</p><div class="qr-actions"><button class="qr-btn" id="qrShare">📤 Share</button><button class="qr-btn" id="qrCopy">🔗 Copy link</button></div></div></div><div class="scanner-overlay" id="scannerOverlay"><video class="scanner-video" id="scannerVideo" playsinline muted></video><div class="scanner-shade"></div><div class="scanner-top"><button class="scanner-icon-btn" id="scannerClose" aria-label="Close scanner">×</button><div class="scanner-title">Scan SPIKE QR</div></div><div class="scan-frame"><span class="scan-corner scan-c1"></span><span class="scan-corner scan-c2"></span><span class="scan-corner scan-c3"></span><span class="scan-corner scan-c4"></span><span class="scan-line"></span></div><div class="scanner-bottom"><p>Point your camera at a SPIKE QR code</p><div class="scanner-controls"><button class="scanner-control" id="galleryQr">🖼 Gallery</button></div><input class="scanner-file" id="qrFile" type="file" accept="image/*"></div></div><div class="connect-preview" id="connectPreview"><div class="connect-card"><div id="connectAvatarWrap"></div><h2 id="connectName">SPIKE member</h2><div class="connect-id" id="connectSpId"></div><p class="feature-muted">Connect instantly. No request or approval required.</p><div class="connect-actions"><button class="btn" id="connectCancel">Cancel</button><button class="btn primary" id="connectConfirm">SPIKE Connect instantly</button></div></div></div><div class="toast" id="toast"></div>
@@ -272,7 +319,7 @@ const $=id=>document.getElementById(id),now=()=>new Date().toISOString();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nameOf=u=>u?.display_name||u?.full_name||u?.name||u?.email||"User",avatarOf=u=>u?.avatar_url||u?.avatar||"";
 const profileLink=id=>`profile.html?uid=${encodeURIComponent(id)}`;
-const state={me:null,uid:null,profile:null,levelDefinitions:[],posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false};
+const state={me:null,uid:null,profile:null,levelDefinitions:[],posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false,cover:{url:"",position_x:0,position_y:0,zoom:1,fit:"cover"}};
 function syncThemeColor(){try{const meta=document.querySelector('meta[name="theme-color"]');if(meta){const bg=getComputedStyle(document.documentElement).getPropertyValue('--spike-bg').trim();if(bg)meta.setAttribute('content',bg)}}catch(_){}}
 document.addEventListener('spike:theme-change',syncThemeColor);
 function toast(s,type,ms){spikePremiumToast(s,type,ms||3200)}
@@ -319,7 +366,8 @@ if(r.error) throw r.error;
 }
 await putDoc(`users/${state.me.id}`,userPatch,"users");
 state.profile={...state.profile,[field]:url};
-renderIdentity();renderActions();renderAbout();
+if(field==="cover_url"){state.cover={url,position_x:0,position_y:0,zoom:1,fit:"cover"};const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:url,p_position_x:0,p_position_y:0,p_zoom:1,p_fit:"cover"});if(cr.error)throw cr.error;renderCover();}
+renderIdentity();renderCover();renderActions();renderAbout();
 }
 async function uploadProfileImage(file,type){
 if(!validImage(file)) return;
@@ -329,7 +377,7 @@ try{
 toast(type==="avatar"?"Uploading profile picture…":"Uploading cover photo…");
 const url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`);
 await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url);
-toast(type==="avatar"?"Profile picture updated":"Cover photo updated");
+toast(type==="avatar"?"Profile picture updated":"Cover photo updated");if(type==="cover")openCoverEditor();
 }catch(err){
 console.error("[SPIKE PROFILE MEDIA]",err);
 toast(err.message||"Image upload failed");
@@ -459,8 +507,47 @@ function renderMediaGallery(){
   }).join("");
 }
 function render(){renderMediaGallery();$("postCount").textContent=state.posts.length;renderFeatures();$("followerCount").textContent=state.followers;$("followingCount").textContent=Array.isArray(state.profile.following)?state.profile.following.length:Number(state.profile.following_count||0)}
-function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc(n[0]||"U");const c=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(c){$("coverImg").src=c;$("coverImg").classList.remove("hidden")}const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.min(100,Math.max(1,Number(p.level||1))),defs=state.levelDefinitions||[],currentDef=defs.find(d=>Number(d.level)===level)||null,nextDef=defs.find(d=>Number(d.level)===level+1)||null;const currentXp=Number(currentDef?.xp_required??0),nextXp=Number(nextDef?.xp_required??currentXp+1),progress=level>=100?100:Math.max(0,Math.min(100,Math.round(((xp-currentXp)/Math.max(1,nextXp-currentXp))*100)));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=level>=100?"MAX LEVEL":`${Math.max(0,nextXp-xp).toLocaleString()} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";const ranks=["Newcomer","Explorer","Connector","Contributor","Influencer","Elite","Leader","Pioneer","Trailblazer","SPIKE Legend"],rankIndex=Math.min(9,Math.floor((level-1)/10));$("levelRank").textContent=`${ranks[rankIndex]} · Levels ${rankIndex*10+1}–${rankIndex*10+10}`;const badgeFiles=['01-Newcomer-level-1-10.webp', '02-Exploer-level-11-20.webp', '03-Connector-level-21-30.webp', '04-Contributor-level-31-40.webp', '05-Influencer-level-41-50.webp', '06-elite-level-51-60.webp', '07-Leader-level-61-70.webp', '08-Pionner-level-71-80.webp', '09-trailblazer-level-81-90.webp', '10-spike-legend-level-91-100.webp'];const badge=badgeFiles[rankIndex]?`assets/badges/${badgeFiles[rankIndex]}`:"assets/badges/01-Newcomer-level-1-10.webp";$("levelBadge").src=badge;$("levelBadge").alt=`${ranks[rankIndex]} badge`;$("levelBadge").onclick=()=>location.href="leveling.html";$("levelBadge").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();location.href="leveling.html"}};$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
-function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverEdit").classList.toggle("hidden",!own);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
+function clamp(n,min,max){return Math.min(max,Math.max(min,n))}
+function coverStyle(c=state.cover){const x=clamp(Number(c.position_x||0),-40,40),y=clamp(Number(c.position_y||0),-40,40),z=clamp(Number(c.zoom||1),1,2.5);return `object-position:50% 50%;transform:translate3d(${x}%,${y}%,0) scale(${z});`}
+function applyCoverStyle(){const img=$("coverImg");if(img)img.style.cssText=coverStyle(state.cover)}
+async function loadCoverSettings(){
+  try{
+    const r=await db.rpc("get_public_cover_settings",{p_user_ids:[state.uid]});
+    if(r.error) throw r.error;
+    const row=Array.isArray(r.data)?r.data[0]:null;
+    if(row) state.cover={url:row.cover_url||"",position_x:Number(row.position_x||0),position_y:Number(row.position_y||0),zoom:Number(row.zoom||1),fit:row.fit||"cover"};
+  }catch(err){console.warn("[SPIKE COVER SETTINGS]",err?.message||err)}
+  const legacy=state.profile||{};
+  if(!state.cover.url) state.cover.url=legacy.cover_url||legacy.coverUrl||legacy.banner_url||legacy.banner||"";
+}
+function renderCover(){const c=state.cover||{};const img=$("coverImg"),gen=$("generatedCover");if(!img)return;const has=!!c.url;if(gen){gen.innerHTML=has?"":(window.SPIKE_IDENTITY?.coverMarkup?.(state.profile)||"");gen.setAttribute("aria-hidden",has?"true":"false")}if(has){img.src=c.url;img.classList.remove("hidden");applyCoverStyle()}else{img.removeAttribute("src");img.classList.add("hidden")};const own=state.uid===state.me.id;$("coverActions")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!has||!own)}
+function openCoverEditor(){
+  if(!state.cover?.url){toast("Add a cover photo first.","info");return}
+  const img=$("coverEditorImg");img.src=state.cover.url;$("coverZoom").value=Math.round(clamp(Number(state.cover.zoom||1),1,2.5)*100);$("coverZoomValue").textContent=$("coverZoom").value+"%";updateCoverEditorTransform();open("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","false")
+}
+function updateCoverEditorTransform(){const z=Number($("coverZoom")?.value||100)/100,x=clamp(Number(state.cover.position_x||0),-40,40),y=clamp(Number(state.cover.position_y||0),-40,40);const img=$("coverEditorImg");if(img)img.style.transform=`translate3d(${x}%,${y}%,0) scale(${z})`;if($("coverZoomValue"))$("coverZoomValue").textContent=Math.round(z*100)+"%"}
+function resetCoverEditor(){state.cover.position_x=0;state.cover.position_y=0;state.cover.zoom=1;$("coverZoom").value=100;updateCoverEditorTransform()}
+async function saveCoverSettings(){
+  const btn=$("coverEditorSave");if(btn)btn.disabled=true;
+  try{
+    const payload={p_cover_url:state.cover.url,p_position_x:clamp(Number(state.cover.position_x||0),-40,40),p_position_y:clamp(Number(state.cover.position_y||0),-40,40),p_zoom:clamp(Number(state.cover.zoom||1),1,2.5),p_fit:"cover"};
+    const r=await db.rpc("save_spike_cover_settings",payload);if(r.error)throw r.error;
+    state.cover={url:payload.p_cover_url,position_x:payload.p_position_x,position_y:payload.p_position_y,zoom:payload.p_zoom,fit:"cover"};
+    state.profile={...state.profile,cover_url:state.cover.url,cover_position_x:state.cover.position_x,cover_position_y:state.cover.position_y,cover_zoom:state.cover.zoom,cover_fit:"cover"};
+    renderCover();close("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","true");toast("Cover appearance saved","success");
+  }catch(err){console.error("[SPIKE COVER SAVE]",err);toast(err.message||"Could not save cover appearance.","error")}finally{if(btn)btn.disabled=false}
+}
+function initCoverEditor(){
+  $("coverZoom")?.addEventListener("input",()=>{state.cover.zoom=Number($("coverZoom").value)/100;updateCoverEditorTransform()});
+  $("coverReset")?.addEventListener("click",resetCoverEditor);$("coverEditorSave")?.addEventListener("click",saveCoverSettings);$("coverEditorClose")?.addEventListener("click",()=>{close("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","true")});$("coverEditorCancel")?.addEventListener("click",()=>{close("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","true")});
+  const area=$("coverEditorPreview");let drag=null;
+  area?.addEventListener("pointerdown",e=>{drag={id:e.pointerId,x:e.clientX,y:e.clientY,px:Number(state.cover.position_x||0),py:Number(state.cover.position_y||0)};area.classList.add("dragging");area.setPointerCapture?.(e.pointerId)});
+  area?.addEventListener("pointermove",e=>{if(!drag||drag.id!==e.pointerId)return;const rect=area.getBoundingClientRect();state.cover.position_x=clamp(drag.px+(e.clientX-drag.x)/rect.width*100,-40,40);state.cover.position_y=clamp(drag.py+(e.clientY-drag.y)/rect.height*100,-40,40);updateCoverEditorTransform()});
+  const end=()=>{drag=null;area.classList.remove("dragging")};area?.addEventListener("pointerup",end);area?.addEventListener("pointercancel",end);area?.addEventListener("wheel",e=>{e.preventDefault();state.cover.zoom=clamp(Number(state.cover.zoom||1)+(e.deltaY<0?.05:-.05),1,2.5);$("coverZoom").value=Math.round(state.cover.zoom*100);updateCoverEditorTransform()},{passive:false});
+  $("coverEditorOverlay")?.addEventListener("click",e=>{if(e.target.id==="coverEditorOverlay"){$("coverEditorCancel").click()}});
+}
+function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=window.SPIKE_IDENTITY?.avatarMarkup?.(p,"profile-avatar",n)|| (a?`<img src="${esc(a)}" alt="${esc(n)}" loading="lazy" decoding="async">`:esc(n[0]||"U"));renderCover();const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";const xp=Math.max(0,Number(p.xp||0)),level=Math.min(100,Math.max(1,Number(p.level||1))),defs=state.levelDefinitions||[],currentDef=defs.find(d=>Number(d.level)===level)||null,nextDef=defs.find(d=>Number(d.level)===level+1)||null;const currentXp=Number(currentDef?.xp_required??0),nextXp=Number(nextDef?.xp_required??currentXp+1),progress=level>=100?100:Math.max(0,Math.min(100,Math.round(((xp-currentXp)/Math.max(1,nextXp-currentXp))*100)));$("levelValue").textContent=`Level ${level}`;$("xpValue").textContent=`${xp.toLocaleString()} XP`;$("xpNext").textContent=level>=100?"MAX LEVEL":`${Math.max(0,nextXp-xp).toLocaleString()} XP to Level ${level+1}`;$("xpFill").style.width=progress+"%";const ranks=["Newcomer","Explorer","Connector","Contributor","Influencer","Elite","Leader","Pioneer","Trailblazer","SPIKE Legend"],rankIndex=Math.min(9,Math.floor((level-1)/10));$("levelRank").textContent=`${ranks[rankIndex]} · Levels ${rankIndex*10+1}–${rankIndex*10+10}`;const badgeFiles=['01-Newcomer-level-1-10.webp', '02-Exploer-level-11-20.webp', '03-Connector-level-21-30.webp', '04-Contributor-level-31-40.webp', '05-Influencer-level-41-50.webp', '06-elite-level-51-60.webp', '07-Leader-level-61-70.webp', '08-Pionner-level-71-80.webp', '09-trailblazer-level-81-90.webp', '10-spike-legend-level-91-100.webp'];const badge=badgeFiles[rankIndex]?`assets/badges/${badgeFiles[rankIndex]}`:"assets/badges/01-Newcomer-level-1-10.webp";$("levelBadge").src=badge;$("levelBadge").alt=`${ranks[rankIndex]} badge`;$("levelBadge").onclick=()=>location.href="leveling.html";$("levelBadge").onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();location.href="leveling.html"}};$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
+function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverActions")?.classList.toggle("hidden",!own);$("coverEdit")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!own||!state.cover?.url);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
 function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
 function syncProfileToFeed(action,active){
   const msg={id:String(state.uid),action,active:!!active,at:Date.now()};
@@ -481,7 +568,7 @@ async function toggleFollow(){
   syncProfileToFeed('follow',state.following);
   renderActions();render();
 }
-function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
+function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=state.cover?.url||p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
 async function saveProfile(e){
   e.preventDefault();
   const form=e.currentTarget;
@@ -502,7 +589,7 @@ async function saveProfile(e){
   try{
     const current=state.profile||{};
     let avatarUrl=$("editAvatar").value.trim()||avatarOf(current);
-    let coverUrl=$("editCover").value.trim()||(current.cover_url||current.coverUrl||current.banner_url||current.banner||"");
+    let coverUrl=$("editCover").value.trim()||(state.cover?.url||current.cover_url||current.coverUrl||current.banner_url||current.banner||"");
 
     if(avatarFile){
       toast("Uploading profile picture…");
@@ -574,6 +661,12 @@ async function saveProfile(e){
       updated_at:timestamp
     };
     await putDoc(`users/${state.me.id}`,userDoc,"users");
+    if(coverUrl){
+      const same=state.cover?.url===coverUrl;
+      const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:coverUrl,p_position_x:same?Number(state.cover.position_x||0):0,p_position_y:same?Number(state.cover.position_y||0):0,p_zoom:same?Number(state.cover.zoom||1):1,p_fit:"cover"});
+      if(cr.error) throw cr.error;
+      state.cover={url:coverUrl,position_x:same?Number(state.cover.position_x||0):0,position_y:same?Number(state.cover.position_y||0):0,zoom:same?Number(state.cover.zoom||1):1,fit:"cover"};
+    }
 
     state.profile={...state.profile,...next,verified:state.profile.verified===true};
     state.privacy={...(state.privacy||{}),...privacyPatch};
@@ -628,6 +721,8 @@ async function addComment(id,text){
 }
 
 function bind(){
+initCoverEditor();
+$("coverAdjust")?.addEventListener("click",e=>{e.stopPropagation();if(state.uid===state.me.id)openCoverEditor()});
 $("avatar").addEventListener("click",()=>state.uid===state.me.id&&openImagePicker("avatarFile"));
 $("coverEdit").addEventListener("click",e=>{e.stopPropagation();state.uid===state.me.id&&openImagePicker("coverFile")});
 $("coverArea").addEventListener("click",e=>{
@@ -715,7 +810,7 @@ async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader()
   const ownerView=state.uid===state.me.id;
   if($('showQr')) $('showQr').hidden=!ownerView;
   if($('copyProfile')) $('copyProfile').textContent=ownerView?'🔗 Copy profile link':'🔗 Share profile link';
-await loadProfile();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
+await loadProfile();await loadCoverSettings();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderCover();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
 
 // SPIKE Connect QR — scanner without flashlight.
 let qrStream=null,qrScanTimer=null,qrTargetUid=null,qrScanBusy=false,qrCanvas=null,qrCtx=null;
@@ -968,7 +1063,7 @@ else setTimeout(install,1500);
 <script src="js/telemetry.js" defer></script>
 <script src="js/spike-adaptive-nav.js" defer></script>
 <script src="js/spike-surface-controls.js"></script>
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
 </body>
-</html>
+</html><style id="spike-identity-profile-css">#generatedCover{position:absolute;inset:0;z-index:0}#generatedCover .spike-generated-cover{position:absolute;inset:0}.cover>img{position:relative;z-index:1}.cover-actions{z-index:4}.avatar .spike-generated-avatar,.avatar .profile-avatar{width:100%;height:100%;border-radius:50%}.profile-avatar .spike-id-mark{font-size:inherit}</style>
