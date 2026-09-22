@@ -1,5 +1,7 @@
 <!doctype html><html lang="en"><head><title>SPIKE Theme Browser Test</title><script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta charset="utf-8"><link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-native-select.css">
+    <link rel="stylesheet" href="css/spike-beauty-v1.css">
 </head><body>
 <button class="primary" id="p">Primary Action</button><a id="a" href="#">Accent Link</a><div class="card"><span class="muted">Muted text</span></div>
 <pre id="out"></pre><script>
@@ -10,4 +12,5 @@ const s=new URLSearchParams(location.search).get('t')||'1';document.documentElem
 requestAnimationFrame(()=>{const p=document.querySelector('#p'),a=document.querySelector('#a'),m=document.querySelector('.muted'),r=getComputedStyle(document.documentElement),pc=getComputedStyle(p),ac=getComputedStyle(a),mc=getComputedStyle(m);const pb=rgb(pc.backgroundColor),pt=rgb(pc.color),ab=rgb(ac.color),mb=rgb(mc.color),bg=rgb(getComputedStyle(document.body).backgroundColor);const out={theme:+s,actionBg:pc.backgroundImage,actionColor:pc.color,actionContrast:[...pc.backgroundImage.matchAll(/rgb\([^)]*\)|rgba\([^)]*\)/g)].map(x=>x[0]),linkColor:ac.color,muted:mc.color,body:bg};document.querySelector('#out').textContent=JSON.stringify(out);});
 </script><script src="js/spike-navigation.js"></script>
 <script src="js/theme.js"></script>
+<script defer src="js/spike-native-select.js"></script>
 </body></html>

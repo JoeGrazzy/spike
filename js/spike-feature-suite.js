@@ -205,9 +205,13 @@
     const q=$('featurePollQuestion')?.value.trim(); const options=($('featurePollOptions')?.value||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,8);
     if(!q || options.length<2) return toast('Add a question and at least two options','warning');
     try {
-      const row=await remoteInsert('spike_polls',{owner_id:uid(),question:q});
-      const rr=await (await requireDb()).from('spike_poll_options').insert(options.map((label,i)=>({poll_id:row.id,label,position:i}))); if(rr.error) throw rr.error;
-      await syncRemote(); renderPolls(featureState()); $('featurePollQuestion').value=''; $('featurePollOptions').value=''; toast('Poll created','success');
+      const c=await requireDb();
+      const {data,error}=await c.rpc('spike_create_poll',{p_question:q,p_options:options});
+      if(error) throw error;
+      if(!data?.id) throw new Error('Poll creation did not return an ID.');
+      await syncRemote(); renderPolls(featureState());
+      $('featurePollQuestion').value=''; $('featurePollOptions').value='';
+      toast('Poll created','success');
     } catch(e){ toast(e?.message||'Could not create Poll','error'); }
   }
 
@@ -215,9 +219,17 @@
     const title=$('featureSeriesTitle')?.value.trim(); const ids=($('featureSeriesPosts')?.value||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,30);
     if(!title) return toast('Enter a Series title','warning');
     try {
-      const row=await remoteInsert('spike_signal_series',{owner_id:uid(),title,description:$('featureSeriesDescription')?.value.trim()||''});
-      if(ids.length){const rr=await (await requireDb()).from('spike_series_items').insert(ids.map((postId,i)=>({series_id:row.id,post_id:postId,position:i,title:`Part ${i+1}`})));if(rr.error)throw rr.error;}
-      await syncRemote(); renderSeries(featureState()); ['featureSeriesTitle','featureSeriesDescription','featureSeriesPosts'].forEach(id=>{if($(id))$(id).value=''}); toast('Signal Series created','success');
+      const c=await requireDb();
+      const {data,error}=await c.rpc('spike_create_signal_series',{
+        p_title:title,
+        p_description:$('featureSeriesDescription')?.value.trim()||'',
+        p_post_ids:ids
+      });
+      if(error) throw error;
+      if(!data?.id) throw new Error('Signal Series creation did not return an ID.');
+      await syncRemote(); renderSeries(featureState());
+      ['featureSeriesTitle','featureSeriesDescription','featureSeriesPosts'].forEach(id=>{if($(id))$(id).value=''});
+      toast('Signal Series created','success');
     } catch(e){ toast(e?.message||'Could not create Signal Series','error'); }
   }
 

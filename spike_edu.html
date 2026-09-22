@@ -232,6 +232,8 @@ body{font-family:var(--spike-font,Inter,ui-sans-serif,system-ui,sans-serif)!impo
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-native-select.css">
+    <link rel="stylesheet" href="css/spike-beauty-v1.css">
 </head>
 <body data-spike-page="spike_edu"><div class="app">
 <header class="top"><div class="wrap nav"><a class="brand" href="spike_edu.html" aria-label="SPIKE EDU home"><span class="mark">S</span><span><strong>SPIKE EDU</strong><small>LEARN WITH PURPOSE</small></span></a><div class="links"><button class="active" onclick="go('home')">Home</button><button onclick="go('subjects')">Subjects</button><button onclick="go('library')">Library</button><button onclick="go('courses')">Courses</button></div><label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search courses, topics…" autocomplete="off"></label><button class="avatar" id="eduAvatar" type="button" aria-label="Student profile">ST</button></div></header>
@@ -276,4 +278,5 @@ $('courseSearch').addEventListener('input',renderCourses);$('catFilter').addEven
 
 <script>(function(){const a=document.getElementById('eduAvatar'),p=document.getElementById('readerProfile');if(a&&p){p.textContent=a.textContent.trim()||'S';}const s=document.getElementById('readerSearch');if(s)s.addEventListener('keydown',e=>{if(e.key==='Enter'){const q=s.value.trim();if(q)window.find?.(q)}})})();</script>
   <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script defer src="js/spike-native-select.js"></script>
 </body></html>

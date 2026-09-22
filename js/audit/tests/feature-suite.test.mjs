@@ -7,6 +7,7 @@ const js = await readFile('js/spike-feature-suite.js', 'utf8');
 const css = await readFile('css/spike-feature-suite.css', 'utf8');
 const migration = await readFile('supabase/migrations/20260911090000_spike_feature_suite_v1.sql', 'utf8');
 const migrationV2 = await readFile('supabase/migrations/20260922030000_spike_feature_suite_functionality_v2.sql', 'utf8');
+const completionMigration = await readFile('supabase/migrations/20260922040000_spike_feature_completion_pass_v1.sql', 'utf8');
 
 test('feature suite assets are present exactly once', () => {
   assert.equal((feed.match(/js\/spike-feature-suite\.js/g) || []).length, 1);
@@ -50,4 +51,8 @@ test('feature migration contains the required tables and protected RPCs', () => 
   assert.match(migration, /enable row level security/);
   assert.match(migrationV2, /spike_signal_collaboration_respond/);
   assert.match(migrationV2, /spike_polls_authenticated_select/);
+  assert.match(completionMigration, /create or replace function public\.spike_create_poll/);
+  assert.match(completionMigration, /create or replace function public\.spike_create_signal_series/);
+  assert.match(js, /rpc\('spike_create_poll'/);
+  assert.match(js, /rpc\('spike_create_signal_series'/);
 });

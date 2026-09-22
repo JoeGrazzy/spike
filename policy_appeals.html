@@ -13,6 +13,8 @@
 </style>  <link rel="stylesheet" href="css/spike-unified-v2.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-native-select.css">
+    <link rel="stylesheet" href="css/spike-beauty-v1.css">
 </head><body data-spike-page="policy_appeals">
 <header class="top"><div class="wrap topin"><a class="brand" href="feed.html"><span class="brandmark">S</span><span>SPIKE</span></a><div class="actions"><button class="btn" id="themeBtn" data-spike-theme-switch="1">Theme</button><a class="btn back" href="policy.html">Policy Center</a></div></div></header>
 <main class="wrap page"><section class="hero"><div class="eyebrow">POLICY ACCOUNT CENTER</div><h1>Enforcement & appeals</h1><p>Review automated SPIKE Policy actions, see the policy reference attached to each case, and submit one active appeal per enforcement case.</p></section>
@@ -30,4 +32,5 @@ function openAppeal(id){selected=cases.find(c=>String(c.id)===String(id));if(!se
 $('#cases').addEventListener('click',e=>{const b=e.target.closest('[data-appeal]');if(b)openAppeal(b.dataset.appeal)});$('#closeAppeal').onclick=()=>$('#appealPanel').hidden=true;$('#refreshCases').onclick=()=>load().catch(e=>{$('#caseStatus').textContent=e.message||'Could not load policy cases.'});$('#submitAppeal').onclick=async()=>{if(!selected)return;const reason=$('#appealReason').value.trim();if(reason.length<10){$('#appealStatus').textContent='Please provide at least 10 characters.';return}const b=$('#submitAppeal');b.disabled=true;try{const r=await sb.rpc('submit_spike_policy_appeal',{p_case_id:selected.id,p_reason:reason});if(r.error)throw r.error;$('#appealStatus').textContent='Appeal submitted.';$('#appealPanel').hidden=true;await load()}catch(e){$('#appealStatus').textContent=e.message||'Could not submit appeal.'}finally{b.disabled=false}};
 load().catch(e=>{$('#caseStatus').textContent=e.message||'Could not load policy cases.';$('#cases').innerHTML='<div class="empty" style="display:block;margin-top:10px">Could not load policy cases.</div>'});
 </script>  <script src="js/maintenance.js?v=20260914113000" defer></script>
+<script defer src="js/spike-native-select.js"></script>
 </body></html>

@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" data-page="live">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070914">
+<title>SPIKE — Live</title>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
+<script src="js/supabase-singleton.js"></script>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-live.css">
+<script defer src="js/theme.js"></script>
+
+<style id="live-menu-css">
+.live-menu{position:fixed;z-index:10050;top:calc(env(safe-area-inset-top,0px) + 68px);right:12px;width:min(360px,calc(100vw - 24px));padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(8,12,24,.98);box-shadow:0 24px 70px rgba(0,0,0,.5);backdrop-filter:blur(20px)}
+.live-menu[hidden]{display:none!important}.live-menu-head{display:flex;justify-content:space-between;align-items:center;padding:3px 3px 10px 5px}.live-menu-head strong{display:block;color:#fff;font-size:14px}.live-menu-head small{display:block;margin-top:3px;color:rgba(220,225,240,.58);font-size:9px}.live-menu-head button{width:32px;height:32px;border:0;border-radius:9px;background:rgba(255,255,255,.06);color:#fff;font-size:19px}.live-menu-list{display:grid;gap:7px}.live-menu-list button{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;text-align:left;gap:8px;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(255,255,255,.035);color:#fff}.live-menu-list button:hover,.live-menu-list button:focus-visible{background:rgba(145,86,255,.13);border-color:rgba(145,86,255,.35);outline:none}.live-menu-list button>span{font-size:21px;text-align:center}.live-menu-list b{display:block;font-size:11px}.live-menu-list small{display:block;margin-top:3px;color:rgba(220,225,240,.56);font-size:8px}.live-menu-list i{font-style:normal;font-size:20px;color:rgba(255,255,255,.45);text-align:right}
+@media(max-width:600px){.live-menu{top:calc(env(safe-area-inset-top,0px) + 62px);right:8px;width:calc(100vw - 16px)}}
+</style>
+<link rel="stylesheet" href="css/spike-native-select.css">
+<style id="live-menu-beautiful-v2">
+.live-menu{position:fixed!important;z-index:10050!important;top:calc(env(safe-area-inset-top,0px) + 68px)!important;right:12px!important;width:min(390px,calc(100vw - 24px))!important;max-height:min(82dvh,720px)!important;overflow:auto!important;padding:12px!important;border:1px solid rgba(148,163,184,.16)!important;border-radius:24px!important;background:radial-gradient(circle at 10% 0%,rgba(124,58,237,.18),transparent 35%),linear-gradient(180deg,rgba(17,24,42,.99),rgba(7,12,24,.99))!important;box-shadow:0 28px 90px rgba(0,0,0,.58),0 8px 36px rgba(99,102,241,.12)!important;backdrop-filter:blur(22px) saturate(120%)!important;-webkit-backdrop-filter:blur(22px) saturate(120%)!important}.live-menu-head{padding:3px 3px 12px!important;border-bottom:1px solid rgba(148,163,184,.10);margin-bottom:11px}.live-menu-head strong{font-size:16px!important}.live-menu-head small{font-size:9px!important;color:rgba(220,225,240,.58)!important}.live-menu-head button{width:36px!important;height:36px!important;border-radius:12px!important;border:1px solid rgba(148,163,184,.14)!important;background:rgba(255,255,255,.055)!important}.live-menu-list{display:grid!important;gap:8px!important}.live-menu-list button{min-height:60px!important;grid-template-columns:38px 1fr 20px!important;padding:10px!important;border:1px solid rgba(148,163,184,.11)!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;transition:.16s ease!important}.live-menu-list button:first-child{min-height:70px!important;border-color:rgba(244,63,94,.34)!important;background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(124,58,237,.12))!important;box-shadow:0 10px 28px rgba(239,68,68,.08)!important}.live-menu-list button:hover,.live-menu-list button:focus-visible{transform:translateY(-1px)!important;background:linear-gradient(145deg,rgba(99,102,241,.12),rgba(192,38,211,.07))!important;border-color:rgba(129,140,248,.36)!important;outline:none!important}.live-menu-list button:first-child>span{width:40px!important;height:40px!important;border-radius:13px!important;display:grid!important;place-items:center!important;background:linear-gradient(145deg,#ef4444,#be123c)!important;box-shadow:0 8px 20px rgba(239,68,68,.22)}.live-menu-list button>span{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(99,102,241,.11);font-size:18px!important}.live-menu-list button:nth-child(2)>span{background:rgba(59,130,246,.13)}.live-menu-list button:nth-child(3)>span{background:rgba(168,85,247,.13)}.live-menu-list button:nth-child(4)>span{background:rgba(20,184,166,.12)}.live-menu-list b{font-size:11px!important}.live-menu-list small{font-size:8px!important;color:rgba(220,225,240,.52)!important}.live-menu-list i{font-size:22px!important;color:rgba(255,255,255,.5)!important}@media(max-width:600px){.live-menu{top:calc(env(safe-area-inset-top,0px) + 62px)!important;right:8px!important;width:calc(100vw - 16px)!important;border-radius:22px!important}}
+</style>    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+</head>
+<body class="live-page">
+<main class="live-shell">
+  <header class="live-top">
+    <button class="live-back" id="backBtn" aria-label="Go back">‹</button>
+    <div class="live-brand"><span>SPIKE</span> LIVE</div>
+    <div class="live-spacer"></div>
+    <button class="live-icon" id="rankingBtn" aria-label="Open ranking packs">🏆</button><button class="live-icon" id="guestInboxBtn" aria-label="Guest requests">🎙</button>
+    <button class="live-icon" id="liveMenuBtn" aria-label="Open Live menu" aria-expanded="false" aria-controls="liveMenu">☰</button>
+  </header>
+
+  <section class="live-create-bar" aria-label="Start a Live">
+    <div><span class="live-create-kicker">CREATOR</span><strong>Ready to go live?</strong><small>Start a real-time broadcast with your camera or an external stream.</small></div>
+    <button class="live-primary live-create-cta" id="goLiveBtnPrimary" type="button">🔴 Start Live</button>
+  </section>
+
+  <div class="live-search"><b>⌕</b><input id="searchInput" type="search" placeholder="Search live topics, creators or conversations…" autocomplete="off"></div>
+  <nav class="live-tabs" id="liveTabs" aria-label="Live ranking views"></nav>
+
+  <section class="live-hero" id="heroSection"></section>
+
+  <section class="live-section" id="mainSections"></section>
+
+  <section class="live-section">
+    <div class="section-head"><div><h2>🏆 Live ranking packs</h2><p>Different ways to discover what matters right now.</p></div><button class="section-link" id="openAllRanks">See all</button></div>
+    <div class="rank-board" id="rankBoard"></div>
+  </section>
+
+  <section class="live-section">
+    <div class="section-head"><div><h2>📊 Live activity</h2><p>Real activity recorded across the Live streams currently visible.</p></div></div>
+    <div class="mission-grid" id="liveActivityGrid"></div>
+  </section>
+</main>
+<div class="live-menu" id="liveMenu" hidden aria-hidden="true">
+  <div class="live-menu-head"><div><strong>SPIKE Live</strong><small>Live controls and creator tools</small></div><button type="button" id="liveMenuClose" aria-label="Close Live menu">×</button></div>
+  <div class="live-menu-list" role="menu" aria-label="Live menu">
+    <button type="button" data-live-menu="start" role="menuitem"><span>🔴</span><div><b>Start Live</b><small>Start a real-time broadcast</small></div><i>›</i></button>
+    <button type="button" data-live-menu="guests" role="menuitem"><span>🎙</span><div><b>Guest requests</b><small>Manage people asking to join</small></div><i>›</i></button>
+    <button type="button" data-live-menu="ranking" role="menuitem"><span>🏆</span><div><b>Live rankings</b><small>Explore Live discovery views</small></div><i>›</i></button>
+    <button type="button" data-live-menu="feed" role="menuitem"><span>⌂</span><div><b>Back to Feed</b><small>Return to your SPIKE Feed</small></div><i>›</i></button>
+  </div>
+</div>
+
+<div class="sheet-wrap" id="watchSheet" role="dialog" aria-modal="true" aria-labelledby="watchTitle"><div class="live-sheet live-watch-sheet"><div class="sheet-head"><h2 id="watchTitle">🔴 Live</h2><button class="close-sheet" data-close="watchSheet">×</button></div><div class="live-watch-video-wrap"><video id="watchVideo" autoplay playsinline controls></video><div id="watchState" class="live-watch-state">Connecting…</div></div><div id="guestInviteBar" class="guest-invite-bar" hidden></div><div id="guestStage" class="guest-stage" hidden></div><div id="watchMeta" class="live-watch-meta"></div>
+<div class="live-audience-bar"><button class="live-audience-btn" id="sparkBtn">⚡ Spark <b id="sparkLiveCount">0</b></button><button class="live-audience-btn" id="momentBtn">🔥 Moment</button><button class="live-audience-btn" id="questionBtn">❓ Question</button></div>
+<div id="livePollPanel" class="live-poll-panel" hidden></div>
+<div id="hostAudienceControls" class="host-audience-controls" hidden><strong>🎛 Audience control</strong><button class="stream-action primary" id="createPollBtn">Create poll</button></div>
+<div id="liveControlRoom" class="live-control-room" hidden>
+  <div class="control-room-head"><strong>🎛 Creator Control Room</strong><span id="presenceCount">0 watching</span></div>
+  <div class="control-room-stats"><div><b id="controlSparkRate">0</b><span>Sparks</span></div><div><b id="controlChatRate">0</b><span>Chat</span></div><div><b id="controlQuestionCount">0</b><span>Questions</span></div><div><b id="controlMomentCount">0</b><span>Moments</span></div></div>
+  <div class="control-room-section"><div class="control-section-title">❓ Question queue</div><div id="questionQueue" class="question-queue"></div></div>
+  <div class="control-room-section"><div class="control-section-title">🔥 Moments</div><div id="momentList" class="moment-list"></div></div><div class="control-room-section"><div class="control-section-title">👥 Participants</div><div id="presenceList" class="presence-list"></div></div>
+  <div class="control-room-section"><div class="control-section-title">🛡 Moderation</div><div id="moderationList" class="moderation-list"><span>Choose a participant above to moderate.</span></div></div>
+</div>
+<div class="live-chat-panel">
+  <div class="chat-head"><strong>💬 Live chat</strong><span id="chatStatus">Connecting…</span></div>
+  <div id="chatMessages" class="chat-messages"></div>
+  <form id="chatForm" class="chat-form"><input id="chatInput" maxlength="500" autocomplete="off" placeholder="Say something…"><button class="live-primary" type="submit">Send</button></form>
+</div></div></div>
+
+<div class="sheet-wrap" id="goLiveSheet" role="dialog" aria-modal="true" aria-labelledby="goLiveTitle">
+  <div class="live-sheet"><div class="sheet-head"><h2 id="goLiveTitle">Start a SPIKE Live</h2><button class="close-sheet" data-close="goLiveSheet">×</button></div>
+    <form id="goLiveForm">
+      <div class="live-preview-wrap"><video id="hostPreview" autoplay muted playsinline></video><div class="live-preview-overlay"><span id="cameraState">Camera preview off</span><button type="button" class="live-icon" id="cameraBtn">Enable camera</button></div></div><div class="form-grid">
+        <div class="field full"><label>LIVE TITLE</label><input name="title" required minlength="3" maxlength="160" placeholder="What is happening?"/></div>
+        <div class="field full"><label>CATEGORY</label>
+  <input type="hidden" name="category" id="liveCategoryValue" value="Chat">
+  <button type="button" class="category-trigger" id="liveCategoryTrigger" aria-haspopup="dialog" aria-controls="categoryPickerSheet">
+    <span class="category-trigger-icon" id="liveCategoryIcon">💬</span>
+    <span class="category-trigger-copy"><b id="liveCategoryLabel">Chat</b><small id="liveCategoryHint">Choose the topic your Live is about</small></span>
+    <span class="category-trigger-chevron">›</span>
+  </button>
+</div>
+        <div class="field"><label>TAGS</label><input name="tags" placeholder="ai, debate, night"/></div>
+        <div class="field full"><label>DESCRIPTION</label><textarea name="description" maxlength="2000" placeholder="Tell people why they should join…"></textarea></div>
+        <div class="field full"><label>PLAYBACK URL (OPTIONAL — external stream fallback)</label><input name="playback_url" type="url" placeholder="https://…"/></div>
+        <div class="field"><label>GUESTS</label><select name="guest_open"><option value="true">Open for guests</option><option value="false">Host only</option></select></div>
+        <div class="field"><label>GUEST SLOTS</label><select name="guest_slots"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      </div>
+      <div class="sheet-actions"><button type="button" class="live-icon" data-close="goLiveSheet">Cancel</button><button class="live-primary" type="submit">Start Live</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="sheet-wrap category-picker-wrap" id="categoryPickerSheet" role="dialog" aria-modal="true" aria-labelledby="categoryPickerTitle">
+  <div class="live-sheet category-picker-sheet">
+    <div class="category-picker-grabber" aria-hidden="true"></div>
+    <div class="sheet-head category-picker-head">
+      <div><span class="category-picker-kicker">SPIKE LIVE</span><h2 id="categoryPickerTitle">Choose a category</h2><p>What are you going live with today?</p></div>
+      <button class="close-sheet" type="button" data-close="categoryPickerSheet" aria-label="Close category picker">×</button>
+    </div>
+    <div class="category-grid" id="categoryGrid" role="listbox" aria-label="Live categories">
+      <button type="button" class="category-option is-selected" data-category="Chat" data-icon="💬" role="option" aria-selected="true"><span class="category-option-icon">💬</span><span><b>Chat</b><small>Conversations</small></span><i>✓</i></button>
+      <button type="button" class="category-option" data-category="Debate" data-icon="🎙️" role="option" aria-selected="false"><span class="category-option-icon">🎙️</span><span><b>Debate</b><small>Ideas & opinions</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Music" data-icon="🎵" role="option" aria-selected="false"><span class="category-option-icon">🎵</span><span><b>Music</b><small>Performances</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Gaming" data-icon="🎮" role="option" aria-selected="false"><span class="category-option-icon">🎮</span><span><b>Gaming</b><small>Play & watch</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Education" data-icon="🎓" role="option" aria-selected="false"><span class="category-option-icon">🎓</span><span><b>Education</b><small>Learn together</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Technology" data-icon="💻" role="option" aria-selected="false"><span class="category-option-icon">💻</span><span><b>Technology</b><small>Tech & building</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Comedy" data-icon="😄" role="option" aria-selected="false"><span class="category-option-icon">😄</span><span><b>Comedy</b><small>Fun & laughs</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Business" data-icon="💼" role="option" aria-selected="false"><span class="category-option-icon">💼</span><span><b>Business</b><small>Work & growth</small></span><i>›</i></button>
+      <button type="button" class="category-option" data-category="Creative" data-icon="🎨" role="option" aria-selected="false"><span class="category-option-icon">🎨</span><span><b>Creative</b><small>Art & making</small></span><i>›</i></button>
+    </div>
+    <div class="category-picker-actions"><button type="button" class="live-primary category-confirm" id="categoryConfirmBtn">Continue <span>→</span></button><button type="button" class="category-cancel" data-close="categoryPickerSheet">Cancel</button></div>
+  </div>
+</div>
+
+<div class="sheet-wrap" id="rankingSheet" role="dialog" aria-modal="true" aria-labelledby="rankingTitle">
+  <div class="live-sheet"><div class="sheet-head"><h2 id="rankingTitle">SPIKE ranking engine</h2><button class="close-sheet" data-close="rankingSheet">×</button></div>
+    <p style="color:var(--live-muted);font-size:11px;line-height:1.5">SPIKE does not reduce Live discovery to viewer count. Each pack uses a different intent: relevance, momentum, participation, community, freshness and trust.</p>
+    <div class="ranking-pack" id="allRankingPacks"></div>
+  </div>
+</div>
+
+<div class="sheet-wrap" id="guestSheet" role="dialog" aria-modal="true" aria-labelledby="guestTitle">
+  <div class="live-sheet"><div class="sheet-head"><h2 id="guestTitle">🎙 Bring a guest</h2><button class="close-sheet" data-close="guestSheet">×</button></div>
+    <p id="guestSub" style="color:var(--live-muted);font-size:11px">Choose someone to invite into the live.</p>
+    <div class="ranking-pack" id="guestList"></div>
+  </div>
+</div>
+
+
+<div class="sheet-wrap" id="guestInboxSheet" role="dialog" aria-modal="true" aria-labelledby="guestInboxTitle"><div class="live-sheet"><div class="sheet-head"><h2 id="guestInboxTitle">🎙 Guest requests</h2><button class="close-sheet" data-close="guestInboxSheet">×</button></div><p style="color:var(--live-muted);font-size:11px">Accept or decline people asking to join your Live.</p><div class="ranking-pack" id="guestInboxList"></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="js/spike-live.js"></script>
+<script defer src="js/spike-native-select.js"></script>
+</body>
+</html>

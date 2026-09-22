@@ -1,0 +1,27 @@
+
+/* SPIKE Live bridge: Feed -> real Live broadcasts */
+.spike-feed-live{margin:12px 0 14px;padding:14px;overflow:hidden}
+.spike-feed-live-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:11px}
+.spike-feed-live-kicker{display:block;font-size:8px;font-weight:950;letter-spacing:.16em;color:#ef4444}
+.spike-feed-live-head h2{margin:2px 0 2px;font-size:17px}
+.spike-feed-live-head p{margin:0;color:var(--muted);font-size:10px}
+.spike-feed-live-all{white-space:nowrap;font-size:10px;font-weight:900;color:var(--text);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:rgba(255,255,255,.04)}
+.spike-feed-live-list{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.spike-feed-live-list::-webkit-scrollbar{display:none}
+.spike-feed-live-card{flex:0 0 min(285px,82vw);display:flex;align-items:center;gap:9px;padding:9px;border:1px solid var(--line);border-radius:15px;background:rgba(255,255,255,.035);color:var(--text);text-decoration:none;min-width:0}
+.spike-feed-live-card:hover{background:rgba(255,255,255,.065);transform:translateY(-1px)}
+.spike-feed-live-avatar{position:relative;width:42px;height:42px;min-width:42px;border-radius:13px;display:grid;place-items:center;overflow:visible;background:rgba(255,255,255,.08)}
+.spike-feed-live-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.spike-feed-live-avatar i{position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid var(--surface,#101116);box-shadow:0 0 0 3px rgba(239,68,68,.13)}
+.spike-feed-live-copy{min-width:0;display:grid;gap:2px;flex:1}
+.spike-feed-live-copy strong,.spike-feed-live-copy b,.spike-feed-live-copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spike-feed-live-copy strong{font-size:10px}
+.spike-feed-live-copy b{font-size:11px}
+.spike-feed-live-copy span{font-size:8px;color:var(--muted)}
+.spike-feed-live-join{font-size:8px;font-weight:950;border-radius:9px;padding:7px 8px;background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.22)}
+@media(max-width:600px){.spike-feed-live{margin:9px 0 11px;padding:11px}.spike-feed-live-head h2{font-size:15px}.spike-feed-live-card{flex-basis:82vw}}
+
+/* Clear creator entry point in the existing header menu. */
+.menu-go-live{display:grid;grid-template-columns:34px 1fr;align-items:center;gap:8px;text-decoration:none;color:inherit;padding:12px;border:1px solid rgba(255,70,90,.28);border-radius:14px;background:rgba(255,70,90,.08)}
+.menu-go-live span{font-size:21px;text-align:center}.menu-go-live strong,.menu-go-live small{display:block}.menu-go-live small{margin-top:3px;opacity:.62;font-size:10px}
+.menu-go-live:hover,.menu-go-live:focus-visible{background:rgba(255,70,90,.14);outline:none}

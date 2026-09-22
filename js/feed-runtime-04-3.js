@@ -205,7 +205,9 @@ function showProfileActions(id, relationship, name){
   items.push(['⚠️','Report',()=>run(async()=>{
     const reason=await window.SPIKEPremiumDialog.input({title:`Report ${name}`,message:'Please enter a reason for review.',placeholder:'Reason…',value:'',confirmText:'Submit report',cancelText:'Cancel',kicker:'SPIKE SAFETY',maxLength:500});
     if(!reason||!reason.trim()) return;
-    toast('User reporting is not available in the current Supabase schema.','warning');
+    const r=await db.from('spike_abuse_cases').insert({reporter_id:state.user.id,subject_user_id:id,source:'profile',source_id:String(id),category:'user_report',details:reason.trim(),status:'open',severity:1});
+    if(r.error) throw r.error;
+    toast('Report submitted for review','success');
   })]);
 
   b.innerHTML=items.map((x,i)=>`<button type="button" data-action-index="${i}" class="${/Unfriend|Block|Report/.test(x[1])?'danger':''}">${x[0]}&nbsp; ${esc(x[1])}</button>`).join('');
@@ -490,6 +492,7 @@ function bindEvents() {
   bindClick('closeAnnouncement', () => { $('announcement')?.classList.remove('show'); sessionStorage.setItem('spikeAnnouncementClosed', '1'); });
 
   // Menu items
+  $('menuGoLive')?.addEventListener('click', () => { closeOverlay('menuOverlay'); });
   bindClick('menuProfile', () => go(profileLink(state.user.id)));
   bindClick('menuFriends', () => go('friends.html'));
   bindClick('menuMessages', () => go('messages.html'));
