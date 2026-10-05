@@ -194,6 +194,7 @@ video{contain:layout paint}
 <link rel="stylesheet" href="css/spike-native-select.css">
     <link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
+  
 </head>
 <body data-spike-page="admin">
 
@@ -983,6 +984,8 @@ async function loadPolicyTerms(){const box=document.getElementById('policyTermsL
 if(document.getElementById('policyTermsList')){document.getElementById('refreshPolicyTerms')?.addEventListener('click',()=>loadPolicyTerms().catch(e=>toast(e.message)));document.getElementById('addPolicyTerm')?.addEventListener('click',async()=>{try{const r=await safeRpc('admin_spike_policy_term_upsert',{p_policy_id:document.getElementById('policyTermPolicy').value.trim(),p_term:document.getElementById('policyTermText').value.trim(),p_match_mode:document.getElementById('policyTermMatch').value,p_severity:document.getElementById('policyTermSeverity').value,p_enforcement:document.getElementById('policyTermEnforcement').value,p_enabled:true,p_locale:document.getElementById('policyTermLocale').value.trim()||'und',p_notes:document.getElementById('policyTermNotes').value.trim()||null});if(r.error)throw r.error;toast('Governed term added');document.getElementById('policyTermText').value='';document.getElementById('policyTermNotes').value='';loadPolicyTerms()}catch(e){toast(e.message)}});document.getElementById('policyTermsList').addEventListener('click',async e=>{const b=e.target.closest('[data-policy-term-delete]');if(!b)return;try{const r=await safeRpc('admin_spike_policy_term_delete',{p_id:b.dataset.policyTermDelete});if(r.error)throw r.error;toast('Governed term deleted');loadPolicyTerms()}catch(err){toast(err.message)}})}
 </script>
 <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
 <script defer src="js/spike-native-select.js"></script>
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+<link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 </body></html>

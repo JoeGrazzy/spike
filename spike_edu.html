@@ -8,6 +8,7 @@
 <script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n===6||n===8;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script><meta name="description" content="SPIKE EDU — learn, practise and master what matters next."><title>SPIKE EDU</title>
 <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-singleton.js"></script>
 <script>
@@ -85,7 +86,7 @@ main{padding:28px 0 40px}.hero{display:grid;grid-template-columns:minmax(0,1.45f
 #lessonModal .sheet-head{position:sticky;top:0;z-index:5;flex:0 0 auto;padding:18px 24px;border-bottom:1px solid var(--line);background:var(--edu-surface,#fff);}
 #lessonModal .sheet-head h2{font-size:24px;}
 #lessonModal .lesson-layout{flex:1;min-height:0;overflow:hidden;display:grid;grid-template-columns:280px minmax(0,1fr);gap:0;margin:0;}
-#lessonModal .lesson-nav{overflow:auto;padding:20px;border-right:1px solid var(--line);background:var(--edu-surface-2,#f8f9fb);}
+#lessonModal .lesson-nav{overflow:auto;padding:20px;border-right:1px solid var(--line);background:var(--edu-surface2,#f8f9fb);}
 #lessonModal .lesson-content{overflow:auto;border-left:0;padding:30px clamp(22px,5vw,72px) 70px;scroll-behavior:smooth;}
 #lessonModal .textbook-page{max-width:820px;font-size:16px;line-height:1.85;}
 #lessonModal .textbook-page h2{font-size:32px;}
@@ -235,6 +236,7 @@ body{font-family:var(--spike-font,Inter,ui-sans-serif,system-ui,sans-serif)!impo
 <link rel="stylesheet" href="css/spike-native-select.css">
     <link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
+  
 </head>
 <body data-spike-page="spike_edu"><div class="app">
 <header class="top"><div class="wrap nav"><a class="brand" href="spike_edu.html" aria-label="SPIKE EDU home"><span class="mark">S</span><span><strong>SPIKE EDU</strong><small>LEARN WITH PURPOSE</small></span></a><div class="links"><button class="active" onclick="go('home')">Home</button><button onclick="go('subjects')">Subjects</button><button onclick="go('library')">Library</button><button onclick="go('courses')">Courses</button></div><label class="search"><span>⌕</span><input id="globalSearch" placeholder="Search courses, topics…" autocomplete="off"></label><button class="avatar" id="eduAvatar" type="button" aria-label="Student profile">ST</button></div></header>
@@ -281,4 +283,5 @@ $('courseSearch').addEventListener('input',renderCourses);$('catFilter').addEven
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script defer src="js/spike-native-select.js"></script>
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+<link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 </body></html>

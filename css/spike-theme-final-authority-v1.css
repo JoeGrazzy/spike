@@ -1,0 +1,287 @@
+/* SPIKE Theme Final Authority V1
+   One palette authority after all page-local visual layers.
+   Themes may change palette/material/atmosphere; they do not change product geometry.
+*/
+html[data-spike-style] {
+  /* Compatibility aliases: legacy/page-local systems must consume the canonical theme. */
+  --solid:var(--spike-surface);
+  --spk-bg:var(--spike-bg);
+  --spk-bg-2:var(--spike-surface-2);
+  --spk-surface:var(--spike-surface);
+  --spk-surface-2:var(--spike-surface-2);
+  --spk-border:var(--spike-line);
+  --spk-border-strong:color-mix(in srgb,var(--spike-accent) 42%,var(--spike-line));
+  --spk-text:var(--spike-text);
+  --spk-muted:var(--spike-muted);
+  --spk-dim:color-mix(in srgb,var(--spike-muted) 72%,var(--spike-bg));
+  --spk-purple:var(--spike-accent);
+  --spk-pink:var(--spike-accent-2);
+  --spk-blue:var(--spike-accent-2);
+  --spk-cyan:var(--spike-accent);
+  --spk-success:#22c55e;
+  --spk-warning:#f59e0b;
+  --spk-danger:#ef476f;
+  --spk-radius:var(--spike-radius);
+  --spk-radius-sm:var(--spike-control-radius);
+  --spk-shadow:var(--spike-shadow);
+  /* Older Unified UI aliases. */
+  --sp-bg:var(--spike-bg);
+  --sp-surface:var(--spike-surface);
+  --sp-surface-2:var(--spike-surface-2);
+  --sp-surface-3:var(--spike-surface-3);
+  --sp-border:var(--spike-line);
+  --sp-border-strong:color-mix(in srgb,var(--spike-accent) 42%,var(--spike-line));
+  --sp-text:var(--spike-text);
+  --sp-muted:var(--spike-muted);
+  --sp-accent:var(--spike-accent);
+  --sp-accent-2:var(--spike-accent-2);
+  --sp-success:#22c55e;
+  --sp-danger:#ef476f;
+  --sp-radius:var(--spike-radius);
+  --sp-radius-sm:var(--spike-control-radius);
+  --sp-shadow:var(--spike-shadow);
+}
+
+/* Canonical document surface. */
+html[data-spike-style],
+html[data-spike-style] body {
+  background-color:var(--spike-bg)!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] body[data-spike-page],
+html[data-spike-style] body.spike-profile-page,
+html[data-spike-style] body.spike-view-user-page,
+html[data-spike-style] body.messages-page,
+html[data-spike-style] body.live-page,
+html[data-spike-style] body.legal-page {
+  background-image:var(--spike-body-image)!important;
+  color:var(--spike-text)!important;
+}
+
+/* The Beauty layer previously carried a fixed dark palette. Make its surfaces theme-owned. */
+html[data-spike-style] .header,
+html[data-spike-style] .topbar,
+html[data-spike-style] .app-header,
+html[data-spike-style] .site-header,
+html[data-spike-style] .page-header,
+html[data-spike-style] .room-header,
+html[data-spike-style] .messages-header {
+  background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;
+  color:var(--spike-text)!important;
+  border-bottom-color:var(--spike-line)!important;
+}
+html[data-spike-style] .brand-title,
+html[data-spike-style] .logo-text,
+html[data-spike-style] .page-title,
+html[data-spike-style] .hero-title {
+  background:linear-gradient(100deg,var(--spike-text) 15%,var(--spike-accent) 52%,var(--spike-accent-2) 92%)!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  color:transparent!important;
+}
+html[data-spike-style] .primary,
+html[data-spike-style] .btn.primary,
+html[data-spike-style] .action.primary {
+  background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;
+  color:var(--spike-action-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .secondary,
+html[data-spike-style] .btn:not(.primary),
+html[data-spike-style] .action:not(.primary) {
+  background:var(--spike-surface-2)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .card,
+html[data-spike-style] .panel,
+html[data-spike-style] .surface,
+html[data-spike-style] .item,
+html[data-spike-style] .tile,
+html[data-spike-style] .feature-card,
+html[data-spike-style] .section-card,
+html[data-spike-style] .settings-card,
+html[data-spike-style] .auth-card,
+html[data-spike-style] .profile-card,
+html[data-spike-style] .room-card,
+html[data-spike-style] .conversation-card,
+html[data-spike-style] .notification-card,
+html[data-spike-style] .stat-card,
+html[data-spike-style] .modal-card {
+  background:var(--spike-surface)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+  box-shadow:var(--spike-shadow)!important;
+}
+html[data-spike-style] .muted,
+html[data-spike-style] .mini,
+html[data-spike-style] .hint,
+html[data-spike-style] .field-hint,
+html[data-spike-style] .subtle,
+html[data-spike-style] .description,
+html[data-spike-style] .subtitle {
+  color:var(--spike-muted)!important;
+}
+html[data-spike-style] .eyebrow,
+html[data-spike-style] .overline,
+html[data-spike-style] .section-label {
+  color:var(--spike-accent)!important;
+}
+html[data-spike-style] .pill,
+html[data-spike-style] .badge,
+html[data-spike-style] .tag,
+html[data-spike-style] .chip {
+  background:color-mix(in srgb,var(--spike-accent) 10%,var(--spike-surface-2))!important;
+  border-color:var(--spike-line)!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] .empty {
+  background:color-mix(in srgb,var(--spike-surface-2) 88%,transparent)!important;
+  border-color:var(--spike-line)!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] .toast,
+html[data-spike-style] .notice,
+html[data-spike-style] .alert,
+html[data-spike-style] .snackbar {
+  background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;
+  border-color:var(--spike-line)!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] .auth-card {
+  background:var(--spike-surface)!important;
+}
+html[data-spike-style] .tab.active {
+  background:color-mix(in srgb,var(--spike-accent) 18%,var(--spike-surface-2))!important;
+  color:var(--spike-text)!important;
+  border-color:color-mix(in srgb,var(--spike-accent) 36%,var(--spike-line))!important;
+}
+html[data-spike-style] input,
+html[data-spike-style] textarea,
+html[data-spike-style] select,
+html[data-spike-style] .control {
+  background:var(--spike-surface-2)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] input::placeholder,
+html[data-spike-style] textarea::placeholder {
+  color:var(--spike-muted)!important;
+}
+
+/* Message page: remove the old fixed-dark Beauty authority from chat surfaces. */
+html[data-spike-style] .chat-head,
+html[data-spike-style] .composer,
+html[data-spike-style] .chat,
+html[data-spike-style] .chat-view {
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] .chat-head,
+html[data-spike-style] .composer {
+  background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .message,
+html[data-spike-style] .bubble {
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .bubble:not(.mine) {
+  background:var(--spike-surface-2)!important;
+}
+html[data-spike-style] .bubble.mine {
+  background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;
+  color:#fff!important;
+}
+html[data-spike-style] .icon,
+html[data-spike-style] .icon-btn,
+html[data-spike-style] .iconbtn,
+html[data-spike-style] .back,
+html[data-spike-style] .header-btn {
+  background:var(--spike-surface-2)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .icon:hover,
+html[data-spike-style] .icon:focus-visible,
+html[data-spike-style] .icon-btn:hover,
+html[data-spike-style] .icon-btn:focus-visible {
+  background:color-mix(in srgb,var(--spike-accent) 14%,var(--spike-surface-2))!important;
+  color:var(--spike-text)!important;
+}
+
+/* Message options: the menu is a theme consumer, not a separate palette. */
+html[data-spike-style] #context.context {
+  background:var(--spike-surface-2)!important;
+  background-color:var(--spike-surface-2)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+  box-shadow:var(--spike-shadow)!important;
+}
+html[data-spike-style] #context.context button {
+  background:transparent!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] #context.context button:hover,
+html[data-spike-style] #context.context button:focus-visible {
+  background:color-mix(in srgb,var(--spike-accent) 14%,var(--spike-surface-2))!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style] #context.context button i {
+  color:var(--spike-accent)!important;
+}
+html[data-spike-style] #context.context .danger,
+html[data-spike-style] #context.context .danger i {
+  color:#ff5d78!important;
+}
+
+/* Feature/navigation surfaces must follow the same theme contract. */
+html[data-spike-style] .features-menu,
+html[data-spike-style] .spike-smart-nav,
+html[data-spike-style] .spike-feature-hub,
+html[data-spike-style] .spike-surface-sheet,
+html[data-spike-style] .spike-menu-v3 .spike-menu-sheet {
+  background:var(--spike-surface)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+  box-shadow:var(--spike-shadow)!important;
+}
+html[data-spike-style] .feature-item,
+html[data-spike-style] .spike-smart-nav-grid button,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid button,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a {
+  background:var(--theme-surface-soft)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style] .feature-item:hover,
+html[data-spike-style] .feature-item:focus-visible,
+html[data-spike-style] .spike-smart-nav-grid button:hover,
+html[data-spike-style] .spike-smart-nav-grid button:focus-visible {
+  background:var(--theme-accent-soft)!important;
+  border-color:var(--theme-accent-line)!important;
+}
+html[data-spike-style] .bottom-nav,
+html[data-spike-style] .spike-bottom-nav,
+html[data-spike-style] .nav,
+html[data-spike-style] .sidebar {
+  background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+
+/* The final-polish header must not hard-code black/white/Georgia. */
+html[data-spike-style] .header .brand-title,
+html[data-spike-style] .header .brand-subtitle {
+  font-family:var(--spike-font)!important;
+}
+html[data-spike-style] .header .brand-title {
+  color:var(--spike-text)!important;
+  background:none!important;
+  -webkit-text-fill-color:initial!important;
+  text-shadow:none!important;
+}
+html[data-spike-style] .header .brand-subtitle { color:var(--spike-muted)!important; }
+
+/* Keep real media stages neutral; they are content, not theme surfaces. */
+html[data-spike-style] .call-video-wrap { background:#05060b!important; }

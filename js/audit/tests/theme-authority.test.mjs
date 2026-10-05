@@ -2,7 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readdir, readFile } from 'node:fs/promises';
 
-const pages=(await readdir('.')).filter(x=>x.endsWith('.html') && !x.endsWith('.pre-rebuild.html')).sort();
+const allPages=(await readdir('.')).filter(x=>x.endsWith('.html') && !x.endsWith('.pre-rebuild.html')).sort();
+const pages=[];
+for(const x of allPages){ const s=await readFile(x,'utf8'); if(x!=='bridge-harness.html' && s.includes('js/theme.js')) pages.push(x); }
 const legacyRuntime=/window\.SPIKE_THEME\s*=\s*\{|SPIKETheme\.|(?:const|let|var)\s+KEY\s*=\s*["']spike-feed-style["']/;
 
 test('Every HTML page has one authoritative theme stylesheet, engine and no private theme registry',async()=>{

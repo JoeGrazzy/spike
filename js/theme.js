@@ -27,6 +27,12 @@
     root.style.setProperty('--spike-theme-id',String(n));
     root.style.colorScheme=theme.mode;
     root.style.setProperty('--spike-style',String(n));
+    // Keep browser chrome/theme-color synchronized with the canonical palette.
+    try{
+      const bg=getComputedStyle(root).getPropertyValue('--spike-bg').trim();
+      const meta=document.querySelector('meta[name="theme-color"]');
+      if(meta && bg) meta.setAttribute('content',bg);
+    }catch(_){}
     window.__SPIKE_STYLE__=n;
     if(persist){try{localStorage.setItem(KEY,String(n));localStorage.setItem('spike-theme',theme.mode);}catch(_) {}}
     document.dispatchEvent(new CustomEvent('spike:theme-change',{detail:{id:n,name:theme.name,mode:theme.mode}}));
