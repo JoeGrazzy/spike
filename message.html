@@ -873,7 +873,7 @@ function setVoicePanel(show){toggleClass('voiceRecordPanel','show',show);toggleC
 function updateVoiceTimer(){if(!recordingStartedAt)return;$('voiceRecTime').textContent=new Date(Date.now()-recordingStartedAt).toISOString().slice(14,19)}
 async function toggleRecording(){
  if(!active)return toast('Choose a friend first');
- if(recording){stopVoiceRecording(false);return}
+ if(recording){stopVoiceRecording(false,true);return}
  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder)return toast('Voice notes are not supported in this browser');
  try{
   recordingMime=voiceMime();
