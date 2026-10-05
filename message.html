@@ -723,6 +723,21 @@ function mergeProfile(id,...parts){const out={id:id||'',user_id:id||''};for(cons
 async function profilesFor(ids){ids=[...new Set(ids.filter(Boolean))];if(!ids.length)return new Map();const {data,error}=await sb.rpc('get_public_profiles',{p_user_ids:ids});if(error)throw error;return new Map((data||[]).map(x=>[x.id,x]))}
 async function ensureProfile(id,p={}){if(!id)return normalizeProfile(id,p);const c=spikeProfileCache.get(id);if(c)return mergeProfile(id,c,p);const base=mergeProfile(id,p);try{const map=await profilesFor([id]);const out=mergeProfile(id,base,map.get(id));if(out.id)spikeProfileCache.set(id,out);return out}catch(e){return base}}
 async function hydrateThreads(){const ids=[...new Set(threads.map(x=>x.user_id||x.other_user_id).filter(id=>id&&id!==me?.id))];const friendMap=new Map((friends||[]).map(f=>[f.user_id||f.id,f]));const p=await profilesFor(ids);threads=threads.map(t=>{const id=t.user_id||t.other_user_id;const merged=mergeProfile(id,p.get(id),friendMap.get(id),t.profile,t);return {...t,user_id:id,other_user_id:id,profile:merged,muted:!!t.muted,archived:!!t.archived,pinned:!!t.pinned}});const seen=new Set();threads=threads.filter(t=>t.user_id&&!seen.has(t.user_id)&&seen.add(t.user_id));window.AppPresence?.watch(ids)}
+function updateThread(message){
+  if(!message?.id)return;
+  const other=message.sender_id===me?.id?message.recipient_id:message.sender_id;
+  if(!other)return;
+  let t=threads.find(x=>x.user_id===other);
+  if(!t){
+    const profile=friends.find(x=>(x.user_id||x.id)===other)||{id:other,user_id:other};
+    t={user_id:other,other_user_id:other,profile:normalizeProfile(other,profile),latest:null,unread:0,muted:false,archived:false,pinned:false};
+    threads.push(t);
+  }
+  const previous=t.latest;
+  if(!previous||new Date(message.created_at||0)>=new Date(previous.created_at||0))t.latest={...message};
+  if(message.sender_id!==me?.id&&other!==active)t.unread=(t.unread||0)+1;
+  renderThreads();
+}
 function threadPreview(t){const m=t.latest||{};if(m.deleted_at)return'Message deleted';if(m.message_type&&m.message_type!=='text')return({image:'Photo',video:'Video',audio:'Voice message',voice:'Voice message',file:'File'}[m.message_type]||'Attachment');return m.body||'No messages yet'}
 async function loadSavedMessageIds(){savedMessageIds=new Set();if(!me)return;const {data,error}=await sb.from('private_message_favorites').select('message_id').eq('user_id',me.id);if(error){console.warn('saved messages unavailable',error);return}const ids=(data||[]).map(x=>x.message_id).filter(Boolean);if(!ids.length)return;const {data:rows,error:e2}=await sb.from('private_messages').select('id,sender_id,recipient_id').in('id',ids);if(e2){console.warn('saved message lookup unavailable',e2);return}savedMessageIds=new Set(ids);const byUser=new Set((rows||[]).flatMap(m=>[m.sender_id,m.recipient_id]).filter(id=>id&&id!==me.id));threads.forEach(t=>{t.saved=byUser.has(t.user_id)})}
 function renderThreads(){const q=$('threadSearch').value.trim().toLowerCase();let rows=[];
@@ -909,7 +924,16 @@ async function sendVoiceNote(){
   const uploaded=await uploadToSupabaseDmStorage(file); uploadedPath=uploaded.path; const mediaUrl=uploaded.signedUrl;
   const {data,error}=await sb.from('private_messages').insert({sender_id:me.id,recipient_id:active,body:'Voice message',message_type:'audio',media_path:uploaded.path,media_mime_type:(mime.split(';',1)[0]||'audio/webm').trim(),voice_duration_seconds:duration,read:false}).select().single();if(error)throw error;
   const att=await sb.from('private_message_attachments').insert({message_id:data.id,uploader_id:me.id,storage_path:uploaded.path,file_name:`voice.${ext}`,mime_type:(mime.split(';',1)[0]||'audio/webm').trim(),file_size:voiceBlob.size});if(att.error)console.warn('voice attachment row',att.error);
-  data.media_url=mediaUrl;upsertMessage(data);updateThread(data);renderMessages({stickBottom:true});toast('Voice note sent');cleanupRecording(true);
+  data.media_url=mediaUrl;
+  cleanupRecording(true);
+  try{
+    upsertMessage(data);
+    updateThread(data);
+    renderMessages({stickBottom:true});
+  }catch(uiError){
+    console.warn('voice message UI update failed after successful send',uiError);
+  }
+  toast('Voice note sent');
  }catch(e){
   if(uploadedPath){try{await sb.storage.from('dm-media').remove([uploadedPath])}catch(cleanupError){console.warn('voice orphan cleanup failed',cleanupError)}}
   console.error('voice upload',e);toast(e?.message||'Could not send voice note');

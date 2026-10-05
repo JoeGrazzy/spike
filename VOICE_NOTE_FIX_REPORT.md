@@ -1,46 +1,82 @@
-# SPIKE Voice Note Fix — v1.0
+# SPIKE Voice Note Fix — v1.2
 
-## Root cause
-The active-recording stop branch in `message.html` and `messages.html` called:
+## Current issue traced
+After a voice note was successfully inserted into Supabase and rendered in the conversation, the composer still showed the recorded preview and its Send button. This allowed the same voice blob to be sent again.
 
-`stopVoiceRecording(false)`
+## Exact root cause
+The voice send path called `updateThread(data)` after the `private_messages` insert, but neither `message.html` nor `messages.html` defined an `updateThread()` function anywhere in the package.
 
-That explicitly left `autoSend` disabled. The existing recorder finalization and Supabase send pipeline already supported automatic sending, but the normal stop interaction never entered it.
+Therefore the actual runtime chain was:
+
+UI Send → MediaRecorder stop → final Blob → storage upload → `private_messages` INSERT succeeds → `upsertMessage()` succeeds → **`updateThread(data)` throws `ReferenceError: updateThread is not defined`** → execution jumps to `catch` → `cleanupRecording(true)` is never reached.
+
+The database row could therefore exist and appear in the conversation while the composer preview remained alive. A subsequent tap of the still-visible Send button could submit the same `voiceBlob` again.
+
+This matches the supplied screenshot: sent voice messages are visible while the voice preview/Send control remains in the composer.
 
 ## Fix
-The active-recording branch now calls:
+Added the missing authoritative `updateThread(message)` state updater to both message surfaces.
 
-`stopVoiceRecording(false, true)`
+It:
+- resolves the other participant from sender/recipient IDs;
+- updates the existing conversation's latest message;
+- creates a missing thread state when necessary;
+- updates unread state for incoming messages outside the active conversation;
+- re-renders the thread list.
 
-This preserves the existing pipeline:
+The voice-send success ordering was also corrected:
 
-Record → MediaRecorder.stop() → final audio chunk → Blob → normalized MIME → `dm-media` upload → `private_messages` insert → attachment insert → renderer/update.
+`private_messages` INSERT → attachment INSERT → **clear voice preview/state** → non-critical local renderer/thread updates → success toast.
+
+The preview is therefore cleared immediately after successful persistence and cannot remain as a reusable send payload because of a secondary UI-rendering failure.
 
 ## Files changed
 - `message.html`
 - `messages.html`
-- `js/audit/tests/voice-note-stop-autosend.test.mjs` (new regression test)
-- `js/audit/protected-baseline.json` (intentional hashes for the two protected HTML changes)
+- `js/audit/tests/voice-note-send-cleanup-v4.test.mjs`
+- `VOICE_NOTE_FIX_REPORT.md`
 
-No Supabase migrations, RLS policies, RPCs, storage policies, or backend functions were changed.
+No Supabase migrations, RLS policies, RPCs, storage policies, triggers, or database functions were changed.
+
+## Full traced path
+UI voice controls
+→ `voiceSend` / `voicePreviewSend`
+→ `sendVoiceNote()`
+→ `stopVoiceRecording(false,true)` when still recording
+→ `MediaRecorder.stop()`
+→ final `dataavailable` chunk
+→ `finishVoiceRecording()`
+→ Blob creation
+→ MIME normalization
+→ `uploadToSupabaseDmStorage()`
+→ `dm-media` upload
+→ `private_messages` INSERT
+→ `private_message_attachments` INSERT
+→ clear `voicePreview` / `voiceBlob`
+→ `upsertMessage()`
+→ `updateThread()`
+→ `renderMessages()`
+→ visible sent voice message
+
+Realtime sender/recipient subscriptions remain deduplicated through `upsertMessage(message.id)`.
 
 ## Verification
-Targeted voice-note tests: PASS.
+Targeted voice-note suite: **12/12 passed**.
 
-Full `npm run check`: 336 passed, 10 failed, 1 skipped. The 10 failures are pre-existing project failures unrelated to this voice-note change; the protected-baseline audit already reports numerous unrelated baseline/hash mismatches in the supplied project.
+Covered:
+- active recording Send action;
+- stop → auto-send;
+- final audio chunk;
+- Blob creation;
+- storage upload;
+- normalized MIME;
+- recipient identity;
+- `private_messages` INSERT;
+- attachment INSERT;
+- renderer state;
+- real thread updater presence;
+- preview cleanup ordering.
 
-Browser/device rendering and live Supabase delivery cannot be verified from this offline package test environment.
+Full project audit: **340 passed, 10 failed, 1 skipped**. The 10 failures are unrelated existing project audit failures. They were not hidden or changed to make this voice-note fix pass.
 
-## Retrace verification — 2026-10-05
-
-The voice-note path was traced again from both message surfaces. The authoritative path is:
-
-UI Voice Send / Voice toggle stop → `stopVoiceRecording(false,true)` → `MediaRecorder.stop()` → final `dataavailable` chunk → `onstop` → `finishVoiceRecording()` → Blob → normalized MIME → `uploadToSupabaseDmStorage()` → `dm-media` → `private_messages` audio row → `private_message_attachments` row → `upsertMessage()` / `updateThread()` → `renderMessages()`.
-
-A new regression test, `js/audit/tests/voice-note-ui-path.test.mjs`, now exercises the exact visible Send-button handler for both `message.html` and `messages.html`, including final audio data, upload, recipient, database rows, renderer state, and render invocation.
-
-Targeted voice suite: 10/10 passed.
-
-Full project audit after retrace: 338 passed, 10 failed, 1 skipped. The 10 failures are unrelated pre-existing project audit failures; the protected-baseline audit also reports pre-existing drift in the supplied package and was not caused by the voice-note retrace. No Supabase backend files were changed.
-
-No live Supabase/browser microphone delivery was performed in this offline verification environment, so live device/network delivery remains the only unverified layer.
+Live microphone capture against the user's production Supabase project cannot be performed in this offline verification environment, so actual device/network delivery remains the one layer requiring a live browser test.
