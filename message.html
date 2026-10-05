@@ -38,25 +38,62 @@ img{content-visibility:auto;}
 @media(max-width:760px){html,body{height:100%;min-height:100%;overflow:hidden}.app{height:100dvh;min-height:100dvh;padding:0;overflow:hidden}.main{width:100%;height:calc(100dvh - 70px);margin:0;overflow:hidden}.layout{display:block;height:100%;min-height:0;overflow:hidden}.panel{border-radius:0;border-left:0;border-right:0}.sidebar{height:100%;overflow:hidden}.list{min-height:0}.chat{position:fixed;left:0;right:0;top:70px;bottom:calc(69px + env(safe-area-inset-bottom));height:auto;z-index:35;display:none;border-radius:0;overflow:hidden}.layout.chat-open .sidebar{display:none}.layout.chat-open .chat{display:flex}.mobile-back{display:grid}.head-title{display:none}.brand{font-size:18px}.chat-head{min-height:70px;height:70px;flex:0 0 70px;padding:10px 8px;gap:8px;overflow:hidden}.chat-head>#chatAvatar{flex:0 0 48px}.chat-user{flex:1 1 auto;min-width:72px;max-width:calc(100% - 48px - 38px - 8px)}.chat-name,.chat-status{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.chat-head-actions{flex:0 0 auto;max-width:52vw;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}.chat-head-actions::-webkit-scrollbar{display:none}.chat-head-actions .icon{flex:0 0 40px}.chat-view{height:100%;min-height:0;overflow:hidden}.messages{min-height:0;flex:1 1 auto;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:12px}.composer{position:relative;flex:0 0 auto;min-height:0;padding-bottom:calc(9px + env(safe-area-inset-bottom));z-index:2}.typing{flex:0 0 16px}.bubble-wrap{max-width:84%}.header{height:70px;flex:0 0 70px}.bottom-nav{display:block;height:69px;padding-bottom:calc(7px + env(safe-area-inset-bottom));box-sizing:border-box}.desktop-only{display:none!important}}
 
 .call-overlay{display:none;position:fixed;inset:0;z-index:120;background:rgba(2,5,14,.86);backdrop-filter:blur(16px);align-items:center;justify-content:center;padding:18px}.call-overlay.show{display:flex}.call-card{width:min(520px,100%);min-height:430px;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:rgba(18,20,31,.96);color:#fff;display:flex;flex-direction:column;align-items:center;padding:24px;box-shadow:0 30px 90px rgba(0,0,0,.45)}.call-avatar{margin:5px 0 12px}.call-card>strong{font-size:20px}.call-card>span{font-size:11px;opacity:.7;margin-top:5px}.call-video-wrap{position:relative;width:100%;height:250px;margin:18px 0;border-radius:18px;overflow:hidden;background:#05060a}.call-video-wrap video{width:100%;height:100%;object-fit:cover}.call-video-wrap #localVideo{position:absolute;width:110px;height:150px;right:12px;bottom:12px;border-radius:14px;border:2px solid rgba(255,255,255,.45);object-fit:cover}.call-actions{display:flex;gap:12px}.call-btn{width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.1);color:#fff}.call-btn.end{background:#ef476f;border-color:transparent}.search-hit{outline:2px solid var(--a);outline-offset:3px}.upload-preview{display:flex;gap:8px;align-items:center;overflow:auto}.upload-chip{padding:5px 8px;border-radius:9px;background:rgba(124,58,237,.1);font-size:9px;white-space:nowrap}.friend-tabs{display:flex;gap:5px;margin-top:9px}.
-/* Message context-menu contrast authority: keep actions readable across SPIKE themes.
-   The message page retains a legacy --solid token (#fff), while Theme V3 owns
-   the dark surface/text tokens. The context menu must use the theme authority. */
+/* Message context-menu visual authority.
+   Use the active SPIKE theme surface/text pair together so the menu never
+   becomes white-on-white when legacy page tokens and theme tokens diverge. */
 .context{
-  background:var(--spike-surface-2,var(--surface)) !important;
-  color:var(--spike-text,var(--text)) !important;
-  border-color:var(--spike-line,var(--line)) !important;
+  background:linear-gradient(145deg,var(--spk-surface,var(--surface)),var(--spk-surface-2,var(--surface))) !important;
+  color:var(--spk-text,var(--text)) !important;
+  border:1px solid var(--spk-border,var(--line)) !important;
+  border-radius:16px !important;
+  box-shadow:0 22px 60px rgba(0,0,0,.30),0 0 0 1px color-mix(in srgb,var(--spk-purple,var(--a)) 8%,transparent) !important;
+  padding:6px !important;
+  min-width:210px !important;
+  max-width:min(310px,calc(100vw - 24px)) !important;
+  overflow:hidden !important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
 }
 .context button{
-  color:var(--spike-text,var(--text)) !important;
+  display:flex !important;
+  align-items:center !important;
+  gap:10px !important;
+  width:100% !important;
+  min-height:40px !important;
+  padding:9px 11px !important;
+  border:0 !important;
+  border-radius:11px !important;
+  color:var(--spk-text,var(--text)) !important;
   background:transparent !important;
   opacity:1 !important;
+  font-size:12px !important;
+  font-weight:750 !important;
+  line-height:1.2 !important;
+  text-align:left !important;
+  white-space:nowrap !important;
+}
+.context button i{
+  width:18px !important;
+  min-width:18px !important;
+  text-align:center !important;
+  color:var(--spk-purple,var(--a)) !important;
 }
 .context button:hover,.context button:focus-visible{
-  background:color-mix(in srgb,var(--spike-accent,var(--a)) 12%,transparent) !important;
-  color:var(--spike-text,var(--text)) !important;
-  outline:none;
+  background:color-mix(in srgb,var(--spk-purple,var(--a)) 13%,transparent) !important;
+  color:var(--spk-text,var(--text)) !important;
+  outline:none !important;
 }
-.context .danger{color:var(--danger,#ef476f) !important;}
+.context button:active{
+  background:color-mix(in srgb,var(--spk-purple,var(--a)) 19%,transparent) !important;
+}
+.context .danger{color:var(--spk-danger,var(--danger,#ef476f)) !important;}
+.context .danger i{color:var(--spk-danger,var(--danger,#ef476f)) !important;}
+@media(max-width:700px){
+  .context{
+    min-width:0 !important;
+    width:min(292px,calc(100vw - 24px)) !important;
+  }
+}
 </style>
 <script defer="" src="js/theme.js"></script>
 <link href="css/ui-fix.css" rel="stylesheet"/>
@@ -647,6 +684,48 @@ body.messages-page{background:
 <link rel="stylesheet" href="css/spike-native-select.css">
     <link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
+
+<style id="spike-voice-player-v2">
+/* SPIKE voice messages — compact, native-looking custom player */
+.voice-message-card{
+  width:min(300px,100%);
+  margin:0 0 6px;
+  padding:9px 10px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border:1px solid color-mix(in srgb,currentColor 14%,transparent);
+  border-radius:16px;
+  background:color-mix(in srgb,var(--surface) 72%,transparent);
+  box-shadow:0 7px 22px rgba(3,8,20,.12);
+}
+.mine .voice-message-card{
+  background:rgba(255,255,255,.10);
+  border-color:rgba(255,255,255,.16);
+}
+.voice-play{
+  flex:0 0 38px;width:38px;height:38px;border:0;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;
+  background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;
+  box-shadow:0 7px 18px rgba(91,140,255,.24);
+  transition:transform .16s ease,filter .16s ease;
+}
+.voice-play:hover{transform:translateY(-1px);filter:brightness(1.06)}
+.voice-play:active{transform:scale(.96)}
+.voice-play:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.voice-play:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.voice-main{min-width:0;flex:1;display:grid;gap:7px}
+.voice-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+.voice-label{font-size:11px;font-weight:850;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.voice-duration{font-size:9px;font-variant-numeric:tabular-nums;opacity:.68;flex:0 0 auto}
+.voice-progress{height:4px;border-radius:99px;background:color-mix(in srgb,currentColor 18%,transparent);overflow:hidden}
+.voice-progress>span{display:block;height:100%;width:0;border-radius:inherit;background:currentColor;opacity:.9;transition:width .08s linear}
+.voice-audio{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important}
+@media(max-width:700px){
+  .voice-message-card{width:min(276px,100%);padding:8px 9px;border-radius:15px;gap:9px}
+  .voice-play{flex-basis:36px;width:36px;height:36px}
+}
+</style>
 </head>
 <body class="messages-page private-message-page">
 <div class="app">
@@ -749,7 +828,8 @@ document.querySelectorAll('.thread').forEach(x=>x.onclick=()=>openChat(x.dataset
 function closeChatToMessages(){try{if(typingChannel){sb.removeChannel(typingChannel);typingChannel=null}}catch(e){}active=null;document.body?.classList.remove('chat-open-mode','friend-selected');removeClass('layout','chat-open');$('chatName').textContent='Private messages';$('chatStatus').textContent='Choose a friend';$('chatAvatar').innerHTML='<div class="avatar chat-placeholder-avatar"><i class="fas fa-comments"></i></div>';openFriendModal();renderThreads();history.replaceState({},'',location.pathname);}
 async function openChat(id){active=id;const t=threads.find(x=>x.user_id===id);let p=await ensureProfile(id,t?.profile||friends.find(x=>x.user_id===id)||{id});if(t)t.profile=p;const fi=friends.find(x=>x.user_id===id);if(fi)Object.assign(fi,p);$('chatName').textContent=nameOf(p);$('chatStatus').textContent=window.AppPresence?.isOnline(id)?'Online':'Offline';$('chatAvatar').innerHTML=avatar(p);document.body?.classList.add('friend-selected');removeClass('layout','chat-open');closeFriendPanel();settings={muted:!!t?.muted,pinned:!!t?.pinned,archived:!!t?.archived};updateSettingButtons();renderThreads();reply=null;removeClass('replybar','show');beforeCursor=null;await loadMessages(true);try{await markRead()}catch(e){console.warn('mark read failed',e)}try{await loadDraft()}catch(e){console.warn('draft load failed',e)}startTypingChannel()}
 function linkify(s){return esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:underline">$1</a>')}
-function mediaMarkup(m){if(!m.media_path)return'';const url=m.media_url;const type=m.media_mime_type||'';if(url&&type.startsWith('image/'))return`<div class="media-card"><img src="${esc(url)}" alt="${esc(m.body||'Image')}" loading="lazy" decoding="async"></div>`;if(url&&type.startsWith('video/'))return`<div class="media-card"><video src="${esc(url)}" controls preload="metadata"></video></div>`;if(url&&type.startsWith('audio/')){const dur=m.voice_duration_seconds?`${Math.floor(m.voice_duration_seconds/60)}:${String(m.voice_duration_seconds%60).padStart(2,'0')}`:'';return`<div class="media-card voice-message-card"><div style="display:flex;align-items:center;gap:8px;padding:8px 10px 2px;font-size:10px;font-weight:800"><span>🎙️ Voice note</span><span style="margin-left:auto;opacity:.65">${esc(dur)}</span></div><audio src="${esc(url)}" controls preload="metadata" style="width:100%"></audio></div>`;}return`<a class="file-card" href="${esc(url||'#')}" ${url?'target="_blank" rel="noopener noreferrer"':''}><i class="fas fa-file"></i><span>${esc((m.body||m.media_path).split('/').pop())}</span></a>`}
+function mediaMarkup(m){if(!m.media_path)return'';const url=m.media_url;const type=m.media_mime_type||'';if(url&&type.startsWith('image/'))return`<div class="media-card"><img src="${esc(url)}" alt="${esc(m.body||'Image')}" loading="lazy" decoding="async"></div>`;if(url&&type.startsWith('video/'))return`<div class="media-card"><video src="${esc(url)}" controls preload="metadata"></video></div>`;if(type.startsWith('audio/')){const dur=m.voice_duration_seconds?`${Math.floor(m.voice_duration_seconds/60)}:${String(m.voice_duration_seconds%60).padStart(2,'0')}`:'0:00';const unavailable=!url;return`<div class="voice-message-card" data-voice-player="1" data-message-id="${esc(m.id||'')}" data-unavailable="${unavailable?'1':'0'}"><button class="voice-play" type="button" aria-label="${unavailable?'Voice message unavailable':'Play voice message'}" ${unavailable?'disabled':''}><i class="fas fa-${unavailable?'triangle-exclamation':'play'}"></i></button><div class="voice-main"><div class="voice-top"><span class="voice-label">${unavailable?'Voice unavailable':'Voice message'}</span><span class="voice-duration" data-voice-duration>${esc(dur)}</span></div><div class="voice-progress" aria-hidden="true"><span data-voice-progress></span></div></div><audio class="voice-audio" preload="metadata" src="${url?esc(url):''}"></audio></div>`;}return`<a class="file-card" href="${esc(url||'#')}" ${url?'target="_blank" rel="noopener noreferrer"':''}><i class="fas fa-file"></i><span>${esc((m.body||m.media_path).split('/').pop())}</span></a>`}
+function bindVoicePlayers(root=document){const scope=root?.querySelectorAll?root:document;scope.querySelectorAll('.voice-message-card[data-voice-player="1"]').forEach(card=>{if(card.dataset.voiceBound==='1')return;card.dataset.voiceBound='1';const audio=card.querySelector('.voice-audio'),play=card.querySelector('.voice-play'),bar=card.querySelector('[data-voice-progress]'),duration=card.querySelector('[data-voice-duration]');if(!audio||!play)return;const format=s=>{const n=Math.max(0,Math.round(Number(s)||0));return`${Math.floor(n/60)}:${String(n%60).padStart(2,'0')}`};const sync=()=>{const d=Number.isFinite(audio.duration)&&audio.duration>0?audio.duration:Number(card.dataset.duration||0);if(duration&&d)duration.textContent=format(d);if(bar)bar.style.width=(d>0?Math.min(100,(audio.currentTime/d)*100):0)+'%';play.innerHTML=`<i class="fas fa-${audio.paused?'play':'pause'}"></i>`;card.classList.toggle('is-playing',!audio.paused)};play.addEventListener('click',async()=>{if(!audio.src)return;try{document.querySelectorAll('.voice-message-card.is-playing .voice-audio').forEach(other=>{if(other!==audio){other.pause();other.currentTime=0}});if(audio.paused)await audio.play();else audio.pause();sync()}catch(e){console.warn('voice playback failed',e);toast('Could not play this voice message');}});audio.addEventListener('loadedmetadata',sync);audio.addEventListener('timeupdate',sync);audio.addEventListener('play',sync);audio.addEventListener('pause',sync);audio.addEventListener('ended',()=>{audio.currentTime=0;sync()});sync()})}
 function upsertMessage(message, {prepend=false}={}){
   if(!message?.id)return false;
   const i=messages.findIndex(x=>x.id===message.id);
@@ -766,9 +846,9 @@ function mergeMessagesUnique(rows=[]){
 }
 
 function messageNodeHtml(m){const mine=m.sender_id===me.id,body=m.deleted_at?'Message deleted':m.body||'',quoted=m.reply_to_id?spikeMessageMap.get(m.reply_to_id):null;const reactions=(m.reactions||[]).map(r=>`<button class="reaction" data-react="${esc(m.id)}" data-r="${esc(r.reaction)}">${esc(r.reaction)}</button>`).join('');return `<div class="row ${mine?'mine':''}" data-id="${esc(m.id)}"><div class="bubble-wrap"><div class="bubble ${m.deleted_at?'deleted':''}" data-msg="${esc(m.id)}" title="${esc(fullTime(m.created_at))}">${quoted?`<div class="reply-preview">↩ ${esc(quoted.body||'Attachment')}</div>`:''}${mediaMarkup(m)}${body&&!m.deleted_at?`<div class="bubble-text">${linkify(body)}</div>`:''}${m.deleted_at?'<div class="bubble-text">Message deleted</div>':''}<div class="meta"><span>${esc(new Date(m.created_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}))}${m.edited_at?' · edited':''}</span>${mine?`<span>${m.read?'✓✓':'✓'}`:''}${m.pinned?'<span>📌</span>':''}</div></div>${reactions?`<div class="reactions">${reactions}</div>`:''}</div></div>`}
-function appendMessageNode(m,stick=true){const box=$('messages');if(!box)return;box.querySelector('.empty')?.remove();spikeMessageMap.set(m.id,m);const w=document.createElement('div');w.innerHTML=messageNodeHtml(m);const n=w.firstElementChild;if(!n)return;const near=box.scrollHeight-box.scrollTop-box.clientHeight<96;box.appendChild(n);if(stick&&near)box.scrollTop=box.scrollHeight}
-function patchMessageNode(m){const row=$('messages')?.querySelector(`.row[data-id="${CSS.escape(String(m.id))}"]`);if(!row)return;const w=document.createElement('div');w.innerHTML=messageNodeHtml(m);row.replaceWith(w.firstElementChild)}
-function renderMessages(opts={}){const box=$('messages');const oldH=box.scrollHeight,oldTop=box.scrollTop,nearBottom=oldH===0||oldH-oldTop-box.clientHeight<48;if(!messages.length){box.innerHTML='<div class="empty">No messages yet.<br>Say hello 👋</div>';return}let day='';box.innerHTML=messages.map(m=>{const d=new Date(m.created_at),ds=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});let dayHtml='';if(ds!==day){day=ds;dayHtml=`<div class="day">${esc(ds)}</div>`}const mine=m.sender_id===me.id;const body=m.deleted_at?'Message deleted':m.body||'';const quoted=m.reply_to_id?spikeMessageMap.get(m.reply_to_id):null;const reactions=(m.reactions||[]).map(r=>`<button class="reaction" data-react="${esc(m.id)}" data-r="${esc(r.reaction)}">${esc(r.reaction)}</button>`).join('');return`${dayHtml}<div class="row ${mine?'mine':''}" data-id="${esc(m.id)}"><div class="bubble-wrap"><div class="bubble ${m.deleted_at?'deleted':''}" data-msg="${esc(m.id)}" title="${esc(fullTime(m.created_at))}">${quoted?`<div class="reply-preview">↩ ${esc(quoted.body||'Attachment')}</div>`:''}${mediaMarkup(m)}${body&&!m.deleted_at?`<div class="bubble-text">${linkify(body)}</div>`:''}${m.deleted_at?'<div class="bubble-text">Message deleted</div>':''}<div class="meta"><span>${esc(new Date(m.created_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}))}${m.edited_at?' · edited':''}</span>${mine?`<span>${m.read?'✓✓':'✓'}</span>`:''}${m.pinned?'<span>📌</span>':''}</div></div>${reactions?`<div class="reactions">${reactions}</div>`:''}</div></div>`}).join('');const newH=box.scrollHeight;if(opts.stickBottom||nearBottom){box.scrollTop=newH}else if(opts.prepend){box.scrollTop=oldTop+(newH-oldH)}else{box.scrollTop=Math.min(oldTop,Math.max(0,newH-box.clientHeight))}if(!$('messages').dataset.spikeDelegated){$('messages').dataset.spikeDelegated='1';$('messages').addEventListener('contextmenu',e=>{const b=e.target.closest('.bubble');if(!b)return;e.preventDefault();showContext(b.dataset.msg,e.clientX,e.clientY)});$('messages').addEventListener('dblclick',e=>{const b=e.target.closest('.bubble');if(b)toggleReaction(b.dataset.msg,'❤️')})}}
+function appendMessageNode(m,stick=true){const box=$('messages');if(!box)return;box.querySelector('.empty')?.remove();spikeMessageMap.set(m.id,m);const w=document.createElement('div');w.innerHTML=messageNodeHtml(m);const n=w.firstElementChild;if(!n)return;const near=box.scrollHeight-box.scrollTop-box.clientHeight<96;box.appendChild(n);if(stick&&near)box.scrollTop=box.scrollHeight;bindVoicePlayers(n);}
+function patchMessageNode(m){const row=$('messages')?.querySelector(`.row[data-id="${CSS.escape(String(m.id))}"]`);if(!row)return;const w=document.createElement('div');w.innerHTML=messageNodeHtml(m);const next=w.firstElementChild;row.replaceWith(next);bindVoicePlayers(next)}
+function renderMessages(opts={}){const box=$('messages');const oldH=box.scrollHeight,oldTop=box.scrollTop,nearBottom=oldH===0||oldH-oldTop-box.clientHeight<48;if(!messages.length){box.innerHTML='<div class="empty">No messages yet.<br>Say hello 👋</div>';return}let day='';box.innerHTML=messages.map(m=>{const d=new Date(m.created_at),ds=d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric',year:'numeric'});let dayHtml='';if(ds!==day){day=ds;dayHtml=`<div class="day">${esc(ds)}</div>`}const mine=m.sender_id===me.id;const body=m.deleted_at?'Message deleted':m.body||'';const quoted=m.reply_to_id?spikeMessageMap.get(m.reply_to_id):null;const reactions=(m.reactions||[]).map(r=>`<button class="reaction" data-react="${esc(m.id)}" data-r="${esc(r.reaction)}">${esc(r.reaction)}</button>`).join('');return`${dayHtml}<div class="row ${mine?'mine':''}" data-id="${esc(m.id)}"><div class="bubble-wrap"><div class="bubble ${m.deleted_at?'deleted':''}" data-msg="${esc(m.id)}" title="${esc(fullTime(m.created_at))}">${quoted?`<div class="reply-preview">↩ ${esc(quoted.body||'Attachment')}</div>`:''}${mediaMarkup(m)}${body&&!m.deleted_at?`<div class="bubble-text">${linkify(body)}</div>`:''}${m.deleted_at?'<div class="bubble-text">Message deleted</div>':''}<div class="meta"><span>${esc(new Date(m.created_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}))}${m.edited_at?' · edited':''}</span>${mine?`<span>${m.read?'✓✓':'✓'}</span>`:''}${m.pinned?'<span>📌</span>':''}</div></div>${reactions?`<div class="reactions">${reactions}</div>`:''}</div></div>`}).join('');const newH=box.scrollHeight;if(opts.stickBottom||nearBottom){box.scrollTop=newH}else if(opts.prepend){box.scrollTop=oldTop+(newH-oldH)}else{box.scrollTop=Math.min(oldTop,Math.max(0,newH-box.clientHeight))}bindVoicePlayers($('messages'));if(!$('messages').dataset.spikeDelegated){$('messages').dataset.spikeDelegated='1';$('messages').addEventListener('contextmenu',e=>{const b=e.target.closest('.bubble');if(!b)return;e.preventDefault();showContext(b.dataset.msg,e.clientX,e.clientY)});$('messages').addEventListener('dblclick',e=>{const b=e.target.closest('.bubble');if(b)toggleReaction(b.dataset.msg,'❤️')})}}
 async function markRead(){if(!active||!me?.id)return;clearTimeout(spikeMarkReadTimer);spikeMarkReadTimer=setTimeout(async()=>{try{const {error}=await sb.rpc('dm_mark_read',{p_user_id:active});if(error)return;const t=threads.find(x=>x.user_id===active);if(t)t.unread=0;renderThreads()}catch(e){console.warn('dm_mark_read failed',e)}},150)}
 
 async function sendText(){
@@ -1478,4 +1558,42 @@ window.SPIKE_MESSAGE_API={openChat,loadMessages,renderMessages,markRead,sendText
 <script src="js/spike-native-v2.js"></script>
 <script defer src="js/spike-native-select.js"></script>
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+
+<style id="spike-message-context-final-authority">
+/* FINAL message-options authority.
+   This block is intentionally last so legacy --solid/--text rules cannot
+   turn the private-message context menu white or white-on-white. */
+html[data-spike-style] #context.context {
+  background: var(--spike-surface-2, #17112b) !important;
+  background-color: var(--spike-surface-2, #17112b) !important;
+  color: var(--spike-text, #f7f8ff) !important;
+  border: 1px solid var(--spike-line, rgba(255,255,255,.16)) !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.38) !important;
+  opacity: 1 !important;
+}
+html[data-spike-style] #context.context button {
+  background: transparent !important;
+  color: var(--spike-text, #f7f8ff) !important;
+  opacity: 1 !important;
+}
+html[data-spike-style] #context.context button:hover,
+html[data-spike-style] #context.context button:focus-visible {
+  background: color-mix(in srgb, var(--spike-accent, #8b6cff) 14%, var(--spike-surface-2, #17112b)) !important;
+  color: var(--spike-text, #f7f8ff) !important;
+}
+html[data-spike-style] #context.context button i {
+  color: var(--spike-accent, #8b6cff) !important;
+}
+html[data-spike-style] #context.context .danger,
+html[data-spike-style] #context.context .danger i {
+  color: #ff5d78 !important;
+}
+@media (max-width:700px) {
+  html[data-spike-style] #context.context {
+    width: min(292px, calc(100vw - 24px)) !important;
+    min-width: 0 !important;
+    padding: 6px !important;
+  }
+}
+</style>
 </body></html>
