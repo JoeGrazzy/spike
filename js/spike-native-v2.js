@@ -97,8 +97,9 @@
   function ensurePanel() {
     if ($('spikeNativePanel')) return $('spikeNativePanel');
     const hub=$('feedV2Hub'); if(!hub) return null;
+    const disclosure=document.createElement('details'); disclosure.id='spikeNativeDisclosure'; disclosure.innerHTML=`<summary>More discovery tools</summary>`;
     const panel=document.createElement('section'); panel.id='spikeNativePanel'; panel.className='spike-native-panel'; panel.innerHTML=`
-      <div class="spike-native-tabs" role="tablist" aria-label="SPIKE native systems">
+      <div class="spike-native-tabs" role="tablist" aria-label="More discovery tools">
         <button class="active" data-native-tab="momentum">Momentum</button>
         <button data-native-tab="topics">◎ Topics</button>
         <button data-native-tab="lenses">◉ Signal Lenses</button>
@@ -106,17 +107,13 @@
         <button data-native-tab="pulses">◌ Pulses</button>
       </div>
       <div id="spikeNativePanelBody" class="spike-native-panel-body"></div>`;
-    hub.parentNode.insertBefore(panel, hub.nextSibling);
+    disclosure.appendChild(panel);
+    hub.appendChild(disclosure);
     panel.addEventListener('click', handlePanelClick);
     return panel;
   }
 
-  function ensureNativeNavButton() {
-    const nav=$('feedV2Nav'); if(!nav || nav.querySelector('[data-native-tab="momentum"]')) return;
-    const btn=document.createElement('button'); btn.type='button'; btn.dataset.nativeOpen='1'; btn.textContent='SPIKE Native';
-    btn.addEventListener('click',()=>{ ensurePanel()?.scrollIntoView({behavior:'smooth',block:'start'}); setNativeTab('momentum'); });
-    nav.insertBefore(btn, nav.firstElementChild?.nextSibling || nav.firstChild);
-  }
+  function ensureNativeNavButton() { /* Native tools are progressive disclosure inside Discover. */ }
 
   function setNativeTab(tab) {
     const panel=ensurePanel(); if(!panel) return;
@@ -210,13 +207,14 @@
 
   function patchExistingLabels() {
     const scope = document.body?.dataset?.spikeNativeGlobal === '1' ? document : ($('feedV2Hub') || document);
-    applyBrandLanguage(scope);
+    // Keep primary Feed vocabulary plain. Native concepts are labeled directly
+    // inside the secondary discovery-tools panel instead of rewriting the whole Feed.
     const filters=$('filters');
     if(filters){
-      const map={latest:'Latest Signals',following:'Connections',popular:'Momentum',trending:'Momentum',saved:'Signal Vault'};
+      const map={latest:'Latest Signals',following:'Following',popular:'Popular',trending:'Trending',saved:'Saved'};
       filters.querySelectorAll('[data-filter]').forEach(b=>{ if(map[b.dataset.filter]) b.textContent=map[b.dataset.filter]; });
     }
-    const storyBtn=$('storyBtn'); if(storyBtn) storyBtn.textContent='◌ Pulse';
+    const storyBtn=$('storyBtn'); if(storyBtn) storyBtn.textContent='◎ Story';
     const search=$('v2DiscoverSearch'); if(search) search.placeholder='Search Signals or Topics…';
     const reelPanel=document.querySelector('[data-v2-panel="reels"]'); if(reelPanel){ const empty=reelPanel.querySelector('.empty'); if(empty) empty.textContent='Loading Signal Stream…'; }
   }
@@ -233,10 +231,6 @@
   function boot() {
     ensureStyles(); patchExistingLabels(); ensureNativeNavButton(); ensurePanel();
     renderNative('momentum'); observeBranding();
-    document.addEventListener('click',e=>{
-      const b=e.target.closest('[data-comments]'); if(b){ setTimeout(()=>applyBrandLanguage(document),0); }
-      if(e.target.closest('#storyBtn')) setTimeout(()=>applyBrandLanguage($('storyOverlay')||document),0);
-    },true);
     setInterval(()=>{ if($('spikeNativePanelBody') && document.visibilityState==='visible'){ const active=document.querySelector('#spikeNativePanel [data-native-tab].active')?.dataset.nativeTab; if(active==='momentum') renderMomentum($('spikeNativePanelBody')); } },30000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();

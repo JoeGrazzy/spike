@@ -1,0 +1,110 @@
+/* SPIKE Experience V2
+   Additive presentation layer. It never observes the document globally and never
+   replaces Feed boot, ranking, Supabase, or existing event handlers. */
+:root{--spike-x-max:1180px;--spike-x-radius:20px}
+
+/* HOME: make the Feed read like a home, not a control dashboard. */
+.spike-x-home{width:min(100%,var(--spike-x-max));margin-inline:auto}
+.spike-x-home #feedV2Hub{border-radius:var(--spike-x-radius);padding:10px}
+.spike-x-home #feedV2Hub .feed-v2-nav{gap:5px;overflow-x:auto;scrollbar-width:none}
+.spike-x-home #feedV2Hub .feed-v2-nav::-webkit-scrollbar{display:none}
+.spike-x-home #feedV2Hub .feed-v2-nav>button,
+.spike-x-home #feedV2Hub .feed-v2-more>summary{min-height:40px;padding:9px 13px;border-radius:12px;white-space:nowrap;font-weight:850}
+.spike-x-home #feedV2Hub .feed-v2-more{margin-left:auto}
+.spike-x-home #feedV2Hub [data-v2="moments"],
+.spike-x-home #feedV2Hub [data-v2="trending"],
+.spike-x-home #feedV2Hub [data-v2="reels"]{display:none!important}
+.spike-x-home #feedV2Hub .feed-v2-more-menu{min-width:215px}
+
+/* Keep the legacy filter contract alive for JS/ranking, but don't make it a
+   second competing navigation system. */
+.spike-x-legacy-filters{display:none!important}
+
+/* HEADER: brand + one intelligence/search entry + menu. Bottom dock handles
+   Home/Discover/Create/Activity/You on supported layouts. */
+.spike-x-header .brand-subtitle{display:none!important}
+.spike-x-header #spikeCoffeeBtn,
+.spike-x-header #spikeThemeIcon,
+.spike-x-header #spikePulseBtn,
+.spike-x-header #spikeSmartNavBtn{display:none!important}
+.spike-x-header .spike-header-actions{gap:7px}
+.spike-x-header .spike-ask-ai{min-height:40px;min-width:40px;border-radius:13px;font-weight:900}
+.spike-x-header .spike-ask-ai .ask-ai-label{display:inline}
+.spike-x-header #menuBtn{min-width:40px;min-height:40px}
+
+/* COMPOSER: familiar post mental model. Core controls remain the same nodes,
+   so all existing handlers keep working. */
+.spike-x-composer{border-radius:var(--spike-x-radius)!important;padding:14px!important}
+.spike-x-composer .signal-composer-top{margin-bottom:10px}
+.spike-x-composer .signal-kicker{font-size:9px}
+.spike-x-composer #spikeComposerTitle{font-size:18px}
+.spike-x-composer .signal-writing-surface{border-radius:16px}
+.spike-x-composer .signal-writing-surface textarea{min-height:82px;padding:14px;font-size:15px}
+.spike-x-composer .signal-tools{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.spike-x-composer .signal-tools .signal-tool{min-height:42px;font-size:11px;font-weight:800}
+.spike-x-composer .signal-tools .signal-tool:nth-child(4),
+.spike-x-composer .signal-tools .signal-tool:nth-child(5){display:none}
+.spike-x-composer.spike-x-advanced-open .signal-tools .signal-tool:nth-child(4),
+.spike-x-composer.spike-x-advanced-open .signal-tools .signal-tool:nth-child(5){display:inline-flex}
+.spike-x-composer .signal-creator-row{margin-top:9px;display:none}
+.spike-x-composer.spike-x-advanced-open .signal-creator-row{display:flex}
+.spike-x-composer .signal-creator-row .creator-tool{display:none}
+.spike-x-composer.spike-x-advanced-open .signal-creator-row .creator-tool{display:inline-flex}
+.spike-x-composer .signal-audience{margin-left:auto}
+.spike-x-composer .signal-release-row{margin-top:10px}
+.spike-x-composer .signal-release-note{font-size:10px}
+.spike-x-composer .signal-release{min-height:42px;padding:10px 15px;border-radius:13px;font-size:10px}
+
+/* Disclosure row is created once by the experience controller. */
+.spike-x-more-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.spike-x-more{min-height:36px;padding:8px 11px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.045);color:var(--text);font-size:10px;font-weight:850;cursor:pointer}
+.spike-x-more[aria-expanded="true"]{background:rgba(255,255,255,.09)}
+.spike-x-more-hint{font-size:9px;color:var(--muted)}
+.spike-x-composer:not(.spike-x-advanced-open) .schedule,
+.spike-x-composer:not(.spike-x-advanced-open) .ai-compose-panel{display:none!important}
+.spike-x-composer.spike-x-advanced-open .schedule{margin-top:8px}
+
+/* Explain the brand vocabulary once, then keep labels plain. */
+.spike-x-top-picks-note{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-bottom:8px}
+.spike-x-top-picks-note strong{font-size:13px}
+.spike-x-top-picks-note span{font-size:10px;color:var(--muted)}
+
+/* Menu: calm command center. Admin remains hidden from ordinary users. */
+.spike-x-menu .spike-menu-hero p{color:var(--muted)}
+.spike-x-menu #menuAdmin{display:none!important}
+.spike-x-menu .spike-menu-section-title{letter-spacing:.11em}
+.spike-x-menu .menu-list button,.spike-x-menu .menu-list a{min-height:50px}
+
+/* Bottom navigation terminology. */
+.spike-x-bottom [data-spike-nav="create"] small{font-size:0}
+.spike-x-bottom [data-spike-nav="create"] small:after{content:'Create';font-size:9px}
+.spike-x-bottom [data-spike-nav="profile"] small{font-size:0}
+.spike-x-bottom [data-spike-nav="profile"] small:after{content:'You';font-size:9px}
+
+/* Guide welcome card. */
+.spike-x-guide-welcome{margin-bottom:14px;padding:20px;border:1px solid var(--g-line);border-radius:22px;background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));box-shadow:0 18px 55px rgba(0,0,0,.18)}
+.spike-x-guide-welcome .eyebrow{font-size:10px;letter-spacing:.16em;font-weight:900;color:var(--g-muted)}
+.spike-x-guide-welcome h1{margin:5px 0 8px;font-size:clamp(27px,5vw,42px);letter-spacing:-1.2px}
+.spike-x-guide-welcome>p{margin:0;color:var(--g-muted);font-size:13px;max-width:760px}
+.spike-x-guide-jobs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px;margin-top:14px}
+.spike-x-guide-job{padding:11px;border:1px solid var(--g-line);border-radius:14px;background:var(--g-card2)}
+.spike-x-guide-job b{display:block;font-size:10px}.spike-x-guide-job span{display:block;margin-top:3px;color:var(--g-muted);font-size:10px}
+.spike-x-guide-vocab{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:10px}
+.spike-x-guide-vocab div{padding:9px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--g-line)}
+.spike-x-guide-vocab strong{display:block;font-size:10px}.spike-x-guide-vocab small{display:block;color:var(--g-muted);font-size:9px;margin-top:2px}
+
+@media(max-width:760px){
+  .spike-x-header .spike-ask-ai{width:40px;padding:0}
+  .spike-x-header .spike-ask-ai .ask-ai-label{display:none}
+  .spike-x-home #feedV2Hub .feed-v2-more{margin-left:0}
+  .spike-x-composer .signal-tools{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .spike-x-guide-jobs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spike-x-guide-vocab{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:430px){
+  .spike-x-composer{padding:11px!important}
+  .spike-x-composer .signal-tools{grid-template-columns:1fr 1fr 1fr}
+  .spike-x-composer .signal-tools .signal-tool{padding-inline:6px;font-size:9px}
+  .spike-x-guide-jobs,.spike-x-guide-vocab{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){.spike-x-more{transition:none!important}}

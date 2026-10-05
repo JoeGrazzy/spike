@@ -1,0 +1,124 @@
+/* SPIKE THEME EXPERIENCE V3
+   Final visual authority layer.
+   The theme changes palette/material/atmosphere, never product geometry or brand identity.
+*/
+
+html[data-spike-style] {
+  --theme-surface-soft: color-mix(in srgb,var(--spike-surface-2) 88%,transparent);
+  --theme-surface-strong: color-mix(in srgb,var(--spike-surface) 96%,transparent);
+  --theme-accent-soft: color-mix(in srgb,var(--spike-accent) 13%,transparent);
+  --theme-accent-line: color-mix(in srgb,var(--spike-accent) 34%,var(--spike-line));
+  --theme-shadow-soft: 0 10px 30px color-mix(in srgb,var(--spike-shadow) 62%,transparent);
+}
+
+/* No page is allowed to replace the theme's typography with a novelty face. */
+html[data-spike-style] body,
+html[data-spike-style] button,
+html[data-spike-style] input,
+html[data-spike-style] textarea,
+html[data-spike-style] select,
+html[data-spike-style] .header,
+html[data-spike-style] .brand-title,
+html[data-spike-style] .brand-subtitle {
+  font-family:var(--spike-font)!important;
+}
+
+/* Canonical brand/header treatment. */
+html[data-spike-style] .header,
+html[data-spike-style] .top {
+  background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+  box-shadow:var(--theme-shadow-soft)!important;
+}
+html[data-spike-style] .header .brand-title { color:var(--spike-text)!important;text-shadow:none!important; }
+html[data-spike-style] .header .brand-subtitle { color:var(--spike-muted)!important; }
+
+/* Feed loader follows the selected theme instead of the old purple identity. */
+html[data-spike-style] #spike-feed-loader { background:color-mix(in srgb,var(--spike-bg) 78%,transparent)!important; }
+html[data-spike-style] .spike-feed-loader-card { background:color-mix(in srgb,var(--spike-surface) 96%,transparent)!important;border-color:var(--spike-line)!important;box-shadow:var(--spike-shadow)!important; }
+html[data-spike-style] .spike-feed-loader-title { color:var(--spike-text)!important; }
+html[data-spike-style] .spike-feed-loader-subtitle { color:var(--spike-muted)!important; }
+html[data-spike-style] .spike-feed-loader-spinner { border-top-color:var(--spike-accent)!important;border-right-color:color-mix(in srgb,var(--spike-accent) 30%,transparent)!important; }
+html[data-spike-style] .spike-feed-loader-line { background:color-mix(in srgb,var(--spike-text) 8%,transparent)!important; }
+html[data-spike-style] .spike-feed-loader-line::after { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+html[data-spike-style] .spike-menu-handle { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+
+/* Menu: preserve the hierarchy, remove the old fixed purple/blue identity. */
+html[data-spike-style] .spike-menu-v3 .spike-menu-sheet {
+  background:radial-gradient(circle at 8% 0%,color-mix(in srgb,var(--spike-accent) 12%,transparent),transparent 32%),
+             radial-gradient(circle at 92% 10%,color-mix(in srgb,var(--spike-accent-2) 9%,transparent),transparent 30%),
+             var(--spike-surface)!important;
+  border-color:var(--spike-line)!important;color:var(--spike-text)!important;
+}
+html[data-spike-style] .spike-menu-v3 .menu-v3-avatar { background:linear-gradient(145deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;box-shadow:0 10px 28px var(--spike-glow)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-kicker,
+html[data-spike-style] .spike-menu-v3 .menu-v3-profile,
+html[data-spike-style] .spike-menu-v3 .menu-v3-label { color:var(--spike-accent)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-identity,
+html[data-spike-style] .spike-menu-v3 .menu-v3-disclosure { border-color:var(--spike-line)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-identity-copy small,
+html[data-spike-style] .spike-menu-v3 .menu-v3-copy small,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid small,
+html[data-spike-style] .spike-menu-v3 .menu-v3-disclosure summary small { color:var(--spike-muted)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid button,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a { background:var(--theme-surface-soft)!important;border-color:var(--spike-line)!important;color:var(--spike-text)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid button:hover,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a:hover,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid button:focus-visible,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a:focus-visible { background:var(--theme-accent-soft)!important;border-color:var(--theme-accent-line)!important;box-shadow:var(--theme-shadow-soft)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid .menu-v3-icon,
+html[data-spike-style] .spike-menu-v3 .menu-v3-disclosure summary .menu-v3-summary-icon { background:var(--theme-accent-soft)!important;color:var(--spike-accent)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-disclosure summary::after { color:var(--spike-muted)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-live a { border-color:color-mix(in srgb,var(--spike-accent) 36%,var(--spike-line))!important;background:linear-gradient(135deg,color-mix(in srgb,var(--spike-accent) 15%,var(--spike-surface)),color-mix(in srgb,var(--spike-accent-2) 9%,var(--spike-surface)))!important;color:var(--spike-text)!important;box-shadow:var(--theme-shadow-soft)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-live-icon { background:linear-gradient(145deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;box-shadow:0 8px 20px var(--spike-glow)!important; }
+html[data-spike-style] .spike-menu-v3 .menu-v3-footer button { border-color:color-mix(in srgb,var(--spike-accent) 24%,var(--spike-line))!important;background:var(--theme-accent-soft)!important;color:var(--spike-accent)!important; }
+
+/* Surface controls: same geometry, active theme supplies the material. */
+html[data-spike-style] .spike-control-select-trigger,
+html[data-spike-style] .spike-surface-option { background:var(--theme-surface-soft)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important; }
+html[data-spike-style] .spike-control-select-trigger:hover,
+html[data-spike-style] .spike-surface-option:hover,
+html[data-spike-style] .spike-surface-option.is-selected { background:var(--theme-accent-soft)!important;border-color:var(--theme-accent-line)!important; }
+html[data-spike-style] .spike-surface-sheet { background:var(--spike-surface)!important;border-color:var(--spike-line)!important;box-shadow:var(--spike-shadow)!important; }
+html[data-spike-style] .spike-surface-option.is-selected { box-shadow:0 8px 24px var(--spike-glow)!important; }
+html[data-spike-style] .spike-surface-option .spike-surface-option-icon { background:var(--theme-accent-soft)!important;color:var(--spike-accent)!important; }
+
+/* Feed feature controls: eliminate the old purple-only visual language. */
+html[data-spike-style] .feed-v2-actions-btn,
+html[data-spike-style] .media-add { background:var(--theme-surface-soft)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important; }
+html[data-spike-style] .media-studio-kicker,
+html[data-spike-style] .premium-dialog-eyebrow,
+html[data-spike-style] .moment-open,
+html[data-spike-style] .moment-focus { color:var(--spike-accent)!important; }
+html[data-spike-style] .media-thumb.active { border-color:var(--spike-accent)!important;box-shadow:0 0 0 2px var(--theme-accent-soft)!important; }
+html[data-spike-style] .premium-confirm { background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;box-shadow:0 8px 25px var(--spike-glow)!important; }
+html[data-spike-style] .toast-progress,
+html[data-spike-style] .spike-premium-toast:after { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+html[data-spike-style] .spike-feed-live-start { background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;color:var(--spike-action-text)!important; }
+
+/* Live: the live product remains energetic, but its energy comes from the active theme. */
+html[data-spike-style] .live-primary,
+html[data-spike-style] .spike-feed-live-start { background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;box-shadow:0 12px 34px var(--spike-glow)!important; }
+html[data-spike-style] .live-brand span { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important; }
+html[data-spike-style] .meter i,
+html[data-spike-style] .mission-bar i { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+html[data-spike-style] .category-picker-sheet { background:radial-gradient(circle at 10% 0%,var(--theme-accent-soft),transparent 35%),var(--spike-surface)!important;border-color:var(--spike-line)!important; }
+html[data-spike-style] .category-picker-kicker { color:var(--spike-accent)!important; }
+html[data-spike-style] .category-option:hover,
+html[data-spike-style] .category-option:focus-visible,
+html[data-spike-style] .category-option.is-selected { border-color:var(--theme-accent-line)!important;background:var(--theme-accent-soft)!important;box-shadow:0 12px 35px var(--spike-glow)!important; }
+html[data-spike-style] .category-option.is-selected .category-option-icon,
+html[data-spike-style] .category-option.is-selected i { background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;color:var(--spike-action-text)!important; }
+
+/* Final polish: never force black/white/Georgia over the active theme. */
+html[data-spike-style] .header .brand-title,
+html[data-spike-style] .header .brand-subtitle { font-family:var(--spike-font)!important;color:var(--spike-text)!important; }
+
+/* Status remains semantic, but branded accents must follow the active theme. */
+html[data-spike-style] .spike-bottom-nav .spike-nav-badge { background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;color:var(--spike-bg)!important;border-color:var(--spike-surface)!important;box-shadow:0 0 14px var(--spike-glow)!important; }
+
+/* Light themes: never leak dark-only text assumptions into theme surfaces. */
+html[data-theme="light"] .live-primary,
+html[data-theme="light"] .spike-feed-live-start { color:var(--spike-action-text)!important; }
+html[data-theme="light"] .menu-v3-live a { color:var(--spike-text)!important; }

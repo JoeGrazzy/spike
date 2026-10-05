@@ -412,11 +412,28 @@ function initModernApp(){
       nav.querySelectorAll('button').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
       const target = b.dataset.spikeNav;
-      if(target === 'home'){ window.scrollTo({top:0,behavior:'smooth'}); }
-      if(target === 'discover'){ document.querySelector('[data-v2="discover"]')?.click(); $('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'}); }
-      if(target === 'create'){ const c=document.querySelector('.spike-signal-composer'); const t=$('signalText'); c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded'); document.getElementById('spikeBottomNav')?.classList.add('spike-composer-nav-hidden'); document.body.classList.add('spike-composer-active'); c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250); }
+      const main = document.querySelector('main.main');
+      if(target === 'home'){
+        main?.classList.remove('spike-discover-mode');
+        document.querySelectorAll('#spikeBottomNav [data-spike-nav]').forEach(x => x.classList.toggle('active', x === b));
+        window.scrollTo({top:0,behavior:'smooth'});
+      }
+      if(target === 'discover'){
+        main?.classList.add('spike-discover-mode');
+        const discover = document.querySelector('[data-v2="discover"]');
+        discover?.click();
+        document.getElementById('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+      if(target === 'create'){
+        main?.classList.remove('spike-discover-mode');
+        const c=document.querySelector('.spike-signal-composer'); const t=$('signalText');
+        c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded');
+        document.getElementById('spikeBottomNav')?.classList.add('spike-composer-nav-hidden'); document.body.classList.add('spike-composer-active');
+        c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250);
+      }
+      if(target === 'messages'){ /* native anchor handles navigation */ }
       if(target === 'activity'){ refreshNotificationBadge(); window.location.href='notifications.html'; }
-      if(target === 'profile'){ $('profileBtn')?.click(); }
+      if(target === 'profile'){ /* native anchor handles navigation */ }
     });
   }
 }
@@ -486,25 +503,94 @@ function bindEvents() {
   });
   // Navigation
   // Header profile control removed; profile remains available from the menu/bottom navigation.
-  bindClick('menuBtn', () => openOverlay('menuOverlay'));
   $('menuClose')?.addEventListener('click', () => closeOverlay('menuOverlay'));
   $('menuOverlay')?.addEventListener('click', e => { if (e.target.id === 'menuOverlay') closeOverlay('menuOverlay'); });
   bindClick('closeAnnouncement', () => { $('announcement')?.classList.remove('show'); sessionStorage.setItem('spikeAnnouncementClosed', '1'); });
 
-  // Menu items
+  // Menu actions — architecture V3: quick actions first, feature groups second, admin/settings last.
+  const activateFeedV2Tab = tab => {
+    const hub = document.getElementById('feedV2Hub');
+    const target = document.querySelector(`[data-v2="${tab}"]`);
+    if (!hub || !target) { toast(`The ${tab} section is not available right now.`, 'error'); return false; }
+    document.querySelectorAll('#feedV2Hub [data-v2-panel]').forEach(panel => {
+      panel.classList.toggle('open', panel.dataset.v2Panel === tab);
+    });
+    document.querySelectorAll('#feedV2Hub [data-v2]').forEach(button => {
+      button.classList.toggle('active', button === target);
+    });
+    if (tab === 'trending') renderTrending();
+    if (tab === 'analytics') renderAnalytics();
+    if (tab === 'gamify') renderGamify();
+    if (tab === 'reels') renderReels();
+    if (tab === 'discover') renderDiscover(document.getElementById('v2DiscoverSearch')?.value || '');
+    if (tab === 'moments') renderMoments();
+    if (tab === 'nearby') { const list=$('v2NearbyList'); if(list && !list.dataset.ready) list.innerHTML='<div class="empty">Nearby discovery is opt-in. Enable location only when you want local results.</div>'; }
+    requestAnimationFrame(() => { document.querySelector('main.main')?.classList.add('spike-discover-mode'); hub.scrollIntoView({behavior:'smooth', block:'start'}); });
+    return true;
+  };
+  const openFeedTab = tab => { closeOverlay('menuOverlay'); return activateFeedV2Tab(tab); };
+  const openCreate = () => {
+    closeOverlay('menuOverlay');
+    const composer = document.querySelector('.spike-signal-composer');
+    const text = document.getElementById('signalText');
+    if (!composer || !text) { toast('The Signal composer is not available right now.', 'error'); return false; }
+    composer.classList.remove('spike-collapsed');
+    composer.classList.add('spike-expanded');
+    document.body.classList.add('spike-composer-active');
+    composer.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(() => text.focus(), 220);
+    return true;
+  };
+  const openStory = () => { closeOverlay('menuOverlay'); const o=$('storyOverlay'); if(o){ o.classList.add('open'); o.removeAttribute('hidden'); o.setAttribute('aria-hidden','false'); if(location.hash!=='#storyOverlay') history.replaceState(null,'','#storyOverlay'); } return true; };
+
   $('menuGoLive')?.addEventListener('click', () => { closeOverlay('menuOverlay'); });
-  bindClick('menuProfile', () => go(profileLink(state.user.id)));
-  bindClick('menuFriends', () => go('friends.html'));
-  bindClick('menuMessages', () => go('messages.html'));
-  bindClick('menuSettings', () => go('settings.html'));
-  bindClick('menuSaved', async () => { closeOverlay('menuOverlay'); try { await openSavedCollections(); } catch (e) { console.error('Saved & Collections', e); toast(e.message || 'Unable to open Saved & Collections'); } });
-  bindClick('menuAudience', async () => { closeOverlay('menuOverlay'); try { await openCloseFriends(); } catch (e) { console.error('Close Friends', e); toast(e.message || 'Unable to open Close Friends'); } });
-  bindClick('menuPolicy', () => go('policy.html'));
-  bindClick('menuPolicyAppeals', () => go('policy_appeals.html'));
-  bindClick('menuSafety', async () => { closeOverlay('menuOverlay'); try { await openSafetyCenter(); } catch (e) { console.error('Safety Center', e); toast(e.message || 'Unable to open Safety Center'); } });
-  bindClick('menuRoom', () => go('rooms.html'));
-  bindClick('menuGuide', () => go('guide.html'));
-  bindClick('menuWorld', () => go('spike_world.html'));
+  // Menu V3 action router: one delegated tap path for every interactive button.
+  // This prevents individual card bindings from drifting apart and gives async
+  // actions the same duplicate-tap protection and error handling. Native <a>
+  // menu items keep their existing href contracts.
+  const menuActions = {
+    saved: async () => { closeOverlay('menuOverlay'); await openSavedCollections(); },
+    audience: async () => { closeOverlay('menuOverlay'); await openCloseFriends(); },
+    safety: async () => { closeOverlay('menuOverlay'); await openSafetyCenter(); },
+    signout: () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); }
+  };
+  // Direct handlers guarantee these primary menu destinations work independently of the delegated tap path.
+
+  const menuOverlay = $('menuOverlay');
+  menuOverlay?.addEventListener('click', async e => {
+    const control = e.target.closest('[data-menu-action]');
+    if (!control || !menuOverlay.contains(control)) return;
+    const action = control.dataset.menuAction;
+    const handler = menuActions[action];
+    if (typeof handler !== 'function') return;
+    if (control.dataset.menuBusy === '1') { e.preventDefault(); return; }
+    control.dataset.menuBusy = '1';
+    control.setAttribute('aria-busy', 'true');
+    try {
+      await handler();
+    } catch (err) {
+      console.error(`[SPIKE MENU] ${action}`, err);
+      toast(err?.message || 'That SPIKE action could not be opened. Please try again.', 'error');
+    } finally {
+      control.dataset.menuBusy = '0';
+      control.removeAttribute('aria-busy');
+    }
+  });
+
+  const syncMenuNotificationBadge = count => {
+    const badge = $('menuNotificationBadge');
+    if (!badge) return;
+    const n = Math.max(0, Number(count) || 0);
+    badge.textContent = n > 99 ? '99+' : String(n);
+    badge.hidden = n === 0;
+  };
+  const notificationBadgeSource = document.querySelector('[data-spike-notification-badge]');
+  syncMenuNotificationBadge(notificationBadgeSource?.dataset.unreadCount || 0);
+  window.addEventListener('spike:notification-count', e => syncMenuNotificationBadge(e.detail?.unread));
+  bindClick('menuBtn', () => {
+    syncMenuNotificationBadge(document.querySelector('[data-spike-notification-badge]')?.dataset.unreadCount || 0);
+    openOverlay('menuOverlay');
+  });
 
 
   $('menuAdmin')?.addEventListener('click', async e => {
@@ -548,8 +634,9 @@ function bindEvents() {
   $('mediaLayoutSelect')?.addEventListener('change',e=>{state.mediaLayout=e.target.value;renderMediaStudio()});
 
   // Story
-  bindClick('storyBtn', () => openOverlay('storyOverlay'));
-  bindClick('cancelStory', () => closeOverlay('storyOverlay'));
+  bindClick('storySectionCreate', () => openStory());
+  bindClick('storyBtn', () => openStory());
+  bindClick('cancelStory', () => { closeOverlay('storyOverlay'); if(location.hash==='#storyOverlay') history.replaceState(null,'',location.pathname+location.search); });
   bindClick('publishStory', publishStory);
   bindClick('storyMediaBtn', () => $('storyMediaInput').click());
   bindClick('storyAudioBtn', () => $('storyAudioInput').click());
@@ -579,6 +666,12 @@ function bindEvents() {
     if (b) storyViewerOpen(b.dataset.story);
   });
 
+  bindClick('spikeDiscoverClose', () => {
+    document.querySelector('main.main')?.classList.remove('spike-discover-mode');
+    document.querySelectorAll('#spikeBottomNav [data-spike-nav]').forEach(x => x.classList.toggle('active', x.dataset.spikeNav === 'home'));
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
   // Filters
   $('filters')?.addEventListener('click', e => {
     const b = e.target.closest('[data-filter]');
@@ -586,6 +679,7 @@ function bindEvents() {
     document.querySelectorAll('.filter').forEach(x => x.classList.remove('active'));
     b.classList.add('active');
     state.filter = b.dataset.filter;
+    document.querySelector('main.main')?.classList.remove('spike-discover-mode');
     state.visiblePosts = 20;
     renderSignals();
   });
@@ -650,6 +744,69 @@ function bindEvents() {
   // Post interactions (delegated)
   $('posts')?.addEventListener('click', handleSignalClick);
   $('posts')?.addEventListener('submit', handleSignalSubmit);
+  $('spikePostShareOverlay')?.addEventListener('click', async e => {
+    if(e.target.id==='spikePostShareOverlay' || e.target.closest('[data-post-share-close]')){ closePostShare(); return; }
+    const b=e.target.closest('[data-post-share-action]');
+    if(!b)return;
+    const id=state.activePost;
+    if(!id)return;
+    const action=b.dataset.postShareAction;
+    b.disabled=true;
+    try{
+      if(action==='external') await sharePostExternally(id);
+      else if(action==='copy') await copyPostShareLink(id);
+      else if(action==='connections'){ closePostShare(); await passSignal(id); return; }
+      if(action!=='connections') closePostShare();
+    }finally{ b.disabled=false; }
+  });
+  $('spikePostShareOverlay')?.addEventListener('keydown', e => { if(e.key==='Escape'){ e.preventDefault(); closePostShare(); } });
+  let spikeLikeLongPressTimer=null;
+  let spikeLikeLongPressButton=null;
+  let spikeLikeLongPressPointerId=null;
+  let spikeLikeLongPressStartX=0;
+  let spikeLikeLongPressStartY=0;
+  let spikeLikeLongPressFired=false;
+  const cancelLikeLongPress=({keepFired=false}={})=>{
+    if(spikeLikeLongPressTimer){clearTimeout(spikeLikeLongPressTimer);spikeLikeLongPressTimer=null;}
+    spikeLikeLongPressButton=null;
+    spikeLikeLongPressPointerId=null;
+    if(!keepFired) spikeLikeLongPressFired=false;
+  };
+  $('posts')?.addEventListener('pointerdown', e => {
+    const b=e.target.closest('[data-like]');
+    if(!b || b.disabled) return;
+    if(e.pointerType==='mouse' && e.button!==0) return;
+    cancelLikeLongPress();
+    const id=b.dataset.like;
+    spikeLikeLongPressButton=b;
+    spikeLikeLongPressPointerId=e.pointerId;
+    spikeLikeLongPressStartX=e.clientX;
+    spikeLikeLongPressStartY=e.clientY;
+    spikeLikeLongPressFired=false;
+    spikeLikeLongPressTimer=setTimeout(()=>{
+      spikeLikeLongPressTimer=null;
+      if(!spikeLikeLongPressButton || spikeLikeLongPressPointerId!==e.pointerId) return;
+      spikeLikeLongPressFired=true;
+      b.dataset.longpressFired='1';
+      state.activePost=id;
+      try{navigator.vibrate?.(10);}catch(_){}
+      openReactionTray(id,b);
+    },520);
+  });
+  $('posts')?.addEventListener('pointermove', e => {
+    if(!spikeLikeLongPressTimer || spikeLikeLongPressPointerId!==e.pointerId) return;
+    if(Math.hypot(e.clientX-spikeLikeLongPressStartX,e.clientY-spikeLikeLongPressStartY)>12) cancelLikeLongPress();
+  });
+  $('posts')?.addEventListener('pointerup', () => {
+    if(spikeLikeLongPressFired) cancelLikeLongPress({keepFired:true});
+    else cancelLikeLongPress();
+  });
+  $('posts')?.addEventListener('pointercancel', cancelLikeLongPress);
+  $('posts')?.addEventListener('pointerleave', cancelLikeLongPress);
+  $('posts')?.addEventListener('contextmenu', e => {
+    const b=e.target.closest('[data-like]');
+    if(b?.dataset.longpressFired==='1' || spikeLikeLongPressTimer){e.preventDefault();}
+  }, true);
   $('signalTopPicksRefresh')?.addEventListener('click', () => refreshSignalRanking());
   $('signalTopPicksList')?.addEventListener('click', e => {
     const b = e.target.closest('[data-signal-pick]');
@@ -985,13 +1142,15 @@ async function applySignalFeedback(p,k,b=null){
 function handleSignalClick(e) {
   const b = e.target.closest('button');
   if (!b) return;
-  const id = b.dataset.like || b.dataset.comments || b.dataset.pass || b.dataset.save || b.dataset.more || b.dataset.reactMenu || b.dataset.insights || b.dataset.video || b.dataset.replyTo || b.dataset.image;
+  const id = b.dataset.like || b.dataset.comments || b.dataset.share || b.dataset.save || b.dataset.pass || b.dataset.more || b.dataset.reactMenu || b.dataset.insights || b.dataset.video || b.dataset.replyTo || b.dataset.image;
   if (!id || b.dataset.busy === '1') return;
+  if (b.dataset.longpressFired === '1') { delete b.dataset.longpressFired; e.preventDefault(); return; }
   const lock = () => { b.dataset.busy = '1'; b.disabled = true; };
   const unlock = () => { b.dataset.busy = '0'; b.disabled = false; };
   if (b.dataset.like) { lock(); return toggleLike(id).then(() => { scheduleSignalRefresh({ render: false }); }).catch(x => toast(x?.message || 'Could not update like','error')).finally(unlock); }
-  if (b.dataset.save) { lock(); return toggleSave(id).then(() => { recordSignal(id, 'saves', state.saved.has(id) ? 1 : -1); scheduleSignalRefresh(); }).catch(x => toast(x?.message || 'Could not update saved post','error')).finally(unlock); }
-  if (b.dataset.comments) { recordSignal(id, 'opens', 1); window.SPIKEComments?.toggle(id); scheduleSignalRefresh(); return; }
+  if (b.dataset.save) { lock(); return toggleSave(id).then(() => { recordSignal(id, 'saves', state.saved.has(id) ? 1 : -1); scheduleSignalRefresh({ render: false }); }).catch(x => toast(x?.message || 'Could not update saved post','error')).finally(unlock); }
+  if (b.dataset.comments) { recordSignal(id, 'opens', 1); window.SPIKEComments?.toggle(id); scheduleSignalRefresh({ render: false }); return; }
+  if (b.dataset.share) { state.activePost=id; openPostShare(id); return; }
   if (b.dataset.insights) { const panel = $(`insights-${id}`); if(panel){ const opening=panel.hidden; panel.hidden=!opening; b.textContent=opening?'📊 Hide insights':'📊 Insights'; } return; }
   if (b.dataset.pass) { lock(); return Promise.resolve(passSignal(id)).catch(x => toast(x?.message || 'Could not open Pass','error')).finally(unlock); }
   if (b.dataset.more) { state.activePost = id; const p = state.posts.find(x => x.id === id); if (p) openSignalMoreMenu(p, b); return; }

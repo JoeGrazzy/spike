@@ -1,0 +1,141 @@
+/* SPIKE Post Action Bar V4 — final viewer presentation contract. */
+.post > .post-actions.spike-post-action-bar{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:2px!important;
+  width:100%!important;
+  margin:10px 0 0!important;
+  padding:7px 4px 5px!important;
+  border-top:1px solid var(--spike-line)!important;
+  border-bottom:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.post > .post-actions.spike-post-action-bar > .spike-post-action{
+  min-width:0!important;
+  width:100%!important;
+  min-height:54px!important;
+  padding:7px 4px!important;
+  display:grid!important;
+  grid-template-columns:auto auto!important;
+  grid-template-rows:1fr auto!important;
+  align-content:center!important;
+  justify-content:center!important;
+  column-gap:4px!important;
+  row-gap:3px!important;
+  border:1px solid transparent!important;
+  border-radius:var(--spike-control-radius)!important;
+  background:transparent!important;
+  color:var(--spike-text)!important;
+  box-shadow:none!important;
+  font-size:inherit!important;
+  white-space:normal!important;
+}
+.post > .post-actions.spike-post-action-bar > .spike-post-action::after{content:none!important;display:none!important}
+.post > .post-actions.spike-post-action-bar .spike-action-icon{grid-row:1;align-self:end;font-size:18px;line-height:1;color:var(--spike-muted);}
+.post > .post-actions.spike-post-action-bar .spike-action-count{grid-row:1;align-self:end;min-width:0;font-size:12px;font-weight:850;line-height:1;color:var(--spike-text);}
+.post > .post-actions.spike-post-action-bar .spike-action-label{grid-column:1/-1;grid-row:2;font-size:9px;line-height:1.1;font-weight:800;color:var(--spike-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.post > .post-actions.spike-post-action-bar [data-like].active{border-color:color-mix(in srgb,var(--spike-accent) 42%,transparent)!important;background:color-mix(in srgb,var(--spike-accent) 10%,transparent)!important;box-shadow:0 0 18px color-mix(in srgb,var(--spike-glow) 80%,transparent)!important;}
+.post > .post-actions.spike-post-action-bar [data-like].active .spike-action-icon{color:var(--spike-accent);transform:scale(1.08);}
+.post > .post-actions.spike-post-action-bar [data-comments] .spike-action-icon{color:var(--spike-accent-2);}
+.post > .post-actions.spike-post-action-bar [data-share] .spike-action-icon{color:var(--spike-accent);}
+.post > .post-actions.spike-post-action-bar [data-save].active{border-color:color-mix(in srgb,var(--spike-accent-2) 42%,transparent)!important;background:color-mix(in srgb,var(--spike-accent-2) 9%,transparent)!important;}
+.post > .post-actions.spike-post-action-bar [data-save].active .spike-action-icon{color:var(--spike-accent-2);transform:scale(1.08);}
+/* These are creator analytics/discovery concepts, never normal viewer post chrome. */
+.post .post-stats,
+.post .signal-activity-row,
+.post .post-meta-stats,
+.post .rank-badge,
+.post .signal-featured-badge{display:none!important;}
+
+/* Owner analytics are opt-in from the More menu. The legacy .owner-insights rule
+   sets display:flex, so the HTML hidden attribute must win explicitly. */
+.post .owner-insights[hidden]{display:none!important}
+.post .owner-insights:not([hidden]){display:flex!important}
+/* The score/rank may exist in state for ranking, but never as post UI. */
+.post [data-signal-score],
+.post [data-signal-rank],
+.post [data-top-pick]{display:none!important;}
+@media(max-width:520px){
+  .post > .post-actions.spike-post-action-bar{gap:1px!important;padding:7px 2px 4px!important;}
+  .post > .post-actions.spike-post-action-bar > .spike-post-action{min-height:52px!important;padding:7px 2px!important;}
+  .post > .post-actions.spike-post-action-bar .spike-action-icon{font-size:16px;}
+  .post > .post-actions.spike-post-action-bar .spike-action-count{font-size:11px;}
+  .post > .post-actions.spike-post-action-bar .spike-action-label{font-size:8.5px;}
+}
+@media(max-width:360px){
+  .post > .post-actions.spike-post-action-bar > .spike-post-action{min-height:48px!important;}
+  .post > .post-actions.spike-post-action-bar .spike-action-icon{font-size:14px;}
+  .post > .post-actions.spike-post-action-bar .spike-action-count{font-size:10px;}
+  .post > .post-actions.spike-post-action-bar .spike-action-label{font-size:7.5px;}
+}
+
+/* Reaction V5: one persistent picker, one Pointer Events selection path. */
+.post-actions.spike-post-action-bar [data-like]{
+  -webkit-touch-callout:none !important;
+  -webkit-user-select:none !important;
+  user-select:none !important;
+  touch-action:manipulation !important;
+}
+.reaction-summary-row{display:flex;align-items:center;min-height:0;padding:2px 4px 0;}
+.reaction-summary-row .reaction-summary{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:3px !important;
+  min-height:26px !important;
+  padding:3px 8px !important;
+  border:0 !important;
+  background:transparent !important;
+  color:var(--muted) !important;
+  font:inherit !important;
+  font-size:11px !important;
+  font-weight:800 !important;
+  cursor:pointer !important;
+}
+.reaction-summary-row .reaction-summary.is-empty{display:none !important;}
+.spike-reaction-tray[hidden]{display:none !important;}
+.spike-reaction-tray{
+  position:fixed !important;
+  z-index:2147483001 !important;
+  isolation:isolate !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  gap:3px !important;
+  width:max-content !important;
+  max-width:calc(100vw - 20px) !important;
+  min-height:54px !important;
+  padding:6px !important;
+  border:1px solid var(--spike-line) !important;
+  border-radius:999px !important;
+  background:var(--spike-surface) !important;
+  color:var(--spike-text) !important;
+  box-shadow:var(--spike-shadow),0 12px 35px rgba(0,0,0,.28) !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  -webkit-user-select:none !important;
+  user-select:none !important;
+}
+.spike-reaction-tray button{
+  width:42px !important;
+  height:42px !important;
+  flex:0 0 42px !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  border-radius:50% !important;
+  background:transparent !important;
+  color:inherit !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  font-size:22px !important;
+  line-height:1 !important;
+  cursor:pointer !important;
+  pointer-events:auto !important;
+  touch-action:none !important;
+  -webkit-tap-highlight-color:transparent !important;
+}
+.spike-reaction-tray button:disabled{opacity:.55 !important;}
+.spike-reaction-tray button.is-selected{transform:translateY(-4px) scale(1.12)!important;background:color-mix(in srgb,var(--spike-accent) 18%,transparent)!important;}
+@media(max-width:480px){.spike-reaction-tray{gap:1px!important;padding:5px!important}.spike-reaction-tray button{width:40px!important;height:40px!important;flex-basis:40px!important;font-size:21px!important;}}

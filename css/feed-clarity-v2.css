@@ -1,0 +1,75 @@
+/* SPIKE Feed Clarity V2
+   Information architecture layer: Home is content-first; Discover is a mode;
+   advanced creation and native systems are progressively disclosed. */
+
+/* Home should not expose the Discover control center inline. */
+main.spike-x-home:not(.spike-discover-mode) #feedV2Hub{display:none!important}
+main.spike-x-home:not(.spike-discover-mode) #spikeNativePanel{display:none!important}
+main.spike-x-home:not(.spike-discover-mode) #signalTopPicks{display:none!important}
+
+/* Keep ranking language out of the Home status strip. */
+#feed-status-placeholder,
+main.spike-x-home .feed-status{display:none!important}
+
+/* Home rhythm: Stories → Live (when live exists) → For You/Following → composer → feed. */
+main.spike-x-home #filters{order:initial;margin:4px 0 10px!important}
+main.spike-x-home #filters .filter{min-height:42px;font-size:12px;font-weight:850}
+
+/* Stories are a compact rail, not a giant empty card. */
+main.spike-x-home #storiesRow:empty{display:none!important}
+main.spike-x-home #storiesRow{min-height:0!important;padding:8px!important;margin:0 0 8px!important;border-radius:16px!important}
+
+/* Live is already hidden by its runtime when empty; keep populated live concise. */
+main.spike-x-home #spikeFeedLive{margin:0 0 10px!important;padding:10px!important;border-radius:16px!important}
+main.spike-x-home #spikeFeedLive .spike-feed-live-head{margin-bottom:7px!important;align-items:center!important}
+main.spike-x-home #spikeFeedLive .spike-feed-live-head p{display:none!important}
+main.spike-x-home #spikeFeedLive .spike-feed-live-start{padding:7px 9px!important}
+main.spike-x-home #spikeFeedLive .spike-feed-live-all{padding:7px 9px!important}
+
+/* Composer is a compact entry point until the user intentionally opens it. */
+main.spike-x-home #spikeComposer{margin:0 0 12px!important;border-radius:18px!important}
+main.spike-x-home #spikeComposer.spike-collapsed .signal-composer-top{display:none!important}
+main.spike-x-home #spikeComposer.spike-collapsed .signal-writing-footer{display:none!important}
+main.spike-x-home #spikeComposer.spike-collapsed .signal-writing-surface{border:0!important;background:transparent!important}
+main.spike-x-home #spikeComposer.spike-collapsed #signalText{min-height:46px!important;height:46px!important;border-radius:14px!important;padding:13px 15px!important;font-size:14px!important}
+main.spike-x-home #spikeComposer.spike-collapsed:before{content:'Create a Signal';display:block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px 2px}
+main.spike-x-home #spikeComposer.spike-expanded #signalText{min-height:110px!important}
+
+/* Advanced composer controls are available only after More is opened. */
+main.spike-x-home #spikeComposer:not(.spike-x-advanced-open) .schedule,
+main.spike-x-home #spikeComposer:not(.spike-x-advanced-open) .ai-compose-panel{display:none!important}
+
+/* Discover becomes its own full-width mode. */
+main.spike-x-home.spike-discover-mode{padding-top:10px!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub{display:block!important;margin-bottom:12px!important}
+main.spike-x-home.spike-discover-mode #filters,
+main.spike-x-home.spike-discover-mode #spikeComposer,
+main.spike-x-home.spike-discover-mode #posts,
+main.spike-x-home.spike-discover-mode #signalTopPicks{display:none!important}
+main.spike-x-home.spike-discover-mode #spikeFeedLive,
+main.spike-x-home.spike-discover-mode #storiesRow{display:none!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-nav{display:flex!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-panel{padding:12px 2px 4px!important}
+
+/* Top Picks lives in Discover now. */
+#feedV2Hub #signalTopPicks{display:block!important;margin:10px 0 2px!important}
+#feedV2Hub #signalTopPicks[hidden]{display:none!important}
+#feedV2Hub #signalTopPicks .signal-picks-list{display:flex!important;overflow-x:auto!important;grid-template-columns:none!important;gap:8px!important;padding-bottom:3px!important}
+#feedV2Hub #signalTopPicks .signal-pick{flex:0 0 180px!important}
+
+/* Native Social Layer is a secondary Discover tool, not primary navigation. */
+#spikeNativeDisclosure{margin:12px 0 2px;border:1px solid var(--feed-line);border-radius:15px;background:var(--feed-soft);overflow:hidden}
+#spikeNativeDisclosure>summary{cursor:pointer;list-style:none;padding:11px 12px;font-size:11px;font-weight:900;color:var(--text)}
+#spikeNativeDisclosure>summary::-webkit-details-marker{display:none}
+#spikeNativeDisclosure>summary:before{content:'＋';display:inline-block;margin-right:7px;opacity:.7}
+#spikeNativeDisclosure[open]>summary:before{content:'−'}
+#spikeNativeDisclosure #spikeNativePanel{display:block!important;margin:0!important;border:0!important;border-top:1px solid var(--feed-line)!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
+
+/* Hide duplicate native tab injection from the old presentation layer. */
+#feedV2Nav [data-native-open]{display:none!important}
+
+@media(max-width:600px){
+  main.spike-x-home #spikeComposer.spike-collapsed{padding:10px!important}
+  main.spike-x-home #filters{padding:3px!important}
+  #feedV2Hub #signalTopPicks .signal-pick{flex-basis:170px!important}
+}

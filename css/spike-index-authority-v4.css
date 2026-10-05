@@ -1,0 +1,86 @@
+/* SPIKE INDEX AUTHORITY V4
+   Final isolation layer for index.html.
+   Fixes global theme/card selectors leaking into auth internals.
+   Auth/runtime/backend contracts are untouched.
+*/
+
+@font-face{font-family:'SPIKE Inter';src:url('../assets/fonts/inter/Inter-Regular.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'SPIKE Inter';src:url('../assets/fonts/inter/Inter-Medium.otf') format('opentype');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'SPIKE Inter';src:url('../assets/fonts/inter/Inter-SemiBold.otf') format('opentype');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'SPIKE Inter';src:url('../assets/fonts/inter/Inter-Bold.otf') format('opentype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'SPIKE Inter';src:url('../assets/fonts/inter/Inter-ExtraBold.otf') format('opentype');font-weight:800;font-style:normal;font-display:swap}
+
+html,body,body[data-spike-page="index"] *{box-sizing:border-box}
+html,body{width:100%;max-width:100%;min-width:0;margin:0}
+body[data-spike-page="index"]{font-family:'SPIKE Inter',var(--spike-font),ui-sans-serif,system-ui,sans-serif!important;letter-spacing:normal!important;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body[data-spike-page="index"] button,body[data-spike-page="index"] input,body[data-spike-page="index"] textarea,body[data-spike-page="index"] select{font-family:inherit!important}
+
+/* Undo project-wide card material rules on structural auth containers. */
+body[data-spike-page="index"] .hero,
+body[data-spike-page="index"] .panel,
+body[data-spike-page="index"] .field{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body[data-spike-page="index"] .hero{overflow:hidden}
+body[data-spike-page="index"] .panel{padding:0!important}
+body[data-spike-page="index"] .field{overflow:visible!important}
+
+/* The auth card is the single visual container. */
+body[data-spike-page="index"] .auth-card{
+  overflow:visible!important;
+  isolation:isolate;
+}
+
+/* Do not use viewport clipping as a substitute for layout containment. */
+html[data-spike-theme-id],body[data-spike-page="index"]{overflow-x:hidden}
+
+/* Real width containment for controls and text. */
+body[data-spike-page="index"] .auth-page,
+body[data-spike-page="index"] .hero-inner,
+body[data-spike-page="index"] .hero-copy,
+body[data-spike-page="index"] .auth-side,
+body[data-spike-page="index"] .auth-wrap,
+body[data-spike-page="index"] .auth-card,
+body[data-spike-page="index"] .panel,
+body[data-spike-page="index"] form,
+body[data-spike-page="index"] .field,
+body[data-spike-page="index"] .input-wrap,
+body[data-spike-page="index"] .tabs,
+body[data-spike-page="index"] .row,
+body[data-spike-page="index"] .oauth-grid,
+body[data-spike-page="index"] .terms{min-width:0;max-width:100%}
+body[data-spike-page="index"] input,
+body[data-spike-page="index"] button,
+body[data-spike-page="index"] select,
+body[data-spike-page="index"] textarea{box-sizing:border-box;min-width:0;max-width:100%}
+
+/* Avoid unsupported 850/950 weights on Android; use the bundled real weights. */
+body[data-spike-page="index"] .brand-name,
+body[data-spike-page="index"] .hero h1,
+body[data-spike-page="index"] .title,
+body[data-spike-page="index"] .primary{font-weight:800}
+body[data-spike-page="index"] .label,
+body[data-spike-page="index"] .tabs button,
+body[data-spike-page="index"] .link,
+body[data-spike-page="index"] .bottom button{font-weight:700}
+
+@media(max-width:560px){
+  body[data-spike-page="index"] .hero{padding:14px 14px 12px}
+  body[data-spike-page="index"] .hero-copy{margin-top:15px}
+  body[data-spike-page="index"] .hero h1{font-size:clamp(27px,8.5vw,34px);letter-spacing:-1.1px}
+  body[data-spike-page="index"] .hero-copy>p{font-size:11px;line-height:1.45}
+  body[data-spike-page="index"] .auth-side{padding:8px 10px 24px}
+  body[data-spike-page="index"] .auth-card{padding:15px}
+}
+@media(max-width:380px){
+  body[data-spike-page="index"] .hero{padding-inline:11px}
+  body[data-spike-page="index"] .auth-side{padding-inline:7px}
+  body[data-spike-page="index"] .auth-card{padding:13px}
+  body[data-spike-page="index"] .oauth-grid{grid-template-columns:1fr}
+  body[data-spike-page="index"] .oauth-btn{height:42px}
+}

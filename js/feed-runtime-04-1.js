@@ -36,7 +36,7 @@ const toast = window.spikePremiumToast || ((msg, type, ms) => {
 const state = {
   user: null, profile: {}, posts: [], stories: [], users: new Map(),
   saved: new Set(), following: new Set(), muted: new Set(), blocked: new Set(), storyViewed: new Set(),
-  filter: "latest", media: null, mediaType: null, mediaItems: [], activeMediaIndex: 0, mediaLayout: "auto",
+  filter: "forYou", media: null, mediaType: null, mediaItems: [], activeMediaIndex: 0, mediaLayout: "auto",
   activePost: null, activeComment: null, activeStory: null, customFeed: null,
   visiblePosts: 20, loadingMore: !1, allLoaded: !1, expandedCaptions: new Set(), realtimeRetryTimer: null, realtimeRetryAttempt: 0, realtimeStarting: false, realtimeRefreshTimer: null
 };
@@ -482,8 +482,14 @@ function renderStories() {
     if (b.authorUid === state.user?.id) return 1;
     return b.score-a.score;
   });
-  if (!grouped.length) { row.innerHTML='<div class="empty" style="width:100%;padding:12px">No stories yet. Create the first one.</div>'; return; }
   const fragment=document.createDocumentFragment();
+  const createCard=document.createElement('button');
+  createCard.type='button';
+  createCard.className='story story-create-tile';
+  createCard.setAttribute('aria-label','Create a Story');
+  createCard.innerHTML='<span class="story-preview story-create-preview"><span class="story-create-plus" aria-hidden="true">＋</span></span><span>Your Story</span>';
+  createCard.addEventListener('click',()=>{ const overlay=$('storyOverlay'); if(overlay){ overlay.classList.add('open'); overlay.removeAttribute('hidden'); } });
+  fragment.appendChild(createCard);
   grouped.forEach((g,idx)=>{
     const story=g.preview, card=document.createElement('button');
     card.type='button'; card.className=`story ${g.unread.length?'story-ring-unread':'story-ring-read'}`;

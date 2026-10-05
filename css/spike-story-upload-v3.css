@@ -1,0 +1,14 @@
+/* Story is a primary creation path on Home, not an advanced control. */
+.spike-x-composer .signal-tools{grid-template-columns:repeat(3,minmax(0,1fr));}
+.spike-x-composer .signal-tools .signal-tool:nth-child(3),
+.spike-x-composer .signal-tools .signal-tool:nth-child(4){display:none;}
+.spike-x-composer .signal-tools .signal-tool:nth-child(1),
+.spike-x-composer .signal-tools .signal-tool:nth-child(2),
+.spike-x-composer .signal-tools .signal-tool:nth-child(5){display:inline-flex;}
+.spike-x-composer .signal-tools .signal-tool:nth-child(5){order:3;}
+.story-create-tile{position:relative;flex:0 0 84px;min-height:118px;border:1px solid rgba(91,151,255,.35);border-radius:16px;background:linear-gradient(180deg,rgba(33,75,143,.55),rgba(8,24,58,.92));color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:7px 5px;cursor:pointer;}
+.story-create-tile:focus-visible,.story-create-tile:hover{outline:2px solid rgba(116,173,255,.8);outline-offset:2px;}
+.story-create-preview{position:absolute;inset:0 0 26px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.035);border-radius:15px 15px 9px 9px;}
+.story-create-plus{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--accent,#4f8cff);color:#fff;font-size:22px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.28);}
+.story-create-tile>span:last-child{font-size:10px;font-weight:850;line-height:1.2;}
+@media (max-width:480px){.spike-x-composer .signal-tools .signal-tool{min-height:44px;font-size:11px;}.story-create-tile{flex-basis:78px;min-height:112px;}}

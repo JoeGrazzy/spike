@@ -1,0 +1,156 @@
+<!doctype html><html><body>
+<button id="storySectionCreate" type="button">＋ Create Story</button>
+<button id="storyBtn" type="button">◎ Story</button>
+<div class="overlay" id="storyOverlay" aria-hidden="true"><div class="modal"><textarea id="storyText"></textarea><button id="storyMediaBtn" type="button">media</button><input id="storyMediaInput" type="file"><button id="storyAudioBtn" type="button">audio</button><input id="storyAudioInput" type="file"><button id="cancelStory" type="button">cancel</button><button id="publishStory" type="button">publish</button></div></div>
+<script>window.publishStory=()=>document.body.dataset.published='1';</script>
+<script>
+(function(){
+  let guardTimer=null;
+  let composerObserver=null;
+  let bodyObserver=null;
+
+  function get(){
+    return {
+      composer:document.getElementById('spikeComposer'),
+      nav:document.getElementById('spikeBottomNav')
+    };
+  }
+
+  function sync(){
+    const {composer,nav}=get();
+    if(!composer) return;
+    const active=composer.classList.contains('spike-expanded');
+    document.body.classList.toggle('spike-composer-active',active);
+    if(nav){
+      nav.classList.toggle('spike-composer-nav-hidden',active);
+      if(active){
+        nav.style.setProperty('display','none','important');
+        nav.style.setProperty('visibility','hidden','important');
+        nav.style.setProperty('pointer-events','none','important');
+      }else{
+        nav.style.removeProperty('display');
+        nav.style.removeProperty('visibility');
+        nav.style.removeProperty('pointer-events');
+      }
+    }
+    if(active && !guardTimer){
+      guardTimer=setInterval(()=>{
+        const {composer:c,nav:n}=get();
+        if(!c || !c.classList.contains('spike-expanded')){
+          clearInterval(guardTimer); guardTimer=null; sync(); return;
+        }
+        if(n){
+          n.classList.add('spike-composer-nav-hidden');
+          n.style.setProperty('display','none','important');
+          n.style.setProperty('visibility','hidden','important');
+          n.style.setProperty('pointer-events','none','important');
+        }
+      },250);
+    }
+  }
+
+  function boot(){
+    const composer=document.getElementById('spikeComposer');
+    if(!composer) return;
+    sync();
+    composerObserver=new MutationObserver(sync);
+    composerObserver.observe(composer,{attributes:true,attributeFilter:['class']});
+    bodyObserver=new MutationObserver(sync);
+    bodyObserver.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['id','class']});
+    document.addEventListener('focusin',e=>{ if(e.target.closest('#spikeComposer')) sync(); },true);
+    document.addEventListener('focusout',()=>setTimeout(sync,40),true);
+    window.addEventListener('resize',sync,{passive:true});
+    window.addEventListener('scroll',sync,{passive:true});
+    document.addEventListener('visibilitychange',sync);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+})();
+
+/* Story interaction reliability bridge.
+ * Story creation must remain usable even if the authenticated Feed boot is
+ * delayed or another Feed runtime fails before bindEvents(). The existing
+ * Story publish/upload implementation remains authoritative; this layer only
+ * guarantees the user-visible open/close/input tap path.
+ */
+(function(){
+  'use strict';
+  if (window.__SPIKE_STORY_INTERACTION_BRIDGE__) return;
+  window.__SPIKE_STORY_INTERACTION_BRIDGE__ = true;
+
+  function byId(id){ return document.getElementById(id); }
+  function openStory(){
+    const overlay=byId('storyOverlay');
+    if(!overlay) return false;
+    overlay.classList.add('open');
+    overlay.removeAttribute('hidden');
+    overlay.setAttribute('aria-hidden','false');
+    const text=byId('storyText');
+    window.setTimeout(()=>text?.focus({preventScroll:true}),40);
+    return true;
+  }
+  function closeStory(){
+    const overlay=byId('storyOverlay');
+    if(!overlay) return false;
+    overlay.classList.remove('open');
+    overlay.setAttribute('aria-hidden','true');
+    return true;
+  }
+  function matches(target, selector){ return target?.closest?.(selector); }
+
+  document.addEventListener('click', function(e){
+    const create=matches(e.target, '#storySectionCreate, #storyBtn, [data-studio="story"]');
+    if(create){
+      e.preventDefault();
+      e.stopPropagation();
+      openStory();
+      return;
+    }
+    if(matches(e.target, '#cancelStory')){
+      e.preventDefault();
+      e.stopPropagation();
+      closeStory();
+      return;
+    }
+    if(matches(e.target, '#storyMediaBtn')){
+      e.preventDefault();
+      e.stopPropagation();
+      byId('storyMediaInput')?.click();
+      return;
+    }
+    if(matches(e.target, '#storyAudioBtn')){
+      e.preventDefault();
+      e.stopPropagation();
+      byId('storyAudioInput')?.click();
+      return;
+    }
+    if(matches(e.target, '#publishStory')){
+      e.preventDefault();
+      e.stopPropagation();
+      if(typeof window.publishStory === 'function') window.publishStory();
+      return;
+    }
+    if(e.target===byId('storyOverlay')){
+      closeStory();
+    }
+  }, true);
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='Escape' && byId('storyOverlay')?.classList.contains('open')){
+      e.preventDefault();
+      closeStory();
+    }
+  }, true);
+})();
+</script>
+<script>
+window.addEventListener('load',()=>{
+ const b=document.getElementById('storySectionCreate'); b.click();
+ document.body.dataset.opened=document.getElementById('storyOverlay').classList.contains('open')?'1':'0';
+ document.getElementById('cancelStory').click();
+ document.body.dataset.closed=!document.getElementById('storyOverlay').classList.contains('open')?'1':'0';
+ document.getElementById('publishStory').click();
+ document.body.dataset.pub=document.body.dataset.published==='1'?'1':'0';
+});
+</script></body></html>

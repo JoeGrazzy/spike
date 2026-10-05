@@ -151,52 +151,31 @@ function signalHTML(p) {
   const liked = reactionLikeUsers(p).has(String(state.user.id)), saved = state.saved.has(p.id);
   const isScheduled = p.scheduledAt && new Date(p.scheduledAt) > new Date();
   const commentsHtml = renderComments(comments);
-  const reactionEntries = normalizedReactionEntries(p);
   const m = signalMetrics(p);
-  const topReactions = reactionEntries.slice(0, 3).map(([emoji]) => `<span class="reaction-icon">${emoji}</span>`).join("");
-  const reactionSummary = m.totalReactions
-    ? `<button type="button" class="reaction-summary" data-react-menu="${esc(p.id)}" aria-label="${m.totalReactions} reactions">${topReactions}<span>${m.totalReactions}</span></button>`
-    : `<button type="button" class="reaction-summary is-empty" data-react-menu="${esc(p.id)}" aria-label="React to Signal"><span>React</span></button>`;
-  const rankBadge = signalRankBadge(p);
-  const signalScoreValue = signalScore(p);
   const isOwner = p.authorUid === state.user.id;
-  const signalRank = Number(p.__signalTopRank || 0);
-  const isSignalFeatured = signalRank >= 1 && signalRank <= 5;
-  const signalFeaturedBadge = isSignalFeatured ? `<div class="signal-featured-badge" aria-label="Top Pick rank ${signalRank}, Signal Strength ${signalScoreValue} out of 100"><b>#${signalRank}</b><span>Top Pick</span><em>${signalScoreValue}/100</em><i class="signal-score-track" aria-hidden="true"><i style="width:${signalScoreValue}%"></i></i></div>` : '';
-  return `<article class="post${isSignalFeatured ? ' signal-featured-post' : ''}" data-post="${esc(p.id)}"${isSignalFeatured ? ` data-signal-rank="${signalRank}"` : ''}>
+  return `<article class="post" data-post="${esc(p.id)}">
 <div class="post-head">
 <a class="post-author" href="${profileLink(p.authorUid)}">
 <div class="post-avatar">${identityAvatar(a,"spike-avatar",nameOf(a))}</div>
 <div>
 <div class="post-name">${esc(nameOf(a))}${verifiedBadgeHTML(a)}</div>
-<div class="post-meta">@${esc(a.username||"spike")} · ${ago(p.createdAt||p.created_at)}${rankBadge ? `<span class="rank-badge" title="Feed ranking score ${signalScoreValue}/100 · ${esc(explainSignalStrength(p))}">${rankBadge} ${signalScoreValue}</span>` : `<span class="rank-badge" title="Feed ranking score ${signalScoreValue}/100 · ${esc(explainSignalStrength(p))}">Signal ${signalScoreValue}</span>`}${p.updatedAt && (p.edited === true || !!p.editedAt) ? `<span class="edited">(edited)</span>` : ""}${isScheduled ? `<span class="scheduled-badge">Scheduled</span>` : ""}</div>
+<div class="post-meta">@${esc(a.username||"spike")} · ${ago(p.createdAt||p.created_at)}${p.updatedAt && (p.edited === true || !!p.editedAt) ? `<span class="edited">(edited)</span>` : ""}${isScheduled ? `<span class="scheduled-badge">Scheduled</span>` : ""}</div>
 </div>
 </a>
 <button class="more" data-more="${esc(p.id)}" aria-label="More">⋯</button>
 </div>
 
 ${p.content?`<div class="post-content ${state.expandedCaptions?.has(String(p.id))?'':'is-collapsed'}" data-caption><span class="caption-body">${markdownToHTML(p.content)}</span><button type="button" class="caption-more" data-caption-toggle aria-label="Expand caption"></button></div>`:""}
-${isSignalFeatured && mediaMarkup(p) ? `<div class="signal-featured-media">${signalFeaturedBadge}${mediaMarkup(p)}</div>` : mediaMarkup(p)}
+${mediaMarkup(p)}
 ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl(p.linkUrl))}" target="_blank" rel="noopener noreferrer">${esc(p.linkUrl)}</a></div>`:""}
-<div class="post-stats">
-<span class="reaction-count">${m.totalReactions ? `${m.totalReactions} reactions` : ""}</span>
-<span class="comments-count">${m.comments ? `💬 ${m.comments}` : ""}</span>
-<span>${Number(p.views||0) ? `👁 ${Number(p.views||0)}` : ""}</span>
-
-<span>${m.saves ? `🔖 ${m.saves}` : ""}</span>
+<div class="reaction-summary-row">${m.totalReactions ? `<button type="button" class="reaction-summary" data-react-menu="${esc(p.id)}" aria-label="${m.totalReactions} reactions" title="View reactions">${normalizedReactionEntries(p).slice(0,3).map(([emoji])=>`<span class="reaction-icon">${esc(emoji)}</span>`).join("")}<span>${m.totalReactions}</span></button>` : `<button type="button" class="reaction-summary is-empty" data-react-menu="${esc(p.id)}" aria-label="React to Signal" title="View reactions"><span>React</span></button>`}</div>
+<div class="post-actions spike-post-action-bar" role="group" aria-label="Signal actions">
+<button class="spike-post-action ${liked?"active":""}" data-like="${esc(p.id)}" aria-pressed="${liked?"true":"false"}" aria-label="${liked?"Unlike Signal":"Like Signal"}" title="${liked?"Unlike":"Like"} · long press for reactions"><span class="spike-action-icon" aria-hidden="true">♡</span><span class="spike-action-count" data-like-count="${esc(p.id)}">${m.likes || ""}</span><span class="spike-action-label">Like</span></button>
+<button class="spike-post-action" data-comments="${esc(p.id)}" aria-label="Open ${m.comments || ""} comments" title="Comments"><span class="spike-action-icon" aria-hidden="true">💬</span><span class="spike-action-count" data-comments-count="${esc(p.id)}">${m.comments || ""}</span><span class="spike-action-label">Comment</span></button>
+<button class="spike-post-action" data-share="${esc(p.id)}" aria-label="Share Signal" title="Share"><span class="spike-action-icon" aria-hidden="true">↗</span><span class="spike-action-label">Share</span></button>
+<button class="spike-post-action ${saved?"active":""}" data-save="${esc(p.id)}" aria-pressed="${saved?"true":"false"}" aria-label="${saved?"Remove from Saved":"Save Signal"}" title="${saved?"Saved":"Save"}"><span class="spike-action-icon" aria-hidden="true">🔖</span><span class="spike-action-label">${saved?"Saved":"Save"}</span></button>
 </div>
-<div class="post-actions">
-<button class="${liked?"active":""}" data-like="${esc(p.id)}" aria-label="${liked?"Unlike Signal":"Like Signal"}" title="${liked?"Unlike":"Like"}">❤️</button>
-<button data-comments="${esc(p.id)}" aria-label="Open comments" title="Comments">💬</button>
-<button data-pass="${esc(p.id)}" aria-label="Pass this Signal">↗</button>
-<button class="${saved?"active":""}" data-save="${esc(p.id)}" aria-label="${saved?"Unsave Signal":"Save Signal"}" title="${saved?"Unsave":"Save"}">🔖</button>
-${p.mediaType === "video" ? `<button type="button" class="spike-video-download" data-download-video="${esc(p.id)}" aria-label="Download watermarked video" title="Download watermarked video">⬇️</button>` : ""}
-</div>
-<div class="reaction-picker">
-<button class="react-trigger" data-react-menu="${esc(p.id)}" aria-label="Choose reaction">☺ React</button>
-${reactionSummary}
-</div>
-<div class="signal-activity-row" aria-label="Signal activity"><span>Signal activity</span><span>${Number(p.views||0)} views</span><span>${m.totalReactions} reactions</span><span>${m.comments} comments</span><span>${m.saves} saves</span></div>${isOwner ? `<div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div>` : ""}
+${isOwner ? `<div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div>` : ""}
 <div class="comments" id="comments-${esc(p.id)}" data-comments-panel="${esc(p.id)}">
   <div class="comments-head">
     <span class="comments-title">Echoes</span>
@@ -220,8 +199,6 @@ ${reactionSummary}
 }
 
 function renderSignalsFromRanked(list) {
-  state.posts.forEach(p => { delete p.__signalTopRank; });
-  list.slice(0, 5).forEach((p, i) => { p.__signalTopRank = i + 1; });
   const visible = list.slice(0, state.visiblePosts);
   state.allLoaded = visible.length >= list.length;
   const container = $("posts");
@@ -286,9 +263,13 @@ function setNotificationBadge(count){
 async function refreshNotificationBadge(){
   if(!state.user?.id||!navigator.onLine)return;
   try{
-    const n=await withTimeout(db.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',state.user.id).eq('read',false),8000,'Notification badge');
+    if(window.SPIKENotificationCenter?.refresh){
+      const count=await window.SPIKENotificationCenter.refresh();
+      if(count!==null){setNotificationBadge(count);return;}
+    }
+    const n=await withTimeout(db.rpc('get_notification_summary'),8000,'Notification badge');
     if(n?.error)throw n.error;
-    setNotificationBadge(n?.count||0);
+    setNotificationBadge(Number(n?.data?.unread||0));
   }catch(e){console.debug('[SPIKE notification badge]',e);}
 }
 function startNotificationBadge(){
@@ -455,8 +436,6 @@ function syncReactionDom(id, post) {
     summary.setAttribute('aria-label', m.totalReactions ? `${m.totalReactions} reactions` : 'React to Signal');
     summary.innerHTML = m.totalReactions ? `${top}<span>${m.totalReactions}</span>` : '<span>React</span>';
   }
-  const total = article.querySelector('.reaction-count');
-  if (total) total.textContent = m.totalReactions ? `${m.totalReactions} reactions` : '';
   const insights = article.querySelector('.owner-insights');
   if (insights) {
     const spans = insights.querySelectorAll('span');
@@ -472,13 +451,14 @@ function syncLikeDom(id, post) {
     const liked = reactionLikeUsers(post).has(String(state.user?.id));
     btn.classList.toggle('active', liked);
     btn.setAttribute('aria-pressed', liked ? 'true' : 'false');
+    btn.setAttribute('aria-label', liked ? 'Unlike Signal' : 'Like Signal');
+    btn.setAttribute('title', liked ? 'Unlike' : 'Like');
+    const icon = btn.querySelector('.spike-action-icon');
+    if(icon) icon.textContent = liked ? '♥' : '♡';
   }
   const m = signalMetrics(post);
-  const stats = article.querySelector('.post-stats');
-  if (stats) {
-    const reactionCount = stats.querySelector('.reaction-count');
-    if (reactionCount) reactionCount.textContent = m.totalReactions ? `${m.totalReactions} reactions` : '';
-  }
+  const count = article.querySelector(`[data-like-count="${CSS.escape(String(id))}"]`);
+  if (count) count.textContent = m.likes ? String(m.likes) : '';
   syncReactionDom(id, post);
 }
 
@@ -493,8 +473,10 @@ function syncCommentDom(id, post) {
   const list = section.querySelector('.comment-list');
   if (list) list.innerHTML = renderComments(comments) || '<div class="meta">No comments yet.</div>';
 
-  const count = article.querySelector('.comments-count');
-  if (count) count.textContent = comments.length ? `💬 ${comments.length}` : '';
+  const count = article.querySelector(`[data-comments-count="${CSS.escape(String(id))}"]`);
+  if (count) count.textContent = comments.length ? String(comments.length) : '';
+  const commentButton = article.querySelector(`[data-comments="${CSS.escape(String(id))}"]`);
+  if (commentButton) commentButton.setAttribute('aria-label', comments.length ? `Open ${comments.length} comments` : 'Open comments');
 
   const m = signalMetrics(post);
   const insights = article.querySelector('.owner-insights');
@@ -514,6 +496,10 @@ function syncSaveDom(id) {
     const saved = state.saved.has(id);
     btn.classList.toggle('active', saved);
     btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
+    btn.setAttribute('aria-label', saved ? 'Remove from Saved' : 'Save Signal');
+    btn.setAttribute('title', saved ? 'Saved' : 'Save');
+    const label = btn.querySelector('.spike-action-label');
+    if(label) label.textContent = saved ? 'Saved' : 'Save';
   }
 }
 
@@ -589,7 +575,9 @@ async function toggleSave(id) {
 async function reactToSignal(id, emoji) {
   const p = getSignalState(id);
   const key = `reaction:${id}`;
-  if (!p || !SPIKE_REACTIONS.includes(emoji) || feedInteractionBusy.has(key)) return;
+  if (!p) throw new Error('This Signal is no longer available. Please refresh the feed.');
+  if (!SPIKE_REACTIONS.includes(emoji)) throw new Error('That reaction is not available.');
+  if (feedInteractionBusy.has(key)) return;
   feedInteractionBusy.add(key);
   setInteractionBusy(id, true, 'reaction');
 
@@ -686,34 +674,156 @@ async function addComment(postId, text, parentCommentId = null) {
 
 // ─── REACTION TRAY ─────────────────────────────────────
 let spikeReactionTray = null;
-function closeReactionTray(){ if (spikeReactionTray) { spikeReactionTray.remove(); spikeReactionTray = null; } }
-function openReactionTray(id, anchor){
-  closeReactionTray();
-  const tray = document.createElement('div');
-  tray.className = 'spike-reaction-tray';
+let spikeReactionTarget = null;
+let spikeReactionPostId = null;
+let spikeReactionCommitBusy = false;
+
+function ensureReactionTray(){
+  if(spikeReactionTray && document.body.contains(spikeReactionTray)) return spikeReactionTray;
+  const tray=document.createElement('div');
+  tray.id='spikeReactionPicker';
+  tray.className='spike-reaction-tray';
   tray.setAttribute('role','dialog');
   tray.setAttribute('aria-label','Choose a reaction');
-  tray.innerHTML = SPIKE_REACTIONS.map(emoji => `<button type="button" data-spike-reaction="${esc(emoji)}" aria-label="${esc(emoji)}">${esc(emoji)}</button>`).join('');
+  tray.hidden=true;
+  tray.innerHTML=SPIKE_REACTIONS.map(emoji=>`<button type="button" data-spike-reaction="${esc(emoji)}" aria-label="${esc(emoji)}">${esc(emoji)}</button>`).join('');
   document.body.appendChild(tray);
-  spikeReactionTray = tray;
-  const r = anchor.getBoundingClientRect();
-  const trayWidth = Math.min(window.innerWidth - 20, 312);
-  let left = Math.max(10, Math.min(window.innerWidth - trayWidth - 10, r.left));
-  let top = r.top - 58;
-  if (top < 8) top = r.bottom + 8;
-  tray.style.left = `${left}px`;
-  tray.style.top = `${top}px`;
-  tray.addEventListener('click', e => {
-    const b = e.target.closest('[data-spike-reaction]');
-    if (!b) return;
-    reactToSignal(id, b.dataset.spikeReaction);
-  }, {once:true});
-  setTimeout(() => document.addEventListener('pointerdown', function outside(e){
-    if (!tray.contains(e.target) && e.target !== anchor) {
-      closeReactionTray();
-      document.removeEventListener('pointerdown', outside);
-    }
-  }), 0);
+  spikeReactionTray=tray;
+
+  tray.addEventListener('pointerup', e=>{
+    const button=e.target?.closest?.('[data-spike-reaction]');
+    if(!button || !tray.contains(button) || button.disabled) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const emoji=button.dataset.spikeReaction;
+    if(!emoji || spikeReactionCommitBusy || !spikeReactionPostId) return;
+    void commitReactionSelection(button,emoji);
+  }, {passive:false});
+
+  tray.addEventListener('keydown', e=>{
+    const button=e.target?.closest?.('[data-spike-reaction]');
+    if(!button || button.disabled || (e.key!=='Enter' && e.key!==' ')) return;
+    e.preventDefault();
+    const emoji=button.dataset.spikeReaction;
+    if(!emoji || spikeReactionCommitBusy || !spikeReactionPostId) return;
+    void commitReactionSelection(button,emoji);
+  });
+  return tray;
+}
+
+function positionReactionTray(anchor){
+  const tray=ensureReactionTray();
+  const r=anchor.getBoundingClientRect();
+  const trayWidth=Math.min(window.innerWidth-20,312);
+  let left=Math.max(10,Math.min(window.innerWidth-trayWidth-10,r.left));
+  let top=r.top-62;
+  if(top<8) top=r.bottom+8;
+  tray.style.left=`${Math.round(left)}px`;
+  tray.style.top=`${Math.round(top)}px`;
+  tray.style.minWidth=`${Math.min(trayWidth,312)}px`;
+}
+
+function closeReactionTray(){
+  const tray=spikeReactionTray;
+  if(!tray) return;
+  tray.hidden=true;
+  tray.setAttribute('aria-hidden','true');
+  tray.querySelectorAll('[data-spike-reaction]').forEach(b=>{
+    b.disabled=false;
+    b.removeAttribute('aria-busy');
+    b.classList.remove('is-selected');
+  });
+  spikeReactionTarget=null;
+  spikeReactionPostId=null;
+  spikeReactionCommitBusy=false;
+}
+
+function openReactionTray(id,anchor){
+  const tray=ensureReactionTray();
+  spikeReactionPostId=String(id);
+  spikeReactionTarget=anchor;
+  spikeReactionCommitBusy=false;
+  tray.hidden=false;
+  tray.setAttribute('aria-hidden','false');
+  tray.querySelectorAll('[data-spike-reaction]').forEach(b=>{
+    b.disabled=false;
+    b.removeAttribute('aria-busy');
+    b.classList.remove('is-selected');
+  });
+  positionReactionTray(anchor);
+  const first=tray.querySelector('[data-spike-reaction]');
+  if(first) requestAnimationFrame(()=>first.focus({preventScroll:true}));
+}
+
+async function commitReactionSelection(button,emoji){
+  if(spikeReactionCommitBusy || !spikeReactionPostId || !SPIKE_REACTIONS.includes(emoji)) return;
+  const id=spikeReactionPostId;
+  const tray=spikeReactionTray;
+  spikeReactionCommitBusy=true;
+  const buttons=[...(tray?.querySelectorAll('[data-spike-reaction]')||[])];
+  buttons.forEach(b=>{b.disabled=true;b.setAttribute('aria-busy','true');});
+  button.classList.add('is-selected');
+  try{
+    await reactToSignal(id,emoji);
+  }catch(err){
+    buttons.forEach(b=>{b.disabled=false;b.removeAttribute('aria-busy');});
+    button.classList.remove('is-selected');
+    spikeReactionCommitBusy=false;
+    toast(err?.message||'Could not save that reaction. Please try again.','error');
+  }
+}
+
+function initReactionPickerDismiss(){
+  if(window.__SPIKE_REACTION_DISMISS__) return;
+  window.__SPIKE_REACTION_DISMISS__=true;
+  document.addEventListener('pointerdown',e=>{
+    const tray=spikeReactionTray;
+    if(!tray || tray.hidden) return;
+    if(tray.contains(e.target) || e.target===spikeReactionTarget) return;
+    closeReactionTray();
+  },{capture:true});
+  window.addEventListener('resize',()=>{
+    if(spikeReactionTray && !spikeReactionTray.hidden && spikeReactionTarget) positionReactionTray(spikeReactionTarget);
+  },{passive:true});
+}
+initReactionPickerDismiss();
+
+// ─── POST SHARE SHEET ───────────────────────────────────
+function spikePostShareUrl(id){ return new URL(`feed.html?post=${encodeURIComponent(id)}`, location.href).href; }
+function openPostShare(id){
+  const p=state.posts.find(x=>String(x.id)===String(id));
+  if(!p)return;
+  state.activePost=id;
+  const overlay=$('spikePostShareOverlay');
+  const preview=$('spikePostSharePreview');
+  if(preview){
+    const text=String(p.content||'Signal').trim();
+    preview.innerHTML=`<span class="spike-share-preview-kicker">SHARE SIGNAL</span><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(text.slice(0,220))}${text.length>220?'…':''}</span>`;
+  }
+  overlay?.classList.add('open');
+  overlay?.setAttribute('aria-hidden','false');
+  setTimeout(()=>overlay?.querySelector('[data-post-share-action]')?.focus(),30);
+}
+function closePostShare(){
+  const overlay=$('spikePostShareOverlay');
+  overlay?.classList.remove('open');
+  overlay?.setAttribute('aria-hidden','true');
+}
+async function sharePostExternally(id){
+  const p=state.posts.find(x=>String(x.id)===String(id));
+  if(!p||!window.SPIKEShare){toast('Sharing is unavailable right now','error');return;}
+  const payload={title:`${nameOf(authorFor(p))} on SPIKE`,text:String(p.content||'A Signal from SPIKE').trim(),url:spikePostShareUrl(id)};
+  try{
+    const prepared=await window.SPIKEShare.prepare(payload);
+    const result=await window.SPIKEShare.sharePrepared(prepared);
+    if(result.method==='copied-link') toast('Signal link copied','success');
+    else if(result.method!=='none'){ await recordCreatorEngagement(id,'share'); queueFeedEvent(id,'share',{metadata:{surface:'post_share',method:result.method}}); toast('Share sheet opened','success'); }
+    else toast('Sharing unavailable — copy the Signal link instead.','error');
+  }catch(e){ if(e?.name!=='AbortError') toast(e?.message||'Device sharing unavailable','error'); }
+}
+async function copyPostShareLink(id){
+  try{ await copyTextSafe(spikePostShareUrl(id)); toast('Signal link copied','success'); }
+  catch(_){ toast('Copy unavailable — press and hold the link.','error'); }
 }
 
 // ─── SPIKE PASS ─────────────────────────────────────────

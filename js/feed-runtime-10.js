@@ -6,7 +6,7 @@
     const tools=c.querySelector('.signal-tools'), creators=c.querySelector('.signal-creator-row');
     if(!tools)return;
     const rail=document.createElement('div'); rail.id='spikeSignalStudioRail';
-    rail.innerHTML='<button type="button" class="studio-chip" data-studio="add">＋ Add</button><button type="button" class="studio-chip" data-studio="refine">✦ Refine</button><button type="button" class="studio-chip" data-studio="later">◷ Later</button><button type="button" class="studio-chip" data-studio="more">More</button><span class="studio-state">Signal <strong>forming</strong></span>';
+    rail.innerHTML='<button type="button" class="studio-chip" data-studio="add">＋ Add</button><button type="button" class="studio-chip" data-studio="story">◎ Story</button><button type="button" class="studio-chip" data-studio="refine">✦ Refine</button><button type="button" class="studio-chip" data-studio="later">◷ Later</button><button type="button" class="studio-chip" data-studio="more">More</button><span class="studio-state">Signal <strong>forming</strong></span>';
     tools.parentNode.insertBefore(rail,tools);
     const more=document.createElement('div'); more.id='spikeSignalStudioMore';
     if(creators){
@@ -24,6 +24,7 @@
     rail.addEventListener('click',e=>{
       const b=e.target.closest('[data-studio]'); if(!b)return; const a=b.dataset.studio;
       if(a==='add'){more.classList.add('open'); [add,clip,link].forEach(x=>x&&x.classList.remove('is-hidden'));}
+      if(a==='story'){document.getElementById('storyBtn')?.click();}
       if(a==='refine'){document.getElementById('composeAiBtn')?.click();}
       if(a==='later'){document.getElementById('scheduleBtn')?.click();}
       if(a==='more')more.classList.toggle('open');

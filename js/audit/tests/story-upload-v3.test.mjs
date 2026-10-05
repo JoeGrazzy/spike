@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const feed=fs.readFileSync('feed.html','utf8');
+const runtime=fs.readFileSync('js/feed-runtime-04-1.js','utf8');
+const exp=fs.readFileSync('js/spike-experience-v2.js','utf8');
+const css=fs.readFileSync('css/spike-story-upload-v3.css','utf8');
+assert.match(feed,/id="storiesRow"/);
+assert.match(feed,/id="storyBtn"/);
+assert.match(feed,/spike-story-upload-v3\.css/);
+assert.match(runtime,/story-create-tile/);
+assert.match(runtime,/aria-label','Create a Story'/);
+assert.match(runtime,/storyOverlay/);
+assert.match(exp,/later\?\.setAttribute\('data-x-advanced', '1'\)/);
+assert.doesNotMatch(exp,/\[later, story\]\.forEach/);
+assert.match(css,/signal-tool:nth-child\(5\)/);
+assert.match(css,/story-create-tile/);
+console.log('story upload v3: 9/9 passed');

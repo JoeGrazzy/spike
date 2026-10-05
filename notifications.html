@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="css/premium-back.css">
 <link rel="stylesheet" href="css/spike-adaptive-nav.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-singleton.js"></script>
+<script src="js/supabase-singleton.js"></script><script src="js/spike-notification-sound-v1.js"></script><script defer src="js/spike-notification-center-v1.js" defer></script>
 <script src="js/presence.js"></script>
 <script src="js/theme.js" defer></script>
 <script src="js/spike-dialog.js"></script>
@@ -29,15 +29,16 @@
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 <link rel="stylesheet" href="css/spike-native-select.css">
     <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<style id="spike-notification-page-badge-css">.notification-page-bell{position:relative;text-decoration:none}.notification-page-bell .spike-notification-badge-count{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:grid;place-items:center;background:#ff365f;color:#fff;border:2px solid var(--spike-bg,#070b10);font:900 9px/1 Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.35)}.notification-page-bell .spike-notification-badge-count[hidden]{display:none}</style>  <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
 </head>
-<body data-spike-page="notifications">
+<body data-spike-page="notifications" data-spike-notification-page>
 <div class="app">
-<header class="header"><button class="smart-back" id="spikeSmartBack" type="button" data-spike-premium-back="1" data-back-fallback="feed.html"><span aria-hidden="true">←</span><span>Back</span></button><a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></a><span class="header-title">Notifications</span><div class="header-actions"><button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh notifications">↻</button></div></header>
+<header class="header"><button class="smart-back" id="spikeSmartBack" type="button" data-spike-premium-back="1" data-back-fallback="feed.html"><span aria-hidden="true">←</span><span>Back</span></button><a class="brand" href="feed.html" aria-label="SPIKE home"><span class="brand-title">SPIKE</span><span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span></a><span class="header-title">Notifications</span><div class="header-actions"><a class="icon-btn notification-page-bell" data-spike-notification-badge href="notifications.html" aria-label="Notifications, no unread alerts" title="Notifications"><span aria-hidden="true">🔔</span><span class="spike-notification-badge-count" hidden>0</span></a><button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh notifications">↻</button></div></header>
 <main class="main"><section class="hero"><div class="eyebrow">SPIKE ACTIVITY</div><h1>Notifications</h1><p><span id="unreadCount">0</span> unread notification<span id="unreadPlural">s</span></p><div class="actions"><button class="btn primary" id="markAll" type="button">Mark all read</button><button class="btn" id="clearAll" type="button">Clear all</button><button class="btn" id="deleteRead" type="button">Delete read</button></div><div class="notif-toolbar" role="toolbar" aria-label="Notification filters"><div class="notif-tabs" role="tablist"><button class="notif-tab active" id="tabAll" type="button" role="tab" aria-selected="true">All</button><button class="notif-tab" id="tabUnread" type="button" role="tab" aria-selected="false">Unread</button><button class="notif-tab" id="tabAnnouncements" type="button" role="tab" aria-selected="false">Announcements</button><button class="notif-tab" id="tabMentions" type="button" role="tab" aria-selected="false">Mentions</button><button class="notif-tab" id="tabSystem" type="button" role="tab" aria-selected="false">System</button></div><label class="notif-search"><span aria-hidden="true">⌕</span><input id="notificationSearch" type="search" autocomplete="off" placeholder="Search notifications" aria-label="Search notifications"></label></div></section><section class="list" id="notificationList"><div class="empty">Loading notifications…</div></section></main>
 <nav class="bottom-nav" aria-label="SPIKE navigation"><div class="bottom-nav-inner"><button class="nav-item" id="feedNav" type="button">⌂<br>Feed</button><button class="nav-item" id="friendsNav" type="button">♧<br>Friends</button><button class="nav-item" id="chatNav" type="button">◌<br>Chat</button><button class="nav-item active" type="button" aria-current="page">🔔<br>Alerts</button><button class="nav-item" id="profileNav" type="button">◯<br>Profile</button></div></nav>
 </div>
 <div class="notif-modal" id="notificationModal" role="dialog" aria-modal="true" aria-hidden="true"><div class="notif-modal-card"><div class="notif-modal-head"><span class="notif-modal-icon" id="notificationModalIcon">🔔</span><div><div class="notif-modal-title" id="notificationModalTitle">Notification</div><div class="notif-modal-meta" id="notificationModalMeta"></div></div><button class="notif-modal-close" id="notificationModalClose" type="button" aria-label="Close notification details">×</button></div><div class="notif-modal-body" id="notificationModalBody"></div></div></div>
-<div class="loader" id="loader"><div class="loader-card"><span class="spinner" aria-hidden="true"></span>Loading SPIKE…</div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="js/premium-back.js" defer></script><script src="js/telemetry.js" defer></script><script src="js/spike-adaptive-nav.js" defer></script><script src="js/ui-fix.js"></script>
+<audio id="notificationTone" preload="auto" src="assets/mp3/notifications.mp3" aria-hidden="true"></audio><div class="loader" id="loader"><div class="loader-card"><span class="spinner" aria-hidden="true"></span>Loading SPIKE…</div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="js/premium-back.js" defer></script><script src="js/telemetry.js" defer></script><script src="js/spike-adaptive-nav.js" defer></script><script src="js/ui-fix.js"></script>
 <script>
 "use strict";
 const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
@@ -175,6 +176,7 @@ let pendingSilentRefresh=false;
 let scrollEndTimer=null;
 function render(){
 const box=$("#notificationList"); if(!box)return; const count=rows.filter(n=>!n.read).length;
+window.SPIKENotificationCenter?.setCount(count);
 $("#unreadCount").textContent=count>99?"99+":String(count);$("#unreadPlural").textContent=count===1?"":"s";$("#markAll").disabled=!count;$("#clearAll").disabled=!rows.length;
 const q=notificationQuery.trim().toLowerCase();
 const visible=rows.filter(n=>{
@@ -316,7 +318,7 @@ const existed=rows.some(x=>String(x.id)===String(n.id));
 upsertRow(n);
 lastRealtimeAt=Date.now();
 const text=notificationText(n);
-if(!existed && !n.read){playNotificationTone();showBrowserNotification(n);}
+if(!existed && !n.read){showBrowserNotification(n);}
 if(!n.read && window.spikePremiumToast) window.spikePremiumToast(text, /error|fail|denied/i.test(String(n.type||""))?"error":"info", 5200);
 }
 async function subscribe(){
@@ -544,5 +546,6 @@ boot();
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script src="js/spike-native-v2.js"></script>
 <script defer src="js/spike-native-select.js"></script>
+<link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 </body>
 </html>
