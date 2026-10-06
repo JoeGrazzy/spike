@@ -1,0 +1,129 @@
+/* SPIKE Android header v2 — right-aligned actions, readable lockup, safe-area aware. */
+.header {
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: clamp(8px, 2vw, 14px) !important;
+  height: auto !important;
+  min-height: calc(68px + env(safe-area-inset-top, 0px)) !important;
+  padding: max(8px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) 8px max(12px, env(safe-area-inset-left, 0px)) !important;
+  overflow: visible !important;
+}
+.header > .brand {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  width: auto !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+.header .brand-logo-wrap {
+  flex: 0 0 48px !important;
+  width: 48px !important;
+  min-width: 48px !important;
+  height: 48px !important;
+  display: grid !important;
+  place-items: center !important;
+}
+.header .brand-logo {
+  display: block !important;
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 100% !important;
+  object-fit: contain !important;
+}
+.header .brand-lockup {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  gap: 0 !important;
+  line-height: 1.05 !important;
+}
+.header .brand-title {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-size: clamp(22px, 5vw, 27px) !important;
+  font-weight: 850 !important;
+  letter-spacing: .075em !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+.header .brand-subtitle {
+  display: block !important;
+  max-width: 100% !important;
+  margin-top: 5px !important;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif !important;
+  font-size: 8px !important;
+  font-weight: 700 !important;
+  letter-spacing: .045em !important;
+  line-height: 1.2 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.header .header-actions {
+  display: flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  justify-self: end !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  overflow: visible !important;
+  flex-wrap: nowrap !important;
+}
+.header .header-actions > a,
+.header .header-actions > button {
+  box-sizing: border-box !important;
+  flex: 0 0 42px !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 14px !important;
+  line-height: 1 !important;
+  font-size: 18px !important;
+  text-decoration: none !important;
+}
+.header .header-actions > a > span:first-child { line-height: 1 !important; }
+.header .header-actions > button:focus-visible,
+.header .header-actions > a:focus-visible,
+.header .brand:focus-visible {
+  outline: 2px solid #55d6a5 !important;
+  outline-offset: 3px !important;
+}
+@media (max-width: 390px) {
+  .header { gap: 6px !important; padding-left: max(8px, env(safe-area-inset-left, 0px)) !important; padding-right: max(8px, env(safe-area-inset-right, 0px)) !important; }
+  .header .brand-logo-wrap { flex-basis: 42px !important; width: 42px !important; min-width: 42px !important; height: 42px !important; }
+  .header .brand-logo { width: 42px !important; height: 42px !important; }
+  .header .brand { gap: 8px !important; }
+  .header .brand-title { font-size: 21px !important; letter-spacing: .055em !important; }
+  .header .brand-subtitle { font-size: 7px !important; letter-spacing: .02em !important; }
+  .header .header-actions { gap: 4px !important; }
+  .header .header-actions > a,
+  .header .header-actions > button { flex-basis: 38px !important; width: 38px !important; min-width: 38px !important; height: 40px !important; min-height: 40px !important; border-radius: 12px !important; }
+}
+@media (max-width: 340px) {
+  .header .brand-subtitle { display: none !important; }
+  .header .brand-title { font-size: 20px !important; }
+  .header .header-actions { gap: 3px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .header .header-actions > a,
+  .header .header-actions > button { transition: none !important; }
+}
