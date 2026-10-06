@@ -16,12 +16,12 @@
   function fallbackMarkup(g,cls,alt){const p=AVATAR_PATHS[g]||[];if(!p.length)return'';return `<img class="${esc(cls||'spike-avatar')} spike-avatar-fallback" src="${esc(p[0])}" data-spike-fallback-next="${esc(p[1]||'')}" data-spike-avatar-fallback="${g}" alt="${esc(alt||'')}" loading="lazy" decoding="async">`;}
   function avatarMarkup(u,cls='spike-generated-avatar',label){
     const c=cls||'spike-generated-avatar',name=label||names(u),src=imageOf(u),g=genderOf(u);
-    if(src)return `<img class="${esc(c)}" src="${esc(src)}"${g?` data-spike-avatar-gender="${g}"`:''} alt="${esc(name)}" loading="lazy" decoding="async">`;
+    if(src)return `<img class="${esc(c)}" src="${esc(src)}" data-spike-remote-avatar="1"${g?` data-spike-avatar-gender="${g}"`:''} alt="${esc(name)}" loading="lazy" decoding="async">`;
     if(g)return fallbackMarkup(g,c,name);
     return generatedAvatar(u,c,name);
   }
   function installImageFallbacks(root=document){
-    root.querySelectorAll('img[data-spike-avatar-fallback],img[data-spike-avatar-gender]').forEach(img=>{
+    root.querySelectorAll('img[data-spike-avatar-fallback],img[data-spike-avatar-gender],img[data-spike-remote-avatar]').forEach(img=>{
       if(img.dataset.spikeBound==='1')return;
       img.dataset.spikeBound='1';
       img.addEventListener('error',function(){
@@ -31,7 +31,7 @@
         if(g&&AVATAR_PATHS[g]?.[0]&&!this.dataset.spikeFallbackTried){this.dataset.spikeFallbackTried='1';this.src=AVATAR_PATHS[g][0];return;}
         const holder=document.createElement('span');
         holder.className=this.className.replace(/spike-avatar-fallback|spike-avatar-broken/g,'')+' spike-avatar-initials';
-        holder.setAttribute('aria-label',this.alt||'SPIKE User');holder.textContent=(this.alt||'S').trim().charAt(0).toUpperCase()||'S';
+        holder.setAttribute('aria-label',this.alt||'SPIKE User');holder.textContent=initials({display_name:this.alt||'User'});
         this.replaceWith(holder);
       });
     });
