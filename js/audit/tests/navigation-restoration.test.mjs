@@ -63,7 +63,7 @@ test('reload clears the generic navigation snapshot', () => {
 });
 
 test('every production HTML page loads the shared navigation layer', () => {
-  const pages = fs.readdirSync(root).filter(name => name.endsWith('.html'));
+  const pages = fs.readdirSync(root).filter(name => name.endsWith('.html') && !name.endsWith('.pre-rebuild.html') && !name.endsWith('-probe.html') && !name.endsWith('-static.html') && !['bridge-harness.html', 'theme-browser-test.html'].includes(name));
   assert.ok(pages.length > 0);
   for (const page of pages) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');

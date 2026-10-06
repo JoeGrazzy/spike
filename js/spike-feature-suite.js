@@ -38,6 +38,9 @@
     syncRemote().then(()=>render('overview')).catch(()=>{});
     updatePulse();
   }
+  // Public entry point for existing menu/navigation controls.
+  window.SPIKE_OPEN_PULSE = open;
+
   function close() {
     const o = $('spikeFeatureHub'); if (!o) return;
     o.classList.remove('open'); o.setAttribute('aria-hidden','true'); o.hidden = true;

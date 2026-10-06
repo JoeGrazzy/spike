@@ -548,7 +548,34 @@ function bindEvents() {
   // This prevents individual card bindings from drifting apart and gives async
   // actions the same duplicate-tap protection and error handling. Native <a>
   // menu items keep their existing href contracts.
+  // Route menu actions to their real destinations/APIs instead of clicking
+  // controls inside the aria-hidden/hidden utility container. Those synthetic
+  // clicks depended on unrelated runtime listeners being initialized first.
+  const openAskSpike = () => {
+    closeOverlay('menuOverlay');
+    const overlay = document.getElementById('spikeAiSearchOverlay');
+    const input = document.getElementById('spikeAiInput');
+    if (!overlay || !input) { toast('Ask SPIKE is unavailable right now. Please reload and try again.', 'error'); return; }
+    overlay.classList.add('open'); overlay.setAttribute('aria-hidden', 'false');
+    window.setTimeout(() => input.focus(), 30);
+  };
   const menuActions = {
+    'ask-spike': openAskSpike,
+    coffee: () => { closeOverlay('menuOverlay'); window.location.assign('coffee.html'); },
+    theme: () => {
+      closeOverlay('menuOverlay');
+      if (window.SPIKE_THEME?.next) window.SPIKE_THEME.next();
+      else toast('Theme controls are still loading. Please try again in a moment.', 'warning');
+    },
+    pulse: () => {
+      closeOverlay('menuOverlay');
+      if (typeof window.SPIKE_OPEN_PULSE === 'function') window.SPIKE_OPEN_PULSE();
+      else {
+        const hub = document.getElementById('spikeFeatureHub');
+        if (hub) { hub.hidden = false; hub.classList.add('open'); hub.setAttribute('aria-hidden', 'false'); document.body.classList.add('spike-feature-open'); }
+        else toast('My Pulse is unavailable right now. Please reload and try again.', 'error');
+      }
+    },
     saved: async () => { closeOverlay('menuOverlay'); await openSavedCollections(); },
     audience: async () => { closeOverlay('menuOverlay'); await openCloseFriends(); },
     safety: async () => { closeOverlay('menuOverlay'); await openSafetyCenter(); },

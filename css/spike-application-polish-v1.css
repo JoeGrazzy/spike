@@ -1,0 +1,28 @@
+/* SPIKE Application Polish V1
+   Additive, geometry-safe cross-page interaction polish.
+   Page-specific layouts, theme tokens, feature behavior and routing remain authoritative.
+*/
+:where(a,button,[role="button"],input,select,textarea,[tabindex]):focus-visible {
+  outline: 2px solid var(--spike-focus-ring, var(--accent, #7c8cff));
+  outline-offset: 3px;
+}
+:where(button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"]) {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"]):disabled,
+:where(button,[role="button"],[aria-disabled="true"],[data-disabled="true"]) {
+  cursor: not-allowed;
+}
+:where(input,textarea,select,button) { font: inherit; }
+:where(textarea) { resize: vertical; }
+:where(img,video) { height: auto; }
+:where(a) { text-underline-offset: .16em; }
+:where(button,[role="button"],a) { touch-action: manipulation; }
+@media (prefers-reduced-motion: reduce) {
+  :where(*, *::before, *::after) {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
