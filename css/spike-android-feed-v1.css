@@ -149,3 +149,84 @@ body[data-spike-page="feed"] #spikeBottomNav .spike-create-nav {
   body[data-spike-page="feed"] .story-section .story { flex-basis: 78px !important; min-width: 78px !important; max-width: 78px !important; }
   body[data-spike-page="feed"] .story-section .story-preview { width: 78px !important; height: 106px !important; }
 }
+
+
+/* SPIKE Android header v3: keep the brand lockup fully inside the header. */
+body[data-spike-page="feed"] .header {
+  box-sizing: border-box !important;
+  height: 76px !important;
+  min-height: 76px !important;
+  max-height: 76px !important;
+  padding: 7px max(10px, env(safe-area-inset-right, 0px)) 7px max(10px, env(safe-area-inset-left, 0px)) !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+body[data-spike-page="feed"] .header > .brand {
+  align-items: center !important;
+  gap: 9px !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+body[data-spike-page="feed"] .header .brand-logo-wrap,
+body[data-spike-page="feed"] .header .brand-logo {
+  box-sizing: border-box !important;
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  max-height: 44px !important;
+}
+body[data-spike-page="feed"] .header .brand-logo-wrap { flex: 0 0 44px !important; }
+body[data-spike-page="feed"] .header .brand-lockup {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  gap: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  line-height: 1 !important;
+}
+body[data-spike-page="feed"] .header .brand-title {
+  display: block !important;
+  font-size: clamp(20px, 5.5vw, 25px) !important;
+  line-height: 1 !important;
+  letter-spacing: .055em !important;
+  margin: 0 !important;
+}
+body[data-spike-page="feed"] .header .brand-subtitle {
+  display: block !important;
+  margin: 3px 0 0 !important;
+  font-size: clamp(6px, 1.8vw, 7.5px) !important;
+  line-height: 1.1 !important;
+  letter-spacing: .025em !important;
+  max-width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+body[data-spike-page="feed"] .header .header-actions {
+  align-items: center !important;
+  gap: clamp(4px, 1.4vw, 7px) !important;
+}
+body[data-spike-page="feed"] .header .header-actions > a,
+body[data-spike-page="feed"] .header .header-actions > button {
+  box-sizing: border-box !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  flex: 0 0 40px !important;
+}
+@media (max-width: 380px) {
+  body[data-spike-page="feed"] .header { padding-left: 7px !important; padding-right: 7px !important; }
+  body[data-spike-page="feed"] .header .brand-logo-wrap,
+  body[data-spike-page="feed"] .header .brand-logo { width: 40px !important; height: 40px !important; min-width: 40px !important; max-height: 40px !important; }
+  body[data-spike-page="feed"] .header .brand-logo-wrap { flex-basis: 40px !important; }
+  body[data-spike-page="feed"] .header .brand { gap: 7px !important; }
+  body[data-spike-page="feed"] .header .brand-title { font-size: 19px !important; }
+  body[data-spike-page="feed"] .header .header-actions > a,
+  body[data-spike-page="feed"] .header .header-actions > button { width: 36px !important; min-width: 36px !important; height: 38px !important; min-height: 38px !important; flex-basis: 36px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-spike-page="feed"] .header * { transition: none !important; }
+}
