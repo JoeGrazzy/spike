@@ -503,8 +503,8 @@ function bindEvents() {
   });
   // Navigation
   // Header profile control removed; profile remains available from the menu/bottom navigation.
-  $('menuClose')?.addEventListener('click', () => closeOverlay('menuOverlay'));
-  $('menuOverlay')?.addEventListener('click', e => { if (e.target.id === 'menuOverlay') closeOverlay('menuOverlay'); });
+  $('menuClose')?.addEventListener('click', () => { closeFeedMenu(); $('menuBtn')?.setAttribute('aria-expanded','false'); });
+  $('menuOverlay')?.addEventListener('click', e => { if (e.target.id === 'menuOverlay') { closeFeedMenu(); $('menuBtn')?.setAttribute('aria-expanded','false'); } });
   bindClick('closeAnnouncement', () => { $('announcement')?.classList.remove('show'); sessionStorage.setItem('spikeAnnouncementClosed', '1'); });
 
   // Menu actions — architecture V3: quick actions first, feature groups second, admin/settings last.
@@ -528,9 +528,9 @@ function bindEvents() {
     requestAnimationFrame(() => { document.querySelector('main.main')?.classList.add('spike-discover-mode'); hub.scrollIntoView({behavior:'smooth', block:'start'}); });
     return true;
   };
-  const openFeedTab = tab => { closeOverlay('menuOverlay'); return activateFeedV2Tab(tab); };
+  const openFeedTab = tab => { closeFeedMenu(); return activateFeedV2Tab(tab); };
   const openCreate = () => {
-    closeOverlay('menuOverlay');
+    closeFeedMenu();
     const composer = document.querySelector('.spike-signal-composer');
     const text = document.getElementById('signalText');
     if (!composer || !text) { toast('The Signal composer is not available right now.', 'error'); return false; }
@@ -541,9 +541,9 @@ function bindEvents() {
     setTimeout(() => text.focus(), 220);
     return true;
   };
-  const openStory = () => { closeOverlay('menuOverlay'); const o=$('storyOverlay'); if(o){ o.classList.add('open'); o.removeAttribute('hidden'); o.setAttribute('aria-hidden','false'); if(location.hash!=='#storyOverlay') history.replaceState(null,'','#storyOverlay'); } return true; };
+  const openStory = () => { closeFeedMenu(); const o=$('storyOverlay'); if(o){ o.classList.add('open'); o.removeAttribute('hidden'); o.setAttribute('aria-hidden','false'); if(location.hash!=='#storyOverlay') history.replaceState(null,'','#storyOverlay'); } return true; };
 
-  $('menuGoLive')?.addEventListener('click', () => { closeOverlay('menuOverlay'); });
+  $('menuGoLive')?.addEventListener('click', () => { closeFeedMenu(); });
   // Menu V3 action router: one delegated tap path for every interactive button.
   // This prevents individual card bindings from drifting apart and gives async
   // actions the same duplicate-tap protection and error handling. Native <a>
@@ -552,23 +552,24 @@ function bindEvents() {
   // controls inside the aria-hidden/hidden utility container. Those synthetic
   // clicks depended on unrelated runtime listeners being initialized first.
   const openAskSpike = () => {
-    closeOverlay('menuOverlay');
+    closeFeedMenu();
     const overlay = document.getElementById('spikeAiSearchOverlay');
     const input = document.getElementById('spikeAiInput');
     if (!overlay || !input) { toast('Ask SPIKE is unavailable right now. Please reload and try again.', 'error'); return; }
     overlay.classList.add('open'); overlay.setAttribute('aria-hidden', 'false');
     window.setTimeout(() => input.focus(), 30);
   };
+  $('feedHeaderSearch')?.addEventListener('click', openAskSpike);
+
   const menuActions = {
     'ask-spike': openAskSpike,
-    coffee: () => { closeOverlay('menuOverlay'); window.location.assign('coffee.html'); },
     theme: () => {
-      closeOverlay('menuOverlay');
+      closeFeedMenu();
       if (window.SPIKE_THEME?.next) window.SPIKE_THEME.next();
       else toast('Theme controls are still loading. Please try again in a moment.', 'warning');
     },
     pulse: () => {
-      closeOverlay('menuOverlay');
+      closeFeedMenu();
       if (typeof window.SPIKE_OPEN_PULSE === 'function') window.SPIKE_OPEN_PULSE();
       else {
         const hub = document.getElementById('spikeFeatureHub');
@@ -576,14 +577,56 @@ function bindEvents() {
         else toast('My Pulse is unavailable right now. Please reload and try again.', 'error');
       }
     },
-    saved: async () => { closeOverlay('menuOverlay'); await openSavedCollections(); },
-    audience: async () => { closeOverlay('menuOverlay'); await openCloseFriends(); },
-    safety: async () => { closeOverlay('menuOverlay'); await openSafetyCenter(); },
+    saved: async () => { closeFeedMenu(); await openSavedCollections(); },
+    audience: async () => { closeFeedMenu(); await openCloseFriends(); },
+    safety: async () => { closeFeedMenu(); await openSafetyCenter(); },
     signout: () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); }
   };
   // Direct handlers guarantee these primary menu destinations work independently of the delegated tap path.
 
   const menuOverlay = $('menuOverlay');
+  // Feed menu owns the bottom-nav visibility while it is open. The nav has an
+  // inline `display:grid !important` baseline, so CSS :has() alone cannot win
+  // the cascade. Set the authoritative inline state at the same open/close
+  // transitions instead of relying on timers or a competing CSS override.
+  function setFeedMenuNavHidden(hidden){
+    const nav = $('spikeBottomNav');
+    window.__SPIKE_FEED_MENU_OPEN__ = !!hidden;
+    document.body.classList.toggle('spike-feed-menu-open', !!hidden);
+    if(!nav) return;
+    nav.classList.toggle('spike-menu-nav-hidden', !!hidden);
+    nav.classList.toggle('spike-nav-auto-hidden', !!hidden);
+    nav.dataset.spikeNavState = hidden ? 'hidden' : 'visible';
+    nav.setAttribute('aria-hidden', hidden ? 'true' : 'false');
+    nav.style.setProperty('display', hidden ? 'none' : 'grid', 'important');
+    nav.style.setProperty('visibility', hidden ? 'hidden' : 'visible', 'important');
+    nav.style.setProperty('pointer-events', hidden ? 'none' : 'auto', 'important');
+    if(!hidden){ nav.style.removeProperty('display'); nav.style.removeProperty('visibility'); nav.style.removeProperty('pointer-events'); }
+  }
+  const openFeedMenu = () => { openOverlay('menuOverlay'); setFeedMenuNavHidden(true); };
+  const closeFeedMenu = () => { closeOverlay('menuOverlay'); setFeedMenuNavHidden(false); $('menuBtn')?.setAttribute('aria-expanded','false'); };
+  function syncFeedMenuIdentity(){
+    const profile = state.profile || state.user?.user_metadata || {};
+    const name = String(profile.display_name || profile.full_name || profile.name || profile.username || state.user?.email?.split('@')[0] || 'SPIKE Member').trim() || 'SPIKE Member';
+    const username = String(profile.username || profile.handle || '').trim();
+    const avatar = String(profile.avatar_url || profile.avatar || profile.photo_url || '').trim();
+    const title = $('spikeMenuTitle');
+    const handle = $('menuIdentityHandle');
+    const holder = $('menuIdentityAvatar');
+    if(title) title.textContent = name;
+    if(handle) handle.textContent = username ? `@${username} · SPIKE member` : 'SPIKE member';
+    if(holder){
+      if(avatar && /^(https?:)?\/\//i.test(avatar)){
+        holder.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = avatar; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('error', () => { holder.textContent = name.slice(0,1).toUpperCase(); }, {once:true});
+        holder.appendChild(img);
+      } else {
+        holder.textContent = name.slice(0,1).toUpperCase();
+      }
+    }
+  }
   menuOverlay?.addEventListener('click', async e => {
     const control = e.target.closest('[data-menu-action]');
     if (!control || !menuOverlay.contains(control)) return;
@@ -615,8 +658,10 @@ function bindEvents() {
   syncMenuNotificationBadge(notificationBadgeSource?.dataset.unreadCount || 0);
   window.addEventListener('spike:notification-count', e => syncMenuNotificationBadge(e.detail?.unread));
   bindClick('menuBtn', () => {
+    syncFeedMenuIdentity();
     syncMenuNotificationBadge(document.querySelector('[data-spike-notification-badge]')?.dataset.unreadCount || 0);
-    openOverlay('menuOverlay');
+    openFeedMenu();
+    $('menuBtn')?.setAttribute('aria-expanded','true');
   });
 
 
@@ -624,7 +669,7 @@ function bindEvents() {
     e.preventDefault();
     const allowed = await verifyAdminUid();
     if (!allowed) {
-      closeOverlay('menuOverlay');
+      closeFeedMenu();
       toast('Admin access is restricted.','error');
       return;
     }
@@ -1115,7 +1160,6 @@ function openSignalMoreMenu(p,anchor){
   menu.setAttribute('role','menu');
   const items=owner ? [
     ['insights','Insights','View activity for this Signal','◉'],
-    ['engagement','Engagement','Open creator engagement','↗'],
     ['delete','Delete Signal','Remove your Signal from SPIKE','×']
   ] : [
     ['not_interested','Not interested','Show fewer Signals like this','−'],
@@ -1137,7 +1181,6 @@ function openSignalMoreMenu(p,anchor){
         if(panel){panel.hidden=!panel.hidden; panel.classList.toggle('is-open',!panel.hidden);}
         return;
       }
-      if(action==='engagement'){location.href='engagement.html';return;}
       if(action==='delete'){await deleteSignal(p.id);return;}
     } else {
       const fake=document.createElement('button'); fake.dataset.feedback=action;

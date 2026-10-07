@@ -11,10 +11,9 @@ const runtimeActions = {
   menuSaved:'saved', menuAudience:'audience', menuSafety:'safety', menuSignOut:'signout'
 };
 const nativeRoutes = {
-  menuProfileHero:'profile.html', menuProfile:'profile.html', menuMessages:'messages.html', menuFriends:'friends.html',
-  menuRoom:'rooms.html', menuProgress:'leveling.html', menuWorld:'spike_world.html', menuGuide:'guide.html', menuSettings:'settings.html',
-  menuGoLive:'live.html?start=1', menuNotifications:'notifications.html', menuSbet:'spike_predictor.html',
-  menuIntelligence:'spike_intelligence.html', menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
+  menuProfileHero:'profile.html', menuMessages:'messages.html', menuFriends:'friends.html',
+  menuRoom:'rooms.html', menuGuide:'guide.html', menuSettings:'settings.html',
+  menuGoLive:'live.html?start=1', menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
 };
 
 for (const [id, action] of Object.entries(runtimeActions)) {

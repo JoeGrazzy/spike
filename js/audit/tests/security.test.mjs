@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const htmlFiles = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','chat_room.html','settings.html','help.html','spike_predictor.html','admin.html'];
+const htmlFiles = ['index.html','feed.html','friends.html','messages.html','message.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','settings.html','help.html','admin.html','guide.html','impact.html','live.html','legal.html','policy.html','policy_appeals.html','reset-password.html','share.html','view_user.html'];
 
 for (const page of htmlFiles) test(`security baseline: ${page}`, async () => {
   const html = await readFile(page, 'utf8');

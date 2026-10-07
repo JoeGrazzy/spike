@@ -1,0 +1,15 @@
+/* Feed header + menu reference layer. Loaded after the existing Android header authority. */
+.header{grid-template-columns:auto minmax(0,1fr) auto!important;gap:10px!important;min-height:64px!important;padding-top:max(8px,env(safe-area-inset-top,0px))!important;}
+.header>.brand{max-width:none!important;overflow:visible!important;}.feed-header-divider{width:1px;height:30px;background:rgba(255,255,255,.14);display:block!important;}.feed-header-title{font-size:18px!important;font-weight:650!important;letter-spacing:-.01em!important;color:rgba(235,240,255,.86)!important;white-space:nowrap!important;}.header .feed-header-search{font-size:25px!important;color:#fff!important;background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.10)!important;}.header .feed-header-search:hover,.header .feed-header-search:focus-visible{background:rgba(99,102,241,.14)!important;border-color:rgba(129,140,248,.44)!important;}.header .icon#menuBtn{font-size:23px!important;color:#fff!important;background:rgba(255,255,255,.035)!important;border:1px solid rgba(255,255,255,.10)!important;}.header .icon#menuBtn:hover,.header .icon#menuBtn:focus-visible,.header .icon#menuBtn[aria-expanded="true"]{background:rgba(145,86,255,.15)!important;border-color:rgba(145,86,255,.44)!important;}
+@media(max-width:600px){.header{grid-template-columns:auto minmax(0,1fr) auto!important;min-height:58px!important;gap:7px!important;padding-left:max(8px,env(safe-area-inset-left,0px))!important;padding-right:max(8px,env(safe-area-inset-right,0px))!important;}.header .brand-logo-wrap{flex-basis:40px!important;width:40px!important;min-width:40px!important;height:40px!important}.header .brand-logo{width:40px!important;height:40px!important}.header .brand-subtitle{display:none!important}.header .brand-title{font-size:21px!important;letter-spacing:.05em!important}.header .brand{gap:7px!important}.feed-header-divider{height:25px!important}.feed-header-title{font-size:16px!important}.header .header-actions{gap:4px!important}.header .header-actions>a,.header .header-actions>button{flex-basis:36px!important;width:36px!important;min-width:36px!important;height:36px!important;min-height:36px!important;border-radius:11px!important}.header .feed-header-search{font-size:22px!important}}
+@media(max-width:360px){.feed-header-title{font-size:15px!important}.header .brand-title{font-size:19px!important}.feed-header-divider{display:none!important}}
+@media(prefers-reduced-motion:reduce){.header .header-actions>a,.header .header-actions>button{transition:none!important}}
+
+/* Menu-open authority: the fixed bottom navigation is intentionally hidden while
+   the Feed menu is actively open, so it never competes with or covers the menu. */
+body:has(#menuOverlay.open) #spikeBottomNav,
+body:has(#menuOverlay.open) .spike-bottom-nav{
+  display:none !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}

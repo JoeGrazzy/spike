@@ -8,29 +8,36 @@ const feed = fs.readFileSync(path.join(ROOT, 'feed.html'), 'utf8');
 const runtime = fs.readFileSync(path.join(ROOT, 'js/feed-runtime-04-3.js'), 'utf8');
 const css = fs.readFileSync(path.join(ROOT, 'css/spike-menu-v3.css'), 'utf8');
 
-test('Feed uses the hierarchy-first Menu V3 architecture', () => {
-  for (const id of ['menuGoLive','menuMessages','menuNotifications','menuProfile','menuFriends','menuSaved','menuAudience','menuRoom','menuProgress','menuWorld','menuGuide','menuSbet','menuIntelligence','menuSettings','menuSafety','menuPolicy','menuPolicyAppeals','menuSignOut']) {
+test('Feed uses the reference-led command panel hierarchy', () => {
+  for (const id of ['menuGoLive','menuMessages','menuFriends','menuRoom','menuSaved','menuProfileHero','menuSettings','menuSafety','menuPolicy','menuSignOut']) {
     assert.match(feed, new RegExp(`id=["']${id}["']`), `missing menu control: ${id}`);
   }
-  assert.match(feed, /class="menu-v3-disclosure"/);
-  assert.match(feed, /<div class="menu-v3-label">QUICK ACTIONS<\/div>/);
-  assert.match(feed, /<div class="menu-v3-label">YOUR SPIKE<\/div>/);
-  assert.match(feed, /<div class="menu-v3-label">DISCOVER<\/div>/);
+  assert.match(feed, /PRIMARY HUBS/);
+  assert.match(feed, /LIVE/);
+  assert.match(feed, /ACCOUNT &amp; SUPPORT/);
+  assert.match(feed, /menu-reference-profile/);
 });
 
-test('Menu V3 keeps navigation actions on the existing routes/runtime contracts', () => {
+test('Menu keeps existing routes and delegated runtime actions', () => {
   const combined = `${feed}\n${runtime}`;
-  for (const route of ['live.html?start=1','notifications.html','messages.html','friends.html','spike_world.html','spike_predictor.html','spike_intelligence.html','settings.html','policy.html','policy_appeals.html','leveling.html']) {
+  for (const route of ['live.html?start=1','messages.html','friends.html','rooms.html','settings.html','policy.html','policy_appeals.html','guide.html']) {
     assert.match(combined, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(runtime, /menuOverlay\?\.addEventListener\('click', async e/);
   assert.match(runtime, /data-menu-action/);
-  assert.match(runtime, /spike:notification-count/);
+  assert.match(runtime, /control\.dataset\.menuBusy === '1'/);
 });
 
-test('Menu V3 is responsive and disclosure-based rather than a giant flat card list', () => {
-  assert.match(css, /max-height:min\(90dvh/);
+test('Reference menu is responsive and uses progressive disclosure for secondary tools', () => {
+  assert.match(css, /max-height:min\(92dvh/);
   assert.match(css, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
-  assert.match(css, /\.menu-v3-disclosure\s+summary/);
-  assert.match(css, /@media\(max-width:520px\)/);
+  assert.match(css, /menu-reference-support-grid/);
+  assert.match(css, /menu-v3-disclosure\s+summary/);
+  assert.match(css, /@media\(max-width:600px\)/);
+});
+
+test('Feed-owned creation and discovery controls stay out of the menu', () => {
+  for (const id of ['menuCreate','menuDiscover','menuTrending','menuNearby','menuSignal','menuStory']) {
+    assert.doesNotMatch(feed, new RegExp(`id=["']${id}["']`), `${id} should stay on Feed, not Menu`);
+  }
 });

@@ -16,7 +16,8 @@
     let lastContext=false;
 
     function apply(){
-      const hidden=isMobile() && (state.scrollHidden || state.contextHidden || state.keyboard);
+      const menuOpen=!!window.__SPIKE_FEED_MENU_OPEN__;
+      const hidden=isMobile() && (menuOpen || state.scrollHidden || state.contextHidden || state.keyboard);
       nav.dataset.spikeAdaptive='1';
       nav.dataset.spikeNavState=hidden?'hidden':'visible';
       nav.setAttribute('aria-hidden',hidden?'true':'false');
@@ -34,7 +35,8 @@
     }
 
     function contextOpen(){
-      return body.classList.contains('chat-open-mode') ||
+      return !!window.__SPIKE_FEED_MENU_OPEN__ ||
+        body.classList.contains('chat-open-mode') ||
         !!document.querySelector('.layout.chat-open, .chat-open-mode .chat') ||
         !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"]') ||
         !!document.querySelector('.spike-premium-overlay.open, .spike-premium-overlay[aria-hidden="false"]') ||

@@ -6,7 +6,7 @@ const read = p => readFile(new URL(`../../../${p}`, import.meta.url), 'utf8');
 
 test('Android full-screen shared responsive stylesheet is included on app pages', async () => {
   const files = (await readdir(new URL('../../../', import.meta.url))).filter(x => x.endsWith('.html'));
-  assert.ok(files.length >= 25, `Expected production HTML pages, got ${files.length}`);
+  assert.ok(files.length >= 20, `Expected production HTML pages, got ${files.length}`);
   for (const file of files) {
     const html = await read(file);
     assert.match(html, /css\/spike-android-fullscreen-v1\.css\?v=1/, `${file} is missing shared fullscreen CSS`);

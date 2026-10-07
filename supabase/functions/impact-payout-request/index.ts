@@ -1,0 +1,10 @@
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "npm:@supabase/supabase-js@2";
+const cors={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS"};const out=(d:unknown,s=200)=>new Response(JSON.stringify(d),{status:s,headers:{...cors,"Content-Type":"application/json"}});
+Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{headers:cors});if(req.method!=="POST")return out({error:"POST required"},405);
+ const url=Deno.env.get("SUPABASE_URL"),anon=Deno.env.get("SUPABASE_ANON_KEY"),service=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");if(!url||!anon||!service)return out({error:"Payout service is not configured"},503);const authorization=req.headers.get("Authorization");if(!authorization)return out({error:"Sign in required"},401);
+ const userDb=createClient(url,anon,{global:{headers:{Authorization:authorization}}});const {data:{user}}=await userDb.auth.getUser();if(!user)return out({error:"Invalid session"},401);let body:any;try{body=await req.json()}catch{return out({error:"Invalid JSON"},400)};
+ const amount=Number(body.amount_gross);if(!Number.isFinite(amount)||amount<=0||Math.round(amount*100)!==amount*100)return out({error:"Enter a valid payout amount"},400);
+ const admin=createClient(url,service);const {data:profile}=await userDb.from("profiles").select("verified").eq("id",user.id).maybeSingle();if(!profile?.verified)return out({error:"Only Verified Badge campaign creators can request payouts"},403);
+ const {data,error}=await admin.rpc("spike_impact_payout_request_create",{p_creator_id:user.id,p_amount_gross:amount});if(error)return out({error:error.message||"Could not submit payout request"},400);return out(data);
+});

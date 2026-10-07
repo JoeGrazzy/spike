@@ -2,11 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const intelligence = await readFile('spike_intelligence.html','utf8');
-const coffee = await readFile('coffee.html','utf8');
-const feedRuntime = await readFile('js/feed-runtime-04-3.js','utf8');
 const feed = await readFile('feed.html','utf8');
-const intelligenceJs = await readFile('js/spike-intelligence-suite.js','utf8');
+const feedRuntime = await readFile('js/feed-runtime-04-3.js','utf8');
+
+const retiredPages = [
+  'bridge-harness.html','theme-browser-test.html','index-probe.html','index-static.html',
+  'coffee.html','engagement.html','leveling.html','spike_edu.html','spike_intelligence.html',
+  'spike_predictor.html','spike_world.html','chat_room.html'
+];
 
 const forbidden = [
   /workspace is ready for the next connected creation flow/i,
@@ -21,10 +24,19 @@ const forbidden = [
   /sample data/i
 ];
 
-test('production UI contains no known placeholder or fake-feature messaging', () => {
-  for (const pattern of forbidden) {
-    assert.doesNotMatch(intelligence + coffee + feedRuntime + feed, pattern, String(pattern));
+test('simplification contract removes obsolete destinations', async () => {
+  for (const page of retiredPages) {
+    await assert.rejects(() => readFile(page, 'utf8'), /ENOENT/, `${page} should be retired`);
   }
+});
+
+test('Feed no longer exposes retired destinations', () => {
+  for (const page of retiredPages) assert.doesNotMatch(feed, new RegExp(page.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  assert.doesNotMatch(feedRuntime, /coffee\.html|engagement\.html/);
+});
+
+test('production UI contains no known placeholder or fake-feature messaging', () => {
+  for (const pattern of forbidden) assert.doesNotMatch(feedRuntime + feed, pattern, String(pattern));
 });
 
 test('profile reporting uses the real abuse-case persistence boundary', () => {
@@ -33,15 +45,4 @@ test('profile reporting uses the real abuse-case persistence boundary', () => {
   assert.match(feedRuntime, /source:'profile'/);
   assert.match(feedRuntime, /category:'user_report'/);
   assert.doesNotMatch(feedRuntime, /User reporting is not available/);
-});
-
-test('Founder route is informational rather than an unconnected payment checkout', () => {
-  assert.match(coffee, /Founder &amp; Creator/);
-  assert.doesNotMatch(coffee, /Support checkout|payment provider|custom amount|data-amount=/i);
-});
-
-test('Intelligence page exposes only implemented connected surfaces', () => {
-  assert.doesNotMatch(intelligence, /Collaboration.*next connected|future personalized/i);
-  assert.match(intelligenceJs, /get_spike_intelligence_snapshot_v1/);
-  assert.match(intelligenceJs, /memorySave/);
 });

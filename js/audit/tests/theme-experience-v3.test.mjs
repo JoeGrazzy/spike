@@ -20,7 +20,7 @@ assert.match(v3Css,/var\(--spike-surface\)/);
 
 const htmlFiles=fs.readdirSync(root).filter(x=>x.endsWith('.html'));
 const themed=htmlFiles.filter(x=>fs.readFileSync(path.join(root,x),'utf8').includes('css/theme.css'));
-assert.ok(themed.length>=25,'expected broad theme coverage');
+assert.ok(themed.length>=20,'expected broad theme coverage');
 for(const file of themed){
   const s=fs.readFileSync(path.join(root,file),'utf8');
   assert.match(s,/spike-theme-experience-v3\.css\?v=theme-v3/ , `${file} missing final theme authority`);

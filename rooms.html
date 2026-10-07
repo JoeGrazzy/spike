@@ -186,6 +186,16 @@ video{contain:layout paint}
 #creatorQualification:not(.show) .cqProgress{display:none}
 #creatorQualification:not(.show) .cqHead{display:none}
 #creatorQualification:not(.show) #cqAgeNote{display:none}
+.roomPicturePicker{display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--card,#fff)}
+.roomPicturePreview{width:64px;height:64px;flex:0 0 64px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:var(--soft,#f2f2f4);font-size:26px;font-weight:800;color:var(--muted)}
+.roomPicturePreview img{width:100%;height:100%;display:block;object-fit:cover}
+.roomPictureCopy{min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:3px}
+.roomPictureCopy strong{font-size:12px}
+.roomPictureCopy span{font-size:10px;color:var(--muted);line-height:1.35}
+.roomPictureCopy .btn{margin-top:5px;padding:8px 10px;font-size:10px}
+.roomPictureStatus{min-height:16px;margin-top:5px;font-size:10px;color:var(--muted)}
+.roomPictureStatus.error{color:#b42318}
+@media(max-width:560px){.roomPicturePicker{align-items:flex-start}.roomPictureCopy{flex:1}}
 @media(max-width:560px){
   .rooms-v2{padding-left:9px;padding-right:9px}
   .rooms-v2-header .brand{font-size:19px}
@@ -241,51 +251,28 @@ video{contain:layout paint}
 <div class="brand"><span>SPIKE</span> Rooms</div>
 <div class="spacer"></div>
 <button aria-label="Notifications" class="iconbtn" id="notif">🔔</button>
-<button aria-label="SPIKE Guide" class="iconbtn" id="guideBtn" title="SPIKE Guide">📖</button>
 <div class="avatar" id="avatar">👤</div>
 </header>
 <section aria-labelledby="roomsTitle" class="rooms-v2-hero">
 <div aria-hidden="true" class="rooms-v2-mark"><img alt="SPIKE" src="assets/icon/icon.png"/></div>
-<h1 id="roomsTitle">Find your community</h1>
-<p>Join conversations, discover people, and find Rooms around the topics you love.</p>
+<h1 id="roomsTitle">Rooms</h1>
+<p>Find a community, join the conversation, or create your own Room.</p>
 <div class="searchWrap rooms-v2-search">
 <span aria-hidden="true">⌕</span>
 <input aria-label="Search rooms or tags" autocomplete="off" class="search" id="search" placeholder="Search rooms or tags..."/>
 </div>
-<section aria-label="Your Rooms account" class="roomAccountCard" id="roomAccountCard">
-<div aria-hidden="true" class="racIcon" id="racIcon">🔐</div>
+<section aria-label="Room profile" class="roomAccountCard roomAccountCompact" id="roomAccountCard">
 <div class="racMain">
-<div class="racTop">
-<div class="racIdentity"><strong id="racName">Sign in to use Room Accounts</strong><span id="racHandle">Sign in before joining or creating rooms</span></div>
-<button class="racEdit" id="racEdit" type="button">SIGN IN</button>
-</div>
-<div class="racLevel"><b id="racLevel">🔐 Authentication required</b><span id="racXp"></span></div>
-<div aria-hidden="true" class="racBar"><span id="racProgress"></span></div>
-<div class="racNext" id="racNext">Sign in to unlock SPIKE Rooms.</div>
+<div class="racTop"><div class="racIdentity"><strong id="racName">Sign in to join Rooms</strong><span id="racHandle">Your SPIKE profile is used for Room access.</span></div><button class="racEdit" id="racEdit" type="button">SIGN IN</button></div>
 </div>
 </section>
 </section>
-<nav aria-label="Room views" class="roomTabs rooms-v2-tabs" id="roomTabs" role="tablist">
-<button aria-selected="true" class="roomTab active" data-tab="discover" role="tab">Discover</button>
-<button aria-selected="false" class="roomTab" data-tab="joined" role="tab">Joined</button>
-<button aria-selected="false" class="roomTab" data-tab="mine" role="tab">My Rooms</button>
-<button aria-selected="false" class="roomTab" data-tab="creator" role="tab">Creator</button>
-</nav>
 <main class="rooms-v2-main" id="roomsMain">
-<section class="room-view active-view" data-view="discover" id="discoverView">
-<section aria-label="Trending rooms" class="trendStrip rooms-v2-trending" id="trendStrip">
-<div class="trendHead">
-<div>
-<h2>Trending now</h2>
-<span id="trendSummary">Live activity</span>
-</div>
-</div>
-<div class="trendGrid" id="trendGrid">
-<div class="empty">Loading trends…</div>
-</div>
-</section>
-</section>
 <section class="room-view active-view" data-view="browse" id="browseView">
+<section class="trendStrip" id="topRoomsSection" aria-labelledby="topRoomsTitle">
+<div class="trendHead"><h3 id="topRoomsTitle">Top Rooms</h3><span id="topRoomsSub">Popular and active right now</span></div>
+<div class="trendGrid" id="topRooms"></div>
+</section>
 <section class="roomList" id="browseSection">
 <div class="sectionHead">
 <div>
@@ -297,35 +284,9 @@ video{contain:layout paint}
 <div class="rooms" id="rooms"></div>
 </section>
 </section>
-<section aria-label="Creator" class="room-view" data-view="creator" id="creatorView">
-<div class="creator-v2-intro">
-<div>
-<span class="creator-eyebrow">CREATOR</span>
-<h2>Become a SPIKE Creator</h2>
-<p>Complete the requirements below to unlock Room creation.</p>
-</div>
-<strong id="cqCountV2">0/11</strong>
-</div>
-<section aria-label="Creator qualification" class="creatorQualification creator-v2-qualification" id="creatorQualification">
-<div class="cqHead">
-<div>
-<div class="cqTitle">Creator qualification</div>
-<div class="cqSub" id="cqSub">Complete all 11 qualification requirements to unlock the Creator Tool.</div>
-</div>
-<strong id="cqCount">0/11</strong>
-</div>
-<div class="cqProgress"><span id="cqProgressBar"></span></div>
-<div class="cqGrid" id="cqGrid"></div>
-<div class="cqSub" id="cqAgeNote" style="margin-top:8px">Account age requirement: your SPIKE account must be at least <strong>1 year 6 months</strong> old. The current status is verified by SPIKE.</div>
-<button class="btn primary cqAction" id="cqChallengeBtn" type="button">START CREATOR CHALLENGE</button>
-</section>
-</section>
-<section aria-label="Room creation" class="creatorStrip rooms-v2-create" id="myRoomsAction">
-<div class="creatorCopy">
-<strong id="creatorTitle">My Rooms</strong>
-<span id="creatorSub">Create and manage the communities you own.</span>
-</div>
-<button class="btn primary creatorBtn" id="creatorAction">CREATE ROOM</button>
+<section aria-label="Create a Room" class="creatorStrip rooms-v2-create" id="myRoomsAction" style="display:flex">
+<div class="creatorCopy"><strong>Create a Room</strong><span>Start a community on SPIKE.</span></div>
+<button class="btn primary creatorBtn" id="creatorAction">CREATE</button>
 </section>
 </main>
 </div>
@@ -350,21 +311,18 @@ video{contain:layout paint}
 <div class="sheetHead"><div><h2>Create A Room</h2><div class="muted">You become the room owner automatically.</div></div><button class="iconbtn" id="closeCreate">×</button></div>
 <form class="form" id="createForm">
 <div class="field"><label>Name</label><input id="name" maxlength="80" placeholder="e.g. CryptoTalk" required=""/></div>
-<div class="field"><label>Emoji</label><input id="emoji" maxlength="8" value="🏠"/></div>
-<div class="field"><label>Category</label><input id="category" maxlength="40" value="General"/></div>
-<div class="field"><label>Tags</label><input id="tags" placeholder="crypto, tech, general"/></div>
+<input id="emoji" type="hidden" value="🏠"><input id="category" type="hidden" value="General"><input id="tags" type="hidden" value="">
+<div class="field full roomPictureField">
+<label for="roomPicture">Room picture <span class="muted">(optional)</span></label>
+<div class="roomPicturePicker">
+<div class="roomPicturePreview" id="roomPicturePreview" aria-hidden="true">🏠</div>
+<div class="roomPictureCopy"><strong>Give your Room a recognizable image.</strong><span>JPG, PNG or WebP · up to 5 MB</span><button class="btn" id="roomPictureButton" type="button">CHOOSE PICTURE</button></div>
+<input accept="image/jpeg,image/png,image/webp" id="roomPicture" type="file" hidden/>
+</div>
+<div class="roomPictureStatus" id="roomPictureStatus" aria-live="polite"></div>
+</div>
 <div class="field full"><label>Description</label><textarea id="description" maxlength="500" placeholder="What is this room about?"></textarea></div>
 <div class="field full"><label>Rules</label><textarea id="rules" maxlength="2000" placeholder="Optional room rules"></textarea></div>
-<div class="field full mediaField">
-<label>Room picture <span class="muted">(optional)</span></label>
-<input accept="image/jpeg,image/png,image/webp,image/gif" id="roomMedia" type="file"/>
-<div class="mediaPreview" id="roomMediaPreview">No picture selected</div>
-</div>
-<div class="field full mediaField">
-<label>Room cover <span class="muted">(optional)</span></label>
-<input accept="image/jpeg,image/png,image/webp,image/gif" id="coverMedia" type="file"/>
-<div class="mediaPreview" id="coverMediaPreview">No cover selected</div>
-</div>
 <div class="field full"><button class="btn primary full" type="submit">CREATE ROOM</button></div>
 </form>
 </div></div>
@@ -380,29 +338,7 @@ video{contain:layout paint}
 <div class="challengeResult" id="challengeResult"></div>
 <button class="btn primary full" id="challengeSubmit" type="submit">SUBMIT CHALLENGE</button>
 </form></div></div>
-<script id="rooms-guide-binding">document.getElementById("guideBtn")?.addEventListener("click",()=>location.href="guide.html#rooms");</script><script>
-const CLOUDINARY_CONFIG={cloudName:'vhmoz6a0',uploadPreset:'spike_present'};
-function validateCloudinaryImage(file){if(!file)return true;if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw new Error('Use JPG, PNG, WEBP, or GIF.');if(file.size>10*1024*1024)throw new Error('Image must be 10MB or smaller.');return true;}
-async function uploadToCloudinary(file,folder='spike/rooms'){
-  validateCloudinaryImage(file);
-  if(!file)return null;
-  const endpoint=`https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/auto/upload`;
-  const form=new FormData(); form.append('file',file); form.append('upload_preset',CLOUDINARY_CONFIG.uploadPreset); form.append('folder',folder);
-  const response=await Promise.race([fetch(endpoint,{method:'POST',body:form}),new Promise((_,reject)=>setTimeout(()=>reject(new Error('Image upload timed out. Please try again.')),30000))]);
-  const data=await response.json().catch(()=>({}));
-  if(!response.ok||!data.secure_url)throw new Error(data.error?.message||'Image upload failed.');
-  return data.secure_url;
-}
-function previewRoomImage(inputId,previewId){
-  const input=document.getElementById(inputId), box=document.getElementById(previewId); if(!input||!box)return;
-  const file=input.files?.[0];
-  if(!file){box.textContent='No picture selected';return;}
-  try{validateCloudinaryImage(file);}catch(e){input.value='';box.textContent=e.message;toast(e.message,'warning');return;}
-  const old=box.dataset.objectUrl; if(old)URL.revokeObjectURL(old);
-  const url=URL.createObjectURL(file); box.dataset.objectUrl=url; box.innerHTML='';
-  const img=document.createElement('img'); img.src=url; img.alt=''; img.loading='lazy'; img.decoding='async';
-  const label=document.createElement('span'); label.textContent=file.name; box.append(img,label);
-}
+<script>
 const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
 const SUPABASE_ANON_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
@@ -495,6 +431,7 @@ let allRooms=[];
 let joinedRoomIds=new Set();
 let activeTab='discover';
 let trendingRooms=[];
+let recommendedRooms=[];
 let spikeCreatorStatus=null;
 let authReadyResolve;
 let authReadySettled=false;
@@ -588,33 +525,13 @@ function normalizeRoomAccount(a){
 }
 function renderRoomAccount(a){
   spikeRoomAccount=normalizeRoomAccount(a);
-  const name=$('#racName'), handle=$('#racHandle'), edit=$('#racEdit'), icon=$('#racIcon'), level=$('#racLevel'), xp=$('#racXp'), progress=$('#racProgress'), next=$('#racNext');
+  const name=$('#racName'), handle=$('#racHandle'), edit=$('#racEdit');
   if(!name||!edit)return;
-  if(!me){
-    name.textContent='Sign in to use Room Accounts';
-    handle.textContent='Sign in before joining or creating rooms';
-    edit.textContent='SIGN IN';
-    icon.textContent='🔐'; level.textContent='🔐 Authentication required'; xp.textContent='';
-    if(progress)progress.style.width='0%';
-    if(next)next.textContent='Sign in to unlock SPIKE Rooms.';
-    return;
-  }
-  if(!spikeRoomAccount){
-    name.textContent='Create your Room Account';
-    handle.textContent='Required before joining or creating rooms';
-    edit.textContent='CREATE'; icon.textContent='🌱'; level.textContent='🌱 Novice · Lv 1'; xp.textContent='0 XP';
-    if(progress)progress.style.width='0%';
-    if(next)next.textContent='Create your Room Account to unlock Rooms.';
-    return;
-  }
-  const acct=spikeRoomAccount;
-  name.textContent=acct.display_name||'Room Account';
-  handle.textContent=acct.handle?'@'+acct.handle:'Room Account';
-  edit.textContent='EDIT'; icon.textContent=acct.icon||'🌱';
-  level.textContent=(acct.icon||'🌱')+' '+(acct.title||'Novice')+' · Lv '+Number(acct.level||1);
-  xp.textContent=Number(acct.xp||0).toLocaleString()+' XP';
-  if(progress)progress.style.width=Math.max(0,Math.min(100,Number(acct.progress_pct||0)))+'%';
-  if(next)next.textContent=acct.next_level===false?'You reached the current Room Account milestone.':'Keep participating to reach '+(acct.next_title||'Builder')+'.'
+  if(!me){ name.textContent='Sign in to join Rooms'; handle.textContent='Your SPIKE profile is used for Room access.'; edit.textContent='SIGN IN'; return; }
+  if(!spikeRoomAccount){ name.textContent='Room profile optional'; handle.textContent='You can join Rooms now. Set this up only when you want to create one.'; edit.textContent='SET UP'; return; }
+  name.textContent=spikeRoomAccount.display_name||'Room profile';
+  handle.textContent=spikeRoomAccount.handle?'@'+spikeRoomAccount.handle:'Room profile ready';
+  edit.textContent='EDIT';
 }
 async function loadRoomAccount(){
   if(!me){renderRoomAccount(null);return null;}
@@ -635,15 +552,17 @@ async function loadRooms(){
   if(roomsLoading)return;
   roomsLoading=true;
   try{
-    const {data,error}=await spikeRpcRead('rooms_list');
+    const [{data,error},{data:recommended,error:recommendationError}]=await Promise.all([
+      spikeRpcRead('rooms_list'),
+      spikeRpcRead('rooms_recommended',{p_limit:6})
+    ]);
     if(error)throw error;
     allRooms=(data||[]).filter(r=>isUuid(r?.id||r?.room_id));
-    trendingRooms=[...allRooms].sort((a,b)=>Number(b.trend_score??b.messages_24h??b.members??0)-Number(a.trend_score??a.messages_24h??a.members??0));
-    renderTrendingStrip();
+    recommendedRooms=recommendationError ? [] : (recommended||[]).filter(r=>isUuid(r?.id||r?.room_id));
     render();
   }catch(e){
     console.warn('SPIKE rooms load failed:',e);
-    allRooms=[]; trendingRooms=[]; joinedRoomIds=new Set(); renderTrendingStrip(); render();
+    allRooms=[]; joinedRoomIds=new Set(); render();
     toast(spikeNetworkError(e)?'Could not reach SPIKE. Check your connection.':'Could not load Rooms. Please retry.');
   }finally{roomsLoading=false;}
 }
@@ -674,43 +593,36 @@ function goToSignIn(){
   const next=encodeURIComponent(location.pathname+location.search);
   location.href='index.html?next='+next;
 }
-function currentRooms(){
-if(activeTab==='mine') return allRooms.filter(r=>me && String(r.owner_id||'')===String(me.id));
-if(activeTab==='joined') return allRooms.filter(r=>joinedRoomIds.has(String(r.id||r.room_id||'')));
-return allRooms;
+function currentRooms(){return allRooms;}
+function recommendationCard(r,index){
+ const id=String(r?.id||'').trim();
+ const joined=joinedRoomIds.has(id);
+ const av=r.avatar_url ? '<img src="'+esc(r.avatar_url)+'" alt="" loading="lazy" decoding="async">' : esc(r.emoji||'🏠');
+ const rank=index<3?['🥇','🥈','🥉'][index]:'#'+(index+1);
+ const meta=joined?'Joined':(r.reason||'Recommended');
+ return '<button class="trendCard" type="button" data-top-room="'+esc(id)+'"><div class="trendTop"><span class="trendRank">'+rank+'</span><div class="trendEmoji">'+av+'</div><div class="trendName">'+esc(r.name||'Room')+'</div></div><div class="trendMeta">'+esc(meta)+' · '+Number(r.member_count||0).toLocaleString()+' members</div></button>';
 }
-function renderTrendingStrip(){
-const grid=$('#trendGrid'); if(!grid)return;
-const rows=(trendingRooms.length?trendingRooms:allRooms).slice(0,3);
-$('#trendSummary').textContent=rows.length?rows.length+' rooms ranked by activity':'No active rooms yet';
-grid.innerHTML=rows.length?rows.map((r,i)=>{
-const av=r.avatar_url?'<img src="'+esc(r.avatar_url)+'" alt="" loading="lazy" decoding="async">':esc(r.emoji||'🏠');
-const score=r.trend_score!=null?Number(r.trend_score).toFixed(1):'—';
-const id=String(r.room_id||r.id||'').trim(); if(!isUuid(id)) return ''; return '<article class="trendCard" data-trend-id="'+esc(id)+'"><div class="trendTop"><div class="trendEmoji">'+av+'</div><div class="trendName">'+esc(r.name||'Room')+'</div></div><div class="trendMeta">'+esc(r.category||'General')+' · '+(r.members??0)+' members · '+(r.messages_24h??0)+' messages today</div><div class="trendScore">#'+(i+1)+' · score '+esc(score)+'</div></article>';
-}).join(''):'<div class="empty" style="min-height:80px;padding:15px;grid-column:1/-1">No trending rooms yet.</div>';
+function renderTrendingStrip(list){
+ const section=$('#topRoomsSection'),box=$('#topRooms');
+ if(!section||!box)return;
+ const q=$('#search')?.value.trim();
+ const visible=q?'':(list||recommendedRooms).filter(r=>!joinedRoomIds.has(String(r.id||''))).slice(0,6);
+ section.hidden=!visible.length;
+ box.innerHTML=visible.map(recommendationCard).join('');
+ box.querySelectorAll('[data-top-room]').forEach(x=>x.onclick=()=>openRoomOrGate(x.dataset.topRoom,'chat'));
 }
 function render(){
 const search=document.getElementById('search');
 const q=search ? search.value.trim().toLowerCase() : '';
-const source=currentRooms();
-const list=source.filter(r=>{
-const tags=Array.isArray(r.tags)?r.tags.join(' '):(r.tags||'');
-return !q || (r.name+' '+(r.description||'')+' '+(r.category||'')+' '+tags)
-.toLowerCase().includes(q);
-});
-const titles={
-discover:['Rooms','Live communities on SPIKE'],
-joined:['Joined Rooms','Rooms you have joined'],
-mine:['My Rooms','Communities you own and manage'],
-creator:['Creator','Complete the requirements to unlock Room creation']
-};
-const title=titles[activeTab]||titles.discover;
-$('#roomListTitle').textContent=title[0];
-$('#roomListSub').textContent=title[1];
+const filtered=currentRooms().filter(r=>{const tags=Array.isArray(r.tags)?r.tags.join(' '):(r.tags||'');return !q || (r.name+' '+(r.description||'')+' '+(r.category||'')+' '+tags).toLowerCase().includes(q);});
+const joined=filtered.filter(r=>joinedRoomIds.has(String(r.id||r.room_id||'')));
+const available=filtered.filter(r=>!joinedRoomIds.has(String(r.id||r.room_id||'')));
+const list=q ? filtered : [...joined,...available];
+$('#roomListTitle').textContent=q?'Search results':(joined.length?'Your Rooms':'Discover Rooms');
+$('#roomListSub').textContent=q?'Find a Room by name, topic or tag':(joined.length?'Open a Room you already joined, or discover something new':'Find a community and join the conversation');
 $('#count').textContent=list.length+' room'+(list.length===1?'':'s');
-$('#rooms').innerHTML=list.length
-? list.map(roomCard).join('')
-: '<div class="empty">'+(!me&&activeTab==='mine'?'Sign in to see and manage your Rooms.':!me&&activeTab==='joined'?'Sign in to see your joined Rooms.':activeTab==='mine'?'You have not created a room yet.':activeTab==='joined'?'You have not joined any rooms yet.':'No rooms match your search yet.')+'</div>';
+$('#rooms').innerHTML=list.length?list.map(roomCard).join(''):'<div class="empty">'+(!me?'Sign in to join a Room.':'No rooms match your search yet.')+'</div>';
+renderTrendingStrip(filtered);
 }
 async function loadJoinedRooms(){
   joinedRoomIds=new Set();
@@ -719,6 +631,7 @@ async function loadJoinedRooms(){
     const {data,error}=await sb.from('room_members').select('room_id').eq('user_id',me.id);
     if(error)throw error;
     joinedRoomIds=new Set((data||[]).map(row=>String(row.room_id||'')).filter(isUuid));
+  render();
   }catch(error){
     console.warn('SPIKE joined rooms load failed:',error);
   }
@@ -727,13 +640,6 @@ async function loadJoinedRooms(){
 async function joinRoomFromRooms(roomId){
 if(!me){toast('Please sign in to join this Room.');goToSignIn();return false;}
 if(!isUuid(roomId)){toast('This Room has an invalid ID.');return false;}
-if(!spikeRoomAccount){
-  await loadRoomAccount();
-  if(!spikeRoomAccount){
-    openRoomAccountModal(roomId);
-    return false;
-  }
-}
 try{
   const {error}=await sb.from('room_members').insert({room_id:roomId,user_id:me.id,role:'member'});
   if(error && error.code!=='23505') throw error;
@@ -783,29 +689,23 @@ async function loadCreatorStatus(){
  if(!me){spikeCreatorStatus=null;renderCreatorQualification();return null;}
  try{const {data,error}=await spikeRpcRead('room_creator_status');if(error)throw error;spikeCreatorStatus=Array.isArray(data)?data[0]:data;renderCreatorQualification();return spikeCreatorStatus;}catch(e){console.warn('SPIKE creator status failed:',e);spikeCreatorStatus=null;renderCreatorQualification();return null;}
 }
-function renderCreatorQualification(){
- const box=$('#creatorQualification'),grid=$('#cqGrid'),count=$('#cqCount'),bar=$('#cqProgressBar'),sub=$('#cqSub'),btn=$('#cqChallengeBtn'),title=$('#creatorTitle'),creatorBtn=$('#creatorAction');
- if(!box||!grid)return;
- if(!me){box.classList.remove('show'); const countV2=$('#cqCountV2'); if(countV2)countV2.textContent='—'; return;}
- const st=spikeCreatorStatus||{}; const req=Array.isArray(st.requirements)?st.requirements:[];
- box.classList.add('show'); const done=Number(st.completed_count||req.filter(x=>x.done).length||0), total=Number(st.total_requirements||11);
- if(count)count.textContent=done+'/'+total; const countV2=$('#cqCountV2'); if(countV2)countV2.textContent=done+'/'+total; if(bar)bar.style.width=Math.round(done/Math.max(total,1)*100)+'%';
- if(sub)sub.textContent=st.can_create?'🎉 Creator unlocked. You have full room creation access.':'Complete all requirements to unlock full Creator access.';
- grid.innerHTML=req.map(r=>{const d=!!r.done;const cur=Number(r.current||0),tar=Number(r.target||1);return '<div class="cqItem '+(d?'cqDone':'cqLock')+'"><b>'+(d?'✓ ':'🔒 ')+esc(r.label)+'</b><small>'+((r.key==='standing')?(d?'Good standing':'Resolve recent serious moderation actions'):(cur+'/'+tar))+'</small></div>'}).join('');
- if(btn){btn.style.display=st.challenge_completed?'none':'block';}
- if(title)title.textContent=st.can_create?'Creator mode unlocked':'Creator qualification in progress';
- if(creatorBtn){creatorBtn.textContent=st.can_create?'CREATE ROOM':'VIEW REQUIREMENTS';}
-}
+function renderCreatorQualification(){ const st=spikeCreatorStatus||{}; const creatorBtn=$('#creatorAction'); if(creatorBtn) creatorBtn.textContent=st.can_create?'CREATE':'CREATE'; }
 function openCreatorChallenge(){if(!me){goToSignIn();return;} $('#creatorChallengeModal')?.classList.add('show');}
 function closeCreatorChallenge(){$('#creatorChallengeModal')?.classList.remove('show');}
 async function submitCreatorChallenge(e){e.preventDefault();const answers={q1:'b',q2:'a',q3:'a',q4:'a',q5:'a'};let score=0;for(const [q,a] of Object.entries(answers)){if(new FormData(e.currentTarget).get(q)===a)score+=20;}const result=$('#challengeResult');if(score<80){result.className='challengeResult show';result.textContent='Score: '+score+'%. You need at least 80%. Review the scenarios and try again.';return;}const btn=$('#challengeSubmit');btn.disabled=true;try{const {data,error}=await spikeRpcWrite('creator_challenge_complete',{p_score:score});if(error)throw error;result.className='challengeResult show';result.textContent='🎉 Challenge passed with '+score+'%. Creator qualification updated.';await loadCreatorStatus();setTimeout(closeCreatorChallenge,900);}catch(err){result.className='challengeResult show';result.textContent=err.message||'Could not save your challenge result.';}finally{btn.disabled=false;}}
 async function guardedCreateRoom(){
-if(!me){toast('Please sign in to create a room.');goToSignIn();return}
-await loadRoomAccount();
-await loadCreatorStatus();
-if(!spikeRoomAccount){openRoomAccountModal();return}
-if(!spikeCreatorStatus?.can_create){$('#creatorQualification')?.classList.add('show');$('#creatorQualification')?.scrollIntoView({behavior:'smooth',block:'center'});toast('Creator access is locked. Complete the requirements below.','warning',3600);return}
-$('#createModal').classList.add('show');
+ if(!me){toast('Please sign in to create a Room.');goToSignIn();return}
+ await loadRoomAccount();
+ await loadCreatorStatus();
+ if(!spikeRoomAccount){openRoomAccountModal();return}
+ const st=spikeCreatorStatus||{};
+ const req=Array.isArray(st.requirements)?st.requirements:[];
+ const allDone=req.length>0 && req.every(r=>!!r.done);
+ if(!st.can_create){
+   if(allDone && !st.challenge_completed){openCreatorChallenge();return;}
+   toast('Room creation is not available for this account yet.','warning',3600);return;
+ }
+ $('#createModal').classList.add('show');
 }
 document.addEventListener('click',function(e){
   const target=e.target.closest('[data-room-id]');
@@ -846,6 +746,43 @@ if(pending) setTimeout(()=>openRoomOrGate(pending),250);
 }catch(err){toast(err.message||'Could not save Room Account')}
 finally{spikeRoomAccountBusy=false;btn.disabled=false}
 });
+let roomPictureFile=null;
+function resetRoomPicture(){
+ roomPictureFile=null;
+ const input=$('#roomPicture'),preview=$('#roomPicturePreview'),status=$('#roomPictureStatus');
+ if(input)input.value='';
+ if(preview)preview.innerHTML='🏠';
+ if(status){status.textContent='';status.className='roomPictureStatus';}
+}
+function setRoomPictureStatus(message,isError=false){const el=$('#roomPictureStatus');if(!el)return;el.textContent=message||'';el.className='roomPictureStatus'+(isError?' error':'');}
+function previewRoomPicture(file){
+ const preview=$('#roomPicturePreview');
+ if(!preview)return;
+ const url=URL.createObjectURL(file);
+ const img=new Image();
+ img.onload=()=>{preview.innerHTML='';preview.appendChild(img);URL.revokeObjectURL(url);};
+ img.onerror=()=>{URL.revokeObjectURL(url);preview.innerHTML='🏠';};
+ img.alt='';img.src=url;
+}
+async function uploadRoomPicture(file){
+ if(!me)throw new Error('Sign in to upload a Room picture.');
+ const ext=(file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg');
+ const path=`${me.id}/rooms/${crypto.randomUUID()}.${ext}`;
+ const {error}=await sb.storage.from('room-media').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+ if(error)throw error;
+ const {data}=sb.storage.from('room-media').getPublicUrl(path);
+ const url=data?.publicUrl||'';
+ if(!url)throw new Error('Could not get the uploaded Room picture URL.');
+ return {path,url};
+}
+$('#roomPictureButton')?.addEventListener('click',()=>$('#roomPicture')?.click());
+$('#roomPicture')?.addEventListener('change',e=>{
+ const file=e.currentTarget.files?.[0];
+ if(!file){resetRoomPicture();return;}
+ if(!/^image\/(jpeg|png|webp)$/.test(file.type)){e.currentTarget.value='';roomPictureFile=null;setRoomPictureStatus('Choose a JPG, PNG or WebP image.',true);return;}
+ if(file.size>5*1024*1024){e.currentTarget.value='';roomPictureFile=null;setRoomPictureStatus('That image is larger than 5 MB.',true);return;}
+ roomPictureFile=file;previewRoomPicture(file);setRoomPictureStatus(file.name+' selected.');
+});
 $('#createForm')?.addEventListener('submit',async e=>{
 e.preventDefault();
 if(!me){goToSignIn();return;}
@@ -853,45 +790,29 @@ if(!spikeRoomAccount){await loadRoomAccount();if(!spikeRoomAccount){openRoomAcco
 const form=e.currentTarget,btn=form.querySelector('button[type=submit]');
 if(btn?.disabled)return;
 if(btn){btn.disabled=true;btn.setAttribute('aria-busy','true');}
+let uploadedPath=null;
 try{
-const tags=$('#tags').value.split(',').map(x=>x.trim()).filter(Boolean);
-const roomFile=$('#roomMedia')?.files?.[0]||null; const coverFile=$('#coverMedia')?.files?.[0]||null;
-const [avatarUrl,coverUrl]=await Promise.all([roomFile?uploadToCloudinary(roomFile,'spike/rooms/avatars'):null,coverFile?uploadToCloudinary(coverFile,'spike/rooms/covers'):null]);
-const payload={p_name:$('#name').value.trim(),p_description:$('#description').value.trim()||null,p_emoji:$('#emoji').value.trim()||'🏠',p_category:$('#category').value.trim()||'General',p_tags:tags,p_avatar_url:avatarUrl,p_cover_url:coverUrl,p_rules:$('#rules').value.trim()||null};
-const res=await spikeRpcWrite('room_create',payload);if(res.error)throw res.error;
-$('#createModal').classList.remove('show');form.reset();$('#emoji').value='🏠';$('#category').value='General'; ['roomMediaPreview','coverMediaPreview'].forEach(id=>{const box=$('#'+id);if(box){if(box.dataset.objectUrl)URL.revokeObjectURL(box.dataset.objectUrl);delete box.dataset.objectUrl;box.textContent=id==='roomMediaPreview'?'No picture selected':'No cover selected';}});
-await loadRooms();toast('Room created successfully.');
-if(res.data?.id)location.href='room.html?id='+encodeURIComponent(res.data.id);
-}catch(err){toast(err.message||'Could not create Room.')}finally{if(btn){btn.disabled=false;btn.removeAttribute('aria-busy')}}
+ let pictureUrl=null;
+ if(roomPictureFile){setRoomPictureStatus('Uploading picture…');const uploaded=await uploadRoomPicture(roomPictureFile);uploadedPath=uploaded.path;pictureUrl=uploaded.url;}
+ const payload={p_name:$('#name').value.trim(),p_description:$('#description').value.trim()||null,p_emoji:'🏠',p_category:'General',p_tags:[],p_avatar_url:pictureUrl,p_cover_url:null,p_rules:$('#rules').value.trim()||null};
+ const res=await spikeRpcWrite('room_create',payload);if(res.error)throw res.error;
+ $('#createModal').classList.remove('show');form.reset();resetRoomPicture();
+ await loadRooms();toast('Room created successfully.');
+ if(res.data?.id)location.href='room_chat.html?id='+encodeURIComponent(res.data.id)+'&from=rooms';
+}catch(err){
+ if(uploadedPath){try{await sb.storage.from('room-media').remove([uploadedPath]);}catch(cleanupError){console.warn('Room picture orphan cleanup failed',cleanupError);}}
+ setRoomPictureStatus(err.message||'Could not upload the Room picture.',true);
+ toast(err.message||'Could not create Room.');
+}finally{if(btn){btn.disabled=false;btn.removeAttribute('aria-busy')}}
 });
 $('#closeCreate')?.addEventListener('click',()=>$('#createModal').classList.remove('show'));
-function setRoomTab(tab){
-  const allowedTabs=new Set(['discover','joined','mine','creator']);
-  activeTab=allowedTabs.has(tab)?tab:'discover';
-  document.querySelectorAll('.roomTab[data-tab]').forEach(button=>{const selected=button.dataset.tab===activeTab;button.classList.toggle('active',selected);button.setAttribute('aria-selected',String(selected));});
-  const discover=$('#discoverView'),browse=$('#browseView'),creator=$('#creatorView'),create=$('#myRoomsAction');
-  discover?.classList.toggle('active-view',activeTab==='discover');
-  browse?.classList.toggle('active-view',activeTab!=='discover'&&activeTab!=='creator');
-  creator?.classList.toggle('active-view',activeTab==='creator');
-  if(create){const show=activeTab==='mine'||activeTab==='creator';create.style.display=show?'flex':'none';create.setAttribute('aria-hidden',String(!show));}
-  if(activeTab==='creator') loadCreatorStatus();
-  render();
-}
-document.querySelectorAll('.roomTab[data-tab]').forEach(tab=>tab.addEventListener('click',()=>setRoomTab(tab.dataset.tab)));
-document.addEventListener('click',e=>{
-  const trend=e.target.closest('[data-trend-id]');
-  if(trend){e.preventDefault();openRoomOrGate(trend.dataset.trendId);return;}
-});
 $('#search')?.addEventListener('input',render);
-$('#roomMedia')?.addEventListener('change',()=>previewRoomImage('roomMedia','roomMediaPreview'));
-$('#coverMedia')?.addEventListener('change',()=>previewRoomImage('coverMedia','coverMediaPreview'));
 $('#notif')?.addEventListener('click',()=>{location.href='notifications.html';});
 $('#avatar')?.addEventListener('click',()=>{if(me) location.href='profile.html?uid='+encodeURIComponent(me.id); else goToSignIn();});
 async function bootRooms(){
   await auth();
-  await Promise.all([loadRoomAccount(),loadCreatorStatus(),loadJoinedRooms(),loadRooms()]);
+  await Promise.all([loadRoomAccount(),loadJoinedRooms(),loadRooms()]);
   renderRoomAccount(spikeRoomAccount);
-  renderTrendingStrip();
   render();
 }
 bootRooms();

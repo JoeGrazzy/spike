@@ -29,6 +29,13 @@ button,input,textarea{font:inherit} button{cursor:pointer} button:focus-visible,
 .loading{min-height:45vh;display:grid;place-items:center;color:var(--muted)} .diagnostic{font-size:12px;color:var(--muted);margin-top:8px}
 @media(max-width:760px){.wrap{width:min(100% - 18px,1100px);margin-top:12px}.cover{height:150px}.roomhead{padding:0 14px 16px;gap:12px}.avatar{width:78px;height:78px;font-size:34px;border-radius:22px}.actions{justify-content:flex-start}.grid{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}.top{padding:11px 12px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+.member-tools{display:grid;gap:12px}.member-toolbar{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px}.member-toolbar input,.member-toolbar select{width:100%;border:1px solid var(--line);border-radius:14px;background:#0e1627;color:var(--text);padding:11px 12px}.member-summary{display:flex;justify-content:space-between;gap:10px;align-items:end}.rank-list{display:grid;gap:8px}.rank-row{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}.rank-row:last-child{border-bottom:0}.rank-num{font-weight:950;color:var(--accent);text-align:center}.member-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}.member-row:last-child{border-bottom:0}.member-avatar{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;overflow:hidden;background:var(--panel2);font-weight:950}.member-avatar img{width:100%;height:100%;object-fit:cover}.member-main{min-width:0}.member-name{font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.member-meta{color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.member-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}.member-pill{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:3px 7px;font-size:10px;font-weight:850;color:var(--muted)}.member-pill.good{color:var(--good);border-color:rgba(56,217,150,.28)}.member-pill.warn{color:var(--warn);border-color:rgba(255,191,71,.28)}.member-pill.danger{color:var(--danger);border-color:rgba(255,107,122,.28)}.member-open{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:12px;padding:8px 10px;font-weight:850}.member-drawer{position:fixed;inset:0;z-index:90;display:none;background:rgba(4,7,14,.66);backdrop-filter:blur(10px);align-items:flex-end;justify-content:center}.member-drawer.show{display:flex}.member-drawer-card{width:min(680px,100%);max-height:min(88vh,760px);overflow:auto;border:1px solid var(--line);border-bottom:0;border-radius:24px 24px 0 0;background:linear-gradient(145deg,#171225,#0e101b);box-shadow:0 -24px 80px rgba(0,0,0,.5);padding:18px}.member-drawer-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.member-drawer-close{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--text);font-size:20px}.member-profile{display:flex;align-items:center;gap:12px;margin:14px 0}.member-profile .member-avatar{width:58px;height:58px}.member-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}.member-action{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:11px;text-align:left;font-weight:850}.member-action.danger{border-color:rgba(255,107,122,.3);color:#ffd8dd}.member-history{display:grid;gap:7px;margin-top:10px}.history-row{padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}.history-row b{font-size:12px}.history-row span{display:block;color:var(--muted);font-size:11px;margin-top:2px}@media(max-width:600px){.member-toolbar{grid-template-columns:1fr}.member-action-grid{grid-template-columns:1fr 1fr}.member-drawer-card{padding:15px}}
+.room-picture-manager{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.02)}
+.room-picture-manager-preview{width:84px;height:84px;flex:0 0 84px;border-radius:22px;display:grid;place-items:center;overflow:hidden;background:#111a2d;border:1px solid var(--line);font-size:34px}
+.room-picture-manager-preview img{width:100%;height:100%;display:block;object-fit:cover}
+.room-picture-manager-copy{min-width:0;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px}.room-picture-manager-copy strong{font-size:14px}.room-picture-manager-copy .diagnostic{min-height:16px}
+@media(max-width:600px){.room-picture-manager{align-items:flex-start}.room-picture-manager-preview{width:72px;height:72px;flex-basis:72px;border-radius:18px}}
 </style>
 <style id="spike-menu-nav-css-fixed">
 /* SPIKE menu-aware bottom navigation */
@@ -86,7 +93,6 @@ button,input,textarea{font:inherit} button{cursor:pointer} button:focus-visible,
 <body data-spike-page="room">
 <header class="top">
   <button id="backBtn" class="iconbtn spike-premium-back" type="button" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back">← Rooms</button>
-  <a class="iconbtn" href="guide.html#rooms" aria-label="SPIKE Room Guide" title="Room Guide">📖</a>
   <div class="brand"><span>SPIKE</span> ROOM</div>
   <button id="retryTop" class="iconbtn" type="button">↻ Retry</button>
 </header>
@@ -167,11 +173,33 @@ button,input,textarea{font:inherit} button{cursor:pointer} button:focus-visible,
     </section>
 
     <section id="members" class="view hidden">
-      <div class="panel">
-        <h2>Members</h2>
-        <div id="membersList"><div class="empty">Member data will appear when provided by the room backend.</div></div>
+      <div class="panel member-tools">
+        <div class="member-summary">
+          <div><h2>Members</h2><div class="muted">Find people, see contribution, and manage access.</div></div>
+          <span id="memberResultCount" class="member-pill">—</span>
+        </div>
+        <div class="member-toolbar">
+          <input id="memberSearch" type="search" maxlength="80" placeholder="Search members…" aria-label="Search members">
+          <select id="memberFilter" aria-label="Filter members">
+            <option value="all">All members</option>
+            <option value="moderators">Moderators</option>
+            <option value="muted">Muted</option>
+          </select>
+        </div>
+        <div class="panel" style="padding:14px">
+          <div class="member-summary"><div><b>⭐ Top Contributors</b><div class="muted" style="font-size:12px">Based on useful activity over the last 30 days.</div></div></div>
+          <div id="memberRankings" class="rank-list"><div class="empty">Loading rankings…</div></div>
+        </div>
+        <div id="membersList"><div class="empty">Loading members…</div></div>
       </div>
     </section>
+
+    <div id="memberDrawer" class="member-drawer" aria-hidden="true">
+      <div class="member-drawer-card" role="dialog" aria-modal="true" aria-labelledby="memberDrawerTitle">
+        <div class="member-drawer-head"><b id="memberDrawerTitle">Member</b><button id="memberDrawerClose" class="member-drawer-close" type="button" aria-label="Close member details">×</button></div>
+        <div id="memberDrawerBody"></div>
+      </div>
+    </div>
 
     <section id="about" class="view hidden">
       <div class="panel">
@@ -185,10 +213,19 @@ button,input,textarea{font:inherit} button{cursor:pointer} button:focus-visible,
     <section id="admin" class="view hidden">
       <div class="panel adminbox">
         <h2>Room management</h2>
-        <p class="muted">This page is built around the confirmed SPIKE room contract: rooms + room_members. Visibility here is client-side only; Supabase RLS remains the final authorization boundary.</p>
-        <div class="actions" style="justify-content:flex-start">
-          <button id="refreshRoomBtn" class="btn" type="button">Refresh room</button>
-          <button id="moderationBtn" class="btn" type="button">Moderation</button>
+        <p class="muted">Manage the parts of your Room that members see first. Only the Room creator can change the Room picture.</p>
+        <div class="room-picture-manager">
+          <div class="room-picture-manager-preview" id="adminRoomPicturePreview" aria-label="Current Room picture">🏠</div>
+          <div class="room-picture-manager-copy">
+            <strong>Room picture</strong>
+            <span class="muted">Optional · JPG, PNG or WebP · up to 5 MB</span>
+            <div class="actions" style="justify-content:flex-start;margin-top:8px">
+              <input id="adminRoomPicture" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+              <button id="changeRoomPictureBtn" class="btn primary" type="button">Change picture</button>
+              <button id="removeRoomPictureBtn" class="btn ghost" type="button">Remove</button>
+            </div>
+            <div id="adminRoomPictureStatus" class="diagnostic" aria-live="polite"></div>
+          </div>
         </div>
         <div id="adminNotice" class="diagnostic"></div>
       </div>
@@ -212,7 +249,7 @@ const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{pers
 window.sb=sb;
 
 const $=s=>document.querySelector(s);
-const state={roomId:null,room:null,me:null,account:null,joined:null,inflight:new Map(),cache:new Map(),retrying:false,diagnostics:[]};
+const state={roomId:null,room:null,me:null,account:null,joined:null,members:[],memberRankings:[],inflight:new Map(),cache:new Map(),retrying:false,diagnostics:[],memberSearch:'',memberFilter:'all',memberOffset:0};
 window.SPIKE_DIAG=state.diagnostics;
 
 function diag(event,extra={}){state.diagnostics.push({at:new Date().toISOString(),event,...extra});if(state.diagnostics.length>100)state.diagnostics.shift();}
@@ -296,6 +333,7 @@ function renderRoom(){
   $('#adminTab').classList.toggle('hidden',!isOwner);
   if(isOwner)$('#adminNotice').textContent='Owner detected. You can manage this room and also join it as a participant. Server-side authorization is still required for every management action.';
   renderMembership();
+  renderAdminRoomPicture();
   $('#app').classList.remove('hidden');$('#loading').classList.add('hidden');
 }
 function showNotFound(){$ ('#loading').classList.add('hidden');$('#app').classList.add('hidden');$('#notFound').classList.remove('hidden');}
@@ -480,7 +518,7 @@ async function boot(){
       showAccountGate();
       return;
     }
-    await Promise.all([refreshMembership(),loadMemberCount(),loadMembers(),loadChannels()]);
+    await Promise.all([refreshMembership(),loadMemberCount(),loadMembers(),loadMemberRankings(),loadChannels()]);
     renderMemberCount();
     renderChatComposer();
     if(state.activeChannel) await selectChannel(state.activeChannel.id);
@@ -511,27 +549,51 @@ function renderMemberCount(){
 }
 async function loadMembers(){
   try{
-    const rows=await read('members:'+state.roomId,async()=>{
-      const {data,error}=await sb.from('room_members')
-        .select('user_id,role,joined_at')
-        .eq('room_id',state.roomId)
-        .order('joined_at',{ascending:true})
-        .limit(100);
+    const key='members:'+state.roomId+':'+state.memberSearch+':'+state.memberFilter+':'+state.memberOffset;
+    const rows=await read(key,async()=>{
+      const {data,error}=await sb.rpc('room_members_list',{p_room_id:state.roomId,p_search:state.memberSearch,p_filter:state.memberFilter,p_limit:100,p_offset:state.memberOffset});
       if(error)throw error;
       return data||[];
-    },{ttl:10000,retries:1});
+    },{ttl:8000,retries:1});
     state.members=rows;
-    const box=document.getElementById('membersList');
-    if(box){
-      box.innerHTML=rows.length?rows.map(m=>{
-        const isOwner=String(m.user_id)===String(state.room?.owner_id);
-        const role=isOwner?'owner':(m.role||'member');
-        return '<div class="memberRow"><b>'+esc(isOwner?'Room owner':m.user_id)+'</b><div class="muted">'+esc(role)+' · joined '+esc(m.joined_at?new Date(m.joined_at).toLocaleDateString():'—')+'</div></div>';
-      }).join(''):'<div class="muted">No members yet.</div>';
-    }
+    renderMembers();
     return rows;
-  }catch(e){diag('members_error',{message:String(e?.message||e)});return [];}
+  }catch(e){diag('members_error',{message:String(e?.message||e)});const box=document.getElementById('membersList');if(box)box.innerHTML='<div class="empty">Could not load members. Please retry.</div>';return [];}
 }
+function memberName(m){return m?.display_name||m?.username||m?.sp_id||'Member'}
+function memberAvatar(m){const name=memberName(m);return m?.avatar_url?'<img src="'+esc(safeHttpUrl(m.avatar_url))+'" alt="">':esc(name.slice(0,1).toUpperCase())}
+function roleLabel(role){return role==='owner'?'Owner':role==='admin'?'Admin':role==='moderator'?'Moderator':'Member'}
+function renderMembers(){
+  const box=$('#membersList');if(!box)return;
+  $('#memberResultCount').textContent=state.members.length+' member'+(state.members.length===1?'':'s');
+  if(!state.members.length){box.innerHTML='<div class="empty">No members match this search.</div>';return;}
+  box.innerHTML=state.members.map(m=>{
+    const role=roleLabel(m.role), status=m.is_banned?'Banned':m.is_muted?'Muted':(m.active_days_30d>0?'Active':'Joined');
+    const pills='<span class="member-pill">'+esc(role)+'</span>'+(m.is_muted?'<span class="member-pill warn">Muted</span>':'')+(m.score>0?'<span class="member-pill good">'+esc(m.label||'Contributor')+'</span>':'');
+    return '<div class="member-row"><div class="member-avatar">'+memberAvatar(m)+'</div><div class="member-main"><div class="member-name">'+esc(memberName(m))+'</div><div class="member-meta">'+(m.username?'@'+esc(m.username):'')+(m.sp_id?' · '+esc(m.sp_id):'')+' · '+esc(status)+'</div><div class="member-tags">'+pills+'</div></div><button class="member-open" type="button" data-member-open="'+esc(m.user_id)+'">View</button></div>';
+  }).join('');
+  box.querySelectorAll('[data-member-open]').forEach(b=>b.onclick=()=>openMemberDrawer(b.dataset.memberOpen));
+}
+async function loadMemberRankings(){
+  try{const {data,error}=await sb.rpc('room_member_rankings',{p_room_id:state.roomId,p_limit:5});if(error)throw error;state.memberRankings=data||[];const box=$('#memberRankings');if(!box)return;if(!state.memberRankings.length){box.innerHTML='<div class="muted">No contributor ranking yet. It will appear as the room becomes active.</div>';return;}box.innerHTML=state.memberRankings.map((m,i)=>'<div class="rank-row"><div class="rank-num">'+(i===0?'🥇':i===1?'🥈':i===2?'🥉':String(i+1))+'</div><div><b>'+esc(memberName(m))+'</b><div class="muted" style="font-size:11px">'+esc(m.label||'Contributor')+' · '+esc(String(m.score||0))+'</div></div><span class="member-pill good">'+esc(String(m.message_count_30d||0))+' msgs</span></div>').join('');}catch(e){diag('member_rankings_error',{message:String(e?.message||e)});const box=$('#memberRankings');if(box)box.innerHTML='<div class="muted">Rankings are temporarily unavailable.</div>';}}
+async function openMemberDrawer(uid){
+  const m=state.members.find(x=>String(x.user_id)===String(uid));if(!m)return;
+  const d=$('#memberDrawer'),body=$('#memberDrawerBody');if(!d||!body)return;
+  const isOwner=m.role==='owner'||String(uid)===String(state.room?.owner_id);
+  const canRole=!isOwner&&m.role!=='admin';
+  body.innerHTML='<div class="member-profile"><div class="member-avatar">'+memberAvatar(m)+'</div><div><div style="font-weight:950;font-size:18px">'+esc(memberName(m))+'</div><div class="muted">'+(m.username?'@'+esc(m.username):'')+(m.sp_id?' · '+esc(m.sp_id):'')+'</div></div></div><div class="member-tags"><span class="member-pill">'+esc(roleLabel(m.role))+'</span>'+(m.is_muted?'<span class="member-pill warn">Muted'+(m.muted_until?' until '+esc(new Date(m.muted_until).toLocaleString()):'')+'</span>':'')+(m.label?'<span class="member-pill good">'+esc(m.label)+'</span>':'')+'</div><div class="stats" style="margin-top:14px"><div class="stat"><span class="muted">Score</span><b>'+esc(String(m.score||0))+'</b></div><div class="stat"><span class="muted">Messages</span><b>'+esc(String(m.message_count_30d||0))+'</b></div><div class="stat"><span class="muted">Helpful reactions</span><b>'+esc(String(m.reactions_received_30d||0))+'</b></div></div><div class="member-action-grid">'+(canRole?'<button class="member-action" id="memberRole">'+(m.role==='moderator'?'Remove moderator role':'Make moderator')+'</button>':'')+(m.is_muted?'<button class="member-action" id="memberMute">Unmute</button>':'<button class="member-action" id="memberMute">Mute 10 min</button>')+'<button class="member-action danger" id="memberRemove">Remove from room</button><button class="member-action danger" id="memberBan">Ban & remove</button></div><div style="margin-top:18px"><b>Moderation history</b><div id="memberHistory" class="member-history"><div class="muted">Loading…</div></div></div>';
+  d.classList.add('show');d.setAttribute('aria-hidden','false');
+  if($('#memberRole'))$('#memberRole').onclick=()=>updateMemberRole(m);
+  $('#memberMute').onclick=()=>toggleMemberMute(m);$('#memberRemove').onclick=()=>removeMember(m);$('#memberBan').onclick=()=>banMember(m);
+  loadMemberHistory(m.user_id);
+}
+function closeMemberDrawer(){const d=$('#memberDrawer');if(d){d.classList.remove('show');d.setAttribute('aria-hidden','true')}}
+async function loadMemberHistory(uid){const box=$('#memberHistory');if(!box)return;try{const {data,error}=await sb.rpc('room_member_history',{p_room_id:state.roomId,p_user_id:uid,p_limit:20});if(error)throw error;box.innerHTML=data?.length?data.map(x=>'<div class="history-row"><b>'+esc(String(x.action).replaceAll('_',' '))+'</b><span>'+esc(x.reason||'No reason recorded')+' · '+esc(new Date(x.created_at).toLocaleString())+'</span></div>').join(''):'<div class="muted">No moderation actions recorded.</div>';}catch(e){box.innerHTML='<div class="muted">History unavailable.</div>';diag('member_history_error',{message:String(e?.message||e)})}}
+async function updateMemberRole(m){const next=m.role==='moderator'?'member':'moderator';try{const {error}=await sb.rpc('room_member_set_role',{p_room_id:state.roomId,p_user_id:m.user_id,p_role:next});if(error)throw error;toast(next==='moderator'?'Member promoted to moderator.':'Moderator role removed.');invalidate('members:'+state.roomId);await loadMembers();await loadMemberRankings();openMemberDrawer(state.members.find(x=>String(x.user_id)===String(m.user_id))?.user_id||m.user_id);}catch(e){toast(e?.message||'Could not change role.')}}
+async function toggleMemberMute(m){try{const fn=m.is_muted?'room_moderation_unmute':'room_moderation_mute';const args=m.is_muted?{p_room_id:state.roomId,p_user_id:m.user_id,p_reason:'Room member management'}:{p_room_id:state.roomId,p_user_id:m.user_id,p_duration_seconds:600,p_reason:'Room member management'};const {error}=await sb.rpc(fn,args);if(error)throw error;toast(m.is_muted?'Member unmuted.':'Member muted for 10 minutes.');invalidate('members:'+state.roomId);await loadMembers();openMemberDrawer(m.user_id);}catch(e){toast(e?.message||'Could not update mute.')}}
+async function removeMember(m){if(String(m.user_id)===String(state.room?.owner_id))return toast('The room owner cannot be removed.');const confirmed=window.SPIKEPremiumDialog?.confirm?await window.SPIKEPremiumDialog.confirm({title:'Remove member?',message:memberName(m)+' will be removed from this Room and can join again later.',confirmText:'Remove',cancelText:'Keep member',danger:true,kicker:'SPIKE ROOM'}):window.confirm('Remove '+memberName(m)+' from this Room? They can join again later.');if(!confirmed)return;try{const {error}=await sb.rpc('room_moderation_remove',{p_room_id:state.roomId,p_user_id:m.user_id,p_reason:'Room member management'});if(error)throw error;toast('Member removed.');closeMemberDrawer();invalidate('members:'+state.roomId);await Promise.all([loadMembers(),loadMemberRankings(),loadMemberCount()]);renderMemberCount();}catch(e){toast(e?.message||'Could not remove member.')}}
+async function banMember(m){if(String(m.user_id)===String(state.room?.owner_id))return toast('The room owner cannot be banned.');const confirmed=window.SPIKEPremiumDialog?.confirm?await window.SPIKEPremiumDialog.confirm({title:'Ban member?',message:memberName(m)+' will be removed and blocked from rejoining this Room.',confirmText:'Ban & remove',cancelText:'Cancel',danger:true,kicker:'SPIKE ROOM'}):window.confirm('Ban and remove '+memberName(m)+' from this Room?');if(!confirmed)return;try{const {error}=await sb.rpc('room_moderation_ban',{p_room_id:state.roomId,p_user_id:m.user_id,p_reason:'Room member management'});if(error)throw error;toast('Member banned and removed.');closeMemberDrawer();invalidate('members:'+state.roomId);await Promise.all([loadMembers(),loadMemberRankings(),loadMemberCount()]);renderMemberCount();}catch(e){toast(e?.message||'Could not ban member.')}}
+
 
 async function refreshMembership(){
   if(!state.me || !state.roomId){state.joined=null;renderMembership();renderChatComposer();return null;}
@@ -606,17 +668,111 @@ async function joinRoom(){
 
 
 $('#backRoomsBtn').onclick=()=>location.href='rooms.html';
-$('#retryBtn').onclick=safeRetry;$('#retryTop').onclick=safeRetry;$('#refreshRoomBtn').onclick=safeRetry;
+$('#retryBtn').onclick=safeRetry;$('#retryTop').onclick=safeRetry;
 $('#joinBtn').onclick=joinRoom;$('#sendBtn').onclick=sendMessage;$('#loadOlderBtn').onclick=()=>fetchMessages({older:true});
 $('#messageInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}});
 $('#shareBtn').onclick=async()=>{const url=location.href;try{if(navigator.share)await navigator.share({title:state.room?.name||'SPIKE Room',url});else{await navigator.clipboard.writeText(url);toast('Room link copied.');}}catch(e){}};
 $('#accountBtn').onclick=()=>location.href='rooms.html';
-$('#moderationBtn').onclick=()=>toast('Moderation UI requires verified backend RPC/table contracts; no guessed admin call was made.');
+
+function renderAdminRoomPicture(){
+  const preview=$('#adminRoomPicturePreview');
+  const remove=$('#removeRoomPictureBtn');
+  if(!preview)return;
+  if(state.room?.avatar_url){
+    const url=safeHttpUrl(state.room.avatar_url);
+    preview.innerHTML=url?`<img src="${esc(url)}" alt="Current Room picture" loading="lazy" decoding="async">`:'🏠';
+    if(remove)remove.disabled=false;
+  }else{
+    preview.textContent='🏠';
+    if(remove)remove.disabled=true;
+  }
+}
+function setAdminRoomPictureStatus(message,isError=false){
+  const el=$('#adminRoomPictureStatus');if(!el)return;
+  el.textContent=message||'';
+  el.className='diagnostic'+(isError?' error':'');
+}
+function roomMediaPathFromUrl(raw){
+  try{
+    const u=new URL(String(raw||''));
+    const marker='/storage/v1/object/public/room-media/';
+    const i=u.pathname.indexOf(marker);
+    if(i<0)return null;
+    return decodeURIComponent(u.pathname.slice(i+marker.length));
+  }catch{return null}
+}
+function adminRoomPictureValid(file){
+  if(!file)return false;
+  if(!/^image\/(jpeg|png|webp)$/.test(file.type)){setAdminRoomPictureStatus('Choose a JPG, PNG or WebP image.',true);return false;}
+  if(file.size>5*1024*1024){setAdminRoomPictureStatus('That image is larger than 5 MB.',true);return false;}
+  return true;
+}
+async function updateRoomPicture(file){
+  if(!state.me||!state.room||String(state.me.id)!==String(state.room.owner_id)){throw new Error('Only the Room creator can change this Room picture.');}
+  if(!adminRoomPictureValid(file))return;
+  const ext=file.type==='image/png'?'png':file.type==='image/webp'?'webp':'jpg';
+  const path=`${state.me.id}/rooms/${state.roomId}/${crypto.randomUUID()}.${ext}`;
+  const oldUrl=state.room.avatar_url||null;
+  setAdminRoomPictureStatus('Uploading picture…');
+  let uploaded=false;
+  try{
+    const up=await sb.storage.from('room-media').upload(path,file,{cacheControl:'3600',upsert:false,contentType:file.type});
+    if(up.error)throw up.error;
+    uploaded=true;
+    const publicUrl=sb.storage.from('room-media').getPublicUrl(path)?.data?.publicUrl||'';
+    if(!publicUrl)throw new Error('Could not get the uploaded Room picture URL.');
+    setAdminRoomPictureStatus('Saving Room picture…');
+    const {data,error}=await sb.rpc('room_update_picture',{p_room_id:state.roomId,p_avatar_url:publicUrl});
+    if(error)throw error;
+    state.room=normalizeRoom(Array.isArray(data)?data[0]:data)||state.room;
+    renderRoom();
+    renderAdminRoomPicture();
+    setAdminRoomPictureStatus('Room picture updated.');
+    const oldPath=roomMediaPathFromUrl(oldUrl);
+    if(oldPath&&oldPath.startsWith(String(state.me.id)+'/rooms/')){
+      try{await sb.storage.from('room-media').remove([oldPath]);}catch(cleanupError){diag('room_picture_old_cleanup_error',{message:String(cleanupError?.message||cleanupError)});}
+    }
+  }catch(e){
+    if(uploaded){try{await sb.storage.from('room-media').remove([path]);}catch(cleanupError){diag('room_picture_upload_cleanup_error',{message:String(cleanupError?.message||cleanupError)});}}
+    throw e;
+  }
+}
+async function removeRoomPicture(){
+  if(!state.me||!state.room||String(state.me.id)!==String(state.room.owner_id))return toast('Only the Room creator can change this Room picture.');
+  if(!state.room.avatar_url)return;
+  const confirmed=window.SPIKEPremiumDialog?.confirm?await window.SPIKEPremiumDialog.confirm({title:'Remove Room picture?',message:'The Room will use the default picture instead.',confirmText:'Remove',cancelText:'Keep picture',danger:true,kicker:'SPIKE ROOM'}):window.confirm('Remove the Room picture?');
+  if(!confirmed)return;
+  try{
+    setAdminRoomPictureStatus('Removing picture…');
+    const {data,error}=await sb.rpc('room_update_picture',{p_room_id:state.roomId,p_avatar_url:null});
+    if(error)throw error;
+    const oldPath=roomMediaPathFromUrl(state.room.avatar_url);
+    state.room=normalizeRoom(Array.isArray(data)?data[0]:data)||state.room;
+    renderRoom();
+    renderAdminRoomPicture();
+    setAdminRoomPictureStatus('Room picture removed.');
+    if(oldPath&&oldPath.startsWith(String(state.me.id)+'/rooms/')){
+      try{await sb.storage.from('room-media').remove([oldPath]);}catch(cleanupError){diag('room_picture_remove_cleanup_error',{message:String(cleanupError?.message||cleanupError)});}
+    }
+  }catch(e){setAdminRoomPictureStatus(e?.message||'Could not remove the Room picture.',true);toast(e?.message||'Could not remove the Room picture.');}
+}
+$('#changeRoomPictureBtn')?.addEventListener('click',()=>$('#adminRoomPicture')?.click());
+$('#adminRoomPicture')?.addEventListener('change',async e=>{
+  const file=e.currentTarget.files?.[0];
+  e.currentTarget.value='';
+  if(!file||!adminRoomPictureValid(file))return;
+  try{await updateRoomPicture(file);toast('Room picture updated.');}catch(err){setAdminRoomPictureStatus(err?.message||'Could not update the Room picture.',true);toast(err?.message||'Could not update the Room picture.');}
+});
+$('#removeRoomPictureBtn')?.addEventListener('click',removeRoomPicture);
+
 document.querySelectorAll('.tab[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 window.addEventListener('online',()=>{setConnection('Connection restored. Reloading room…',false);safeRetry();});
 window.addEventListener('offline',()=>setConnection('You are offline. Cached room data may still be visible.',true));
 window.addEventListener('pagehide',e=>{if(e.persisted)return;try{if(state.realtime)sb.removeChannel(state.realtime);}catch(e){}try{authSubscription?.unsubscribe?.()}catch(_){} });
 $('#createAccountGateBtn').onclick=()=>location.href='rooms.html';
+$('#memberSearch').addEventListener('input',()=>{clearTimeout(window.__memberSearchTimer);window.__memberSearchTimer=setTimeout(()=>{state.memberSearch=$('#memberSearch').value.trim();state.memberOffset=0;invalidate('members:'+state.roomId);loadMembers();},220)});
+$('#memberFilter').addEventListener('change',()=>{state.memberFilter=$('#memberFilter').value;state.memberOffset=0;invalidate('members:'+state.roomId);loadMembers();});
+$('#memberDrawerClose').onclick=closeMemberDrawer;$('#memberDrawer').addEventListener('click',e=>{if(e.target.id==='memberDrawer')closeMemberDrawer()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMemberDrawer()});
 
 boot();
 })();

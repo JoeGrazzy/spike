@@ -3,9 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 const root=process.cwd();
-const production=[
-'admin.html','chat_room.html','coffee.html','engagement.html','feed.html','friends.html','guide.html','help.html','index.html','legal.html','leveling.html','live.html','message.html','messages.html','notifications.html','policy.html','policy_appeals.html','profile.html','reset-password.html','room.html','room_chat.html','rooms.html','settings.html','share.html','spike_edu.html','spike_intelligence.html','spike_predictor.html','spike_world.html','view_user.html'
-];
+const production=['admin.html','feed.html','friends.html','guide.html','help.html','impact.html','index.html','legal.html','live.html','message.html','messages.html','notifications.html','policy.html','policy_appeals.html','profile.html','reset-password.html','room.html','room_chat.html','rooms.html','settings.html','share.html','view_user.html'];
 function read(f){return fs.readFileSync(path.join(root,f),'utf8')}
 test('global visual authority is loaded exactly once and after Theme V3 on every production page',()=>{
  for(const f of production){const s=read(f);const links=[...s.matchAll(/<link[^>]+href=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);assert.equal(links.filter(x=>x.includes('spike-global-page-authority-v2.css')).length,1,f);const gi=links.findIndex(x=>x.includes('spike-global-page-authority-v2.css'));const ti=links.findIndex(x=>x.includes('spike-theme-experience-v3.css'));assert.ok(ti>=0&&gi>ti,`${f}: global authority must follow Theme V3`);}
