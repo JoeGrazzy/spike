@@ -605,28 +605,68 @@ function bindEvents() {
   }
   const openFeedMenu = () => { openOverlay('menuOverlay'); setFeedMenuNavHidden(true); };
   const closeFeedMenu = () => { closeOverlay('menuOverlay'); setFeedMenuNavHidden(false); $('menuBtn')?.setAttribute('aria-expanded','false'); };
-  function syncFeedMenuIdentity(){
-    const profile = state.profile || state.user?.user_metadata || {};
-    const name = String(profile.display_name || profile.full_name || profile.name || profile.username || state.user?.email?.split('@')[0] || 'SPIKE Member').trim() || 'SPIKE Member';
+  async function syncFeedMenuIdentity(){
+    const user = state.user || {};
+    let profile = {...(user.user_metadata || {}), ...(state.profile || {})};
+    const avatarKeys = ['avatar_url','avatarUrl','profile_image_url','profileImageUrl','profile_picture_url','profilePictureUrl','photo_url','photoUrl','image_url','imageUrl','picture','avatar'];
+    const readAvatar = obj => {
+      for (const key of avatarKeys) {
+        const value = obj && obj[key];
+        if (typeof value === 'string' && value.trim()) return value.trim();
+      }
+      return '';
+    };
+    let avatarValue = readAvatar(profile);
+
+    // The user's own profiles row is the source of truth for the picture they
+    // save from profile.html. The public-profile RPC can omit fields by design,
+    // so use it only as a fallback rather than the sole source.
+    if (!avatarValue && user.id && db) {
+      try {
+        const result = await db.from('profiles')
+          .select('id,display_name,username,avatar_url')
+          .eq('id', user.id).maybeSingle();
+        if (!result.error && result.data) {
+          profile = {...profile, ...result.data};
+          state.profile = {...(state.profile || {}), ...result.data};
+          avatarValue = readAvatar(result.data);
+        }
+      } catch (error) { console.debug('SPIKE menu own-profile lookup unavailable', error); }
+    }
+    if (!avatarValue && user.id && db?.rpc) {
+      try {
+        const result = await db.rpc('get_public_profiles', {p_user_ids:[user.id]});
+        const fetched = Array.isArray(result?.data) ? result.data[0] : null;
+        if (fetched && !result.error) {
+          profile = {...profile, ...fetched};
+          state.profile = {...(state.profile || {}), ...fetched};
+          avatarValue = readAvatar(fetched);
+        }
+      } catch (error) { console.debug('SPIKE menu public-profile lookup unavailable', error); }
+    }
+
+    const name = String(profile.display_name || profile.full_name || profile.name || profile.username || user.email?.split('@')[0] || 'SPIKE Member').trim() || 'SPIKE Member';
     const username = String(profile.username || profile.handle || '').trim();
-    const avatar = String(profile.avatar_url || profile.avatar || profile.photo_url || '').trim();
     const title = $('spikeMenuTitle');
     const handle = $('menuIdentityHandle');
     const holder = $('menuIdentityAvatar');
     if(title) title.textContent = name;
     if(handle) handle.textContent = username ? `@${username} · SPIKE member` : 'SPIKE member';
     if(holder){
-      if(avatar && /^(https?:)?\/\//i.test(avatar)){
-        holder.innerHTML = '';
+      holder.replaceChildren();
+      const avatar = String(avatarValue || '').trim();
+      if (avatar && /^(https?:)?\/\//i.test(avatar)) {
         const img = document.createElement('img');
-        img.src = avatar; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
-        img.addEventListener('error', () => { holder.textContent = name.slice(0,1).toUpperCase(); }, {once:true});
+        img.src = avatar; img.alt = `${name} profile picture`; img.loading = 'eager'; img.decoding = 'async';
+        img.referrerPolicy = 'no-referrer';
+        img.addEventListener('error', () => { holder.replaceChildren(document.createTextNode(name.slice(0,1).toUpperCase())); }, {once:true});
         holder.appendChild(img);
       } else {
         holder.textContent = name.slice(0,1).toUpperCase();
       }
     }
   }
+
   menuOverlay?.addEventListener('click', async e => {
     const control = e.target.closest('[data-menu-action]');
     if (!control || !menuOverlay.contains(control)) return;

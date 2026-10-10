@@ -19,7 +19,9 @@
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link href="css/premium-back.css" rel="stylesheet">
 </head><body data-spike-page="policy_appeals">
+<button type="button" data-spike-premium-back="true" aria-label="Back" class="premium-back">‹</button>
 <header class="top"><div class="wrap topin"><a class="brand" href="feed.html"><span class="brandmark">S</span><span>SPIKE</span></a><div class="actions"><button class="btn" id="themeBtn" data-spike-theme-switch="1">Theme</button><a class="btn back" href="policy.html">Policy Center</a></div></div></header>
 <main class="wrap page"><section class="hero"><div class="eyebrow">POLICY ACCOUNT CENTER</div><h1>Enforcement & appeals</h1><p>Review automated SPIKE Policy actions, see the policy reference attached to each case, and submit one active appeal per enforcement case.</p></section>
 <section class="two"><div class="card panel"><div class="headrow"><div><h2 style="margin:0">Your policy cases</h2><div class="status" id="caseStatus">Loading…</div></div><button class="ghost" id="refreshCases">Refresh</button></div><div id="cases"></div></div><div class="card panel"><div class="headrow"><div><h2 style="margin:0">Your appeals</h2><div class="status">Appeal decisions appear here and in notifications.</div></div></div><div id="appeals"></div></div></section>
@@ -39,4 +41,5 @@ load().catch(e=>{$('#caseStatus').textContent=e.message||'Could not load policy 
 <script defer src="js/spike-native-select.js"></script>
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
+<script defer src="js/premium-back.js"></script>
 </body></html>

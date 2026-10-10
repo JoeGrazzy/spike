@@ -1,0 +1,267 @@
+/* SPIKE Admin Workspace V1
+   Page-specific layout authority. Feature behavior and backend contracts remain in admin.html. */
+body[data-spike-page="admin"] {
+  --admin-layout-gap: 18px;
+  --admin-radius: 20px;
+}
+body[data-spike-page="admin"] .app {
+  width: min(100%, 1680px);
+  max-width: 1680px;
+  margin-inline: auto;
+  padding: clamp(12px, 2vw, 28px) clamp(12px, 2.2vw, 32px) 72px;
+}
+body[data-spike-page="admin"] .top {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 58px;
+  padding: 4px 0 16px;
+}
+body[data-spike-page="admin"] .brand {
+  min-width: 0;
+  font-size: clamp(18px, 2vw, 24px);
+  letter-spacing: .045em;
+}
+body[data-spike-page="admin"] .user { justify-self: end; }
+body[data-spike-page="admin"] .stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 4px;
+}
+body[data-spike-page="admin"] .stat {
+  min-width: 0;
+  min-height: 102px;
+  padding: 17px 18px;
+  border-radius: var(--admin-radius);
+}
+body[data-spike-page="admin"] .stat strong {
+  overflow-wrap: anywhere;
+  font-size: clamp(21px, 2.3vw, 30px);
+  letter-spacing: -.035em;
+}
+body[data-spike-page="admin"] .admin-command {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 18px;
+}
+body[data-spike-page="admin"] .admin-command-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+body[data-spike-page="admin"] .admin-command-search input { min-width: 0; }
+body[data-spike-page="admin"] .admin-status-strip {
+  margin-top: 9px;
+  padding: 10px 13px;
+}
+body[data-spike-page="admin"] .layout {
+  grid-template-columns: 248px minmax(0, 1fr);
+  align-items: start;
+  gap: var(--admin-layout-gap);
+  margin-top: var(--admin-layout-gap);
+}
+body[data-spike-page="admin"] .side {
+  position: sticky;
+  top: 14px;
+  display: grid;
+  align-content: start;
+  gap: 15px;
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  padding: 13px;
+  border-radius: 22px;
+  overscroll-behavior: contain;
+}
+body[data-spike-page="admin"] .admin-nav-group {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+body[data-spike-page="admin"] .admin-nav-label {
+  padding: 3px 11px 5px;
+  color: var(--spike-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .105em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+body[data-spike-page="admin"] .side button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--spike-text);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
+}
+body[data-spike-page="admin"] .side button .pill {
+  flex: 0 0 auto;
+  margin-left: auto;
+  padding: 3px 7px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+body[data-spike-page="admin"] .side button.active {
+  border-color: color-mix(in srgb, var(--spike-accent) 30%, var(--spike-line));
+  background: color-mix(in srgb, var(--spike-accent) 12%, var(--spike-surface-2));
+}
+body[data-spike-page="admin"] .side button.active:before { left: 0; }
+body[data-spike-page="admin"] .content {
+  min-width: 0;
+  display: grid;
+  gap: 14px;
+}
+body[data-spike-page="admin"] .page { min-width: 0; }
+body[data-spike-page="admin"] .page[hidden] { display: none !important; }
+body[data-spike-page="admin"] .page > .panel,
+body[data-spike-page="admin"] .page > .modal {
+  min-width: 0;
+}
+body[data-spike-page="admin"] .page > .panel {
+  padding: clamp(14px, 1.8vw, 24px);
+  border-radius: 22px;
+}
+body[data-spike-page="admin"] .toolbar {
+  align-items: center;
+  gap: 14px;
+}
+body[data-spike-page="admin"] .toolbar > div:first-child { min-width: 0; }
+body[data-spike-page="admin"] .toolbar h2 {
+  font-size: clamp(18px, 1.7vw, 23px);
+  letter-spacing: -.025em;
+  line-height: 1.25;
+}
+body[data-spike-page="admin"] .toolbar .muted {
+  display: inline-block;
+  max-width: 76ch;
+  line-height: 1.55;
+}
+body[data-spike-page="admin"] .cards,
+body[data-spike-page="admin"] .formgrid,
+body[data-spike-page="admin"] .purchaseStats,
+body[data-spike-page="admin"] .postops-hero {
+  min-width: 0;
+}
+body[data-spike-page="admin"] .admin-quick {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+body[data-spike-page="admin"] .admin-quick button {
+  min-width: 0;
+  min-height: 90px;
+  border-radius: 15px;
+}
+body[data-spike-page="admin"] .admin-quick span { font-size: 11px; }
+body[data-spike-page="admin"] input,
+body[data-spike-page="admin"] textarea,
+body[data-spike-page="admin"] select {
+  min-width: 0;
+  max-width: 100%;
+}
+body[data-spike-page="admin"] .actions {
+  min-width: 0;
+  flex-wrap: wrap;
+}
+body[data-spike-page="admin"] .modal .sheet,
+body[data-spike-page="admin"] .modalbox {
+  max-width: min(920px, calc(100vw - 28px));
+}
+body[data-spike-page="admin"] .gxtabs {
+  padding-bottom: 3px;
+  scrollbar-width: thin;
+}
+body[data-spike-page="admin"] .gxpanel,
+body[data-spike-page="admin"] .gxcard,
+body[data-spike-page="admin"] .usercard,
+body[data-spike-page="admin"] .purchaseGrid,
+body[data-spike-page="admin"] .postops-row {
+  min-width: 0;
+}
+body[data-spike-page="admin"] :is(.postops-text, .postops-json, .audit, .usercard, .room-card, .purchaseGrid) {
+  overflow-wrap: anywhere;
+}
+body[data-spike-page="admin"] :is(button, input, textarea, select, a):focus-visible {
+  outline-offset: 3px;
+}
+@media (max-width: 1100px) {
+  body[data-spike-page="admin"] .layout { grid-template-columns: 220px minmax(0, 1fr); gap: 12px; }
+  body[data-spike-page="admin"] .side { padding: 9px; }
+  body[data-spike-page="admin"] .admin-quick { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 800px) {
+  body[data-spike-page="admin"] .top {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  body[data-spike-page="admin"] .layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+  }
+  body[data-spike-page="admin"] .side {
+    position: sticky;
+    z-index: 30;
+    top: 0;
+    display: flex;
+    gap: 8px;
+    max-height: none;
+    padding: 9px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    border-radius: 16px;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+  body[data-spike-page="admin"] .admin-nav-group { display: contents; }
+  body[data-spike-page="admin"] .admin-nav-label { display: none; }
+  body[data-spike-page="admin"] .side button {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 230px;
+    min-height: 40px;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
+  body[data-spike-page="admin"] .side button.active { padding-left: 11px; }
+  body[data-spike-page="admin"] .side button.active:before { display: none; }
+  body[data-spike-page="admin"] .content { gap: 12px; }
+  body[data-spike-page="admin"] .page > .panel { padding: 14px; border-radius: 18px; }
+}
+@media (max-width: 560px) {
+  body[data-spike-page="admin"] .app { padding: 10px 10px calc(24px + env(safe-area-inset-bottom)); }
+  body[data-spike-page="admin"] .top { grid-template-columns: auto minmax(0, 1fr); }
+  body[data-spike-page="admin"] .top .user { grid-column: 2; grid-row: 2; justify-self: start; }
+  body[data-spike-page="admin"] .brand { grid-column: 2; grid-row: 1; }
+  body[data-spike-page="admin"] .top .smart-back { grid-column: 1; grid-row: 1 / span 2; }
+  body[data-spike-page="admin"] .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  body[data-spike-page="admin"] .stat { min-height: 86px; padding: 12px; border-radius: 15px; }
+  body[data-spike-page="admin"] .stat strong { font-size: clamp(19px, 6vw, 25px); }
+  body[data-spike-page="admin"] .admin-command { padding: 9px; }
+  body[data-spike-page="admin"] .admin-command-search { grid-template-columns: minmax(0, 1fr); }
+  body[data-spike-page="admin"] .admin-command-search button { width: 100%; }
+  body[data-spike-page="admin"] .admin-status-strip { align-items: start; grid-template-columns: minmax(0, 1fr); }
+  body[data-spike-page="admin"] .admin-quick { gap: 7px; }
+  body[data-spike-page="admin"] .admin-quick button { min-height: 78px; padding: 10px; }
+  body[data-spike-page="admin"] .toolbar { align-items: stretch; flex-direction: column; }
+  body[data-spike-page="admin"] .toolbar .actions { justify-content: flex-start; }
+  body[data-spike-page="admin"] .postops-toolbar { grid-template-columns: minmax(0, 1fr); }
+  body[data-spike-page="admin"] .postops-toolbar .wide { grid-column: auto; }
+  body[data-spike-page="admin"] .postops-row { grid-template-columns: 24px minmax(0, 1fr); }
+  body[data-spike-page="admin"] .postops-row > .actions { grid-column: 2; }
+  body[data-spike-page="admin"] .gxgrid,
+  body[data-spike-page="admin"] .gxcols { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-spike-page="admin"] * { scroll-behavior: auto; }
+}

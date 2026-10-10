@@ -20,7 +20,7 @@ export default {
     if (req.method !== "POST") return json({ error: "POST required" }, 405);
     const callerId = ctx.userClaims?.sub;
     if (!callerId) return json({ error: "Authentication required" }, 401);
-    const { data: isSuper, error: roleError } = await ctx.supabase.rpc("is_super_admin", { p_user_id: callerId });
+    const { data: isSuper, error: roleError } = await ctx.supabase.rpc("admin_is_super_admin_self");
     if (roleError || isSuper !== true) return json({ error: "Super admin access required" }, 403);
     let body: Record<string, unknown>;
     try { body = await req.json(); } catch { return json({ error: "Invalid JSON body" }, 400); }
