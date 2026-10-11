@@ -27,7 +27,7 @@ for(const file of themed){
 }
 
 // These are theme-owned accents that previously leaked the old purple identity.
-for(const file of ['css/spike-menu-v3.css','css/spike-surface-controls.css','css/feed-features.css','css/spike-final-polish.css']){
+for(const file of ['css/spike-live.css','css/spike-menu-v3.css','css/spike-surface-controls.css','css/feed-features.css','css/spike-final-polish.css']){
   assert.ok(fs.existsSync(path.join(root,file)),`${file} missing`);
 }
 assert.match(v3Css,/spike-menu-v3/);

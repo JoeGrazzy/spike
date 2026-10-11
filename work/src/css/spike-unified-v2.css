@@ -1,0 +1,157 @@
+/* SPIKE Unified UI v2 — shared visual language across every HTML surface */
+:root{
+  --sp-bg:#07090d;
+  --sp-surface:#0d1118;
+  --sp-surface-2:#111722;
+  --sp-surface-3:#151c28;
+  --sp-border:rgba(255,255,255,.09);
+  --sp-border-strong:rgba(255,255,255,.15);
+  --sp-text:#f5f7fb;
+  --sp-muted:#98a2b3;
+  --sp-accent:#8b5cf6;
+  --sp-accent-2:#a78bfa;
+  --sp-success:#34d399;
+  --sp-danger:#fb7185;
+  --sp-radius:18px;
+  --sp-radius-sm:12px;
+  --sp-shadow:0 18px 50px rgba(0,0,0,.24);
+}
+html{background:var(--sp-bg);color-scheme:dark;scroll-behavior:smooth}
+body:not(.auth-page){background:var(--sp-bg)!important;color:var(--sp-text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.01em}
+body:not(.auth-page) a{color:inherit}
+body:not(.auth-page) .header,
+body:not(.auth-page) header.top,
+body:not(.auth-page) header.header,
+body:not(.auth-page) .messages-page-header{
+  background:rgba(7,9,13,.86)!important;
+  border-color:var(--sp-border)!important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+body:not(.auth-page) main,
+body:not(.auth-page) .main,
+body:not(.auth-page) .wrap,
+body:not(.auth-page) .content,
+body:not(.auth-page) .chat,
+body:not(.auth-page) .intel-shell{
+  color:var(--sp-text);
+}
+body:not(.auth-page) button,
+body:not(.auth-page) input,
+body:not(.auth-page) textarea,
+body:not(.auth-page) select{
+  font:inherit;
+}
+body:not(.auth-page) button,
+body:not(.auth-page) .btn,
+body:not(.auth-page) [role="button"]{
+  border-radius:var(--sp-radius-sm);
+  transition:transform .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease,opacity .16s ease;
+}
+body:not(.auth-page) button:hover,
+body:not(.auth-page) .btn:hover,
+body:not(.auth-page) [role="button"]:hover{transform:translateY(-1px)}
+body:not(.auth-page) button:focus-visible,
+body:not(.auth-page) a:focus-visible,
+body:not(.auth-page) input:focus-visible,
+body:not(.auth-page) textarea:focus-visible,
+body:not(.auth-page) select:focus-visible{outline:2px solid var(--sp-accent-2);outline-offset:2px}
+body:not(.auth-page) input,
+body:not(.auth-page) textarea,
+body:not(.auth-page) select{
+  background:var(--sp-surface)!important;
+  border:1px solid var(--sp-border)!important;
+  color:var(--sp-text)!important;
+  border-radius:var(--sp-radius-sm)!important;
+}
+body:not(.auth-page) input::placeholder,
+body:not(.auth-page) textarea::placeholder{color:#697386}
+body:not(.auth-page) input:focus,
+body:not(.auth-page) textarea:focus,
+body:not(.auth-page) select:focus{border-color:rgba(167,139,250,.65)!important;box-shadow:0 0 0 4px rgba(139,92,246,.11)!important}
+body:not(.auth-page) .card,
+body:not(.auth-page) .panel,
+body:not(.auth-page) .section,
+body:not(.auth-page) .box,
+body:not(.auth-page) .surface,
+body:not(.auth-page) .composer,
+body:not(.auth-page) .post,
+body:not(.auth-page) .conversation,
+body:not(.auth-page) .room-card,
+body:not(.auth-page) .feature-card{
+  background:linear-gradient(180deg,rgba(17,23,34,.96),rgba(13,17,24,.96));
+  border:1px solid var(--sp-border);
+  box-shadow:var(--sp-shadow);
+  border-radius:var(--sp-radius);
+}
+body:not(.auth-page) .muted,
+body:not(.auth-page) .subtle,
+body:not(.auth-page) .secondary,
+body:not(.auth-page) .meta{color:var(--sp-muted)}
+body:not(.auth-page) .tabs,
+body:not(.auth-page) .settings-index,
+body:not(.auth-page) .roomTabs,
+body:not(.auth-page) .bottom-nav,
+body:not(.auth-page) .spike-bottom-nav,
+body:not(.auth-page) nav[aria-label="Main navigation"]{
+  border-color:var(--sp-border)!important;
+}
+body:not(.auth-page) .tabs a,
+body:not(.auth-page) .tabs button,
+body:not(.auth-page) .settings-index a,
+body:not(.auth-page) .roomTabs button{
+  border-radius:999px;
+}
+body:not(.auth-page) .tabs a:hover,
+body:not(.auth-page) .tabs button:hover,
+body:not(.auth-page) .settings-index a:hover,
+body:not(.auth-page) .roomTabs button:hover{background:rgba(139,92,246,.10)}
+body:not(.auth-page) img{max-width:100%;height:auto}
+body:not(.auth-page) table{width:100%;border-collapse:collapse}
+body:not(.auth-page) th,
+body:not(.auth-page) td{border-color:var(--sp-border)!important}
+body:not(.auth-page) hr{border:0;border-top:1px solid var(--sp-border)}
+body:not(.auth-page) .badge,
+body:not(.auth-page) .pill,
+body:not(.auth-page) .chip,
+body:not(.auth-page) .tag{
+  border:1px solid var(--sp-border)!important;
+  background:rgba(255,255,255,.04)!important;
+  color:#dce2eb!important;
+  border-radius:999px!important;
+}
+body:not(.auth-page) .primary,
+body:not(.auth-page) .primary-btn,
+body:not(.auth-page) .btn-primary,
+body:not(.auth-page) button.primary{
+  background:linear-gradient(135deg,var(--sp-accent),#6d28d9)!important;
+  border-color:transparent!important;
+  color:#fff!important;
+  box-shadow:0 10px 28px rgba(109,40,217,.22)!important;
+}
+body:not(.auth-page) .danger,
+body:not(.auth-page) .btn-danger{border-color:rgba(251,113,133,.3)!important}
+body:not(.auth-page) .empty,
+body:not(.auth-page) .empty-state{text-align:center;color:var(--sp-muted)}
+body:not(.auth-page) .bottom-nav,
+body:not(.auth-page) .spike-bottom-nav{
+  background:rgba(7,9,13,.92)!important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+@media(max-width:720px){
+  body:not(.auth-page){font-size:15px}
+  body:not(.auth-page) .card,
+  body:not(.auth-page) .panel,
+  body:not(.auth-page) .section,
+  body:not(.auth-page) .box,
+  body:not(.auth-page) .surface,
+  body:not(.auth-page) .composer,
+  body:not(.auth-page) .post,
+  body:not(.auth-page) .conversation,
+  body:not(.auth-page) .room-card,
+  body:not(.auth-page) .feature-card{border-radius:15px;box-shadow:0 12px 32px rgba(0,0,0,.18)}
+  body:not(.auth-page) .header,
+  body:not(.auth-page) header.top,
+  body:not(.auth-page) header.header{padding-left:14px!important;padding-right:14px!important}
+}

@@ -1,0 +1,195 @@
+/* SPIKE THEME RUNTIME V3
+   Canonical theme consumer boundary.
+   theme.js + css/theme.css own palette values.
+   All compatibility namespaces below are aliases into --spike-* only.
+   No component should define an independent palette after this file.
+*/
+
+html[data-spike-style] {
+  /* Core/legacy aliases */
+  --solid: var(--spike-surface) !important;
+  --panel: var(--spike-surface) !important;
+  --panel2: var(--spike-surface-2) !important;
+  --surface: var(--spike-surface) !important;
+  --surface2: var(--spike-surface-2) !important;
+  --surface3: var(--spike-surface-3) !important;
+  --bg: var(--spike-bg) !important;
+  --text: var(--spike-text) !important;
+  --muted: var(--spike-muted) !important;
+  --line: var(--spike-line) !important;
+  --a: var(--spike-accent) !important;
+  --a2: var(--spike-accent-2) !important;
+  --accent: var(--spike-accent) !important;
+  --accent2: var(--spike-accent-2) !important;
+  --primary: var(--spike-accent) !important;
+  --primary2: var(--spike-accent-2) !important;
+  --good: #22c55e !important;
+  --danger: #ef476f !important;
+  --warning: #f59e0b !important;
+  --success: #22c55e !important;
+  --border: var(--spike-line) !important;
+  --page-bg: var(--spike-bg) !important;
+  --soft: var(--spike-surface-2) !important;
+  --ink: var(--spike-text) !important;
+  --purple: var(--spike-accent) !important;
+  --pink: var(--spike-accent-2) !important;
+  --orange: var(--spike-accent) !important;
+  --yellow: #f59e0b !important;
+  --red: #ef476f !important;
+  --shadow: var(--spike-shadow) !important;
+  --glass: color-mix(in srgb,var(--spike-surface) 90%,transparent) !important;
+
+  /* --sp-* namespace */
+  --sp-bg: var(--spike-bg) !important;
+  --sp-surface: var(--spike-surface) !important;
+  --sp-surface-solid: var(--spike-surface) !important;
+  --sp-surface-2: var(--spike-surface-2) !important;
+  --sp-surface-3: var(--spike-surface-3) !important;
+  --sp-text: var(--spike-text) !important;
+  --sp-muted: var(--spike-muted) !important;
+  --sp-line: var(--spike-line) !important;
+  --sp-border: var(--spike-line) !important;
+  --sp-border-strong: color-mix(in srgb,var(--spike-accent) 36%,var(--spike-line)) !important;
+  --sp-accent: var(--spike-accent) !important;
+  --sp-accent-2: var(--spike-accent-2) !important;
+  --sp-accent-3: var(--spike-accent-2) !important;
+  --sp-good: #22c55e !important;
+  --sp-success: #22c55e !important;
+  --sp-danger: #ef476f !important;
+  --sp-radius: var(--spike-radius) !important;
+  --sp-radius-sm: var(--spike-control-radius) !important;
+  --sp-shadow: var(--spike-shadow) !important;
+  --sp-shadow-soft: 0 8px 24px color-mix(in srgb,var(--spike-shadow) 72%,transparent) !important;
+
+  /* --spk-* namespace */
+  --spk-bg: var(--spike-bg) !important;
+  --spk-bg-2: var(--spike-surface-2) !important;
+  --spk-surface: var(--spike-surface) !important;
+  --spk-surface-2: var(--spike-surface-2) !important;
+  --spk-text: var(--spike-text) !important;
+  --spk-muted: var(--spike-muted) !important;
+  --spk-dim: var(--spike-muted) !important;
+  --spk-border: var(--spike-line) !important;
+  --spk-border-strong: color-mix(in srgb,var(--spike-accent) 36%,var(--spike-line)) !important;
+  --spk-purple: var(--spike-accent) !important;
+  --spk-pink: var(--spike-accent-2) !important;
+  --spk-blue: var(--spike-accent-2) !important;
+  --spk-cyan: var(--spike-accent) !important;
+  --spk-success: #22c55e !important;
+  --spk-warning: #f59e0b !important;
+  --spk-danger: #ef476f !important;
+  --spk-radius: var(--spike-radius) !important;
+  --spk-radius-sm: var(--spike-control-radius) !important;
+  --spk-shadow: var(--spike-shadow) !important;
+
+  /* --spx-* feature namespace */
+  --spx-bg: var(--spike-bg) !important;
+  --spx-surface: var(--spike-surface) !important;
+  --spx-surface-2: var(--spike-surface-2) !important;
+  --spx-line: var(--spike-line) !important;
+  --spx-text: var(--spike-text) !important;
+  --spx-muted: var(--spike-muted) !important;
+  --spx-accent: var(--spike-accent) !important;
+  --spx-accent-2: var(--spike-accent-2) !important;
+
+  /* --g-* guide namespace */
+  --g-bg: var(--spike-bg) !important;
+  --g-card: var(--spike-surface) !important;
+  --g-card2: var(--spike-surface-2) !important;
+  --g-line: var(--spike-line) !important;
+  --g-text: var(--spike-text) !important;
+  --g-muted: var(--spike-muted) !important;
+  --g-accent: var(--spike-accent) !important;
+  --g-accent2: var(--spike-accent-2) !important;
+  --g-good: #22c55e !important;
+  --g-warn: #f59e0b !important;
+
+  /* --edu-* education namespace. Keep both historical spellings. */
+  --edu-bg: var(--spike-bg) !important;
+  --edu-surface: var(--spike-surface) !important;
+  --edu-surface-2: var(--spike-surface-2) !important;
+  --edu-surface2: var(--spike-surface-2) !important;
+  --edu-surface3: var(--spike-surface-3) !important;
+  --edu-line: var(--spike-line) !important;
+  --edu-text: var(--spike-text) !important;
+  --edu-muted: var(--spike-muted) !important;
+  --edu-accent: var(--spike-accent) !important;
+  --edu-accent2: var(--spike-accent-2) !important;
+
+  /* --live-* namespace */
+  --live-bg: var(--spike-bg) !important;
+  --live-panel: var(--spike-surface) !important;
+  --live-panel-2: var(--spike-surface-2) !important;
+  --live-line: var(--spike-line) !important;
+  --live-text: var(--spike-text) !important;
+  --live-muted: var(--spike-muted) !important;
+  --live-accent: var(--spike-accent) !important;
+  --live-cyan: var(--spike-accent-2) !important;
+  --live-green: #22c55e !important;
+  --live-red: #ef476f !important;
+  --live-shadow: var(--spike-shadow) !important;
+
+  /* --pb-* premium/back namespace */
+  --pb-surface: var(--spike-surface) !important;
+  --pb-line: var(--spike-line) !important;
+  --pb-text: var(--spike-text) !important;
+  --pb-accent: var(--spike-accent) !important;
+
+  /* --chat-* namespace */
+  --chat-incoming: var(--spike-surface-2) !important;
+  --chat-incoming-text: var(--spike-text) !important;
+  --chat-outgoing: var(--spike-action-bg) !important;
+  --chat-outgoing-text: var(--spike-action-text) !important;
+  --chat-hover: color-mix(in srgb,var(--spike-accent) 9%,transparent) !important;
+  --chat-avatar-bg: var(--spike-surface-2) !important;
+  --chat-status-border: var(--spike-line) !important;
+
+  /* --spn-* navigation namespace */
+  --spn-line: var(--spike-line) !important;
+  --spn-muted: var(--spike-muted) !important;
+  --spn-text: var(--spike-text) !important;
+  --spn-life: 3600ms !important;
+
+  /* Theme Experience aliases */
+  --theme-surface-soft: color-mix(in srgb,var(--spike-surface-2) 88%,transparent) !important;
+  --theme-surface-strong: color-mix(in srgb,var(--spike-surface) 96%,transparent) !important;
+  --theme-accent-soft: color-mix(in srgb,var(--spike-accent) 13%,transparent) !important;
+  --theme-accent-line: color-mix(in srgb,var(--spike-accent) 34%,var(--spike-line)) !important;
+  --theme-shadow-soft: 0 10px 30px color-mix(in srgb,var(--spike-shadow) 62%,transparent) !important;
+}
+
+/* Generic visual primitives must always consume the active theme. */
+html[data-spike-style] :where(
+  .card,.panel,.post,.composer,.hero,.stat,.list,.friend-card,.fr-card,
+  .notification-card,.room-card,.settings-card,.adminbox,.section,.box,
+  .room,.room-item,.premiumCard,.modal,.modal-card,.dialog,.drawer,.sheet,
+  .toolbar,.field,.mediaField,.mediaPreview,.rec-item,.notice,.empty,
+  .thread,.control-card,.feature-panel,.features-panel,.feature-menu,.features-menu,
+  .spike-smart-nav,.spike-feature-hub,.spike-surface-sheet
+) {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+
+html[data-spike-style] :where(
+  input,textarea,select,.control,
+  .btn:not(.primary):not(.btn-primary),button.ghost,.ghost,.icon-btn,.iconbtn,
+  .back,.header-btn,.tab,.chip,.tag,.badge,.pill
+) {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+
+html[data-spike-style] :where(.muted,.sub,.status,.meta,.time,.preview,.subtitle,.description,.eyebrow) {
+  color: var(--spike-muted) !important;
+}
+
+html[data-spike-style] :where(h1,h2,h3,h4,strong,b,label) { color: var(--spike-text) !important; }
+html[data-spike-style] :where(a,.accent,.active,.selected) { color: var(--spike-accent) !important; }
+html[data-spike-style] :focus-visible { outline-color: var(--spike-accent) !important; }
+
+/* Neutral media content remains neutral by design; its chrome still follows theme. */
+html[data-spike-style] .call-video-wrap,
+html[data-spike-style] video { background: #05060b !important; }

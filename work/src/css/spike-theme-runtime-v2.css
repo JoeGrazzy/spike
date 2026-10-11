@@ -1,0 +1,212 @@
+/* SPIKE THEME RUNTIME V2
+   Final theme-consumer contract. This file is loaded after every other
+   production visual authority. It maps legacy component tokens to the
+   canonical --spike-* palette so theme.js controls the whole UI.
+*/
+
+html[data-spike-style] {
+  /* Canonical aliases used by legacy/private-message components. */
+  --solid: var(--spike-surface);
+  --panel: var(--spike-surface);
+  --panel2: var(--spike-surface-2);
+  --surface: var(--spike-surface);
+  --surface2: var(--spike-surface-2);
+  --surface3: var(--spike-surface-3);
+  --bg: var(--spike-bg);
+  --text: var(--spike-text);
+  --muted: var(--spike-muted);
+  --line: var(--spike-line);
+  --a: var(--spike-accent);
+  --a2: var(--spike-accent-2);
+  --accent: var(--spike-accent);
+  --accent2: var(--spike-accent-2);
+  --primary: var(--spike-accent);
+  --primary2: var(--spike-accent-2);
+  --good: #22c55e;
+  --danger: #ef476f;
+  --warning: #f59e0b;
+  --success: #22c55e;
+  --border: var(--spike-line);
+  --page-bg: var(--spike-bg);
+  --glass: color-mix(in srgb,var(--spike-surface) 90%,transparent);
+  --soft: var(--spike-surface-2);
+  --ink: var(--spike-text);
+  --purple: var(--spike-accent);
+  --pink: var(--spike-accent-2);
+  --orange: var(--spike-accent);
+  --yellow: #f59e0b;
+  --red: #ef476f;
+  --shadow: var(--spike-shadow);
+
+  /* Feature-suite legacy namespace. */
+  --spx-bg: var(--spike-bg);
+  --spx-surface: color-mix(in srgb,var(--spike-surface) 96%,transparent);
+  --spx-surface-2: color-mix(in srgb,var(--spike-surface-2) 92%,transparent);
+  --spx-line: var(--spike-line);
+  --spx-text: var(--spike-text);
+  --spx-muted: var(--spike-muted);
+  --spx-accent: var(--spike-accent);
+  --spx-accent-2: var(--spike-accent-2);
+
+  /* Guide namespace. */
+  --g-bg: var(--spike-bg);
+  --g-card: color-mix(in srgb,var(--spike-surface) 92%,transparent);
+  --g-card2: color-mix(in srgb,var(--spike-surface-2) 90%,transparent);
+  --g-line: var(--spike-line);
+  --g-text: var(--spike-text);
+  --g-muted: var(--spike-muted);
+  --g-accent: var(--spike-accent);
+  --g-accent2: var(--spike-accent-2);
+  --g-good: #22c55e;
+  --g-warn: #f59e0b;
+
+  /* Education namespace. */
+  --edu-bg: var(--spike-bg);
+  --edu-surface: var(--spike-surface);
+  --edu-surface2: var(--spike-surface-2);
+  --edu-surface3: var(--spike-surface-3);
+  --edu-line: var(--spike-line);
+  --edu-text: var(--spike-text);
+  --edu-muted: var(--spike-muted);
+  --edu-accent: var(--spike-accent);
+  --edu-accent2: var(--spike-accent-2);
+
+  /* Live/premium-back namespaces. */
+  --live-bg: var(--spike-bg);
+  --live-panel: var(--spike-surface);
+  --live-panel-2: var(--spike-surface-2);
+  --live-line: var(--spike-line);
+  --live-text: var(--spike-text);
+  --live-muted: var(--spike-muted);
+  --live-accent: var(--spike-accent);
+  --live-cyan: var(--spike-accent);
+  --live-green: #22c55e;
+  --live-red: #ef476f;
+  --pb-surface: var(--spike-surface);
+  --pb-line: var(--spike-line);
+  --pb-text: var(--spike-text);
+  --pb-accent: var(--spike-accent);
+
+  /* Room-chat legacy message palette. */
+  --chat-incoming: var(--spike-surface-2);
+  --chat-incoming-text: var(--spike-text);
+  --chat-outgoing: var(--spike-action-bg);
+  --chat-outgoing-text: var(--spike-action-text);
+  --chat-hover: color-mix(in srgb,var(--spike-accent) 9%,transparent);
+  --chat-avatar-bg: var(--spike-surface-2);
+  --chat-status-border: var(--spike-line);
+
+  /* Navigation aliases. */
+  --spn-line: var(--spike-line);
+  --spn-muted: var(--spike-muted);
+  --spn-text: var(--spike-text);
+
+  /* Theme Experience V3 aliases. */
+  --theme-surface-soft: color-mix(in srgb,var(--spike-surface-2) 88%,transparent);
+  --theme-surface-strong: color-mix(in srgb,var(--spike-surface) 96%,transparent);
+  --theme-accent-soft: color-mix(in srgb,var(--spike-accent) 13%,transparent);
+  --theme-accent-line: color-mix(in srgb,var(--spike-accent) 34%,var(--spike-line));
+  --theme-shadow-soft: 0 10px 30px color-mix(in srgb,var(--spike-shadow) 62%,transparent);
+}
+
+/* Components that historically bypassed the token contract now consume it. */
+html[data-spike-style] .feature-panel,
+html[data-spike-style] .features-panel,
+html[data-spike-style] .feature-menu,
+html[data-spike-style] .features-menu {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] .feature-panel button,
+html[data-spike-style] .features-panel button,
+html[data-spike-style] .feature-menu button,
+html[data-spike-style] .features-menu button,
+html[data-spike-style] .feature-panel a,
+html[data-spike-style] .features-panel a,
+html[data-spike-style] .feature-menu a,
+html[data-spike-style] .features-menu a {
+  background: color-mix(in srgb,var(--spike-surface-2) 92%,transparent) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] .feature-panel button:hover,
+html[data-spike-style] .features-panel button:hover,
+html[data-spike-style] .feature-menu button:hover,
+html[data-spike-style] .features-menu button:hover,
+html[data-spike-style] .feature-panel a:hover,
+html[data-spike-style] .features-panel a:hover,
+html[data-spike-style] .feature-menu a:hover,
+html[data-spike-style] .features-menu a:hover {
+  background: color-mix(in srgb,var(--spike-accent) 14%,var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb,var(--spike-accent) 34%,var(--spike-line)) !important;
+}
+
+html[data-spike-style] .spike-smart-nav,
+html[data-spike-style] .spike-feature-hub,
+html[data-spike-style] .spike-surface-sheet,
+html[data-spike-style] .spike-menu-v3 .spike-menu-sheet {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] .spike-smart-nav-grid button,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid button,
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+
+/* Common overlays/dialogs must follow the selected theme. */
+html[data-spike-style] .drawer,
+html[data-spike-style] .sheet,
+html[data-spike-style] .modalCard,
+html[data-spike-style] .modal-card,
+html[data-spike-style] .userActionSheet,
+html[data-spike-style] .premium-card,
+html[data-spike-style] .call-card,
+html[data-spike-style] .lock-card {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+
+html[data-spike-style] .status,
+html[data-spike-style] .toast {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+
+/* Never let page-local feature palettes restore a fixed dark/light surface. */
+html[data-spike-style] .walletHero,
+html[data-spike-style] .walletCard,
+html[data-spike-style] .walletTab,
+html[data-spike-style] .panelCard,
+html[data-spike-style] .friends-inline,
+html[data-spike-style] .userActionBtn,
+html[data-spike-style] .userGiftBtn {
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] .walletCard,
+html[data-spike-style] .walletTab,
+html[data-spike-style] .panelCard,
+html[data-spike-style] .userActionBtn,
+html[data-spike-style] .userGiftBtn {
+  background: var(--spike-surface-2) !important;
+}
+
+/* Theme-aware custom highlights. */
+html[data-spike-style] .replyCount,
+html[data-spike-style] .walletRankMain em,
+html[data-spike-style] .topRankInfo b em {
+  color: var(--spike-accent) !important;
+}
+
+/* The only intentionally neutral surface: actual video playback content. */
+html[data-spike-style] .call-video-wrap,
+html[data-spike-style] video {
+  background: #05060b !important;
+}

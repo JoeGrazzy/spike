@@ -1,0 +1,49 @@
+/* SPIKE Feed Clarity V2
+   Information architecture layer: Home is content-first; Discover is a mode;
+   advanced creation and native systems are progressively disclosed. */
+
+/* Home should not expose the Discover control center inline. */
+main.spike-x-home:not(.spike-discover-mode) #feedV2Hub{display:none!important}
+main.spike-x-home:not(.spike-discover-mode) #spikeNativePanel{display:none!important}
+main.spike-x-home:not(.spike-discover-mode) #signalTopPicks{display:none!important}
+
+/* Keep ranking language out of the Home status strip. */
+#feed-status-placeholder,
+main.spike-x-home .feed-status{display:none!important}
+
+/* Home rhythm: For You/Following → feed. */
+main.spike-x-home #filters{order:initial;margin:4px 0 10px!important}
+main.spike-x-home #filters .filter{min-height:42px;font-size:12px;font-weight:850}
+
+
+/* Discover becomes its own full-width mode. */
+main.spike-x-home.spike-discover-mode{padding-top:10px!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub{display:block!important;margin-bottom:12px!important}
+main.spike-x-home.spike-discover-mode #posts,
+main.spike-x-home.spike-discover-mode #infiniteScrollSentinel,
+main.spike-x-home.spike-discover-mode #filters,
+main.spike-x-home.spike-discover-mode .feed-status{display:none!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-nav{display:flex!important}
+main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-panel{padding:12px 2px 4px!important}
+
+/* Top Picks lives in Discover now. */
+#feedV2Hub #signalTopPicks{display:block!important;margin:10px 0 2px!important}
+#feedV2Hub #signalTopPicks[hidden]{display:none!important}
+#feedV2Hub #signalTopPicks .signal-picks-list{display:flex!important;overflow-x:auto!important;grid-template-columns:none!important;gap:8px!important;padding-bottom:3px!important}
+#feedV2Hub #signalTopPicks .signal-pick{flex:0 0 180px!important}
+
+/* Native Social Layer is a secondary Discover tool, not primary navigation. */
+#spikeNativeDisclosure{margin:12px 0 2px;border:1px solid var(--feed-line);border-radius:15px;background:var(--feed-soft);overflow:hidden}
+#spikeNativeDisclosure>summary{cursor:pointer;list-style:none;padding:11px 12px;font-size:11px;font-weight:900;color:var(--text)}
+#spikeNativeDisclosure>summary::-webkit-details-marker{display:none}
+#spikeNativeDisclosure>summary:before{content:'＋';display:inline-block;margin-right:7px;opacity:.7}
+#spikeNativeDisclosure[open]>summary:before{content:'−'}
+#spikeNativeDisclosure #spikeNativePanel{display:block!important;margin:0!important;border:0!important;border-top:1px solid var(--feed-line)!important;border-radius:0!important;box-shadow:none!important;background:transparent!important}
+
+/* Hide duplicate native tab injection from the old presentation layer. */
+#feedV2Nav [data-native-open]{display:none!important}
+
+@media(max-width:600px){
+  main.spike-x-home #filters{padding:3px!important}
+  #feedV2Hub #signalTopPicks .signal-pick{flex-basis:170px!important}
+}

@@ -40,8 +40,6 @@
 <style id="spike-notification-page-badge-css">.notification-page-bell{position:relative;text-decoration:none}.notification-page-bell .spike-notification-badge-count{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:grid;place-items:center;background:#ff365f;color:#fff;border:2px solid var(--spike-bg,#070b10);font:900 9px/1 Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.35)}.notification-page-bell .spike-notification-badge-count[hidden]{display:none}</style>  <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
-<link rel="stylesheet" href="css/spike-premium-loader.css?v=spike-loader-v1">
-<script src="js/spike-loader-core.js?v=1" defer></script>
 </head>
 <body data-spike-page="notifications" data-spike-notification-page>
 <div class="app">
@@ -50,7 +48,7 @@
 <nav aria-label="Main navigation" class="spike-bottom-nav" id="spikeBottomNav" style="grid-template-columns:repeat(4,minmax(0,1fr))!important"><a data-spike-nav="home" href="feed.html"><span aria-hidden="true">⌂</span><small>Home</small></a><button data-spike-nav="discover" type="button"><span aria-hidden="true">⌕</span><small>Discover</small></button><a aria-current="page" class="active" data-spike-nav="activity" href="notifications.html"><span aria-hidden="true">🔔</span><small>Alerts</small></a><a data-spike-nav="profile" href="profile.html"><span aria-hidden="true">◉</span><small>Me</small></a></nav>
 </div>
 <div class="notif-modal" id="notificationModal" role="dialog" aria-modal="true" aria-hidden="true"><div class="notif-modal-card"><div class="notif-modal-head"><span class="notif-modal-icon" id="notificationModalIcon">🔔</span><div><div class="notif-modal-title" id="notificationModalTitle">Notification</div><div class="notif-modal-meta" id="notificationModalMeta"></div></div><button class="notif-modal-close" id="notificationModalClose" type="button" aria-label="Close notification details">×</button></div><div class="notif-modal-body" id="notificationModalBody"></div></div></div>
-<audio id="notificationTone" preload="auto" src="assets/mp3/notifications.mp3" aria-hidden="true"></audio><div class="loader" id="loader" role="status" aria-live="polite" aria-label="Loading SPIKE notifications"><div class="loader-card"><div class="spike-loader-mark-wrap"><div class="spike-loader-spinner"></div><img class="spike-loader-logo" src="assets/icon/icon.webp" alt="" decoding="async"></div><span>Loading your activity</span><small style="display:block;margin-top:10px;color:#c5b3dc">Connecting to SPIKE…</small></div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="js/premium-back.js" defer></script><script src="js/telemetry.js" defer></script><script src="js/spike-adaptive-nav.js" defer></script><script src="js/ui-fix.js"></script>
+<audio id="notificationTone" preload="auto" src="assets/mp3/notifications.mp3" aria-hidden="true"></audio><div class="loader" id="loader"><div class="loader-card"><span class="spinner" aria-hidden="true"></span>Loading SPIKE…</div></div><div class="toast" id="toast" role="status" aria-live="polite"></div><script src="js/premium-back.js" defer></script><script src="js/telemetry.js" defer></script><script src="js/spike-adaptive-nav.js" defer></script><script src="js/ui-fix.js"></script>
 <script>
 "use strict";
 const SUPABASE_URL="https://cjqpyndceqyqsijihxbb.supabase.co";
@@ -246,6 +244,7 @@ if(window.spikePremiumToast)window.spikePremiumToast("All notifications marked a
 }finally{btn.disabled=!rows.some(n=>!n.read)}
 }
 async function confirmClearAll(){
+  if(!window.SPIKEPremiumDialog?.confirm)return window.confirm("Clear all notifications? This cannot be undone.");
   return window.SPIKEPremiumDialog.confirm({
     title:"Clear all notifications?",
     message:"All notifications will be permanently removed. This cannot be undone.",
@@ -320,7 +319,7 @@ function showBrowserNotification(n){
   if(appPrefs.browser_notifications!==true)return;
   if(typeof Notification!=="function"||Notification.permission!=="granted")return;
   if(!document.hidden)return;
-  try{new Notification("SPIKE",{body:notificationText(n),icon:"assets/icon/icon.webp",tag:"spike-notification-"+n.id});}catch(e){}
+  try{new Notification("SPIKE",{body:notificationText(n),icon:"assets/icon/icon.png",tag:"spike-notification-"+n.id});}catch(e){}
 }
 function notifyLocal(n){
 if(!n||String(n.user_id)!==String(me.id))return;

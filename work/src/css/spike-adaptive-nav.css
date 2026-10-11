@@ -1,0 +1,96 @@
+/* SPIKE Adaptive Navigation v3
+   Principle: visible by default. Only an explicit runtime state may hide it. */
+:root{
+  --spike-nav-height:62px;
+  --spike-nav-clearance:82px;
+  --spike-nav-active-clearance:82px;
+}
+
+/* Base contract: never make the dock disappear merely because JS failed or
+   because a legacy class exists elsewhere on the page. */
+.spike-bottom-nav,
+nav.bottom-nav{
+  position:fixed !important;
+  z-index:90000 !important;
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+  will-change:transform,opacity;
+}
+
+.spike-bottom-nav{
+  left:50% !important;
+  right:auto !important;
+  bottom:max(10px,env(safe-area-inset-bottom)) !important;
+  width:min(560px,calc(100vw - 20px)) !important;
+  transform:translate3d(-50%,0,0) !important;
+}
+
+nav.bottom-nav{
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  transform:translate3d(0,0,0) !important;
+}
+
+/* Explicit hidden state is the ONLY normal way the adaptive layer hides the
+   navigation. */
+.spike-bottom-nav[data-spike-nav-state="hidden"],
+nav.bottom-nav[data-spike-nav-state="hidden"],
+.spike-bottom-nav.spike-nav-auto-hidden,
+nav.bottom-nav.spike-nav-auto-hidden{
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+.spike-bottom-nav[data-spike-nav-state="hidden"],
+.spike-bottom-nav.spike-nav-auto-hidden{
+  transform:translate3d(-50%,calc(100% + env(safe-area-inset-bottom) + 28px),0) !important;
+}
+nav.bottom-nav[data-spike-nav-state="hidden"],
+nav.bottom-nav.spike-nav-auto-hidden{
+  transform:translate3d(0,calc(100% + env(safe-area-inset-bottom) + 28px),0) !important;
+}
+
+/* Visible state wins over the old menu-nav class used by legacy controllers. */
+html .spike-bottom-nav[data-spike-nav-state="visible"],
+html nav.bottom-nav[data-spike-nav-state="visible"]{
+  opacity:1 !important;
+  visibility:visible !important;
+  pointer-events:auto !important;
+}
+html .spike-bottom-nav[data-spike-nav-state="visible"]{
+  left:50% !important;
+  right:auto !important;
+  bottom:max(10px,env(safe-area-inset-bottom)) !important;
+  transform:translate3d(-50%,0,0) !important;
+}
+html nav.bottom-nav[data-spike-nav-state="visible"]{
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
+  transform:translate3d(0,0,0) !important;
+}
+
+/* Content receives clearance while the dock is visible. */
+body.spike-nav-flow-safe{
+  padding-bottom:max(var(--spike-nav-active-clearance),env(safe-area-inset-bottom)) !important;
+}
+body.spike-nav-flow-safe main,
+body.spike-nav-flow-safe .page,
+body.spike-nav-flow-safe .content,
+body.spike-nav-flow-safe .wrap{
+  scroll-padding-bottom:max(var(--spike-nav-active-clearance),env(safe-area-inset-bottom));
+}
+
+body.spike-nav-context-hidden{--spike-nav-active-clearance:0px;}
+
+@media(max-width:760px){
+  .spike-bottom-nav{min-height:58px;}
+  nav.bottom-nav{min-height:58px;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .spike-bottom-nav,
+  nav.bottom-nav{transition:none !important;}
+}

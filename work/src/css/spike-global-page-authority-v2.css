@@ -1,0 +1,111 @@
+/* SPIKE GLOBAL PAGE AUTHORITY V1
+   Cross-surface typography + containment contract.
+   This layer is intentionally geometry-safe: it does not redesign page-specific UI.
+*/
+
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-Regular.otf') format('opentype');
+  font-style:normal;font-weight:400;font-display:swap;
+}
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-Medium.otf') format('opentype');
+  font-style:normal;font-weight:500;font-display:swap;
+}
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-SemiBold.otf') format('opentype');
+  font-style:normal;font-weight:600;font-display:swap;
+}
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-Bold.otf') format('opentype');
+  font-style:normal;font-weight:700;font-display:swap;
+}
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-ExtraBold.otf') format('opentype');
+  font-style:normal;font-weight:800;font-display:swap;
+}
+
+@font-face{
+  font-family:'SPIKE Inter';
+  src:url('../assets/fonts/inter/Inter-ExtraBold.otf') format('opentype');
+  font-style:normal;font-weight:900;font-display:swap;
+}
+
+html{box-sizing:border-box;max-width:100%;font-synthesis:none;--spike-font:'SPIKE Inter',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+*,*::before,*::after{box-sizing:inherit;}
+
+html,body{
+  max-width:100%;
+  min-width:0;
+  overflow-x:clip;
+}
+
+html,body,
+button,input,textarea,select{
+  font-family:var(--spike-font,'SPIKE Inter',Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif);
+}
+
+body{min-width:0;}
+
+img,video,canvas,svg,iframe,object,embed{
+  max-width:100%;
+}
+
+input,textarea,select,button{
+  max-width:100%;
+  min-width:0;
+}
+
+textarea{overflow:auto;}
+
+pre{
+  max-width:100%;
+  overflow:auto;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+
+p,li,dt,dd,h1,h2,h3,h4,h5,h6,
+label,a,.description,.subtitle,.meta,.muted,.subtle{
+  overflow-wrap:break-word;
+}
+
+/* Flex/grid descendants are allowed to shrink instead of creating viewport overflow. */
+.flex > *,
+.row > *,
+.grid > *,
+.header > *,
+.header-actions > *,
+.top > *,
+.topin > *,
+.wrap > *,
+.main > *,
+.content > *,
+.app > *{
+  min-width:0;
+}
+
+/* Tables are contained without forcing the document wider. */
+table{max-width:100%;}
+
+/* Fixed/viewport-sized overlays must remain inside the visual viewport. */
+[role="dialog"],
+.modal,
+.modal-card,
+.dialog,
+.drawer,
+.sheet,
+.sheet-wrap,
+.overlay,
+.popover,
+.dropdown{
+  max-width:100vw;
+}
+
+@media(max-width:600px){
+  img,video,canvas,iframe{max-width:100%;}
+}
