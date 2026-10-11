@@ -1,0 +1,40 @@
+{
+  "generated_on": "2026-10-11",
+  "reference": "spikefix_story_cleanup.zip (approved baseline identified in conversation)",
+  "candidate": "spikefix_audit_v3.zip",
+  "scope_note": "This is a package comparison, not proof of production equivalence. v3 was compared directly against the approved baseline ZIP.",
+  "baseline_file_count": 390,
+  "candidate_file_count": 376,
+  "added_files": [
+    "SOURCE_BASELINE_COMPARISON_2026-10-11.json",
+    "SUPABASE_AUDIT_2026-10-11.md",
+    "SUPABASE_MIGRATION_RECONCILIATION_2026-10-11.json",
+    "js/audit/tests/unique-migration-versions.test.mjs",
+    "supabase/migrations-archive/duplicate-version-cleanup/20260912103000_profile_transaction_and_follow_hardening_v1.sql",
+    "supabase/migrations-archive/duplicate-version-cleanup/20260922090000_spike_live_complete_v1.sql",
+    "supabase/migrations-archive/duplicate-version-cleanup/20261011170000_spike_sitewide_call_presence_v2.sql"
+  ],
+  "removed_files": [
+    "supabase/migrations/20260912103000_profile_transaction_and_follow_hardening_v1.sql",
+    "supabase/migrations/20260922090000_spike_live_complete_v1.sql",
+    "supabase/migrations/20261011170000_spike_sitewide_call_presence_v2.sql"
+  ],
+  "changed_files": [
+    "all-files.txt",
+    "js/audit/protected-baseline.json",
+    "js/audit/tests/dm-realtime-calls-v1.test.mjs"
+  ],
+  "active_migrations_baseline": 106,
+  "active_migrations_candidate": 103,
+  "local_edge_function_dirs_baseline": [
+    "admin-register-user",
+    "admin-user-ops",
+    "spike-webauthn"
+  ],
+  "local_edge_function_dirs_candidate": [
+    "admin-register-user",
+    "admin-user-ops",
+    "spike-webauthn"
+  ],
+  "impact_rule": "Do not restore Impact. No live public Impact tables or public functions were found in the read-only catalog checks on 2026-10-11. Historical migration records remain historical only."
+}

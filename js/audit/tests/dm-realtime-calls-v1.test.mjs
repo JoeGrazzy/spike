@@ -6,7 +6,7 @@ const root=process.cwd();
 const html=fs.readFileSync(path.join(root,'message.html'),'utf8');
 const js=fs.readFileSync(path.join(root,'js/spike-dm-realtime-calls-v2.js'),'utf8');
 const migration=fs.readFileSync(path.join(root,'supabase/migrations/20261011140000_spike_dm_realtime_calls_v1.sql'),'utf8');
-const sitewideMigration=fs.readFileSync(path.join(root,'supabase/migrations/20261011170000_spike_sitewide_call_presence_v2.sql'),'utf8');
+const sitewideMigration=fs.readFileSync(path.join(root,'supabase/migrations/20261011171500_spike_sitewide_call_presence_v2.sql'),'utf8');
 test('message page keeps existing ringtone assets and call preferences',()=>{
  assert.match(js,/assets\/mp3\/incoming\.mp3/);assert.match(js,/assets\/mp3\/outgoing\.mp3/);
  assert.match(js,/incoming_call_tone,outgoing_call_tone/);assert.match(js,/incomingTone/);assert.match(js,/outgoingTone/);

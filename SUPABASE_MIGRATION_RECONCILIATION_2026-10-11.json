@@ -1,0 +1,53 @@
+{
+  "generated_on": "2026-10-11",
+  "project_id": "cjqpyndceqyqsijihxbb",
+  "source_of_truth": "spikefix_story_cleanup.zip (approved baseline identified by user)",
+  "method": "Read-only comparison of the live supabase_migrations.schema_migrations version values against the active local supabase/migrations/*.sql filename prefixes. No writes performed.",
+  "counts": {
+    "live_history_rows": 426,
+    "local_active_migration_files": 103,
+    "local_unique_version_prefixes": 103,
+    "matching_version_ids": 3,
+    "live_version_ids_without_exact_local_file": 423,
+    "local_version_ids_not_in_live_history": 100
+  },
+  "interpretation": "The local migration files are not a reliable replay set for this live database. A simple version-ID match finds only three overlapping IDs. Do not run db push, migration repair, reset, or replay based on this package. Reconstruct the full canonical migration set and inspect actual applied schema/state first.",
+  "known_live_history_only_examples": [
+    "20260827155343 create_profiles_auth_backend",
+    "20260827160014 spike_application_schema_v2",
+    "20261011130222 spike_call_recipient_channel_authorization_repair_v3"
+  ],
+  "impact_retirement": {
+    "live_public_impact_tables": 0,
+    "live_public_impact_functions": 0,
+    "historical_impact_migration_records": 4,
+    "action": "Do not restore Impact. Historical records are not active feature instructions."
+  },
+  "edge_functions": {
+    "deployed_live": 9,
+    "local_source_directories": [
+      "admin-register-user",
+      "admin-user-ops",
+      "spike-webauthn"
+    ],
+    "remote_only": [
+      "create-private-call",
+      "spike-predictor-sync",
+      "spike-media-download",
+      "spike-paystack-init",
+      "spike-b2-media",
+      "spike-paystack-verify"
+    ],
+    "action": "Do not restore or redeploy remote-only functions until intended status is established against approved app callers and removal history."
+  },
+  "production_changes_made": false,
+  "live_schema_inventory_read_only": {
+    "public_base_tables": 160,
+    "public_views": 2,
+    "public_functions": 301,
+    "public_triggers": 54,
+    "public_rls_policies": 279,
+    "public_impact_named_tables_or_functions": 0,
+    "note": "Catalog counts are a point-in-time inventory, not a proof of object-by-object parity with the approved project."
+  }
+}
