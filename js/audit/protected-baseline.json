@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "created_from": "SPIKE_LIVE_STREAM_REMOVED_UNIFIED_LOADER_HARDENED_2026-10-11",
-  "policy": "Current source archive after intentional removal of the Live Stream feature from active UI/assets. Historical original baseline is preserved at docs/audit-baselines/protected-baseline-original-2026-09-22.json. Removed paths and paths absent from the supplied archive are recorded in protected-baseline-exclusions.json. Historical Supabase migrations are retained and no live backend objects were dropped. Loader lifecycle was consolidated into js/spike-loader-core.js; intentionally modified present-file hashes were refreshed after the loader regression tests were added. Audit repair on 2026-10-11: refreshed stale entries for seven files present in the supplied project archive after review; this records the shipped source state and does not alter application behavior. New media-sharing work is limited to message.html plus its new migration and setup documentation. Report-file cleanup on 2026-10-11: removed seven standalone report/audit Markdown documents; retained audit tests and baseline checks, with deleted report-only entries removed from the current manifest.",
+  "policy": "Current source archive after intentional removal of the Live Stream feature from active UI/assets. Historical original baseline is preserved at docs/audit-baselines/protected-baseline-original-2026-09-22.json. Removed paths and paths absent from the supplied archive are recorded in protected-baseline-exclusions.json. Historical Supabase migrations are retained and no live backend objects were dropped. Loader lifecycle was consolidated into js/spike-loader-core.js; intentionally modified present-file hashes were refreshed after the loader regression tests were added. Audit repair on 2026-10-11: refreshed stale entries for seven files present in the supplied project archive after review; this records the shipped source state and does not alter application behavior. New media-sharing work is limited to message.html plus its new migration and setup documentation. Report-file cleanup on 2026-10-11: removed seven standalone report/audit Markdown documents; retained audit tests and baseline checks, with deleted report-only entries removed from the current manifest. Performance optimization on 2026-10-11: replaced in-page SPIKE icon and default avatar image references with smaller WebP assets while preserving PNG fallbacks and favicon compatibility; added an additive index migration for the conversation-settings foreign key. Baseline hashes for directly edited tracked files were synchronized after checks; this records current shipped state, not a claim of historical equivalence. Phase 2 mobile image-loading optimization on 2026-10-11: added asynchronous image decoding and lazy loading to non-first static images on affected pages; baseline hashes synchronized to the edited source after test review. Phase 3 background-work optimization on 2026-10-11: stop relative-timestamp DOM refresh and maintenance-status polling while the page is hidden or in pagehide; resume/check immediately when visible/pageshow. Baseline hashes synchronized after source review; this is not a live performance benchmark.",
   "file_count": 352,
   "files": {
     "LICENSE": {
@@ -337,24 +337,24 @@
       "sha256": "ea7c7ee01ffb35388a243f6b8cdfdd5683dfbc422f4e97bbd2a4ca65bca2428c"
     },
     "feed.html": {
-      "bytes": 100463,
-      "sha256": "a98f52bafd48ba5aebc57dee96f53da2ebd6ddc0c3caee3051667ad7fa6cdf09"
+      "bytes": 100497,
+      "sha256": "fd3c41d91c2fc0ea4a8a416f20c6da5c4b193b1d495c293d66cbbb2ea3e0be66"
     },
     "friends.html": {
       "bytes": 61341,
       "sha256": "3a2744ae96d351e319987a372cae604f1ea495f4990386b4bf3a40a20d66044d"
     },
     "guide.html": {
-      "bytes": 35131,
-      "sha256": "67bd87b508b4a3b675597c61cc74fbbecdddebfc0cf071c6594568512fb7cdd6"
+      "bytes": 35149,
+      "sha256": "5ca3083a1d74a98aa408746972ffebac8c8cd5439f1ee10686c59f90c5dc71de"
     },
     "help.html": {
       "bytes": 127958,
       "sha256": "2a193521663448663613fd6a3256ec18d56299be4fcef58b5ddd4262e814b30d"
     },
     "index.html": {
-      "bytes": 52764,
-      "sha256": "6b7af26b669c9cfee9ff0f3f1a11423bfa647234abe68a90db3ad268776a2d54"
+      "bytes": 52815,
+      "sha256": "aea0e92362dc9bd9b5172c6218a4520ed786f2af2f3d6a8a42b4f42429d3e429"
     },
     "js/audit/build.mjs": {
       "bytes": 872,
@@ -733,8 +733,8 @@
       "sha256": "edcfe3afdd13d2afbf76aeda6b81c67a806c63d47ef1de5f6189dde59ed56b17"
     },
     "js/feed-runtime-03.js": {
-      "bytes": 3371,
-      "sha256": "1dd75cc03296afe5a3d0a043ed3c46e90f5be2d0f4b1456a68912f9a1c627336"
+      "bytes": 3952,
+      "sha256": "87a0a4e47993efaa588529bcf34917b49572fd91e802eee4d78e1eea0b8b2c1f"
     },
     "js/feed-runtime-04-1.js": {
       "bytes": 20250,
@@ -769,8 +769,8 @@
       "sha256": "10ef247aa2e90333dd233ce75b34c4a4d61f2f718cbb5c81acb40eea5428c608"
     },
     "js/maintenance.js": {
-      "bytes": 6394,
-      "sha256": "42b04ae21d32219af808abedfa0af8dad325e72236fac3a89fdc58c990bd520a"
+      "bytes": 6936,
+      "sha256": "42e9d42063e301fd5b529a60a8ced8b3df74731eeb9efde2a92060c4e47cd293"
     },
     "js/premium-back.js": {
       "bytes": 2007,
@@ -813,8 +813,8 @@
       "sha256": "52f21937bc9aaf4de88fa8a1509939638f37e6d7fd9f0e114f08125cafa6126f"
     },
     "js/spike-identity.js": {
-      "bytes": 5036,
-      "sha256": "ed5c922f49956e5981a278f471af80aa366bcd29e40718e5f4623013f7db4df3"
+      "bytes": 5092,
+      "sha256": "5cec8175818d93f27fc8845232d4305ea174eb0f5aaea698ca8c8577448dc68d"
     },
     "js/spike-native-select.js": {
       "bytes": 5185,
@@ -873,16 +873,16 @@
       "sha256": "62c162bb230372c815bd5d32510cfafc6413554bf58ebd5d4fb4fc5f74e6fc1b"
     },
     "message.html": {
-      "bytes": 41584,
-      "sha256": "1f1e03227d875ea4e8f0e011dfd329f9ad1373f9c7f2c295cd9f416994d9a7ff"
+      "bytes": 41601,
+      "sha256": "2dea78a6484a66f7e9d2b84d146171633a41d3ce40b1576a4109145a5a5f6b65"
     },
     "messages.html": {
-      "bytes": 16257,
-      "sha256": "012fcd3909f94c6788c4f27ad7ac221d9704ae01f953de7037b04ff4ba5a07f4"
+      "bytes": 16274,
+      "sha256": "5b5b2497c6a0d4f37c4d3f2a6daca642fdd29e50405058134563de186562f45f"
     },
     "notifications.html": {
-      "bytes": 51432,
-      "sha256": "8d7be47966185c66828aa7d8cfe5b55973c8e0299ca0e7bf7a2fd81d7788f910"
+      "bytes": 51451,
+      "sha256": "962d3b754b5dcab558130936e30775e7f6c9300050d6e54caed958d399cb60ac"
     },
     "package.json": {
       "bytes": 313,
@@ -897,24 +897,24 @@
       "sha256": "fd9d9c8b0e064748d5b2192678d55192bb032826088b9bd14409920b7fe83b4e"
     },
     "profile.html": {
-      "bytes": 113504,
-      "sha256": "3f39d7efc19f668fa7ad3dc39d3da844e7539456c0d2811e9a5f3421ff963abb"
+      "bytes": 113586,
+      "sha256": "7d3f784155ecc770192836ea677a598806ce68674f24e317926ea2bdfe5439a0"
     },
     "reset-password.html": {
-      "bytes": 12796,
-      "sha256": "a3870f4a6a96666344015f8cd955df6b6d06bb78be03e2a31230d430b6810866"
+      "bytes": 12814,
+      "sha256": "affbc521f532f521302f6159565ef3e45460b43398fc4de2c9a73ec240ff4527"
     },
     "room.html": {
-      "bytes": 62793,
-      "sha256": "d7a82160a66148bc1b2df9a5e2667ccbce84236dd64392ba96926a97aee5a825"
+      "bytes": 62825,
+      "sha256": "100e5d5434220d76758e1b60b0b8449cd5df15e3af9c7309669520486a1ed9aa"
     },
     "room_chat.html": {
-      "bytes": 98088,
-      "sha256": "98fd2a381f6113fb92f7ab1e23614d405c4f2f4e4150043821f7809db90638d9"
+      "bytes": 98105,
+      "sha256": "e922e84cd804cf7ce5c06f9e1eab0910788610ec006f99c5e71e5ff9be62daf2"
     },
     "rooms.html": {
-      "bytes": 65765,
-      "sha256": "247d1966ade3b00a43f5d139aa4a509faccb50cbfdbf5da223f107725cc875fc"
+      "bytes": 65783,
+      "sha256": "2c8d6a8728b68d188a4ae5f32e1f47afebbe58c681fdf49ef47173d4642b7195"
     },
     "settings.html": {
       "bytes": 32641,
@@ -1405,8 +1405,8 @@
       "sha256": "befe1525b525361e4b9f4b036034696a3bc4d9068a7ed8d0540904ddb7b80316"
     },
     "view_user.html": {
-      "bytes": 39045,
-      "sha256": "3cfd59b30be98a22fcac5401856b5f85851dc9acb4474fec7f44d335efe7349a"
+      "bytes": 39080,
+      "sha256": "15f8644637a76d4b23e16ce9fad107c3af3102a24422e4df7a916619e8b94b75"
     },
     "wrangler.jsonc": {
       "bytes": 360,

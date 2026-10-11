@@ -561,7 +561,7 @@ async function loadMembers(){
   }catch(e){diag('members_error',{message:String(e?.message||e)});const box=document.getElementById('membersList');if(box)box.innerHTML='<div class="empty">Could not load members. Please retry.</div>';return [];}
 }
 function memberName(m){return m?.display_name||m?.username||m?.sp_id||'Member'}
-function memberAvatar(m){const name=memberName(m);return m?.avatar_url?'<img src="'+esc(safeHttpUrl(m.avatar_url))+'" alt="">':esc(name.slice(0,1).toUpperCase())}
+function memberAvatar(m){const name=memberName(m);return m?.avatar_url?'<img src="'+esc(safeHttpUrl(m.avatar_url))+'" alt="" decoding="async" loading="lazy">':esc(name.slice(0,1).toUpperCase())}
 function roleLabel(role){return role==='owner'?'Owner':role==='admin'?'Admin':role==='moderator'?'Moderator':'Member'}
 function renderMembers(){
   const box=$('#membersList');if(!box)return;

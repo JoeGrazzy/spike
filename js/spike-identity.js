@@ -1,7 +1,7 @@
 /* SPIKE Identity System — theme-safe identity media + gender-aware avatar fallback. */
 (function(){
   'use strict';
-  const AVATAR_PATHS={male:['assets/avatars/male.png','assets/male.png'],female:['assets/avatars/female.png','assets/female.png']};
+  const AVATAR_PATHS={male:['assets/avatars/male.webp','assets/avatars/male.png','assets/male.png'],female:['assets/avatars/female.webp','assets/avatars/female.png','assets/female.png']};
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const names=u=>String(u?.display_name||u?.full_name||u?.name||u?.username||u?.email||'User').trim()||'User';
   const initials=u=>{const n=names(u).replace(/@.*$/,'').trim();const parts=n.split(/\s+/).filter(Boolean);return esc(((parts[0]?.[0]||'S')+(parts.length>1?parts[parts.length-1][0]||'':'')).slice(0,2).toUpperCase());};
