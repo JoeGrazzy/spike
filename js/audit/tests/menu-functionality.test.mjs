@@ -13,7 +13,7 @@ const runtimeActions = {
 const nativeRoutes = {
   menuProfileHero:'profile.html', menuFriends:'friends.html',
   menuRoom:'rooms.html', menuGuide:'guide.html', menuSettings:'settings.html',
-  menuGoLive:'live.html?start=1', menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
+  menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
 };
 
 for (const [id, action] of Object.entries(runtimeActions)) {
@@ -55,4 +55,8 @@ test('Route-only menu entries are not dependent on JavaScript menu actions', () 
     const element = feed.match(new RegExp(`<[^>]*id=["']${id}["'][^>]*>`))?.[0] || '';
     assert.doesNotMatch(element, /data-menu-action=/, `${id} should navigate natively`);
   }
+});
+
+test('Live streaming entry points are removed from the Feed menu', () => {
+  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
 });

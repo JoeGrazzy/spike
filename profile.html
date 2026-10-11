@@ -228,9 +228,11 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-premium-loader.css?v=spike-loader-v1">
+<script src="js/spike-loader-core.js?v=1" defer></script>
 </head>
 <body class="spike-profile-page">
-<div class="loader" id="loader"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>
+<div class="loader" id="loader" role="status" aria-live="polite" aria-label="Loading SPIKE profile"><div class="loader-card"><div class="spike-loader-mark-wrap"><div class="spike-loader-spinner"></div><img class="spike-loader-logo" src="assets/icon/icon.png" alt=""></div><span id="loaderText">Loading your profile</span><small style="display:block;margin-top:10px;color:#c5b3dc">Connecting to SPIKE…</small></div></div>
 <header class="header"><button class="header-btn spike-premium-back" id="backBtn" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back" type="button">‹</button><div class="header-title" id="headerTitle">Profile</div><button class="header-btn hidden" id="adminBtn" type="button" title="Admin" aria-label="Admin">⚙</button><button class="header-btn" id="menuBtn">⋯</button></header>
 <main class="main"><section class="card">
 <div class="cover" id="coverArea">

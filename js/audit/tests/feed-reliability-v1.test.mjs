@@ -18,7 +18,8 @@ test('Feed restoration never CSS-hides the loader before session validation', ()
 
 test('Feed loader offers retry on slow startup instead of automatically exposing a half-loaded page', () => {
   assert.match(html, /id="spikeFeedRetry"[^>]*hidden/);
-  assert.match(loader, /retry\?\.addEventListener\("click", \(\) => window\.location\.reload\(\)\)/);
+  assert.match(loader, /core\.register\(loader/);
+  assert.match(loader, /retry: "reload"/);
   assert.match(loader, /This is taking longer than usual/);
   assert.doesNotMatch(loader, /window\.setTimeout\(hide,\s*9000\)/);
   assert.match(runtime, /if \(!bootFailed\) window\.SPIKE_HIDE_FEED_LOADER\?\.\(\)/);

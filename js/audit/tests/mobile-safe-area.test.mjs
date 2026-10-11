@@ -7,7 +7,7 @@ const ROOT = process.cwd();
 const pages = fs.readdirSync(ROOT).filter(f => f.endsWith('.html') && !f.endsWith('.pre-rebuild.html')).sort();
 const cssPath = path.join(ROOT, 'css', 'spike-mobile-safe-area.css');
 
-assert.ok(pages.length >= 21, `Expected at least 21 production HTML pages, found ${pages.length}`);
+assert.ok(pages.length >= 20, `Expected at least 20 production HTML pages, found ${pages.length}`);
 
 const css = fs.readFileSync(cssPath, 'utf8');
 

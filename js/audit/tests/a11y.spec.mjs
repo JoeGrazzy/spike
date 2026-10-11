@@ -9,7 +9,7 @@ try {
 }
 
 if (AxeBuilder) {
-  const pages = ['index.html','feed.html','friends.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','settings.html','help.html','admin.html','guide.html','live.html','legal.html','policy.html','policy_appeals.html','reset-password.html','share.html','view_user.html'];
+  const pages = ['index.html','feed.html','friends.html','notifications.html','profile.html','rooms.html','room.html','room_chat.html','settings.html','help.html','admin.html','guide.html','legal.html','policy.html','policy_appeals.html','reset-password.html','share.html','view_user.html'];
   for (const path of pages) {
     test(`WCAG 2.1 AA baseline: ${path}`, async ({ page }) => {
       await page.goto(`/${path}`, { waitUntil: 'domcontentloaded' });

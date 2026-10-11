@@ -395,8 +395,6 @@ function bindEvents() {
     return true;
   };
   const openFeedTab = tab => { closeFeedMenu(); return activateFeedV2Tab(tab); };
-
-  $('menuGoLive')?.addEventListener('click', () => { closeFeedMenu(); });
   // Menu V3 action router: one delegated tap path for every interactive button.
   // This prevents individual card bindings from drifting apart and gives async
   // actions the same duplicate-tap protection and error handling. Native <a>

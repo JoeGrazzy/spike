@@ -1,37 +1,29 @@
-# SPIKE Feed Reliability — Implementation and Verification Report
+# SPIKE Feed Reliability Implementation Report
 
-Date: 2026-10-11
+## Changes made
 
-## Result
+- Feed loader remains visible until session restoration validates the user.
+- Slow startup provides a retry/recovery action instead of revealing a partially initialized Feed.
+- Feed post-list requests guard against stale responses and responses belonging to a previous user.
+- Realtime reconciliation handles soft-deleted posts, content changes, inserts, and row deletions.
+- Added five static regression tests in `js/audit/tests/feed-reliability-v1.test.mjs`.
+- Updated only the protected-baseline byte/hash records for the four intentionally changed Feed files (`feed.html`, `js/feed-runtime-04-1.js`, `js/feed-runtime-04-3.js`, `js/feed-runtime-07.js`). The baseline's expected entries for missing files were retained; the integrity test was not disabled or weakened.
 
-- `npm run check`: **PASS**
-- JavaScript syntax check: **PASS**
-- Automated test suite: **456 passed, 0 failed, 1 skipped**
-- Browser accessibility audit: **SKIPPED** because optional Playwright/browser dependencies are not installed in this archive.
-- Production deployment: **NOT performed**.
-- Live Supabase changes: **NOT performed**.
+## Verification
 
-## Integrity-baseline repair
+- `node --check` across every `.js` file under `js/`: passed.
+- Feed reliability regression tests: 5 passed.
+- Full `npm run check`: 453 passed, 1 skipped, 1 failed.
+- The only remaining failure is the protected-baseline integrity test because 26 files recorded in `js/audit/protected-baseline.json` are absent from the supplied project archive. The full missing-file list is emitted by that test. Existing present protected files have no hash mismatches after updating the four intentional Feed changes.
+- The optional browser accessibility audit is skipped because its browser dependencies are unavailable. No browser-level test of real authentication, realtime delivery, or mobile visuals is claimed.
 
-The supplied ZIP did not contain 26 paths listed in its September 22, 2026 protected baseline. Exact source contents cannot be reconstructed from hashes alone, so those files were not fabricated.
+## Deployment status
 
-To make the supplied archive's audit accurate and repeatable:
-1. The original baseline was preserved at `docs/audit-baselines/protected-baseline-original-2026-09-22.json`.
-2. `js/audit/protected-baseline.json` now represents the 342 protected files actually present in this archive.
-3. The 26 absent paths are explicitly recorded in `js/audit/protected-baseline-exclusions.json`; their original expected sizes and hashes remain in the historical manifest.
-4. A new audit test verifies that exclusions are documented and traceable to the historical manifest. If an excluded path is restored, the test requires the exclusion record to be reviewed.
-5. The protected-file hash test remains enabled for every file in the current baseline.
+No production deployment, Supabase schema/policy/configuration change, or live backend operation was performed. Preview testing is still required before production deployment.
 
-**Important:** This does not claim the 26 absent files have been restored or verified. If you recover them from your repository or backup, restore them and review/update the exclusion record and baseline.
-
-## Feed changes
-
-The archive includes the Feed reliability updates and regression tests from the preceding patch: improved startup/session restoration, stale-request protection, and more robust handling of real-time post updates/deletions.
-
-## Remaining manual verification
-
-Automated checks do not prove that authentication or real-time behavior works against a live backend. Before production deployment, preview the project in a browser and test sign-in/session refresh, Feed loading/recovery, post creation/edit/deletion, two-account real-time behavior, and narrow Android layouts. Use test accounts and test content.
-
-## Safety
-
-No production hosting deployment or live Supabase database/function changes were made.
+## Premium SPIKE loader update (2026-10-11)
+- Redesigned the Feed startup loader with a dark plum atmosphere, layered purple/magenta/gold orbit rings, larger logo, luminous gradient progress animation, and a glass-like card.
+- Updated status copy to “Connecting to SPIKE…” and added a “CONNECTING SECURELY” indicator.
+- Removed visible retry text. If startup exceeds nine seconds, the bottom glowing spinner control becomes an accessible, text-free retry button (with an accessible label), preserving the recovery action without displaying “Retry connection”.
+- Includes narrow-screen/short-screen adjustments and reduced-motion handling.
+- Updated the current archive's protected hashes for the two intentionally changed files; historical baseline remains preserved separately.
