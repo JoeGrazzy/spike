@@ -16,7 +16,7 @@ const runtime = await readFile(new URL('../../feed-runtime-04-3.js', import.meta
 
 test('Feed menu keeps primary actions in the existing runtime contracts', () => {
   for (const [id, action] of [['menuAskSpike','ask-spike'],['menuTheme','theme'],['menuPulse','pulse'],['menuSaved','saved'],['menuSafety','safety']]) {
-    assert.match(html, new RegExp(`id="${id}"[^>]*data-menu-action="${action}"`));
+    assert.match(html, new RegExp(`<[^>]*\\bid="${id}"[^>]*data-menu-action="${action}"|<[^>]*data-menu-action="${action}"[^>]*\\bid="${id}"`));
     assert.ok(runtime.includes(`'${action}':`) || runtime.includes(`${action}:`), `missing menu action ${action}`);
   }
   assert.match(runtime, /const openAskSpike = \(/);

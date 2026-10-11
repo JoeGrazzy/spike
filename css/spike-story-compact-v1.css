@@ -1,0 +1,78 @@
+/* SPIKE Stories compact rail: reduce vertical weight without changing story behavior. */
+body[data-spike-page="feed"] .main > .story-section,
+body[data-spike-page="feed"] .main .story-section {
+  box-sizing: border-box !important;
+  padding: 7px 8px 8px !important;
+  margin: 0 0 8px !important;
+  min-height: 0 !important;
+  height: auto !important;
+  border-radius: 18px !important;
+}
+body[data-spike-page="feed"] .story-section .story-section-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  padding: 0 3px 6px !important;
+  margin: 0 !important;
+  min-height: 34px !important;
+}
+body[data-spike-page="feed"] .story-section-kicker { display: none !important; }
+body[data-spike-page="feed"] .story-section-head h2 {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.15 !important;
+}
+body[data-spike-page="feed"] .story-section-create {
+  min-height: 30px !important;
+  height: 30px !important;
+  padding: 5px 9px !important;
+  font-size: 10px !important;
+  line-height: 1 !important;
+  border-radius: 10px !important;
+}
+body[data-spike-page="feed"] .story-section .story-row {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 0 1px 1px !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: 122px !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+}
+body[data-spike-page="feed"] .story-section .story {
+  flex: 0 0 78px !important;
+  width: 78px !important;
+  min-width: 78px !important;
+  max-width: 78px !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 10px !important;
+}
+body[data-spike-page="feed"] .story-section .story-preview {
+  box-sizing: border-box !important;
+  width: 78px !important;
+  min-width: 78px !important;
+  height: 96px !important;
+  min-height: 96px !important;
+  max-height: 96px !important;
+  border-radius: 13px !important;
+}
+body[data-spike-page="feed"] .story-section .story-preview + span {
+  display: block !important;
+  max-width: 78px !important;
+  margin: 2px 0 0 !important;
+  font-size: 10px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+@media (max-width: 380px) {
+  body[data-spike-page="feed"] .story-section .story { flex-basis: 72px !important; width:72px !important; min-width:72px !important; max-width:72px !important; }
+  body[data-spike-page="feed"] .story-section .story-preview { width:72px !important; min-width:72px !important; height:88px !important; min-height:88px !important; max-height:88px !important; }
+}

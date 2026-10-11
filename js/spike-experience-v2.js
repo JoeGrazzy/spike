@@ -74,58 +74,6 @@
     document.documentElement.dataset.spikeExperience = 'v2';
   }
 
-  function setupComposer() {
-    const composer = $('#spikeComposer');
-    const text = $('#signalText');
-    if (!composer || !text) return;
-    composer.classList.add('spike-x-composer');
-    const title = $('#spikeComposerTitle');
-    if (title) title.textContent = 'Create a post';
-    const copy = title?.nextElementSibling;
-    if (copy) copy.textContent = 'Every post is a Signal. Share what is happening.';
-    text.placeholder = 'What’s happening?';
-    text.setAttribute('aria-label', 'What’s happening? Create a post');
-
-    const tools = $('.signal-tools', composer);
-    const creator = $('.signal-creator-row', composer);
-    if (!tools || !creator || $('.spike-x-more-row', composer)) return;
-
-    const later = $('#scheduleBtn');
-    const story = $('#storyBtn');
-    const refine = $('#composeAiBtn');
-    const saved = $('#saveDraftBtn');
-    const more = $('#contentCenterBtn');
-    later?.setAttribute('data-x-advanced', '1');
-
-    const row = document.createElement('div');
-    row.className = 'spike-x-more-row';
-    row.innerHTML = '<button type="button" class="spike-x-more" aria-expanded="false" aria-controls="spikeXAdvanced">More</button><span class="spike-x-more-hint">Link, schedule, refine, drafts</span>';
-    composer.appendChild(row);
-
-    const toggle = $('.spike-x-more', row);
-    const advanced = row;
-    advanced.id = 'spikeXAdvanced';
-    toggle.setAttribute('aria-controls', 'spikeXAdvanced');
-    toggle.addEventListener('click', () => {
-      const open = composer.classList.toggle('spike-x-advanced-open');
-      toggle.setAttribute('aria-expanded', String(open));
-      advanced.setAttribute('aria-hidden', String(!open));
-      toggle.textContent = open ? 'Less' : 'More';
-    });
-
-    // Keep a visible, familiar label for the existing content center action.
-    if (more) more.textContent = 'Drafts & history';
-    if (refine) refine.textContent = '✦ Refine';
-    if (saved) saved.textContent = 'Saved automatically';
-    const release = $('#releaseSignalBtn');
-    if (release) {
-      const span = release.querySelector('span');
-      const b = release.querySelector('b');
-      if (span) span.textContent = 'POST';
-      if (b) b.textContent = 'SPIKE';
-      release.setAttribute('aria-label', 'Publish your post to SPIKE');
-    }
-  }
 
   function setupTopPicks() {
     const box = $('#signalTopPicks');
@@ -175,7 +123,6 @@
   function boot() {
     setupHeader();
     setupFeedNavigation();
-    setupComposer();
     setupTopPicks();
     setupFeatureCenter();
     setupMenu();

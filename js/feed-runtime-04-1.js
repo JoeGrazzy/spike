@@ -34,10 +34,10 @@ const toast = window.spikePremiumToast || ((msg, type, ms) => {
 
 // ─── STATE ──────────────────────────────────────────────
 const state = {
-  user: null, profile: {}, posts: [], stories: [], users: new Map(),
-  saved: new Set(), following: new Set(), muted: new Set(), blocked: new Set(), storyViewed: new Set(),
+  user: null, profile: {}, posts: [], users: new Map(),
+  saved: new Set(), following: new Set(), muted: new Set(), blocked: new Set(),
   filter: "forYou", media: null, mediaType: null, mediaItems: [], activeMediaIndex: 0, mediaLayout: "auto",
-  activePost: null, activeComment: null, activeStory: null, customFeed: null,
+  activePost: null, activeComment: null, customFeed: null,
   visiblePosts: 20, loadingMore: !1, allLoaded: !1, expandedCaptions: new Set(), realtimeRetryTimer: null, realtimeRetryAttempt: 0, realtimeStarting: false, realtimeRefreshTimer: null
 };
 window.state = state;
@@ -263,11 +263,6 @@ async function requireUser() {
   if (p.error) throw p.error;
   const ext = await withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null);
   state.profile = { ...(p.data?.[0] || {}), ...(ext || {}), id: state.user.id };
-  const composerAvatar = $("composerAvatar");
-  if (composerAvatar) {
-    const avatar = avatarOf(state.profile);
-    composerAvatar.innerHTML = identityAvatar(state.profile,"spike-avatar",nameOf(state.profile));
-  }
   return true;
 }
 
@@ -277,7 +272,6 @@ async function loadAux() {
   const blocksPromise = withTimeout(db.from("feed_blocks").select("blocked_id").eq("blocker_id", state.user.id), 8000, "Block list").catch(() => ({ data: [] }));
   const ids = [...new Set([
     ...state.posts.map(p => p.authorUid),
-    ...state.stories.map(st => st.authorUid),
     state.user.id
   ].filter(Boolean))];
   const profilesPromise = (async () => {
@@ -299,224 +293,6 @@ async function loadAux() {
   state.following = new Set(me?.following || []);
   state.muted = new Set(me?.mutedAuthors || []);
   state.blocked = new Set((blocks.data || []).map(x => x.blocked_id).filter(Boolean));
-}
-
-// ─── STORIES ──────────────────────────────────────────
-async function loadStories() {
-  const previous = Array.isArray(state.stories) ? state.stories.slice() : [];
-  try {
-    const { data: rows, error } = await withTimeout(db.from("app_documents").select("document_id,data,created_at").eq("collection_name", "stories"), 10000, "Stories loading");
-    if (error) throw error;
-    const nowMs = Date.now();
-    state.stories = (rows || []).map(r => ({ id:r.document_id, ...(r.data || {}) })).filter(s => {
-      if (s.deleted) return false;
-      const created = new Date(s.createdAt || s.created_at || 0).getTime();
-      const expiresRaw = s.expiresAt || s.expires_at;
-      const expires = expiresRaw ? new Date(expiresRaw).getTime() : (created ? created + 86400000 : 0);
-      return expires > nowMs;
-    });
-    await loadStoryReadState();
-    renderStories();
-  } catch (e) { console.warn('loadStories failed', e); state.stories = previous; renderStories(); }
-}
-
-async function loadStoryReadState() {
-  state.storyViewed = state.storyViewed instanceof Set ? state.storyViewed : new Set();
-  if (!state.user?.id || !state.stories.length) return;
-  try {
-    const ids = state.stories.map(s => s.id).filter(Boolean);
-    const { data, error } = await withTimeout(db.from('story_views').select('story_id').eq('user_id', state.user.id).in('story_id', ids), 8000, 'Story read state');
-    if (error) throw error;
-    state.storyViewed = new Set((data || []).map(x => x.story_id));
-  } catch (e) { console.warn('story read state unavailable', e); }
-}
-
-function storyRank(s) {
-  const created = new Date(s.createdAt || s.created_at || 0).getTime() || 0;
-  const ageHours = Math.max(0, (Date.now() - created) / 3600000);
-  const freshness = Math.max(0, 24 - ageHours) / 24;
-  const unseen = state.storyViewed?.has(s.id) ? 0 : 1;
-  const relationship = s.authorUid === state.user?.id ? 100 : (state.following?.has(s.authorUid) ? 45 : 0);
-  const engagement = Math.min(20, Number(s.views || 0) * .05 + Number(s.replies || 0) * 1.5 + Number(s.reactions || 0) * 1.2);
-  const mediaQuality = s.mediaType === 'image' || s.mediaType === 'video' ? 4 : 1;
-  return relationship + unseen * 70 + freshness * 28 + engagement + mediaQuality;
-}
-
-function isGifUrl(url){ return /\.gif(?:[?#].*)?$/i.test(String(url||'')); }
-function mediaKindOf(item){
-  const type=String(item?.type||item?.mediaType||'').toLowerCase();
-  const urls=[item?.url,item?.mediaUrl,item?.originalUrl,item?.playbackUrl].map(x=>String(x||'')).filter(Boolean);
-  const mime=String(item?.mimeType||item?.mime||'').toLowerCase();
-  // GIFs are animated images, never HTML5 video sources. Check every stored
-  // URL (including original/playback URLs) before trusting a legacy mediaType.
-  // This prevents a GIF whose delivery URL was converted to .mp4 from being
-  // rendered inside <video>, which causes Android to show "format not supported".
-  if(type==='gif' || /image\/gif/i.test(mime) || urls.some(isGifUrl)) return 'gif';
-  return type==='video' ? 'video' : 'image';
-}
-function cloudinaryFeedImageUrl(url){
-  const raw=safeHttpUrl(url); if(!raw)return '';
-  try{
-    const u=new URL(raw); if(!u.hostname.includes('cloudinary.com'))return raw;
-    const marker='/upload/'; const i=u.pathname.indexOf(marker); if(i<0)return raw;
-    const tail=u.pathname.slice(i+marker.length);
-    // Preserve animated GIF delivery. Do not let f_auto silently change an
-    // animated GIF into a still/unsupported representation for older clients.
-    const gif=isGifUrl(raw);
-    const transform=gif ? 'f_gif,fl_animated,q_auto:eco,w_1080,c_limit' : 'f_auto,q_auto:eco,w_1080,c_limit,dpr_auto';
-    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
-    return u.toString();
-  }catch(_){return raw;}
-}
-
-function cloudinaryVideoPosterUrl(url){
-  const raw=safeHttpUrl(url); if(!raw)return '';
-  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return '';const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return '';const tail=cloudinaryVideoAssetTail(u.pathname,i);if(!tail)return '';u.pathname=u.pathname.slice(0,i+marker.length)+'so_0,f_jpg,q_auto:eco,w_1080,c_limit/'+tail;u.pathname=u.pathname.replace(/\.(mp4|webm|mov|m4v|avi|mpeg|mpg)$/i,'.jpg');return u.toString();}catch(_){return '';}
-}
-
-// Browser-safe Cloudinary video delivery. Rebuild from the clean asset tail
-// instead of stacking transformations on an already-derived URL.
-function cloudinaryVideoAssetTail(pathname, markerIndex){
-  const after=pathname.slice(markerIndex + '/upload/'.length);
-  const parts=after.split('/').filter(Boolean);
-  const versionIndex=parts.findIndex(x=>/^v\d+$/.test(x));
-  if(versionIndex>=0) return parts.slice(versionIndex).join('/');
-  const transformPrefix=/^(?:f|vc|ac|q|w|h|c|g|l|e|so|du|br|fps|sp|d|r|ar|dpr|fl|x|y|z)_/i;
-  let i=0;
-  while(i<parts.length && transformPrefix.test(parts[i])) i++;
-  return parts.slice(i).join('/');
-}
-
-function cloudinaryVideoTransformUrl(url, transform){
-  const raw=safeHttpUrl(url); if(!raw)return '';
-  try{
-    const u=new URL(raw);
-    if(!u.hostname.includes('cloudinary.com')) return raw;
-    const marker='/upload/'; const i=u.pathname.indexOf(marker);
-    if(i<0) return raw;
-    const tail=cloudinaryVideoAssetTail(u.pathname,i);
-    if(!tail) return raw;
-    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
-    u.pathname=u.pathname.replace(/\.(mov|m4v|webm|avi|mpeg|mpg|gif)$/i,'.mp4');
-    return u.toString();
-  }catch(_){ return raw; }
-}
-
-function cloudinaryFeedVideoCandidates(url){
-  const raw=safeHttpUrl(url); if(!raw)return [];
-  if(!/cloudinary\.com/i.test(raw)) return [raw];
-  const transforms=[
-    // Android-safe H.264 + AAC first. Keep the baseline profile as a later
-    // fallback instead of making it the primary delivery path.
-    'f_mp4,vc_h264,ac_aac,q_auto:good',
-    'f_mp4,vc_auto,ac_aac,q_auto:good',
-    SPIKE_VIDEO_FALLBACK_TRANSFORM,
-    SPIKE_VIDEO_DELIVERY_TRANSFORM,
-    'f_mp4,q_auto:good'
-  ];
-  const out=[];
-  for(const t of transforms){
-    const candidate=cloudinaryVideoTransformUrl(raw,t);
-    if(candidate && !out.includes(candidate)) out.push(candidate);
-  }
-  if(!out.includes(raw)) out.push(raw);
-  return out;
-}
-
-function cloudinaryFeedVideoUrl(url){
-  return cloudinaryFeedVideoCandidates(url)[0] || '';
-}
-
-function storyCardMediaUrl(url, kind='image') {
-  const raw = String(url || '').trim();
-  if (!raw) return '';
-  try {
-    const u = new URL(raw);
-    if (!u.hostname.includes('cloudinary.com')) return raw;
-    const marker='/upload/'; const i=u.pathname.indexOf(marker); if(i<0)return raw;
-    const transform = kind==='video' ? 'so_0,f_jpg,q_auto:eco,w_360,h_504,c_fill,g_auto' : 'f_auto,q_auto:eco,w_360,h_504,c_fill,g_auto,dpr_auto';
-    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+u.pathname.slice(i+marker.length);
-    if(kind==='video') u.pathname=u.pathname.replace(/\.(mp4|webm|mov|m4v)$/i,'.jpg');
-    return u.toString();
-  } catch (_) { return raw; }
-}
-
-function storyFullMediaUrl(url, kind='image') {
-  const raw=String(url||'').trim(); if(!raw)return '';
-  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return raw;const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return raw;u.pathname=u.pathname.slice(0,i+marker.length)+(kind==='video'?'f_mp4,vc_h264,ac_aac,q_auto:good':'f_auto,q_auto:good,w_1080,h_1920,c_limit')+'/'+u.pathname.slice(i+marker.length);if(kind==='video')u.pathname=u.pathname.replace(/\.(mov|m4v|webm|avi)$/i,'.mp4');return u.toString();}catch(_){return raw;}
-}
-
-function storyAvatarUrl(url) {
-  const raw = String(url || '').trim();
-  if (!raw) return '';
-  try {
-    const u = new URL(raw);
-    if (!u.hostname.includes('cloudinary.com')) return raw;
-    const marker='/upload/'; const i=u.pathname.indexOf(marker); if(i<0)return raw;
-    u.pathname=u.pathname.slice(0,i+marker.length)+'f_auto,q_auto:eco,w_64,h_64,c_fill,g_face/'+u.pathname.slice(i+marker.length);
-    return u.toString();
-  } catch (_) { return raw; }
-}
-
-function renderStories() {
-  const row = $('storiesRow');
-  if (!row) return;
-  const nowMs = Date.now();
-  const groups = new Map();
-  for (const s of (state.stories || [])) {
-    if (!s || s.deleted) continue;
-    const expires = new Date(s.expiresAt || s.expires_at || 0).getTime();
-    if (expires && expires <= nowMs) continue;
-    const key = s.authorUid || s.authorName || s.id;
-    if (!groups.has(key)) groups.set(key, []);
-    groups.get(key).push(s);
-  }
-  const grouped = [...groups.entries()].map(([authorUid, stories]) => {
-    const sorted = stories.slice().sort((a,b)=>(new Date(b.createdAt||b.created_at||0))-(new Date(a.createdAt||a.created_at||0)));
-    const unread = sorted.filter(s => !state.storyViewed?.has(s.id));
-    const preview = unread[0] || sorted[0];
-    const author = state.users.get(authorUid) || {id:authorUid,name:preview.authorName||'User',avatar_url:preview.authorAvatar||''};
-    return {authorUid,author,stories:sorted,preview,unread,score:Math.max(...sorted.map(storyRank))};
-  }).sort((a,b)=>{
-    if (a.authorUid === state.user?.id) return -1;
-    if (b.authorUid === state.user?.id) return 1;
-    return b.score-a.score;
-  });
-  const fragment=document.createDocumentFragment();
-  const createCard=document.createElement('button');
-  createCard.type='button';
-  createCard.className='story story-create-tile';
-  createCard.setAttribute('aria-label','Create a Story');
-  createCard.innerHTML='<span class="story-preview story-create-preview"><span class="story-create-plus" aria-hidden="true">＋</span></span><span>Your Story</span>';
-  createCard.addEventListener('click',()=>{ const overlay=$('storyOverlay'); if(overlay){ overlay.classList.add('open'); overlay.removeAttribute('hidden'); } });
-  fragment.appendChild(createCard);
-  grouped.forEach((g,idx)=>{
-    const story=g.preview, card=document.createElement('button');
-    card.type='button'; card.className=`story ${g.unread.length?'story-ring-unread':'story-ring-read'}`;
-    card.dataset.story=story.id; card.dataset.storyAuthor=g.authorUid;
-    card.setAttribute('aria-label',`${g.authorUid===state.user?.id?'Your Story':nameOf(g.author)}${g.stories.length>1?`, ${g.stories.length} stories`:''}`);
-    const wrap=document.createElement('span'); wrap.className='story-preview';
-    const storyKind=mediaKindOf(story);
-    const media=story?.mediaUrl ? storyCardMediaUrl(story.mediaUrl,storyKind==='video'?'video':'image') : '';
-    if(media){
-      const img=document.createElement('img'); img.className='story-preview-media'; img.src=media; img.alt=''; img.width=84; img.height=118;
-      img.loading=idx<4?'eager':'lazy'; img.decoding='async';
-      if(idx<2) img.fetchPriority='high';
-      img.onerror=()=>{img.remove(); const f=document.createElement('span'); f.className='story-preview-fallback'; f.textContent=(story?.text||nameOf(g.author)||'S').trim().slice(0,1).toUpperCase(); wrap.prepend(f);};
-      wrap.appendChild(img);
-    } else {
-      const t=document.createElement('span'); t.className='story-preview-text'; t.textContent=(story?.text||nameOf(g.author)||'S').trim().slice(0,1).toUpperCase(); wrap.appendChild(t);
-    }
-    if(g.unread.length){const dot=document.createElement('span');dot.className='story-new-dot';dot.setAttribute('aria-hidden','true');wrap.appendChild(dot);}
-    const avatar=storyAvatarUrl(avatarOf(g.author));
-    const badge=document.createElement('span');badge.className='story-avatar-badge';badge.innerHTML=identityAvatar(g.author,'story-avatar',nameOf(g.author));wrap.appendChild(badge);
-    if(g.stories.length>1){const count=document.createElement('b');count.className='story-count';count.textContent=String(g.stories.length);wrap.appendChild(count);}
-    if(g.authorUid===state.user?.id){const add=document.createElement('b');add.className='story-add';add.textContent='+';wrap.appendChild(add);}
-    card.appendChild(wrap);
-    const label=document.createElement('span');label.textContent=g.authorUid===state.user?.id?'Your Story':nameOf(g.author);card.appendChild(label);
-    fragment.appendChild(card);
-  });
-  row.replaceChildren(fragment);
 }
 
 // ─── POSTS ─────────────────────────────────────────────
@@ -582,3 +358,6 @@ function signalMetrics(p) {
  * of documented weights; modifiers are bounded and explicitly exposed.
  * All rank functions are pure: state arrives through ctx; no I/O occurs.
  */
+
+// Narrow bridge for the independent Signal Studio module; keeps the retired composer API retired.
+window.SPIKEUploadToCloudinary = uploadToCloudinary;

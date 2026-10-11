@@ -1,0 +1,114 @@
+/* SPIKE V10.1: final menu/dock authority, loaded after legacy menu styles. */
+#menuOverlay.spike-menu-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 120000 !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+}
+#menuOverlay.spike-menu-overlay.open,
+#menuOverlay.spike-menu-overlay[aria-hidden="false"] {
+  display: grid !important;
+  pointer-events: auto !important;
+}
+html body:has(#menuOverlay.open) #spikeBottomNav,
+html body:has(#menuOverlay[aria-hidden="false"]) #spikeBottomNav,
+html body:has(#menuOverlay.open) .spike-bottom-nav,
+html body:has(#menuOverlay[aria-hidden="false"]) .spike-bottom-nav {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(120%) !important;
+  z-index: 0 !important;
+}
+#menuOverlay[aria-hidden="true"] { pointer-events: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  #menuOverlay, #menuOverlay * { animation: none !important; transition: none !important; }
+}
+
+
+/* V10.2: keep Log Out in normal document flow. Older V6 CSS made the footer
+   sticky inside the scrolling sheet, so it could cover Account & Support rows
+   and appear directly below Go Live while the remaining menu content was hidden. */
+#menuOverlay .spike-command-footer {
+  position: static !important;
+  inset: auto !important;
+  bottom: auto !important;
+  z-index: auto !important;
+  margin-top: 14px !important;
+  padding: 12px 0 max(14px, env(safe-area-inset-bottom, 0px)) !important;
+  background: none !important;
+}
+#menuOverlay .spike-command-menu {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scroll-padding-bottom: max(20px, env(safe-area-inset-bottom, 0px)) !important;
+}
+
+
+/* SPIKE V10.6: authoritative modal interaction and footer containment fix.
+   The header must remain visible above the drawer, but its other controls must not
+   receive taps while the drawer is modal. The menu button remains available to close it.
+   Remove legacy paint containment so the scroll sheet/footer share one predictable flow. */
+#menuOverlay.spike-menu-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  z-index: 120000 !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+  touch-action: pan-y !important;
+}
+#menuOverlay.spike-menu-overlay::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: auto !important;
+}
+#menuOverlay .spike-command-menu {
+  position: relative !important;
+  z-index: 1 !important;
+  contain: none !important;
+  min-height: 0 !important;
+  max-height: min(90dvh, calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  pointer-events: auto !important;
+}
+#menuOverlay .spike-command-footer {
+  position: static !important;
+  inset: auto !important;
+  bottom: auto !important;
+  top: auto !important;
+  transform: none !important;
+  z-index: auto !important;
+  flex: 0 0 auto !important;
+  align-self: stretch !important;
+  margin-top: 14px !important;
+  padding: 12px 0 max(14px, env(safe-area-inset-bottom, 0px)) !important;
+  background: none !important;
+}
+html body:has(#menuOverlay.open) > header.header,
+html body:has(#menuOverlay[aria-hidden="false"]) > header.header {
+  pointer-events: none !important;
+}
+html body:has(#menuOverlay.open) > header.header *,
+html body:has(#menuOverlay[aria-hidden="false"]) > header.header * {
+  pointer-events: none !important;
+}
+html body:has(#menuOverlay.open) > header.header #menuBtn,
+html body:has(#menuOverlay[aria-hidden="false"]) > header.header #menuBtn {
+  pointer-events: auto !important;
+}
+#menuOverlay[aria-hidden="true"] { pointer-events: none !important; }

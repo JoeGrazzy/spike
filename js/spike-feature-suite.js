@@ -301,15 +301,6 @@
     $('featureSearchResults')?.addEventListener('click',e=>{ const p=e.target.closest('[data-search-post]'); if(p){close();document.querySelector(`[data-post=\"${CSS.escape(String(p.dataset.searchPost))}\"]`)?.scrollIntoView({behavior:'smooth',block:'center'});return;} const u=e.target.closest('[data-search-user]'); if(u){location.href=`view_user.html?uid=${encodeURIComponent(u.dataset.searchUser)}`;} });
     $('featureResumeList')?.addEventListener('click',e=>{const b=e.target.closest('[data-resume]');if(!b)return;const item=featureState().resume.find(x=>x.id===b.dataset.resume);if(item){location.href=item.route;}});
     document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('spikeFeatureHub')?.classList.contains('open'))close();});
-    let resumeSavedAt=0;
-    const saveComposerResume=()=>{
-      const text=$('signalText')?.value.trim();
-      if(!text || Date.now()-resumeSavedAt<5000) return;
-      resumeSavedAt=Date.now();
-      saveResume('Continue your Signal draft','feed.html#spikeComposer',{text:text.slice(0,1000)});
-    };
-    $('signalText')?.addEventListener('input',()=>{ if(document.visibilityState==='hidden') saveComposerResume(); });
-    document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') saveComposerResume(); });
     updatePulse();
     window.setInterval(updatePulse,30000);
     window.SPIKEFeatureSuite={open,close,setTab,saveResume,render,syncRemote};

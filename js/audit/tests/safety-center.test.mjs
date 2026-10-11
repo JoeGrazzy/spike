@@ -48,7 +48,10 @@ test('safety protections include concrete detection hooks', () => {
   assert.match(js, /scanText/);
   assert.match(js, /installLinkScanner/);
   assert.match(js, /installRateProtection/);
-  assert.match(js, /installSensitiveWarning/);
+  // Public post creation was intentionally removed; sensitive-data detection remains
+  // available through scanText and the explicit scan:text Safety Center action.
+  assert.match(js, /scanText/);
+  assert.match(js, /action==='scan:text'/);
   assert.match(js, /installScreenProtection/);
   assert.match(js, /navigator\.credentials\.create/);
 });

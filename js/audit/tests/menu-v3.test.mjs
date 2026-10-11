@@ -9,7 +9,7 @@ const runtime = fs.readFileSync(path.join(ROOT, 'js/feed-runtime-04-3.js'), 'utf
 const css = fs.readFileSync(path.join(ROOT, 'css/spike-menu-v3.css'), 'utf8');
 
 test('Feed uses the reference-led command panel hierarchy', () => {
-  for (const id of ['menuGoLive','menuMessages','menuFriends','menuRoom','menuSaved','menuProfileHero','menuSettings','menuSafety','menuPolicy','menuSignOut']) {
+  for (const id of ['menuGoLive','menuFriends','menuRoom','menuSaved','menuProfileHero','menuSettings','menuSafety','menuPolicy','menuSignOut']) {
     assert.match(feed, new RegExp(`id=["']${id}["']`), `missing menu control: ${id}`);
   }
   assert.match(feed, /PRIMARY HUBS/);
@@ -20,7 +20,7 @@ test('Feed uses the reference-led command panel hierarchy', () => {
 
 test('Menu keeps existing routes and delegated runtime actions', () => {
   const combined = `${feed}\n${runtime}`;
-  for (const route of ['live.html?start=1','messages.html','friends.html','rooms.html','settings.html','policy.html','policy_appeals.html','guide.html']) {
+  for (const route of ['live.html?start=1','friends.html','rooms.html','settings.html','policy.html','policy_appeals.html','guide.html']) {
     assert.match(combined, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(runtime, /menuOverlay\?\.addEventListener\('click', async e/);

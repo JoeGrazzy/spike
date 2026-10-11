@@ -11,21 +11,23 @@ const runtimeActions = {
   menuSaved:'saved', menuAudience:'audience', menuSafety:'safety', menuSignOut:'signout'
 };
 const nativeRoutes = {
-  menuProfileHero:'profile.html', menuMessages:'messages.html', menuFriends:'friends.html',
+  menuProfileHero:'profile.html', menuFriends:'friends.html',
   menuRoom:'rooms.html', menuGuide:'guide.html', menuSettings:'settings.html',
   menuGoLive:'live.html?start=1', menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
 };
 
 for (const [id, action] of Object.entries(runtimeActions)) {
   test(`${id} has a live delegated action contract`, () => {
-    assert.match(feed, new RegExp(`id=["']${id}["'][^>]*data-menu-action=["']${action}["']`));
+    const element = feed.match(new RegExp(`<[^>]*\\bid=["']${id}["'][^>]*>`))?.[0] || feed.match(new RegExp(`<[^>]*\\bdata-menu-action=["']${action}["'][^>]*\\bid=["']${id}["'][^>]*>`))?.[0] || '';
+    assert.ok(element && new RegExp(`data-menu-action=["']${action}["']`).test(element), `${id} must expose ${action} on its own element`);
   });
 }
 
 for (const [id, route] of Object.entries(nativeRoutes)) {
   test(`${id} has a native route contract`, () => {
     const escaped = route.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-    assert.match(feed, new RegExp(`id=["']${id}["'][^>]*href=["']${escaped}["']`));
+    const element = feed.match(new RegExp(`<[^>]*\\bid=["']${id}["'][^>]*>`))?.[0] || '';
+    assert.ok(element && new RegExp(`href=["']${escaped}["']`).test(element), `${id} must link to ${route}`);
   });
 }
 

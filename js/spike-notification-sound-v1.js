@@ -1,5 +1,5 @@
 /* SPIKE notification sound v1
- * One shared notifications.mp3 playback path for notifications and private messages.
+ * Shared notifications.mp3 playback path for notifications.
  * Respects the existing message_tone preference stored by Settings.
  */
 (()=>{

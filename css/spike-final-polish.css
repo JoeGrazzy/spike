@@ -51,7 +51,6 @@
 
 /* Never let content create viewport-width overflow. */
 html,body{max-width:100%;overflow-x:hidden}
-.post,.card,.main,.feed-v2-nav,.feed-v2-panel,.spike-signal-composer{min-width:0;max-width:100%}
 @media(prefers-reduced-motion:reduce){.spike-signal-more-list button,.post-actions>button{transition:none!important}}
 
 /* Unread Activity badge: compact, collision-safe, always above the nav icon. */
@@ -167,33 +166,22 @@ html,body{max-width:100%;overflow-x:hidden}
   overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
   -webkit-overflow-scrolling:touch!important;scrollbar-gutter:stable!important;
 }
-#contentCenterOverlay{align-items:center!important;justify-content:center!important}
-#contentCenterOverlay .content-center-card{
-  width:min(680px,calc(100vw - 32px))!important;max-height:min(86dvh,760px)!important;
-  overflow:hidden!important;margin:auto!important;
-}
-#contentCenterOverlay .content-center-list{
-  max-height:min(55dvh,480px)!important;overflow-y:auto!important;overflow-x:hidden!important;
-  overscroll-behavior:contain!important;
-}
 @media(max-width:560px){
   .spike-premium-overlay{padding:12px!important}
   .spike-premium-sheet{width:94vw!important;max-height:calc(100dvh - 24px)!important;border-radius:24px!important}
   .spike-premium-body{max-height:calc(100dvh - 120px)!important}
-  #contentCenterOverlay{padding:12px!important}
-  #contentCenterOverlay .content-center-card{width:94vw!important;max-height:86dvh!important}
 }
-@media(max-width:380px){.spike-premium-sheet,#contentCenterOverlay .content-center-card{width:calc(100vw - 24px)!important}}
+@media(max-width:380px){}
 
 
-/* FINAL OVERRIDE — Feature Center must remain centered, never a bottom sheet. */
-#spikePremiumOverlay.spike-premium-overlay {
+/* FINAL OVERRIDE — Premium Feature Center must remain centered, never a bottom sheet. */
+#spikePremiumOverlay.spike-premium-overlay{
   position:fixed!important; inset:0!important; width:100vw!important; height:100dvh!important;
   min-height:100vh!important; align-items:center!important; justify-content:center!important;
   overflow:hidden!important; z-index:100000!important;
 }
-#spikePremiumOverlay.spike-premium-overlay.open { display:flex!important; }
-#spikePremiumOverlay .spike-premium-sheet {
+#spikePremiumOverlay.spike-premium-overlay.open{ display:flex!important; }
+#spikePremiumOverlay .spike-premium-sheet{
   position:relative!important; margin:0!important;
   width:min(680px,calc(100vw - 24px))!important; max-width:680px!important;
   height:auto!important; max-height:86dvh!important; overflow:hidden!important;

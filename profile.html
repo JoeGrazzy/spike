@@ -131,7 +131,6 @@ img, video, iframe { max-width:100%; }
 }
 </style>
 <script src="js/presence.js"></script>
-<script src="js/call-receiver.js"></script>
 <link rel="stylesheet" href="css/premium-back.css">
 <style id="spike-profile-gallery">
 .media-gallery-head{display:flex;align-items:center;justify-content:space-between;padding:5px 2px 10px}
@@ -362,15 +361,19 @@ if(file.size>10*1024*1024){ toast("Image must be 10MB or smaller."); return fals
 return true;
 }
 async function persistProfileMedia(field,url){
+const stage = field === "avatar_url" ? "save-avatar-url" : "save-cover-document";
 const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
 const userPatch={...(old||{}),[field]:url,updated_at:now(),id:state.me.id};
 // Only write columns that actually exist in public.profiles.
 // cover_url is stored in the users document because profiles has no cover_url column.
 if(field==="avatar_url"){
-const r=await db.from("profiles").upsert({id:state.me.id,avatar_url:url,updated_at:now()},{onConflict:"id"});
-if(r.error) throw r.error;
-}
+const privacy=state.privacy||{profile_visibility:"public",posts_visibility:"public",media_visibility:"public",friends_visibility:"public",allow_messages:"friends",allow_calls:"friends",show_online_status:true,allow_profile_discovery:true};
+const profile={username:state.profile?.username||"",display_name:state.profile?.display_name||state.profile?.full_name||"",bio:state.profile?.bio||"",avatar_url:url,website:state.profile?.website||""};
+const r=await db.rpc("spike_update_profile_v1",{p_profile:profile,p_privacy:privacy,p_user_doc:userPatch});
+if(r.error) { console.error("[SPIKE PROFILE MEDIA]["+stage+"] RPC spike_update_profile_v1 failed", {code:r.error.code,message:r.error.message,details:r.error.details,hint:r.error.hint}); throw r.error; }
+} else {
 await putDoc(`users/${state.me.id}`,userPatch,"users");
+}
 state.profile={...state.profile,[field]:url};
 if(field==="cover_url"){state.cover={url,position_x:0,position_y:0,zoom:1,fit:"cover"};const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:url,p_position_x:0,p_position_y:0,p_zoom:1,p_fit:"cover"});if(cr.error)throw cr.error;renderCover();}
 renderIdentity();renderCover();renderActions();renderAbout();
@@ -381,8 +384,11 @@ const area=type==="avatar"?document.querySelector(".avatar-wrap"):$("coverArea")
 area?.classList.add("uploading");
 try{
 toast(type==="avatar"?"Uploading profile picture…":"Uploading cover photo…");
-const url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`);
-await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url);
+let url;
+try { url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`); }
+catch(uploadError) { console.error("[SPIKE PROFILE MEDIA][cloudinary-upload]", {message:uploadError?.message}); throw uploadError; }
+try { await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url); }
+catch(saveError) { console.error("[SPIKE PROFILE MEDIA][supabase-save]", {code:saveError?.code,message:saveError?.message,details:saveError?.details,hint:saveError?.hint}); throw saveError; }
 toast(type==="avatar"?"Profile picture updated":"Cover photo updated");if(type==="cover")openCoverEditor();
 }catch(err){
 console.error("[SPIKE PROFILE MEDIA]",err);
@@ -551,7 +557,7 @@ function initCoverEditor(){
   $("coverEditorOverlay")?.addEventListener("click",e=>{if(e.target.id==="coverEditorOverlay"){$("coverEditorCancel").click()}});
 }
 function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=window.SPIKE_IDENTITY?.avatarMarkup?.(p,"profile-avatar",n)|| (a?`<img src="${esc(a)}" alt="${esc(n)}" loading="lazy" decoding="async">`:esc(n[0]||"U"));renderCover();const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
-function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><a class="btn" href="messages.html?user=${encodeURIComponent(state.uid)}">💬 Message</a><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverActions")?.classList.toggle("hidden",!own);$("coverEdit")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!own||!state.cover?.url);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
+function renderActions(){const own=state.uid===state.me.id;$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("coverActions")?.classList.toggle("hidden",!own);$("coverEdit")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!own||!state.cover?.url);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
 function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
 function syncProfileToFeed(action,active){
   const msg={id:String(state.uid),action,active:!!active,at:Date.now()};
@@ -622,20 +628,7 @@ async function saveProfile(e){
 
     // Identity fields belong in public.profiles. Never update verified here:
     // only the admin verification workflow may change that field.
-    const profilePatch={
-      id:state.me.id,
-      username:next.username,
-      display_name:next.display_name,
-      bio:next.bio,
-      avatar_url:next.avatar_url,
-      website:next.website,
-      updated_at:timestamp
-    };
-    const profileResult=await db.from("profiles").upsert(profilePatch,{onConflict:"id"});
-    if(profileResult.error) throw profileResult.error;
-
     const privacyPatch={
-      user_id:state.me.id,
       profile_visibility:$("editVisibility").value,
       posts_visibility:$("editPostsVisibility").value,
       media_visibility:$("editMediaVisibility").value,
@@ -646,9 +639,6 @@ async function saveProfile(e){
       allow_profile_discovery:$("editDiscovery").checked,
       updated_at:timestamp
     };
-    const privacyResult=await db.from("profile_privacy").upsert(privacyPatch,{onConflict:"user_id"});
-    if(privacyResult.error) throw new Error("Privacy settings could not be saved: "+privacyResult.error.message);
-
     const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
     const userDoc={
       ...(old||{}),
@@ -664,7 +654,10 @@ async function saveProfile(e){
       profile_visibility:next.profile_visibility,
       updated_at:timestamp
     };
-    await putDoc(`users/${state.me.id}`,userDoc,"users");
+    const rpcProfile={username:next.username,display_name:next.display_name,bio:next.bio,avatar_url:next.avatar_url,website:next.website};
+    const rpcPrivacy={profile_visibility:privacyPatch.profile_visibility,posts_visibility:privacyPatch.posts_visibility,media_visibility:privacyPatch.media_visibility,friends_visibility:privacyPatch.friends_visibility,allow_messages:privacyPatch.allow_messages,allow_calls:privacyPatch.allow_calls,show_online_status:privacyPatch.show_online_status,allow_profile_discovery:privacyPatch.allow_profile_discovery};
+    const profileSave=await db.rpc("spike_update_profile_v1",{p_profile:rpcProfile,p_privacy:rpcPrivacy,p_user_doc:userDoc});
+    if(profileSave.error) throw new Error("Profile could not be saved: "+profileSave.error.message);
     if(coverUrl){
       const same=state.cover?.url===coverUrl;
       const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:coverUrl,p_position_x:same?Number(state.cover.position_x||0):0,p_position_y:same?Number(state.cover.position_y||0):0,p_zoom:same?Number(state.cover.zoom||1):1,p_fit:"cover"});

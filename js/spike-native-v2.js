@@ -48,7 +48,6 @@
   function applyBrandLanguage(root=document) {
     const replacements = new Map([
       ['Close Friends','Circles'],['Close friends','Circles'],
-      ['Stories','Pulses'],['Story','Pulse'],['stories','Pulses'],['story','Pulse'],
       ['Reels','Signal Stream'],['Reel','Signal Stream'],['reels','Signal Stream'],['reel','Signal Stream'],
       ['Trending','Momentum'],['trending','Momentum'],['Popular','Momentum'],['popular','Momentum'],
       ['Comments','Echoes'],['Comment','Echo'],['comments','Echoes'],['comment','Echo'],
@@ -69,17 +68,7 @@
         if (next!==v) el.setAttribute(attr,next);
       }
     }
-    const direct = [
-      ['storyOverlay','h2','Create Pulse'], ['storyOverlay','p','Pulses evolve for 24 hours. Add text or media to show what is happening right now.'],
-      ['storyText','placeholder','What is your Pulse right now?'],
-      ['storyText','aria-label','Pulse text'], ['publishStory','textContent','Release Pulse'],
-      ['storyActionShare','textContent','↗ Pass Pulse'], ['storyActionDelete','textContent','🗑 Delete Pulse'],
-      ['storyLoaderTitle','textContent','Releasing your Pulse…'], ['storyLoaderText','textContent','Publishing your live state securely.'],
-      ['storyViewerAuthor','textContent','Pulse'], ['storyViewerCaption','aria-label','Pulse caption'],
-      ['storyViewerClose','aria-label','Close Pulse'], ['storyViewer','aria-label','Pulse viewer'],
-      ['storyPrev','aria-label','Previous Pulse'], ['storyNext','aria-label','Next Pulse'],
-      ['storyViewerDownload','aria-label','Download Pulse media'], ['storyViewerDelete','aria-label','Delete Pulse']
-    ];
+    const direct = [];
     for (const [id,attr,value] of direct) { const el=$(id); if(!el) continue; if(attr==='textContent') el.textContent=value; else el.setAttribute(attr,value); }
   }
 
@@ -104,7 +93,6 @@
         <button data-native-tab="topics">◎ Topics</button>
         <button data-native-tab="lenses">◉ Signal Lenses</button>
         <button data-native-tab="chains">↗ Signal Chains</button>
-        <button data-native-tab="pulses">◌ Pulses</button>
       </div>
       <div id="spikeNativePanelBody" class="spike-native-panel-body"></div>`;
     disclosure.appendChild(panel);
@@ -127,7 +115,6 @@
     if(tab==='topics') return renderTopics(body);
     if(tab==='lenses') return renderLenses(body);
     if(tab==='chains') return renderChains(body);
-    if(tab==='pulses') return renderPulses(body);
   }
 
   function renderMomentum(body) {
@@ -158,11 +145,6 @@
     body.innerHTML=`<div class="spike-native-actions"><input id="spikeChainTitle" class="spike-native-input" placeholder="Chain title"><button type="button" data-native-create-chain>Create Chain</button></div><div class="spike-native-grid" style="margin-top:9px">${rows.length?rows.map(x=>`<article class="spike-native-card"><b>${esc(x.title)}</b><small>${esc(x.description||'A connected line of Signals')} · ${new Date(x.created_at).toLocaleDateString()}</small></article>`).join(''):'<div class="spike-native-empty">No Signal Chains yet. Start one from a Signal.</div>'}</div>`;
   }
 
-  function renderPulses(body) {
-    const stories=Array.isArray(window.state?.stories)?window.state.stories:[];
-    const active=stories.filter(s=>!s.deleted && (!s.expiresAt || new Date(s.expiresAt).getTime()>now())).length;
-    body.innerHTML=`<div class="spike-native-card"><b>Pulses are your live state.</b><small>${active} active Pulse${active===1?'':'s'} visible to you. A Pulse expires naturally and can carry text, image, video or audio.</small><div class="spike-native-actions"><button type="button" data-native-create-pulse>＋ Create Pulse</button><button type="button" data-native-view-pulses>View Pulses</button></div></div>`;
-  }
 
   async function createLens() {
     const name=$('spikeLensName')?.value.trim(); const topic=$('spikeLensTopic')?.value.trim();
@@ -200,8 +182,6 @@
     const open=e.target.closest('[data-native-open-signal]'); if(open) return openSignal(open.dataset.nativeOpenSignal);
     const chain=e.target.closest('[data-native-chain]'); if(chain) return createChain(chain.dataset.nativeChain);
     if(e.target.closest('[data-native-create-chain]')) return createChain(null);
-    if(e.target.closest('[data-native-create-pulse]')) { $('storyOverlay')?.classList.add('open'); $('storyOverlay')?.removeAttribute('hidden'); return; }
-    if(e.target.closest('[data-native-view-pulses]')) { $('storiesRow')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
     const lens=e.target.closest('[data-native-apply-lens]'); if(lens){ const rows=await loadLenses(); const x=rows.find(r=>String(r.id)===String(lens.dataset.nativeApplyLens)); const topic=x?.rules?.keywords?.[0]; if(topic) applyTopic(topic); else toast('This Lens has no keyword rule yet','info'); }
   }
 
@@ -214,7 +194,6 @@
       const map={latest:'Latest Signals',following:'Following',popular:'Popular',trending:'Trending',saved:'Saved'};
       filters.querySelectorAll('[data-filter]').forEach(b=>{ if(map[b.dataset.filter]) b.textContent=map[b.dataset.filter]; });
     }
-    const storyBtn=$('storyBtn'); if(storyBtn) storyBtn.textContent='◎ Story';
     const search=$('v2DiscoverSearch'); if(search) search.placeholder='Search Signals or Topics…';
     const reelPanel=document.querySelector('[data-v2-panel="reels"]'); if(reelPanel){ const empty=reelPanel.querySelector('.empty'); if(empty) empty.textContent='Loading Signal Stream…'; }
   }

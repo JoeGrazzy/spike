@@ -705,6 +705,12 @@ video{contain:layout paint}
 <div id="suggestionsContainer"></div>
 </section>
 </div>
+<nav class="bottom-nav" aria-label="Main navigation">
+  <a class="nav-item" href="feed.html"><i class="fas fa-house" aria-hidden="true"></i><span>Feed</span></a>
+  <a class="nav-item active" href="friends.html" aria-current="page"><i class="fas fa-user-group" aria-hidden="true"></i><span>Friends</span></a>
+  <a class="nav-item" href="messages.html"><i class="fas fa-comments" aria-hidden="true"></i><span>Messages</span></a>
+  <a class="nav-item" href="profile.html"><i class="fas fa-user" aria-hidden="true"></i><span>Profile</span></a>
+</nav>
 <style>
 .notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.friend-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* ===== SPIKE PREMIUM THEME SYSTEM ===== */
@@ -987,7 +993,7 @@ border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:
 'use strict';
 const SUPABASE_URL = 'https://cjqpyndceqyqsijihxbb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = window.__SPIKE_SUPABASE__ || window.supabaseClient || window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 window.sb = db;
 window.supabaseClient = db;
 const $ = id => document.getElementById(id);
@@ -1019,7 +1025,7 @@ if(uid) return `user:${uid.toLowerCase()}`;
 const rid=requestId(r);
 return rid ? `request:${rid.toLowerCase()}` : '';
 }
-function initials(name) { return (name || '?').trim().split(/\\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
+function initials(name) { return (name || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
 function avatar(p) {
 const name = p.display_name || p.username || '?';
 return p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="${esc(name)}" loading="lazy" decoding="async">` : esc(initials(name));
@@ -1028,7 +1034,7 @@ function timeAgo(iso) {
 if (!iso) return ''; const n=Math.max(0, Date.now()-new Date(iso).getTime()); const m=Math.floor(n/60000);
 if(m<1) return 'just now'; if(m<60) return `${m}m ago`; const h=Math.floor(m/60); if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`;
 }
-function notice(msg, error=false) { const n=$('notice'); n.textContent=msg; n.className='notice'+(error?' error':''); n.hidden=!msg; if(msg) spikePremiumToast(msg,error?'error':'success',error?4200:3000); if(msg&&!error)setTimeout(()=>{n.hidden=true},3500); }
+function notice(msg, error=false) { const n=$('notice'); n.textContent=msg; n.className='notice'+(error?' error':''); n.hidden=!msg; if(msg && typeof window.spikePremiumToast==='function') window.spikePremiumToast(msg,error?'error':'success',error?4200:3000); if(msg&&!error)setTimeout(()=>{n.hidden=true},3500); }
 function loading(id) { $(id).innerHTML='<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading…</div>'; }
 function empty(id,msg) { $(id).innerHTML=`<div class="empty">${esc(msg)}</div>`; }
 async function requireUser() {
@@ -1053,7 +1059,7 @@ try {
   }
 
   state.user=user;
-  window.AppPresence.start(db,user);
+  try { await window.AppPresence?.start?.(db, user); } catch (presenceError) { console.warn('[SPIKE Friends] Presence is unavailable:', presenceError); }
   return user;
 } catch(err) {
   if(window.__isJwtFutureError?.(err)) {
@@ -1068,13 +1074,14 @@ loading('friendsContainer');
 const {data,error}=await db.rpc('get_friends_public',{p_limit:100,p_offset:0});
 if(error) throw error;
 state.friends=uniqueBy((data||[]).map(f=>({...f,user_id:personId(f)})),friendKey);
+try { window.AppPresence?.watch?.(state.friends.map(personId).filter(Boolean)); } catch (presenceError) { console.warn('[SPIKE Friends] Could not watch friend presence:', presenceError); }
 renderFriends();
 }
 async function loadNetworkRecommendations() {
   if(state.tab==='suggestions') loading('networkRecommendationsContainer');
   const {data,error}=await db.rpc('get_spike_network_recommendations',{p_limit:12});
-  if(error) throw error;
-  state.networkRecommendations=uniqueBy((data||[]).map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id) && p.user_id!==state.user?.id),friendKey);
+  if(error) { console.warn('[SPIKE Friends] Network recommendations unavailable; showing registered people instead:', error.message); state.networkRecommendations=[]; }
+  else state.networkRecommendations=uniqueBy((data||[]).map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id) && p.user_id!==state.user?.id),friendKey);
   if(state.tab==='suggestions') renderNetworkRecommendations();
 }
 async function loadRegisteredUsers(q='') {
@@ -1187,7 +1194,8 @@ id=String(id||'').trim();
 if(!validUuid(id)){ notice('This friend request is missing a valid ID. Refreshing…',true); await loadRequests().catch(()=>{}); return; }
 const btn=document.querySelector(`[data-action="${action}"][data-id="${CSS.escape(id)}"]`); if(btn) btn.disabled=true;
 const fn=action==='accept'?'accept_friend_request':'decline_friend_request';
-const {error}=await db.rpc(fn,{p_request_id:id});
+const args=action==='decline'?{p_request_id:id,p_sender_id:null}:{p_request_id:id};
+const {error}=await db.rpc(fn,args);
 if(error){notice(error.message||'Could not update request.',true);if(btn)btn.disabled=false;return;}
 await refresh(); notice(action==='accept'?'Friend request accepted.':'Friend request declined.');
 }
@@ -1196,7 +1204,7 @@ id=String(id||'').trim();
 if(!validUuid(id)){ notice('Could not unfriend this person because their profile ID is unavailable. Refreshing your friends…',true); await loadFriends().catch(()=>{}); return; }
 const friend=state.friends.find(f=>personId(f)===id);
 const name=friend?.display_name||friend?.username||'this friend';
-const confirmed=await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'});
+const confirmed=window.SPIKEPremiumDialog?.confirm ? await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'}) : window.confirm(`Unfriend ${name}? They will be removed from your friends list.`);
 if(!confirmed) return;
 if(btn) btn.disabled=true;
 try {
@@ -1241,21 +1249,30 @@ $('requestBadge').textContent=n;
 $('requestBadge').style.display=n?'flex':'none';
 $('onlineCount').textContent=String(friends.filter(x=>AppPresence.isOnline(personId(x))).length);
 }
+if (typeof window.AppPresence?.subscribe === 'function') {
+  window.AppPresence.subscribe(() => {
+    if (state.tab === 'online') renderFriends();
+    updateCounts();
+  });
+}
+
 function setTab(tab){
 state.tab=tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
 $('pendingSection').hidden=tab!=='all'&&tab!=='pending'; $('friendsSection').hidden=tab==='pending'||tab==='suggestions'; $('suggestionsSection').hidden=tab!=='suggestions';
 if(tab==='pending') $('pendingSection').hidden=false;
-if(tab==='suggestions'){ $('searchWrap').style.display='block'; Promise.all([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]).catch(err=>notice(err.message||'Could not load people recommendations.',true)); }
+if(tab==='suggestions'){ $('searchWrap').style.display='block'; Promise.allSettled([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]).then(results=>{const failed=results.find(r=>r.status==='rejected');if(failed)notice(failed.reason?.message||'Could not load all people.',true);}); }
 else if(tab==='online'){ $('searchWrap').style.display='block'; renderFriends(); }
 else $('searchWrap').style.display='block';
 }
-async function refresh(){ await Promise.all([loadFriends(),loadRequests()]); if(state.tab==='suggestions') await Promise.all([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]); }
+async function refresh(){ await Promise.all([loadFriends(),loadRequests()]); if(state.tab==='suggestions') await Promise.allSettled([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]); }
 document.addEventListener('click', async e=>{
 const tab=e.target.closest('.tab'); if(tab){setTab(tab.dataset.tab);return;}
 const a=e.target.closest('[data-action]'); if(a){await actRequest(a.dataset.id,a.dataset.action);return;}
 const send=e.target.closest('[data-send]'); if(send){await sendRequest(send.dataset.send,send);return;}
 const unfriendBtn=e.target.closest('[data-unfriend]'); if(unfriendBtn){await unfriend(unfriendBtn.dataset.unfriend,unfriendBtn);return;}
-const msg=e.target.closest('[data-message]'); if(msg){location.href='messages.html?user='+encodeURIComponent(msg.dataset.message);return;}
+const messageBtn=e.target.closest('[data-message]'); if(messageBtn){const id=String(messageBtn.dataset.message||'').trim();if(!validUuid(id)){notice('This friend does not have a valid profile ID. Refresh the page and try again.',true);return;}location.href='message.html?to='+encodeURIComponent(id);return;}
+if(e.target.closest('[data-open-pending]')){setTab('pending');return;}
+
 if(e.target.closest('#requestsButton')) setTab('pending');
 if(e.target.closest('#searchButton')) $('searchInput').focus();
 });
@@ -1284,17 +1301,21 @@ window.addEventListener('app-presence-sync', () => {
 // friendships is intentionally not subscribed here: it is not part of the live Realtime publication.
 // The page refreshes after supported friend actions and on auth changes.
 state.friendsRealtime = null;
-db.auth.onAuthStateChange((_event,session)=>{
+db.auth.onAuthStateChange((event,session)=>{
+  if(event==='INITIAL_SESSION') return;
   state.user=session?.user||null;
-  if(state.user) {
-    refresh().catch(async err=>{
-      if(window.__isJwtFutureError?.(err)) {
-        await window.__clearBadSupabaseSession(db,err);
-        return;
-      }
-      notice(err.message||'Could not load friends.',true);
-    });
+  if(!state.user) {
+    location.replace('index.html?reauth=1');
+    return;
   }
+  window.setTimeout(()=>refresh().catch(async err=>{
+    if(window.__isJwtFutureError?.(err)) {
+      await window.__clearBadSupabaseSession(db,err);
+      return;
+    }
+    console.error('[SPIKE Friends] Refresh after auth change failed:',err);
+    notice(err.message||'Could not refresh friends. Please try again.',true);
+  }),0);
 });
 (async()=>{try{const user=await requireUser();if(!user){notice('Please sign in to manage friends.',true);return;}await refresh();}catch(err){
   console.error(err);

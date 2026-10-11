@@ -11,13 +11,10 @@ main.spike-x-home:not(.spike-discover-mode) #signalTopPicks{display:none!importa
 #feed-status-placeholder,
 main.spike-x-home .feed-status{display:none!important}
 
-/* Home rhythm: Stories → Live (when live exists) → For You/Following → composer → feed. */
+/* Home rhythm: Live (when available) → For You/Following → feed. */
 main.spike-x-home #filters{order:initial;margin:4px 0 10px!important}
 main.spike-x-home #filters .filter{min-height:42px;font-size:12px;font-weight:850}
 
-/* Stories are a compact rail, not a giant empty card. */
-main.spike-x-home #storiesRow:empty{display:none!important}
-main.spike-x-home #storiesRow{min-height:0!important;padding:8px!important;margin:0 0 8px!important;border-radius:16px!important}
 
 /* Live is already hidden by its runtime when empty; keep populated live concise. */
 main.spike-x-home #spikeFeedLive{margin:0 0 10px!important;padding:10px!important;border-radius:16px!important}
@@ -26,28 +23,14 @@ main.spike-x-home #spikeFeedLive .spike-feed-live-head p{display:none!important}
 main.spike-x-home #spikeFeedLive .spike-feed-live-start{padding:7px 9px!important}
 main.spike-x-home #spikeFeedLive .spike-feed-live-all{padding:7px 9px!important}
 
-/* Composer is a compact entry point until the user intentionally opens it. */
-main.spike-x-home #spikeComposer{margin:0 0 12px!important;border-radius:18px!important}
-main.spike-x-home #spikeComposer.spike-collapsed .signal-composer-top{display:none!important}
-main.spike-x-home #spikeComposer.spike-collapsed .signal-writing-footer{display:none!important}
-main.spike-x-home #spikeComposer.spike-collapsed .signal-writing-surface{border:0!important;background:transparent!important}
-main.spike-x-home #spikeComposer.spike-collapsed #signalText{min-height:46px!important;height:46px!important;border-radius:14px!important;padding:13px 15px!important;font-size:14px!important}
-main.spike-x-home #spikeComposer.spike-collapsed:before{content:'Create a Signal';display:block;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 6px 2px}
-main.spike-x-home #spikeComposer.spike-expanded #signalText{min-height:110px!important}
-
-/* Advanced composer controls are available only after More is opened. */
-main.spike-x-home #spikeComposer:not(.spike-x-advanced-open) .schedule,
-main.spike-x-home #spikeComposer:not(.spike-x-advanced-open) .ai-compose-panel{display:none!important}
-
 /* Discover becomes its own full-width mode. */
 main.spike-x-home.spike-discover-mode{padding-top:10px!important}
 main.spike-x-home.spike-discover-mode #feedV2Hub{display:block!important;margin-bottom:12px!important}
-main.spike-x-home.spike-discover-mode #filters,
-main.spike-x-home.spike-discover-mode #spikeComposer,
 main.spike-x-home.spike-discover-mode #posts,
-main.spike-x-home.spike-discover-mode #signalTopPicks{display:none!important}
+main.spike-x-home.spike-discover-mode #infiniteScrollSentinel,
+main.spike-x-home.spike-discover-mode #filters,
+main.spike-x-home.spike-discover-mode .feed-status{display:none!important}
 main.spike-x-home.spike-discover-mode #spikeFeedLive,
-main.spike-x-home.spike-discover-mode #storiesRow{display:none!important}
 main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-nav{display:flex!important}
 main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-panel{padding:12px 2px 4px!important}
 
@@ -69,7 +52,6 @@ main.spike-x-home.spike-discover-mode #feedV2Hub .feed-v2-panel{padding:12px 2px
 #feedV2Nav [data-native-open]{display:none!important}
 
 @media(max-width:600px){
-  main.spike-x-home #spikeComposer.spike-collapsed{padding:10px!important}
   main.spike-x-home #filters{padding:3px!important}
   #feedV2Hub #signalTopPicks .signal-pick{flex-basis:170px!important}
 }

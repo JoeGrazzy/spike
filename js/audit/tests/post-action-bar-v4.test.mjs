@@ -9,7 +9,7 @@ const css=fs.readFileSync(path.join(root,'css/spike-post-actions-v4.css'),'utf8'
 const render=runtime.slice(runtime.indexOf('function signalHTML(p)'),runtime.indexOf('function renderSignalsFromRanked'));
 test('feed loads cache-busted post action runtime and final stylesheet',()=>{
   assert.match(feed,/feed-runtime-04-2\.js\?v=reaction-v5/);
-  assert.match(feed,/feed-runtime-04-3\.js\?v=post-actions-v5/);
+  assert.match(feed,/feed-runtime-04-3\.js\?v=menu-action-dismiss-v10\.7/);
   assert.match(feed,/spike-post-actions-v4\.css\?v=reaction-v5/);
 });
 test('renderer has exactly four dedicated actions',()=>{

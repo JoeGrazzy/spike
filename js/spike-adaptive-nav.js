@@ -16,8 +16,23 @@
     let lastContext=false;
 
     function apply(){
-      const menuOpen=!!window.__SPIKE_FEED_MENU_OPEN__;
+      const menuOpen=!!window.__SPIKE_FEED_MENU_OPEN__ || !!document.querySelector('#menuOverlay.open, #menuOverlay[aria-hidden="false"]');
       const hidden=isMobile() && (menuOpen || state.scrollHidden || state.contextHidden || state.keyboard);
+      // The Feed menu has absolute priority over adaptive navigation. A CSS
+      // visibility-only hide loses against legacy !important display rules,
+      // so apply the hidden state directly to the dock as well.
+      const menuOwnsNav=menuOpen;
+      if(menuOwnsNav){
+        nav.style.setProperty('display','none','important');
+        nav.style.setProperty('visibility','hidden','important');
+        nav.style.setProperty('opacity','0','important');
+        nav.style.setProperty('pointer-events','none','important');
+      } else if(!hidden){
+        nav.style.removeProperty('display');
+        nav.style.removeProperty('visibility');
+        nav.style.removeProperty('opacity');
+        nav.style.removeProperty('pointer-events');
+      }
       nav.dataset.spikeAdaptive='1';
       nav.dataset.spikeNavState=hidden?'hidden':'visible';
       nav.setAttribute('aria-hidden',hidden?'true':'false');
@@ -42,12 +57,11 @@
         !!document.querySelector('.spike-premium-overlay.open, .spike-premium-overlay[aria-hidden="false"]') ||
         !!document.querySelector('#spikePassOverlay.open, #spikePassOverlay[aria-hidden="false"]') ||
         !!document.querySelector('#logoutConfirmOverlay.show, #logoutConfirmOverlay[aria-hidden="false"]') ||
-        !!document.querySelector('#contentCenterOverlay.open, #contentCenterOverlay[aria-hidden="false"]') ||
         !!document.querySelector('#spikeMediaLongpress.open, #spikeMediaLongpress[aria-hidden="false"]') ||
         !!document.querySelector('#spikeProfileSheet.show, #spikeProfileSheet[aria-hidden="false"]') ||
         !!document.querySelector('#feedImageViewer.open, #feedImageViewer[aria-hidden="false"]') ||
         !!document.querySelector('#spikeAiSearchOverlay.open, #spikeAiSearchOverlay[aria-hidden="false"]') ||
-        !!document.querySelector('#storyViewer.open, #storyViewer[aria-hidden="false"]');
+        false;
     }
 
     function contextCheck(){

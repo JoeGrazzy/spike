@@ -98,8 +98,17 @@
         root.hidden = true;
         return;
       }
+      // Use the signed-in user's access token when available. A publishable key
+      // is an API identifier, not a user identity and may not satisfy RLS.
+      const client = window.__SPIKE_SUPABASE__ || window.supabaseClient || window.sb;
+      let bearer = SUPABASE_KEY;
+      if (client?.auth?.getSession) {
+        const sessionResult = await client.auth.getSession();
+        const accessToken = sessionResult?.data?.session?.access_token;
+        if (accessToken) bearer = accessToken;
+      }
       const r = await fetch(`${SUPABASE_URL}/rest/v1/app_maintenance?select=enabled,title,message,starts_at,ends_at&id=eq.true&limit=1`, {
-        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${bearer}` },
         cache: 'no-store'
       });
       if (!r.ok) throw new Error(`maintenance ${r.status}`);

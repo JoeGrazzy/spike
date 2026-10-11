@@ -76,6 +76,92 @@ function markdownToHTML(text) {
   return x;
 }
 
+function cloudinaryFeedImageUrl(url){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{
+    const u=new URL(raw); if(!u.hostname.includes('cloudinary.com'))return raw;
+    const marker='/upload/'; const i=u.pathname.indexOf(marker); if(i<0)return raw;
+    const tail=u.pathname.slice(i+marker.length);
+    // Preserve animated GIF delivery. Do not let f_auto silently change an
+    // animated GIF into a still/unsupported representation for older clients.
+    const gif=isGifUrl(raw);
+    const transform=gif ? 'f_gif,fl_animated,q_auto:eco,w_1080,c_limit' : 'f_auto,q_auto:eco,w_1080,c_limit,dpr_auto';
+    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
+    return u.toString();
+  }catch(_){return raw;}
+}
+
+function cloudinaryVideoPosterUrl(url){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{const u=new URL(raw);if(!u.hostname.includes('cloudinary.com'))return '';const marker='/upload/';const i=u.pathname.indexOf(marker);if(i<0)return '';const tail=cloudinaryVideoAssetTail(u.pathname,i);if(!tail)return '';u.pathname=u.pathname.slice(0,i+marker.length)+'so_0,f_jpg,q_auto:eco,w_1080,c_limit/'+tail;u.pathname=u.pathname.replace(/\.(mp4|webm|mov|m4v|avi|mpeg|mpg)$/i,'.jpg');return u.toString();}catch(_){return '';}
+}
+
+// Browser-safe Cloudinary video delivery. Rebuild from the clean asset tail
+// instead of stacking transformations on an already-derived URL.
+function cloudinaryVideoAssetTail(pathname, markerIndex){
+  const after=pathname.slice(markerIndex + '/upload/'.length);
+  const parts=after.split('/').filter(Boolean);
+  const versionIndex=parts.findIndex(x=>/^v\d+$/.test(x));
+  if(versionIndex>=0) return parts.slice(versionIndex).join('/');
+  const transformPrefix=/^(?:f|vc|ac|q|w|h|c|g|l|e|so|du|br|fps|sp|d|r|ar|dpr|fl|x|y|z)_/i;
+  let i=0;
+  while(i<parts.length && transformPrefix.test(parts[i])) i++;
+  return parts.slice(i).join('/');
+}
+
+function cloudinaryVideoTransformUrl(url, transform){
+  const raw=safeHttpUrl(url); if(!raw)return '';
+  try{
+    const u=new URL(raw);
+    if(!u.hostname.includes('cloudinary.com')) return raw;
+    const marker='/upload/'; const i=u.pathname.indexOf(marker);
+    if(i<0) return raw;
+    const tail=cloudinaryVideoAssetTail(u.pathname,i);
+    if(!tail) return raw;
+    u.pathname=u.pathname.slice(0,i+marker.length)+transform+'/'+tail;
+    u.pathname=u.pathname.replace(/\.(mov|m4v|webm|avi|mpeg|mpg|gif)$/i,'.mp4');
+    return u.toString();
+  }catch(_){ return raw; }
+}
+
+function cloudinaryFeedVideoCandidates(url){
+  const raw=safeHttpUrl(url); if(!raw)return [];
+  if(!/cloudinary\.com/i.test(raw)) return [raw];
+  const transforms=[
+    // Android-safe H.264 + AAC first. Keep the baseline profile as a later
+    // fallback instead of making it the primary delivery path.
+    'f_mp4,vc_h264,ac_aac,q_auto:good',
+    'f_mp4,vc_auto,ac_aac,q_auto:good',
+    SPIKE_VIDEO_FALLBACK_TRANSFORM,
+    SPIKE_VIDEO_DELIVERY_TRANSFORM,
+    'f_mp4,q_auto:good'
+  ];
+  const out=[];
+  for(const t of transforms){
+    const candidate=cloudinaryVideoTransformUrl(raw,t);
+    if(candidate && !out.includes(candidate)) out.push(candidate);
+  }
+  if(!out.includes(raw)) out.push(raw);
+  return out;
+}
+
+function cloudinaryFeedVideoUrl(url){
+  return cloudinaryFeedVideoCandidates(url)[0] || '';
+}
+
+
+
+function isGifUrl(url){ return /\.gif(?:[?#].*)?$/i.test(String(url||'')); }
+function mediaKindOf(item){
+  const type=String(item?.type||item?.mediaType||'').toLowerCase();
+  const urls=[item?.url,item?.mediaUrl,item?.originalUrl,item?.playbackUrl].map(x=>String(x||'')).filter(Boolean);
+  const mime=String(item?.mimeType||item?.mime||'').toLowerCase();
+  // GIFs are animated images, never HTML5 video sources. Check every stored
+  // URL (including original/playback URLs) before trusting a legacy mediaType.
+  if(type==='gif' || /image\/gif/i.test(mime) || urls.some(isGifUrl)) return 'gif';
+  return type==='video' ? 'video' : 'image';
+}
+
 function signalVideoPlaybackUrl(mediaItem){
   const raw=safeHttpUrl(mediaItem?.playbackUrl||mediaItem?.url||'');
   if(!raw)return '';
@@ -289,40 +375,6 @@ async function loadAnnouncement() {
 }
 
 // ─── POST CRUD ─────────────────────────────────────────
-async function writeSignal({ content = '', mediaUrl = null, mediaType = null, mediaWatermarked = false, mediaSpid = null, mediaOriginalUrl = null, mediaNormalized = false, mediaItems = [], mediaLayout = 'auto', linkUrl = null, scheduledAt = null } = {}) {
-  if (!state.user) return;
-  const text = String(content || '').trim();
-  if (!text && !mediaUrl && !mediaItems.length && !linkUrl) { toast('Write something first'); return null; }
-  // UX-only preflight. NEVER stop the write here: the database trigger is authoritative and
-  // must be allowed to create the policy case + notification before it marks the Signal removed.
-  let preflightDecision = 'allow';
-  if(text){
-    try{
-      const moderation=await db.rpc('moderate_spike_content',{p_content:text,p_content_type:'post'});
-      if(!moderation.error) preflightDecision=String(moderation.data?.decision||'allow');
-    }catch(e){ console.warn('SPIKE policy preflight unavailable; database enforcement remains authoritative.',e); }
-  }
-  const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-  const data = {
-    authorUid: state.user.id, authorName: nameOf(state.profile), authorAvatar: avatarOf(state.profile),
-    content: text, mediaUrl, mediaType, mediaWatermarked: !!mediaWatermarked, mediaSpid: mediaSpid || null, mediaOriginalUrl: mediaOriginalUrl || null, mediaNormalized: !!mediaNormalized, mediaItems: Array.isArray(mediaItems) ? mediaItems : [], mediaLayout: mediaLayout || 'auto', linkUrl, scheduledAt: scheduledAt || null,
-    comments: [], reactions: { like: 0, like_users: [] }, views: 0, createdAt: now(), updatedAt: null, deleted: false
-  };
-  await putDoc(`posts/${id}`, data, 'posts');
-  // Read back the row after the server trigger has run. This is important: the trigger may
-  // have changed deleted/content/moderation and created the user's policy case + notification.
-  const serverData = await getDoc(`posts/${id}`).catch(() => data);
-  const serverRemoved = !!serverData?.deleted || String(serverData?.moderation?.status||'') === 'removed';
-  if(serverRemoved){
-    rankingDirty=true; rankingCache.clear();
-    toast(preflightDecision==='remove' ? 'Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.' : 'Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.','error');
-    renderSignals();
-    return id;
-  }
-  state.posts.unshift(normalizeSignalModel({ id, ...serverData })); rankingDirty=true; rankingCache.clear();
-  renderSignals();
-  return id;
-}
 
 async function updateSignal(id, patch) {
   const p = state.posts.find(x => x.id === id);
@@ -469,7 +521,7 @@ function syncCommentDom(id, post) {
   const section = article.querySelector(`#comments-${CSS.escape(String(id))}`);
   if (!section) return;
 
-  // Only the list is patched. The live composer is never replaced.
+  // Only the list is patched; Feed content and post interactions remain stable.
   const list = section.querySelector('.comment-list');
   if (list) list.innerHTML = renderComments(comments) || '<div class="meta">No comments yet.</div>';
 
@@ -916,452 +968,7 @@ async function reportSignal(id, reason) {
 function openOverlay(id) { $(id)?.classList.add('open'); }
 function closeOverlay(id) { $(id)?.classList.remove('open'); }
 
-// ─── PREMIUM MEDIA STUDIO ───────────────────────────────
-const MAX_POST_MEDIA = 10;
-function mediaItemId(){ return (globalThis.crypto?.randomUUID) ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`; }
-function formatMediaSize(bytes){ if(!Number.isFinite(bytes)) return ''; const u=['B','KB','MB','GB']; let n=bytes,i=0; while(n>=1024&&i<u.length-1){n/=1024;i++;} return `${n<10&&i?n.toFixed(1):Math.round(n)} ${u[i]}`; }
-function mediaTypeOf(file){ return String(file?.type||'').startsWith('video/') ? 'video' : 'image'; }
-function revokeMediaPreview(item){ try{ if(item?.previewUrl?.startsWith('blob:')) URL.revokeObjectURL(item.previewUrl); }catch(_){} }
-function mediaItemsFromState(){ return Array.isArray(state.mediaItems) ? state.mediaItems : []; }
-function syncLegacyMediaState(){ const items=mediaItemsFromState(); state.media=items[0]?.file||null; state.mediaType=items[0]?.type||null; }
-function mediaCollectionStats(items){
-  const photos=items.filter(x=>x.type==='image').length, videos=items.filter(x=>x.type==='video').length;
-  return `${photos?`${photos} photo${photos===1?'':'s'}`:''}${photos&&videos?' · ':''}${videos?`${videos} video${videos===1?'':'s'}`:''}` || 'Selected media';
-}
-function mediaFilterCss(v){return ({0:'none',1:'contrast(1.12) saturate(1.18)',2:'grayscale(.9) contrast(1.08)',3:'sepia(.55) saturate(1.2)',4:'brightness(1.12) saturate(.78)'})[Number(v)]||'none';}
-function applyMediaEdit(action){const items=mediaItemsFromState(),item=items[state.activeMediaIndex];if(!item)return;if(action==='rotate'&&item.type==='image')item.rotation=((item.rotation||0)+90)%360;if(action==='filter'&&item.type==='image')item.filter=((item.filter||0)+1)%5;if(action==='mute'&&item.type==='video')item.muted=!item.muted;if(action==='crop'&&item.type==='image')item.crop=item.crop==='square'?'portrait':item.crop==='portrait'?'landscape':'square';renderMediaStudio();}
-
-function renderMediaStudio(){
-  const items=mediaItemsFromState(), studio=$('mediaPreview'), stage=$('mediaStage'), strip=$('mediaFilmstrip');
-  if(!studio||!stage||!strip) return;
-  if(!items.length){ studio.hidden=true; studio.classList.remove('is-uploading'); stage.innerHTML=''; strip.innerHTML=''; if($('mediaCount'))$('mediaCount').textContent='0 items'; return; }
-  studio.hidden=false;
-  if(!Number.isInteger(state.activeMediaIndex)||state.activeMediaIndex<0||state.activeMediaIndex>=items.length) state.activeMediaIndex=0;
-  const active=items[state.activeMediaIndex], total=items.length;
-  const busy=items.some(x=>x.status==='uploading'); studio.classList.toggle('is-uploading',busy);
-  if($('mediaCount'))$('mediaCount').textContent=`${total} ${total===1?'item':'items'}`;
-  if($('mediaReady'))$('mediaReady').textContent=items.some(x=>x.status==='error')?'Needs attention':busy?'Uploading…':'Ready to post';
-  const details=[mediaCollectionStats(items),active.file?.name,formatMediaSize(active.file?.size)].filter(Boolean).join(' · ');
-  if($('mediaMeta'))$('mediaMeta').textContent=details;
-  const mediaSrc=esc(active.previewUrl);
-  const mediaStyle=`transform:rotate(${Number(active.rotation||0)}deg);filter:${mediaFilterCss(active.filter||0)};${active.crop==='square'?'aspect-ratio:1/1;':''}${active.crop==='portrait'?'aspect-ratio:4/5;':''}${active.crop==='landscape'?'aspect-ratio:16/9;':''}`;
-  stage.innerHTML=`<span class="media-index">${state.activeMediaIndex+1} / ${total}</span><span class="media-type-badge">${active.type==='video'?'VIDEO':'PHOTO'}</span>${active.type==='video'?`<video src="${mediaSrc}" controls playsinline preload="metadata" ${active.muted?'muted':''} style="${mediaStyle}"></video>`:`<img src="${mediaSrc}" alt="Selected photo" decoding="async" style="${mediaStyle}" loading="lazy">`}`;
-  if($('mediaEditbar'))$('mediaEditbar').hidden=false;
-  if($('mediaLayoutSelect'))$('mediaLayoutSelect').value=state.mediaLayout||'auto';
-  strip.innerHTML=items.map((item,i)=>`<div class="media-thumb-wrap" draggable="${busy?'false':'true'}" data-media-wrap="${i}"><button type="button" class="media-thumb ${i===state.activeMediaIndex?'active':''}" data-media-index="${i}" aria-label="${item.type==='video'?'Video':'Photo'} ${i+1}: ${esc(item.file?.name||'media')}" ${busy?'disabled':''}>${item.type==='video'?`<video src="${esc(item.previewUrl)}" muted preload="metadata"></video><span class="thumb-video">▶</span>`:`<img src="${esc(item.previewUrl)}" alt="" loading="lazy" decoding="async">`}<span class="thumb-number">${i+1}</span>${item.status==='uploading'?`<span class="thumb-status">${Math.round((item.progress||0)*100)}%</span>`:''}${item.status==='complete'?'<span class="thumb-status">✓</span>':''}</button><button type="button" class="thumb-remove" data-media-remove="${i}" aria-label="Remove media ${i+1}" ${busy?'disabled':''}>×</button></div>`).join('')+`<button type="button" class="media-thumb media-thumb-add" id="mediaStripAdd" ${busy?'disabled':''} aria-label="Add more media"><span>＋</span><small>Add</small></button>`;
-  strip.querySelectorAll('[data-media-index]').forEach(btn=>btn.onclick=()=>{state.activeMediaIndex=Number(btn.dataset.mediaIndex);renderMediaStudio();});
-  strip.querySelectorAll('[data-media-remove]').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation();removeMediaItem(Number(btn.dataset.mediaRemove));});
-  $('mediaStripAdd')?.addEventListener('click',()=>openMediaPicker());
-  strip.querySelectorAll('[data-media-wrap]').forEach(w=>{
-    w.addEventListener('dragstart',e=>{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',w.dataset.mediaWrap);});
-    w.addEventListener('dragover',e=>e.preventDefault());
-    w.addEventListener('drop',e=>{e.preventDefault();const from=Number(e.dataTransfer.getData('text/plain')),to=Number(w.dataset.mediaWrap);reorderMediaItem(from,to);});
-  });
-}
-function openMediaPicker(){ $('mediaInput')?.click(); }
-function addMediaFiles(fileList){
-  const incoming=Array.from(fileList||[]).filter(f=>/^image\//.test(f.type)||/^video\//.test(f.type));
-  if(!incoming.length){toast('Please choose an image or video','warning');return;}
-  const items=mediaItemsFromState(); let added=0;
-  for(const file of incoming){
-    if(items.length>=MAX_POST_MEDIA){toast(`You can select up to ${MAX_POST_MEDIA} media items`,'warning');break;}
-    const duplicate=items.some(x=>x.file?.name===file.name&&x.file?.size===file.size&&x.file?.lastModified===file.lastModified);
-    if(duplicate){toast(`${file.name} is already selected`,'warning');continue;}
-    const type=mediaTypeOf(file);
-    items.push({id:mediaItemId(),file,type,previewUrl:URL.createObjectURL(file),status:'ready'}); added++;
-  }
-  if(added){state.mediaItems=items;state.activeMediaIndex=items.length-1;syncLegacyMediaState();renderMediaStudio();}
-}
-function reorderMediaItem(from,to){const items=mediaItemsFromState();if(from===to||!items[from]||!items[to])return;const [m]=items.splice(from,1);items.splice(to,0,m);state.mediaItems=items;state.activeMediaIndex=to;syncLegacyMediaState();renderMediaStudio();}
-function removeMediaItem(index){const items=mediaItemsFromState();if(!items[index])return;revokeMediaPreview(items[index]);items.splice(index,1);state.activeMediaIndex=Math.min(state.activeMediaIndex||0,Math.max(0,items.length-1));syncLegacyMediaState();renderMediaStudio();}
-function clearMedia(){mediaItemsFromState().forEach(revokeMediaPreview);state.mediaItems=[];state.activeMediaIndex=0;state.media=null;state.mediaType=null;state.mediaLayout='auto';if($('mediaEditbar'))$('mediaEditbar').hidden=true;renderMediaStudio();['imageInput','videoInput','mediaInput'].forEach(id=>{if($(id))$(id).value='';});}
-function setMedia(file,type){addMediaFiles([file]);}
-async function prepareMediaForUpload(item){
-  if(!item?.file||item.type!=='image'||(!(item.rotation||0)&&!(item.filter||0)&&!item.crop)) return item.file;
-  const img=new Image(); img.src=item.previewUrl; await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=reject});
-  const angle=((item.rotation||0)%360+360)%360, swap=angle===90||angle===270; const baseW=img.naturalWidth||img.width,baseH=img.naturalHeight||img.height;
-  let w=baseW,h=baseH;if(item.crop==='square'){const side=Math.min(w,h);w=side;h=side}else if(item.crop==='portrait'){const target=w*5/4;if(target<h)h=target;else w=h*4/5}else if(item.crop==='landscape'){const target=w*9/16;if(target<h)h=target;else w=h*16/9}
-  const c=document.createElement('canvas');c.width=swap?h:w;c.height=swap?w:h;const ctx=c.getContext('2d');ctx.translate(c.width/2,c.height/2);ctx.rotate(angle*Math.PI/180);ctx.filter=mediaFilterCss(item.filter||0);ctx.drawImage(img,-w/2,-h/2,w,h);
-  return await new Promise(resolve=>c.toBlob(b=>resolve(b||item.file),item.file.type||'image/jpeg',.94));
-}
-async function uploadMedia(file,type,options={}){return await uploadToCloudinary(file,type==='video'?'spike/videos':'spike/images',{watermark:type==='video',...options});}
-function validateMediaCollection(items){
-  if(items.length>MAX_POST_MEDIA)return `You can select up to ${MAX_POST_MEDIA} media items`;
-  for(const item of items){if(!item.file)return 'One selected media item is unavailable.';if(!/^image\//.test(item.file.type)&&!/^video\//.test(item.file.type))return `Unsupported media: ${item.file.name}`;}
-  return null;
-}
-
-const CONTENT_DRAFTS_KEY='spike-content-drafts-v3';
-const CONTENT_DRAFT_DB='spike-composer-drafts-v1';
-const CONTENT_DRAFT_STORE='drafts';
-let draftSaveTimer=null;
-function draftDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(CONTENT_DRAFT_DB,1);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(CONTENT_DRAFT_STORE))db.createObjectStore(CONTENT_DRAFT_STORE,{keyPath:'id'});};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('Draft storage unavailable'));});}
-async function putDraftRecord(record){const db=await draftDb();return new Promise((resolve,reject)=>{const tx=db.transaction(CONTENT_DRAFT_STORE,'readwrite');tx.objectStore(CONTENT_DRAFT_STORE).put(record);tx.oncomplete=()=>{db.close();resolve(record)};tx.onerror=()=>{db.close();reject(tx.error||new Error('Draft save failed'))};});}
-async function getDraftRecords(){const db=await draftDb();return new Promise((resolve,reject)=>{const tx=db.transaction(CONTENT_DRAFT_STORE,'readonly');const req=tx.objectStore(CONTENT_DRAFT_STORE).getAll();req.onsuccess=()=>{db.close();resolve((req.result||[]).sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt))));};req.onerror=()=>{db.close();reject(req.error||new Error('Draft read failed'))};});}
-async function deleteDraftRecord(id){const db=await draftDb();return new Promise((resolve,reject)=>{const tx=db.transaction(CONTENT_DRAFT_STORE,'readwrite');tx.objectStore(CONTENT_DRAFT_STORE).delete(id);tx.oncomplete=()=>{db.close();resolve()};tx.onerror=()=>{db.close();reject(tx.error||new Error('Draft delete failed'))};});}
-function draftSnapshot(){return {text:$('signalText')?.value.trim()||'',link:$('linkInput')?.value.trim()||'',schedule:$('scheduleTime')?.value||'',layout:state.mediaLayout||'auto',media:mediaItemsFromState().map(x=>({id:x.id,name:x.file?.name||'media',type:x.type,size:x.file?.size||0,lastModified:x.file?.lastModified||0,file:x.file||null}))};}
-async function saveCurrentDraft({silent=false}={}){
-  const snap=draftSnapshot();
-  if(!snap.text&&!snap.media.length&&!snap.link){if(!silent)toast('Nothing to save yet','warning');return null;}
-  const id=state.activeDraftId||mediaItemId(); state.activeDraftId=id;
-  try{await putDraftRecord({id,...snap,updatedAt:new Date().toISOString()});if(!silent)toast('Draft saved','success');return id;}
-  catch(e){console.warn('[SPIKE DRAFT]',e);if(!silent)toast('Draft storage is unavailable on this device','error');return null;}
-}
-function queueAutoDraft(){clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(()=>{saveCurrentDraft({silent:true}).catch(()=>{});},900);}
-async function loadDrafts(){try{return await getDraftRecords()}catch(e){console.warn('[SPIKE DRAFT READ]',e);return []}}
-async function restoreDraft(id){const rows=await loadDrafts(),d=rows.find(x=>String(x.id)===String(id));if(!d)return false;$('signalText').value=d.text||'';$('linkInput').value=d.link||'';$('scheduleTime').value=d.schedule||'';state.mediaLayout=d.layout||'auto';state.activeDraftId=d.id;const files=(d.media||[]).filter(x=>x.file instanceof Blob).map(x=>x.file);if(files.length){state.mediaItems=[];addMediaFiles(files);}renderMediaStudio();$('signalText').dispatchEvent(new Event('input',{bubbles:true}));toast('Draft restored','success');return true;}
-async function renderContentCenter(tab='drafts'){
-  const body=$('contentCenterBody');if(!body)return;
-  if(tab==='drafts'){
-    const d=await loadDrafts();
-    body.innerHTML=d.length?d.map(x=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(x.text||'Media draft')}</div><div class="content-item-meta">${x.media?.length?x.media.length+' media · ':''}${x.schedule?'Scheduled · ':''}${new Date(x.updatedAt).toLocaleString()}</div></div><div class="content-item-actions"><button data-draft-restore="${esc(x.id)}">Restore</button><button data-draft-delete="${esc(x.id)}">Delete</button></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">No drafts yet</div><div class="content-item-meta">Drafts save text, links, schedule and selected media on this device.</div></div></div>';
-  }else if(tab==='scheduled'){
-    const rows=state.posts.filter(p=>p.scheduledAt&&new Date(p.scheduledAt)>new Date()).sort((a,b)=>new Date(a.scheduledAt)-new Date(b.scheduledAt));
-    body.innerHTML=rows.length?rows.map(p=>`<div class="content-item"><div class="content-item-main"><div class="content-item-title">${esc(p.content||'Scheduled media Signal')}</div><div class="content-item-meta">${new Date(p.scheduledAt).toLocaleString()} · ${Array.isArray(p.mediaItems)&&p.mediaItems.length?p.mediaItems.length+' media':'Text'}</div></div></div>`).join(''):'<div class="content-item"><div class="content-item-main"><div class="content-item-title">Nothing scheduled</div><div class="content-item-meta">Scheduled Signals will appear here.</div></div></div>';
-  }else{
-    const rows=state.posts.filter(p=>!p.scheduledAt||new Date(p.scheduledAt)<=new Date()).slice(0,20),views=rows.reduce((n,p)=>n+Number(p.views||0),0),likes=rows.reduce((n,p)=>n+reactionLikeCount(p),0),comments=rows.reduce((n,p)=>n+(Array.isArray(p.comments)?p.comments.length:Number(p.comments||0)),0);body.innerHTML=`<div class="analytics-grid"><div class="analytics-stat"><b>${views}</b><span>Views</span></div><div class="analytics-stat"><b>${likes}</b><span>Likes</span></div><div class="analytics-stat"><b>${comments}</b><span>Comments</span></div><div class="analytics-stat"><b>${rows.length}</b><span>Released Signals</span></div></div>`;
-  }
-}
-function openContentCenter(tab='drafts'){openOverlay('contentCenterOverlay');document.querySelectorAll('[data-center-tab]').forEach(b=>b.classList.toggle('active',b.dataset.centerTab===tab));renderContentCenter(tab);}
-function localAiAction(action){const t=$('signalText');if(!t)return;let v=t.value.trim();if(action==='polish')v=v.replace(/\s+/g,' ').replace(/(^|[.!?]\s+)([a-z])/g,(m,a,b)=>a+b.toUpperCase());if(action==='hook'&&v)v=`Here’s what you need to know: ${v}`;if(action==='shorten'&&v){const a=v.split(/\s+/);v=a.slice(0,35).join(' ')+(a.length>35?'…':'')}if(action==='hashtags'&&v){const words=v.toLowerCase().match(/\b[a-z][a-z0-9]{4,}\b/g)||[],tags=[...new Set(words)].slice(0,5).map(w=>`#${w}`);if(tags.length)v+=`\n\n${tags.join(' ')}`}t.value=v;t.dispatchEvent(new Event('input',{bubbles:true}));toast('AI suggestion applied','success')}
-
-let publishInFlight = false;
-async function releaseSignal(){
-  if(publishInFlight) return;
-  const btn=$('releaseSignalBtn'), content=$('signalText').value.trim(), link=$('linkInput').value.trim(), items=mediaItemsFromState();
-  if(link){try{const u=new URL(link);if(!/^https?:$/.test(u.protocol))throw new Error();}catch(_){toast('Enter a valid http(s) link','warning');return;}}
-  if(!content&&!items.length&&!link){ toast('Write something or add media first','warning'); return; }
-  const mediaError=validateMediaCollection(items); if(mediaError){toast(mediaError,'error');return;}
-  let scheduledAt=null;
-  if($('scheduleTime').value){const d=new Date($('scheduleTime').value);if(Number.isNaN(d.getTime())){toast('Choose a valid schedule time','warning');return;}if(d.getTime()<=Date.now()){toast('Schedule time must be in the future','warning');return;}scheduledAt=d.toISOString();}
-  publishInFlight=true; if(btn){btn.disabled=true;btn.dataset.originalText=btn.textContent;btn.textContent=items.length?'Uploading…':'Releasing…';}
-  try{
-    const uploadedItems=[];
-    for(let i=0;i<items.length;i++){
-      const item=items[i]; item.status='uploading'; renderMediaStudio();
-      try{ const uploadFile=await prepareMediaForUpload(item); const uploaded=await uploadMedia(uploadFile,item.type,{onProgress:(ratio)=>{item.progress=ratio;renderMediaStudio();}}); uploadedItems.push({id:item.id,url:uploaded?.playbackUrl||uploaded?.url||uploaded,type:item.type,name:item.file.name,size:item.file.size,originalUrl:uploaded?.originalUrl||null,playbackUrl:uploaded?.playbackUrl||uploaded?.url||null,normalized:!!uploaded?.normalized,format:uploaded?.format||null,videoCodec:uploaded?.videoCodec||null,audioCodec:uploaded?.audioCodec||null,watermarked:!!uploaded?.watermarked,spid:uploaded?.spid||null}); item.status='complete'; }
-      catch(e){item.status='error';renderMediaStudio();throw e;}
-    }
-    const first=uploadedItems[0]||null;
-    await writeSignal({content,mediaUrl:first?.url||null,mediaType:first?.type||null,mediaWatermarked:!!first?.watermarked,mediaSpid:first?.spid||null,mediaOriginalUrl:first?.originalUrl||null,mediaNormalized:!!first?.normalized,mediaItems:uploadedItems,mediaLayout:state.mediaLayout||'auto',linkUrl:link||null,scheduledAt});
-    if(state.activeDraftId){try{await deleteDraftRecord(state.activeDraftId)}catch(_){}} state.activeDraftId=null; $('signalText').value='';$('linkInput').value='';$('scheduleTime').value='';clearMedia();toast(scheduledAt?'Signal scheduled':'Signal released','success');
-  }catch(e){console.error('publish',e);toast(e?.message||'Could not release Signal','error');}
-  finally{publishInFlight=false;if(btn){btn.disabled=false;btn.textContent=btn.dataset.originalText||'Post';delete btn.dataset.originalText;}}
-}
-
-// ─── STORY PUBLISH ─────────────────────────────────────
-function setStoryPublishing(on, title = "Publishing your story…", text = "Uploading media securely.") {
-  const loader = $('storyPublishLoader');
-  if (loader) loader.hidden = !on;
-  if ($('storyLoaderTitle')) $('storyLoaderTitle').textContent = title;
-  if ($('storyLoaderText')) $('storyLoaderText').textContent = text;
-  if (on) $('storiesRow')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-function resetStoryForm() {
-  $('storyText').value = '';
-  if ($('storyMediaInput')) $('storyMediaInput').value = '';
-  if ($('storyAudioInput')) $('storyAudioInput').value = '';
-  if ($('storyMediaName')) $('storyMediaName').textContent = '';
-  if ($('storyAudioName')) $('storyAudioName').textContent = '';
-}
-async function publishStory() {
-  const text = $('storyText').value.trim(), mediaFile = $('storyMediaInput')?.files?.[0] || null, audioFile = $('storyAudioInput')?.files?.[0] || null;
-  if (!text && !mediaFile && !audioFile) { toast('Add story content'); return; }
-  closeOverlay('storyOverlay');
-  setStoryPublishing(true, "Publishing your story…");
-  try {
-    let mediaUrl = null, mediaType = null, audioUrl = null, mediaOriginalUrl = null, mediaNormalized = false, mediaWatermarked = false, mediaSpid = null;
-    if (mediaFile) {
-      mediaType = mediaFile.type.startsWith('video/') ? 'video' : 'image';
-      const uploadedMedia = await uploadToCloudinary(mediaFile, 'spike/stories', { watermark: mediaType === 'video' });
-      mediaUrl = uploadedMedia?.playbackUrl || uploadedMedia?.url || uploadedMedia;
-       mediaOriginalUrl = uploadedMedia?.originalUrl || null;
-       mediaNormalized = !!uploadedMedia?.normalized;
-       mediaWatermarked = !!uploadedMedia?.watermarked;
-       mediaSpid = uploadedMedia?.spid || null;
-    }
-    if (audioFile) { audioUrl = await uploadToCloudinary(audioFile, 'spike/story-audio'); }
-    const id = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const data = {
-      authorUid: state.user.id, authorName: nameOf(state.profile), authorAvatar: avatarOf(state.profile),
-      text, mediaUrl, mediaType, audioUrl, playbackSeconds: 50, lifetimeSeconds: 86400,
-      mediaOriginalUrl, mediaNormalized, mediaWatermarked, mediaSpid,
-      createdAt: now(), expiresAt: new Date(Date.now() + 86400000).toISOString(), deleted: false
-    };
-    await putDoc(`stories/${id}`, data, 'stories');
-    const saved = await getDoc(`stories/${id}`);
-    if (!saved) throw new Error('Story could not be verified');
-    state.stories.unshift({ id, ...saved });
-    renderStories();
-    resetStoryForm();
-    setStoryPublishing(true, "Story published ✓", "Your story is now live in Stories.");
-    setTimeout(() => setStoryPublishing(false), 700);
-    toast('Story published', 'success');
-  } catch (e) { console.error('publishStory', e); setStoryPublishing(false); openOverlay('storyOverlay'); toast(e?.message || 'Could not release Signal story'); }
-}
-
-// ─── STORY VIEWER ENGINE ──────────────────────────────
-const StoryEngine = (() => {
-  const s = { groups: [], creatorIndex: 0, index: 0, token: 0, raf: 0, timer: 0, completed: false, paused: false, busy: false, audio: null, muted: true }
-  const $e = id => document.getElementById(id);
-  function allStories(){ return (window.state?.stories || []).filter(s => s && !s.deleted && (!s.expiresAt || new Date(s.expiresAt).getTime() > Date.now())).sort((a,b) => (new Date(a.createdAt||a.created_at||0) - new Date(b.createdAt||b.created_at||0))); }
-  function creatorKey(s){ return s?.authorUid || s?.authorId || s?.userId || s?.author_id || s?.user_id || s?.uid || s?.authorName || s?.id; }
-  function isOwnStory(stOrKey){
-    const uid=String(state.user?.id||'').trim().toLowerCase();
-    if(!uid)return false;
-    if(typeof stOrKey==='string')return stOrKey.trim().toLowerCase()===uid;
-    const candidates=[stOrKey?.authorUid,stOrKey?.authorId,stOrKey?.userId,stOrKey?.author_id,stOrKey?.user_id,stOrKey?.uid];
-    return candidates.some(v=>String(v||'').trim().toLowerCase()===uid);
-  }
-  function rebuildGroups(){
-    const map = new Map();
-    for(const st of allStories()){ const k=creatorKey(st); if(!map.has(k)) map.set(k,[]); map.get(k).push(st); }
-    s.groups=[...map.entries()].map(([key,stories])=>({key,stories}));
-    return s.groups;
-  }
-  function locate(id){ const gs=rebuildGroups(); for(let gi=0;gi<gs.length;gi++){ const si=gs[gi].stories.findIndex(st=>st.id===id); if(si>=0)return {gi,si}; } return null; }
-  function mediaKind(st){ const url=String(st?.mediaUrl||'').trim(); const mt=String(st?.mediaType||'').toLowerCase(); if(mt==='gif'||isGifUrl(url)||/image\/gif/i.test(String(st?.mimeType||'')))return'image'; if(mt==='video'||/\.(mp4|webm|mov|m4v|avi|mpeg|mpg)(?:[?#].*)?$/i.test(url))return'video'; if(mt==='image'||url)return'image'; return'text'; }
-  function seconds(st){ return Math.max(2,Math.min(60,Number(st?.playbackSeconds||st?.duration||5))); }
-  function audioUrl(st){ return String(st?.audioUrl||st?.musicUrl||'').trim(); }
-  function cancelClock(){ if(s.raf)cancelAnimationFrame(s.raf); s.raf=0; clearTimeout(s.timer); s.timer=0; }
-  function stopMedia(){ const v=$e('storyViewerVideo'), img=$e('storyViewerImage'), text=$e('storyViewerText'); if(v){try{v.pause()}catch(_){} v.onloadedmetadata=null;v.onloadeddata=null;v.oncanplay=null;v.ontimeupdate=null;v.onended=null;v.onerror=null;v.removeAttribute('src');v.load();v.hidden=true;} if(img){img.onload=null;img.onerror=null;img.hidden=true;img.removeAttribute('src');} if(text)text.hidden=true; if(s.audio){try{s.audio.pause()}catch(_){} s.audio.onended=null;s.audio.onerror=null;s.audio.removeAttribute('src');s.audio.load();s.audio=null;} }
-  function setProgress(r){ const bars=$e('storyProgress')?.querySelectorAll('i>b'); if(!bars)return; bars.forEach((b,i)=>{ b.style.width=i<s.index?'100%':i===s.index?`${Math.max(0,Math.min(1,r))*100}%`:'0%'; }); }
-  function buildProgress(list){ const host=$e('storyProgress'); if(!host)return; const frag=document.createDocumentFragment(); list.forEach(()=>{const i=document.createElement('i');i.appendChild(document.createElement('b'));frag.appendChild(i)}); host.replaceChildren(frag); setProgress(0); }
-  function finish(token){ if(token!==s.token||s.completed)return; s.completed=true; cancelClock(); setProgress(1); requestAnimationFrame(()=>{ if(token===s.token)next(true); }); }
-  function timed(token,dur,ratioReader){ const started=performance.now(), total=dur*1000; const tick=()=>{ if(token!==s.token||s.completed||s.paused)return; const ratio=ratioReader?ratioReader():Math.min(1,(performance.now()-started)/total); setProgress(ratio); if(ratio>=1){finish(token);return;} s.raf=requestAnimationFrame(tick); }; s.raf=requestAnimationFrame(tick); }
-  function setAudioButton(on){ const b=$e('storyViewerMute'); if(!b)return; b.textContent=on?'🔊':'🔇'; b.setAttribute('aria-label',on?'Mute story audio':'Unmute story audio'); b.title=on?'Mute story audio':'Unmute story audio'; b.dataset.audioEnabled=on?'1':'0'; }
-  function showAudioHint(show){ const viewer=$e('storyViewer'); if(viewer) viewer.classList.toggle('audio-unavailable',!!show); }
-  function startBackgroundAudio(st,token){
-    const url=audioUrl(st); if(!url)return;
-    const a=new Audio(); a.preload='auto'; a.loop=false; a.volume=1; a.muted=!!s.muted; s.audio=a;
-    a.onended=()=>{ if(token===s.token) s.audio=null; };
-    a.onerror=()=>{ if(token===s.token) { s.audio=null; showAudioHint(false); } };
-    a.src=url; a.load();
-    if(!s.muted) a.play().catch(()=>{ if(token===s.token) showAudioHint(true); });
-  }
-  async function enableAudio(){
-    const v=$e('storyViewerVideo');
-    s.muted=false; setAudioButton(true); showAudioHint(false);
-    let ok=false;
-    if(v && !v.hidden){
-      v.muted=false;
-      try { await v.play(); ok=true; } catch(_) { v.muted=true; }
-    }
-    if(s.audio){
-      s.audio.muted=false;
-      try { await s.audio.play(); ok=true; } catch(_) {}
-    }
-    if(!ok && ((v && !v.hidden) || s.audio)) { s.muted=true; setAudioButton(false); showAudioHint(true); return false; }
-    return true;
-  }
-  function disableAudio(){ s.muted=true; setAudioButton(false); showAudioHint(false); const v=$e('storyViewerVideo'); if(v && !v.hidden) v.muted=true; if(s.audio) s.audio.muted=true; }
-  function playImage(st,token){ const img=$e('storyViewerImage'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); if(!img||!st.mediaUrl)return playText(st,token); img.hidden=false; img.decoding='async'; img.onload=()=>{ if(token!==s.token)return; shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready'); startBackgroundAudio(st,token); timed(token,seconds(st)); }; img.onerror=()=>finish(token); img.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(st.mediaUrl,'image'):st.mediaUrl; }
-  function storyVideoCandidates(st){
-    const out=[];
-    const push=u=>{u=String(u||'').trim();if(u&&!out.includes(u))out.push(u);};
-    const original=st.mediaOriginalUrl || st.mediaUrl;
-    // Prefer the persisted playback URL when it was generated by the upload
-    // pipeline. Then fall back to a known-good Cloudinary H.264/AAC delivery.
-    push(st.mediaUrl);
-    if(st.mediaSpid && typeof cloudinaryWatermarkedVideoUrl==='function'){
-      push(cloudinaryWatermarkedVideoUrl(original,st.mediaSpid));
-    }
-    if(typeof cloudinaryFeedVideoCandidates==='function'){
-      cloudinaryFeedVideoCandidates(original).forEach(push);
-    } else {
-      push(original);
-    }
-    return out;
-  }
-  function playVideo(st,token){
-    const v=$e('storyViewerVideo'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage');
-    if(!v||!st.mediaUrl)return finish(token);
-    const candidates=storyVideoCandidates(st);
-    if(!candidates.length)return finish(token);
-
-    v.hidden=false;
-    v.controls=false;
-    v.playsInline=true;
-    v.setAttribute('playsinline','');
-    v.setAttribute('webkit-playsinline','');
-    v.autoplay=true;
-    v.preload='auto';
-    v.muted=!!s.muted;
-    setAudioButton(false);
-    showAudioHint(false);
-
-    let sourceIndex=0, begun=false;
-    const applySource=()=>{
-      if(token!==s.token)return;
-      begun=false;
-      v.pause();
-      v.removeAttribute('src');
-      v.load();
-      v.src=candidates[sourceIndex];
-      v.load();
-    };
-    const markReadyAndPlay=()=>{
-      if(token!==s.token||begun)return;
-      begun=true;
-      shell?.classList.remove('story-loading');
-      stage?.classList.add('story-media-ready');
-      v.muted=!!s.muted;
-      v.currentTime=0;
-      const promise=v.play();
-      if(promise && typeof promise.catch==='function'){
-        promise.catch(()=>{
-          if(token!==s.token)return;
-          if(!s.muted){
-            s.muted=true;
-            v.muted=true;
-            setAudioButton(false);
-            showAudioHint(true);
-            v.play().catch(()=>{});
-          }
-        });
-      }
-      timed(token,seconds(st),()=>{
-        if(Number.isFinite(v.duration)&&v.duration>0)return v.currentTime/v.duration;
-        return Math.min(1,(performance.now()-s.videoStarted)/(seconds(st)*1000));
-      });
-    };
-    const maybePlay=()=>{
-      if(token!==s.token)return;
-      if(v.readyState>=2)markReadyAndPlay();
-    };
-
-    s.videoStarted=performance.now();
-    v.onloadedmetadata=maybePlay;
-    v.onloadeddata=maybePlay;
-    v.oncanplay=maybePlay;
-    v.onplaying=()=>{
-      if(token!==s.token)return;
-      shell?.classList.remove('story-loading');
-      stage?.classList.add('story-media-ready');
-    };
-    v.ontimeupdate=()=>{
-      if(token!==s.token||s.completed)return;
-      if(Number.isFinite(v.duration)&&v.duration>0){
-        const r=v.currentTime/v.duration;
-        setProgress(r);
-        if(r>=.999)finish(token);
-      }
-    };
-    v.onended=()=>finish(token);
-    v.onerror=()=>{
-      if(token!==s.token)return;
-      if(sourceIndex<candidates.length-1){
-        sourceIndex++;
-        applySource();
-        return;
-      }
-      finish(token);
-    };
-    applySource();
-  }
-  function playText(st,token){ const text=$e('storyViewerText'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); if(!text)return finish(token); text.hidden=false; text.textContent=st.text||'Story'; shell?.classList.remove('story-loading'); stage?.classList.add('story-media-ready'); startBackgroundAudio(st,token); timed(token,seconds(st)); }
-  function render(direction=1){ cancelClock();stopMedia(); const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index]; if(!st)return close(); const token=++s.token; s.completed=false;s.paused=false;s.busy=false; setAudioButton(!s.muted); showAudioHint(false); const viewer=$e('storyViewer'), shell=document.querySelector('.story-viewer-shell'), stage=$e('storyStage'); const avatar=$e('storyViewerAvatar'), author=$e('storyViewerAuthor'), time=$e('storyViewerTime'); const cap=$e('storyViewerCaption'), meta=$e('storyViewerMeta');
-    const wm=$e('storyViewerWatermark'), wmId=$e('storyViewerWatermarkId');
-    const storyAuthor = state.users.get(st.authorUid) || st;
-    const storySpId = spIdOf(st) || spIdOf(storyAuthor);
-    const storyIsVideo = mediaKind(st) === 'video' && !!storySpId;
-    const storyNeedsOverlay = storyIsVideo && st.mediaWatermarked !== true;
-    if (wm) wm.classList.toggle('show', storyNeedsOverlay);
-    if (wmId) wmId.textContent = storyIsVideo ? `• ${storySpId}` : '';
- viewer?.classList.remove('story-transition-next','story-transition-prev'); void viewer?.offsetWidth; viewer?.classList.add(direction>0?'story-transition-next':'story-transition-prev'); shell?.classList.add('story-loading'); stage?.classList.remove('story-media-ready'); if(avatar){ avatar.style.backgroundImage=''; avatar.innerHTML=identityAvatar(st,'spike-avatar',nameOf(st)||'Story'); } if(author)author.textContent=nameOf(st)||'Story'; if(time)time.textContent=typeof SPIKETime?.relativeTime==='function'?SPIKETime.relativeTime(st.createdAt||st.created_at):'now'; if(cap)cap.textContent=st.text||''; if(meta)meta.textContent=`${nameOf(st)} · ${s.index+1}/${group.stories.length}`; buildProgress(group.stories); markStoryViewed(st.id).catch(()=>{}); const k=mediaKind(st); const muteBtn=$e('storyViewerMute'); const hasAudio = k==='video' || !!audioUrl(st); const dlBtn=$e('storyViewerDownload'); const delBtn=$e('storyViewerDelete'); const canManageStory=isOwnStory(st); if(dlBtn){ dlBtn.hidden = !canManageStory || !['video','image'].includes(k); dlBtn.setAttribute('aria-label', k==='video'?'Download story video':'Download story image'); dlBtn.title = k==='video'?'Download story video':'Download story image'; } if(delBtn) delBtn.hidden = !canManageStory; if(muteBtn){ muteBtn.hidden=!hasAudio; if(hasAudio)setAudioButton(!s.muted); } if(k==='video')playVideo(st,token); else if(k==='image')playImage(st,token); else playText(st,token); const ns=group.stories[s.index+1]||gs[s.creatorIndex+1]?.stories?.[0]; if(ns?.mediaUrl){ if(mediaKind(ns)==='video'){const p=document.createElement('video');p.preload='metadata';p.src=ns.mediaUrl;} else{const p=new Image();p.decoding='async';p.src=typeof storyFullMediaUrl==='function'?storyFullMediaUrl(ns.mediaUrl,'image'):ns.mediaUrl;} } }
-  function next(auto=false){ if(s.busy)return false; const gs=rebuildGroups(), g=gs[s.creatorIndex]; if(!g)return false; if(s.index<g.stories.length-1){s.busy=true;s.index++;render(1);return true;} if(s.creatorIndex<gs.length-1){s.busy=true;s.creatorIndex++;s.index=0;render(1);return true;} close();return false; }
-  function previous(){ if(s.busy)return false; const gs=rebuildGroups(); if(s.index>0){s.busy=true;s.index--;render(-1);return true;} if(s.creatorIndex>0){s.busy=true;s.creatorIndex--;s.index=gs[s.creatorIndex].stories.length-1;render(-1);return true;} return false; }
-  function open(id){ const loc=locate(id);if(!loc)return; cancelClock();stopMedia();s.token++; s.creatorIndex=loc.gi; s.index=0; s.busy=false; s.muted=true; setAudioButton(false); showAudioHint(false); document.body.classList.add('story-viewer-open'); const viewer=$e('storyViewer'); viewer?.classList.add('open'); viewer?.setAttribute('aria-hidden','false'); render(1); }
-  function close(){ cancelClock();s.token++;stopMedia();s.busy=false;s.muted=true;showAudioHint(false);document.body.classList.remove('story-viewer-open'); const viewer=$e('storyViewer'); viewer?.classList.remove('open','story-transition-next','story-transition-prev','audio-unavailable'); viewer?.setAttribute('aria-hidden','true'); }
-  function pause(){ s.paused=true; try{$e('storyViewerVideo')?.pause()}catch(_){} try{s.audio?.pause()}catch(_){} }
-  function resume(){ s.paused=false; try{$e('storyViewerVideo')?.play().catch(()=>{})}catch(_){} try{s.audio?.play().catch(()=>{})}catch(_){} }
-  function bind(){
-    const stage=$e('storyStage'); if(!stage||stage.dataset.storyEngine==='v4')return; stage.dataset.storyEngine='v4';
-    $e('storyViewerDownload')?.addEventListener('click',async e=>{
-      e.preventDefault(); e.stopPropagation();
-      const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index];
-      const kind=st ? mediaKind(st) : 'text';
-      if (!isOwnStory(st)) { toast('You can only download your own story.', 'error'); return; }
-      if (!st?.mediaUrl || !['video','image'].includes(kind)) { toast('This story has no downloadable media.', 'warning'); return; }
-      const spid=spIdOf(st)||spIdOf(state.users.get(st.authorUid))||'story';
-      const isVideo=kind==='video';
-      const ext=isVideo?'mp4':'jpg';
-      const filename=`SPIKE-${String(spid).replace(/[^a-z0-9_-]/gi,'-')}-story.${ext}`;
-      const ok=await premiumConfirm({
-        title:isVideo?'Download this story video?':'Download this story picture?',
-        message:isVideo?'The watermarked video will be saved to your device without leaving SPIKE.':'The story picture will be saved to your device without leaving SPIKE.',
-        confirmText:isVideo?'Download video':'Download picture',
-        cancelText:'Not now',
-        icon:'⬇️',
-        eyebrow:'SPIKE DOWNLOAD'
-      });
-      if(!ok)return;
-      const source=isVideo && st.mediaWatermarked!==true ? (st.mediaOriginalUrl || st.mediaUrl) : st.mediaUrl;
-      await downloadStoryMediaInApp(source, filename, kind, $e('storyViewerDownload'));
-    });
-    $e('storyViewerDelete')?.addEventListener('click',async e=>{
-      e.preventDefault(); e.stopPropagation();
-      const gs=rebuildGroups(), group=gs[s.creatorIndex], st=group?.stories[s.index];
-      if(!st)return;
-      if(!isOwnStory(st)){ toast('You can only delete your own story','error'); return; }
-      await deleteStory(st.id, { closeViewer:true });
-    });
-    $e('storyViewerMute')?.addEventListener('click',async e=>{ e.preventDefault(); e.stopPropagation(); if(s.muted) await enableAudio(); else disableAudio(); });
-    $e('storyViewerClose')?.addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); close(); });
-    const nav=$e('storyViewer'); nav?.addEventListener('click',e=>{ if(e.target===nav) close(); });
-    let sx=0,sy=0,active=false;
-    stage.addEventListener('pointerdown',e=>{ if(e.pointerType==='mouse'&&e.button!==0)return; sx=e.clientX;sy=e.clientY;active=true;clearTimeout(s.holdTimer);s.holdTimer=setTimeout(()=>{if(active)pause()},280);stage.setPointerCapture?.(e.pointerId); });
-    stage.addEventListener('pointerup',e=>{ if(!active)return;active=false;clearTimeout(s.holdTimer);const dx=e.clientX-sx,dy=e.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.15){dx<0?next():previous();return;}if(s.paused){resume();return;}if(Math.abs(dx)<14&&Math.abs(dy)<14){const r=stage.getBoundingClientRect();e.clientX-r.left>r.width*.5?next():previous();}});
-    stage.addEventListener('pointercancel',()=>{active=false;clearTimeout(s.holdTimer)});
-  }
-  return {open,close,next,previous,pause,resume,bind};
-})();
-
-function storyViewerOpen(id){ StoryEngine.open(id); }
-function storyViewerClose(){ StoryEngine.close(); }
-function storyGo(dir){ return dir>0 ? StoryEngine.next(true) : StoryEngine.previous(); }
-
-async function markStoryViewed(id) {
-  if (!id || !state.user?.id) return;
-  state.storyViewed = state.storyViewed instanceof Set ? state.storyViewed : new Set();
-  state.storyViewed.add(id);
-  try { await db.rpc('mark_story_view', { p_story_id:id }); } catch (e) { console.warn('markStoryViewed', e); }
-}
-function storyFor(id) { return state.stories.find(s => s.id === id) || null; }
-
-function storyShareUrl(s) { return `${location.origin}${location.pathname}?story=${encodeURIComponent(s.id)}`; }
-function storyMediaName(s) { const base = nameOf(s).replace(/[^a-z0-9-_]+/gi, '-').replace(/^-|-$/g, '') || 'spike-story'; return `${base}-${s.id}`; }
-async function shareStoryToFriends(s) {
-  if (!s) return;
-  const url = storyShareUrl(s);
-  try {
-    if (navigator.share) { await navigator.share({ title: `${nameOf(s)} on SPIKE`, text: s.text || 'Shared a story on SPIKE', url }); toast('Story shared', 'success'); }
-    else { await copyTextSafe(url); toast('Story link copied', 'success'); }
-  } catch (e) { if (e?.name !== 'AbortError') toast('Sharing unavailable', 'error'); }
-}
-async function deleteStory(id, options = {}) {
-  const s = storyFor(id);
-  if (!s || s.authorUid !== state.user.id) { toast('You can only delete your own story', 'error'); return; }
-  const ok = await premiumConfirm({ title: 'Delete this story?', message: 'This story will disappear from Stories immediately.', confirmText: 'Delete story', cancelText: 'Keep story', icon: '🗑️', eyebrow: 'STORY CONTROL', danger: true });
-  if (!ok) return;
-  try {
-    await putDoc(`stories/${id}`, { ...s, deleted: true, deletedAt: now() }, 'stories');
-    state.stories = state.stories.filter(x => x.id !== id);
-    closeOverlay('storyActionsOverlay');
-    if(options.closeViewer) StoryEngine.close();
-    renderStories();
-    toast('Story deleted', 'success');
-  } catch (e) { console.error('deleteStory', e); toast(e?.message || 'Could not delete story', 'error'); }
-}
-let activeStoryActionId = null;
-function openStoryActions(id) {
-  const s = storyFor(id);
-  if (!s) return;
-  activeStoryActionId = id;
-  $('storyActionsSummary').textContent = `${nameOf(s)} · ${s.mediaType || 'text'} story`;
-  $('storyActionDelete').hidden = s.authorUid !== state.user.id;
-  openOverlay('storyActionsOverlay');
-}
+/* Legacy post media studio/upload pipeline removed with the old composer. */
 
 
 // ─── FEED V2 PANELS ────────────────────────────────────
@@ -1616,7 +1223,7 @@ function cloudinaryStandardDownloadUrl(url) {
 // otherwise the attachment navigation is handed to the browser/WebView download
 // manager. Neither path intentionally opens a new tab or sends the user away
 // from the SPIKE UI.
-function cloudinaryStoryAttachmentUrl(url, filename) {
+function cloudinaryFeedAttachmentUrl(url, filename) {
   const raw=safeHttpUrl(url); if(!raw)return '';
   if(!/cloudinary\.com/i.test(raw))return raw;
   try {
@@ -1626,21 +1233,21 @@ function cloudinaryStoryAttachmentUrl(url, filename) {
     if(i<0)return raw;
     const tail=cloudinaryVideoAssetTail(u.pathname,i);
     if(!tail)return raw;
-    const safeName=String(filename||'SPIKE-story-download').trim()
-      .replace(/[^a-z0-9._-]/gi,'-').replace(/-+/g,'-') || 'SPIKE-story-download';
+    const safeName=String(filename||'SPIKE-feed-download').trim()
+      .replace(/[^a-z0-9._-]/gi,'-').replace(/-+/g,'-') || 'SPIKE-feed-download';
     u.pathname=u.pathname.slice(0,i+marker.length)+`fl_attachment:${encodeURIComponent(safeName)}/`+tail;
     return u.toString();
   } catch (_) { return raw; }
 }
 
-async function downloadStoryMediaInApp(url, filename, kind, button) {
+async function downloadFeedMediaInApp(url, filename, kind, button) {
   if (!url) { toast('Media is not available', 'error'); return; }
   if (button?.dataset.busy === '1') return;
   if (button) { button.dataset.busy='1'; button.disabled=true; button.classList.add('is-busy'); }
   try {
-    const requestedName=String(filename||`SPIKE-story.${kind==='video'?'mp4':'jpg'}`).trim();
+    const requestedName=String(filename||`SPIKE-media.${kind==='video'?'mp4':'jpg'}`).trim();
     const sourceUrl=safeHttpUrl(url);
-    if (!sourceUrl) throw new Error('Story media URL is invalid.');
+    if (!sourceUrl) throw new Error('Media URL is invalid.');
 
     // Android app path: hand the authenticated SPIKE proxy URL to the native
     // DownloadManager bridge. Native Android owns the filesystem destination
@@ -1651,7 +1258,7 @@ async function downloadStoryMediaInApp(url, filename, kind, button) {
     if(isAndroidApp && androidBridge && typeof androidBridge.download==='function'){
       const sessionResult=await db.auth.getSession();
       const accessToken=sessionResult?.data?.session?.access_token;
-      if(!accessToken) throw new Error('Please sign in again to download this story.');
+      if(!accessToken) throw new Error('Please sign in again to download this media.');
       const endpoint=`${SUPABASE_URL}/functions/v1/spike-media-download?url=${encodeURIComponent(sourceUrl)}&filename=${encodeURIComponent(requestedName)}`;
       const mimeType=kind==='video'?'video/mp4':'image/jpeg';
       try {
@@ -1704,7 +1311,7 @@ async function downloadStoryMediaInApp(url, filename, kind, button) {
     // Supabase JWT and only permits Cloudinary as its upstream host.
     const sessionResult=await db.auth.getSession();
     const accessToken=sessionResult?.data?.session?.access_token;
-    if(!accessToken) throw new Error('Please sign in again to download this story.');
+    if(!accessToken) throw new Error('Please sign in again to download this media.');
     const endpoint=`${SUPABASE_URL}/functions/v1/spike-media-download?url=${encodeURIComponent(sourceUrl)}&filename=${encodeURIComponent(requestedName)}`;
     const proxyResponse=await fetch(endpoint,{method:'GET',headers:{Authorization:`Bearer ${accessToken}`,apikey:SUPABASE_KEY},cache:'no-store'});
     if(!proxyResponse.ok) throw new Error(`Download service failed (${proxyResponse.status})`);
@@ -1717,17 +1324,15 @@ async function downloadStoryMediaInApp(url, filename, kind, button) {
     window.__SPIKE_LAST_DOWNLOAD={url:endpoint,filename:requestedName,kind,mode:'supabase-proxy',createdAt:Date.now()};
     toast(kind==='video'?'Video saved to your device':'Picture saved to your device','success');
   } catch(e) {
-    console.error('downloadStoryMediaInApp',e);
-    toast(e?.message || 'Could not download story media','error');
+    console.error('downloadFeedMediaInApp',e);
+    toast(e?.message || 'Could not download media','error');
   } finally {
     if (button) { button.dataset.busy='0'; button.disabled=false; button.classList.remove('is-busy'); }
   }
 }
-// Backward-compatible post-video helper. Story downloads use the generic
-// in-app media helper above, while existing feed-post video downloads continue
-// to use the same Cloudinary attachment behavior.
+// Feed-post video downloads use the shared in-app media helper.
 async function downloadWatermarkedVideoUrl(url, filename, button) {
-  return downloadStoryMediaInApp(url, filename, 'video', button);
+  return downloadFeedMediaInApp(url, filename, 'video', button);
 }
 
 // ─── VIDEO CONTROLS ────────────────────────────────────

@@ -14,8 +14,9 @@ function between(a,b){
   return i>=0&&j>=0?feed.slice(i,j):'';
 }
 
-test('Home keeps For You/Following before the composer', () => {
-  assert.ok(feed.indexOf('id="filters"') < feed.indexOf('id="spikeComposer"'));
+test('Home keeps the For You/Following filters and no legacy composer', () => {
+  assert.ok(feed.includes('id="filters"'));
+  assert.doesNotMatch(feed,/id="spikeComposer"|id="signalText"/);
 });
 
 test('Top Picks belongs to Discover, not the Home stream', () => {
@@ -43,15 +44,12 @@ test('Feed status ranking jargon is hidden from the primary Home surface', () =>
   assert.match(css,/main\.spike-x-home \.feed-status\{display:none!important\}/);
 });
 
-test('Composer advanced disclosure has a valid controlled element', () => {
-  assert.match(experience,/const advanced = row;/);
-  assert.match(experience,/advanced\.id = 'spikeXAdvanced'/);
-  assert.match(experience,/toggle\.setAttribute\('aria-controls', 'spikeXAdvanced'\)/);
+test('Removed composer is not revived by the experience layer', () => {
+  assert.doesNotMatch(experience,/spikeComposer|signalText|releaseSignalBtn/);
 });
 
 test('Primary Feed vocabulary stays plain instead of being globally rewritten', () => {
   assert.match(native,/following:'Following'/);
-  assert.match(native,/storyBtn\) storyBtn\.textContent='◎ Story'/);
+  assert.doesNotMatch(native,/storyBtn|Story|Pulse/);
   assert.doesNotMatch(native,/following:'Connections'/);
-  assert.doesNotMatch(native,/storyBtn\) storyBtn\.textContent='◌ Pulse'/);
 });

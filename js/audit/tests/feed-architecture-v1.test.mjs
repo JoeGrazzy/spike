@@ -7,10 +7,10 @@ const ROOT = path.resolve(new URL('../../..', import.meta.url).pathname);
 const feed = fs.readFileSync(path.join(ROOT, 'feed.html'), 'utf8');
 const runtime = fs.readFileSync(path.join(ROOT, 'js/feed-runtime-04-3.js'), 'utf8');
 
-test('Feed architecture V1 keeps primary navigation to Home, Discover, Start, Messages and Me', () => {
-  for (const key of ['home','discover','create','messages','profile']) {
-    assert.match(feed, new RegExp(`data-spike-nav=["']${key}["']`));
-  }
+test('Feed primary navigation omits the removed Start/Create entry', () => {
+  for (const key of ['home','discover','profile']) assert.match(feed, new RegExp(`data-spike-nav=["']${key}["']`));
+  assert.doesNotMatch(feed, /data-spike-nav=["']create["']/);
+  assert.doesNotMatch(feed, /data-smart-nav=["']create["']/);
   assert.doesNotMatch(feed, /data-spike-nav=["']activity["']/);
 });
 
@@ -34,9 +34,8 @@ test('Feed architecture V1 moves discovery into a dedicated Discover mode withou
   assert.match(runtime, /spike-discover-mode/);
 });
 
-test('Feed architecture V1 keeps creation contextual and preserves native global routes', () => {
-  assert.match(feed, /id=["']spikeComposer["']/);
-  assert.match(feed, /data-spike-nav=["']create["']/);
-  assert.match(feed, /href=["']messages\.html["'][^>]*data-spike-nav=["']messages["']/);
-  assert.match(feed, /href=["']profile\.html["'][^>]*data-spike-nav=["']profile["']/);
+test('Feed architecture V1 removes the old creation entry and preserves native global routes', () => {
+  assert.doesNotMatch(feed, /id=["']spikeComposer["']/);
+  assert.doesNotMatch(feed, /data-spike-nav=["']create["']/);
+  assert.doesNotMatch(feed, /data-smart-nav=["']create["']/);
 });

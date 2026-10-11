@@ -90,9 +90,9 @@ async function openSpikeProfilePreview(id, seed){
     } else if(act==='mute') toast('Use the profile menu to manage mute settings.','info');
     else if(act==='report') toast('Use the profile menu to report this account.','info');
   }));
-  body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{if(relationship==='friend')location.href='message.html?private_uid='+encodeURIComponent(id);else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await acceptFriendRequest(id);else await sendFriendRequest(id,null);});
+  body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{if(relationship==='friend')location.href='?private_uid='+encodeURIComponent(id);else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await acceptFriendRequest(id);else await sendFriendRequest(id,null);});
   body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{
-    if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio';return;}
+    if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='?private_uid='+encodeURIComponent(id)+'&call=audio';return;}
     if(relationship==='request_sent'){await cancelFriendRequest(id);return;}
     if(relationship==='request_received'){await declineFriendRequest(id);return;}
     try{
@@ -108,7 +108,7 @@ async function openSpikeProfilePreview(id, seed){
       rankingDirty=true;rankingCache.clear();renderSignals();
     }catch(e){toast(e?.message||'Could not update following','error');}
   });
-  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{if(relationship==='friend'&&typeof window.startCall==='function')window.startCall(id,'video');else location.href='message.html?private_uid='+encodeURIComponent(id);});
+  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{if(relationship==='friend'&&typeof window.startCall==='function')window.startCall(id,'video');else location.href='?private_uid='+encodeURIComponent(id);});
   body.querySelector('[data-profile-more]')?.addEventListener('click',()=>showProfileActions(id,relationship,name));
   setTimeout(()=>body.querySelector('[data-profile-more]')?.focus(),0);
 }
@@ -157,9 +157,9 @@ function showProfileActions(id, relationship, name){
   const run=async(fn)=>{ closeProfileActions(); closeSpikeProfile(); try{ await fn(); } catch(e){ console.error('[SPIKE profile action]',e); toast(e?.message||'Action could not be completed','error'); } };
   items.push(['👤','View profile',()=>{ closeProfileActions(); window.location.href=profileLink(id); }]);
   if(relationship==='friend'){
-    items.push(['💬','Message',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id); }]);
-    items.push(['📞','Voice call',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=audio'; }]);
-    items.push(['🎥','Video call',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id)+'&call=video'; }]);
+    items.push(['💬','Message',()=>{ location.href='?private_uid='+encodeURIComponent(id); }]);
+    items.push(['📞','Voice call',()=>{ location.href='?private_uid='+encodeURIComponent(id)+'&call=audio'; }]);
+    items.push(['🎥','Video call',()=>{ location.href='?private_uid='+encodeURIComponent(id)+'&call=video'; }]);
     items.push(['❌','Unfriend',()=>run(async ()=>{
       const ok=await premiumConfirm({title:'Unfriend user', message:`Remove ${name} from your friends?`, confirmText:'Unfriend', cancelText:'Cancel', icon:'🗑️', danger:true });
       if(!ok)return;
@@ -176,7 +176,7 @@ function showProfileActions(id, relationship, name){
     items.push(['×','Decline request',()=>run(()=>declineFriendRequest(id))]);
   } else {
     items.push(['➕','Add friend',()=>run(()=>sendFriendRequest(id,null))]);
-    items.push(['💬','Message',()=>{ location.href='message.html?private_uid='+encodeURIComponent(id); }]);
+    items.push(['💬','Message',()=>{ location.href='?private_uid='+encodeURIComponent(id); }]);
   }
   items.push(['🔗','Share profile',()=>run(async()=>{
     const url=location.origin+location.pathname+'?profile='+encodeURIComponent(id);
@@ -230,7 +230,7 @@ function initAISearch(){
       ['Getting started','Create an account, complete your profile, then explore the Feed, Messages and Rooms.'],
       ['Profile','Update your username, profile picture, cover image and profile information.'],
       ['Feed','Browse personalized, discovery and trending content. Start Signals, react, Echo, Pass, save and connect.'],
-      ['Stories','Open Stories to view updates, move between stories, interact and reply where available.'],
+      
       ['Friends','Send friend requests, manage incoming requests and build connections.'],
       ['Messages','Open Messages, choose a conversation, type a message and send it.'],
       ['Calls','Open an eligible private conversation and choose audio or video call.'],
@@ -245,7 +245,7 @@ function initAISearch(){
     return docs;
   };
   function score(q,doc){ const qs=clean(q), text=(doc.title+' '+doc.text).toLowerCase(), title=doc.title.toLowerCase(); let n=0; qs.forEach(w=>{if(title.includes(w))n+=5; if(text.includes(w))n+=2;}); return n; }
-  function answer(q,results){ const l=q.toLowerCase(); if(/video.*call|call.*video/.test(l))return 'To make a video call, open an eligible private conversation and choose the video-call option.'; if(/audio.*call|call.*audio/.test(l))return 'To make an audio call, open an eligible private conversation and choose the audio-call option.'; if(/create|make|post/.test(l)&&/post|feed/.test(l))return 'Open the Feed and start a new Signal. Add supported text or media, then publish your update.'; if(/room/.test(l))return 'Open Rooms to discover communities. Select a Room, join when available, then choose a channel.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(/story|stories/.test(l))return 'Open the Stories area to view updates. You can move through stories and interact.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
+  function answer(q,results){ const l=q.toLowerCase(); if(/video.*call|call.*video/.test(l))return 'To make a video call, open an eligible private conversation and choose the video-call option.'; if(/audio.*call|call.*audio/.test(l))return 'To make an audio call, open an eligible private conversation and choose the audio-call option.'; if(/create|make|post|publish|story|stories/.test(l))return 'Create a public Signal from Home using Share a Signal. Signal Studio supports text, one photo or video, accessible media descriptions, and a sensitive-content heads-up. Stories are not available.'; if(/room/.test(l))return 'Open Rooms to discover communities. Select a Room, join when available, then choose a channel.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
   function run(q){ q=q.trim(); if(!q)return; const docs=corpus().map(d=>({...d,_score:score(q,d)})).filter(d=>d._score>0).sort((a,b)=>b._score-a._score).slice(0,8); const ans=answer(q,docs); body.innerHTML=`<div class="spike-ai-answer"><div class="spike-ai-answer-label">✦ Local answer</div><p>${esc(ans)}</p></div><div class="spike-ai-related-title">Related results</div><div class="spike-ai-results">${docs.length?docs.slice(0,6).map((d,i)=>`<div class="spike-ai-result" data-url="${esc(d.url||'')}"><b>${esc(d.title)}</b><small>${esc((d.text||'').slice(0,180))}${(d.text||'').length>180?'…':''}</small></div>`).join(''):'<div class="spike-ai-empty">No matching SPIKE content found.</div>'}</div>`; }
   function openAI(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); setTimeout(()=>input.focus(),30); }
   function closeAI(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
@@ -260,132 +260,7 @@ function initAISearch(){
 
 // ─── MODERN APP V3 ────────────────────────────────────
 function initModernApp(){
-  const DRAFT_KEY = 'spike-modern-draft-v1';
   const PIN_KEY = 'spike-pinned-post-v1';
-
-  const composer = document.querySelector('.spike-signal-composer');
-  const text = $('signalText');
-  if(composer && text){
-    let collapseTimer = null;
-    const resizeComposerText = () => {
-      if (!text) return;
-      if (!composer.classList.contains('spike-expanded')) {
-        text.style.height = '';
-        text.style.overflowY = 'hidden';
-        return;
-      }
-      text.style.height = 'auto';
-      const next = Math.min(Math.max(text.scrollHeight, 64), 180);
-      text.style.height = next + 'px';
-      text.style.overflowY = text.scrollHeight > 180 ? 'auto' : 'hidden';
-    };
-    const setComposerOpen = (open, focusField = false) => {
-      if (collapseTimer) { clearTimeout(collapseTimer); collapseTimer = null; }
-      composer.classList.toggle('spike-expanded', open);
-      composer.classList.toggle('spike-collapsed', !open);
-      composer.setAttribute('data-composer-open', String(open));
-      // Critical mobile behavior: while collapsed, the textarea is read-only.
-      // A swipe/scroll beginning over it therefore cannot focus it or expose the
-      // posting controls. Only an intentional click/tap enters compose mode.
-      text.readOnly = !open;
-      text.setAttribute('aria-expanded', String(open));
-      resizeComposerText();
-      if (open && focusField) {
-        requestAnimationFrame(() => {
-          text.focus({preventScroll:true});
-          resizeComposerText();
-        });
-      }
-    };
-    const expand = (focusField = false) => setComposerOpen(true, focusField);
-    const collapse = (delay = 80) => {
-      if (collapseTimer) clearTimeout(collapseTimer);
-      collapseTimer = setTimeout(() => {
-        const active = document.activeElement;
-        const inside = active && composer.contains(active);
-        if (!inside) setComposerOpen(false, false);
-      }, delay);
-    };
-
-    // The composer is intentionally compact until the writing field is actually in use.
-    setComposerOpen(false, false);
-
-    // Do NOT expand on pointerdown/focus: a finger swipe that starts over the
-    // compact field must remain a normal page scroll. The field is read-only
-    // until an actual click/tap is completed.
-    text.addEventListener('click', () => {
-      if (!composer.classList.contains('spike-expanded')) {
-        expand(true);
-      } else {
-        text.focus({preventScroll:true});
-      }
-    });
-    text.addEventListener('focus', () => {
-      if (!composer.classList.contains('spike-expanded')) {
-        text.blur();
-        return;
-      }
-      resizeComposerText();
-    });
-    text.addEventListener('input', () => {
-      try{ localStorage.setItem(DRAFT_KEY, text.value); }catch(_){}
-      expand(false);
-      resizeComposerText();
-    });
-
-    // Keep the expanded state while any composer control is being used.
-    composer.addEventListener('focusin', expand);
-    composer.addEventListener('focusout', () => {
-      setTimeout(() => {
-        if (!composer.contains(document.activeElement)) collapse();
-      }, 0);
-    });
-    composer.addEventListener('pointerdown', e => {
-      // Controls intentionally expand on touch; the textarea does not, because
-      // it is the scroll-sensitive compact surface.
-      if (e.target.closest('button,input,select,label') && !e.target.closest('#signalText')) expand(false);
-    }, true);
-    document.addEventListener('pointerdown', e => {
-      if (!composer.contains(e.target)) collapse(40);
-    }, true);
-
-    // When the writing field is no longer focused and no composer control is active,
-    // return automatically to the compact state.
-    text.addEventListener('blur', () => collapse(100));
-    text.addEventListener('keydown', e => {
-      if (e.key === 'Escape' && composer.classList.contains('spike-expanded')) {
-        e.preventDefault();
-        text.blur();
-        setComposerOpen(false, false);
-      }
-    });
-
-    try{
-      const draft = localStorage.getItem(DRAFT_KEY);
-      if(draft){ text.value = draft; }
-    }catch(_){}
-    $('releaseSignalBtn')?.addEventListener('click', () => {
-      setTimeout(() => {
-        try{ localStorage.removeItem(DRAFT_KEY); }catch(_){}
-        setComposerOpen(false, false);
-      }, 300);
-    });
-
-    // Mobile keyboards can resize the viewport after focus. Re-center the composer
-    // so the revealed tools are not hidden behind the keyboard/bottom navigation.
-    if (window.visualViewport) {
-      let lastHeight = window.visualViewport.height;
-      window.visualViewport.addEventListener('resize', () => {
-        const h = window.visualViewport.height;
-        if (composer.classList.contains('spike-expanded') && document.activeElement === text && Math.abs(h-lastHeight) > 40) {
-          setTimeout(() => {
-            try { composer.scrollIntoView({behavior:'smooth', block:'nearest'}); } catch(_) {}
-          }, 120);
-        }
-        lastHeight = h;
-      });
-    }
-  }
 
   // Pin posts via shift+click on more button
   function pinSignal(id){
@@ -398,8 +273,6 @@ function initModernApp(){
     postsContainer.addEventListener('click', e => {
       const more = e.target.closest('.more');
       if(more && e.shiftKey){ e.preventDefault(); pinSignal(more.closest('.post')?.dataset.post); }
-      const quote = e.target.closest('[data-modern-quote]');
-      if(quote){ e.preventDefault(); const post=quote.closest('.post'); const name=post?.querySelector('.post-name')?.textContent?.trim()||'SPIKE user'; const content=post?.querySelector('.caption-body')?.textContent?.trim()||''; if(text && composer){ text.value=`\n\n❝ ${content.slice(0,280)}\n— ${name}`; composer.classList.remove('spike-collapsed'); composer.classList.add('spike-expanded'); composer.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>text.focus(),250); } }
     });
   }
 
@@ -424,13 +297,6 @@ function initModernApp(){
         discover?.click();
         document.getElementById('feedV2Hub')?.scrollIntoView({behavior:'smooth',block:'start'});
       }
-      if(target === 'create'){
-        main?.classList.remove('spike-discover-mode');
-        const c=document.querySelector('.spike-signal-composer'); const t=$('signalText');
-        c?.classList.remove('spike-collapsed'); c?.classList.add('spike-expanded');
-        document.getElementById('spikeBottomNav')?.classList.add('spike-composer-nav-hidden'); document.body.classList.add('spike-composer-active');
-        c?.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(()=>t?.focus(),250);
-      }
       if(target === 'messages'){ /* native anchor handles navigation */ }
       if(target === 'activity'){ refreshNotificationBadge(); window.location.href='notifications.html'; }
       if(target === 'profile'){ /* native anchor handles navigation */ }
@@ -446,7 +312,7 @@ function closeMediaLongpress(){ const sheet=$('spikeMediaLongpress'); if(!sheet)
 function openMediaLongpress(button){ const sheet=$('spikeMediaLongpress'); if(!sheet)return; spikeLongPressTarget=button; const img=button.querySelector('img'); const thumb=$('spikeMediaLongpressThumb'); thumb.innerHTML=img?.src?`<img src="${esc(img.src)}" alt="" loading="lazy" decoding="async">`:''; const post=button.closest('.post'); const caption=post?.querySelector('[data-caption]')?.innerText?.trim()||'SPIKE media'; $('spikeMediaLongpressMeta').textContent=caption.slice(0,80)||'Selected media'; sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; spikeLongPressOpened=true; button.classList.add('longpress-active'); }
 function longpressMediaUrl(){ return spikeLongPressTarget?.dataset?.image||''; }
 async function mediaUrlToFile(url){ const r=await fetch(url,{mode:'cors'}); if(!r.ok)throw new Error('Media could not be loaded'); const blob=await r.blob(); const ext=(blob.type.split('/')[1]||'jpg').replace(/[^a-z0-9]/gi,''); return new File([blob],`spike-media-${Date.now()}.${ext||'jpg'}`,{type:blob.type||'image/jpeg'}); }
-async function useLongpressMedia(action){ const url=longpressMediaUrl(); if(!url)return; closeMediaLongpress(); if(action==='details'){ const img=spikeLongPressTarget?.querySelector('img'); const show=()=>{ const w=img?.naturalWidth||'—',h=img?.naturalHeight||'—'; toast(`Image · ${w}×${h}`,'success'); }; if(img?.complete)show(); else if(img){img.addEventListener('load',show,{once:true});} return; } try{ const file=await mediaUrlToFile(url); if(action==='new-signal'){ addMediaFiles([file]); $('signalText')?.focus(); $('signalText')?.scrollIntoView({behavior:'smooth',block:'center'}); toast('Media added to a new Signal','success'); } else if(action==='story'){ const input=$('storyMediaInput'); if(input){ const dt=new DataTransfer(); dt.items.add(file); input.files=dt.files; $('storyMediaName').textContent=file.name; openOverlay('storyOverlay'); toast('Media added to your story','success'); } else throw new Error('Story composer unavailable'); } }catch(e){ toast(e?.message||'Could not reuse this media','error'); } }
+async function useLongpressMedia(action){ const url=longpressMediaUrl(); if(!url)return; closeMediaLongpress(); if(action==='details'){ const img=spikeLongPressTarget?.querySelector('img'); const show=()=>{ const w=img?.naturalWidth||'—',h=img?.naturalHeight||'—'; toast(`Image · ${w}×${h}`,'success'); }; if(img?.complete)show(); else if(img){img.addEventListener('load',show,{once:true});} return; }  }
 function bindLongpressMedia(){ const posts=$('posts'); if(!posts)return; posts.addEventListener('pointerdown',e=>{ const b=e.target.closest('button[data-image]'); if(!b)return; if(e.pointerType==='mouse'&&e.button!==0)return; clearTimeout(spikeLongPressTimer); spikeLongPressMoved=false; spikeLongPressOpened=false; spikeLongPressTimer=setTimeout(()=>{ if(!spikeLongPressMoved){ openMediaLongpress(b); } },560); }); posts.addEventListener('pointermove',e=>{ if(!spikeLongPressTimer)return; if(Math.abs(e.movementX)>8||Math.abs(e.movementY)>8){spikeLongPressMoved=true;clearTimeout(spikeLongPressTimer);spikeLongPressTimer=null;} }); const cancel=()=>{clearTimeout(spikeLongPressTimer);spikeLongPressTimer=null;}; posts.addEventListener('pointerup',cancel); posts.addEventListener('pointercancel',cancel); posts.addEventListener('pointerleave',cancel); posts.addEventListener('click',e=>{ if(spikeLongPressOpened){e.preventDefault();e.stopPropagation(); spikeLongPressOpened=false; } },true); }
 function updateCaptionToggles() {
   document.querySelectorAll('#posts [data-caption]').forEach(box => {
@@ -529,19 +395,6 @@ function bindEvents() {
     return true;
   };
   const openFeedTab = tab => { closeFeedMenu(); return activateFeedV2Tab(tab); };
-  const openCreate = () => {
-    closeFeedMenu();
-    const composer = document.querySelector('.spike-signal-composer');
-    const text = document.getElementById('signalText');
-    if (!composer || !text) { toast('The Signal composer is not available right now.', 'error'); return false; }
-    composer.classList.remove('spike-collapsed');
-    composer.classList.add('spike-expanded');
-    document.body.classList.add('spike-composer-active');
-    composer.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(() => text.focus(), 220);
-    return true;
-  };
-  const openStory = () => { closeFeedMenu(); const o=$('storyOverlay'); if(o){ o.classList.add('open'); o.removeAttribute('hidden'); o.setAttribute('aria-hidden','false'); if(location.hash!=='#storyOverlay') history.replaceState(null,'','#storyOverlay'); } return true; };
 
   $('menuGoLive')?.addEventListener('click', () => { closeFeedMenu(); });
   // Menu V3 action router: one delegated tap path for every interactive button.
@@ -561,6 +414,16 @@ function bindEvents() {
   };
   $('feedHeaderSearch')?.addEventListener('click', openAskSpike);
 
+  const showSignOutConfirmation = () => {
+    // Close the navigation layer before opening the confirmation dialog.
+    // Keeping both overlays open can leave the sticky footer/menu intercepting taps.
+    closeFeedMenu();
+    const overlay = $('logoutConfirmOverlay');
+    if (!overlay) { toast('Sign out confirmation is unavailable. Please reload and try again.', 'error'); return; }
+    overlay.classList.add('show');
+    overlay.setAttribute('aria-hidden', 'false');
+    window.setTimeout(() => $('logoutCancel')?.focus(), 0);
+  };
   const menuActions = {
     'ask-spike': openAskSpike,
     theme: () => {
@@ -580,7 +443,7 @@ function bindEvents() {
     saved: async () => { closeFeedMenu(); await openSavedCollections(); },
     audience: async () => { closeFeedMenu(); await openCloseFriends(); },
     safety: async () => { closeFeedMenu(); await openSafetyCenter(); },
-    signout: () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); }
+    signout: showSignOutConfirmation
   };
   // Direct handlers guarantee these primary menu destinations work independently of the delegated tap path.
 
@@ -590,6 +453,8 @@ function bindEvents() {
   // the cascade. Set the authoritative inline state at the same open/close
   // transitions instead of relying on timers or a competing CSS override.
   function setFeedMenuNavHidden(hidden){
+    const overlay = $('menuOverlay');
+    overlay?.setAttribute('aria-hidden', hidden ? 'false' : 'true');
     const nav = $('spikeBottomNav');
     window.__SPIKE_FEED_MENU_OPEN__ = !!hidden;
     document.body.classList.toggle('spike-feed-menu-open', !!hidden);
@@ -605,71 +470,67 @@ function bindEvents() {
   }
   const openFeedMenu = () => { openOverlay('menuOverlay'); setFeedMenuNavHidden(true); };
   const closeFeedMenu = () => { closeOverlay('menuOverlay'); setFeedMenuNavHidden(false); $('menuBtn')?.setAttribute('aria-expanded','false'); };
-  async function syncFeedMenuIdentity(){
-    const user = state.user || {};
-    let profile = {...(user.user_metadata || {}), ...(state.profile || {})};
-    const avatarKeys = ['avatar_url','avatarUrl','profile_image_url','profileImageUrl','profile_picture_url','profilePictureUrl','photo_url','photoUrl','image_url','imageUrl','picture','avatar'];
-    const readAvatar = obj => {
-      for (const key of avatarKeys) {
-        const value = obj && obj[key];
-        if (typeof value === 'string' && value.trim()) return value.trim();
-      }
-      return '';
-    };
-    let avatarValue = readAvatar(profile);
-
-    // The user's own profiles row is the source of truth for the picture they
-    // save from profile.html. The public-profile RPC can omit fields by design,
-    // so use it only as a fallback rather than the sole source.
-    if (!avatarValue && user.id && db) {
-      try {
-        const result = await db.from('profiles')
-          .select('id,display_name,username,avatar_url')
-          .eq('id', user.id).maybeSingle();
-        if (!result.error && result.data) {
-          profile = {...profile, ...result.data};
-          state.profile = {...(state.profile || {}), ...result.data};
-          avatarValue = readAvatar(result.data);
-        }
-      } catch (error) { console.debug('SPIKE menu own-profile lookup unavailable', error); }
-    }
-    if (!avatarValue && user.id && db?.rpc) {
-      try {
-        const result = await db.rpc('get_public_profiles', {p_user_ids:[user.id]});
-        const fetched = Array.isArray(result?.data) ? result.data[0] : null;
-        if (fetched && !result.error) {
-          profile = {...profile, ...fetched};
-          state.profile = {...(state.profile || {}), ...fetched};
-          avatarValue = readAvatar(fetched);
-        }
-      } catch (error) { console.debug('SPIKE menu public-profile lookup unavailable', error); }
-    }
-
-    const name = String(profile.display_name || profile.full_name || profile.name || profile.username || user.email?.split('@')[0] || 'SPIKE Member').trim() || 'SPIKE Member';
+  // V10.7: dismiss the menu in the capture phase before any menu destination
+  // or feature action runs. In embedded Android WebViews, routed content can
+  // otherwise update behind a still-visible drawer, making the user close it
+  // manually to see the result. Keep the More-tools disclosure expandable.
+  menuOverlay?.addEventListener('click', event => {
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    if (!target || !menuOverlay.contains(target)) return;
+    const action = target.closest('[data-menu-action]');
+    const link = target.closest('a[href]');
+    if (action || link) closeFeedMenu();
+  }, { capture: true });
+  // V10.5: Android WebView can deliver taps to the page underneath a visually
+  // open fixed drawer when a sibling stacking context/composited layer wins hit
+  // testing. Add a capture-phase interaction shield as a second line of defense.
+  // Menu controls and the fixed feed header remain interactive; all other page
+  // targets are blocked until the drawer closes. This does not replace handlers.
+  const feedMenuInteractionShield = event => {
+    const overlay = $('menuOverlay');
+    const menuIsOpen = !!overlay && (
+      overlay.classList.contains('open') || overlay.getAttribute('aria-hidden') === 'false' ||
+      document.body.classList.contains('spike-feed-menu-open')
+    );
+    if (!menuIsOpen) return;
+    const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    if (!target) return;
+    if (overlay.contains(target) || target.closest('body > header.header')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (typeof event.stopImmediatePropagation === 'function') event.stopImmediatePropagation();
+  };
+  ['pointerdown', 'mousedown', 'touchstart', 'click'].forEach(type => {
+    document.addEventListener(type, feedMenuInteractionShield, { capture: true, passive: false });
+  });
+  function syncFeedMenuIdentity(){
+    const profile = state.profile || state.user?.user_metadata || {};
+    const name = String(profile.display_name || profile.full_name || profile.name || profile.username || state.user?.email?.split('@')[0] || 'SPIKE Member').trim() || 'SPIKE Member';
     const username = String(profile.username || profile.handle || '').trim();
+    const avatar = String(profile.avatar_url || profile.avatar || profile.photo_url || '').trim();
     const title = $('spikeMenuTitle');
     const handle = $('menuIdentityHandle');
     const holder = $('menuIdentityAvatar');
     if(title) title.textContent = name;
     if(handle) handle.textContent = username ? `@${username} · SPIKE member` : 'SPIKE member';
     if(holder){
-      holder.replaceChildren();
-      const avatar = String(avatarValue || '').trim();
-      if (avatar && /^(https?:)?\/\//i.test(avatar)) {
+      if(avatar && /^(https?:)?\/\//i.test(avatar)){
+        holder.innerHTML = '';
         const img = document.createElement('img');
-        img.src = avatar; img.alt = `${name} profile picture`; img.loading = 'eager'; img.decoding = 'async';
-        img.referrerPolicy = 'no-referrer';
-        img.addEventListener('error', () => { holder.replaceChildren(document.createTextNode(name.slice(0,1).toUpperCase())); }, {once:true});
+        img.src = avatar; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+        img.addEventListener('error', () => { holder.textContent = name.slice(0,1).toUpperCase(); }, {once:true});
         holder.appendChild(img);
       } else {
         holder.textContent = name.slice(0,1).toUpperCase();
       }
     }
   }
-
   menuOverlay?.addEventListener('click', async e => {
     const control = e.target.closest('[data-menu-action]');
     if (!control || !menuOverlay.contains(control)) return;
+    // Menu actions are isolated from document/feed click handlers so the tap
+    // cannot trigger a card, media control, or other element behind the drawer.
+    e.stopPropagation();
     const action = control.dataset.menuAction;
     const handler = menuActions[action];
     if (typeof handler !== 'function') return;
@@ -715,68 +576,13 @@ function bindEvents() {
     }
     location.href = 'admin.html';
   });
-  bindClick('menuSignOut', () => { const o=$('logoutConfirmOverlay'); if(o) o.classList.add('show'); });
-  bindClick('logoutCancel', () => $('logoutConfirmOverlay')?.classList.remove('show'));
-  bindClick('logoutConfirmOverlay', e => { if(e.target.id==='logoutConfirmOverlay') e.currentTarget.classList.remove('show'); });
+  // Sign-out is handled only by the menu's delegated action router above.
+  // Do not add a second direct click handler: it would open the modal twice.
+  bindClick('logoutCancel', () => { const o=$('logoutConfirmOverlay'); o?.classList.remove('show'); o?.setAttribute('aria-hidden','true'); $('menuBtn')?.focus(); });
+  bindClick('logoutConfirmOverlay', e => { if(e.target.id==='logoutConfirmOverlay') { e.currentTarget.classList.remove('show'); e.currentTarget.setAttribute('aria-hidden','true'); $('menuBtn')?.focus(); } });
   bindClick('logoutYes', async () => { const btn=$('logoutYes'); btn.disabled=true; btn.textContent='Signing out…'; try { cleanupFeedRuntime(); const {error}=await db.auth.signOut({scope:'local'}); if(error) throw error; location.replace('index.html?logged_out=1'); } catch(err) { btn.disabled=false; btn.textContent='Yes, sign out'; console.error('SPIKE logout error:',err); toast(err?.message||'Could not sign out','error'); } });
 
-  // Composer
-  bindClick('imageBtn', () => $('imageInput').click());
-  bindClick('videoBtn', () => $('videoInput').click());
-  bindClick('mediaAddMore', openMediaPicker);
-  bindChange('imageInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
-  bindChange('videoInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
-  bindChange('mediaInput', e => { addMediaFiles(e.target.files); e.target.value=''; });
-  bindClick('removeMedia', clearMedia);
-  bindClick('scheduleBtn', () => $('scheduleRow').classList.toggle('show'));
-  bindClick('linkBtn', () => openOverlay('linkOverlay'));
-  bindClick('addLink', () => { const u = $('linkInput').value.trim(); try{const x=new URL(u);if(!/^https?:$/.test(x.protocol))throw new Error();}catch(_){toast('Enter a valid http(s) link','warning');return;} $('signalText').value += `${$('signalText').value?'\n':''}${u}`; closeOverlay('linkOverlay'); $('signalText').dispatchEvent(new Event('input',{bubbles:true})); });
-  bindClick('cancelLink', () => closeOverlay('linkOverlay'));
-  bindClick('releaseSignalBtn', releaseSignal);
-  $('signalText')?.addEventListener('input',()=>{const c=$('signalCharCount');if(c)c.textContent=`${$('signalText').value.length} / 5000`;});
-  $('saveDraftBtn')?.addEventListener('click',()=>saveCurrentDraft());
-  $('contentCenterBtn')?.addEventListener('click',()=>openContentCenter('drafts'));
-  $('contentCenterClose')?.addEventListener('click',()=>closeOverlay('contentCenterOverlay'));
-  $('contentCenterBody')?.addEventListener('click',async e=>{const r=e.target.closest('[data-draft-restore]');if(r){await restoreDraft(r.dataset.draftRestore);closeOverlay('contentCenterOverlay');return;}const b=e.target.closest('[data-draft-delete]');if(!b)return;try{await deleteDraftRecord(b.dataset.draftDelete);renderContentCenter('drafts');toast('Draft deleted','success')}catch(_){toast('Could not delete draft','error')}});
-  $('signalText')?.addEventListener('input',queueAutoDraft); $('linkInput')?.addEventListener('input',queueAutoDraft); $('scheduleTime')?.addEventListener('change',queueAutoDraft);
-  document.querySelectorAll('[data-center-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-center-tab]').forEach(x=>x.classList.toggle('active',x===b));renderContentCenter(b.dataset.centerTab)}));
-  $('composeAiBtn')?.addEventListener('click',()=>{const p=$('composeAiPanel');if(p)p.hidden=!p.hidden});
-  document.querySelectorAll('[data-ai-action]').forEach(b=>b.addEventListener('click',()=>localAiAction(b.dataset.aiAction)));
-  document.querySelectorAll('[data-media-edit]').forEach(b=>b.addEventListener('click',()=>applyMediaEdit(b.dataset.mediaEdit)));
-  $('mediaLayoutSelect')?.addEventListener('change',e=>{state.mediaLayout=e.target.value;renderMediaStudio()});
 
-  // Story
-  bindClick('storySectionCreate', () => openStory());
-  bindClick('storyBtn', () => openStory());
-  bindClick('cancelStory', () => { closeOverlay('storyOverlay'); if(location.hash==='#storyOverlay') history.replaceState(null,'',location.pathname+location.search); });
-  bindClick('publishStory', publishStory);
-  bindClick('storyMediaBtn', () => $('storyMediaInput').click());
-  bindClick('storyAudioBtn', () => $('storyAudioInput').click());
-  bindChange('storyMediaInput', e => { const f = e.target.files?.[0]; if (f) $('storyMediaName').textContent = `Selected: ${f.name}`; });
-  bindChange('storyAudioInput', e => { const f = e.target.files?.[0]; if (f) $('storyAudioName').textContent = `Selected: ${f.name}`; });
-
-  // Story actions
-  bindClick('cancelStoryActions', () => closeOverlay('storyActionsOverlay'));
-  bindClick('storyActionShare', () => { const s = storyFor(activeStoryActionId); if (s) shareStoryToFriends(s); });
-  bindClick('storyActionDelete', () => deleteStory(activeStoryActionId));
-
-  // Story viewer
-  $('storyViewerClose')?.addEventListener('click', storyViewerClose);
-  $('storyPrev')?.addEventListener('click', () => storyGo(-1));
-  $('storyNext')?.addEventListener('click', () => storyGo(1));
-  document.addEventListener('keydown', e => {
-    if(!$('storyViewer')?.classList.contains('open')) return;
-    if(e.key==='Escape') storyViewerClose();
-    else if(e.key==='ArrowRight') storyGo(1);
-    else if(e.key==='ArrowLeft') storyGo(-1);
-  });
-  StoryEngine.bind();
-
-  // Stories row click
-  $('storiesRow')?.addEventListener('click', e => {
-    const b = e.target.closest('[data-story]');
-    if (b) storyViewerOpen(b.dataset.story);
-  });
 
   bindClick('spikeDiscoverClose', () => {
     document.querySelector('main.main')?.classList.remove('spike-discover-mode');
@@ -987,6 +793,7 @@ function bindEvents() {
   // Also catch profile.html links
   document.addEventListener('click', e => {
     const a = e.target.closest('a[href*="profile.html"]');
+    if(a && e.target.closest('[data-spike-profile-id]')) return; // already handled by the profile-id delegate
     if(a){ const m=a.getAttribute('href').match(/[?&](?:uid|id)=([^&]+)/); if(m){ e.preventDefault(); openSpikeProfilePreview(decodeURIComponent(m[1])); } }
   });
 
@@ -1345,8 +1152,7 @@ async function initRealtime({ immediate = true } = {}) {
       state.realtimeRefreshTimer = setTimeout(async () => {
         state.realtimeRefreshTimer = null;
         try {
-          if (kind === 'stories') await loadStories();
-          else await loadSignals();
+          await loadSignals();
           refreshSignalRanking();
         } catch (e) { console.warn('[SPIKE REALTIME REFRESH]', e); }
       }, 350);
@@ -1378,11 +1184,10 @@ async function initRealtime({ immediate = true } = {}) {
     // Keep this channel public: Postgres Changes visibility is governed by the
     // authenticated database/RLS path. A private channel would require realtime.messages policies.
     const channel = db.channel(`feed:global:${state.user?.id || 'anon'}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: 'collection_name=in.(posts,stories)' }, p => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: 'collection_name=eq.posts' }, p => {
         const r = p?.new || p?.record || {};
         const collection = r.collection_name;
-        if (collection === 'stories') scheduleRefresh('stories');
-        else if (collection === 'posts' && !applyPostEvent(r.data ? { id: r.document_id, ...r.data } : r)) scheduleRefresh('posts');
+        if (collection === 'posts' && !applyPostEvent(r.data ? { id: r.document_id, ...r.data } : r)) scheduleRefresh('posts');
       })
       .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
@@ -1433,9 +1238,9 @@ function captureFeedSnapshot(){
     if(!state.user?.id||!Array.isArray(state.posts)||!state.posts.length)return;
     const snapshot={
       v:1,at:Date.now(),userId:String(state.user.id),scrollY:window.scrollY||window.pageYOffset||0,
-      posts:state.posts.slice(0,60),stories:(state.stories||[]).slice(0,40),
+      posts:state.posts.slice(0,60),
       users:[...state.users.entries()].slice(0,120),
-      saved:[...state.saved],following:[...state.following],muted:[...state.muted],blocked:[...state.blocked],storyViewed:[...state.storyViewed],
+      saved:[...state.saved],following:[...state.following],muted:[...state.muted],blocked:[...state.blocked],
       profile:state.profile,filter:state.filter,visiblePosts:state.visiblePosts,expandedCaptions:[...state.expandedCaptions]
     };
     const encoded=JSON.stringify(snapshot);
@@ -1448,13 +1253,11 @@ function restoreFeedSnapshot(snapshot){
   try{
     state.profile=snapshot.profile&&typeof snapshot.profile==='object'?snapshot.profile:state.profile;
     state.posts=Array.isArray(snapshot.posts)?snapshot.posts:[];
-    state.stories=Array.isArray(snapshot.stories)?snapshot.stories:[];
     state.users=new Map(Array.isArray(snapshot.users)?snapshot.users:[]);
     state.saved=new Set(Array.isArray(snapshot.saved)?snapshot.saved:[]);
     state.following=new Set(Array.isArray(snapshot.following)?snapshot.following:[]);
     state.muted=new Set(Array.isArray(snapshot.muted)?snapshot.muted:[]);
     state.blocked=new Set(Array.isArray(snapshot.blocked)?snapshot.blocked:[]);
-    state.storyViewed=new Set(Array.isArray(snapshot.storyViewed)?snapshot.storyViewed:[]);
     state.filter=typeof snapshot.filter==='string'?snapshot.filter:'forYou';
     state.visiblePosts=Math.max(1,Math.min(50,Number(snapshot.visiblePosts)||20));
     state.expandedCaptions=new Set(Array.isArray(snapshot.expandedCaptions)?snapshot.expandedCaptions.map(String):[]);
@@ -1486,7 +1289,6 @@ async function boot() {
       bindEvents();
       startNotificationBadge();
       $("v2PersonalStatus").textContent = `Personalized feed for ${nameOf(state.profile)}.`;
-      renderStories();
       refreshSignalRanking();
       initModernApp();
       initAISearch();
@@ -1496,7 +1298,7 @@ async function boot() {
       void Promise.allSettled([
         loadSettings(),
         (async()=>{await loadSignals();await loadAux();refreshSignalRanking();})(),
-        loadStories(),
+
         loadAnnouncement(),
         loadServerSignalProfile()
       ]).then(()=>{refreshSignalRanking();}).catch(()=>{});
@@ -1521,19 +1323,13 @@ async function boot() {
     // hydrated, and both must exist before the first ranked render.
     await loadSettings();
     await loadSignals();
-    await loadStories();
+
     await loadAux();
     await Promise.allSettled([loadAnnouncement(), loadServerSignalProfile()]);
     refreshSignalRanking();
     initModernApp();
     initAISearch();
     initRealtime().catch(e => console.warn('realtime init', e));
-
-    const deepStory = new URLSearchParams(location.search).get('story');
-    if (deepStory && state.stories.some(s => s.id === deepStory)) {
-      storyViewerOpen(deepStory);
-      document.querySelector(`[data-story="${CSS.escape(deepStory)}"]`)?.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-    }
 
     if (sessionStorage.getItem("spikeAnnouncementClosed") === "1") $("announcement").classList.remove("show");
   } catch (e) {
