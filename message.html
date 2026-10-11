@@ -26,7 +26,7 @@ const params=new URLSearchParams(location.search);let other=params.get('to')||pa
 const uuidRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function notice(s,error=false){$('notice').hidden=!s;$('notice').textContent=s||'';$('notice').classList.toggle('error',error)}
 function initials(s){return String(s||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()}
-function time(s){const d=new Date(s);return Number.isFinite(d.getTime())?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):''}
+function time(s){const d=new Date(s);return Number.isFinite(d.getTime())?d.toLocaleString([],{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}
 function render(){if(!items.length){$('thread').innerHTML='<div class="empty">This is the beginning of your conversation. Say hello 👋</div>';return}$('thread').innerHTML=items.map(m=>{const voice=m.message_type==='voice'&&String(m.body||'').startsWith('data:audio/');const body=voice?`<div class="voiceLabel"><i class="fa-solid fa-waveform"></i> Voice note</div><audio controls preload="metadata" src="${esc(m.body)}"></audio>`:esc(m.body);return `<div class="bubble ${m.sender_id===me.id?'mine':''}" data-message-id="${esc(m.id)}" data-message-body="${esc(voice?'Voice note':m.body)}">${body}${m.reactions?.like?'<span class="msgReaction">❤️</span>':''}<time>${esc(time(m.created_at))}${m.sender_id===me.id?' · Sent':''}</time></div>`}).join('')}
 function scrollBottom(){const el=$('scroll');requestAnimationFrame(()=>{el.scrollTop=el.scrollHeight})}
 async function profile(id){
@@ -60,4 +60,6 @@ $('body').addEventListener('input',()=>{const el=$('body');el.style.height='auto
 })();
 </script>
 <script src="js/spike-navigation.js"></script>
+<script src="js/presence.js?v=sitewide-presence-v3"></script>
+<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v3"></script>
 </body></html>
