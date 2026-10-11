@@ -3,28 +3,26 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 const js=fs.readFileSync(path.join(process.cwd(),'js/spike-dm-realtime-calls-v2.js'),'utf8');
-test('voice and video recordings require explicit consent from both participants',()=>{
-  assert.match(js,/id="recordConsent"/);
-  assert.match(js,/id="recordDecline"/);
-  assert.match(js,/localConsent:false,remoteConsent:false/);
-  assert.match(js,/type:'recording-consent',consent:true/);
-  assert.match(js,/type:'recording-consent',consent:false/);
-  assert.match(js,/c\.localConsent&&c\.remoteConsent/);
-  assert.match(js,/Recording declined\. This call will not be recorded\./);
+const html=fs.readFileSync(path.join(process.cwd(),'js/spike-dm-realtime-calls-v2.js'),'utf8');
+test('the call UI exposes exactly three distinct recording modes',()=>{
+  assert.match(js,/id="recordVoice"/);assert.match(js,/id="recordVideo"/);assert.match(js,/id="recordBusiness"/);
+  assert.match(js,/addEventListener\('click',\(\)=>startCallRecording\('voice'\)\)/);
+  assert.match(js,/addEventListener\('click',\(\)=>startCallRecording\('video'\)\)/);
+  assert.match(js,/addEventListener\('click',requestBusinessRecording\)/);
 });
-test('recording mixes both participants audio and includes video for video calls',()=>{
-  assert.match(js,/new window\.AudioContext|new \(window\.AudioContext\|\|window\.webkitAudioContext\)/);
-  assert.match(js,/localTracks/);
-  assert.match(js,/remoteTracks/);
-  assert.match(js,/createMediaStreamDestination/);
-  assert.match(js,/canvas\.captureStream\(24\)/);
-  assert.match(js,/new MediaRecorder\(stream/);
+test('voice and video modes mix local and remote audio and disclose recording in-call',()=>{
+  assert.match(js,/buildMixedAudio/);assert.match(js,/liveTracks\(c\.local,'audio'\)/);assert.match(js,/liveTracks\(c\.remote,'audio'\)/);
+  assert.match(js,/recording-notice/);assert.match(js,/notifyPeerOfRecording/);assert.match(js,/recording-notice-ack/);assert.match(js,/The other participant has started/);
+  assert.match(js,/canvas\.captureStream\(20\)/);assert.match(js,/drawCover\(ctx,localVideo/);assert.match(js,/drawCover\(ctx,remoteVideo/);
 });
-test('recordings can be stopped, automatically downloaded, and manually saved to device',()=>{
-  assert.match(js,/type:'recording-stop'/);
-  assert.match(js,/recorder\.ondataavailable/);
-  assert.match(js,/recorder\.onstop/);
-  assert.match(js,/triggerRecordingDownload/);
-  assert.match(js,/id="saveCallRecording"/);
-  assert.match(js,/id="closeRecordingResult"/);
+test('business recording requires both explicit approvals before the initiator starts capture',()=>{
+  assert.match(js,/recording-business-request/);assert.match(js,/recording-business-consent/);
+  assert.match(js,/!b\.localConsent\|\|!b\.remoteConsent/);assert.match(js,/b\.initiator===me\?\.id/);
+  assert.match(js,/Both participants must explicitly approve/);assert.match(js,/recordBusinessApprove/);assert.match(js,/recordBusinessDecline/);
+  assert.match(js,/Business recording consent was withdrawn before capture began/);assert.match(js,/participant-withdrew-consent/);
+});
+test('one recorder per call, unique session state, and cleanup prevent duplicate recording work',()=>{
+  assert.match(js,/c\.recordingStarting\|\|c\.recordingStarted\|\|c\.recorder/);
+  assert.match(js,/function recordingSessionId\(\)/);assert.match(js,/recordingStopping/);assert.match(js,/const suffix=safeFilePart\(c\.recordingSessionId\|\|'session'\)/);
+  assert.match(js,/c\.recordAudioContext\?\.close/);assert.match(js,/c\.recordingStream\?\.getTracks/);
 });

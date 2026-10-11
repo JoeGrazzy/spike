@@ -9,8 +9,10 @@ test('incoming calls subscribe to one user-specific topic without querying DM hi
  assert.match(source,/function callTopic\(recipient\)\{return 'spike:call:'\+String\(recipient\)\}/);
  const body=source.slice(source.indexOf('async function topicForMe()'),source.indexOf('async function setupPeer()'));
  assert.match(body,/callTopic\(me\.id\)/);
- assert.match(body,/\.on\('broadcast',\{event:'call_signal'\}/);
- assert.match(body,/await new Promise/);
+ assert.match(body,/subscribeCallTopic\(topic,handleSignal,'Incoming-call'\)/);
+ const subscription=source.slice(source.indexOf('async function subscribeCallTopic('),source.indexOf('async function topicForMe()'));
+ assert.match(subscription,/\.on\('broadcast',\{event:'call_signal'\}/);
+ assert.match(subscription,/await new Promise/);
  assert.doesNotMatch(body,/from\('private_messages'\)/);
 });
 test('outgoing signals target recipient topic and preserve recipient validation',()=>{

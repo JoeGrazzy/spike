@@ -16,8 +16,7 @@ body{padding-bottom:0}.app{height:100dvh;min-height:0}.content{overflow:auto;ove
 <form class="composer" id="form"><div id="replyPreview" class="replyPreview"><span id="replyText">Replying to message</span><button type="button" id="cancelReply" aria-label="Cancel reply">×</button></div><div id="recordingTray" class="recordingTray" hidden><span class="recordDot"></span><strong id="recordingTime">00:00</strong><span>Recording voice note</span><button type="button" id="cancelRecording">Cancel</button><button type="button" id="sendRecording">Send voice note</button></div><div class="composebox"><button class="voiceNoteBtn" id="voiceNote" type="button" aria-label="Record voice note" title="Record voice note"><i class="fa-solid fa-microphone"></i></button><textarea id="body" rows="1" maxlength="5000" placeholder="Write a message…" aria-label="Write a message" required></textarea><button class="send" id="send" type="submit" aria-label="Send message"><i class="fa-solid fa-arrow-up"></i></button></div><div class="status" id="status">Be kind. Never share information you don't want forwarded.</div></form>
 </div>
 <div id="messageMenuShade" class="messageMenuShade" role="dialog" aria-modal="true" aria-label="Message options"><div class="messageMenu"><h3 id="messageMenuTitle">Message options</h3><div class="menuGrid"><button type="button" data-msg-action="reply"><i class="fa-solid fa-reply"></i>Reply</button><button type="button" data-msg-action="like"><i class="fa-solid fa-heart"></i>Like</button><button type="button" data-msg-action="share"><i class="fa-solid fa-share-nodes"></i>Share to Friends</button><button type="button" data-msg-action="archive"><i class="fa-solid fa-box-archive"></i>Archive chat</button><button type="button" data-msg-action="delete" class="danger"><i class="fa-solid fa-trash"></i>Delete message</button><button type="button" data-msg-action="close"><i class="fa-solid fa-xmark"></i>Cancel</button></div></div></div>
-<!-- Call UI is created once by spike-dm-realtime-calls-v2.js; do not duplicate it here. -->
-<script src="js/spike-dm-realtime-calls-v1.js"></script>
+<!-- Canonical call UI and runtime are loaded once below; do not add a second call implementation. -->
 <script>
 (()=>{'use strict';
 const URL='https://cjqpyndceqyqsijihxbb.supabase.co',KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';const db=window.__SPIKE_SUPABASE__||window.supabaseClient||window.supabase?.createClient(URL,KEY);if(db){window.__SPIKE_SUPABASE__=db;window.supabaseClient=db;}const $=id=>document.getElementById(id);
@@ -61,5 +60,5 @@ $('body').addEventListener('input',()=>{const el=$('body');el.style.height='auto
 </script>
 <script src="js/spike-navigation.js"></script>
 <script src="js/presence.js?v=sitewide-presence-v5"></script>
-<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v12"></script>
+<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v13"></script>
 </body></html>

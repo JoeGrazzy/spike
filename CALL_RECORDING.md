@@ -1,21 +1,24 @@
-# SPIKE voice and video call recording
+# SPIKE call recording modes
 
-## Behavior
+## Record Voice
+- Records a mixed audio track from both the local microphone and the remote participant's incoming audio.
+- Before capture starts, SPIKE sends a visible in-call recording notice to the other participant. This is not an approval popup, but the other participant is not kept unaware.
+- The recording is finalized and downloaded on the initiating participant's device.
 
-- Recording is optional and does not start merely because a call connects.
-- Each participant must tap **Agree & record**. Recording starts automatically only after both participants consent.
-- Either participant can decline before recording begins or stop recording once it has started.
-- Voice recordings mix the local microphone with the remote participant's audio.
-- Video recordings capture a composite of the remote video and a local picture-in-picture view, plus mixed audio.
-- When recording stops or the call ends, SPIKE requests a download to the participant's device. A **Save to device** fallback remains available if the browser blocks the automatic download.
-- Files use a browser-supported format, normally `.webm`, with a descriptive SPIKE filename.
+## Record Video
+- Available during an active video call.
+- Composes the local and remote video feeds side-by-side and combines both live audio tracks.
+- Sends the other participant a visible in-call recording notice before capture begins.
+- Saves a single composed recording on the initiating participant's device.
 
-## Browser/device notes
+## Business Meeting Recording
+- The requester and the other participant each have to explicitly approve the same recording session.
+- The recording cannot start if either participant declines. The initiating participant's device records the shared meeting after both approvals are received.
+- If the request is declined, approval signalling fails, or recording cannot start, no business recording is treated as active.
+- Either participant can stop an active business recording; the initiating device finalizes its file.
 
-Recording requires a secure HTTPS context, microphone/camera permission as appropriate, WebRTC media tracks, `MediaRecorder`, `AudioContext`, and (for video) canvas capture support. Browser and operating-system behavior determines the exact download location and whether an automatic download is permitted. The in-app save action provides a user-gesture fallback.
-
-Each participant records independently in their own browser. Recordings are not uploaded to SPIKE's server by this feature. The application must clearly show recording status and users should follow applicable recording-consent laws.
-
-## Verification boundary
-
-Static syntax and audit checks can verify that the code paths exist, but a real two-device test is still required to certify microphone/camera permissions, both-party consent signaling, recording playback, and Android/iOS download behavior.
+## Safety, storage, and browser support
+- These controls do not secretly record the other participant. Local-mode recording sends a visible in-call notice; business recording requires two explicit approvals.
+- Recordings are created in the browser and downloaded to the initiating device; this implementation does not upload them to SPIKE's server.
+- Recording requires secure-context access, live local and remote media tracks, `MediaRecorder`, and `AudioContext` mixing. Video recording additionally requires both video feeds and canvas capture support. Browser/device compatibility must be verified on real devices.
+- Only one recorder can be active per call at a time. A repeated tap cannot create a second recorder. Call teardown stops recorders and media-processing resources.
