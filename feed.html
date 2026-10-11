@@ -384,4 +384,14 @@ window.openStory=()=>false;
 })();</script>
 <script src="js/spike-signal-studio.js?v=signal-studio-v32-theme-smart-errors"></script>
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<style id="spike-centered-popup-final">
+/* Final authority: long-press and command menus are centered, never docked to the bottom. */
+#menuOverlay.spike-menu-overlay.open,#menuOverlay.spike-menu-overlay[aria-hidden="false"]{align-items:center!important;justify-content:center!important;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;overflow:auto!important;overscroll-behavior:contain!important}
+#menuOverlay .spike-menu-sheet,#menuOverlay .spike-command-menu{width:min(600px,100%)!important;max-height:min(88dvh,780px)!important;min-height:0!important;overflow-x:hidden!important;overflow-y:auto!important;margin:auto!important;border-radius:24px!important;border-bottom:1px solid rgba(192,132,252,.24)!important;box-shadow:0 28px 90px rgba(0,0,0,.62),0 0 38px rgba(147,51,234,.12)!important}
+.spike-media-longpress-sheet{align-items:center!important;justify-content:center!important;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;overflow:auto!important;overscroll-behavior:contain!important;background:rgba(5,3,12,.76)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
+.spike-media-longpress-card{width:min(520px,100%)!important;max-height:min(88dvh,700px)!important;overflow:auto!important;margin:0!important;border-radius:24px!important;border:1px solid rgba(192,132,252,.3)!important;background:linear-gradient(145deg,#1b1428,#0e0b17)!important;box-shadow:0 28px 90px rgba(0,0,0,.6)!important;transform:translateY(8px) scale(.99)!important}.spike-media-longpress-sheet.open .spike-media-longpress-card{transform:translateY(0) scale(1)!important}
+.spike-profile-action-sheet{display:none;align-items:center!important;justify-content:center!important;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))!important;background:rgba(5,3,12,.76)!important;backdrop-filter:blur(14px)!important}.spike-profile-action-sheet.show{display:flex!important}.spike-profile-action-card{width:min(520px,100%)!important;max-height:min(88dvh,720px)!important;overflow:auto!important;margin:auto!important;border-radius:24px!important}
+@media(max-width:600px){#menuOverlay .spike-menu-sheet,#menuOverlay .spike-command-menu{width:min(540px,100%)!important;max-height:86dvh!important;border-radius:22px!important}.spike-media-longpress-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(prefers-reduced-motion:reduce){.spike-media-longpress-card{transition:none!important;transform:none!important}}
+</style>
 </body></html>

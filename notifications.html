@@ -246,7 +246,6 @@ if(window.spikePremiumToast)window.spikePremiumToast("All notifications marked a
 }finally{btn.disabled=!rows.some(n=>!n.read)}
 }
 async function confirmClearAll(){
-  if(!window.SPIKEPremiumDialog?.confirm)return window.confirm("Clear all notifications? This cannot be undone.");
   return window.SPIKEPremiumDialog.confirm({
     title:"Clear all notifications?",
     message:"All notifications will be permanently removed. This cannot be undone.",

@@ -1205,7 +1205,7 @@ id=String(id||'').trim();
 if(!validUuid(id)){ notice('Could not unfriend this person because their profile ID is unavailable. Refreshing your friends…',true); await loadFriends().catch(()=>{}); return; }
 const friend=state.friends.find(f=>personId(f)===id);
 const name=friend?.display_name||friend?.username||'this friend';
-const confirmed=window.SPIKEPremiumDialog?.confirm ? await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'}) : window.confirm(`Unfriend ${name}? They will be removed from your friends list.`);
+const confirmed=await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'});
 if(!confirmed) return;
 if(btn) btn.disabled=true;
 try {
