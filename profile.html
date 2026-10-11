@@ -362,6 +362,10 @@ if(!allowed.includes(file.type)) { toast("Use JPG, PNG, WEBP, or GIF."); return 
 if(file.size>10*1024*1024){ toast("Image must be 10MB or smaller."); return false; }
 return true;
 }
+function versionedAvatarUrl(url){
+  const raw=String(url||'').trim();if(!raw)return '';
+  try{const u=new URL(raw,location.href);if(!/^https?:$/.test(u.protocol))return raw;u.searchParams.set('spike_v',String(Date.now()));return u.href;}catch(_){return raw;}
+}
 async function persistProfileMedia(field,url){
 const stage = field === "avatar_url" ? "save-avatar-url" : "save-cover-document";
 const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
@@ -377,6 +381,10 @@ if(r.error) { console.error("[SPIKE PROFILE MEDIA]["+stage+"] RPC spike_update_p
 await putDoc(`users/${state.me.id}`,userPatch,"users");
 }
 state.profile={...state.profile,[field]:url};
+if(field==="avatar_url"){
+  const detail={id:String(state.me.id),avatar_url:url,updated_at:now()};
+  try{window.dispatchEvent(new CustomEvent("spike:profile-avatar-updated",{detail}));localStorage.setItem("spike.profile.avatar.updated",JSON.stringify(detail));}catch(_){}
+}
 if(field==="cover_url"){state.cover={url,position_x:0,position_y:0,zoom:1,fit:"cover"};const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:url,p_position_x:0,p_position_y:0,p_zoom:1,p_fit:"cover"});if(cr.error)throw cr.error;renderCover();}
 renderIdentity();renderCover();renderActions();renderAbout();
 }
@@ -387,7 +395,7 @@ area?.classList.add("uploading");
 try{
 toast(type==="avatar"?"Uploading profile picture…":"Uploading cover photo…");
 let url;
-try { url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`); }
+try { url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`);if(type==="avatar")url=versionedAvatarUrl(url); }
 catch(uploadError) { console.error("[SPIKE PROFILE MEDIA][cloudinary-upload]", {message:uploadError?.message}); throw uploadError; }
 try { await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url); }
 catch(saveError) { console.error("[SPIKE PROFILE MEDIA][supabase-save]", {code:saveError?.code,message:saveError?.message,details:saveError?.details,hint:saveError?.hint}); throw saveError; }
@@ -605,7 +613,7 @@ async function saveProfile(e){
 
     if(avatarFile){
       toast("Uploading profile picture…");
-      avatarUrl=await uploadToCloudinary(avatarFile,`spike/profiles/${state.me.id}`);
+      avatarUrl=versionedAvatarUrl(await uploadToCloudinary(avatarFile,`spike/profiles/${state.me.id}`));
     }
     if(coverFile){
       toast("Uploading cover photo…");
@@ -668,6 +676,10 @@ async function saveProfile(e){
     }
 
     state.profile={...state.profile,...next,verified:state.profile.verified===true};
+    if(avatarUrl && avatarUrl!==avatarOf(current)){
+      const detail={id:String(state.me.id),avatar_url:avatarUrl,updated_at:timestamp};
+      try{window.dispatchEvent(new CustomEvent("spike:profile-avatar-updated",{detail}));localStorage.setItem("spike.profile.avatar.updated",JSON.stringify(detail));}catch(_){}
+    }
     state.privacy={...(state.privacy||{}),...privacyPatch};
     window.__SPIKE_ONLINE_ALLOWED__=state.uid===state.me.id && privacyPatch.show_online_status===true;
     if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db);

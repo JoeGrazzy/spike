@@ -1181,7 +1181,30 @@ async function initRealtime({ immediate = true } = {}) {
 
     // Keep this channel public: Postgres Changes visibility is governed by the
     // authenticated database/RLS path. A private channel would require realtime.messages policies.
+    const applyAuthorProfile = profile => {
+      if (!profile?.id) return;
+      const id=String(profile.id), previous=state.users.get(id)||{};
+      state.users.set(id,{...previous,...profile,id});
+      rankingDirty=true;
+      // Re-render only the feed presentation; posts and engagement state stay intact.
+      renderSignals();
+    };
+    const refreshAuthorProfile = async id => {
+      if(!id)return;
+      try{
+        const {data,error}=await db.rpc('get_public_profiles',{p_user_ids:[String(id)]});
+        if(error)throw error;
+        const profile=Array.isArray(data)?data[0]:null;
+        if(profile?.id)applyAuthorProfile(profile);
+      }catch(e){console.debug('[SPIKE FEED AVATAR REFRESH]',e?.message||e)}
+    };
+    window.addEventListener('spike:profile-avatar-updated',e=>applyAuthorProfile({id:e.detail?.id,avatar_url:e.detail?.avatar_url,updated_at:e.detail?.updated_at}));
+    window.addEventListener('storage',e=>{if(e.key!=='spike.profile.avatar.updated'||!e.newValue)return;try{const profile=JSON.parse(e.newValue);if(profile?.id)applyAuthorProfile(profile)}catch(_){}});
     const channel = db.channel(`feed:global:${state.user?.id || 'anon'}`)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles' }, p => {
+        const id=p?.new?.id||p?.new?.user_id;
+        if(id && (p?.new?.avatar_url!==p?.old?.avatar_url || p?.new?.updated_at!==p?.old?.updated_at)) refreshAuthorProfile(id);
+      })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: 'collection_name=eq.posts' }, p => {
         // INSERT/UPDATE events are filtered to posts. Reconcile soft-deletes
         // immediately; refresh for new posts or content edits that need a full
