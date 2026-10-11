@@ -13,6 +13,7 @@ test('Feed uses the reference-led command panel hierarchy', () => {
     assert.match(feed, new RegExp(`id=["']${id}["']`), `missing menu control: ${id}`);
   }
   assert.match(feed, /PRIMARY HUBS/);
+  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
   assert.match(feed, /ACCOUNT &amp; SUPPORT/);
   assert.match(feed, /menu-reference-profile/);
 });
@@ -39,8 +40,4 @@ test('Feed-owned creation and discovery controls stay out of the menu', () => {
   for (const id of ['menuCreate','menuDiscover','menuTrending','menuNearby','menuSignal','menuStory']) {
     assert.doesNotMatch(feed, new RegExp(`id=["']${id}["']`), `${id} should stay on Feed, not Menu`);
   }
-});
-
-test('Live streaming route is absent from the Feed menu', () => {
-  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
 });

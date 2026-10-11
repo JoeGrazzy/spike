@@ -22,7 +22,6 @@ test('active Supabase migration version prefixes are unique', () => {
 test('archived duplicate migrations are byte-identical to their active later versions', () => {
   const pairs = [
     ['20260912103000_profile_transaction_and_follow_hardening_v1.sql', '20260912103100_profile_transaction_and_follow_hardening_v1.sql'],
-    ['20260922090000_spike_live_complete_v1.sql', '20260922090100_spike_live_complete_v1.sql'],
     ['20261011170000_spike_sitewide_call_presence_v2.sql', '20261011171500_spike_sitewide_call_presence_v2.sql'],
   ];
   for (const [archived, canonical] of pairs) {
@@ -30,4 +29,12 @@ test('archived duplicate migrations are byte-identical to their active later ver
     assert.ok(fs.existsSync(path.join(migrationsDir, canonical)), `Missing active canonical copy ${canonical}`);
     assert.deepEqual(fs.readFileSync(path.join(archivedDir, archived)), fs.readFileSync(path.join(migrationsDir, canonical)), `${archived} must remain byte-identical to ${canonical}`);
   }
+});
+
+
+test('removed live-stream migrations are archived and not active', () => {
+  const names = fs.readdirSync(path.join(root, 'supabase', 'migrations'));
+  assert.deepEqual(names.filter(name => /spike_live_|live_stream/i.test(name)), []);
+  const archive = path.join(root, 'supabase', 'migrations-archive', 'live-stream-removed');
+  assert.ok(fs.existsSync(path.join(archive, '20260922090100_spike_live_complete_v1.sql')));
 });

@@ -669,7 +669,6 @@ video{contain:layout paint}
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
-<script src="js/spike-loader-core.js?v=1" defer></script>
 </head>
 <body data-spike-page="friends">
 <header class="header">
@@ -1205,7 +1204,7 @@ id=String(id||'').trim();
 if(!validUuid(id)){ notice('Could not unfriend this person because their profile ID is unavailable. Refreshing your friends…',true); await loadFriends().catch(()=>{}); return; }
 const friend=state.friends.find(f=>personId(f)===id);
 const name=friend?.display_name||friend?.username||'this friend';
-const confirmed=await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'});
+const confirmed=window.SPIKEPremiumDialog?.confirm ? await window.SPIKEPremiumDialog.confirm({title:`Unfriend ${name}?`,message:'They will be removed from your friends list.',confirmText:'Unfriend',cancelText:'Keep friend',danger:true,kicker:'SPIKE CONNECTION'}) : window.confirm(`Unfriend ${name}? They will be removed from your friends list.`);
 if(!confirmed) return;
 if(btn) btn.disabled=true;
 try {

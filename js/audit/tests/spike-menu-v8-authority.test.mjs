@@ -37,7 +37,3 @@ test('V8 preserves existing menu destinations and sign-out flow', () => {
   assert.match(runtime, /const showSignOutConfirmation = \(\) =>/);
   assert.match(runtime, /db\.auth\.signOut\(\{scope:'local'\}\)/);
 });
-
-test('V8 menu no longer exposes a live-stream entry', () => {
-  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
-});

@@ -56,7 +56,3 @@ test('Route-only menu entries are not dependent on JavaScript menu actions', () 
     assert.doesNotMatch(element, /data-menu-action=/, `${id} should navigate natively`);
   }
 });
-
-test('Live streaming entry points are removed from the Feed menu', () => {
-  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
-});

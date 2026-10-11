@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "created_from": "SPIKE_LIVE_STREAM_REMOVED_UNIFIED_LOADER_HARDENED_2026-10-11",
-  "policy": "Current source archive after intentional removal of the Live Stream feature from active UI/assets. Historical original baseline is preserved at docs/audit-baselines/protected-baseline-original-2026-09-22.json. Removed paths and paths absent from the supplied archive are recorded in protected-baseline-exclusions.json. Historical Supabase migrations are retained and no live backend objects were dropped. Loader lifecycle was consolidated into js/spike-loader-core.js; intentionally modified present-file hashes were refreshed after the loader regression tests were added. Audit repair on 2026-10-11: refreshed stale entries for seven files present in the supplied project archive after review; this records the shipped source state and does not alter application behavior. New media-sharing work is limited to message.html plus its new migration and setup documentation. Report-file cleanup on 2026-10-11: removed seven standalone report/audit Markdown documents; retained audit tests and baseline checks, with deleted report-only entries removed from the current manifest. Performance optimization on 2026-10-11: replaced in-page SPIKE icon and default avatar image references with smaller WebP assets while preserving PNG fallbacks and favicon compatibility; added an additive index migration for the conversation-settings foreign key. Baseline hashes for directly edited tracked files were synchronized after checks; this records current shipped state, not a claim of historical equivalence. Phase 2 mobile image-loading optimization on 2026-10-11: added asynchronous image decoding and lazy loading to non-first static images on affected pages; baseline hashes synchronized to the edited source after test review. Phase 3 background-work optimization on 2026-10-11: stop relative-timestamp DOM refresh and maintenance-status polling while the page is hidden or in pagehide; resume/check immediately when visible/pageshow. Baseline hashes synchronized after source review; this is not a live performance benchmark. Phase 4 profile-avatar viewer on 2026-10-11: message.html now opens the existing header avatar in a contained full-screen lightbox; tap image/background or close button, Escape, and browser/Android Back dismiss it. The original avatar URL is reused; no new dependency or backend change. Baseline hash refreshed after tests; this is a source change, not a deployment claim. Feed avatar freshness optimization on 2026-10-11: profile avatar uploads receive a cache-version query value; profile changes broadcast locally and feed listens for profile-row updates, refreshes the authoritative public profile and re-renders affected feed cards without rewriting post records. Baseline hashes synchronized after static checks; cross-device realtime behavior still requires deployment/browser verification.",
-  "file_count": 352,
+  "created_from": "SPIKE_PROJECT_BEAUTIFUL_2026-09-22",
+  "policy": "Existing baseline files are protected. New files are allowed. Intentional baseline changes require regenerating this manifest and reviewing the resulting diff.",
+  "file_count": 351,
   "files": {
     "LICENSE": {
       "bytes": 988,
@@ -16,6 +16,10 @@
       "bytes": 520,
       "sha256": "241dc5e295ad85a0437202850c2d23fcb769ef6dff88e8a0b6e68c52c939c068"
     },
+    "SPIKE_FEED_RELIABILITY_IMPLEMENTATION_REPORT.md": {
+      "bytes": 2914,
+      "sha256": "53c62d38af744e042070a7ae5fcd2c5921b975a71db0f131396aab2aed37822a"
+    },
     "SUPABASE_ADMIN_POST_BULK_FIX.sql": {
       "bytes": 2562,
       "sha256": "f1bbe72f718e5a9640408d4edb1741044b3fda5d82e928c0886488fdba66c02f"
@@ -25,8 +29,8 @@
       "sha256": "4c407738cd0edc9cffb1c93473c3ba612f48af82bf0fda08dcdc0f2f8dbec643"
     },
     "admin.html": {
-      "bytes": 150439,
-      "sha256": "3da480e7818afdde5b5157372780f8ce24d9ba4487c409047b3d21545b1eed87"
+      "bytes": 150381,
+      "sha256": "890ad4344834745c0b424aecc64f22e69027a1be7192ff478a5216f9529e0c30"
     },
     "assets/avatars/README.txt": {
       "bytes": 124,
@@ -129,8 +133,8 @@
       "sha256": "5f43d7f4b9c782150312a9e0bfe9be3cb1580c30d9d113d4c3d08084bc7efca4"
     },
     "css/feed-clarity-v2.css": {
-      "bytes": 2986,
-      "sha256": "9f2a4946c0a01470e7b4cc64c636c93ce84e39326d5966d58add48120812d7a3"
+      "bytes": 2925,
+      "sha256": "33edc756fb3ea53eddf08283237d127fb86b180f1d9aa9a26a4f36907a944d41"
     },
     "css/feed-core.css": {
       "bytes": 46465,
@@ -181,16 +185,16 @@
       "sha256": "da4466f0fe05b26ccd0030be9b907ead32f5a0a04f3b7f9ac06db27c2182cbcb"
     },
     "css/spike-android-feed-v1.css": {
-      "bytes": 6454,
-      "sha256": "5e01e9b0a4c182e19f12c442dff3738b88fc34b028b2ba508425310f9057ec8e"
+      "bytes": 6424,
+      "sha256": "ac9e5722325cbafab91f75bb5aff1bf7176870c87de962ad91763f0bf03db038"
     },
     "css/spike-android-fullscreen-v1.css": {
       "bytes": 809,
       "sha256": "cc4f5f2a92e0c47e0affd09e574fa86a634846b59ec16dac6c097f34f57231d7"
     },
     "css/spike-android-menu-polish-v5.css": {
-      "bytes": 8365,
-      "sha256": "04fd40918ffed283ded78e57e06a0ab328199bcdd982679c7c85ea7e27950b05"
+      "bytes": 8389,
+      "sha256": "d1b51c2f3dc3ecd0e003f27f00f2f7afdfa094ea4ca3e2c4fa6cfb17aa46074d"
     },
     "css/spike-android-menu-polish-v6.css": {
       "bytes": 3289,
@@ -213,8 +217,8 @@
       "sha256": "9c879755719e736137969cbd53a15a9645c497d98aa948192be31721ce91292f"
     },
     "css/spike-feed-command-menu-v4.css": {
-      "bytes": 9591,
-      "sha256": "171ba82f212305fcf17150e53702032fc253122596dc537dab5c32ef2db16559"
+      "bytes": 9649,
+      "sha256": "fc7fa65d6bad576a373068a2cfafbb503b3814e186f1a0a45ffc5fc36e511199"
     },
     "css/spike-feed-menu-layout-v2.css": {
       "bytes": 2821,
@@ -228,13 +232,9 @@
       "bytes": 2919,
       "sha256": "7fc7901d8b2d78cc251df83c5b291413ecc71fe67b1eef6091044bb24fe4ad50"
     },
-    "css/spike-feed.css": {
-      "bytes": 546,
-      "sha256": "838eadc8de2a9a35bad140a7ac33ea242f06bc33ed605f89cba57407f053609e"
-    },
     "css/spike-final-polish.css": {
-      "bytes": 14160,
-      "sha256": "03dcaa82c67e73ef411d4bca9a37b72ebba691284f20fae4086be1b636fd0ea7"
+      "bytes": 14134,
+      "sha256": "c6f885ef93b5a8dc6208243628d59d0a157b29053c6c07c38ad77ab5c61b2b54"
     },
     "css/spike-global-page-authority-v2.css": {
       "bytes": 2651,
@@ -265,8 +265,8 @@
       "sha256": "97047d468c42ef672a88d4ade74f5018f66eaabdaa4679b671c4fa0ec893f41e"
     },
     "css/spike-menu-v3.css": {
-      "bytes": 9932,
-      "sha256": "389fd99d74f79202affed1954980369ec978ef54042aaf081cd3f8a67c92a272"
+      "bytes": 9979,
+      "sha256": "c93852e7913de4c951134d930cbce08df8a6d0583778e6e742390ff1c3e67de6"
     },
     "css/spike-mobile-safe-area.css": {
       "bytes": 4180,
@@ -288,10 +288,6 @@
       "bytes": 7000,
       "sha256": "33e14d8e8809c0504f73709d17309eae86d9086b7cab6311c79596c483b16a56"
     },
-    "css/spike-premium-loader.css": {
-      "bytes": 6104,
-      "sha256": "db6be19ccd8c3b2c0cd4efe30005f158fe8101307d283ed2a42bf9da7dd04ccf"
-    },
     "css/spike-safety-center.css": {
       "bytes": 6389,
       "sha256": "11b6fc440b8dad612f297c3a541f1c373e84d42fa1738924c2d76d4bc5b3ae32"
@@ -305,8 +301,8 @@
       "sha256": "d6a8b0e2c48971eaf2d7b4d3df29a526a6ad94b5f61b3216e201a9c88446b32b"
     },
     "css/spike-theme-experience-v3.css": {
-      "bytes": 8844,
-      "sha256": "80e6465301868b1b03f629aec54ded136998af0ffb486b09e2f4b98bd57401b0"
+      "bytes": 8955,
+      "sha256": "468a046262d276853dfe2d65b9116961fc9027264165bf17c74a47ca03c0b49b"
     },
     "css/spike-theme-final-authority-v1.css": {
       "bytes": 10654,
@@ -337,24 +333,24 @@
       "sha256": "ea7c7ee01ffb35388a243f6b8cdfdd5683dfbc422f4e97bbd2a4ca65bca2428c"
     },
     "feed.html": {
-      "bytes": 100497,
-      "sha256": "fd3c41d91c2fc0ea4a8a416f20c6da5c4b193b1d495c293d66cbbb2ea3e0be66"
+      "bytes": 97698,
+      "sha256": "a5f44afafd0e254cd8416e5c872032e64e5b418a3bbab65466433f0c3fed24d9"
     },
     "friends.html": {
-      "bytes": 61341,
-      "sha256": "3a2744ae96d351e319987a372cae604f1ea495f4990386b4bf3a40a20d66044d"
+      "bytes": 61403,
+      "sha256": "13d25565eb8cd9a83482c33145a6f7d230393f7d374dca0b366b63cf79b48a6c"
     },
     "guide.html": {
-      "bytes": 35149,
-      "sha256": "5ca3083a1d74a98aa408746972ffebac8c8cd5439f1ee10686c59f90c5dc71de"
+      "bytes": 35073,
+      "sha256": "c00beaf43b06eadfde12b0e9e866f136cee242dafab626bd367d9bdc56e04532"
     },
     "help.html": {
-      "bytes": 127958,
-      "sha256": "2a193521663448663613fd6a3256ec18d56299be4fcef58b5ddd4262e814b30d"
+      "bytes": 127900,
+      "sha256": "062d2373f8810e463b113d378c40476d0ea3f38832f96d4dfaf16e47979cdb35"
     },
     "index.html": {
-      "bytes": 52815,
-      "sha256": "aea0e92362dc9bd9b5172c6218a4520ed786f2af2f3d6a8a42b4f42429d3e429"
+      "bytes": 52628,
+      "sha256": "374a2ee2e86e663dc7da5fbec187acd6c1381a6d9e9d024f4252b95848111931"
     },
     "js/audit/build.mjs": {
       "bytes": 872,
@@ -364,13 +360,9 @@
       "bytes": 276,
       "sha256": "eeb28233a37ae0ad7e4930427e8f4e7814775381f4ec8ad1c65f7cd15f996daa"
     },
-    "js/audit/create-protected-baseline.mjs": {
-      "bytes": 1572,
-      "sha256": "2c66eae7dba43f42e19feefe79896f103097c2aac00ce8f17df0f907f4bc7593"
-    },
     "js/audit/protected-baseline-exclusions.json": {
-      "bytes": 1623,
-      "sha256": "15ac5895a05115be72cab58be7f7d9adeb9f0d469ccb27144252612faf7b2b8c"
+      "bytes": 1465,
+      "sha256": "b7af048c19a8cb85ff9f8da3a9965d5b573e6acc9562e2ae10a1e69f2a69f14b"
     },
     "js/audit/rpc-gate.mjs": {
       "bytes": 264,
@@ -497,8 +489,8 @@
       "sha256": "111a1a265a473a97976e841ba97ef30b6cb25b9dfbf9a8ea00bc9876891ad4c3"
     },
     "js/audit/tests/feed-reliability-v1.test.mjs": {
-      "bytes": 2518,
-      "sha256": "486368bb7f99fd843157334fa86bd569a3086422b71c8a521953ee1ac261073f"
+      "bytes": 2527,
+      "sha256": "6aa924d89cf6a349fa4e939114c1b3ebfbf4df28bb0889e518d0381528b6a89b"
     },
     "js/audit/tests/feed-smart-navigation.test.mjs": {
       "bytes": 1474,
@@ -520,21 +512,17 @@
       "bytes": 1395,
       "sha256": "b89ee3cef75285c39cea6fdff78c41304622c0837ee0f1af1be20dd9c22e1d5c"
     },
-    "js/audit/tests/live-stream-removal.test.mjs": {
-      "bytes": 1726,
-      "sha256": "58bf6d49b0c69228f4744f77906f892e98f9b7d101eac9a901e2199585e541c9"
-    },
     "js/audit/tests/menu-functionality.test.mjs": {
-      "bytes": 2981,
-      "sha256": "acaaff140ce3749de45926b3da3fe568fcf9fb6836145b38edd57f33b828b6a8"
+      "bytes": 2826,
+      "sha256": "80e1dfc69dba46cdcd3f61360080256ee887b0bad5275421537e51eed877df7d"
     },
     "js/audit/tests/menu-signout-layering-v7.test.mjs": {
       "bytes": 1799,
       "sha256": "38b76de60e2edec542fd10c67ebcf95e96581d0acf06513922fbfdaf52c949ce"
     },
     "js/audit/tests/menu-v3.test.mjs": {
-      "bytes": 2200,
-      "sha256": "b3e4ec713351d303cf82eff60cf5e949c67a0c631db77d5e60755b67cffefa10"
+      "bytes": 2129,
+      "sha256": "b9d7754294aac9917345369d1743ec71f07e4b8412773fcb2d21e93084f0fcd3"
     },
     "js/audit/tests/message-archive-inbox.test.mjs": {
       "bytes": 776,
@@ -542,7 +530,7 @@
     },
     "js/audit/tests/mobile-safe-area.test.mjs": {
       "bytes": 2034,
-      "sha256": "94531b1b76f105a9f1951f47e02e81bc7a3433b83c879788583539402369d935"
+      "sha256": "c68f016d54ababb15442a2cfd9753e2761507fcc670c1e9362083184eaae6a7e"
     },
     "js/audit/tests/navigation-restoration.test.mjs": {
       "bytes": 2857,
@@ -564,10 +552,6 @@
       "bytes": 2141,
       "sha256": "3a892c2da619600f80ee1bd30307f35bd73b9ab5db53a8b0e84d05abb5d7115a"
     },
-    "js/audit/tests/premium-loader-standardization.test.mjs": {
-      "bytes": 1308,
-      "sha256": "f8dfb7ee47d6bd84c792e5cd061a7caf46e1c1fa76fc0acc896c2ab2add2be64"
-    },
     "js/audit/tests/product-completeness.test.mjs": {
       "bytes": 1933,
       "sha256": "e48e4aacc479ac22a20a1e1fba3dbc65be8a8b3bea6d4b688b034cf04a44e837"
@@ -579,10 +563,6 @@
     "js/audit/tests/protected-baseline-exclusions.test.mjs": {
       "bytes": 1346,
       "sha256": "65af643a12252bb053b5f115932e0ccfcb72dd36139f15f9aceb0bc5d1d0cbca"
-    },
-    "js/audit/tests/protected-baseline.test.mjs": {
-      "bytes": 1761,
-      "sha256": "df720e5df99fcfd8d040aa4ab6c5fcc4a7e6c1ee494d1f4326b2a4cd5bafde14"
     },
     "js/audit/tests/public-profile-activity-visibility.test.mjs": {
       "bytes": 1033,
@@ -665,8 +645,8 @@
       "sha256": "9cbd672a2c8bdd0829d45e5596bb2addbe9c69a3099abb922be02fff09446ae3"
     },
     "js/audit/tests/spike-menu-v8-authority.test.mjs": {
-      "bytes": 2294,
-      "sha256": "be801037c5479c268c843b7563a52acc3aa2336f63bacf48dd96ba67e6384c3b"
+      "bytes": 2152,
+      "sha256": "70ac623624418f6577bfd1e44dfdf58ab6df58185916bf972ac328342a8ddbcc"
     },
     "js/audit/tests/spike-signal-studio.test.mjs": {
       "bytes": 3121,
@@ -713,8 +693,8 @@
       "sha256": "8ebbca554886b278e6a42bee0c9bc164eb10af46bd01d49655653bf6dd3b1261"
     },
     "js/audit/tests/unique-migration-versions.test.mjs": {
-      "bytes": 1818,
-      "sha256": "f613620851625026189dbdddbb8973fdad9ab0d5a3e275f91dedce8099d348fe"
+      "bytes": 2148,
+      "sha256": "6b0d585fcaa232603e93a0f6b7111118ad0134810b1c5e1f6d0e9909d01a7ede"
     },
     "js/audit/tests/world-hardening.test.mjs": {
       "bytes": 1268,
@@ -733,20 +713,20 @@
       "sha256": "edcfe3afdd13d2afbf76aeda6b81c67a806c63d47ef1de5f6189dde59ed56b17"
     },
     "js/feed-runtime-03.js": {
-      "bytes": 3952,
-      "sha256": "87a0a4e47993efaa588529bcf34917b49572fd91e802eee4d78e1eea0b8b2c1f"
+      "bytes": 3371,
+      "sha256": "1dd75cc03296afe5a3d0a043ed3c46e90f5be2d0f4b1456a68912f9a1c627336"
     },
     "js/feed-runtime-04-1.js": {
       "bytes": 20250,
       "sha256": "3d2ce8dd4eb6aec595339637667184856762b060ae3ebd2bebc3a6851751e9fc"
     },
     "js/feed-runtime-04-2.js": {
-      "bytes": 104338,
-      "sha256": "e95e5ae4f4d5a601e0275300bf5e9f86be727c9c215d91a3d272f1927561f03c"
+      "bytes": 103615,
+      "sha256": "6e5ce5beabf5fe34d5182e9871fd150685285d5ee56022e668787556f6567703"
     },
     "js/feed-runtime-04-3.js": {
-      "bytes": 92249,
-      "sha256": "44767d5a936ad447ab7ae19f3763b43b680183e9bc879af61946ac704063b2cb"
+      "bytes": 90871,
+      "sha256": "9f78467a68f93f89bf082ee413b2b009ec5bf3898b89c6f517790f0cfc849b7a"
     },
     "js/feed-runtime-05.js": {
       "bytes": 1495,
@@ -757,8 +737,8 @@
       "sha256": "5994ebb066e0abf74d76c08e4f177fd5209833dfff804a5e55e2d602abe09340"
     },
     "js/feed-runtime-07.js": {
-      "bytes": 1038,
-      "sha256": "6faeb1960481e5b170f2547b05da6af4200a1bfa240857090e245db1c88612e1"
+      "bytes": 1202,
+      "sha256": "21da5be99f1b69171d044340840ea7dadb90b76f5f823f295de2b7b364c47909"
     },
     "js/feed-runtime-08.js": {
       "bytes": 928,
@@ -769,8 +749,8 @@
       "sha256": "10ef247aa2e90333dd233ce75b34c4a4d61f2f718cbb5c81acb40eea5428c608"
     },
     "js/maintenance.js": {
-      "bytes": 6936,
-      "sha256": "42e9d42063e301fd5b529a60a8ced8b3df74731eeb9efde2a92060c4e47cd293"
+      "bytes": 6394,
+      "sha256": "42b04ae21d32219af808abedfa0af8dad325e72236fac3a89fdc58c990bd520a"
     },
     "js/premium-back.js": {
       "bytes": 2007,
@@ -789,8 +769,8 @@
       "sha256": "9ff495b65ebe71364de6f7bcdaf2c78bc4fcd1602fcc10b1e18aa68d9e4e0154"
     },
     "js/spike-dialog.js": {
-      "bytes": 7938,
-      "sha256": "4e789fb6b56d3e71cc5b9dd05f3972e9018e0eb17556afe44e248f6fc6fb1201"
+      "bytes": 6304,
+      "sha256": "97a0851345a51c6c6b99fffd63d25ec3a10eec84b5e8ad19297d5e64a0d4c2e8"
     },
     "js/spike-dm-realtime-calls-v1.js": {
       "bytes": 120,
@@ -813,8 +793,8 @@
       "sha256": "52f21937bc9aaf4de88fa8a1509939638f37e6d7fd9f0e114f08125cafa6126f"
     },
     "js/spike-identity.js": {
-      "bytes": 5092,
-      "sha256": "5cec8175818d93f27fc8845232d4305ea174eb0f5aaea698ca8c8577448dc68d"
+      "bytes": 5036,
+      "sha256": "ed5c922f49956e5981a278f471af80aa366bcd29e40718e5f4623013f7db4df3"
     },
     "js/spike-native-select.js": {
       "bytes": 5185,
@@ -869,60 +849,60 @@
       "sha256": "1922eb933da595f448a2764a09f4ad15e5d3f891e267e52d4bcb1b90ed637b7a"
     },
     "legal.html": {
-      "bytes": 11664,
-      "sha256": "62c162bb230372c815bd5d32510cfafc6413554bf58ebd5d4fb4fc5f74e6fc1b"
+      "bytes": 11606,
+      "sha256": "ce88346da87a48aeccb316d9ccd6b61f7583f29f813ba580079db80f82a25adb"
     },
     "message.html": {
-      "bytes": 45805,
-      "sha256": "6e4503d5b906beaa9f58469a2af1148f98e54b2b549b3e395eb17e349d736191"
+      "bytes": 41584,
+      "sha256": "1f1e03227d875ea4e8f0e011dfd329f9ad1373f9c7f2c295cd9f416994d9a7ff"
     },
     "messages.html": {
-      "bytes": 16274,
-      "sha256": "5b5b2497c6a0d4f37c4d3f2a6daca642fdd29e50405058134563de186562f45f"
+      "bytes": 18218,
+      "sha256": "d31ad5b1cc27891e3db697190124be266c95cd5977362e9c81c94888b94bc2f6"
     },
     "notifications.html": {
-      "bytes": 51451,
-      "sha256": "962d3b754b5dcab558130936e30775e7f6c9300050d6e54caed958d399cb60ac"
+      "bytes": 51131,
+      "sha256": "089bd8429093e581ccc23b4dd324ed4228f8fc44d3ac32b5885f096247f9a08a"
     },
     "package.json": {
       "bytes": 313,
       "sha256": "9376c28c1fec67c37e32ef0a355d938d397b52ebc80cd9d0d3827455b8cdae6f"
     },
     "policy.html": {
-      "bytes": 25197,
-      "sha256": "82c69f1b081ba507a503ac50a3d3bafaa8b8d3c424e518ea3da41bedd6aaa354"
+      "bytes": 25139,
+      "sha256": "c4a0023570289a5f0bd8f949c45a9bfb641b3d5e6125ec125c1fa92d5a256745"
     },
     "policy_appeals.html": {
-      "bytes": 9847,
-      "sha256": "fd9d9c8b0e064748d5b2192678d55192bb032826088b9bd14409920b7fe83b4e"
+      "bytes": 9789,
+      "sha256": "794a6cc98fda54b3ade0a02c42d02fe729be4114bb89bc25a5e8b8afcaea8c53"
     },
     "profile.html": {
-      "bytes": 114510,
-      "sha256": "3bb9db0df86703a008ebe140e7d1f4c495a7e5731d18667d87a95257766f425e"
+      "bytes": 113089,
+      "sha256": "285793f2fc1cac7fb4cb14d943975c1234512d5cda587599e6540f4185d1d9b0"
     },
     "reset-password.html": {
-      "bytes": 12814,
-      "sha256": "affbc521f532f521302f6159565ef3e45460b43398fc4de2c9a73ec240ff4527"
+      "bytes": 12738,
+      "sha256": "d338a95f4a5cfe0a3524773f415878d995283ed572d8dc1e23dcdc3b6120315e"
     },
     "room.html": {
-      "bytes": 62825,
-      "sha256": "100e5d5434220d76758e1b60b0b8449cd5df15e3af9c7309669520486a1ed9aa"
+      "bytes": 63036,
+      "sha256": "67ebda3409313cb3bb6475a7828d84236815439f61e123f6eca6405bc6a553e1"
     },
     "room_chat.html": {
-      "bytes": 98105,
-      "sha256": "e922e84cd804cf7ce5c06f9e1eab0910788610ec006f99c5e71e5ff9be62daf2"
+      "bytes": 96240,
+      "sha256": "a3c69a68c3d5681a4c6cf05b0ebf9a00e59ac7e6b4faf036db2207a1f1cb97f9"
     },
     "rooms.html": {
-      "bytes": 65783,
-      "sha256": "2c8d6a8728b68d188a4ae5f32e1f47afebbe58c681fdf49ef47173d4642b7195"
+      "bytes": 65707,
+      "sha256": "77c83e661f62626507a35b0534243701ff5b15aad0bcc05fc931d058c660f79a"
     },
     "settings.html": {
-      "bytes": 32641,
-      "sha256": "e347e8275c0c2c908ba8f6fa09425f7bd3255c591b7732d9735b688050947826"
+      "bytes": 32583,
+      "sha256": "2f95e1e223dd8fda39ca87b9043f3f2858e97a8164dd4e4228c1571c0729d23b"
     },
     "share.html": {
-      "bytes": 3951,
-      "sha256": "9a514f6b934e32b49ce3293909ad284626f4b669061f7f5909c78e5c64a91530"
+      "bytes": 3893,
+      "sha256": "b90971e5332c80a5c10a7f767239def8277df05480d61d59ee3b22ee9fefba3e"
     },
     "supabase/SPIKE_SAFETY_ALL_INSTALL.sql": {
       "bytes": 14596,
@@ -979,6 +959,18 @@
     "supabase/legacy/remove_legacy.sql": {
       "bytes": 142,
       "sha256": "681ac35c1a73ff1dad20070681c730aaf53f9432dbfa654bdbe358b016952f5d"
+    },
+    "supabase/migrations-archive/duplicate-version-cleanup/20260912103000_profile_transaction_and_follow_hardening_v1.sql": {
+      "bytes": 6119,
+      "sha256": "a8dd801e54db2cb1e1fe5bdfd76d03b8ebcb9ccf0511be24f78ba6087b8ff960"
+    },
+    "supabase/migrations-archive/duplicate-version-cleanup/20260922090000_spike_live_complete_v1.sql": {
+      "bytes": 12892,
+      "sha256": "2cc3a2f5195c60711a1d00c79e116f37c9d846425b6822070d091629df4ceafa"
+    },
+    "supabase/migrations-archive/duplicate-version-cleanup/20261011170000_spike_sitewide_call_presence_v2.sql": {
+      "bytes": 1434,
+      "sha256": "befe1525b525361e4b9f4b036034696a3bc4d9068a7ed8d0540904ddb7b80316"
     },
     "supabase/migrations/20260904070000_irreversible_sp_id_welcome.sql": {
       "bytes": 1165,
@@ -1224,38 +1216,6 @@
       "bytes": 5286,
       "sha256": "15433581234af1496836cdb564716edb831357181f5fb5740c2ec795dc27d158"
     },
-    "supabase/migrations/20260922083100_spike_live_audience_engine_v1.sql": {
-      "bytes": 4434,
-      "sha256": "aced0212f954ccb2100885c4b27016208a48fe2c496474b823f05001d1544654"
-    },
-    "supabase/migrations/20260922090000_spike_live_phase3b_control_room.sql": {
-      "bytes": 4383,
-      "sha256": "5cfe358b1c7fe7942ab25b9a4ce50ed4354156dfa9f170e191824f6b344666f5"
-    },
-    "supabase/migrations/20260922090100_spike_live_complete_v1.sql": {
-      "bytes": 12892,
-      "sha256": "2cc3a2f5195c60711a1d00c79e116f37c9d846425b6822070d091629df4ceafa"
-    },
-    "supabase/migrations/20260922093000_spike_live_phase2b_chat_guests.sql": {
-      "bytes": 2092,
-      "sha256": "364916e7319a1d5f002800298c355c58768636351be5556705162b096b91d108"
-    },
-    "supabase/migrations/20260922094500_spike_live_phase3c_moments_metrics.sql": {
-      "bytes": 3164,
-      "sha256": "4e0433206d230926a5acadbb7cb41ce8d569e4fb24e1066d69cea52ac4c92007"
-    },
-    "supabase/migrations/20260922100000_spike_live_social_phase2.sql": {
-      "bytes": 2296,
-      "sha256": "5228552c45f7caff79baec8c45241e42fbb83ce768d7a6813464a7ea9a2e1f65"
-    },
-    "supabase/migrations/20260922104500_spike_live_moderation_enforcement_v1.sql": {
-      "bytes": 1547,
-      "sha256": "a4a500d669afca4ad9443842634e314a9d041b2e5eeb8e6e71c628f88fff1996"
-    },
-    "supabase/migrations/20260922143000_spike_live_viewer_metrics_v1.sql": {
-      "bytes": 2043,
-      "sha256": "55b61e112a0029babceeffd5021e69563529320538d1acc06817ef902483f1c8"
-    },
     "supabase/migrations/20260922160000_spike_feature_suite_collaboration_reconcile.sql": {
       "bytes": 1537,
       "sha256": "e4c8fb5db0f13d92ebbc56b6479a1770a80d11f186d15fd56a2cb4442474bbf3"
@@ -1392,25 +1352,61 @@
       "bytes": 2850,
       "sha256": "fa8338da85e2a96514503cf08cffe368d646198f9048cb5090421fb347efa591"
     },
-    "supabase/migrations-archive/duplicate-version-cleanup/20260912103000_profile_transaction_and_follow_hardening_v1.sql": {
-      "bytes": 6119,
-      "sha256": "a8dd801e54db2cb1e1fe5bdfd76d03b8ebcb9ccf0511be24f78ba6087b8ff960"
-    },
-    "supabase/migrations-archive/duplicate-version-cleanup/20260922090000_spike_live_complete_v1.sql": {
-      "bytes": 12892,
-      "sha256": "2cc3a2f5195c60711a1d00c79e116f37c9d846425b6822070d091629df4ceafa"
-    },
-    "supabase/migrations-archive/duplicate-version-cleanup/20261011170000_spike_sitewide_call_presence_v2.sql": {
-      "bytes": 1434,
-      "sha256": "befe1525b525361e4b9f4b036034696a3bc4d9068a7ed8d0540904ddb7b80316"
-    },
     "view_user.html": {
-      "bytes": 39080,
-      "sha256": "15f8644637a76d4b23e16ce9fad107c3af3102a24422e4df7a916619e8b94b75"
+      "bytes": 38722,
+      "sha256": "199b7bb02d312cea51f6a3069f752f47e9e224e36d31c3611d4f4c610a6cff94"
     },
     "wrangler.jsonc": {
       "bytes": 360,
       "sha256": "517fec813b9ec517fe9ff4257730ba67d8dacb81f21d2a9ab17190361043b5f3"
+    },
+    "js/audit/create-protected-baseline.mjs": {
+      "bytes": 1572,
+      "sha256": "2c66eae7dba43f42e19feefe79896f103097c2aac00ce8f17df0f907f4bc7593"
+    },
+    "js/audit/tests/protected-baseline.test.mjs": {
+      "bytes": 1761,
+      "sha256": "df720e5df99fcfd8d040aa4ab6c5fcc4a7e6c1ee494d1f4326b2a4cd5bafde14"
+    },
+    "js/audit/tests/message-media-picker.test.mjs": {
+      "bytes": 997,
+      "sha256": "f783a45be7355f75286347fef311b3d69a9c21c316acb2490506a15719319659"
+    },
+    "js/audit/tests/live-stream-removal.test.mjs": {
+      "bytes": 2104,
+      "sha256": "e8de6f70795efacda2199671a606ebb27cdc7e5e16ec1cf27c39666492d1a6ca"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922094500_spike_live_phase3c_moments_metrics.sql": {
+      "bytes": 3164,
+      "sha256": "4e0433206d230926a5acadbb7cb41ce8d569e4fb24e1066d69cea52ac4c92007"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922090100_spike_live_complete_v1.sql": {
+      "bytes": 12892,
+      "sha256": "2cc3a2f5195c60711a1d00c79e116f37c9d846425b6822070d091629df4ceafa"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922083100_spike_live_audience_engine_v1.sql": {
+      "bytes": 4434,
+      "sha256": "aced0212f954ccb2100885c4b27016208a48fe2c496474b823f05001d1544654"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922093000_spike_live_phase2b_chat_guests.sql": {
+      "bytes": 2092,
+      "sha256": "364916e7319a1d5f002800298c355c58768636351be5556705162b096b91d108"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922100000_spike_live_social_phase2.sql": {
+      "bytes": 2296,
+      "sha256": "5228552c45f7caff79baec8c45241e42fbb83ce768d7a6813464a7ea9a2e1f65"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922143000_spike_live_viewer_metrics_v1.sql": {
+      "bytes": 2043,
+      "sha256": "55b61e112a0029babceeffd5021e69563529320538d1acc06817ef902483f1c8"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922090000_spike_live_phase3b_control_room.sql": {
+      "bytes": 4383,
+      "sha256": "5cfe358b1c7fe7942ab25b9a4ce50ed4354156dfa9f170e191824f6b344666f5"
+    },
+    "supabase/migrations-archive/live-stream-removed/20260922104500_spike_live_moderation_enforcement_v1.sql": {
+      "bytes": 1547,
+      "sha256": "a4a500d669afca4ad9443842634e314a9d041b2e5eeb8e6e71c628f88fff1996"
     }
   }
 }
