@@ -228,9 +228,11 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-premium-loader.css?v=spike-loader-v1">
+<script src="js/spike-loader-core.js?v=1" defer></script>
 </head>
 <body class="spike-profile-page">
-<div class="loader" id="loader"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>
+<div class="loader" id="loader" role="status" aria-live="polite" aria-label="Loading SPIKE profile"><div class="loader-card"><div class="spike-loader-mark-wrap"><div class="spike-loader-spinner"></div><img class="spike-loader-logo" src="assets/icon/icon.webp" alt="" decoding="async"></div><span id="loaderText">Loading your profile</span><small style="display:block;margin-top:10px;color:#c5b3dc">Connecting to SPIKE…</small></div></div>
 <header class="header"><button class="header-btn spike-premium-back" id="backBtn" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back" type="button">‹</button><div class="header-title" id="headerTitle">Profile</div><button class="header-btn hidden" id="adminBtn" type="button" title="Admin" aria-label="Admin">⚙</button><button class="header-btn" id="menuBtn">⋯</button></header>
 <main class="main"><section class="card">
 <div class="cover" id="coverArea">
@@ -283,7 +285,7 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 <div class="cover-editor-overlay" id="coverEditorOverlay" aria-hidden="true">
   <div class="cover-editor-modal" role="dialog" aria-modal="true" aria-labelledby="coverEditorTitle">
     <div class="cover-editor-head"><div><h2 id="coverEditorTitle">Adjust your cover</h2><p>Drag to reposition and use the slider to control how large it appears.</p></div><button class="cover-editor-close" id="coverEditorClose" type="button" aria-label="Close">×</button></div>
-    <div class="cover-editor-preview" id="coverEditorPreview"><img id="coverEditorImg" alt="Cover preview"><div class="cover-editor-safe"><span>Desktop preview</span><span>Mobile-safe area</span></div></div>
+    <div class="cover-editor-preview" id="coverEditorPreview"><img id="coverEditorImg" alt="Cover preview" decoding="async" loading="lazy"><div class="cover-editor-safe"><span>Desktop preview</span><span>Mobile-safe area</span></div></div>
     <div class="cover-editor-controls">
       <div class="cover-editor-row"><div><b>Size</b><small>Zoom the image without changing the cover frame.</small></div><output id="coverZoomValue">100%</output></div>
       <input id="coverZoom" type="range" min="100" max="250" step="1" value="100" aria-label="Cover size">
@@ -360,6 +362,10 @@ if(!allowed.includes(file.type)) { toast("Use JPG, PNG, WEBP, or GIF."); return 
 if(file.size>10*1024*1024){ toast("Image must be 10MB or smaller."); return false; }
 return true;
 }
+function versionedAvatarUrl(url){
+  const raw=String(url||'').trim();if(!raw)return '';
+  try{const u=new URL(raw,location.href);if(!/^https?:$/.test(u.protocol))return raw;u.searchParams.set('spike_v',String(Date.now()));return u.href;}catch(_){return raw;}
+}
 async function persistProfileMedia(field,url){
 const stage = field === "avatar_url" ? "save-avatar-url" : "save-cover-document";
 const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
@@ -375,6 +381,10 @@ if(r.error) { console.error("[SPIKE PROFILE MEDIA]["+stage+"] RPC spike_update_p
 await putDoc(`users/${state.me.id}`,userPatch,"users");
 }
 state.profile={...state.profile,[field]:url};
+if(field==="avatar_url"){
+  const detail={id:String(state.me.id),avatar_url:url,updated_at:now()};
+  try{window.dispatchEvent(new CustomEvent("spike:profile-avatar-updated",{detail}));localStorage.setItem("spike.profile.avatar.updated",JSON.stringify(detail));}catch(_){}
+}
 if(field==="cover_url"){state.cover={url,position_x:0,position_y:0,zoom:1,fit:"cover"};const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:url,p_position_x:0,p_position_y:0,p_zoom:1,p_fit:"cover"});if(cr.error)throw cr.error;renderCover();}
 renderIdentity();renderCover();renderActions();renderAbout();
 }
@@ -385,7 +395,7 @@ area?.classList.add("uploading");
 try{
 toast(type==="avatar"?"Uploading profile picture…":"Uploading cover photo…");
 let url;
-try { url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`); }
+try { url=await uploadToCloudinary(file,`spike/profiles/${state.me.id}`);if(type==="avatar")url=versionedAvatarUrl(url); }
 catch(uploadError) { console.error("[SPIKE PROFILE MEDIA][cloudinary-upload]", {message:uploadError?.message}); throw uploadError; }
 try { await persistProfileMedia(type==="avatar"?"avatar_url":"cover_url",url); }
 catch(saveError) { console.error("[SPIKE PROFILE MEDIA][supabase-save]", {code:saveError?.code,message:saveError?.message,details:saveError?.details,hint:saveError?.hint}); throw saveError; }
@@ -603,7 +613,7 @@ async function saveProfile(e){
 
     if(avatarFile){
       toast("Uploading profile picture…");
-      avatarUrl=await uploadToCloudinary(avatarFile,`spike/profiles/${state.me.id}`);
+      avatarUrl=versionedAvatarUrl(await uploadToCloudinary(avatarFile,`spike/profiles/${state.me.id}`));
     }
     if(coverFile){
       toast("Uploading cover photo…");
@@ -666,6 +676,10 @@ async function saveProfile(e){
     }
 
     state.profile={...state.profile,...next,verified:state.profile.verified===true};
+    if(avatarUrl && avatarUrl!==avatarOf(current)){
+      const detail={id:String(state.me.id),avatar_url:avatarUrl,updated_at:timestamp};
+      try{window.dispatchEvent(new CustomEvent("spike:profile-avatar-updated",{detail}));localStorage.setItem("spike.profile.avatar.updated",JSON.stringify(detail));}catch(_){}
+    }
     state.privacy={...(state.privacy||{}),...privacyPatch};
     window.__SPIKE_ONLINE_ALLOWED__=state.uid===state.me.id && privacyPatch.show_online_status===true;
     if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db);
@@ -760,12 +774,12 @@ function renderMediaViewer(){
   $("mediaViewerCount").textContent=`${mediaViewerIndex+1} / ${items.length}`;
   $("mediaViewerPrev").disabled=mediaViewerIndex===0;
   $("mediaViewerNext").disabled=mediaViewerIndex===items.length-1;
-  $("mediaViewerStage").innerHTML=type==="video"?`<video src="${url}" controls playsinline autoplay preload="metadata"></video>`:`<img src="${url}" alt="SPIKE media" decoding="async">`;
+  $("mediaViewerStage").innerHTML=type==="video"?`<video src="${url}" controls playsinline autoplay preload="metadata"></video>`:`<img src="${url}" alt="SPIKE media" decoding="async" loading="lazy">`;
   const n=esc(p.authorName||nameOf(state.profile)),a=avatarOf(state.profile);
   $("mediaViewerAuthor").textContent=p.authorName||nameOf(state.profile);
   $("mediaViewerTime").textContent=ago(p.createdAt||p.created_at);
   $("mediaViewerCaption").textContent=p.content||"";
-  $("mediaViewerAvatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy">`:esc((p.authorName||nameOf(state.profile)||"S")[0]);
+  $("mediaViewerAvatar").innerHTML=a?`<img src="${esc(a)}" alt="" loading="lazy" decoding="async">`:esc((p.authorName||nameOf(state.profile)||"S")[0]);
   const likeBtn=$("mediaViewerLike"),saveBtn=$("mediaViewerSave");
   likeBtn.innerHTML=`♥ <span>${Array.isArray(p.likes)?p.likes.length:0}</span>`;
   likeBtn.classList.toggle("active",liked(p));

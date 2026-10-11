@@ -51,7 +51,25 @@ function ago(v) {
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-function authorFor(p) { return state.users.get(p.authorUid) || { id: p.authorUid, name: p.authorName || "User", avatar_url: p.authorAvatar || "" }; }
+function authorFor(p) {
+  const id = String(p?.authorUid || p?.author_uid || "");
+  const current = id ? state.users.get(id) : null;
+  if (current) {
+    // The profile record is canonical. Never let an avatar snapshot saved on an
+    // old post override the current profile (including an intentionally blank avatar).
+    const currentAvatar = current.avatar_url ?? current.avatar ?? current.photo_url ?? "";
+    return {
+      ...current,
+      id: current.id || id,
+      display_name: current.display_name || current.full_name || current.name || p?.authorName || "User",
+      avatar_url: currentAvatar,
+      avatar: currentAvatar,
+      photo_url: currentAvatar
+    };
+  }
+  // Fallback only until the author's canonical profile is available.
+  return { id, name: p?.authorName || "User", display_name: p?.authorName || "User", avatar_url: p?.authorAvatar || "" };
+}
 
 function safeHttpUrl(value) {
   try {

@@ -9,18 +9,17 @@ const runtime = fs.readFileSync(path.join(ROOT, 'js/feed-runtime-04-3.js'), 'utf
 const css = fs.readFileSync(path.join(ROOT, 'css/spike-menu-v3.css'), 'utf8');
 
 test('Feed uses the reference-led command panel hierarchy', () => {
-  for (const id of ['menuGoLive','menuFriends','menuRoom','menuSaved','menuProfileHero','menuSettings','menuSafety','menuPolicy','menuSignOut']) {
+  for (const id of ['menuFriends','menuRoom','menuSaved','menuProfileHero','menuSettings','menuSafety','menuPolicy','menuSignOut']) {
     assert.match(feed, new RegExp(`id=["']${id}["']`), `missing menu control: ${id}`);
   }
   assert.match(feed, /PRIMARY HUBS/);
-  assert.match(feed, /LIVE/);
   assert.match(feed, /ACCOUNT &amp; SUPPORT/);
   assert.match(feed, /menu-reference-profile/);
 });
 
 test('Menu keeps existing routes and delegated runtime actions', () => {
   const combined = `${feed}\n${runtime}`;
-  for (const route of ['live.html?start=1','friends.html','rooms.html','settings.html','policy.html','policy_appeals.html','guide.html']) {
+  for (const route of ['friends.html','rooms.html','settings.html','policy.html','policy_appeals.html','guide.html']) {
     assert.match(combined, new RegExp(route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
   }
   assert.match(runtime, /menuOverlay\?\.addEventListener\('click', async e/);
@@ -40,4 +39,8 @@ test('Feed-owned creation and discovery controls stay out of the menu', () => {
   for (const id of ['menuCreate','menuDiscover','menuTrending','menuNearby','menuSignal','menuStory']) {
     assert.doesNotMatch(feed, new RegExp(`id=["']${id}["']`), `${id} should stay on Feed, not Menu`);
   }
+});
+
+test('Live streaming route is absent from the Feed menu', () => {
+  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
 });

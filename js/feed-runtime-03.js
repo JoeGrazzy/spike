@@ -66,6 +66,7 @@
     return d.toLocaleDateString(undefined, {month:"short", day:"numeric", year:d.getFullYear() === new Date().getFullYear() ? undefined : "numeric"});
   }
   function refresh() {
+    if (document.visibilityState === "hidden") return;
     document.querySelectorAll("[data-spike-time]").forEach(el => {
       const raw = el.dataset.spikeTime;
       const txt = relativeTime(raw);
@@ -76,8 +77,19 @@
     });
   }
   window.SPIKETime = { dateValue, relativeTime, refresh };
-  setInterval(refresh, 30000);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
+  let refreshTimer = null;
+  function startRefresh() {
+    if (refreshTimer !== null) clearInterval(refreshTimer);
+    refresh();
+    if (document.visibilityState === "visible") refreshTimer = setInterval(refresh, 30000);
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") startRefresh();
+    else if (refreshTimer !== null) { clearInterval(refreshTimer); refreshTimer = null; }
+  });
+  window.addEventListener("pagehide", () => { if (refreshTimer !== null) clearInterval(refreshTimer); refreshTimer = null; }, {passive:true});
+  window.addEventListener("pageshow", startRefresh, {passive:true});
+  startRefresh();
 })();
 
 // Edit detection

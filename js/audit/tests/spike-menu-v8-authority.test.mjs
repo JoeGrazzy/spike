@@ -31,9 +31,13 @@ test('V8 preserves the existing menu open/close navigation state contract', () =
 });
 
 test('V8 preserves existing menu destinations and sign-out flow', () => {
-  for (const id of ['menuFriends', 'menuRoom', 'menuSaved', 'menuPulse', 'menuGoLive', 'menuSettings', 'menuSafety', 'menuPolicy', 'menuTheme', 'menuAudience', 'menuGuide', 'menuPolicyAppeals', 'menuSignOut']) {
+  for (const id of ['menuFriends', 'menuRoom', 'menuSaved', 'menuPulse', 'menuSettings', 'menuSafety', 'menuPolicy', 'menuTheme', 'menuAudience', 'menuGuide', 'menuPolicyAppeals', 'menuSignOut']) {
     assert.match(feed, new RegExp(`id="${id}"`), `${id} remains present`);
   }
   assert.match(runtime, /const showSignOutConfirmation = \(\) =>/);
   assert.match(runtime, /db\.auth\.signOut\(\{scope:'local'\}\)/);
+});
+
+test('V8 menu no longer exposes a live-stream entry', () => {
+  assert.doesNotMatch(feed, /menuGoLive|menu-reference-live|live\.html/i);
 });

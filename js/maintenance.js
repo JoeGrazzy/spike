@@ -9,6 +9,7 @@
   let lastState = null;
   let adminBypass = false;
   let adminCheckDone = false;
+  let pollTimer = null;
 
   function ensureOverlay() {
     if (overlay) return overlay;
@@ -120,11 +121,27 @@
     }
   }
 
+  function stopPolling() {
+    if (pollTimer !== null) clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  function startPolling() {
+    stopPolling();
+    if (document.visibilityState === 'hidden') return;
+    check();
+    pollTimer = setInterval(() => {
+      if (document.visibilityState === 'visible') check();
+    }, POLL_MS);
+  }
   function boot() {
     if (!document.body) return setTimeout(boot, 0);
-    check();
-    setInterval(check, POLL_MS);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+    startPolling();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') startPolling();
+      else stopPolling();
+    });
+    window.addEventListener('pagehide', stopPolling, {passive:true});
+    window.addEventListener('pageshow', startPolling, {passive:true});
   }
   boot();
 })();

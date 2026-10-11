@@ -1,33 +1,29 @@
 
-/* SPIKE feed boot loader — never owns or replaces feed application logic. */
+/* SPIKE feed loader adapter — delegates lifecycle and retry ownership to shared core. */
 (() => {
   const loader = document.getElementById("spike-feed-loader");
   if (!loader) return;
-  let hidden = false;
-  const startedAt = performance.now();
-  const MIN_LOADER_MS = 1600;
-
-  const hide = () => {
-    if (hidden) return;
-    hidden = true;
-    const elapsed = performance.now() - startedAt;
-    const wait = Math.max(0, MIN_LOADER_MS - elapsed);
-    window.setTimeout(() => {
+  const core = window.SpikeLoader;
+  if (!core) {
+    // Defensive fallback for a misconfigured deployment; preserve functional boot.
+    let hidden = false;
+    window.SPIKE_HIDE_FEED_LOADER = () => {
+      if (hidden) return;
+      hidden = true;
       loader.classList.add("is-hidden");
-      window.setTimeout(() => loader.remove(), 320);
-    }, wait);
-  };
-
-  window.SPIKE_HIDE_FEED_LOADER = hide;
-
-  // Keep the premium loader visible while startup is genuinely in progress.
-  // On a stall, the text-free glowing orb becomes a retry control.
-  const retry = document.getElementById("spikeFeedRetry");
-  retry?.addEventListener("click", () => window.location.reload());
-  window.setTimeout(() => {
-    if (hidden || !loader.isConnected) return;
-    const subtitle = loader.querySelector(".spike-feed-loader-subtitle");
-    if (subtitle) subtitle.textContent = "This is taking longer than usual. Check your connection.";
-    if (retry) retry.hidden = false;
-  }, 9000);
+      window.setTimeout(() => loader.remove(), 380);
+    };
+    document.getElementById("spikeFeedRetry")?.addEventListener("click", () => window.location.reload());
+    return;
+  }
+  const controller = core.register(loader, {
+    minVisibleMs: 1600,
+    stallMs: 9000,
+    retry: "reload",
+    retryElement: document.getElementById("spikeFeedRetry"),
+    stallMessage: "This is taking longer than usual. Check your connection."
+  });
+  window.SPIKE_HIDE_FEED_LOADER = () => controller.hide();
+  window.SPIKE_SHOW_FEED_LOADER = () => controller.show();
 })();
+
