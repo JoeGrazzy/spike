@@ -12,7 +12,7 @@ test('the call UI exposes exactly three distinct recording modes',()=>{
 });
 test('voice and video modes mix local and remote audio and disclose recording in-call',()=>{
   assert.match(js,/buildMixedAudio/);assert.match(js,/liveTracks\(c\.local,'audio'\)/);assert.match(js,/liveTracks\(c\.remote,'audio'\)/);
-  assert.match(js,/recording-notice/);assert.match(js,/notifyPeerOfRecording/);assert.match(js,/recording-notice-ack/);assert.match(js,/Other participant is recording/);assert.match(js,/#recordingRemoteNotice/);assert.match(js,/A discreet recording indicator is visible to the other participant/);
+  assert.match(js,/recording-notice/);assert.match(js,/notifyPeerOfRecording/);assert.match(js,/recording-notice-ack/);assert.match(js,/Recording in progress/);assert.match(js,/#recordingRemoteNotice/);assert.match(js,/A discreet recording indicator is visible to the other participant/);
   assert.match(js,/canvas\.captureStream\(20\)/);assert.match(js,/drawCover\(ctx,localVideo/);assert.match(js,/drawCover\(ctx,remoteVideo/);
 });
 test('business recording requires both explicit approvals before the initiator starts capture',()=>{
@@ -25,4 +25,21 @@ test('one recorder per call, unique session state, and cleanup prevent duplicate
   assert.match(js,/c\.recordingStarting\|\|c\.recordingStarted\|\|c\.recorder/);
   assert.match(js,/function recordingSessionId\(\)/);assert.match(js,/recordingStopping/);assert.match(js,/const suffix=safeFilePart\(c\.recordingSessionId\|\|'session'\)/);
   assert.match(js,/c\.recordAudioContext\?\.close/);assert.match(js,/c\.recordingStream\?\.getTracks/);
+});
+
+test('remote recording notice is compact, visible only while active, and clears without a stopped toast',()=>{
+  assert.match(js,/c\.remoteRecordingNotice='Recording in progress'/);
+  assert.match(js,/\['stop','failed'\]\.includes\(p\.action\)/);
+  assert.match(js,/c\.remoteRecordingNotice=''/);
+  assert.doesNotMatch(js,/Other participant stopped recording/);
+});
+
+test('finished call recordings request automatic download and expose a manual fallback while the call remains active',()=>{
+  assert.match(js,/function triggerRecordingDownload\(record\)/);
+  assert.match(js,/a\.download=record\.name/);
+  assert.match(js,/id=\"recordingDownloadFallbackWrap\"/);
+  assert.match(js,/id=\"downloadFinishedRecording\"/);
+  assert.match(js,/If the automatic download did not start, tap Download recording/);
+  assert.match(js,/downloadFinishedRecording.*triggerRecordingDownload\(lastCallRecording\)/);
+  assert.match(js,/Recording finished\. A download was requested automatically/);
 });
