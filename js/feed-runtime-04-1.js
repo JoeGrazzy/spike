@@ -38,7 +38,7 @@ const state = {
   saved: new Set(), following: new Set(), muted: new Set(), blocked: new Set(),
   filter: "forYou", media: null, mediaType: null, mediaItems: [], activeMediaIndex: 0, mediaLayout: "auto",
   activePost: null, activeComment: null, customFeed: null,
-  visiblePosts: 20, loadingMore: !1, allLoaded: !1, expandedCaptions: new Set(), realtimeRetryTimer: null, realtimeRetryAttempt: 0, realtimeStarting: false, realtimeRefreshTimer: null
+  visiblePosts: 20, loadingMore: !1, allLoaded: !1, expandedCaptions: new Set(), realtimeRetryTimer: null, realtimeRetryAttempt: 0, realtimeStarting: false, realtimeRefreshTimer: null, postsLoadGeneration: 0
 };
 window.state = state;
 try { const cf=JSON.parse(localStorage.getItem('spike-active-custom-feed')||'null'); if(cf&&typeof cf==='object') { state.customFeed=cf; window.SPIKE_ACTIVE_CUSTOM_FEED=cf; } } catch(_) {}
@@ -321,13 +321,24 @@ function reactionLikeUsers(p) {
 function reactionLikeCount(p) { return reactionLikeUsers(p).size; }
 
 async function loadSignals() {
+  const requestedUserId = String(state.user?.id || '');
+  if (!requestedUserId) throw new Error('Authentication required to load the feed.');
+  const generation = ++state.postsLoadGeneration;
   const rows = await withTimeout(listCollection('posts', ''), 10000, "Posts loading");
-  state.posts = rows.map(r => normalizeSignalModel({ id: r.document_id, ...(r.data || {}) })).filter(p => {
+
+  // Requests can overlap (boot, refresh, realtime). Only the newest response
+  // for the still-active user may replace the canonical in-memory feed.
+  if (generation !== state.postsLoadGeneration || requestedUserId !== String(state.user?.id || '')) return;
+
+  const posts = rows.map(r => normalizeSignalModel({ id: r.document_id, ...(r.data || {}) })).filter(p => {
     if (!p.id || p.deleted) return false;
     const scheduled = p.scheduledAt && new Date(p.scheduledAt) > new Date();
-    return !scheduled || p.authorUid === state.user.id;
+    return !scheduled || p.authorUid === requestedUserId;
   });
-  rankingDirty=true; rankingCache.clear();
+  if (generation !== state.postsLoadGeneration || requestedUserId !== String(state.user?.id || '')) return;
+  state.posts = posts;
+  rankingDirty = true;
+  rankingCache.clear();
 }
 
 const SPIKE_REACTIONS = ["❤️","👍","😂","😮","😢","🔥"];

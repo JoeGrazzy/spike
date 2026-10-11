@@ -1185,9 +1185,38 @@ async function initRealtime({ immediate = true } = {}) {
     // authenticated database/RLS path. A private channel would require realtime.messages policies.
     const channel = db.channel(`feed:global:${state.user?.id || 'anon'}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'app_documents', filter: 'collection_name=eq.posts' }, p => {
+        // INSERT/UPDATE events are filtered to posts. Reconcile soft-deletes
+        // immediately; refresh for new posts or content edits that need a full
+        // ranked render. Keep reaction/comment-only updates surgical to avoid
+        // destroying focused text inputs or open reply state.
         const r = p?.new || p?.record || {};
-        const collection = r.collection_name;
-        if (collection === 'posts' && !applyPostEvent(r.data ? { id: r.document_id, ...r.data } : r)) scheduleRefresh('posts');
+        if (p?.eventType === 'DELETE') {
+          scheduleRefresh('posts-delete');
+          return;
+        }
+        if (r.collection_name !== 'posts') return;
+        const post = r.data && typeof r.data === 'object' ? { id: r.document_id, ...r.data } : r;
+        const postId = post.id || post.post_id || post.postId;
+        if (post.deleted === true && postId) {
+          const before = state.posts.length;
+          state.posts = state.posts.filter(item => String(item.id) !== String(postId));
+          if (state.posts.length !== before) {
+            rankingDirty = true;
+            rankingCache.clear();
+            renderSignals();
+          }
+          return;
+        }
+        const oldData = p?.old?.data || {};
+        const contentFields = ['content','caption','media','mediaUrl','media_url','mediaType','media_type','mediaItems','media_items'];
+        const contentChanged = p?.eventType === 'UPDATE' && contentFields.some(key => JSON.stringify(oldData?.[key] ?? null) !== JSON.stringify(r.data?.[key] ?? null));
+        if (p?.eventType === 'INSERT' || contentChanged || !applyPostEvent(post)) scheduleRefresh('posts');
+      })
+      // Supabase Postgres Changes does not support DELETE filters consistently.
+      // A deleted row may only include its primary key, so refresh on deletes
+      // and let the authenticated eligible-posts view enforce visibility.
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'app_documents' }, () => {
+        scheduleRefresh('posts-delete');
       })
       .subscribe((status, err) => {
         if (status === 'SUBSCRIBED') {
@@ -1272,6 +1301,7 @@ window.addEventListener('pagehide',captureFeedSnapshot,{capture:true});
 
 // ─── BOOT ──────────────────────────────────────────────
 async function boot() {
+  let bootFailed = false;
   try {
     updateAdminVisibility();
     const feedLoaderSubtitle = $("spike-feed-loader")?.querySelector(".spike-feed-loader-subtitle");
@@ -1333,12 +1363,16 @@ async function boot() {
 
     if (sessionStorage.getItem("spikeAnnouncementClosed") === "1") $("announcement").classList.remove("show");
   } catch (e) {
+    bootFailed = true;
     console.error("[SPIKE FEED]", e);
-    const feedLoaderSubtitle = $("spike-feed-loader")?.querySelector(".spike-feed-loader-subtitle");
-    if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE could not load this feed.";
-    toast(e.message || "Feed initialization failed.");
+    const loader = $("spike-feed-loader");
+    const feedLoaderSubtitle = loader?.querySelector(".spike-feed-loader-subtitle");
+    const retry = $("spikeFeedRetry");
+    if (feedLoaderSubtitle) feedLoaderSubtitle.textContent = "SPIKE could not finish loading your feed. Check your connection and retry.";
+    if (retry) retry.hidden = false;
+    toast(e.message || "Feed initialization failed.", "error");
   } finally {
-    window.SPIKE_HIDE_FEED_LOADER?.();
+    if (!bootFailed) window.SPIKE_HIDE_FEED_LOADER?.();
     // Set up intersection observer for infinite scroll
     const sentinel = document.getElementById("infiniteScrollSentinel");
     if (sentinel) {
@@ -1361,10 +1395,11 @@ if (!window.__SPIKE_FEED_STARTUP_WATCHDOG__) {
       await withTimeout(__spikeBootCore(), 20000, 'SPIKE startup');
     } catch (e) {
       console.error('[SPIKE STARTUP WATCHDOG]', e);
-      window.SPIKE_HIDE_FEED_LOADER?.();
       const sub = $('spike-feed-loader')?.querySelector('.spike-feed-loader-subtitle');
-      if (sub) sub.textContent = 'SPIKE is taking too long to respond. You can retry.';
-      toast('SPIKE startup timed out. Please retry.');
+      const retry = $('spikeFeedRetry');
+      if (sub) sub.textContent = 'SPIKE is taking too long to respond. Check your connection and retry.';
+      if (retry) retry.hidden = false;
+      toast('SPIKE startup timed out. Please retry.', 'error');
     }
   };
 }

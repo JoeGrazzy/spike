@@ -19,5 +19,15 @@
   };
 
   window.SPIKE_HIDE_FEED_LOADER = hide;
-  window.setTimeout(hide, 9000);
+
+  // A slow network must not uncover a half-initialized feed. Offer recovery
+  // instead of dismissing the loader while the application is still booting.
+  const retry = document.getElementById("spikeFeedRetry");
+  retry?.addEventListener("click", () => window.location.reload());
+  window.setTimeout(() => {
+    if (hidden || !loader.isConnected) return;
+    const subtitle = loader.querySelector(".spike-feed-loader-subtitle");
+    if (subtitle) subtitle.textContent = "This is taking longer than usual. Check your connection or retry.";
+    if (retry) retry.hidden = false;
+  }, 9000);
 })();
