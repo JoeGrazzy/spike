@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "created_from": "SPIKE_LIVE_STREAM_REMOVED_UNIFIED_LOADER_HARDENED_2026-10-11",
-  "policy": "Current source archive after intentional removal of the Live Stream feature from active UI/assets. Historical original baseline is preserved at docs/audit-baselines/protected-baseline-original-2026-09-22.json. Removed paths and paths absent from the supplied archive are recorded in protected-baseline-exclusions.json. Historical Supabase migrations are retained and no live backend objects were dropped. Loader lifecycle was consolidated into js/spike-loader-core.js; intentionally modified present-file hashes were refreshed after the loader regression tests were added.",
-  "file_count": 355,
+  "policy": "Current source archive after intentional removal of the Live Stream feature from active UI/assets. Historical original baseline is preserved at docs/audit-baselines/protected-baseline-original-2026-09-22.json. Removed paths and paths absent from the supplied archive are recorded in protected-baseline-exclusions.json. Historical Supabase migrations are retained and no live backend objects were dropped. Loader lifecycle was consolidated into js/spike-loader-core.js; intentionally modified present-file hashes were refreshed after the loader regression tests were added. Audit repair on 2026-10-11: refreshed stale entries for seven files present in the supplied project archive after review; this records the shipped source state and does not alter application behavior. New media-sharing work is limited to message.html plus its new migration and setup documentation. Report-file cleanup on 2026-10-11: removed seven standalone report/audit Markdown documents; retained audit tests and baseline checks, with deleted report-only entries removed from the current manifest.",
+  "file_count": 352,
   "files": {
     "LICENSE": {
       "bytes": 988,
@@ -15,18 +15,6 @@
     "SPIKE_CALLS_V49_DIAGNOSTICS.sql": {
       "bytes": 520,
       "sha256": "241dc5e295ad85a0437202850c2d23fcb769ef6dff88e8a0b6e68c52c939c068"
-    },
-    "SPIKE_FEED_RELIABILITY_IMPLEMENTATION_REPORT.md": {
-      "bytes": 2551,
-      "sha256": "4159c4dbf131f1fb7f0a71dace6099f0576db93c1b67f7ddb87811cdb7d43d53"
-    },
-    "SPIKE_LIVE_STREAM_REMOVAL_REPORT.md": {
-      "bytes": 1420,
-      "sha256": "e4ad189bbdd4a3a56dedc889b4d101d1d24b7b76014bbb3810ef2702330b5da6"
-    },
-    "SPIKE_PROJECT_LOADER_AUDIT_REPORT.md": {
-      "bytes": 2421,
-      "sha256": "18f46662a1cbd0162f312b0748249b77fe0c410ad3116e7cae5af8ce8ce93bb0"
     },
     "SUPABASE_ADMIN_POST_BULK_FIX.sql": {
       "bytes": 2562,
@@ -349,12 +337,12 @@
       "sha256": "ea7c7ee01ffb35388a243f6b8cdfdd5683dfbc422f4e97bbd2a4ca65bca2428c"
     },
     "feed.html": {
-      "bytes": 97806,
-      "sha256": "3e1c514f9e4d9e5fcf177c78bc164c7ec4d3ef915e05baef6efb7d38d7095231"
+      "bytes": 100463,
+      "sha256": "a98f52bafd48ba5aebc57dee96f53da2ebd6ddc0c3caee3051667ad7fa6cdf09"
     },
     "friends.html": {
-      "bytes": 61461,
-      "sha256": "b262cb4fe5f684e2388ac4a3d6ddb8e7896d812c99f146b2f967deb6a2ad383f"
+      "bytes": 61341,
+      "sha256": "3a2744ae96d351e319987a372cae604f1ea495f4990386b4bf3a40a20d66044d"
     },
     "guide.html": {
       "bytes": 35131,
@@ -801,8 +789,8 @@
       "sha256": "9ff495b65ebe71364de6f7bcdaf2c78bc4fcd1602fcc10b1e18aa68d9e4e0154"
     },
     "js/spike-dialog.js": {
-      "bytes": 6304,
-      "sha256": "97a0851345a51c6c6b99fffd63d25ec3a10eec84b5e8ad19297d5e64a0d4c2e8"
+      "bytes": 7938,
+      "sha256": "4e789fb6b56d3e71cc5b9dd05f3972e9018e0eb17556afe44e248f6fc6fb1201"
     },
     "js/spike-dm-realtime-calls-v1.js": {
       "bytes": 120,
@@ -885,16 +873,16 @@
       "sha256": "62c162bb230372c815bd5d32510cfafc6413554bf58ebd5d4fb4fc5f74e6fc1b"
     },
     "message.html": {
-      "bytes": 27740,
-      "sha256": "309cd20e8b15e033ea889242e4088c5ed38fecbca0633191f8d63706c018cd74"
+      "bytes": 41584,
+      "sha256": "1f1e03227d875ea4e8f0e011dfd329f9ad1373f9c7f2c295cd9f416994d9a7ff"
     },
     "messages.html": {
       "bytes": 16257,
       "sha256": "012fcd3909f94c6788c4f27ad7ac221d9704ae01f953de7037b04ff4ba5a07f4"
     },
     "notifications.html": {
-      "bytes": 51547,
-      "sha256": "dc47af5d9b6dcd6298ad51d91d78693168a47e923c64c4c549a76834c50bace5"
+      "bytes": 51432,
+      "sha256": "8d7be47966185c66828aa7d8cfe5b55973c8e0299ca0e7bf7a2fd81d7788f910"
     },
     "package.json": {
       "bytes": 313,
@@ -917,12 +905,12 @@
       "sha256": "a3870f4a6a96666344015f8cd955df6b6d06bb78be03e2a31230d430b6810866"
     },
     "room.html": {
-      "bytes": 63094,
-      "sha256": "00fd3f428ff19efcf6d5b84a8f84c8826ab7fa16ff1777e61fcbc34ff628f192"
+      "bytes": 62793,
+      "sha256": "d7a82160a66148bc1b2df9a5e2667ccbce84236dd64392ba96926a97aee5a825"
     },
     "room_chat.html": {
-      "bytes": 96298,
-      "sha256": "914ab5e8bc28d25f12c1055890643511c2001c77e5e679cffbc310a9a30df6a0"
+      "bytes": 98088,
+      "sha256": "98fd2a381f6113fb92f7ab1e23614d405c4f2f4e4150043821f7809db90638d9"
     },
     "rooms.html": {
       "bytes": 65765,
