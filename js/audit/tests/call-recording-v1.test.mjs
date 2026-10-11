@@ -12,7 +12,7 @@ test('the call UI exposes exactly three distinct recording modes',()=>{
 });
 test('voice and video modes mix local and remote audio and disclose recording in-call',()=>{
   assert.match(js,/buildMixedAudio/);assert.match(js,/liveTracks\(c\.local,'audio'\)/);assert.match(js,/liveTracks\(c\.remote,'audio'\)/);
-  assert.match(js,/recording-notice/);assert.match(js,/notifyPeerOfRecording/);assert.match(js,/recording-notice-ack/);assert.match(js,/The other participant has started/);
+  assert.match(js,/recording-notice/);assert.match(js,/notifyPeerOfRecording/);assert.match(js,/recording-notice-ack/);assert.match(js,/Other participant is recording/);assert.match(js,/#recordingRemoteNotice/);assert.match(js,/A discreet recording indicator is visible to the other participant/);
   assert.match(js,/canvas\.captureStream\(20\)/);assert.match(js,/drawCover\(ctx,localVideo/);assert.match(js,/drawCover\(ctx,remoteVideo/);
 });
 test('business recording requires both explicit approvals before the initiator starts capture',()=>{
