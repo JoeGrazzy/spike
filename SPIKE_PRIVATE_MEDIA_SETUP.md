@@ -8,11 +8,11 @@
 - Existing text messages, voice notes, reactions, reply gestures, and call integration remain in place.
 
 ## Required before use
-1. Apply `supabase/migrations/20261012100000_spike_private_message_media_v1.sql` to the same Supabase project used by SPIKE.
+1. The missing `attachment` column and private media bucket/policies have now been applied to the connected Supabase project. The migration file is kept in sync for reproducible setup and preserves existing `audio` message types.
 2. Deploy the updated `message.html` together with the rest of the existing site assets.
 3. Test using two authenticated accounts: sender uploads each file type, recipient sees the attachment, and an unrelated third account cannot create a signed URL for it.
 
-The page caps uploads at 50 MiB. The Storage bucket is private; the UI creates a five-minute signed URL only when a participant opens an attachment. The database migration is included but was not applied to the live Supabase project from this build process.
+The page caps uploads at 50 MiB. The Storage bucket is private; the UI creates a five-minute signed URL only when a participant opens an attachment. The schema migration was applied to the connected Supabase project during this repair. The updated website assets still need to be deployed, and end-to-end attachment sharing still needs a two-account test.
 
 ## Limitations
 - Upload status reports upload and message-delivery phases, but the standard Storage upload call does not expose a reliable byte-by-byte progress callback here.

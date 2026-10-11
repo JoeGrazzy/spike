@@ -1,5 +1,6 @@
 -- SPIKE private-message attachments: private Storage bucket and participant-only access.
--- Apply this migration in the Supabase project before using media sharing.
+-- Apply this migration to the Supabase project used by SPIKE before using media sharing.
+-- Keep the legacy 'audio' message_type accepted for existing production rows.
 
 alter table public.private_messages
   add column if not exists attachment jsonb;
@@ -21,7 +22,7 @@ end $$;
 
 alter table public.private_messages
   add constraint private_messages_message_type_media_check
-  check (message_type is null or message_type in ('text', 'voice', 'attachment'));
+  check (message_type is null or message_type in ('text', 'voice', 'audio', 'attachment'));
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
