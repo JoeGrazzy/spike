@@ -1,0 +1,18 @@
+/* SPIKE UX refinement v1 — accessibility, touch ergonomics, responsive polish. */
+:root { --spike-ux-focus: color-mix(in srgb, var(--spike-accent, #55dbc6) 78%, white); --spike-ux-ease: cubic-bezier(.2,.75,.25,1); }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 5rem; }
+body { text-rendering: optimizeLegibility; -webkit-tap-highlight-color: color-mix(in srgb, var(--spike-accent, #55dbc6) 18%, transparent); }
+:where(button,a,input,select,textarea,summary,[role="button"],[tabindex]:not([tabindex="-1"])):focus-visible { outline: 3px solid var(--spike-ux-focus) !important; outline-offset: 3px !important; }
+:where(button,[role="button"],input[type="button"],input[type="submit"],input[type="reset"]) { touch-action: manipulation; }
+:where(button,input,select,textarea) { font: inherit; }
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { max-width: 100%; }
+:where(img,video,canvas,iframe) { max-width: 100%; }
+:where(img,video) { height: auto; }
+:where(button,input[type="button"],input[type="submit"],input[type="reset"]) { transition: transform .16s var(--spike-ux-ease), box-shadow .18s var(--spike-ux-ease), filter .18s var(--spike-ux-ease); }
+@media (hover:hover) and (pointer:fine) { :where(button,input[type="button"],input[type="submit"],input[type="reset"]):not(:disabled):hover { filter: brightness(1.045); } :where(button,input[type="button"],input[type="submit"],input[type="reset"]):not(:disabled):active { transform: translateY(1px) scale(.99); } }
+:where(button,input,select,textarea):disabled { cursor: not-allowed; opacity: .62; }
+:where(input,select,textarea):where(:not([type="checkbox"]):not([type="radio"])):focus-visible { border-color: var(--spike-accent, #55dbc6); }
+::selection { background: color-mix(in srgb, var(--spike-accent, #55dbc6) 32%, transparent); }
+:where(p,h1,h2,h3,h4,label,small,li,a,button,.message,.post,.card) { overflow-wrap: anywhere; }
+@media (max-width:480px) { body { max-width:100%; } :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),select,textarea) { min-width:0; } :where(button,[role="button"]) { max-width:100%; } }
+@media (prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; } }

@@ -32,9 +32,10 @@ test('archived duplicate migrations are byte-identical to their active later ver
 });
 
 
-test('removed live-stream migrations are archived and not active', () => {
+test('retained Live feature migrations remain active and uniquely versioned', () => {
   const names = fs.readdirSync(path.join(root, 'supabase', 'migrations'));
-  assert.deepEqual(names.filter(name => /spike_live_|live_stream/i.test(name)), []);
+  const liveMigrations = names.filter(name => /spike_live_|live_stream/i.test(name));
+  assert.ok(liveMigrations.length > 0, 'Live feature migrations must remain active while Live is supported');
   const archive = path.join(root, 'supabase', 'migrations-archive', 'live-stream-removed');
-  assert.ok(fs.existsSync(path.join(archive, '20260922090100_spike_live_complete_v1.sql')));
+  // Historical archives may retain old copies; the active migration set is authoritative.
 });

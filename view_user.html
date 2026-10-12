@@ -83,10 +83,13 @@
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 <link href="css/premium-back.css" rel="stylesheet">
+
+<script src="js/spike-loader-core.js?v=1" defer></script>
+  <link rel="stylesheet" href="css/spike-premium-loader.css">
 </head>
 <body class="spike-view-user-page">
 <button type="button" data-spike-premium-back="true" aria-label="Back" class="premium-back">‹</button>
-<div class="loader" id="loader"><div class="loader-box"><div class="spinner"></div><b>Loading SPIKE profile</b><span id="loaderText">Checking profile access…</span></div></div>
+<div class="loader" id="loader" role="status" aria-live="polite"><div class="loader-box"><div class="spinner"></div><b>Loading SPIKE profile</b><span id="loaderText">Checking profile access…</span></div></div>
 <header class="header"><button class="icon" id="backBtn" aria-label="Back">←</button><div class="title" id="headerTitle">SPIKE profile</div><button class="icon" id="menuBtn" aria-label="Profile options">⋮</button></header>
 <main class="main">
 <section class="hero">
@@ -277,6 +280,7 @@ setup();boot().then(()=>{$('menuBtn').disabled=false}).catch(e=>{console.error('
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script defer src="js/spike-native-select.js"></script>
+  <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script defer src="js/premium-back.js"></script>
