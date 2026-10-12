@@ -3,16 +3,16 @@
   'use strict';
   const KEY='spike-feed-style';
   const THEMES=[
-    {id:1,name:'Aurora Glass',mode:'dark',signature:'Electric Cyan'},
-    {id:2,name:'Velvet Nocturne',mode:'dark',signature:'Neon Purple'},
-    {id:3,name:'Solar Ember',mode:'dark',signature:'Blazing Orange'},
-    {id:4,name:'Emerald Atelier',mode:'dark',signature:'Mint Emerald'},
-    {id:5,name:'Ocean Cobalt',mode:'dark',signature:'Royal Blue'},
-    {id:6,name:'Desert Rose',mode:'light',signature:'Warm Rose'},
-    {id:7,name:'Royal Amethyst',mode:'dark',signature:'Lavender'},
-    {id:8,name:'Arctic Platinum',mode:'light',signature:'Glacier Cyan'},
-    {id:9,name:'Neon Citrus',mode:'dark',signature:'Metallic Gold'},
-    {id:10,name:'Midnight Cherry',mode:'dark',signature:'Crimson OLED'}
+    {id:1,name:'Pearl Luxe',mode:'light',signature:'#6F687F'},
+    {id:2,name:'Arctic Blue',mode:'light',signature:'#5D728C'},
+    {id:3,name:'Sage Serenity',mode:'light',signature:'#687C6C'},
+    {id:4,name:'Rose Champagne',mode:'light',signature:'#8C6D75'},
+    {id:5,name:'Solar Gold',mode:'light',signature:'#7B6B50'},
+    {id:6,name:'Midnight Amethyst',mode:'dark',signature:'#B8ADC9'},
+    {id:7,name:'Cyber Ice',mode:'dark',signature:'#A0BAC8'},
+    {id:8,name:'Emerald Elite',mode:'dark',signature:'#A2C5B2'},
+    {id:9,name:'Ruby Noir',mode:'dark',signature:'#C9A3AE'},
+    {id:10,name:'Titanium Pro',mode:'dark',signature:'#AAB3C0'}
   ];
   const allowed=new Set(THEMES.map(t=>t.id));
   const clamp=n=>allowed.has(Number(n))?Number(n):1;
