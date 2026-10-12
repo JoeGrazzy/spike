@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en"><head>
+<html lang="en"><head><script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-feed-style")||"1",10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=n<=5?"light":"dark";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=n<=5?"light":"dark"}catch(_){}})();</script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080811"><meta name="description" content="SPIKE private conversation">
 <title>SPIKE — Conversation</title><link rel="stylesheet" href="css/perf.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
@@ -18,6 +18,8 @@ body{padding-bottom:0}.app{height:100dvh;min-height:0}.content{overflow:auto;ove
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
+<link rel="stylesheet" href="css/spike-premium-theme-system.css">
+<script src="js/theme.js" defer></script>
 </head><body><div class="app">
 <header class="top"><a class="back" href="messages.html" aria-label="Back to inbox"><i class="fa-solid fa-arrow-left"></i></a><div class="person"><div class="avatar" id="avatar">S</div><div class="titlewrap"><div class="brand" id="name">SPIKE member</div><div class="subtitle" id="sub">Direct message</div></div></div><div class="callActions"><button class="iconbtn" id="voiceCall" aria-label="Start voice call" title="Voice call"><i class="fa-solid fa-phone"></i></button><button class="iconbtn" id="videoCall" aria-label="Start video call" title="Video call"><i class="fa-solid fa-video"></i></button></div><button class="iconbtn" id="refresh" aria-label="Refresh conversation"><i class="fa-solid fa-rotate"></i></button></header>
 <main class="content" id="scroll"><div id="notice" class="notice" hidden></div><div id="typingLine" class="typingLine" aria-live="polite"></div><div id="thread" class="thread"><div class="empty">Loading conversation…</div></div></main>

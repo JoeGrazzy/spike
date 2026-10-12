@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
@@ -35,6 +35,7 @@
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
+<link rel="stylesheet" href="css/spike-premium-theme-system.css">
 </head><body data-spike-page="settings"><main class="wrap">
 <header class="top"><button class="back spike-premium-back" id="back" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back" type="button">‹</button><div><h1>Settings</h1><small id="accountLabel" style="color:var(--muted)">Loading…</small></div></header>
 
@@ -47,9 +48,8 @@
 <section class="setup" aria-label="Your SPIKE setup"><div class="eyebrow">Your SPIKE setup</div><strong id="setupTitle">Personal preferences</strong><p id="setupDescription">Your current appearance, privacy and notification choices.</p><div class="summary"><span class="pill"><i></i><span id="setupTheme">Theme</span></span><span class="pill"><i></i><span id="setupPrivacy">Profile: Public</span></span><span class="pill"><i></i><span id="setupPresence">Online</span></span><span class="pill"><i></i><span id="setupNotifications">Notifications</span></span></div></section>
 <section class="card"><div class="section" id="appearance">Appearance</div>
 <div class="row"><div><strong>Theme</strong><small>Use the same SPIKE theme preference across pages.</small></div><div class="theme-select"><span class="theme-dot" aria-hidden="true"></span><select id="theme" class="control">
-<optgroup label="LIGHT THEMES"><option value="1">Pearl Luxe</option><option value="2">Arctic Blue</option><option value="3">Sage Serenity</option><option value="4">Rose Champagne</option><option value="5">Solar Gold</option></optgroup><optgroup label="DARK THEMES"><option value="6">Midnight Amethyst · SPIKE signature</option><option value="7">Cyber Ice</option><option value="8">Emerald Elite</option><option value="9">Ruby Noir</option><option value="10">Titanium Pro</option></optgroup>
+<option value="1">Aurora Glass</option><option value="2">Velvet Nocturne</option><option value="3">Solar Ember</option><option value="4">Emerald Atelier</option><option value="5">Ocean Cobalt</option><option value="6">Desert Rose</option><option value="7">Royal Amethyst</option><option value="8">Arctic Platinum</option><option value="9">Neon Citrus</option><option value="10">Midnight Cherry</option>
 </select></div>
-<div class="theme-preview" id="themePreview" aria-label="Choose a theme visually"></div>
 </section>
 <section class="card"><div class="section" id="feed-content">Feed &amp; Content <small>Preferences used by the SPIKE Feed.</small></div>
 <div class="row"><div><strong>Show sensitive content</strong><small>Allow posts marked as sensitive to appear in your Feed.</small></div><input id="feedSensitive" class="switch" type="checkbox"></div>
@@ -103,12 +103,10 @@ function normalizeFeedPrefs(v){const f=v&&typeof v==='object'?v:{};return {show_
 function setFeedPrefs(f){const v=normalizeFeedPrefs(f);$('feedSensitive').checked=v.show_sensitive;$('feedSpoilers').checked=v.show_spoilers;$('feedPolitical').checked=v.show_political;$('feedFollowingOnly').checked=v.following_only;$('feedMutedKeywords').value=v.muted_keywords.join(', ')}
 function readFeedPrefs(){return normalizeFeedPrefs({show_sensitive:$('feedSensitive').checked,show_spoilers:$('feedSpoilers').checked,show_political:$('feedPolitical').checked,following_only:$('feedFollowingOnly').checked,muted_keywords:$('feedMutedKeywords').value.split(',').map(x=>x.trim()).filter(Boolean)})}
 const NOTIFICATION_DEFAULTS=Object.freeze(Object.fromEntries(NOTIFICATION_KEYS.map(k=>[k,true])));
-const THEME_NAMES=Object.freeze({1:'Pearl Luxe',2:'Arctic Blue',3:'Sage Serenity',4:'Rose Champagne',5:'Solar Gold',6:'Midnight Amethyst',7:'Cyber Ice',8:'Emerald Elite',9:'Ruby Noir',10:'Titanium Pro'});
+const THEME_NAMES=Object.freeze({1:'Aurora Glass',2:'Velvet Nocturne',3:'Solar Ember',4:'Emerald Atelier',5:'Ocean Cobalt',6:'Desert Rose',7:'Royal Amethyst',8:'Arctic Platinum',9:'Neon Citrus',10:'Midnight Cherry'});
 function setNotificationPrefs(q){const prefs={...NOTIFICATION_DEFAULTS,...(q||{})};NOTIFICATION_KEYS.forEach(k=>{const el=$('np_'+k);if(el)el.checked=prefs[k]!==false})}
 function getNotificationPrefs(){return Object.fromEntries(NOTIFICATION_KEYS.map(k=>[k,$('np_'+k)?.checked!==false]))}
-function updateSetupSummary(){const theme=Number($('theme')?.value||1);const profile=$('profile')?.value||'public';const online=$('online')?.checked!==false;const enabled=NOTIFICATION_KEYS.filter(k=>$('np_'+k)?.checked!==false).length;const browser=$('notify')?.textContent==='Enabled';const pretty=v=>v.charAt(0).toUpperCase()+v.slice(1);if($('setupTheme'))$('setupTheme').textContent=THEME_NAMES[theme]||'Theme';renderThemePreview();if($('setupPrivacy'))$('setupPrivacy').textContent='Profile: '+pretty(profile);if($('setupPresence'))$('setupPresence').textContent=online?'Online':'Hidden';if($('setupNotifications'))$('setupNotifications').textContent=(browser?'Browser · ':'')+enabled+' types enabled';}
-function renderThemePreview(){const host=$('themePreview');if(!host)return;const palettes=[['#F8F7FC','#FFFFFF','#7561D8'],['#F3F8FF','#FFFFFF','#1677FF'],['#F5F7F0','#FFFFFF','#34765B'],['#FFF7F6','#FFFFFF','#C46C82'],['#FFFAF0','#FFFFFF','#C47B20'],['#100D19','#191522','#A78BFA'],['#080D14','#101923','#39D9FF'],['#08110E','#101D18','#38C995'],['#130B10','#1E1018','#FF5477'],['#101216','#191C22','#C4CDD8']];host.innerHTML='';palettes.forEach((c,i)=>{const id=i+1,mode=id<=5?'Light':'Dark',name=THEME_NAMES[id];const b=document.createElement('button');b.type='button';b.className='theme-swatch';b.setAttribute('aria-pressed',String(Number($('theme').value)===id));b.setAttribute('aria-label','Use '+name+' '+mode+' theme');b.innerHTML='<span class="theme-swatch-colors"></span><b></b><small>'+mode+' mode</small>';b.querySelector('.theme-swatch-colors').style.setProperty('--swatch-bg',c[0]);b.querySelector('.theme-swatch-colors').style.setProperty('--swatch-surface',c[1]);b.querySelector('.theme-swatch-colors').style.setProperty('--swatch-accent',c[2]);b.querySelector('b').textContent=name;b.addEventListener('click',()=>{$('theme').value=String(id);$('theme').dispatchEvent(new Event('change',{bubbles:true}));});host.appendChild(b);});}
-
+function updateSetupSummary(){const theme=Number($('theme')?.value||1);const profile=$('profile')?.value||'public';const online=$('online')?.checked!==false;const enabled=NOTIFICATION_KEYS.filter(k=>$('np_'+k)?.checked!==false).length;const browser=$('notify')?.textContent==='Enabled';const pretty=v=>v.charAt(0).toUpperCase()+v.slice(1);if($('setupTheme'))$('setupTheme').textContent=THEME_NAMES[theme]||'Theme';if($('setupPrivacy'))$('setupPrivacy').textContent='Profile: '+pretty(profile);if($('setupPresence'))$('setupPresence').textContent=online?'Online':'Hidden';if($('setupNotifications'))$('setupNotifications').textContent=(browser?'Browser · ':'')+enabled+' types enabled';}
 
 function toneKey(k){return 'spike-setting-'+k}
 function getTone(k){try{const v=localStorage.getItem(toneKey(k));return v===null?DEFAULTS[k]:v==='1'}catch{return DEFAULTS[k]}}

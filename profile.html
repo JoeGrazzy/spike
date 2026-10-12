@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -221,6 +221,7 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
   <link rel="stylesheet" href="css/spike-premium-loader.css">
+<link rel="stylesheet" href="css/spike-premium-theme-system.css">
 </head>
 <body class="spike-profile-page">
 <div class="loader" id="loader" role="status" aria-live="polite"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>

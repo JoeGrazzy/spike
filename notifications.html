@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#070b10">
 <meta name="description" content="SPIKE notifications">
 <title>SPIKE — Notifications</title>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="stylesheet" href="css/perf.css">
 <link rel="stylesheet" href="css/ui-fix.css">
@@ -43,6 +43,7 @@
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
   <link rel="stylesheet" href="css/spike-premium-loader.css">
+<link rel="stylesheet" href="css/spike-premium-theme-system.css">
 </head>
 <body data-spike-page="notifications" data-spike-notification-page>
 <div class="app">

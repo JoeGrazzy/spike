@@ -1,63 +1,85 @@
-/* SPIKE PREMIUM THEME COLLECTION — 10 coordinated palettes; first five light, last five dark. */
-/* 01 — PEARL LUXE */
-html[data-spike-style="1"]{color-scheme:light;
-  --spike-bg:#F8F7FC;--spike-surface:#FFFFFF;--spike-surface-2:#F0EDF8;--spike-surface-3:#E4DFF1;
-  --spike-text:#28243A;--spike-muted:#6F687F;--spike-line:rgba(38,52,68,.13);--spike-accent:#7561D8;--spike-accent-2:#A18BEF;--spike-glow:color-mix(in srgb,#7561D8 15%,transparent);
-  --spike-action-bg:#6048C4;--spike-action-bg-2:#A18BEF;--spike-shadow:0 12px 32px rgba(40,50,70,.10);--spike-blur:10px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#7561D8 11%,transparent),transparent 28%),linear-gradient(135deg,#F8F7FC,#FFFFFF 60%,#F8F7FC);
+/* SPIKE THEME AUTHORITY V18
+   Beauty + consistency system.
+   Themes change atmosphere, palette and material — not product geometry.
+   Every theme shares the same typography, spacing, controls, card silhouettes
+   and interaction language so SPIKE remains recognisably SPIKE everywhere. */
+
+:root{
+  --spike-bg:#081016;--spike-surface:#101b23;--spike-surface-2:#15242e;--spike-surface-3:#1b2e3a;
+  --spike-text:#f6fbff;--spike-muted:#9eb1bd;--spike-line:rgba(255,255,255,.12);
+  --spike-accent:#55dbc6;--spike-accent-2:#7ea8ff;--spike-glow:rgba(85,219,198,.16);
+  --spike-action-bg:#0b6c62;--spike-action-bg-2:#40509a;--spike-action-text:#fff;
+  --spike-shadow:0 14px 38px rgba(0,0,0,.24);--spike-radius:20px;--spike-control-radius:12px;
+  --spike-blur:0px;--spike-font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --spike-card-bg:var(--spike-surface);--spike-panel-bg:var(--spike-surface-2);--spike-card-border:var(--spike-line);--spike-card-shadow:var(--spike-shadow);
+  --spike-body-image:linear-gradient(135deg,#071016,#0b1c25 58%,#071117);
+  --spike-material:solid;
+  --btn-primary:var(--spike-action-bg);--btn-primary-2:var(--spike-action-bg-2);
+  --btn-success:#22c55e;--btn-info:#0ea5e9;--btn-warning:#f59e0b;--btn-danger:#ef4444;
+  --bg:var(--spike-bg);--surface:var(--spike-surface);--surface2:var(--spike-surface-2);--surface3:var(--spike-surface-3);
+  --text:var(--spike-text);--muted:var(--spike-muted);--line:var(--spike-line);--primary:var(--spike-accent);--primary2:var(--spike-accent-2);--shadow:var(--spike-shadow);--radius:var(--spike-radius);
+  --card-bg:var(--spike-card-bg);--card-border:var(--spike-card-border);--accent:var(--spike-accent);--accent2:var(--spike-accent-2);
 }
-/* 02 — ARCTIC BLUE */
-html[data-spike-style="2"]{color-scheme:light;
-  --spike-bg:#F3F8FF;--spike-surface:#FFFFFF;--spike-surface-2:#EAF3FF;--spike-surface-3:#DCEAFF;
-  --spike-text:#172D48;--spike-muted:#5D728C;--spike-line:rgba(38,52,68,.13);--spike-accent:#1677FF;--spike-accent-2:#47B7F5;--spike-glow:color-mix(in srgb,#1677FF 15%,transparent);
-  --spike-action-bg:#125DCC;--spike-action-bg-2:#47B7F5;--spike-shadow:0 12px 32px rgba(40,50,70,.10);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#1677FF 11%,transparent),transparent 28%),linear-gradient(135deg,#F3F8FF,#FFFFFF 60%,#F3F8FF);
+
+/* 01 — AURORA GLASS: calm cyan atmosphere. */
+html[data-spike-style="1"]{color-scheme:dark;
+  --spike-bg:#06151b;--spike-surface:#0e242b;--spike-surface-2:#153039;--spike-surface-3:#1b3c45;
+  --spike-text:#effdfb;--spike-muted:#9bc9c5;--spike-line:rgba(104,235,214,.20);--spike-accent:#49ddc4;--spike-accent-2:#88a7ff;--spike-glow:rgba(73,221,196,.16);
+  --spike-action-bg:#0a6c61;--spike-action-bg-2:#42539d;--spike-shadow:0 16px 42px rgba(0,0,0,.25);--spike-blur:14px;--spike-body-image:radial-gradient(circle at 8% 0%,rgba(73,221,196,.12),transparent 28%),radial-gradient(circle at 92% 8%,rgba(136,167,255,.10),transparent 26%),linear-gradient(135deg,#06151b,#0b2028 58%,#071217);
 }
-/* 03 — SAGE SERENITY */
-html[data-spike-style="3"]{color-scheme:light;
-  --spike-bg:#F5F7F0;--spike-surface:#FFFFFF;--spike-surface-2:#EDF2E7;--spike-surface-3:#DDE7D5;
-  --spike-text:#24372B;--spike-muted:#687C6C;--spike-line:rgba(38,52,68,.13);--spike-accent:#34765B;--spike-accent-2:#83A96E;--spike-glow:color-mix(in srgb,#34765B 15%,transparent);
-  --spike-action-bg:#286247;--spike-action-bg-2:#83A96E;--spike-shadow:0 12px 32px rgba(40,50,70,.10);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#34765B 11%,transparent),transparent 28%),linear-gradient(135deg,#F5F7F0,#FFFFFF 60%,#F5F7F0);
+/* 02 — VELVET NOCTURNE: restrained plum luxury. */
+html[data-spike-style="2"]{color-scheme:dark;
+  --spike-bg:#110a12;--spike-surface:#20131f;--spike-surface-2:#2a1828;--spike-surface-3:#351f33;
+  --spike-text:#fff5fa;--spike-muted:#c9a8bb;--spike-line:rgba(236,151,197,.18);--spike-accent:#e58ab8;--spike-accent-2:#aa9af2;--spike-glow:rgba(229,138,184,.14);
+  --spike-action-bg:#793158;--spike-action-bg-2:#5b4987;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-body-image:radial-gradient(circle at 10% 0%,rgba(229,138,184,.10),transparent 26%),radial-gradient(circle at 92% 88%,rgba(170,154,242,.08),transparent 28%),linear-gradient(135deg,#110a12,#21131f 58%,#0d080e);
 }
-/* 04 — ROSE CHAMPAGNE */
-html[data-spike-style="4"]{color-scheme:light;
-  --spike-bg:#FFF7F6;--spike-surface:#FFFFFF;--spike-surface-2:#FFF0EF;--spike-surface-3:#F5DEDD;
-  --spike-text:#422B32;--spike-muted:#8C6D75;--spike-line:rgba(38,52,68,.13);--spike-accent:#C46C82;--spike-accent-2:#D6A16F;--spike-glow:color-mix(in srgb,#C46C82 15%,transparent);
-  --spike-action-bg:#A64C65;--spike-action-bg-2:#D6A16F;--spike-shadow:0 12px 32px rgba(40,50,70,.10);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#C46C82 11%,transparent),transparent 28%),linear-gradient(135deg,#FFF7F6,#FFFFFF 60%,#FFF7F6);
+/* 03 — SOLAR EMBER: warm, confident, editorial. */
+html[data-spike-style="3"]{color-scheme:dark;
+  --spike-bg:#17100b;--spike-surface:#241a13;--spike-surface-2:#302118;--spike-surface-3:#3a291e;
+  --spike-text:#fff7ea;--spike-muted:#d7b38a;--spike-line:rgba(242,169,59,.22);--spike-accent:#f2a93b;--spike-accent-2:#e46a4d;--spike-glow:rgba(242,169,59,.13);
+  --spike-action-bg:#8b520d;--spike-action-bg-2:#873927;--spike-shadow:0 16px 40px rgba(0,0,0,.28);--spike-body-image:radial-gradient(circle at 10% 0%,rgba(242,169,59,.11),transparent 28%),linear-gradient(135deg,#17100b,#261912 60%,#100b08);
 }
-/* 05 — SOLAR GOLD */
-html[data-spike-style="5"]{color-scheme:light;
-  --spike-bg:#FFFAF0;--spike-surface:#FFFFFF;--spike-surface-2:#FFF3D9;--spike-surface-3:#F3E3BF;
-  --spike-text:#352B1C;--spike-muted:#7B6B50;--spike-line:rgba(38,52,68,.13);--spike-accent:#C47B20;--spike-accent-2:#E3AF45;--spike-glow:color-mix(in srgb,#C47B20 15%,transparent);
-  --spike-action-bg:#9B5A12;--spike-action-bg-2:#E3AF45;--spike-shadow:0 12px 32px rgba(40,50,70,.10);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#C47B20 11%,transparent),transparent 28%),linear-gradient(135deg,#FFFAF0,#FFFFFF 60%,#FFFAF0);
+/* 04 — EMERALD ATELIER: quiet green + warm gold. */
+html[data-spike-style="4"]{color-scheme:dark;
+  --spike-bg:#07140e;--spike-surface:#0f2419;--spike-surface-2:#153022;--spike-surface-3:#1b3a2a;
+  --spike-text:#effcf4;--spike-muted:#9fc6ae;--spike-line:rgba(83,215,154,.19);--spike-accent:#53d79a;--spike-accent-2:#d4b45a;--spike-glow:rgba(83,215,154,.12);
+  --spike-action-bg:#0c6d48;--spike-action-bg-2:#75631e;--spike-shadow:0 14px 38px rgba(0,0,0,.25);--spike-body-image:radial-gradient(circle at 92% 0%,rgba(212,180,90,.08),transparent 24%),linear-gradient(135deg,#07140e,#10271c 60%,#06100b);
 }
-/* 06 — MIDNIGHT AMETHYST */
-html[data-spike-style="6"]{color-scheme:dark;
-  --spike-bg:#100D19;--spike-surface:#191522;--spike-surface-2:#211B30;--spike-surface-3:#302641;
-  --spike-text:#F8F4FF;--spike-muted:#B8ADC9;--spike-line:rgba(255,255,255,.13);--spike-accent:#A78BFA;--spike-accent-2:#D1B5FF;--spike-glow:color-mix(in srgb,#A78BFA 15%,transparent);
-  --spike-action-bg:#8056DB;--spike-action-bg-2:#D1B5FF;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-blur:10px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#A78BFA 11%,transparent),transparent 28%),linear-gradient(135deg,#100D19,#191522 60%,#100D19);
+/* 05 — OCEAN COBALT: deep blue with a clean aqua lift. */
+html[data-spike-style="5"]{color-scheme:dark;
+  --spike-bg:#07111f;--spike-surface:#0e2035;--spike-surface-2:#142b45;--spike-surface-3:#1a3654;
+  --spike-text:#f0f7ff;--spike-muted:#9ab6d3;--spike-line:rgba(86,168,255,.19);--spike-accent:#56a8ff;--spike-accent-2:#44d7c5;--spike-glow:rgba(86,168,255,.13);
+  --spike-action-bg:#185b9d;--spike-action-bg-2:#176f67;--spike-shadow:0 17px 44px rgba(0,15,45,.30);--spike-blur:10px;--spike-body-image:radial-gradient(circle at 50% 100%,rgba(68,215,197,.10),transparent 30%),linear-gradient(180deg,#07111f,#0b1d32 58%,#06101b);
 }
-/* 07 — CYBER ICE */
+/* 06 — DESERT ROSE: warm paper, modern editorial. */
+html[data-spike-style="6"]{color-scheme:light;
+  --spike-bg:#f3ebe5;--spike-surface:#fffaf6;--spike-surface-2:#f8f0eb;--spike-surface-3:#eee2da;
+  --spike-text:#3a2a2c;--spike-muted:#7d686b;--spike-line:rgba(111,76,78,.16);--spike-accent:#a74f63;--spike-accent-2:#8b6a45;--spike-glow:rgba(167,79,99,.12);
+  --spike-action-bg:#873e50;--spike-action-bg-2:#6c5337;--spike-shadow:0 12px 30px rgba(92,63,53,.12);--spike-body-image:radial-gradient(circle at 8% 0%,rgba(167,79,99,.07),transparent 28%),linear-gradient(135deg,#f1e5dd,#fbf7f3 58%,#eee1d8);
+}
+/* 07 — ROYAL AMETHYST: jewel-toned, polished, never faceted. */
 html[data-spike-style="7"]{color-scheme:dark;
-  --spike-bg:#080D14;--spike-surface:#101923;--spike-surface-2:#142533;--spike-surface-3:#20394B;
-  --spike-text:#F1FAFF;--spike-muted:#A0BAC8;--spike-line:rgba(255,255,255,.13);--spike-accent:#39D9FF;--spike-accent-2:#6EA9FF;--spike-glow:color-mix(in srgb,#39D9FF 15%,transparent);
-  --spike-action-bg:#087EA0;--spike-action-bg-2:#6EA9FF;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#39D9FF 11%,transparent),transparent 28%),linear-gradient(135deg,#080D14,#101923 60%,#080D14);
+  --spike-bg:#100b1b;--spike-surface:#1c132c;--spike-surface-2:#26193b;--spike-surface-3:#31214b;
+  --spike-text:#fbf8ff;--spike-muted:#c6b6dc;--spike-line:rgba(206,183,255,.20);--spike-accent:#c887f1;--spike-accent-2:#8194ff;--spike-glow:rgba(200,135,241,.14);
+  --spike-action-bg:#743a98;--spike-action-bg-2:#4d5a9e;--spike-shadow:0 17px 46px rgba(0,0,0,.31);--spike-blur:8px;--spike-body-image:radial-gradient(circle at 88% 0%,rgba(200,135,241,.12),transparent 26%),radial-gradient(circle at 12% 100%,rgba(129,148,255,.08),transparent 28%),linear-gradient(135deg,#100b1b,#1d132d 60%,#0c0812);
 }
-/* 08 — EMERALD ELITE */
-html[data-spike-style="8"]{color-scheme:dark;
-  --spike-bg:#08110E;--spike-surface:#101D18;--spike-surface-2:#172B23;--spike-surface-3:#224034;
-  --spike-text:#F0FFF7;--spike-muted:#A2C5B2;--spike-line:rgba(255,255,255,.13);--spike-accent:#38C995;--spike-accent-2:#D3B86A;--spike-glow:color-mix(in srgb,#38C995 15%,transparent);
-  --spike-action-bg:#167A58;--spike-action-bg-2:#D3B86A;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#38C995 11%,transparent),transparent 28%),linear-gradient(135deg,#08110E,#101D18 60%,#08110E);
+/* 08 — ARCTIC PLATINUM: crisp, airy, quietly technical. */
+html[data-spike-style="8"]{color-scheme:light;
+  --spike-bg:#edf3f6;--spike-surface:#ffffff;--spike-surface-2:#f6f9fa;--spike-surface-3:#e5edf1;
+  --spike-text:#182b34;--spike-muted:#5f737b;--spike-line:rgba(38,79,93,.15);--spike-accent:#167f97;--spike-accent-2:#5868c7;--spike-glow:rgba(22,127,151,.10);
+  --spike-action-bg:#075f73;--spike-action-bg-2:#4553a2;--spike-shadow:0 12px 28px rgba(48,73,82,.10);--spike-body-image:linear-gradient(135deg,#f7fafb,#eaf1f4 58%,#f8fafb);
 }
-/* 09 — RUBY NOIR */
+/* 09 — NEON CITRUS: controlled energy, not arcade styling. */
 html[data-spike-style="9"]{color-scheme:dark;
-  --spike-bg:#130B10;--spike-surface:#1E1018;--spike-surface-2:#2A1520;--spike-surface-3:#3A1B2A;
-  --spike-text:#FFF2F5;--spike-muted:#C9A3AE;--spike-line:rgba(255,255,255,.13);--spike-accent:#FF5477;--spike-accent-2:#E99A64;--spike-glow:color-mix(in srgb,#FF5477 15%,transparent);
-  --spike-action-bg:#B72D51;--spike-action-bg-2:#E99A64;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#FF5477 11%,transparent),transparent 28%),linear-gradient(135deg,#130B10,#1E1018 60%,#130B10);
+  --spike-bg:#090e05;--spike-surface:#111806;--spike-surface-2:#192308;--spike-surface-3:#22300d;
+  --spike-text:#f5fbdc;--spike-muted:#b5c28b;--spike-line:rgba(205,239,65,.20);--spike-accent:#c9ee3d;--spike-accent-2:#54d99a;--spike-glow:rgba(201,238,61,.12);
+  --spike-action-bg:#536c09;--spike-action-bg-2:#236f4c;--spike-shadow:0 15px 40px rgba(0,0,0,.31);--spike-body-image:radial-gradient(circle at 88% 0%,rgba(201,238,61,.10),transparent 24%),linear-gradient(135deg,#090e05,#182308 60%,#070b04);
 }
-/* 10 — TITANIUM PRO */
+/* 10 — MIDNIGHT CHERRY: cinematic black + refined cherry. */
 html[data-spike-style="10"]{color-scheme:dark;
-  --spike-bg:#101216;--spike-surface:#191C22;--spike-surface-2:#242932;--spike-surface-3:#343A44;
-  --spike-text:#F5F7FA;--spike-muted:#AAB3C0;--spike-line:rgba(255,255,255,.13);--spike-accent:#C4CDD8;--spike-accent-2:#8DABFF;--spike-glow:color-mix(in srgb,#C4CDD8 15%,transparent);
-  --spike-action-bg:#687B9A;--spike-action-bg-2:#8DABFF;--spike-shadow:0 16px 42px rgba(0,0,0,.30);--spike-blur:0px;--spike-body-image:radial-gradient(circle at 92% 0%,color-mix(in srgb,#C4CDD8 11%,transparent),transparent 28%),linear-gradient(135deg,#101216,#191C22 60%,#101216);
+  --spike-bg:#050306;--spike-surface:#0d080b;--spike-surface-2:#160d11;--spike-surface-3:#201116;
+  --spike-text:#fff3f5;--spike-muted:#c89fa8;--spike-line:rgba(255,92,119,.18);--spike-accent:#f05b7a;--spike-accent-2:#e99a64;--spike-glow:rgba(240,91,122,.13);
+  --spike-action-bg:#8d2945;--spike-action-bg-2:#8b5636;--spike-shadow:0 17px 46px rgba(0,0,0,.38);--spike-body-image:radial-gradient(circle at 92% 0%,rgba(240,91,122,.12),transparent 24%),linear-gradient(180deg,#050306,#0e070a 60%,#030203);
 }
 
 /* Shared compatibility aliases. */
