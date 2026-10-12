@@ -47,3 +47,23 @@ Audited and patched the existing direct-message typing behavior and room-chat ty
 3. In a room, have two users type; verify each user's timer refreshes independently and a stop event clears only that user's indicator.
 4. Switch rooms, close/reopen the page, and test offline/online transitions; verify there are no stuck indicators or duplicate subscriptions.
 5. Confirm ordinary message delivery, reactions, presence, and calls remain functional.
+
+## Second diagnostic/repair pass — typing still not visible
+
+The user reported that the indicator remained non-functional, so the first static pass was not treated as proof of success. A second pass was made against the actual source and authorization migration history.
+
+### Additional changes
+- Direct-message typing now waits for the private DM channel to report `SUBSCRIBED` before sending. The sender no longer silently discards broadcast failures; send failures and channel authorization/status failures are logged with actionable context.
+- When the DM channel becomes subscribed, a non-empty composer is re-evaluated so typing started during subscription setup is not lost.
+- Room typing now uses `httpSend` when supported and falls back to the normal Realtime `send` API if it is not. Synchronous and asynchronous failures are logged rather than swallowed.
+- Added idempotent migration `supabase/migrations/20261012150000_spike_dm_typing_realtime_authorization_v1.sql` to explicitly authorize SELECT and INSERT on `spike:dm:<uuid>:<uuid>` private topics only for authenticated users whose UUID is one of the two topic participants.
+- Added targeted regression tests for DM channel readiness/error reporting, room broadcast fallback/error reporting, and DM topic authorization.
+
+### Verification after second pass
+- 483 automated tests: 482 passed, 0 failed, 1 skipped (optional browser accessibility dependencies are unavailable).
+- `node --check` passed for all 39 JavaScript files.
+- Inline JavaScript syntax checks passed for `message.html` and `room_chat.html` (2 and 8 inline script blocks respectively).
+- Protected baseline updated only for the two intentionally modified protected source files; historical baseline preserved.
+
+### Important deployment requirement
+This package does not connect to or change the live Supabase project. Apply the new migration to the project's Supabase database (through the established migration deployment process), then test typing with two authenticated accounts. If typing still fails, inspect the browser console for `[SPIKE DM typing]` or `[SPIKE room typing]` messages and verify each channel reaches `SUBSCRIBED`. Static tests cannot prove live authorization, broadcast delivery, or device-to-device behavior.
