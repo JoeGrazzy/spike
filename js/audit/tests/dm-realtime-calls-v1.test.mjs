@@ -17,7 +17,7 @@ test('message page wires voice/video controls and accessible call overlay',()=>{
  assert.match(html,/js\/spike-dm-realtime-calls-v2\.js/);assert.doesNotMatch(html,/spike-dm-realtime-calls-v1\.js/);assert.match(js,/RTCPeerConnection/);assert.match(js,/getUserMedia/);
 });
 test('typing stays pair-scoped and site-wide call topics are participant-authorized',()=>{
- assert.match(js,/config:\{private:true/);assert.match(js,/event:'typing'/);assert.match(js,/event:'call_signal'/);assert.match(js,/spike:call:/);assert.match(js,/receiveOffer/);
+ assert.doesNotMatch(js,/event:\s*'typing'/);assert.match(fs.readFileSync(path.join(root,'js/spike-dm-signals.js'),'utf8'),/event:\s*'typing'/);assert.match(js,/event:'call_signal'/);assert.match(js,/spike:call:/);assert.match(js,/receiveOffer/);
  assert.match(migration,/on realtime\.messages for select to authenticated/i);assert.match(migration,/on realtime\.messages for insert to authenticated/i);
  assert.match(migration,/split_part\(topic, ':', 3\)/);assert.match(migration,/split_part\(topic, ':', 4\)/);assert.match(sitewideMigration,/topic like 'spike:call:%'/);assert.match(sitewideMigration,/on realtime\.messages for select to authenticated/i);assert.match(sitewideMigration,/on realtime\.messages for insert to authenticated/i);
 });

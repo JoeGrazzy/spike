@@ -1,7 +1,5 @@
--- Fix DM typing authorization for existing conversations.
--- Keep the established spike:dm-typing:v1:<sorted-uuid>:<sorted-uuid> topic.
--- Only authenticated participants with an existing DM thread may broadcast;
--- blocks always deny access.
+-- Pair-scoped typing Realtime authorization for existing DM conversations.
+-- Recreated from the currently deployed policies so repository migrations match production.
 drop policy if exists "spike dm typing v2 participants can receive" on realtime.messages;
 create policy "spike dm typing v2 participants can receive"
 on realtime.messages for select to authenticated
@@ -25,6 +23,7 @@ using (
        or (b.blocker_id = split_part(topic, ':', 5)::uuid and b.blocked_id = split_part(topic, ':', 4)::uuid)
   )
 );
+
 drop policy if exists "spike dm typing v2 participants can send" on realtime.messages;
 create policy "spike dm typing v2 participants can send"
 on realtime.messages for insert to authenticated

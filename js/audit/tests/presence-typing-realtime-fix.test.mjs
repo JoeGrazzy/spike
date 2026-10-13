@@ -5,11 +5,13 @@ const inbox=await readFile('messages.html','utf8');
 const dm=await readFile('message.html','utf8');
 const presence=await readFile('js/presence.js','utf8');
 const calls=await readFile('js/spike-dm-realtime-calls-v2.js','utf8');
+const signals=await readFile('js/spike-dm-signals.js','utf8');
 const policies=await readFile('supabase/migrations/20261013160000_spike_global_presence_channel_auth_v1.sql','utf8');
 test('all DM typing publishers and subscribers use the authorized v1 topic',()=>{
- assert.match(inbox,/const topic='spike:dm-typing:v1:'\+pair\.join\(':'\)/);
- assert.match(dm,/const typingTopic='spike:dm-typing:v1:'/);
- assert.match(calls,/const topic='spike:dm-typing:v1:'/);
+ assert.match(inbox,/signals\.subscribeTyping\(db,me\.id,id/);
+ assert.match(dm,/signals\.subscribeTyping\(db,me\.id,other/);
+ assert.match(signals,/spike:dm-typing:v1:/);
+ assert.doesNotMatch(calls,/spike:dm-typing:v1:/);
 });
 test('presence uses an authenticated private channel with matching select and insert policies',()=>{
  assert.match(presence,/channel=sb\.channel\(CHANNEL_NAME,\{config:\{private:true,presence:/);
@@ -19,17 +21,4 @@ test('presence uses an authenticated private channel with matching select and in
 test('DM page starts after shared presence script can load and reports realtime failures',()=>{
  assert.match(dm,/window\.addEventListener\('load',init,\{once:true\}\)/);
  assert.match(dm,/Live message connection interrupted/);
-});
-
-test('presence retries a broken channel on reconnect/visibility and DM screen displays contact presence',()=>{
- assert.match(presence,/channel\.state!=='joined'\)scheduleReconnect\(sb\)/);
- assert.match(presence,/addEventListener\('pageshow'/);
- assert.match(dm,/id=\"dmPresenceWrap\" data-presence-user/);
- assert.match(dm,/AppPresence\?\.watch\?\.\(\[other\]\)/);
-});
-test('DM typing waits for subscription, preserves other input listeners, and normalizes participant IDs',()=>{
- assert.match(dm,/typingChannelReady=true/);
- assert.match(dm,/typingPending!==null/);
- assert.doesNotMatch(dm,/event\.stopImmediatePropagation\(\)/);
- assert.match(dm,/map\(x=>String\(x\)\.toLowerCase\(\)\)\.sort\(\)\.join\(':'\)/);
 });

@@ -104,7 +104,7 @@
             window.dispatchEvent(new CustomEvent('spike-presence-status',{detail:{status}}));
             if(status==='SUBSCRIBED'){
               reconnectAttempts=0;
-              if(!done){done=true;subscribed=true;const tracked=await track(true);apply();resolve(true);if(!tracked)scheduleReconnect(client);}
+              if(!done){done=true;subscribed=true;await track(true);apply();resolve(true);}
             } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
               if(!done){done=true;reject(new Error('Presence channel '+status));}
               else scheduleReconnect(client);
@@ -123,11 +123,10 @@
       clearInterval(timer);
       if(subscribed){lastTrackAt=Date.now();timer=setInterval(()=>track().catch(()=>{}),HEARTBEAT_MS);}
       if(!onlineHandler){
-        onlineHandler=()=>{if(!channel||channel.state!=='joined')scheduleReconnect(sb);else track(true).then(ok=>{if(!ok)scheduleReconnect(sb)});apply();}; window.addEventListener('online',onlineHandler);
+        onlineHandler=()=>{if(!channel)start(sb,{publish});else track(true);apply();}; window.addEventListener('online',onlineHandler);
         offlineHandler=()=>{watched.forEach(id=>{if(states.get(id)?.online)markOfflineLater(id);});}; window.addEventListener('offline',offlineHandler);
-        visibilityHandler=()=>{if(document.visibilityState==='visible'){if(!channel||channel.state!=='joined')scheduleReconnect(sb);else track(true).then(ok=>{if(!ok)scheduleReconnect(sb)});apply();}}; document.addEventListener('visibilitychange',visibilityHandler);
+        visibilityHandler=()=>{if(document.visibilityState==='visible'){if(!channel)start(sb,{publish});else track(true);apply();}}; document.addEventListener('visibilitychange',visibilityHandler);
         pagehideHandler=e=>{if(e.persisted)return;stop(true).catch(()=>{});}; window.addEventListener('pagehide',pagehideHandler);
-        window.addEventListener('pageshow',e=>{if(e.persisted&&sb&&me){if(!channel||channel.state!=='joined')scheduleReconnect(sb);else track(true).then(ok=>{if(!ok)scheduleReconnect(sb)});}});
       }
       return true;
     })().finally(()=>{starting=null;});

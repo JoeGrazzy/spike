@@ -1,21 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-
 const inbox = await readFile('messages.html', 'utf8');
 const thread = await readFile('message.html', 'utf8');
-
-test('Inbox typing listens on the same pair-scoped topic as the conversation composer', () => {
-  assert.match(thread, /const typingTopic='spike:dm-typing:v1:'/);
-  assert.match(inbox, /const topic='spike:dm-typing:v1:'\+pair\.join\(':'\)/);
+const signals = await readFile('js/spike-dm-signals.js', 'utf8');
+test('Inbox and conversation use the same shared pair-scoped typing manager', () => {
+  assert.match(inbox, /signals\.subscribeTyping\(db,me\.id,id/);
+  assert.match(thread, /signals\.subscribeTyping\(db,me\.id,other/);
+  assert.match(signals, /const PREFIX = 'spike:dm-typing:v1:'/);
+  assert.match(signals, /function pairTopic\(a, b\)/);
 });
-
-test('Inbox typing validates the same from/to payload contract emitted by the conversation', () => {
-  assert.match(thread, /String\(payload\?\.from\|\|''\)\.toLowerCase\(\)!==String\(other\)\.toLowerCase\(\)/);
-  assert.match(thread, /String\(payload\?\.to\|\|''\)\.toLowerCase\(\)!==String\(me\.id\)\.toLowerCase\(\)/);
-  assert.match(inbox, /payload\.from\|\|''/);
-  assert.match(inbox, /String\(payload\.from\|\|''\)\.toLowerCase\(\)!==String\(id\)/);
-  assert.match(inbox, /payload\.to\|\|''/);
-  assert.match(inbox, /String\(payload\.to\|\|''\)\.toLowerCase\(\)!==String\(me\.id\)/);
-  assert.match(inbox, /setPeerTyping\(id,payload\.typing===true\)/);
+test('Shared typing contract validates participants and never transmits draft content', () => {
+  assert.match(signals, /lower\(payload\.from\) !== peer/);
+  assert.match(signals, /lower\(payload\.to\) !== self/);
+  assert.match(signals, /payload: \{ from: lower\(from\), to: lower\(to\), typing: typing === true \}/);
+  assert.doesNotMatch(signals, /body:|text:|draft:/);
 });
