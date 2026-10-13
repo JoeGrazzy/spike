@@ -1,4 +1,4 @@
-/* SPIKE inbox last-seen timestamps. Keeps the protected shared presence runtime unchanged. */
+/* SPIKE inbox last-seen timestamps. Performance hardened: DOM changes update watches only; polling remains bounded. */
 (()=>{'use strict';
 if(window.__SPIKE_PRESENCE_TIMESTAMPS__)return;window.__SPIKE_PRESENCE_TIMESTAMPS__=true;
 const URL='https://cjqpyndceqyqsijihxbb.supabase.co',KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
@@ -14,6 +14,6 @@ function stopTimers(){clearInterval(heartbeatTimer);clearInterval(pollTimer);hea
 function scheduleTimers(){stopTimers();if(!started)return;heartbeatTimer=setInterval(touch,30000);pollTimer=setInterval(refresh,30000)}
 async function start(){if(started)return;started=true;try{const {data,error}=await db.auth.getSession();if(error)throw error;me=data?.session?.user||null;if(!me)return;const pref=await db.from('profile_privacy').select('show_online_status').eq('user_id',me.id).maybeSingle();enabled=!pref.error&&pref.data?.show_online_status!==false;// The inbox owns shared AppPresence startup. Do not initialize it a second time here.
 if(enabled)await touch();await refresh();scheduleTimers()}catch(e){console.debug('[SPIKE presence timestamp] startup unavailable',e?.message||e);started=false;stopTimers()}}
-const list=document.getElementById('list');if(list&&window.MutationObserver)new MutationObserver(()=>{window.AppPresence?.watch?.(watchedIds());refresh()}).observe(list,{childList:true,subtree:true});
+const list=document.getElementById('list');let watchQueued=false;if(list&&window.MutationObserver)new MutationObserver(()=>{if(watchQueued)return;watchQueued=true;requestAnimationFrame(()=>{watchQueued=false;window.AppPresence?.watch?.(watchedIds())})}).observe(list,{childList:true,subtree:true});
 window.addEventListener('online',()=>{touch();refresh();scheduleTimers()});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){touch();refresh();scheduleTimers()}});window.addEventListener('pageshow',()=>{if(started){touch();refresh();scheduleTimers()}else start()});window.addEventListener('pagehide',()=>{stopTimers()});start();
 })();
