@@ -20,3 +20,16 @@ test('DM page starts after shared presence script can load and reports realtime 
  assert.match(dm,/window\.addEventListener\('load',init,\{once:true\}\)/);
  assert.match(dm,/Live message connection interrupted/);
 });
+
+test('presence retries a broken channel on reconnect/visibility and DM screen displays contact presence',()=>{
+ assert.match(presence,/channel\.state!=='joined'\)scheduleReconnect\(sb\)/);
+ assert.match(presence,/addEventListener\('pageshow'/);
+ assert.match(dm,/id=\"dmPresenceWrap\" data-presence-user/);
+ assert.match(dm,/AppPresence\?\.watch\?\.\(\[other\]\)/);
+});
+test('DM typing waits for subscription, preserves other input listeners, and normalizes participant IDs',()=>{
+ assert.match(dm,/typingChannelReady=true/);
+ assert.match(dm,/typingPending!==null/);
+ assert.doesNotMatch(dm,/event\.stopImmediatePropagation\(\)/);
+ assert.match(dm,/map\(x=>String\(x\)\.toLowerCase\(\)\)\.sort\(\)\.join\(':'\)/);
+});

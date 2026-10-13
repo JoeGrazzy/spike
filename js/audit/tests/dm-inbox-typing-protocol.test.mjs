@@ -11,7 +11,8 @@ test('Inbox typing listens on the same pair-scoped topic as the conversation com
 });
 
 test('Inbox typing validates the same from/to payload contract emitted by the conversation', () => {
-  assert.match(thread, /payload\?\.from!==other\|\|payload\?\.to!==me\.id/);
+  assert.match(thread, /String\(payload\?\.from\|\|''\)\.toLowerCase\(\)!==String\(other\)\.toLowerCase\(\)/);
+  assert.match(thread, /String\(payload\?\.to\|\|''\)\.toLowerCase\(\)!==String\(me\.id\)\.toLowerCase\(\)/);
   assert.match(inbox, /payload\.from\|\|''/);
   assert.match(inbox, /String\(payload\.from\|\|''\)\.toLowerCase\(\)!==String\(id\)/);
   assert.match(inbox, /payload\.to\|\|''/);
