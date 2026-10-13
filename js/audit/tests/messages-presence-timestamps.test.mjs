@@ -26,3 +26,8 @@ test('presence persistence is authenticated and respects each target privacy set
  assert.match(migration,/coalesce\(pp\.show_online_status, true\) is not false/i);
  assert.match(migration,/cardinality\(coalesce\(p_user_ids, '\{\}'::uuid\[\]\)\) <= 100/i);
 });
+
+test('timestamp helper does not start a second shared presence lifecycle',()=>{
+ assert.doesNotMatch(presence,/AppPresence\?\.start\?\.\(db\)/);
+ assert.match(presence,/The inbox owns shared AppPresence startup/);
+});
