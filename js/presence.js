@@ -76,7 +76,7 @@
       } catch(e) { console.info('[SPIKE PRESENCE] Privacy lookup unavailable; using default visibility.',e?.message||''); }
       publish=opts.publish!==false;
       if(channel){try{await sb.removeChannel(channel)}catch(_){} channel=null;}
-      channel=sb.channel(CHANNEL_NAME,{config:{presence:{key:String(me.id)}}});
+      channel=sb.channel(CHANNEL_NAME,{config:{private:true,presence:{key:String(me.id)}}});
       channel.on('presence',{event:'sync'},apply);
       channel.on('presence',{event:'join'},apply);
       channel.on('presence',{event:'leave'},payload=>{const id=payload?.key;if(id&&String(id)!==String(me.id)&&watched.has(String(id)))markOfflineLater(id);apply();});

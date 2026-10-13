@@ -18,6 +18,6 @@ test('inbox summary RPC is authenticated and participant-scoped',()=>{
  assert.match(migration,/revoke all on function public\.spike_get_inbox_summaries\(\) from public, anon/);
 });
 test('typing retains the authenticated pair-scoped channel protocol while keeping subscriptions bounded',()=>{
- assert.match(html,/const topic='spike:dm:'\+pair\.join\(':'\)/);
+ assert.match(html,/const topic='spike:dm-typing:v1:'\+pair\.join\(':'\)/);
  assert.match(html,/ids\.slice\(0,30\)/);
 });

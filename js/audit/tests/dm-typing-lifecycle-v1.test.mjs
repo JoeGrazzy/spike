@@ -12,7 +12,7 @@ test('DM typing is handled only by the composer and blank drafts stop typing',()
  assert.match(html,/event\.stopImmediatePropagation\(\)/);assert.match(html,/Math\.min\(input\.scrollHeight,140\)/);
 });
 test('DM typing is pair-scoped and remote indicator expires',()=>{
- assert.match(html,/const typingTopic='spike:dm:'/);
+ assert.match(html,/const typingTopic='spike:dm-typing:v1:'/);
  assert.match(html,/payload\?\.from!==other\|\|payload\?\.to!==me\.id/);
  assert.match(html,/remoteTypingTimer=setTimeout/);
  assert.match(html,/clearThreadTyping\(notify=true\)/);
