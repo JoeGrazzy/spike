@@ -6,7 +6,7 @@
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
 <meta name="theme-color" content="#070b10">
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <title>SPIKE — Shared</title>
 <meta name="description" content="Shared from SPIKE — connect, pass and discover.">

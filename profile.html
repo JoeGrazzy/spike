@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -280,24 +280,13 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 </div>
 </section></main>
 <div class="overlay" id="editOverlay"><div class="modal"><h2>Edit profile</h2><p>Changes are saved to your SPIKE profile.</p><form class="form" id="editForm">
-<div><label>Display name</label><input id="editName" maxlength="80"></div><div><label>Username</label><input id="editUsername" maxlength="40"></div><div><label>Bio</label><textarea id="editBio" maxlength="500"></textarea></div><div><label>Avatar image</label><input id="editAvatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><input id="editAvatar" type="url" placeholder="or paste an image URL"></div><div><label>Cover image</label><input id="editCoverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif"><input id="editCover" type="url" placeholder="or paste an image URL"></div><div><label>Website</label><input id="editWebsite" type="url"></div><div><label>Location</label><input id="editLocation" maxlength="100"></div><div><label>Social links</label><input id="editSocial" maxlength="500" placeholder="Optional social links"></div><section class="privacy-premium-panel" aria-labelledby="privacyPanelTitle">
+<div><label>Display name</label><input id="editName" maxlength="80" aria-label="Display name"></div><div><label>Username</label><input id="editUsername" maxlength="40" aria-label="Username"></div><div><label>Bio</label><textarea id="editBio" maxlength="500" aria-label="Bio"></textarea></div><div><label>Avatar image</label><input id="editAvatarFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Choose avatar image file"><input id="editAvatar" type="url" placeholder="or paste an image URL" aria-label="Avatar image URL"></div><div><label>Cover image</label><input id="editCoverFile" type="file" accept="image/jpeg,image/png,image/webp,image/gif" aria-label="Choose cover image file"><input id="editCover" type="url" placeholder="or paste an image URL" aria-label="Cover image URL"></div><div><label>Website</label><input id="editWebsite" type="url" aria-label="Website URL"></div><div><label>Location</label><input id="editLocation" maxlength="100" aria-label="Location"></div><div><label>Social links</label><input id="editSocial" maxlength="500" placeholder="Optional social links" aria-label="Social links"></div><section class="privacy-premium-panel" aria-labelledby="privacyPanelTitle">
   <div class="privacy-panel-glow"></div>
   <div class="privacy-panel-head">
-    <div class="privacy-panel-icon">✦</div>
-    <div><h3 id="privacyPanelTitle">Privacy & access</h3><p>Choose who can see, discover and interact with you.</p></div>
-    <span class="privacy-secure">🔒 Protected</span>
+    <div class="privacy-panel-icon">🔒</div>
+    <div><h3 id="privacyPanelTitle">Privacy & access</h3><p>Privacy controls live in Settings so the same preferences apply consistently across SPIKE.</p></div>
   </div>
-  <div class="privacy-grid">
-    <div class="privacy-row"><div class="privacy-copy"><b>Profile visibility</b><small>Who can open your profile</small></div><select id="editVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
-    <div class="privacy-row"><div class="privacy-copy"><b>Posts</b><small>Control who can see your posts</small></div><select id="editPostsVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
-    <div class="privacy-row"><div class="privacy-copy"><b>Media</b><small>Photos and videos on your profile</small></div><select id="editMediaVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
-    <div class="privacy-row"><div class="privacy-copy"><b>Friends & following</b><small>Who can view your connections</small></div><select id="editFriendsVisibility"><option value="public">Everyone</option><option value="friends">Friends only</option><option value="private">Only me</option></select></div>
-    <div class="privacy-row"><div class="privacy-copy"><b>Messages</b><small>Who can start a conversation</small></div><select id="editMessages"><option value="everyone">Everyone</option><option value="friends">Friends only</option><option value="nobody">Nobody</option></select></div>
-    <div class="privacy-row"><div class="privacy-copy"><b>Calls</b><small>Who can call you on SPIKE</small></div><select id="editCalls"><option value="everyone">Everyone</option><option value="friends">Friends only</option><option value="nobody">Nobody</option></select></div>
-    <div class="privacy-row privacy-toggle-row"><div class="privacy-copy"><b>Online status</b><small>Let permitted people see when you're online</small></div><label class="premium-switch"><input id="editOnline" type="checkbox" checked><span class="premium-slider"></span></label></div>
-    <div class="privacy-row privacy-toggle-row"><div class="privacy-copy"><b>Profile discovery</b><small>Allow your profile to appear in discovery</small></div><label class="premium-switch"><input id="editDiscovery" type="checkbox" checked><span class="premium-slider"></span></label></div>
-  </div>
-  <div class="privacy-panel-foot"><span>🛡️ Your choices are enforced by SPIKE's access controls.</span><span>Changes apply after saving.</span></div>
+  <a class="btn" href="settings.html#privacy" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;margin-top:14px">Manage privacy in Settings ↗</a>
 </section>
 <div class="modal-actions"><button type="button" class="btn" id="cancelEdit">Cancel</button><button class="btn primary">Save profile</button></div></form></div></div>
 <div class="cover-editor-overlay" id="coverEditorOverlay" aria-hidden="true">
@@ -313,7 +302,7 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 </div>
 <div class="overlay" id="menuOverlay"><div class="modal"><h2 id="profileMenuTitle">Profile options</h2><p id="profileMenuText">Quick actions for this profile.</p><div class="actions" style="justify-content:flex-start;margin-top:14px"><button class="btn" id="copyProfile">🔗 Copy profile link</button><button class="btn" id="showQr">▣ Show QR</button><button class="btn" id="scanQr">⌗ Scan QR</button><button class="btn" id="themeBtn">◐ Theme</button><button class="btn danger" id="signOutBtn">↪ Sign out</button></div><div class="modal-actions"><button class="btn" id="closeMenu">Close</button></div></div></div>
 
-<div class="qr-overlay" id="qrOverlay"><div class="qr-sheet"><div class="qr-head"><div><h2 style="margin:0">My SPIKE QR</h2><div class="feature-muted">Scan to connect instantly</div></div><button class="qr-close" id="qrClose" aria-label="Close">×</button></div><div class="qr-code-box" id="qrCodeBox"></div><p class="qr-help">Show this code to someone nearby. They can scan it and connect with you without a friend request.</p><div class="qr-actions"><button class="qr-btn" id="qrShare">📤 Share</button><button class="qr-btn" id="qrCopy">🔗 Copy link</button></div></div></div><div class="scanner-overlay" id="scannerOverlay"><video class="scanner-video" id="scannerVideo" playsinline muted></video><div class="scanner-shade"></div><div class="scanner-top"><button class="scanner-icon-btn" id="scannerClose" aria-label="Close scanner">×</button><div class="scanner-title">Scan SPIKE QR</div></div><div class="scan-frame"><span class="scan-corner scan-c1"></span><span class="scan-corner scan-c2"></span><span class="scan-corner scan-c3"></span><span class="scan-corner scan-c4"></span><span class="scan-line"></span></div><div class="scanner-bottom"><p>Point your camera at a SPIKE QR code</p><div class="scanner-controls"><button class="scanner-control" id="galleryQr">🖼 Gallery</button></div><input class="scanner-file" id="qrFile" type="file" accept="image/*"></div></div><div class="connect-preview" id="connectPreview"><div class="connect-card"><div id="connectAvatarWrap"></div><h2 id="connectName">SPIKE member</h2><div class="connect-id" id="connectSpId"></div><p class="feature-muted">Connect instantly. No request or approval required.</p><div class="connect-actions"><button class="btn" id="connectCancel">Cancel</button><button class="btn primary" id="connectConfirm">SPIKE Connect instantly</button></div></div></div><div class="toast" id="toast"></div>
+<div class="qr-overlay" id="qrOverlay"><div class="qr-sheet"><div class="qr-head"><div><h2 style="margin:0">My SPIKE QR</h2><div class="feature-muted">Scan to connect instantly</div></div><button class="qr-close" id="qrClose" aria-label="Close">×</button></div><div class="qr-code-box" id="qrCodeBox"></div><p class="qr-help">Show this code to someone nearby. They can scan it and connect with you without a friend request.</p><div class="qr-actions"><button class="qr-btn" id="qrShare">📤 Share</button><button class="qr-btn" id="qrCopy">🔗 Copy link</button></div></div></div><div class="scanner-overlay" id="scannerOverlay"><video class="scanner-video" id="scannerVideo" playsinline muted></video><div class="scanner-shade"></div><div class="scanner-top"><button class="scanner-icon-btn" id="scannerClose" aria-label="Close scanner">×</button><div class="scanner-title">Scan SPIKE QR</div></div><div class="scan-frame"><span class="scan-corner scan-c1"></span><span class="scan-corner scan-c2"></span><span class="scan-corner scan-c3"></span><span class="scan-corner scan-c4"></span><span class="scan-line"></span></div><div class="scanner-bottom"><p>Point your camera at a SPIKE QR code</p><div class="scanner-controls"><button class="scanner-control" id="galleryQr">🖼 Gallery</button></div><input class="scanner-file" id="qrFile" type="file" accept="image/*" aria-label="Upload QR code image"></div></div><div class="connect-preview" id="connectPreview"><div class="connect-card"><div id="connectAvatarWrap"></div><h2 id="connectName">SPIKE member</h2><div class="connect-id" id="connectSpId"></div><p class="feature-muted">Connect instantly. No request or approval required.</p><div class="connect-actions"><button class="btn" id="connectCancel">Cancel</button><button class="btn primary" id="connectConfirm">SPIKE Connect instantly</button></div></div></div><div class="toast" id="toast"></div>
 <script>
 "use strict";
 const CLOUDINARY_CONFIG = {
@@ -344,7 +333,7 @@ const $=id=>document.getElementById(id),now=()=>new Date().toISOString();
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const nameOf=u=>u?.display_name||u?.full_name||u?.name||u?.email||"User",avatarOf=u=>u?.avatar_url||u?.avatar||"";
 const profileLink=id=>`profile.html?uid=${encodeURIComponent(id)}`;
-const state={me:null,uid:null,profile:null,posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false,cover:{url:"",position_x:0,position_y:0,zoom:1,fit:"cover"}};
+const state={me:null,uid:null,profile:null,posts:[],following:false,followers:0,activePost:null,realtime:null,views:0,canSeePosts:true,canSeeMedia:true,canSeeOnline:false,privacyLoadError:false,cover:{url:"",position_x:0,position_y:0,zoom:1,fit:"cover"}};
 function syncThemeColor(){try{const meta=document.querySelector('meta[name="theme-color"]');if(meta){const bg=getComputedStyle(document.documentElement).getPropertyValue('--spike-bg').trim();if(bg)meta.setAttribute('content',bg)}}catch(_){}}
 document.addEventListener('spike:theme-change',syncThemeColor);
 function toast(s,type,ms){spikePremiumToast(s,type,ms||3200)}
@@ -399,6 +388,7 @@ if(field==="cover_url"){state.cover={url,position_x:0,position_y:0,zoom:1,fit:"c
 renderIdentity();renderCover();renderActions();renderAbout();
 }
 async function uploadProfileImage(file,type){
+if(type==="avatar"&&state.privacyLoadError){toast("Your privacy preferences could not be loaded. Open Settings and retry before changing your profile picture.","error");return;}
 if(!validImage(file)) return;
 const area=type==="avatar"?document.querySelector(".avatar-wrap"):$("coverArea");
 area?.classList.add("uploading");
@@ -451,7 +441,8 @@ async function loadPrivacy(){
  let privacy=null;
  if(own){
    const r=await db.from("profile_privacy").select("user_id,profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,allow_calls,show_online_status,allow_profile_discovery").eq("user_id",state.uid).maybeSingle();
-   if(r.error && !/permission|row/i.test(r.error.message||"")) console.warn("[SPIKE PRIVACY LOAD]",r.error.message);
+   state.privacyLoadError=!!r.error;
+   if(r.error) console.warn("[SPIKE PRIVACY LOAD]",r.error.message);
    privacy=r.data;
  }
  state.privacy=privacy||{user_id:state.uid,profile_visibility:state.profile?.profile_visibility||"public",posts_visibility:"public",media_visibility:"public",friends_visibility:"public",allow_messages:"friends",allow_calls:"friends",show_online_status:true,allow_profile_discovery:true};
@@ -474,7 +465,6 @@ async function loadPrivacy(){
    state.canSeeOnline=(await access?.online?.(state.uid))===true;
  }
 }
-function fillPrivacy(){const q=state.privacy||{}; $("editVisibility").value=q.profile_visibility||"public"; $("editPostsVisibility").value=q.posts_visibility||"public"; $("editMediaVisibility").value=q.media_visibility||"public"; $("editFriendsVisibility").value=q.friends_visibility||"public"; $("editMessages").value=q.allow_messages||"friends"; $("editCalls").value=q.allow_calls||"friends"; $("editOnline").checked=q.show_online_status!==false; $("editDiscovery").checked=q.allow_profile_discovery!==false}
 
 async function loadSocial(){
   const meDoc=await getDoc(`users/${state.me.id}`).catch(err=>{
@@ -598,9 +588,10 @@ async function toggleFollow(){
   syncProfileToFeed('follow',state.following);
   renderActions();render();
 }
-function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=state.cover?.url||p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
+function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=state.cover?.url||p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";open("editOverlay")}
 async function saveProfile(e){
   e.preventDefault();
+  if(state.privacyLoadError){toast("Your privacy preferences could not be loaded, so profile changes are paused to protect them. Open Settings, reload, and try again.","error");return;}
   let profileSaved = false;
   const form=e.currentTarget;
   const username=$("editUsername").value.trim().replace(/^@/,"");
@@ -643,22 +634,23 @@ async function saveProfile(e){
       website:$("editWebsite").value.trim(),
       location:$("editLocation").value.trim(),
       social_links:$("editSocial").value.trim(),
-      profile_visibility:$("editVisibility").value,
+      profile_visibility:state.privacy?.profile_visibility||current.profile_visibility||"public",
       updated_at:timestamp
     };
 
     // Identity fields belong in public.profiles. Never update verified here:
     // only the admin verification workflow may change that field.
+    // Privacy is owned by settings.html. Preserve the loaded values when the profile editor saves identity fields.
     const privacyPatch={
-      profile_visibility:$("editVisibility").value,
-      posts_visibility:$("editPostsVisibility").value,
-      media_visibility:$("editMediaVisibility").value,
-      friends_visibility:$("editFriendsVisibility").value,
-      allow_messages:$("editMessages").value,
-      allow_calls:$("editCalls").value,
-      show_online_status:$("editOnline").checked,
-      allow_profile_discovery:$("editDiscovery").checked,
-      updated_at:timestamp
+      profile_visibility:state.privacy?.profile_visibility||current.profile_visibility||"public",
+      posts_visibility:state.privacy?.posts_visibility||"public",
+      media_visibility:state.privacy?.media_visibility||"public",
+      friends_visibility:state.privacy?.friends_visibility||"public",
+      allow_messages:state.privacy?.allow_messages||"friends",
+      allow_calls:state.privacy?.allow_calls||"friends",
+      show_online_status:state.privacy?.show_online_status!==false,
+      allow_profile_discovery:state.privacy?.allow_profile_discovery!==false,
+      updated_at:state.privacy?.updated_at||timestamp
     };
     const old=await getDoc(`users/${state.me.id}`).catch(()=>({}));
     const userDoc={
@@ -838,7 +830,7 @@ async function boot(){bind();try{if(!(await bootAuth()))return;initAdminHeader()
   const ownerView=state.uid===state.me.id;
   if($('showQr')) $('showQr').hidden=!ownerView;
   if($('copyProfile')) $('copyProfile').textContent=ownerView?'🔗 Copy profile link':'🔗 Share profile link';
-await loadProfile();await loadCoverSettings();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderCover();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide")}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
+await loadProfile();await loadCoverSettings();await loadPrivacy();await loadPosts();window.__SPIKE_ONLINE_ALLOWED__=state.canSeeOnline;if(window.__SPIKE_ONLINE_ALLOWED__) window.AppPresence?.start(db); else window.AppPresence?.stop?.();await loadSocial();renderIdentity();renderCover();renderActions();renderAbout();render();await realtime();$("loader").classList.add("hide");if(new URLSearchParams(location.search).get("edit")==="1"&&state.uid===state.me.id){history.replaceState(history.state,"",location.pathname);fillEdit()}}catch(e){console.error("[SPIKE PROFILE]",e);$("loaderText").textContent="SPIKE could not load this profile.";$("loader").classList.add("hide");toast(e.message||"Profile initialization failed") }}
 
 // SPIKE Connect QR — scanner without flashlight.
 let qrStream=null,qrScanTimer=null,qrTargetUid=null,qrScanBusy=false,qrCanvas=null,qrCtx=null;

@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -689,7 +689,7 @@ video{contain:layout paint}
 <button class="tab" data-tab="suggestions">Suggestions</button>
 </div>
 <div class="search-wrap" id="searchWrap">
-<div class="icon"><i class="fas fa-search"></i><input type="text" placeholder="Search friends or people…" id="searchInput" autocomplete="off" /></div>
+<div class="icon"><i class="fas fa-search"></i><input type="text" placeholder="Search friends or people…" id="searchInput" autocomplete="off" / aria-label="Search friends or people"></div>
 </div>
 <div class="content" id="content">
 <div id="notice" class="notice" hidden></div>

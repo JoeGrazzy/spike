@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <meta charset="utf-8">
@@ -58,7 +58,7 @@
 </div>
 <div class="heroBadge heroCard"><img class="spikeAppIcon" src="assets/icon/icon.png" alt="SPIKE app icon"><b>SPIKE, at a glance</b><span>Connect • Share • Discover • Create • Participate • Grow</span></div>
 </section>
-<div class="searchBar"><input id="guideSearch" type="search" placeholder="Search the guide — e.g. Rooms, privacy, XP, calls…" autocomplete="off"></div>
+<div class="searchBar"><input id="guideSearch" type="search" placeholder="Search the guide — e.g. Rooms, privacy, XP, calls…" autocomplete="off" aria-label="Search the SPIKE guide"></div>
 <div class="layout">
 <nav class="toc card" aria-label="Guide sections">
 <h2>CONTENTS</h2>

@@ -17,7 +17,7 @@ test('Every HTML page bootstraps Theme 3 as dark before styles load', async () =
   for (const page of (await readdir('.')).filter(name => name.endsWith('.html'))) {
     const html = await readFile(page, 'utf8');
     if (html.includes('n===1?"dark":"light"') || html.includes('n===1||n===3')) {
-      assert.match(html, /\(n===1\|\|n===3\)\?"dark":"light"/, page);
+      assert.match(html, /\(n===1\|\|n===3\)\?"dark":(?:m|"light")/, page);
     }
   }
 });

@@ -13,11 +13,11 @@ test('Theme selection writes through to account settings and reports sync failur
   assert.match(handler, /version===themeWriteVersion/);
 });
 
-test('Profile editor keeps one real select per audience setting and suppresses only redundant summary decorations', async () => {
+test('Settings owns privacy selectors and profile editor links to Settings for privacy changes', async () => {
   const profile = await readFile('profile.html', 'utf8');
-  for (const id of ['editVisibility','editPostsVisibility','editMediaVisibility','editFriendsVisibility','editMessages','editCalls']) {
-    assert.equal((profile.match(new RegExp(`id="${id}"`, 'g')) || []).length, 1, `${id} should remain a single functional control`);
+  for (const id of ['profile','posts','media','friends','messages','calls']) {
+    assert.match(settings, new RegExp(`id=["']${id}["']`), `${id} should be available in Settings`);
   }
-  assert.match(profile, /\.privacy-row \.privacy-audience[^{]*\{display:none!important\}/);
-  assert.match(profile, /\.privacy-row \.audience-summary[^{]*\{display:none!important\}/);
+  assert.match(profile, /settings\.html#privacy/);
+  assert.doesNotMatch(profile, /id="editVisibility"/);
 });
