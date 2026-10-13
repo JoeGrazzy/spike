@@ -5,7 +5,7 @@
   const HEARTBEAT_MS=30000;
   const MIN_TRACK_GAP_MS=20000;
   const GRACE_MS=10000;
-  let sb=null, me=null, channel=null, timer=null, onlineHandler=null, offlineHandler=null, visibilityHandler=null, pagehideHandler=null, lastTrackAt=0;
+  let sb=null, me=null, channel=null, timer=null, reconnectTimer=null, reconnectAttempts=0, onlineHandler=null, offlineHandler=null, visibilityHandler=null, pagehideHandler=null, lastTrackAt=0;
   let starting=null, publish=true;
   const watched=new Set(), states=new Map(), timers=new Map(), listeners=new Set();
 
@@ -51,6 +51,22 @@
       else if(!states.has(id)) notify({user_id:id,online:false,last_seen:null});
     });
   }
+  function scheduleReconnect(client){
+    if(!client || reconnectTimer || navigator.onLine===false) return;
+    const delay=Math.min(30000,1000*Math.pow(2,Math.min(reconnectAttempts,5)));
+    reconnectAttempts++;
+    reconnectTimer=setTimeout(async()=>{
+      reconnectTimer=null;
+      const old=channel;
+      channel=null;
+      if(old && sb){try{await sb.removeChannel(old)}catch(_){}}
+      try{
+        const ok=await start(client,{publish});
+        if(ok && channel){reconnectAttempts=0;return;}
+      }catch(e){console.info('[SPIKE PRESENCE] reconnect attempt failed',e?.message||'');}
+      scheduleReconnect(client);
+    },delay);
+  }
   async function track(force=false){
     if(!channel||!me||!publish)return false;
     if(navigator.onLine===false)return false;
@@ -63,7 +79,7 @@
     if(starting)return starting;
     publish=opts.publish!==false;
     starting=(async()=>{
-      if(channel && sb===client && me){ return true; }
+      if(channel && sb===client && me && channel.state==='joined'){ return true; }
       sb=client;
       const r=await sb.auth.getUser();
       me=r.data?.user||null;
@@ -86,8 +102,13 @@
           let done=false;
           const sub=channel.subscribe(async status=>{
             window.dispatchEvent(new CustomEvent('spike-presence-status',{detail:{status}}));
-            if(status==='SUBSCRIBED'&&!done){done=true;subscribed=true;await track();apply();resolve(true);}
-            else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){if(!done){done=true;reject(new Error('Presence channel '+status));}}
+            if(status==='SUBSCRIBED'){
+              reconnectAttempts=0;
+              if(!done){done=true;subscribed=true;await track(true);apply();resolve(true);}
+            } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+              if(!done){done=true;reject(new Error('Presence channel '+status));}
+              else scheduleReconnect(client);
+            }
           });
           Promise.resolve(sub).catch(reject);
         });
@@ -96,14 +117,15 @@
         try{await sb.removeChannel(channel)}catch(_){}
         channel=null;
         clearInterval(timer);
+        scheduleReconnect(client);
         return false;
       }
       clearInterval(timer);
       if(subscribed){lastTrackAt=Date.now();timer=setInterval(()=>track().catch(()=>{}),HEARTBEAT_MS);}
       if(!onlineHandler){
-        onlineHandler=()=>{track();apply();}; window.addEventListener('online',onlineHandler);
+        onlineHandler=()=>{if(!channel)start(sb,{publish});else track(true);apply();}; window.addEventListener('online',onlineHandler);
         offlineHandler=()=>{watched.forEach(id=>{if(states.get(id)?.online)markOfflineLater(id);});}; window.addEventListener('offline',offlineHandler);
-        visibilityHandler=()=>{if(document.visibilityState==='visible'){track(true);apply();}}; document.addEventListener('visibilitychange',visibilityHandler);
+        visibilityHandler=()=>{if(document.visibilityState==='visible'){if(!channel)start(sb,{publish});else track(true);apply();}}; document.addEventListener('visibilitychange',visibilityHandler);
         pagehideHandler=e=>{if(e.persisted)return;stop(true).catch(()=>{});}; window.addEventListener('pagehide',pagehideHandler);
       }
       return true;
@@ -112,7 +134,7 @@
   }
   async function stop(force=false){
     if(!force && window.__SPIKE_GLOBAL_PRESENCE_REQUIRED__ && sb && me){try{const own=await sb.from('profile_privacy').select('show_online_status').eq('user_id',me.id).maybeSingle();if(!own.error && own.data?.show_online_status!==false)return false;}catch(_){}}
-    clearInterval(timer);timer=null;
+    clearInterval(timer);timer=null;clearTimeout(reconnectTimer);reconnectTimer=null;reconnectAttempts=0;
     if(channel&&sb){try{await sb.removeChannel(channel)}catch(_){} }
     channel=null; states.clear(); timers.forEach(t=>clearTimeout(t));timers.clear(); lastTrackAt=0;
   }
