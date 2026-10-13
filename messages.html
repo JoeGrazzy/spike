@@ -54,7 +54,17 @@ async function getProfiles(ids){
    const normalize=data=>new Map((data||[]).map(p=>[String(p.id||p.user_id||p.profile_id||'').toLowerCase(),p]).filter(([id])=>id));
    let found=new Map();
    try{const {data,error}=await db.rpc('get_public_profiles',{p_user_ids:missing});if(!error)found=normalize(data);else console.warn('[SPIKE messages] public profile RPC lookup:',error.message)}catch(e){console.warn('[SPIKE messages] public profile RPC lookup:',e.message)}
-   /* Avoid the expensive global 500-user directory fallback during inbox startup. Missing public profiles use a safe generic label and can be retried on demand. */
+   // Preserve the Friends directory fallback for contact names/photos when the
+   // preferred profile RPC omits a DM participant. Only run it when needed and
+   // only once per missing batch; never query private profile rows directly.
+   if(found.size<missing.length){
+    try{
+     const {data,error}=await db.rpc('get_registered_users_public',{p_query:'',p_limit:500,p_offset:0});
+     if(error)throw error;
+     const wantedSet=new Set(missing);
+     for(const [id,p] of normalize((data||[]).filter(p=>wantedSet.has(String(p.id||p.user_id||p.profile_id||'').toLowerCase()))))if(!found.has(id))found.set(id,p);
+    }catch(e){console.warn('[SPIKE messages] registered-profile fallback:',e.message)}
+   }
    for(const id of missing)profileCache.set(id,found.get(id)||null);
   }
   return new Map(wanted.filter(id=>profileCache.get(id)).map(id=>[id,profileCache.get(id)]));
