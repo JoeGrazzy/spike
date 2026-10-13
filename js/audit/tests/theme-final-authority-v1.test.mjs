@@ -27,6 +27,15 @@ test('Theme engine updates browser theme-color from canonical theme background',
 
 test('There is still exactly one canonical theme registry',async()=>{
   const js=await readFile('js/theme.js','utf8');
-  assert.equal((js.match(/const THEMES=\[/g)||[]).length,1);
+  assert.equal((js.match(/const THEMES=Object\.freeze\(\[/g)||[]).length,1);
   assert.equal((js.match(/function next\(\)/g)||[]).length,1);
+});
+
+
+test('nested Feed and Help menu cards use theme-owned surfaces instead of fixed dark/white fills',async()=>{
+  const css=await readFile('css/spike-theme-final-authority-v1.css','utf8');
+  assert.match(css,/\.spike-menu-sheet \.menu-list button[\s\S]*?\.spike-menu-sheet \.menu-list a \{[\s\S]*?background:var\(--theme-surface-soft\)!important/);
+  assert.match(css,/\.spike-menu-v3 \.menu-v3-grid button/);
+  const palette=await readFile('css/spike-three-theme-authority.css','utf8');
+  for(const id of ['1','2','3']) assert.ok(palette.includes(`html[data-spike-style="${id}"]`), `missing theme ${id}`);
 });

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070914">
 <title>SPIKE — Live</title>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===6||n===8)?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4"></script>
 <script src="js/supabase-singleton.js"></script>
@@ -13,14 +13,13 @@
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
 <link rel="stylesheet" href="css/spike-live.css">
-<script defer src="js/theme.js"></script>
+
 
 <style id="live-menu-css">
 .live-menu{position:fixed;z-index:10050;top:calc(env(safe-area-inset-top,0px) + 68px);right:12px;width:min(360px,calc(100vw - 24px));padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(8,12,24,.98);box-shadow:0 24px 70px rgba(0,0,0,.5);backdrop-filter:blur(20px)}
 .live-menu[hidden]{display:none!important}.live-menu-head{display:flex;justify-content:space-between;align-items:center;padding:3px 3px 10px 5px}.live-menu-head strong{display:block;color:#fff;font-size:14px}.live-menu-head small{display:block;margin-top:3px;color:rgba(220,225,240,.58);font-size:9px}.live-menu-head button{width:32px;height:32px;border:0;border-radius:9px;background:rgba(255,255,255,.06);color:#fff;font-size:19px}.live-menu-list{display:grid;gap:7px}.live-menu-list button{width:100%;display:grid;grid-template-columns:34px 1fr 18px;align-items:center;text-align:left;gap:8px;padding:11px;border:1px solid rgba(255,255,255,.08);border-radius:13px;background:rgba(255,255,255,.035);color:#fff}.live-menu-list button:hover,.live-menu-list button:focus-visible{background:rgba(145,86,255,.13);border-color:rgba(145,86,255,.35);outline:none}.live-menu-list button>span{font-size:21px;text-align:center}.live-menu-list b{display:block;font-size:11px}.live-menu-list small{display:block;margin-top:3px;color:rgba(220,225,240,.56);font-size:8px}.live-menu-list i{font-style:normal;font-size:20px;color:rgba(255,255,255,.45);text-align:right}
 @media(max-width:600px){.live-menu{top:calc(env(safe-area-inset-top,0px) + 62px);right:8px;width:calc(100vw - 16px)}}
 </style>
-<link rel="stylesheet" href="css/spike-native-select.css">
 <style id="live-menu-beautiful-v2">
 .live-menu{position:fixed!important;z-index:10050!important;top:calc(env(safe-area-inset-top,0px) + 68px)!important;right:12px!important;width:min(390px,calc(100vw - 24px))!important;max-height:min(82dvh,720px)!important;overflow:auto!important;padding:12px!important;border:1px solid rgba(148,163,184,.16)!important;border-radius:24px!important;background:radial-gradient(circle at 10% 0%,rgba(124,58,237,.18),transparent 35%),linear-gradient(180deg,rgba(17,24,42,.99),rgba(7,12,24,.99))!important;box-shadow:0 28px 90px rgba(0,0,0,.58),0 8px 36px rgba(99,102,241,.12)!important;backdrop-filter:blur(22px) saturate(120%)!important;-webkit-backdrop-filter:blur(22px) saturate(120%)!important}.live-menu-head{padding:3px 3px 12px!important;border-bottom:1px solid rgba(148,163,184,.10);margin-bottom:11px}.live-menu-head strong{font-size:16px!important}.live-menu-head small{font-size:9px!important;color:rgba(220,225,240,.58)!important}.live-menu-head button{width:36px!important;height:36px!important;border-radius:12px!important;border:1px solid rgba(148,163,184,.14)!important;background:rgba(255,255,255,.055)!important}.live-menu-list{display:grid!important;gap:8px!important}.live-menu-list button{min-height:60px!important;grid-template-columns:38px 1fr 20px!important;padding:10px!important;border:1px solid rgba(148,163,184,.11)!important;border-radius:16px!important;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018))!important;transition:.16s ease!important}.live-menu-list button:first-child{min-height:70px!important;border-color:rgba(244,63,94,.34)!important;background:linear-gradient(135deg,rgba(239,68,68,.16),rgba(124,58,237,.12))!important;box-shadow:0 10px 28px rgba(239,68,68,.08)!important}.live-menu-list button:hover,.live-menu-list button:focus-visible{transform:translateY(-1px)!important;background:linear-gradient(145deg,rgba(99,102,241,.12),rgba(192,38,211,.07))!important;border-color:rgba(129,140,248,.36)!important;outline:none!important}.live-menu-list button:first-child>span{width:40px!important;height:40px!important;border-radius:13px!important;display:grid!important;place-items:center!important;background:linear-gradient(145deg,#ef4444,#be123c)!important;box-shadow:0 8px 20px rgba(239,68,68,.22)}.live-menu-list button>span{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:rgba(99,102,241,.11);font-size:18px!important}.live-menu-list button:nth-child(2)>span{background:rgba(59,130,246,.13)}.live-menu-list button:nth-child(3)>span{background:rgba(168,85,247,.13)}.live-menu-list button:nth-child(4)>span{background:rgba(20,184,166,.12)}.live-menu-list b{font-size:11px!important}.live-menu-list small{font-size:8px!important;color:rgba(220,225,240,.52)!important}.live-menu-list i{font-size:22px!important;color:rgba(255,255,255,.5)!important}@media(max-width:600px){.live-menu{top:calc(env(safe-area-inset-top,0px) + 62px)!important;right:8px!important;width:calc(100vw - 16px)!important;border-radius:22px!important}}
 </style>    <link rel="stylesheet" href="css/spike-beauty-v1.css">
@@ -30,7 +29,8 @@
 <link href="css/premium-back.css" rel="stylesheet">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
+
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
 </head>
 <body class="live-page">
 <button type="button" data-spike-premium-back="true" aria-label="Back" class="premium-back">‹</button>
@@ -156,12 +156,14 @@
 <div class="sheet-wrap" id="guestInboxSheet" role="dialog" aria-modal="true" aria-labelledby="guestInboxTitle"><div class="live-sheet"><div class="sheet-head"><h2 id="guestInboxTitle">🎙 Guest requests</h2><button class="close-sheet" data-close="guestInboxSheet">×</button></div><p style="color:var(--live-muted);font-size:11px">Accept or decline people asking to join your Live.</p><div class="ranking-pack" id="guestInboxList"></div></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="js/spike-live.js"></script>
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script defer src="js/premium-back.js"></script>
 <script src="js/presence.js?v=sitewide-presence-v5"></script>
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<script src="js/spike-surface-controls.js"></script>
 </body>
 </html>

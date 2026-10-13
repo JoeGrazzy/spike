@@ -4,14 +4,14 @@ import { readFile } from 'node:fs/promises';
 
 const settings = await readFile('settings.html', 'utf8');
 
-test('Settings treats the database theme as authoritative over cached theme state', () => {
-  assert.match(settings, /const dbTheme=Number\(appResult\.data\?\.theme_style\)/);
-  assert.match(settings, /ALLOWED_THEMES\.includes\(dbTheme\)\?dbTheme:null/);
-  assert.match(settings, /const cached=Number\(getLocal\('theme_style',DEFAULTS\.theme_style\)\)/);
-  assert.match(settings, /localStorage\.getItem\('spike-feed-style'\)/);
-  const themeLine = settings.split('\n').find(line => line.includes('const dbTheme=Number(appResult.data?.theme_style)'));
+test('Settings preserves the current browser theme before falling back to the account value', () => {
+  assert.match(settings, /spike-theme-choice-v3/);
+  assert.match(settings, /localStorage\.getItem\('spike-theme-choice-v3'\)/);
+  assert.match(settings, /let theme=null;try\{const shared=Number\(localStorage\.getItem\('spike-theme-choice-v3'\)\)/);
+  assert.match(settings, /if\(theme===null\)\{const dbTheme=Number\(appResult\.data\?\.theme_style\)/);
+  const themeLine = settings.split('\n').find(line => line.includes("let theme=null;try{const shared=Number(localStorage.getItem('spike-theme-choice-v3'))"));
   assert.ok(themeLine);
-  assert.ok(themeLine.indexOf('const dbTheme=') < themeLine.indexOf("localStorage.getItem('spike-feed-style')"));
+  assert.ok(themeLine.indexOf('localStorage.getItem') < themeLine.indexOf('const dbTheme='));
 });
 
 test('Settings only reports full save success when all persistence operations succeed', () => {

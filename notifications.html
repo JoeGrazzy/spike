@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#070b10">
 <meta name="description" content="SPIKE notifications">
 <title>SPIKE — Notifications</title>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="stylesheet" href="css/perf.css">
 <link rel="stylesheet" href="css/ui-fix.css">
@@ -17,7 +17,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
 <script src="js/supabase-singleton.js"></script><script src="js/spike-notification-sound-v1.js"></script><script defer src="js/spike-notification-center-v1.js" defer></script>
 <script src="js/presence.js"></script>
-<script src="js/theme.js" defer></script>
+
 <script src="js/spike-dialog.js"></script>
 <style>
 :root{--page-bg:var(--spike-bg);--surface:var(--spike-surface);--surface-2:var(--spike-surface-2);--border:var(--spike-line);--text:var(--spike-text);--muted:var(--spike-muted);--accent:var(--spike-accent);--accent-2:var(--spike-accent-2);--danger:var(--btn-danger)}
@@ -35,15 +35,15 @@
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 <link rel="stylesheet" href="css/spike-identity.css"><script src="js/spike-identity.js"></script>
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-native-select.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
 <style id="spike-notification-page-badge-css">.notification-page-bell{position:relative;text-decoration:none}.notification-page-bell .spike-notification-badge-count{position:absolute;right:-4px;top:-5px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;display:grid;place-items:center;background:#ff365f;color:#fff;border:2px solid var(--spike-bg,#070b10);font:900 9px/1 Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(0,0,0,.35)}.notification-page-bell .spike-notification-badge-count[hidden]{display:none}</style>  <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
   <link rel="stylesheet" href="css/spike-premium-loader.css">
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
+
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
 </head>
 <body data-spike-page="notifications" data-spike-notification-page>
 <div class="app">
@@ -558,11 +558,13 @@ boot();
 </script>
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script src="js/spike-native-v2.js"></script>
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<script src="js/spike-surface-controls.js"></script>
 </body>
 </html>
 <style id="spike-notifications-nav-repair-v1">

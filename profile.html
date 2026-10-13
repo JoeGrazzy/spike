@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -65,7 +65,7 @@ img, video, iframe { max-width:100%; }
 /* SPIKE Connect QR — intentionally secondary to the profile */
 .qr-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.qr-btn{border:1px solid var(--spike-line);background:var(--spike-surface-2);color:var(--spike-text);border-radius:14px;padding:10px 14px;font-weight:800;cursor:pointer}.qr-overlay{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:9999;display:none;align-items:center;justify-content:center;padding:18px}.qr-overlay.open{display:flex}.qr-sheet{width:min(440px,100%);border:1px solid rgba(255,255,255,.12);background:var(--spike-surface);border-radius:28px;padding:20px;box-shadow:0 30px 90px rgba(0,0,0,.45);color:var(--spike-text);text-align:center}.qr-head{display:flex;align-items:center;justify-content:space-between;text-align:left}.qr-close{border:0;background:transparent;color:inherit;font-size:28px;cursor:pointer}.qr-code-box{width:min(280px,78vw);height:min(280px,78vw);margin:22px auto 16px;background:#fff;border-radius:22px;display:grid;place-items:center;padding:14px}.qr-code-box img,.qr-code-box canvas{max-width:100%;max-height:100%}.qr-help{color:var(--spike-muted);font-size:13px;margin:0 0 14px}.scanner-overlay{position:fixed;inset:0;background:#05070b;z-index:10000;display:none;color:#fff}.scanner-overlay.open{display:block}.scanner-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.scanner-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.58),transparent 30%,transparent 70%,rgba(0,0,0,.65))}.scanner-top{position:absolute;top:0;left:0;right:0;padding:18px 18px;display:flex;align-items:center;justify-content:space-between}.scanner-title{font-weight:900;font-size:18px}.scanner-icon-btn{width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.28);color:#fff;font-size:22px;cursor:pointer}.scan-frame{position:absolute;left:50%;top:50%;width:min(76vw,300px);height:min(76vw,300px);transform:translate(-50%,-55%);border:2px solid rgba(255,255,255,.75);border-radius:24px;box-shadow:0 0 0 9999px rgba(0,0,0,.30)}.scan-corner{position:absolute;width:42px;height:42px;border-color:#fff;border-style:solid}.scan-c1{top:-2px;left:-2px;border-width:4px 0 0 4px;border-radius:20px 0 0 0}.scan-c2{top:-2px;right:-2px;border-width:4px 4px 0 0;border-radius:0 20px 0 0}.scan-c3{bottom:-2px;left:-2px;border-width:0 0 4px 4px;border-radius:0 0 0 20px}.scan-c4{bottom:-2px;right:-2px;border-width:0 4px 4px 0;border-radius:0 0 20px 0}.scan-line{position:absolute;left:14px;right:14px;top:20%;height:2px;background:linear-gradient(90deg,transparent,#fff,transparent);animation:scanline 2s ease-in-out infinite}@keyframes scanline{0%,100%{top:18%;opacity:.3}50%{top:82%;opacity:1}}.scanner-bottom{position:absolute;bottom:28px;left:0;right:0;text-align:center;padding:0 18px}.scanner-bottom p{margin:10px 0;color:rgba(255,255,255,.78);font-size:14px}.scanner-controls{display:flex;justify-content:center;gap:14px}.scanner-control{border:1px solid rgba(255,255,255,.22);background:rgba(0,0,0,.34);color:#fff;border-radius:999px;padding:12px 18px;font-weight:800;cursor:pointer}.scanner-file{display:none}.connect-preview{position:fixed;inset:0;background:rgba(3,5,12,.78);backdrop-filter:blur(14px);z-index:10001;display:none;align-items:center;justify-content:center;padding:18px}.connect-preview.open{display:flex}.connect-card{width:min(390px,100%);background:var(--spike-surface);color:var(--spike-text);border:1px solid var(--spike-line);border-radius:26px;padding:22px;text-align:center}.connect-avatar{width:76px;height:76px;border-radius:50%;object-fit:cover;margin:auto;border:3px solid rgba(124,58,237,.28)}.connect-avatar-fallback{display:grid;place-items:center;background:var(--spike-surface-2);font-size:30px}.connect-card h2{margin:12px 0 4px}.connect-id{color:var(--spike-muted);font-weight:800}.connect-actions{display:flex;gap:10px;margin-top:20px}.connect-actions .btn{flex:1}
 </style>
-<script src="js/theme.js" defer></script>
+
 <script src="js/spike-identity.js" defer></script>
 <link rel="stylesheet" href="css/ui-fix.css">
 
@@ -92,7 +92,34 @@ img, video, iframe { max-width:100%; }
 .privacy-toggle-row{cursor:pointer}.privacy-toggle-row .privacy-copy{cursor:pointer}
 .premium-switch{width:58px;height:32px}.premium-slider:before{width:24px;height:24px}.premium-switch input:checked+.premium-slider:before{transform:translateX(25px)}
 .avatar,.mini-avatar,.comment-avatar{border-radius:50%!important;aspect-ratio:1/1!important;overflow:hidden!important;isolation:isolate}.avatar img,.mini-avatar img,.comment-avatar img{display:block!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:cover!important;object-position:50% 50%!important;border-radius:50%!important}
-@media(max-width:520px){.privacy-row{align-items:center}.privacy-row select{width:142px;min-width:120px}.privacy-copy{padding-right:4px}.privacy-copy b{font-size:11px}.privacy-copy small{font-size:8.5px}}
+@media(max-width:520px){
+  .privacy-premium-panel{padding:14px;margin-top:12px}
+  .privacy-panel-head{gap:10px;align-items:center}
+  .privacy-panel-head h3{font-size:15px}
+  .privacy-panel-head p{font-size:11px;line-height:1.45}
+  .privacy-grid{gap:7px}
+  .privacy-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,44%);align-items:center;gap:10px;padding:12px;min-height:76px}
+  .privacy-copy{min-width:0;padding:0}
+  .privacy-copy b{font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+  .privacy-copy small{font-size:10px;line-height:1.35;overflow-wrap:anywhere}
+  .privacy-row select{width:100%;min-width:0;max-width:100%;font-size:11px;padding:10px 25px 10px 9px;background-position:calc(100% - 12px) 50%,calc(100% - 7px) 50%}
+  .privacy-toggle-row{grid-template-columns:minmax(0,1fr) auto}
+  .premium-switch{justify-self:end}
+  .privacy-panel-foot{font-size:9px;gap:7px}
+}
+@media(max-width:360px){.privacy-row{grid-template-columns:minmax(0,1fr) minmax(0,42%);gap:7px;padding:10px}.privacy-copy b{font-size:11px}.privacy-copy small{font-size:9px}.privacy-row select{font-size:10px}}
+/* Privacy rows use the native select for data and the native-select controller's trigger for interaction.
+   Do not hide generic third children: the trigger is inserted immediately after each select. */
+.privacy-row> .spike-select-native-hidden{display:none!important}
+.privacy-row> .spike-select-trigger{display:flex!important;align-items:center;gap:8px;width:148px;min-width:132px;max-width:44%;padding:9px 10px;border:1px solid color-mix(in srgb,var(--spike-accent-2) 22%,transparent);border-radius:12px;background:var(--spike-surface-solid);color:var(--spike-text);font-size:11px;font-weight:850;text-align:left;}
+.privacy-row .spike-select-trigger .sst-icon{flex:none;color:var(--spike-accent-2)}
+.privacy-row .spike-select-trigger .sst-copy{min-width:0;flex:1;display:flex;flex-direction:column;overflow:hidden}
+.privacy-row .spike-select-trigger .sst-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.privacy-row .spike-select-trigger .sst-hint{display:none}
+.privacy-row .spike-select-trigger .sst-chevron{flex:none;transform:rotate(90deg);color:var(--spike-muted)}
+.privacy-row .privacy-audience,.privacy-row .audience-summary,.privacy-row .privacy-value-card,.privacy-row [class*="audience-card"],.privacy-row [class*="audience-summary"],.privacy-row [class*="privacy-value"]{display:none!important}
+@media(max-width:520px){.privacy-row .spike-select-trigger{width:100%;min-width:0;max-width:100%;font-size:12px;padding:11px}}
+@media(max-width:520px){.privacy-row{grid-template-columns:minmax(0,1fr);gap:9px;min-height:0}.privacy-row select{width:100%;min-width:0;max-width:100%;font-size:12px;padding:11px 32px 11px 11px}.privacy-toggle-row{grid-template-columns:minmax(0,1fr) auto}.privacy-copy b{font-size:12px}.privacy-copy small{font-size:10px}}
 </style>
 
 <style id="spike-menu-nav-css-fixed">
@@ -213,16 +240,15 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-native-select.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
   <link rel="stylesheet" href="css/spike-premium-loader.css">
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
-</head>
+
+<script src="js/theme.js" defer></script></head>
 <body class="spike-profile-page">
 <div class="loader" id="loader" role="status" aria-live="polite"><div class="loader-card"><div class="spinner"></div><span id="loaderText">Loading profile…</span></div></div>
 <header class="header"><button class="header-btn spike-premium-back" id="backBtn" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back" type="button">‹</button><div class="header-title" id="headerTitle">Profile</div><button class="header-btn hidden" id="adminBtn" type="button" title="Admin" aria-label="Admin">⚙</button><button class="header-btn" id="menuBtn">⋯</button></header>
@@ -575,6 +601,7 @@ async function toggleFollow(){
 function fillEdit(){const p=state.profile;$("editName").value=p.display_name||p.full_name||p.name||"";$("editUsername").value=p.username||"";$("editBio").value=p.bio||p.about||"";$("editAvatar").value=p.avatar_url||p.avatar||"";$("editCover").value=state.cover?.url||p.cover_url||p.coverUrl||p.banner_url||p.banner||"";$("editWebsite").value=p.website||"";$("editLocation").value=p.location||"";$("editSocial").value=p.social_links||p.socialLinks||"";fillPrivacy();open("editOverlay")}
 async function saveProfile(e){
   e.preventDefault();
+  let profileSaved = false;
   const form=e.currentTarget;
   const username=$("editUsername").value.trim().replace(/^@/,"");
   if(username && !/^[A-Za-z0-9._-]{2,40}$/.test(username)){
@@ -652,6 +679,7 @@ async function saveProfile(e){
     const rpcPrivacy={profile_visibility:privacyPatch.profile_visibility,posts_visibility:privacyPatch.posts_visibility,media_visibility:privacyPatch.media_visibility,friends_visibility:privacyPatch.friends_visibility,allow_messages:privacyPatch.allow_messages,allow_calls:privacyPatch.allow_calls,show_online_status:privacyPatch.show_online_status,allow_profile_discovery:privacyPatch.allow_profile_discovery};
     const profileSave=await db.rpc("spike_update_profile_v1",{p_profile:rpcProfile,p_privacy:rpcPrivacy,p_user_doc:userDoc});
     if(profileSave.error) throw new Error("Profile could not be saved: "+profileSave.error.message);
+    profileSaved = true;
     if(coverUrl){
       const same=state.cover?.url===coverUrl;
       const cr=await db.rpc("save_spike_cover_settings",{p_cover_url:coverUrl,p_position_x:same?Number(state.cover.position_x||0):0,p_position_y:same?Number(state.cover.position_y||0):0,p_zoom:same?Number(state.cover.zoom||1):1,p_fit:"cover"});
@@ -673,7 +701,11 @@ async function saveProfile(e){
     toast("Profile updated","success");
   }catch(err){
     console.error("[SPIKE PROFILE SAVE]",err);
-    toast(err.message||"Could not save your profile.","error");
+    if(profileSaved){
+      toast("Your profile details were saved, but the cover settings could not be saved. Reopen Edit profile and retry the cover update.","error");
+    } else {
+      toast(err.message||"Could not save your profile.","error");
+    }
   }finally{
     if(saveBtn){saveBtn.disabled=false;saveBtn.textContent=saveBtn.dataset.originalText||"Save changes";}
     $("editAvatarFile").value="";
@@ -730,7 +762,12 @@ if(f) uploadProfileImage(f,"cover");
 $("backBtn").onclick=()=>{
   if(history.length>1) history.back(); else location.href='feed.html';
 };
-$("menuBtn").onclick=()=>open("menuOverlay");$("closeMenu").onclick=()=>close("menuOverlay");$("cancelEdit").onclick=()=>close("editOverlay");$("editForm").addEventListener("submit",saveProfile);$("shareProfileBtn")?.addEventListener("click",openShareProfile);$("signOutBtn").onclick=async()=>{try{await window.AppPresence?.stop?.();try{await db.removeAllChannels?.()}catch(_){}const {error}=await db.auth.signOut({scope:"local"});if(error)throw error;location.replace("index.html?logged_out=1")}catch(e){console.error("[SPIKE PROFILE SIGNOUT]",e);toast(e.message||"Could not sign out. Please try again.","error")}};$("copyProfile").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied")}catch{toast(location.href)}};document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(x=>x.classList.remove("open"))});document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));$("mediaPanel").classList.toggle("hidden",t.dataset.tab!=="media");$("aboutPanel").classList.toggle("hidden",t.dataset.tab!=="about")});$("mediaPosts").addEventListener("click",e=>{const tile=e.target.closest("[data-gallery-index]");if(tile)openMediaViewer(Number(tile.dataset.galleryIndex))});}
+$("menuBtn").onclick=()=>open("menuOverlay");$("closeMenu").onclick=()=>close("menuOverlay");$("cancelEdit").onclick=()=>close("editOverlay");$("editForm").addEventListener("submit",saveProfile);
+// File upload and URL entry are alternative sources; keep them mutually exclusive.
+$("editAvatarFile").addEventListener("change",()=>{if($("editAvatarFile").files?.length) $("editAvatar").value="";});
+$("editAvatar").addEventListener("input",()=>{if($("editAvatar").value.trim()) $("editAvatarFile").value="";});
+$("editCoverFile").addEventListener("change",()=>{if($("editCoverFile").files?.length) $("editCover").value="";});
+$("editCover").addEventListener("input",()=>{if($("editCover").value.trim()) $("editCoverFile").value="";});$("shareProfileBtn")?.addEventListener("click",openShareProfile);$("signOutBtn").onclick=async()=>{try{await window.AppPresence?.stop?.();try{await db.removeAllChannels?.()}catch(_){}const {error}=await db.auth.signOut({scope:"local"});if(error)throw error;location.replace("index.html?logged_out=1")}catch(e){console.error("[SPIKE PROFILE SIGNOUT]",e);toast(e.message||"Could not sign out. Please try again.","error")}};$("copyProfile").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Profile link copied")}catch{toast(location.href)}};document.querySelectorAll(".overlay").forEach(o=>o.addEventListener("click",e=>{if(e.target===o)o.classList.remove("open")}));document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".overlay.open").forEach(x=>x.classList.remove("open"))});document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active",x===t));$("mediaPanel").classList.toggle("hidden",t.dataset.tab!=="media");$("aboutPanel").classList.toggle("hidden",t.dataset.tab!=="about")});$("mediaPosts").addEventListener("click",e=>{const tile=e.target.closest("[data-gallery-index]");if(tile)openMediaViewer(Number(tile.dataset.galleryIndex))});}
 let mediaViewerIndex=0;
 function openMediaViewer(index){
   const items=galleryMedia();
@@ -1056,10 +1093,11 @@ else setTimeout(install,1500);
 <script src="js/spike-surface-controls.js"></script>
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script src="js/spike-native-v2.js"></script>
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
 </body>
 </html><style id="spike-identity-profile-css">#generatedCover{position:absolute;inset:0;z-index:0}#generatedCover .spike-generated-cover{position:absolute;inset:0}.cover>img{position:relative;z-index:1}.cover-actions{z-index:4}.avatar .spike-generated-avatar,.avatar .profile-avatar{width:100%;height:100%;border-radius:50%}.profile-avatar .spike-id-mark{font-size:inherit}</style>

@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -615,7 +615,7 @@ video{contain:layout paint}
 .spike-presence-target{position:relative!important}
 .spike-presence-target::after{content:attr(data-presence-status);position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;border-radius:999px;background:var(--card,#10141d);border:1px solid rgba(255,255,255,.10);color:var(--muted,#aab2c0);font:700 8px/1.1 system-ui,sans-serif;z-index:5;pointer-events:none}
 </style>
-<script src="js/theme.js" defer></script>
+
 <link rel="stylesheet" href="css/ui-fix.css">
 
 <style id="spike-menu-nav-css-fixed">
@@ -664,14 +664,14 @@ video{contain:layout paint}
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-native-select.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
+
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
 </head>
 <body data-spike-page="friends">
 <header class="header">
@@ -716,7 +716,7 @@ video{contain:layout paint}
 </nav>
 <style>
 .notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.friend-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-/* ===== SPIKE PREMIUM THEME SYSTEM ===== */
+/* Shared SPIKE component styling; colors resolve through the active theme tokens. */
 :root{
 --sp-bg:#f6f7fb;
 --sp-surface:rgba(255,255,255,.88);
@@ -1404,10 +1404,12 @@ else setTimeout(install,1500);
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script src="js/spike-native-v2.js"></script>
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<script src="js/spike-surface-controls.js"></script>
 </body>
 </html>

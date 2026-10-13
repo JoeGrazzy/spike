@@ -1,0 +1,147 @@
+/* SPIKE Feed Header + Menus — single theme-token consumer.
+   Loaded after the page's legacy menu styles and the canonical three-theme palette.
+   Layout/interaction are unchanged; only theme-owned colors and focus states are normalized.
+*/
+html[data-spike-style] body[data-spike-page="feed"] > header.header {
+  color: var(--spike-text) !important;
+  background: color-mix(in srgb, var(--spike-surface) 96%, transparent) !important;
+  border-bottom: 1px solid var(--spike-line) !important;
+  box-shadow: var(--spike-shadow) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .brand,
+html[data-spike-style] body[data-spike-page="feed"] > header.header .brand-title,
+html[data-spike-style] body[data-spike-page="feed"] > header.header .feed-header-title,
+html[data-spike-style] body[data-spike-page="feed"] > header.header .header-actions,
+html[data-spike-style] body[data-spike-page="feed"] > header.header .header-actions a,
+html[data-spike-style] body[data-spike-page="feed"] > header.header .header-actions button {
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .brand-subtitle {
+  color: var(--spike-muted) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .feed-header-divider {
+  background: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .header-actions :is(button, a),
+html[data-spike-style] body[data-spike-page="feed"] > header.header .icon {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border: 1px solid var(--spike-line) !important;
+  box-shadow: none !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .header-actions :is(button, a):is(:hover, :focus-visible, [aria-expanded="true"]),
+html[data-spike-style] body[data-spike-page="feed"] > header.header .icon:is(:hover, :focus-visible, [aria-expanded="true"]) {
+  background: color-mix(in srgb, var(--spike-accent) 13%, var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 48%, var(--spike-line)) !important;
+  outline-color: var(--spike-focus) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header .spike-notification-badge-count {
+  background: var(--spike-accent) !important;
+  color: var(--spike-action-text) !important;
+  border-color: var(--spike-surface) !important;
+}
+
+/* Main command menu and older sheet markup share the same palette. */
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay.spike-menu-overlay {
+  background: color-mix(in srgb, var(--spike-bg) 72%, transparent) !important;
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.spike-command-menu, .spike-menu-sheet) {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+  box-shadow: var(--spike-shadow) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.menu-reference-profile, .spike-command-more, .spike-command-footer) {
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.menu-v3-kicker, .menu-reference-label, .spike-command-section-title) {
+  color: var(--spike-accent) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.menu-reference-profile-copy strong, .spike-command-row strong, .spike-command-more strong, .menu-v3-copy strong) {
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.menu-reference-profile-copy small, .spike-command-row small, .spike-command-more small, .menu-v3-copy small, .spike-command-row > b, .spike-command-chevron) {
+  color: var(--spike-muted) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.menu-reference-edit, .spike-command-row a) {
+  color: var(--spike-accent) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay .spike-menu-close {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay .spike-menu-search {
+  background: color-mix(in srgb, var(--spike-accent) 7%, var(--spike-surface-2)) !important;
+  color: var(--spike-text) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 38%, var(--spike-line)) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay .spike-menu-search kbd {
+  color: var(--spike-muted) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.spike-command-icon, .menu-v3-summary-icon, .spike-menu-sheet .menu-list button > span, .spike-menu-sheet .menu-list a > span) {
+  background: color-mix(in srgb, var(--spike-accent) 11%, var(--spike-surface-2)) !important;
+  color: var(--spike-accent) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.spike-command-row, .spike-menu-sheet .menu-list button, .spike-menu-sheet .menu-list a) {
+  color: var(--spike-text) !important;
+  border-color: transparent !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(.spike-command-row, .spike-menu-sheet .menu-list button, .spike-menu-sheet .menu-list a):is(:hover, :focus-visible, [aria-current="page"], [aria-checked="true"], .active) {
+  background: color-mix(in srgb, var(--spike-accent) 11%, var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 34%, var(--spike-line)) !important;
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay :is(button, a, summary, input, textarea, select):focus-visible {
+  outline: 3px solid var(--spike-focus) !important;
+  outline-offset: 2px !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #menuOverlay .spike-command-footer #menuSignOut {
+  color: var(--spike-danger, #b4233c) !important;
+  border-color: color-mix(in srgb, var(--spike-danger, #b4233c) 32%, var(--spike-line)) !important;
+  background: color-mix(in srgb, var(--spike-danger, #b4233c) 7%, var(--spike-surface)) !important;
+}
+
+/* Secondary navigation drawer is generated separately from #menuOverlay. */
+html[data-spike-style] body[data-spike-page="feed"] .spike-smart-nav {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+  box-shadow: var(--spike-shadow) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] .spike-smart-nav :is(strong, b, span) { color: var(--spike-text) !important; }
+html[data-spike-style] body[data-spike-page="feed"] .spike-smart-nav small { color: var(--spike-muted) !important; }
+html[data-spike-style] body[data-spike-page="feed"] .spike-smart-nav :is(button, a) {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] .spike-smart-nav :is(button, a):is(:hover, :focus-visible, [aria-current="page"], .active) {
+  background: color-mix(in srgb, var(--spike-accent) 12%, var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 42%, var(--spike-line)) !important;
+}
+
+/* Feed's persistent bottom dock previously used a fixed plum palette. */
+html[data-spike-style] body[data-spike-page="feed"] #spikeBottomNav.spike-bottom-nav {
+  background: color-mix(in srgb, var(--spike-surface) 96%, transparent) !important;
+  border-color: var(--spike-line) !important;
+  box-shadow: var(--spike-shadow) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #spikeBottomNav :is(a, button) {
+  color: var(--spike-muted) !important;
+  background: transparent !important;
+  border-color: transparent !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #spikeBottomNav :is(a, button):is(:hover, :focus-visible, .active, [aria-current="page"]) {
+  color: var(--spike-text) !important;
+  background: color-mix(in srgb, var(--spike-accent) 13%, var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 30%, var(--spike-line)) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] #spikeBottomNav :is(a, button) :is(span, small) { color: inherit !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-spike-style] body[data-spike-page="feed"] :is(#menuOverlay, .spike-smart-nav, #spikeBottomNav) *,
+  html[data-spike-style] body[data-spike-page="feed"] > header.header * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

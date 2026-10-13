@@ -251,7 +251,7 @@ function verifiedBadgeHTML(u, extraClass="") {
 function avatarOf(u) { return u?.avatar_url || u?.avatar || ""; }
 function identityAvatar(u, cls="spike-avatar", label){ return window.SPIKE_IDENTITY.avatarMarkup(u, cls, label||nameOf(u)); }
 function profileLink(id) { const uid=String(id||""); return uid && uid===String(state.user?.id||"") ? `profile.html?uid=${encodeURIComponent(uid)}` : `view_user.html?uid=${encodeURIComponent(uid)}`; }
-function applyTheme(theme) { const n = Number(theme); if (window.SPIKE_THEME && Number.isFinite(n)) window.SPIKE_THEME.set(n); }
+function applyTheme(theme) { const n = Number(theme); if (window.SPIKE_THEME && [1,2,3].includes(n)) window.SPIKE_THEME.set(n); }
 function initTheme() { if (window.SPIKE_THEME) window.SPIKE_THEME.set(window.SPIKE_THEME.get()); }
 
 async function requireUser() {

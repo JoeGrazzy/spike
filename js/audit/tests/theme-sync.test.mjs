@@ -7,11 +7,11 @@ const feed = await readFile('feed.html', 'utf8');
 const settings = await readFile('settings.html', 'utf8');
 
 test('Global theme persistence is shared by Feed and Settings', () => {
-  assert.match(themeJs, /localStorage\.setItem\(KEY,String\(n\)\)/);
+  assert.match(themeJs, /localStorage\.setItem\(KEY,String\(id\)\)/);
   assert.match(themeJs, /window\.addEventListener\('storage'/);
-  assert.match(themeJs, /event\.key!==KEY/);
-  assert.ok(feed.includes('window.SPIKE_THEME?.hasStored?.()'));
-  assert.match(settings, /localStorage\.getItem\('spike-feed-style'\)/);
+  assert.match(themeJs, /e\.key===KEY/);
+  assert.match(themeJs, /hasStored:/); assert.match(themeJs, /const KEY='spike-theme-choice-v3'/);
+  assert.match(settings, /localStorage\.getItem\('spike-theme-choice-v3'\)/);
   assert.match(settings, /window\.SPIKE_THEME\.set\(n\)/);
   assert.match(settings, /spike:theme-change/);
 });

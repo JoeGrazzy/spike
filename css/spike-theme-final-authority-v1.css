@@ -249,7 +249,10 @@ html[data-spike-style] .spike-menu-v3 .spike-menu-sheet {
 html[data-spike-style] .feature-item,
 html[data-spike-style] .spike-smart-nav-grid button,
 html[data-spike-style] .spike-menu-v3 .menu-v3-grid button,
-html[data-spike-style] .spike-menu-v3 .menu-v3-grid a {
+html[data-spike-style] .spike-menu-v3 .menu-v3-grid a,
+/* Older Feed/Help menu markup uses .menu-list instead of .menu-v3-grid. */
+html[data-spike-style] .spike-menu-sheet .menu-list button,
+html[data-spike-style] .spike-menu-sheet .menu-list a {
   background:var(--theme-surface-soft)!important;
   color:var(--spike-text)!important;
   border-color:var(--spike-line)!important;
@@ -285,3 +288,110 @@ html[data-spike-style] .header .brand-subtitle { color:var(--spike-muted)!import
 
 /* Keep real media stages neutral; they are content, not theme surfaces. */
 html[data-spike-style] .call-video-wrap { background:#05060b!important; }
+
+/* Pass 14 — Theme 2 whole-product coverage.
+   Keep all selectors scoped to Theme 2 so Themes 1 and 3 remain visually independent. */
+html[data-spike-style="2"] {
+  --theme-surface-soft: color-mix(in srgb,var(--spike-surface-2) 94%,transparent);
+  --theme-surface-strong: color-mix(in srgb,var(--spike-surface) 98%,transparent);
+  --theme-accent-soft: color-mix(in srgb,var(--spike-accent) 10%,var(--spike-surface));
+  --theme-accent-line: color-mix(in srgb,var(--spike-accent) 42%,var(--spike-line));
+  --theme-shadow-soft: 0 8px 24px color-mix(in srgb,var(--spike-shadow) 70%,transparent);
+}
+
+/* Page shells, headers, sticky bars and navigation. */
+html[data-spike-style="2"] :is(body,main,.main,.page,.page-content,.page-container,.app,.app-shell,.content,.content-wrap,.layout,.workspace,.feed,.feed-container,.settings-page,.profile-page,.messages-page,.chat-page) {
+  color:var(--spike-text);
+}
+html[data-spike-style="2"] :is(.header,.top,.topbar,.app-header,.site-header,.page-header,.room-header,.messages-header,.chat-header,.toolbar,.nav,.navbar,.sidebar,.bottom-nav,.spike-bottom-nav,.feed-v2-nav,.tabs,.tab-bar) {
+  background-color:var(--spike-surface)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style="2"] :is(.header,.top,.topbar,.app-header,.site-header,.page-header,.room-header,.messages-header,.chat-header) :is(a,button,.icon,.icon-btn,.back,.menu-toggle) {
+  color:var(--spike-text)!important;
+}
+
+/* Cards, sections, nested panels, popovers, menus and native option lists. */
+html[data-spike-style="2"] :is(.card,.panel,.surface,.tile,.item-card,.feature-card,.section-card,.settings-card,.auth-card,.profile-card,.room-card,.conversation-card,.notification-card,.stat-card,.post-card,.modal,.modal-card,.dialog,.popover,.dropdown,.dropdown-menu,.dropdown-content,.menu,.menu-panel,.menu-sheet,.drawer,.sheet,.option-panel,.options-menu,.context-menu,.contextual-menu,.spike-menu-sheet,.spike-feature-hub,.features-menu,.spike-smart-nav,.spike-surface-sheet,.category-picker-sheet,#context.context) {
+  background-color:var(--spike-surface)!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style="2"] :is(.menu-item,.dropdown-item,.option-item,.feature-item,.settings-row,.setting-row,.list-row,.conversation-row,.notification-row,.friend-row,.spike-menu-sheet .menu-list a,.spike-menu-sheet .menu-list button) {
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+}
+html[data-spike-style="2"] :is(.menu-item,.dropdown-item,.option-item,.feature-item,.settings-row,.setting-row,.list-row,.conversation-row,.notification-row,.friend-row,.spike-menu-sheet .menu-list a,.spike-menu-sheet .menu-list button):is(:hover,:focus-visible,.active,.selected,[aria-selected="true"],[aria-current="page"]) {
+  background:var(--theme-accent-soft)!important;
+  border-color:var(--theme-accent-line)!important;
+  color:var(--spike-text)!important;
+}
+html[data-spike-style="2"] option { background:var(--spike-surface)!important;color:var(--spike-text)!important; }
+
+/* Inputs and all common controls, including search, composer and form fields. */
+html[data-spike-style="2"] :is(input,textarea,select,button,.btn,.action,[role="button"],[role="option"],[role="switch"],.control,.form-control,.input,.select-trigger,.spike-control-select-trigger,.spike-surface-option) {
+  border-color:var(--spike-line);
+}
+html[data-spike-style="2"] :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),textarea,select,.control,.form-control,.input,.select-trigger,.spike-control-select-trigger) {
+  background-color:var(--spike-surface-2)!important;
+  color:var(--spike-text)!important;
+  caret-color:var(--spike-accent);
+}
+html[data-spike-style="2"] :is(input,textarea,select,.control,.form-control,.input):focus,
+html[data-spike-style="2"] :is(input,textarea,select,.control,.form-control,.input):focus-visible {
+  border-color:var(--spike-focus)!important;
+  outline:2px solid color-mix(in srgb,var(--spike-focus) 30%,transparent)!important;
+  outline-offset:1px;
+}
+html[data-spike-style="2"] :is(input,textarea)::placeholder { color:var(--spike-muted)!important;opacity:1; }
+html[data-spike-style="2"] :is(input[type="checkbox"],input[type="radio"],input[type="range"],progress) { accent-color:var(--spike-accent)!important; }
+html[data-spike-style="2"] :is(input,textarea,select,button):disabled,
+html[data-spike-style="2"] :is([aria-disabled="true"],[disabled]) { opacity:.62; }
+html[data-spike-style="2"] :is(button:not(.primary):not(.btn-primary),.btn:not(.primary):not(.btn-primary),.action:not(.primary),[role="button"]:not(.primary)) {
+  background-color:var(--spike-surface-2);
+  color:var(--spike-text);
+}
+html[data-spike-style="2"] :is(button.primary,.btn.primary,.btn-primary,.action.primary,.primary,[type="submit"],[role="button"].primary) {
+  background:linear-gradient(135deg,var(--spike-action-bg),var(--spike-action-bg-2))!important;
+  color:var(--spike-action-text)!important;
+  border-color:transparent!important;
+}
+
+/* Text hierarchy, icons, tabs, chips, badges, alerts and empty states. */
+html[data-spike-style="2"] :is(h1,h2,h3,h4,h5,h6,p,li,dt,dd,label,legend,strong,b,summary,.title,.name,.primary-text,.menu-v3-identity,.menu-v3-disclosure) { color:var(--spike-text); }
+html[data-spike-style="2"] :is(small,.muted,.mini,.hint,.field-hint,.subtle,.description,.subtitle,.secondary-text,.helper-text,.form-text,.menu-v3-copy small,.menu-v3-grid small) { color:var(--spike-muted); }
+html[data-spike-style="2"] :is(a,.link,.eyebrow,.overline,.section-label,.menu-v3-kicker,.menu-v3-profile,.menu-v3-label) { color:var(--spike-accent); }
+html[data-spike-style="2"] :is(.icon,.icon-btn,.iconbtn,.header-btn,.back,.menu-v3-icon,.menu-v3-summary-icon) { color:var(--spike-text); }
+html[data-spike-style="2"] :is(.pill,.badge,.tag,.chip,.status-badge,.label-badge) { background:var(--theme-accent-soft)!important;color:var(--spike-text)!important;border-color:var(--spike-line)!important; }
+html[data-spike-style="2"] :is(.tab.active,.tabs .active,[aria-selected="true"],[aria-current="page"],.selected,.is-selected) { background:var(--theme-accent-soft)!important;color:var(--spike-text)!important;border-color:var(--theme-accent-line)!important; }
+html[data-spike-style="2"] :is(.toast,.notice,.alert,.snackbar,.empty,.empty-state,.error-box,.success-box) { background:var(--spike-surface-2);color:var(--spike-text);border-color:var(--spike-line); }
+html[data-spike-style="2"] ::selection { background:var(--spike-surface-3);color:var(--spike-text); }
+html[data-spike-style="2"] :is(button,a,input,textarea,select,[tabindex],[role="button"]):focus-visible { outline:3px solid var(--spike-focus)!important;outline-offset:2px; }
+html[data-spike-style="2"] [hidden] { display:none!important; }
+
+/* Pass 16 — close remaining Theme 2 hard-coded status/typing surface leaks. */
+html[data-spike-style="2"] :is(.typingLine,[data-typing-preview],.inboxTypingDots) {
+  color:var(--spike-accent)!important;
+}
+html[data-spike-style="2"] .inboxTypingDots i { background:var(--spike-accent)!important; }
+html[data-spike-style="2"] :is(.spike-premium-toast,.spike-premium-stack .spike-premium-toast) {
+  background:linear-gradient(145deg,var(--spike-surface),var(--spike-surface-2))!important;
+  color:var(--spike-text)!important;
+  border-color:var(--spike-line)!important;
+  box-shadow:var(--spike-shadow)!important;
+}
+html[data-spike-style="2"] :is(.spn-title,.spn-message) { color:var(--spike-text)!important; }
+html[data-spike-style="2"] .spn-message { color:var(--spike-muted)!important; }
+html[data-spike-style="2"] .spn-close { color:var(--spike-muted)!important; }
+html[data-spike-style="2"] .spn-close:hover { background:var(--theme-accent-soft)!important;color:var(--spike-text)!important; }
+html[data-spike-style="2"] .spn-icon {
+  color:var(--spike-accent)!important;
+  background:var(--theme-accent-soft)!important;
+  border-color:var(--theme-accent-line)!important;
+}
+html[data-spike-style="2"] .spike-premium-toast:after { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+html[data-spike-style="2"] .spike-premium-toast.success:after,
+html[data-spike-style="2"] .spike-premium-toast.error:after,
+html[data-spike-style="2"] .spike-premium-toast.warning:after { background:linear-gradient(90deg,var(--spike-accent),var(--spike-accent-2))!important; }
+

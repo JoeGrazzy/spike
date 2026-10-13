@@ -1,0 +1,3084 @@
+
+> spike-social-platform-rooms-simplified@1.3.0 check
+> npm run syntax && npm run audit
+
+
+> spike-social-platform-rooms-simplified@1.3.0 syntax
+> node --check js/spike-native-v2.js
+
+
+> spike-social-platform-rooms-simplified@1.3.0 audit
+> node --test js/audit/tests/*.mjs
+
+TAP version 13
+# Subtest: WCAG 2.1 AA browser audit is skipped when optional browser dependencies are unavailable
+ok 1 - WCAG 2.1 AA browser audit is skipped when optional browser dependencies are unavailable # SKIP Install pinned devDependencies and Playwright browsers to run the live accessibility audit.
+  ---
+  duration_ms: 0.649101
+  type: 'test'
+  ...
+# Subtest: admin overview removes duplicate quick-action launcher but keeps operational snapshot
+ok 2 - admin overview removes duplicate quick-action launcher but keeps operational snapshot
+  ---
+  duration_ms: 1.007366
+  type: 'test'
+  ...
+# Subtest: Room Members is owned by Rooms, not duplicated inside Users
+ok 3 - Room Members is owned by Rooms, not duplicated inside Users
+  ---
+  duration_ms: 0.911352
+  type: 'test'
+  ...
+# Subtest: Room Members runtime remains wired after relocation
+ok 4 - Room Members runtime remains wired after relocation
+  ---
+  duration_ms: 0.242532
+  type: 'test'
+  ...
+# Subtest: User registration action remains available while redundant explanatory panel is removed
+ok 5 - User registration action remains available while redundant explanatory panel is removed
+  ---
+  duration_ms: 0.1804
+  type: 'test'
+  ...
+# Subtest: Admin identity is no longer mislabeled as Rooms Admin
+ok 6 - Admin identity is no longer mislabeled as Rooms Admin
+  ---
+  duration_ms: 0.146429
+  type: 'test'
+  ...
+# Subtest: shared modal close control is wired and backdrop closes the modal
+ok 7 - shared modal close control is wired and backdrop closes the modal
+  ---
+  duration_ms: 0.288581
+  type: 'test'
+  ...
+# Subtest: dashboard refresh does not report success when stats refresh fails
+ok 8 - dashboard refresh does not report success when stats refresh fails
+  ---
+  duration_ms: 0.118747
+  type: 'test'
+  ...
+# Subtest: user cards do not expose the removed gamification level field
+ok 9 - user cards do not expose the removed gamification level field
+  ---
+  duration_ms: 0.189714
+  type: 'test'
+  ...
+# Subtest: Admin v2 closes privileged operation gaps without browser table bypasses
+ok 10 - Admin v2 closes privileged operation gaps without browser table bypasses
+  ---
+  duration_ms: 0.984882
+  type: 'test'
+  ...
+# Subtest: Admin v2 announcement editing preserves lifecycle safety
+ok 11 - Admin v2 announcement editing preserves lifecycle safety
+  ---
+  duration_ms: 0.158416
+  type: 'test'
+  ...
+# Subtest: Admin Control Center exposes protected user directory, SPID coin grant, scheduled announcements and audit
+ok 12 - Admin Control Center exposes protected user directory, SPID coin grant, scheduled announcements and audit
+  ---
+  duration_ms: 1.221877
+  type: 'test'
+  ...
+# Subtest: Coin grants are transactional, bounded, super-admin-only and audited
+ok 13 - Coin grants are transactional, bounded, super-admin-only and audited
+  ---
+  duration_ms: 0.158346
+  type: 'test'
+  ...
+# Subtest: Announcement expiry is server-enforced and notifications receive expires_at
+ok 14 - Announcement expiry is server-enforced and notifications receive expires_at
+  ---
+  duration_ms: 0.142784
+  type: 'test'
+  ...
+# Subtest: Auth-wide directory is server-side and enumerates the Auth population without service-role leakage
+ok 15 - Auth-wide directory is server-side and enumerates the Auth population without service-role leakage
+  ---
+  duration_ms: 0.308851
+  type: 'test'
+  ...
+# Subtest: Admin Edge Functions workspace exposes the complete deployed function matrix
+ok 16 - Admin Edge Functions workspace exposes the complete deployed function matrix
+  ---
+  duration_ms: 1.220224
+  type: 'test'
+  ...
+# Subtest: Admin Edge Functions workspace preserves secure user-bound functions
+ok 17 - Admin Edge Functions workspace preserves secure user-bound functions
+  ---
+  duration_ms: 0.241391
+  type: 'test'
+  ...
+# Subtest: Admin Edge Functions workspace maps the current deployed versions
+ok 18 - Admin Edge Functions workspace maps the current deployed versions
+  ---
+  duration_ms: 0.521189
+  type: 'test'
+  ...
+# Subtest: Admin exposes the requested operational workspaces without bypassing server authority
+ok 19 - Admin exposes the requested operational workspaces without bypassing server authority
+  ---
+  duration_ms: 1.81333
+  type: 'test'
+  ...
+# Subtest: Protected registration endpoint never changes the caller session and requires super-admin authorization
+ok 20 - Protected registration endpoint never changes the caller session and requires super-admin authorization
+  ---
+  duration_ms: 0.226489
+  type: 'test'
+  ...
+# Subtest: Admin workspace groups every existing navigation destination exactly once
+ok 21 - Admin workspace groups every existing navigation destination exactly once
+  ---
+  duration_ms: 1.554092
+  type: 'test'
+  ...
+# Subtest: Admin workspace styling is page-scoped and loaded after shared theme authority
+ok 22 - Admin workspace styling is page-scoped and loaded after shared theme authority
+  ---
+  duration_ms: 0.256663
+  type: 'test'
+  ...
+# Subtest: Admin page navigation keeps the existing delegated event authority and RPC runtime
+ok 23 - Admin page navigation keeps the existing delegated event authority and RPC runtime
+  ---
+  duration_ms: 1.188847
+  type: 'test'
+  ...
+# Subtest: Android full-screen shared responsive stylesheet is included on app pages
+ok 24 - Android full-screen shared responsive stylesheet is included on app pages
+  ---
+  duration_ms: 12.808745
+  type: 'test'
+  ...
+# Subtest: Feed restores the fixed bottom navigation hidden by a conflicting ID rule
+ok 25 - Feed restores the fixed bottom navigation hidden by a conflicting ID rule
+  ---
+  duration_ms: 2.585033
+  type: 'test'
+  ...
+# Subtest: remote avatar failures are selected for a graceful initials fallback
+ok 26 - remote avatar failures are selected for a graceful initials fallback
+  ---
+  duration_ms: 1.897055
+  type: 'test'
+  ...
+# Subtest: Android header v3 rules are appended to the final Feed stylesheet
+ok 27 - Android header v3 rules are appended to the final Feed stylesheet
+  ---
+  duration_ms: 0.72282
+  type: 'test'
+  ...
+# Subtest: Android header v3 constrains the lockup to a stable mobile header height
+ok 28 - Android header v3 constrains the lockup to a stable mobile header height
+  ---
+  duration_ms: 0.32773
+  type: 'test'
+  ...
+# Subtest: Android header v3 retains safe-area padding and narrow-screen action sizing
+ok 29 - Android header v3 retains safe-area padding and narrow-screen action sizing
+  ---
+  duration_ms: 0.939504
+  type: 'test'
+  ...
+# Subtest: back button: friends.html
+ok 30 - back button: friends.html
+  ---
+  duration_ms: 5.066342
+  type: 'test'
+  ...
+# Subtest: back button: notifications.html
+ok 31 - back button: notifications.html
+  ---
+  duration_ms: 1.519271
+  type: 'test'
+  ...
+# Subtest: back button: profile.html
+ok 32 - back button: profile.html
+  ---
+  duration_ms: 1.017771
+  type: 'test'
+  ...
+# Subtest: back button: rooms.html
+ok 33 - back button: rooms.html
+  ---
+  duration_ms: 0.822469
+  type: 'test'
+  ...
+# Subtest: back button: room.html
+ok 34 - back button: room.html
+  ---
+  duration_ms: 1.02396
+  type: 'test'
+  ...
+# Subtest: back button: room_chat.html
+ok 35 - back button: room_chat.html
+  ---
+  duration_ms: 2.378505
+  type: 'test'
+  ...
+# Subtest: back button: settings.html
+ok 36 - back button: settings.html
+  ---
+  duration_ms: 1.154205
+  type: 'test'
+  ...
+# Subtest: back button: help.html
+ok 37 - back button: help.html
+  ---
+  duration_ms: 1.030089
+  type: 'test'
+  ...
+# Subtest: back button: admin.html
+ok 38 - back button: admin.html
+  ---
+  duration_ms: 1.435355
+  type: 'test'
+  ...
+# Subtest: entry page has no back control: index.html
+ok 39 - entry page has no back control: index.html
+  ---
+  duration_ms: 3.855072
+  type: 'test'
+  ...
+# Subtest: entry page has no back control: feed.html
+ok 40 - entry page has no back control: feed.html
+  ---
+  duration_ms: 1.323077
+  type: 'test'
+  ...
+# Subtest: the call UI exposes exactly three distinct recording modes
+ok 41 - the call UI exposes exactly three distinct recording modes
+  ---
+  duration_ms: 0.795159
+  type: 'test'
+  ...
+# Subtest: voice and video modes mix local and remote audio and disclose recording in-call
+ok 42 - voice and video modes mix local and remote audio and disclose recording in-call
+  ---
+  duration_ms: 0.249072
+  type: 'test'
+  ...
+# Subtest: business recording requires both explicit approvals before the initiator starts capture
+ok 43 - business recording requires both explicit approvals before the initiator starts capture
+  ---
+  duration_ms: 0.2745
+  type: 'test'
+  ...
+# Subtest: one recorder per call, unique session state, and cleanup prevent duplicate recording work
+ok 44 - one recorder per call, unique session state, and cleanup prevent duplicate recording work
+  ---
+  duration_ms: 0.192418
+  type: 'test'
+  ...
+# Subtest: remote recording notice is compact, visible only while active, and clears without a stopped toast
+ok 45 - remote recording notice is compact, visible only while active, and clears without a stopped toast
+  ---
+  duration_ms: 0.138557
+  type: 'test'
+  ...
+# Subtest: finished call recordings request automatic download and expose a manual fallback while the call remains active
+ok 46 - finished call recordings request automatic download and expose a manual fallback while the call remains active
+  ---
+  duration_ms: 0.214351
+  type: 'test'
+  ...
+# Subtest: recording options are filtered by active call media
+ok 47 - recording options are filtered by active call media
+  ---
+  duration_ms: 0.707107
+  type: 'test'
+  ...
+# Subtest: front/back camera control exists only for connected video calls
+ok 48 - front/back camera control exists only for connected video calls
+  ---
+  duration_ms: 0.20737
+  type: 'test'
+  ...
+# Subtest: recording feedback stays compact while preserving an active recording indicator
+ok 49 - recording feedback stays compact while preserving an active recording indicator
+  ---
+  duration_ms: 0.128422
+  type: 'test'
+  ...
+# Subtest: Feed loads the keyboard-aware Echo input helper after the comment runtime
+ok 50 - Feed loads the keyboard-aware Echo input helper after the comment runtime
+  ---
+  duration_ms: 0.672385
+  type: 'test'
+  ...
+# Subtest: Echo input is revealed when focus opens the Android keyboard
+ok 51 - Echo input is revealed when focus opens the Android keyboard
+  ---
+  duration_ms: 0.264886
+  type: 'test'
+  ...
+# Subtest: Keyboard reveal rechecks delayed viewport animation and respects reduced motion
+ok 52 - Keyboard reveal rechecks delayed viewport animation and respects reduced motion
+  ---
+  duration_ms: 0.129824
+  type: 'test'
+  ...
+# Subtest: direct-message history starts with the newest page using stable descending query order
+ok 53 - direct-message history starts with the newest page using stable descending query order
+  ---
+  duration_ms: 0.691964
+  type: 'test'
+  ...
+# Subtest: older-message pagination advances by fetched rows and merges without duplicate IDs
+ok 54 - older-message pagination advances by fetched rows and merges without duplicate IDs
+  ---
+  duration_ms: 0.201942
+  type: 'test'
+  ...
+# Subtest: older-page loading preserves the reader scroll position and exposes a retryable control
+ok 55 - older-page loading preserves the reader scroll position and exposes a retryable control
+  ---
+  duration_ms: 0.196003
+  type: 'test'
+  ...
+# Subtest: Inbox typing listens on the same pair-scoped topic as the conversation composer
+ok 56 - Inbox typing listens on the same pair-scoped topic as the conversation composer
+  ---
+  duration_ms: 0.775739
+  type: 'test'
+  ...
+# Subtest: Inbox typing validates the same from/to payload contract emitted by the conversation
+ok 57 - Inbox typing validates the same from/to payload contract emitted by the conversation
+  ---
+  duration_ms: 0.150445
+  type: 'test'
+  ...
+# Subtest: message page keeps existing ringtone assets and call preferences
+ok 58 - message page keeps existing ringtone assets and call preferences
+  ---
+  duration_ms: 0.708769
+  type: 'test'
+  ...
+# Subtest: message page wires voice/video controls and accessible call overlay
+ok 59 - message page wires voice/video controls and accessible call overlay
+  ---
+  duration_ms: 0.329342
+  type: 'test'
+  ...
+# Subtest: typing stays pair-scoped and site-wide call topics are participant-authorized
+ok 60 - typing stays pair-scoped and site-wide call topics are participant-authorized
+  ---
+  duration_ms: 0.303233
+  type: 'test'
+  ...
+# Subtest: call controls include decline, mute, camera, connection states, and cleanup
+ok 61 - call controls include decline, mute, camera, connection states, and cleanup
+  ---
+  duration_ms: 0.236023
+  type: 'test'
+  ...
+# Subtest: call UI honors hidden state so inactive actions never appear as duplicate controls
+ok 62 - call UI honors hidden state so inactive actions never appear as duplicate controls
+  ---
+  duration_ms: 0.329052
+  type: 'test'
+  ...
+# Subtest: site-wide call receiver and shared presence are loaded on every SPIKE page
+ok 63 - site-wide call receiver and shared presence are loaded on every SPIKE page
+  ---
+  duration_ms: 4.753354
+  type: 'test'
+  ...
+# Subtest: DM typing is handled only by the composer and blank drafts stop typing
+ok 64 - DM typing is handled only by the composer and blank drafts stop typing
+  ---
+  duration_ms: 0.670312
+  type: 'test'
+  ...
+# Subtest: DM typing is pair-scoped and remote indicator expires
+ok 65 - DM typing is pair-scoped and remote indicator expires
+  ---
+  duration_ms: 0.20055
+  type: 'test'
+  ...
+# Subtest: DM typing cleanup runs on blur, hidden tab, pagehide, and channel errors
+ok 66 - DM typing cleanup runs on blur, hidden tab, pagehide, and channel errors
+  ---
+  duration_ms: 0.155012
+  type: 'test'
+  ...
+# Subtest: no duplicate literal HTML ids in initial DOM markup
+ok 67 - no duplicate literal HTML ids in initial DOM markup
+  ---
+  duration_ms: 14.456438
+  type: 'test'
+  ...
+# Subtest: every local feature asset referenced by Feed exists
+ok 68 - every local feature asset referenced by Feed exists
+  ---
+  duration_ms: 2.956029
+  type: 'test'
+  ...
+# Subtest: source Feed contains feature assets and no dist build is required
+ok 69 - source Feed contains feature assets and no dist build is required
+  ---
+  duration_ms: 2.855719
+  type: 'test'
+  ...
+# Subtest: Experience V2 is additive and loaded after existing Feed runtime
+ok 70 - Experience V2 is additive and loaded after existing Feed runtime
+  ---
+  duration_ms: 0.773416
+  type: 'test'
+  ...
+# Subtest: Experience V2 never installs a global MutationObserver or replaces boot
+ok 71 - Experience V2 never installs a global MutationObserver or replaces boot
+  ---
+  duration_ms: 0.299478
+  type: 'test'
+  ...
+# Subtest: Removed legacy post composer is not reintroduced
+ok 72 - Removed legacy post composer is not reintroduced
+  ---
+  duration_ms: 1.697677
+  type: 'test'
+  ...
+# Subtest: Guide uses the same simple five-part mental model
+ok 73 - Guide uses the same simple five-part mental model
+  ---
+  duration_ms: 0.119519
+  type: 'test'
+  ...
+# Subtest: feature suite assets are present exactly once
+ok 74 - feature suite assets are present exactly once
+  ---
+  duration_ms: 0.86993
+  type: 'test'
+  ...
+# Subtest: all ten feature surfaces exist
+ok 75 - all ten feature surfaces exist
+  ---
+  duration_ms: 0.400258
+  type: 'test'
+  ...
+# Subtest: feature suite uses unique storage key and does not replace existing header controls
+ok 76 - feature suite uses unique storage key and does not replace existing header controls
+  ---
+  duration_ms: 0.166368
+  type: 'test'
+  ...
+# Subtest: feature suite contains no flash/lightning emoji
+ok 77 - feature suite contains no flash/lightning emoji
+  ---
+  duration_ms: 0.197065
+  type: 'test'
+  ...
+# Subtest: feature migration contains the required tables and protected RPCs
+ok 78 - feature migration contains the required tables and protected RPCs
+  ---
+  duration_ms: 0.250023
+  type: 'test'
+  ...
+# Subtest: Feed primary navigation omits the removed Start/Create entry
+ok 79 - Feed primary navigation omits the removed Start/Create entry
+  ---
+  duration_ms: 1.146975
+  type: 'test'
+  ...
+# Subtest: Feed architecture V1 removes Feed-owned discovery filters from the primary Feed
+ok 80 - Feed architecture V1 removes Feed-owned discovery filters from the primary Feed
+  ---
+  duration_ms: 0.497164
+  type: 'test'
+  ...
+# Subtest: Feed architecture V1 moves discovery into a dedicated Discover mode without deleting runtime panels
+ok 81 - Feed architecture V1 moves discovery into a dedicated Discover mode without deleting runtime panels
+  ---
+  duration_ms: 1.36451
+  type: 'test'
+  ...
+# Subtest: Feed architecture V1 removes the old creation entry and preserves native global routes
+ok 82 - Feed architecture V1 removes the old creation entry and preserves native global routes
+  ---
+  duration_ms: 0.327279
+  type: 'test'
+  ...
+# Subtest: Home keeps the For You/Following filters and no legacy composer
+ok 83 - Home keeps the For You/Following filters and no legacy composer
+  ---
+  duration_ms: 2.831973
+  type: 'test'
+  ...
+# Subtest: Top Picks belongs to Discover, not the Home stream
+ok 84 - Top Picks belongs to Discover, not the Home stream
+  ---
+  duration_ms: 0.167881
+  type: 'test'
+  ...
+# Subtest: Discover mode hides Home content and reveals the Discover hub
+ok 85 - Discover mode hides Home content and reveals the Discover hub
+  ---
+  duration_ms: 0.092668
+  type: 'test'
+  ...
+# Subtest: Native Social tools are progressive disclosure inside Discover
+ok 86 - Native Social tools are progressive disclosure inside Discover
+  ---
+  duration_ms: 0.22083
+  type: 'test'
+  ...
+# Subtest: Feed status ranking jargon is hidden from the primary Home surface
+ok 87 - Feed status ranking jargon is hidden from the primary Home surface
+  ---
+  duration_ms: 0.20725
+  type: 'test'
+  ...
+# Subtest: Removed composer is not revived by the experience layer
+ok 88 - Removed composer is not revived by the experience layer
+  ---
+  duration_ms: 0.155542
+  type: 'test'
+  ...
+# Subtest: Primary Feed vocabulary stays plain instead of being globally rewritten
+ok 89 - Primary Feed vocabulary stays plain instead of being globally rewritten
+  ---
+  duration_ms: 0.235612
+  type: 'test'
+  ...
+# Subtest: Feed loads an isolated original-image fallback without changing the protected runtime
+ok 90 - Feed loads an isolated original-image fallback without changing the protected runtime
+  ---
+  duration_ms: 0.838654
+  type: 'test'
+  ...
+# Subtest: Cloudinary transform parser strips only recognized image transformation segments
+ok 91 - Cloudinary transform parser strips only recognized image transformation segments
+  ---
+  duration_ms: 2.27478
+  type: 'test'
+  ...
+# Subtest: fallback listener is restricted to Feed media thumbnails and runs only once per image
+ok 92 - fallback listener is restricted to Feed media thumbnails and runs only once per image
+  ---
+  duration_ms: 0.122352
+  type: 'test'
+  ...
+# Subtest: fallback implementation switches to the original URL once and ignores a second failure
+ok 93 - fallback implementation switches to the original URL once and ignores a second failure
+  ---
+  duration_ms: 0.730502
+  type: 'test'
+  ...
+# Subtest: feed runtime defines media kind helpers before rendering feed media
+ok 94 - feed runtime defines media kind helpers before rendering feed media
+  ---
+  duration_ms: 2.155842
+  type: 'test'
+  ...
+# Subtest: feed media URL helpers exist and generate safe Cloudinary image/video URLs
+ok 95 - feed media URL helpers exist and generate safe Cloudinary image/video URLs
+  ---
+  duration_ms: 1.671769
+  type: 'test'
+  ...
+# Subtest: V10.7 closes menu before menu destinations and feature actions execute
+ok 96 - V10.7 closes menu before menu destinations and feature actions execute
+  ---
+  duration_ms: 0.715149
+  type: 'test'
+  ...
+# Subtest: V10.7 leaves the More-tools disclosure available and refreshes menu runtime cache key
+ok 97 - V10.7 leaves the More-tools disclosure available and refreshes menu runtime cache key
+  ---
+  duration_ms: 0.163615
+  type: 'test'
+  ...
+# Subtest: Feed bottom navigation is hidden only while the menu is actively open
+ok 98 - Feed bottom navigation is hidden only while the menu is actively open
+  ---
+  duration_ms: 0.740877
+  type: 'test'
+  ...
+# Subtest: Feed menu has an authoritative runtime hide/show path that beats the inline nav baseline
+ok 99 - Feed menu has an authoritative runtime hide/show path that beats the inline nav baseline
+  ---
+  duration_ms: 0.417464
+  type: 'test'
+  ...
+# Subtest: V10.2 loads the final menu authority after legacy nav styles
+ok 100 - V10.2 loads the final menu authority after legacy nav styles
+  ---
+  duration_ms: 1.07672
+  type: 'test'
+  ...
+# Subtest: V10.2 hides the dock with inline important styles when menu is open
+ok 101 - V10.2 hides the dock with inline important styles when menu is open
+  ---
+  duration_ms: 0.125157
+  type: 'test'
+  ...
+# Subtest: V10.2 gives the menu the top interaction layer and hides dock for both menu states
+ok 102 - V10.2 gives the menu the top interaction layer and hides dock for both menu states
+  ---
+  duration_ms: 0.31422
+  type: 'test'
+  ...
+# Subtest: V10.2 keeps Log Out in normal flow instead of covering menu rows
+ok 103 - V10.2 keeps Log Out in normal flow instead of covering menu rows
+  ---
+  duration_ms: 0.176004
+  type: 'test'
+  ...
+# Subtest: V10.4 raises the existing feed header above the open menu overlay
+ok 104 - V10.4 raises the existing feed header above the open menu overlay
+  ---
+  duration_ms: 0.907396
+  type: 'test'
+  ...
+# Subtest: V10.4 preserves the existing header and menu toggle contract
+ok 105 - V10.4 preserves the existing header and menu toggle contract
+  ---
+  duration_ms: 0.218226
+  type: 'test'
+  ...
+# Subtest: V10.5 shields underlying feed interactions while menu is open
+ok 106 - V10.5 shields underlying feed interactions while menu is open
+  ---
+  duration_ms: 0.892644
+  type: 'test'
+  ...
+# Subtest: protected Feed HTML keeps its established stylesheet reference
+ok 107 - protected Feed HTML keeps its established stylesheet reference
+  ---
+  duration_ms: 0.782329
+  type: 'test'
+  ...
+# Subtest: menu CSS cannot remain stale in browser or preview cache
+ok 108 - menu CSS cannot remain stale in browser or preview cache
+  ---
+  duration_ms: 0.151095
+  type: 'test'
+  ...
+# Subtest: open modal blocks header controls except menu toggle
+ok 109 - open modal blocks header controls except menu toggle
+  ---
+  duration_ms: 0.981497
+  type: 'test'
+  ...
+# Subtest: Log Out footer remains in normal scroll flow
+ok 110 - Log Out footer remains in normal scroll flow
+  ---
+  duration_ms: 0.34106
+  type: 'test'
+  ...
+# Subtest: menu sheet does not use paint containment
+ok 111 - menu sheet does not use paint containment
+  ---
+  duration_ms: 0.143264
+  type: 'test'
+  ...
+# Subtest: Feed has no legacy post composer, draft/schedule panel, or Start/Create nav entry
+ok 112 - Feed has no legacy post composer, draft/schedule panel, or Start/Create nav entry
+  ---
+  duration_ms: 1.788984
+  type: 'test'
+  ...
+# Subtest: Feed reading and interaction surfaces remain present
+ok 113 - Feed reading and interaction surfaces remain present
+  ---
+  duration_ms: 0.471034
+  type: 'test'
+  ...
+# Subtest: Feed has no Story section, viewer, or composer
+ok 114 - Feed has no Story section, viewer, or composer
+  ---
+  duration_ms: 1.589526
+  type: 'test'
+  ...
+# Subtest: Story feature assets and tests are removed
+ok 115 - Story feature assets and tests are removed
+  ---
+  duration_ms: 0.271576
+  type: 'test'
+  ...
+# Subtest: Story feed runtime is removed
+ok 116 - Story feed runtime is removed
+  ---
+  duration_ms: 0.293639
+  type: 'test'
+  ...
+# Subtest: Feed menu state has a CSS fallback that hides and disables the fixed bottom navigation
+ok 117 - Feed menu state has a CSS fallback that hides and disables the fixed bottom navigation
+  ---
+  duration_ms: 0.875559
+  type: 'test'
+  ...
+# Subtest: Android menu rendering avoids expensive full-screen backdrop blur
+ok 118 - Android menu rendering avoids expensive full-screen backdrop blur
+  ---
+  duration_ms: 0.251996
+  type: 'test'
+  ...
+# Subtest: V9 preserves protected Feed source and current navigation/action contracts
+ok 119 - V9 preserves protected Feed source and current navigation/action contracts
+  ---
+  duration_ms: 0.299537
+  type: 'test'
+  ...
+# Subtest: Feed restoration never CSS-hides the loader before session validation
+ok 120 - Feed restoration never CSS-hides the loader before session validation
+  ---
+  duration_ms: 1.00323
+  type: 'test'
+  ...
+# Subtest: Feed loader offers retry on slow startup instead of automatically exposing a half-loaded page
+ok 121 - Feed loader offers retry on slow startup instead of automatically exposing a half-loaded page
+  ---
+  duration_ms: 0.245076
+  type: 'test'
+  ...
+# Subtest: Overlapping Feed requests cannot replace state with a stale response or another user’s response
+ok 122 - Overlapping Feed requests cannot replace state with a stale response or another user’s response
+  ---
+  duration_ms: 0.137465
+  type: 'test'
+  ...
+# Subtest: Feed real-time updates reconcile soft-deletes, content edits and row deletion events
+ok 123 - Feed real-time updates reconcile soft-deletes, content edits and row deletion events
+  ---
+  duration_ms: 0.164065
+  type: 'test'
+  ...
+# Subtest: Feed recovery UI remains accessible and preserves reduced-motion handling
+ok 124 - Feed recovery UI remains accessible and preserves reduced-motion handling
+  ---
+  duration_ms: 0.180269
+  type: 'test'
+  ...
+# Subtest: Feed header exposes the reference-led menu and search entry points
+ok 125 - Feed header exposes the reference-led menu and search entry points
+  ---
+  duration_ms: 0.756
+  type: 'test'
+  ...
+# Subtest: Feed menu keeps primary actions in the existing runtime contracts
+ok 126 - Feed menu keeps primary actions in the existing runtime contracts
+  ---
+  duration_ms: 1.458891
+  type: 'test'
+  ...
+# Subtest: global visual authority is loaded exactly once and after Theme V3 on every production page
+ok 127 - global visual authority is loaded exactly once and after Theme V3 on every production page
+  ---
+  duration_ms: 5.64756
+  type: 'test'
+  ...
+# Subtest: production pages have exactly one safe-area stylesheet
+ok 128 - production pages have exactly one safe-area stylesheet
+  ---
+  duration_ms: 3.330007
+  type: 'test'
+  ...
+# Subtest: remote font CSS is absent except for Room Chat font-picker feature
+ok 129 - remote font CSS is absent except for Room Chat font-picker feature
+  ---
+  duration_ms: 3.510577
+  type: 'test'
+  ...
+# Subtest: bundled SPIKE Inter declares discrete 800 and 900 weights
+ok 130 - bundled SPIKE Inter declares discrete 800 and 900 weights
+  ---
+  duration_ms: 0.345957
+  type: 'test'
+  ...
+# Subtest: global geometry authority provides structural containment without relying on page clipping alone
+ok 131 - global geometry authority provides structural containment without relying on page clipping alone
+  ---
+  duration_ms: 0.30734
+  type: 'test'
+  ...
+# Subtest: Inbox loads all private-message pages rather than silently stopping at 500 rows
+ok 132 - Inbox loads all private-message pages rather than silently stopping at 500 rows
+  ---
+  duration_ms: 5.814851
+  type: 'test'
+  ...
+# Index UX V1: 6/6 passed
+# Subtest: js/audit/tests/index-ux-v1.test.mjs
+ok 38 - js/audit/tests/index-ux-v1.test.mjs
+  ---
+  duration_ms: 29.607899
+  type: 'test'
+  ...
+# Subtest: index uses the shared theme authority followed by the final Index authority
+ok 134 - index uses the shared theme authority followed by the final Index authority
+  ---
+  duration_ms: 0.754909
+  type: 'test'
+  ...
+# Subtest: index has no competing legacy visual authorities
+ok 135 - index has no competing legacy visual authorities
+  ---
+  duration_ms: 0.186989
+  type: 'test'
+  ...
+# Subtest: index typography uses the bundled SPIKE font and controlled mobile scale
+ok 136 - index typography uses the bundled SPIKE font and controlled mobile scale
+  ---
+  duration_ms: 0.572726
+  type: 'test'
+  ...
+# Subtest: index enforces border-box and structural overflow protection
+ok 137 - index enforces border-box and structural overflow protection
+  ---
+  duration_ms: 0.124355
+  type: 'test'
+  ...
+# Subtest: index mobile hierarchy removes redundant feature strip and compresses hero
+ok 138 - index mobile hierarchy removes redundant feature strip and compresses hero
+  ---
+  duration_ms: 0.109744
+  type: 'test'
+  ...
+# Subtest: index keeps long labels and actions inside narrow screens
+ok 139 - index keeps long labels and actions inside narrow screens
+  ---
+  duration_ms: 0.172668
+  type: 'test'
+  ...
+# Subtest: index authentication DOM contracts remain present
+ok 140 - index authentication DOM contracts remain present
+  ---
+  duration_ms: 0.177415
+  type: 'test'
+  ...
+# Subtest: index V5 uses bundled SPIKE Inter with higher cascade specificity
+ok 141 - index V5 uses bundled SPIKE Inter with higher cascade specificity
+  ---
+  duration_ms: 0.842519
+  type: 'test'
+  ...
+# Subtest: index V5 reflows narrow action rows instead of clipping them
+ok 142 - index V5 reflows narrow action rows instead of clipping them
+  ---
+  duration_ms: 0.145307
+  type: 'test'
+  ...
+# Subtest: index V5 keeps structural width containment
+ok 143 - index V5 keeps structural width containment
+  ---
+  duration_ms: 0.203534
+  type: 'test'
+  ...
+# Subtest: index V5 preserves auth contracts
+ok 144 - index V5 preserves auth contracts
+  ---
+  duration_ms: 0.180229
+  type: 'test'
+  ...
+# Subtest: Live remains available as a dedicated SPIKE feature page
+ok 145 - Live remains available as a dedicated SPIKE feature page
+  ---
+  duration_ms: 3.827761
+  type: 'test'
+  ...
+# Subtest: Feed does not duplicate the dedicated Live feature rail
+ok 146 - Feed does not duplicate the dedicated Live feature rail
+  ---
+  duration_ms: 0.40801
+  type: 'test'
+  ...
+# Subtest: Live feature entry points remain page-scoped to the dedicated Live page
+ok 147 - Live feature entry points remain page-scoped to the dedicated Live page
+  ---
+  duration_ms: 2.303393
+  type: 'test'
+  ...
+# Subtest: Live database migrations remain available for the retained Live feature
+ok 148 - Live database migrations remain available for the retained Live feature
+  ---
+  duration_ms: 0.855999
+  type: 'test'
+  ...
+# Subtest: menuSaved has a live delegated action contract
+ok 149 - menuSaved has a live delegated action contract
+  ---
+  duration_ms: 1.59183
+  type: 'test'
+  ...
+# Subtest: menuAudience has a live delegated action contract
+ok 150 - menuAudience has a live delegated action contract
+  ---
+  duration_ms: 0.357184
+  type: 'test'
+  ...
+# Subtest: menuSafety has a live delegated action contract
+ok 151 - menuSafety has a live delegated action contract
+  ---
+  duration_ms: 0.241701
+  type: 'test'
+  ...
+# Subtest: menuSignOut has a live delegated action contract
+ok 152 - menuSignOut has a live delegated action contract
+  ---
+  duration_ms: 0.215872
+  type: 'test'
+  ...
+# Subtest: menuProfileHero has a native route contract
+ok 153 - menuProfileHero has a native route contract
+  ---
+  duration_ms: 0.292207
+  type: 'test'
+  ...
+# Subtest: menuFriends has a native route contract
+ok 154 - menuFriends has a native route contract
+  ---
+  duration_ms: 0.258827
+  type: 'test'
+  ...
+# Subtest: menuRoom has a native route contract
+ok 155 - menuRoom has a native route contract
+  ---
+  duration_ms: 0.24717
+  type: 'test'
+  ...
+# Subtest: menuGuide has a native route contract
+ok 156 - menuGuide has a native route contract
+  ---
+  duration_ms: 0.185317
+  type: 'test'
+  ...
+# Subtest: menuSettings has a native route contract
+ok 157 - menuSettings has a native route contract
+  ---
+  duration_ms: 0.365746
+  type: 'test'
+  ...
+# Subtest: menuPolicy has a native route contract
+ok 158 - menuPolicy has a native route contract
+  ---
+  duration_ms: 0.445667
+  type: 'test'
+  ...
+# Subtest: menuPolicyAppeals has a native route contract
+ok 159 - menuPolicyAppeals has a native route contract
+  ---
+  duration_ms: 0.251556
+  type: 'test'
+  ...
+# Subtest: Menu V3 defines every runtime action exactly once
+ok 160 - Menu V3 defines every runtime action exactly once
+  ---
+  duration_ms: 0.264886
+  type: 'test'
+  ...
+# Subtest: Feed-owned controls are not duplicated in Menu V3
+ok 161 - Feed-owned controls are not duplicated in Menu V3
+  ---
+  duration_ms: 1.150669
+  type: 'test'
+  ...
+# Subtest: Route-only menu entries are not dependent on JavaScript menu actions
+ok 162 - Route-only menu entries are not dependent on JavaScript menu actions
+  ---
+  duration_ms: 0.933224
+  type: 'test'
+  ...
+# Subtest: sign-out closes the feed menu before showing confirmation
+ok 163 - sign-out closes the feed menu before showing confirmation
+  ---
+  duration_ms: 1.460503
+  type: 'test'
+  ...
+# Subtest: menu delegated actions stop propagation before running
+ok 164 - menu delegated actions stop propagation before running
+  ---
+  duration_ms: 0.123925
+  type: 'test'
+  ...
+# Subtest: menu and logout confirmation have explicit non-overlapping interaction layers
+ok 165 - menu and logout confirmation have explicit non-overlapping interaction layers
+  ---
+  duration_ms: 0.972324
+  type: 'test'
+  ...
+# Subtest: Feed uses the reference-led command panel hierarchy
+ok 166 - Feed uses the reference-led command panel hierarchy
+  ---
+  duration_ms: 1.322076
+  type: 'test'
+  ...
+# Subtest: Menu keeps existing routes and delegated runtime actions
+ok 167 - Menu keeps existing routes and delegated runtime actions
+  ---
+  duration_ms: 1.55879
+  type: 'test'
+  ...
+# Subtest: Reference menu is responsive and uses progressive disclosure for secondary tools
+ok 168 - Reference menu is responsive and uses progressive disclosure for secondary tools
+  ---
+  duration_ms: 0.156113
+  type: 'test'
+  ...
+# Subtest: Feed-owned creation and discovery controls stay out of the menu
+ok 169 - Feed-owned creation and discovery controls stay out of the menu
+  ---
+  duration_ms: 0.581208
+  type: 'test'
+  ...
+# Subtest: Inbox filters archived conversations using the same per-user key as message.html
+ok 170 - Inbox filters archived conversations using the same per-user key as message.html
+  ---
+  duration_ms: 4.713846
+  type: 'test'
+  ...
+# Subtest: conversation page retains the media picker entry point and supported phone media types
+ok 171 - conversation page retains the media picker entry point and supported phone media types
+  ---
+  duration_ms: 0.800336
+  type: 'test'
+  ...
+# Subtest: mobile safe-area stylesheet has dynamic top/bottom inset contract
+ok 172 - mobile safe-area stylesheet has dynamic top/bottom inset contract
+  ---
+  duration_ms: 0.666716
+  type: 'test'
+  ...
+# Subtest: every production page loads exactly one mobile safe-area stylesheet
+ok 173 - every production page loads exactly one mobile safe-area stylesheet
+  ---
+  duration_ms: 4.625945
+  type: 'test'
+  ...
+# Subtest: every production page opts into viewport-fit cover
+ok 174 - every production page opts into viewport-fit cover
+  ---
+  duration_ms: 2.979924
+  type: 'test'
+  ...
+# Subtest: profile secondary tabs follow the safe-area-aware header
+ok 175 - profile secondary tabs follow the safe-area-aware header
+  ---
+  duration_ms: 0.159828
+  type: 'test'
+  ...
+# Subtest: room chat stacked chrome follows the safe-area-aware header
+ok 176 - room chat stacked chrome follows the safe-area-aware header
+  ---
+  duration_ms: 0.150966
+  type: 'test'
+  ...
+# Subtest: captures and restores scroll on a normal back/forward document load
+ok 177 - captures and restores scroll on a normal back/forward document load
+  ---
+  duration_ms: 2.880195
+  type: 'test'
+  ...
+# Subtest: does not overwrite BFCache-restored pages
+ok 178 - does not overwrite BFCache-restored pages
+  ---
+  duration_ms: 0.627878
+  type: 'test'
+  ...
+# Subtest: reload clears the generic navigation snapshot
+ok 179 - reload clears the generic navigation snapshot
+  ---
+  duration_ms: 1.125993
+  type: 'test'
+  ...
+# Subtest: every production HTML page loads the shared navigation layer
+ok 180 - every production HTML page loads the shared navigation layer
+  ---
+  duration_ms: 3.677226
+  type: 'test'
+  ...
+# Subtest: profile no longer contains level badge styling
+ok 181 - profile no longer contains level badge styling
+  ---
+  duration_ms: 3.506271
+  type: 'test'
+  ...
+# Subtest: guide no longer promotes leveling, XP or daily check-in progression
+ok 182 - guide no longer promotes leveling, XP or daily check-in progression
+  ---
+  duration_ms: 1.216408
+  type: 'test'
+  ...
+# Subtest: legacy level badge assets are retained for future use
+ok 183 - legacy level badge assets are retained for future use
+  ---
+  duration_ms: 0.267289
+  type: 'test'
+  ...
+# Subtest: forward database cleanup migration exists and preserves wallet tables
+ok 184 - forward database cleanup migration exists and preserves wallet tables
+  ---
+  duration_ms: 0.26119
+  type: 'test'
+  ...
+# Subtest: Feed exposes a persistent notification entry point with unread badge
+ok 185 - Feed exposes a persistent notification entry point with unread badge
+  ---
+  duration_ms: 0.76236
+  type: 'test'
+  ...
+# Subtest: Notifications page exposes its own authoritative unread badge
+ok 186 - Notifications page exposes its own authoritative unread badge
+  ---
+  duration_ms: 0.325777
+  type: 'test'
+  ...
+# Subtest: shared notification center uses the existing summary RPC and private user topic
+ok 187 - shared notification center uses the existing summary RPC and private user topic
+  ---
+  duration_ms: 0.165658
+  type: 'test'
+  ...
+# Subtest: Feed badge no longer uses a separate raw notification-count implementation
+ok 188 - Feed badge no longer uses a separate raw notification-count implementation
+  ---
+  duration_ms: 0.136003
+  type: 'test'
+  ...
+# Subtest: existing notification backend protects unread/read operations
+ok 189 - existing notification backend protects unread/read operations
+  ---
+  duration_ms: 0.16762
+  type: 'test'
+  ...
+# Subtest: existing backend broadcasts notification changes privately per authenticated user
+ok 190 - existing backend broadcasts notification changes privately per authenticated user
+  ---
+  duration_ms: 0.110155
+  type: 'test'
+  ...
+# Subtest: HTML budget: admin.html
+ok 191 - HTML budget: admin.html
+  ---
+  duration_ms: 14.460823
+  type: 'test'
+  ...
+# Subtest: HTML budget: feed.html
+ok 192 - HTML budget: feed.html
+  ---
+  duration_ms: 5.085482
+  type: 'test'
+  ...
+# Subtest: HTML budget: friends.html
+ok 193 - HTML budget: friends.html
+  ---
+  duration_ms: 0.670152
+  type: 'test'
+  ...
+# Subtest: HTML budget: guide.html
+ok 194 - HTML budget: guide.html
+  ---
+  duration_ms: 0.610613
+  type: 'test'
+  ...
+# Subtest: HTML budget: help.html
+ok 195 - HTML budget: help.html
+  ---
+  duration_ms: 0.597473
+  type: 'test'
+  ...
+# Subtest: HTML budget: index.html
+ok 196 - HTML budget: index.html
+  ---
+  duration_ms: 1.399722
+  type: 'test'
+  ...
+# Subtest: HTML budget: legal.html
+ok 197 - HTML budget: legal.html
+  ---
+  duration_ms: 0.653377
+  type: 'test'
+  ...
+# Subtest: HTML budget: live.html
+ok 198 - HTML budget: live.html
+  ---
+  duration_ms: 0.607848
+  type: 'test'
+  ...
+# Subtest: HTML budget: message.html
+ok 199 - HTML budget: message.html
+  ---
+  duration_ms: 4.510793
+  type: 'test'
+  ...
+# Subtest: HTML budget: messages.html
+ok 200 - HTML budget: messages.html
+  ---
+  duration_ms: 0.815539
+  type: 'test'
+  ...
+# Subtest: HTML budget: notifications.html
+ok 201 - HTML budget: notifications.html
+  ---
+  duration_ms: 0.52235
+  type: 'test'
+  ...
+# Subtest: HTML budget: policy.html
+ok 202 - HTML budget: policy.html
+  ---
+  duration_ms: 0.403934
+  type: 'test'
+  ...
+# Subtest: HTML budget: policy_appeals.html
+ok 203 - HTML budget: policy_appeals.html
+  ---
+  duration_ms: 0.450984
+  type: 'test'
+  ...
+# Subtest: HTML budget: profile.html
+ok 204 - HTML budget: profile.html
+  ---
+  duration_ms: 0.404434
+  type: 'test'
+  ...
+# Subtest: HTML budget: reset-password.html
+ok 205 - HTML budget: reset-password.html
+  ---
+  duration_ms: 0.440578
+  type: 'test'
+  ...
+# Subtest: HTML budget: room.html
+ok 206 - HTML budget: room.html
+  ---
+  duration_ms: 0.40197
+  type: 'test'
+  ...
+# Subtest: HTML budget: room_chat.html
+ok 207 - HTML budget: room_chat.html
+  ---
+  duration_ms: 0.517623
+  type: 'test'
+  ...
+# Subtest: HTML budget: rooms.html
+ok 208 - HTML budget: rooms.html
+  ---
+  duration_ms: 0.412006
+  type: 'test'
+  ...
+# Subtest: HTML budget: settings.html
+ok 209 - HTML budget: settings.html
+  ---
+  duration_ms: 0.471705
+  type: 'test'
+  ...
+# Subtest: HTML budget: share.html
+ok 210 - HTML budget: share.html
+  ---
+  duration_ms: 0.648399
+  type: 'test'
+  ...
+# Subtest: HTML budget: view_user.html
+ok 211 - HTML budget: view_user.html
+  ---
+  duration_ms: 2.066459
+  type: 'test'
+  ...
+# Subtest: asset budget: css/admin-workspace-v1.css
+ok 212 - asset budget: css/admin-workspace-v1.css
+  ---
+  duration_ms: 0.73593
+  type: 'test'
+  ...
+# Subtest: asset budget: css/feed-clarity-v2.css
+ok 213 - asset budget: css/feed-clarity-v2.css
+  ---
+  duration_ms: 2.492074
+  type: 'test'
+  ...
+# Subtest: asset budget: css/feed-core.css
+ok 214 - asset budget: css/feed-core.css
+  ---
+  duration_ms: 0.417173
+  type: 'test'
+  ...
+# Subtest: asset budget: css/feed-features.css
+ok 215 - asset budget: css/feed-features.css
+  ---
+  duration_ms: 1.370859
+  type: 'test'
+  ...
+# Subtest: asset budget: css/feed-polish-mobile.css
+ok 216 - asset budget: css/feed-polish-mobile.css
+  ---
+  duration_ms: 0.411575
+  type: 'test'
+  ...
+# Subtest: asset budget: css/feed-rebuild-v1.css
+ok 217 - asset budget: css/feed-rebuild-v1.css
+  ---
+  duration_ms: 0.423674
+  type: 'test'
+  ...
+# Subtest: asset budget: css/index.css
+ok 218 - asset budget: css/index.css
+  ---
+  duration_ms: 0.48794
+  type: 'test'
+  ...
+# Subtest: asset budget: css/legal.css
+ok 219 - asset budget: css/legal.css
+  ---
+  duration_ms: 0.430824
+  type: 'test'
+  ...
+# Subtest: asset budget: css/mobile-safe-area.css
+ok 220 - asset budget: css/mobile-safe-area.css
+  ---
+  duration_ms: 0.37461
+  type: 'test'
+  ...
+# Subtest: asset budget: css/perf.css
+ok 221 - asset budget: css/perf.css
+  ---
+  duration_ms: 0.428381
+  type: 'test'
+  ...
+# Subtest: asset budget: css/policy.css
+ok 222 - asset budget: css/policy.css
+  ---
+  duration_ms: 0.397715
+  type: 'test'
+  ...
+# Subtest: asset budget: css/premium-back.css
+ok 223 - asset budget: css/premium-back.css
+  ---
+  duration_ms: 0.316312
+  type: 'test'
+  ...
+# Subtest: asset budget: css/room-chat-core.css
+ok 224 - asset budget: css/room-chat-core.css
+  ---
+  duration_ms: 2.454258
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-adaptive-nav.css
+ok 225 - asset budget: css/spike-adaptive-nav.css
+  ---
+  duration_ms: 0.402351
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-android-feed-v1.css
+ok 226 - asset budget: css/spike-android-feed-v1.css
+  ---
+  duration_ms: 0.443302
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-android-fullscreen-v1.css
+ok 227 - asset budget: css/spike-android-fullscreen-v1.css
+  ---
+  duration_ms: 0.349161
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-android-menu-polish-v5.css
+ok 228 - asset budget: css/spike-android-menu-polish-v5.css
+  ---
+  duration_ms: 0.346518
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-android-menu-polish-v6.css
+ok 229 - asset budget: css/spike-android-menu-polish-v6.css
+  ---
+  duration_ms: 0.387419
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-android-menu-polish-v7.css
+ok 230 - asset budget: css/spike-android-menu-polish-v7.css
+  ---
+  duration_ms: 0.310263
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-beauty-v1.css
+ok 231 - asset budget: css/spike-beauty-v1.css
+  ---
+  duration_ms: 2.54961
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-experience-v2.css
+ok 232 - asset budget: css/spike-experience-v2.css
+  ---
+  duration_ms: 1.148236
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feature-suite.css
+ok 233 - asset budget: css/spike-feature-suite.css
+  ---
+  duration_ms: 0.288612
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feed-command-menu-v4.css
+ok 234 - asset budget: css/spike-feed-command-menu-v4.css
+  ---
+  duration_ms: 0.295492
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feed-menu-layout-v2.css
+ok 235 - asset budget: css/spike-feed-menu-layout-v2.css
+  ---
+  duration_ms: 0.210285
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feed-menu-layout-v3.css
+ok 236 - asset budget: css/spike-feed-menu-layout-v3.css
+  ---
+  duration_ms: 0.838263
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feed-menu-reference-v1.css
+ok 237 - asset budget: css/spike-feed-menu-reference-v1.css
+  ---
+  duration_ms: 0.623662
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-feed.css
+ok 238 - asset budget: css/spike-feed.css
+  ---
+  duration_ms: 0.214651
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-final-polish.css
+ok 239 - asset budget: css/spike-final-polish.css
+  ---
+  duration_ms: 0.492967
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-global-page-authority-v2.css
+ok 240 - asset budget: css/spike-global-page-authority-v2.css
+  ---
+  duration_ms: 0.288932
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-guide-experience-v2.css
+ok 241 - asset budget: css/spike-guide-experience-v2.css
+  ---
+  duration_ms: 0.191416
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-header-android-v2.css
+ok 242 - asset budget: css/spike-header-android-v2.css
+  ---
+  duration_ms: 1.054486
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-identity.css
+ok 243 - asset budget: css/spike-identity.css
+  ---
+  duration_ms: 0.26064
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-index-authority-v3.css
+ok 244 - asset budget: css/spike-index-authority-v3.css
+  ---
+  duration_ms: 0.309232
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-index-authority-v5.css
+ok 245 - asset budget: css/spike-index-authority-v5.css
+  ---
+  duration_ms: 0.2003
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-live.css
+ok 246 - asset budget: css/spike-live.css
+  ---
+  duration_ms: 0.19419
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-menu-final-v10.css
+ok 247 - asset budget: css/spike-menu-final-v10.css
+  ---
+  duration_ms: 0.195993
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-menu-v3.css
+ok 248 - asset budget: css/spike-menu-v3.css
+  ---
+  duration_ms: 0.347229
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-mobile-safe-area.css
+ok 249 - asset budget: css/spike-mobile-safe-area.css
+  ---
+  duration_ms: 0.202733
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-native-select.css
+ok 250 - asset budget: css/spike-native-select.css
+  ---
+  duration_ms: 0.192257
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-native-v2.css
+ok 251 - asset budget: css/spike-native-v2.css
+  ---
+  duration_ms: 0.44153
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-post-actions-v2.css
+ok 252 - asset budget: css/spike-post-actions-v2.css
+  ---
+  duration_ms: 0.259768
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-post-actions-v4.css
+ok 253 - asset budget: css/spike-post-actions-v4.css
+  ---
+  duration_ms: 0.186689
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-premium-loader.css
+ok 254 - asset budget: css/spike-premium-loader.css
+  ---
+  duration_ms: 0.316724
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-safety-center.css
+ok 255 - asset budget: css/spike-safety-center.css
+  ---
+  duration_ms: 0.370745
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-signal-studio.css
+ok 256 - asset budget: css/spike-signal-studio.css
+  ---
+  duration_ms: 0.857181
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-surface-controls.css
+ok 257 - asset budget: css/spike-surface-controls.css
+  ---
+  duration_ms: 0.228281
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-theme-experience-v3.css
+ok 258 - asset budget: css/spike-theme-experience-v3.css
+  ---
+  duration_ms: 0.191396
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-theme-final-authority-v1.css
+ok 259 - asset budget: css/spike-theme-final-authority-v1.css
+  ---
+  duration_ms: 0.200099
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-theme-runtime-v3.css
+ok 260 - asset budget: css/spike-theme-runtime-v3.css
+  ---
+  duration_ms: 0.308041
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-three-theme-authority.css
+ok 261 - asset budget: css/spike-three-theme-authority.css
+  ---
+  duration_ms: 0.188151
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-unified-v2.css
+ok 262 - asset budget: css/spike-unified-v2.css
+  ---
+  duration_ms: 0.189333
+  type: 'test'
+  ...
+# Subtest: asset budget: css/spike-ux-refinement-v1.css
+ok 263 - asset budget: css/spike-ux-refinement-v1.css
+  ---
+  duration_ms: 0.317895
+  type: 'test'
+  ...
+# Subtest: asset budget: css/theme.css
+ok 264 - asset budget: css/theme.css
+  ---
+  duration_ms: 0.297685
+  type: 'test'
+  ...
+# Subtest: asset budget: css/ui-fix.css
+ok 265 - asset budget: css/ui-fix.css
+  ---
+  duration_ms: 0.516542
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-01.js
+ok 266 - asset budget: js/feed-runtime-01.js
+  ---
+  duration_ms: 0.217345
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-02.js
+ok 267 - asset budget: js/feed-runtime-02.js
+  ---
+  duration_ms: 0.373869
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-03.js
+ok 268 - asset budget: js/feed-runtime-03.js
+  ---
+  duration_ms: 0.390864
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-04-1.js
+ok 269 - asset budget: js/feed-runtime-04-1.js
+  ---
+  duration_ms: 0.39461
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-04-2.js
+ok 270 - asset budget: js/feed-runtime-04-2.js
+  ---
+  duration_ms: 0.727928
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-04-3.js
+ok 271 - asset budget: js/feed-runtime-04-3.js
+  ---
+  duration_ms: 1.389497
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-05.js
+ok 272 - asset budget: js/feed-runtime-05.js
+  ---
+  duration_ms: 0.318195
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-06.js
+ok 273 - asset budget: js/feed-runtime-06.js
+  ---
+  duration_ms: 0.770051
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-07.js
+ok 274 - asset budget: js/feed-runtime-07.js
+  ---
+  duration_ms: 0.197806
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-08.js
+ok 275 - asset budget: js/feed-runtime-08.js
+  ---
+  duration_ms: 0.2207
+  type: 'test'
+  ...
+# Subtest: asset budget: js/feed-runtime-10.js
+ok 276 - asset budget: js/feed-runtime-10.js
+  ---
+  duration_ms: 0.238226
+  type: 'test'
+  ...
+# Subtest: asset budget: js/maintenance.js
+ok 277 - asset budget: js/maintenance.js
+  ---
+  duration_ms: 0.177536
+  type: 'test'
+  ...
+# Subtest: asset budget: js/premium-back.js
+ok 278 - asset budget: js/premium-back.js
+  ---
+  duration_ms: 0.184095
+  type: 'test'
+  ...
+# Subtest: asset budget: js/presence.js
+ok 279 - asset budget: js/presence.js
+  ---
+  duration_ms: 0.253118
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-adaptive-nav.js
+ok 280 - asset budget: js/spike-adaptive-nav.js
+  ---
+  duration_ms: 0.632115
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-comment-keyboard-v1.js
+ok 281 - asset budget: js/spike-comment-keyboard-v1.js
+  ---
+  duration_ms: 0.774247
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-dialog.js
+ok 282 - asset budget: js/spike-dialog.js
+  ---
+  duration_ms: 0.209954
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-dm-realtime-calls-v1.js
+ok 283 - asset budget: js/spike-dm-realtime-calls-v1.js
+  ---
+  duration_ms: 0.184996
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-dm-realtime-calls-v2.js
+ok 284 - asset budget: js/spike-dm-realtime-calls-v2.js
+  ---
+  duration_ms: 0.262483
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-experience-v2.js
+ok 285 - asset budget: js/spike-experience-v2.js
+  ---
+  duration_ms: 0.186248
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-feature-suite.js
+ok 286 - asset budget: js/spike-feature-suite.js
+  ---
+  duration_ms: 0.18048
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-feed-image-fallback-v1.js
+ok 287 - asset budget: js/spike-feed-image-fallback-v1.js
+  ---
+  duration_ms: 0.181642
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-feed-live.js
+ok 288 - asset budget: js/spike-feed-live.js
+  ---
+  duration_ms: 0.220109
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-guide-experience-v2.js
+ok 289 - asset budget: js/spike-guide-experience-v2.js
+  ---
+  duration_ms: 0.362942
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-identity.js
+ok 290 - asset budget: js/spike-identity.js
+  ---
+  duration_ms: 0.336683
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-live.js
+ok 291 - asset budget: js/spike-live.js
+  ---
+  duration_ms: 0.425165
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-loader-core.js
+ok 292 - asset budget: js/spike-loader-core.js
+  ---
+  duration_ms: 2.958873
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-native-select.js
+ok 293 - asset budget: js/spike-native-select.js
+  ---
+  duration_ms: 0.221521
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-native-v2.js
+ok 294 - asset budget: js/spike-native-v2.js
+  ---
+  duration_ms: 0.222633
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-navigation.js
+ok 295 - asset budget: js/spike-navigation.js
+  ---
+  duration_ms: 0.240289
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-notification-center-v1.js
+ok 296 - asset budget: js/spike-notification-center-v1.js
+  ---
+  duration_ms: 0.338076
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-notification-sound-v1.js
+ok 297 - asset budget: js/spike-notification-sound-v1.js
+  ---
+  duration_ms: 0.723812
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-safety-center-v5.js
+ok 298 - asset budget: js/spike-safety-center-v5.js
+  ---
+  duration_ms: 0.221632
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-share.js
+ok 299 - asset budget: js/spike-share.js
+  ---
+  duration_ms: 0.18704
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-signal-studio.js
+ok 300 - asset budget: js/spike-signal-studio.js
+  ---
+  duration_ms: 0.23408
+  type: 'test'
+  ...
+# Subtest: asset budget: js/spike-surface-controls.js
+ok 301 - asset budget: js/spike-surface-controls.js
+  ---
+  duration_ms: 2.463231
+  type: 'test'
+  ...
+# Subtest: asset budget: js/supabase-singleton.js
+ok 302 - asset budget: js/supabase-singleton.js
+  ---
+  duration_ms: 1.062217
+  type: 'test'
+  ...
+# Subtest: asset budget: js/telemetry.js
+ok 303 - asset budget: js/telemetry.js
+  ---
+  duration_ms: 0.251106
+  type: 'test'
+  ...
+# Subtest: asset budget: js/theme.js
+ok 304 - asset budget: js/theme.js
+  ---
+  duration_ms: 0.182432
+  type: 'test'
+  ...
+# Subtest: asset budget: js/ui-fix.js
+ok 305 - asset budget: js/ui-fix.js
+  ---
+  duration_ms: 2.138316
+  type: 'test'
+  ...
+# Subtest: no duplicated shared CSS/JS in assets root
+ok 306 - no duplicated shared CSS/JS in assets root
+  ---
+  duration_ms: 1.185773
+  type: 'test'
+  ...
+# Subtest: post renderer has exactly four primary actions
+ok 307 - post renderer has exactly four primary actions
+  ---
+  duration_ms: 1.700582
+  type: 'test'
+  ...
+# Subtest: like and comment counts live on their dedicated actions
+ok 308 - like and comment counts live on their dedicated actions
+  ---
+  duration_ms: 0.260319
+  type: 'test'
+  ...
+# Subtest: save and like state are synchronized in place
+ok 309 - save and like state are synchronized in place
+  ---
+  duration_ms: 0.12049
+  type: 'test'
+  ...
+# Subtest: Share action opens a dedicated themed share sheet
+ok 310 - Share action opens a dedicated themed share sheet
+  ---
+  duration_ms: 0.312147
+  type: 'test'
+  ...
+# Subtest: Pass to connections remains available through Share without being a duplicate primary action
+ok 311 - Pass to connections remains available through Share without being a duplicate primary action
+  ---
+  duration_ms: 0.150064
+  type: 'test'
+  ...
+# Subtest: long-pressing Like opens the existing reaction tray without adding a permanent React button
+ok 312 - long-pressing Like opens the existing reaction tray without adding a permanent React button
+  ---
+  duration_ms: 0.150595
+  type: 'test'
+  ...
+# Subtest: duplicate viewer-facing metrics are suppressed while creator insights remain available
+ok 313 - duplicate viewer-facing metrics are suppressed while creator insights remain available
+  ---
+  duration_ms: 0.137906
+  type: 'test'
+  ...
+# Subtest: post action styling uses theme authority instead of fixed palette colors
+ok 314 - post action styling uses theme authority instead of fixed palette colors
+  ---
+  duration_ms: 0.160219
+  type: 'test'
+  ...
+# Subtest: the dedicated action stylesheet is loaded after the existing feed polish layers
+ok 315 - the dedicated action stylesheet is loaded after the existing feed polish layers
+  ---
+  duration_ms: 0.319427
+  type: 'test'
+  ...
+# Subtest: feed loads cache-busted post action runtime and final stylesheet
+ok 316 - feed loads cache-busted post action runtime and final stylesheet
+  ---
+  duration_ms: 0.669591
+  type: 'test'
+  ...
+# Subtest: renderer has exactly four dedicated actions
+ok 317 - renderer has exactly four dedicated actions
+  ---
+  duration_ms: 0.939685
+  type: 'test'
+  ...
+# Subtest: renderer contains no duplicate viewer analytics
+ok 318 - renderer contains no duplicate viewer analytics
+  ---
+  duration_ms: 0.104236
+  type: 'test'
+  ...
+# Subtest: final stylesheet defeats legacy post chrome
+ok 319 - final stylesheet defeats legacy post chrome
+  ---
+  duration_ms: 0.209884
+  type: 'test'
+  ...
+# Subtest: runtime no longer assigns per-post Top Pick rank
+ok 320 - runtime no longer assigns per-post Top Pick rank
+  ---
+  duration_ms: 0.126609
+  type: 'test'
+  ...
+# Subtest: owner analytics stay hidden until explicitly opened, and legacy DOM guard removes duplicate metrics
+ok 321 - owner analytics stay hidden until explicitly opened, and legacy DOM guard removes duplicate metrics
+  ---
+  duration_ms: 0.202723
+  type: 'test'
+  ...
+# Subtest: Theme 2 is identified as Modern Mineral with a stable ID and selectable light/dark mode
+ok 322 - Theme 2 is identified as Modern Mineral with a stable ID and selectable light/dark mode
+  ---
+  duration_ms: 0.877171
+  type: 'test'
+  ...
+# Subtest: Modern Mineral uses a fresh mineral-white and jade palette plus a dark variant
+ok 323 - Modern Mineral uses a fresh mineral-white and jade palette plus a dark variant
+  ---
+  duration_ms: 0.230845
+  type: 'test'
+  ...
+# Subtest: Modern Mineral text and primary actions meet WCAG AA contrast on light and dark surfaces
+ok 324 - Modern Mineral text and primary actions meet WCAG AA contrast on light and dark surfaces
+  ---
+  duration_ms: 0.340929
+  type: 'test'
+  ...
+# Subtest: full-page SPIKE loaders share the premium visual system
+ok 325 - full-page SPIKE loaders share the premium visual system
+  ---
+  duration_ms: 6.862998
+  type: 'test'
+  ...
+# Subtest: shared loader styling does not override loader lifecycle classes
+ok 326 - shared loader styling does not override loader lifecycle classes
+  ---
+  duration_ms: 1.069398
+  type: 'test'
+  ...
+# Subtest: Premium Neon Red primary action endpoints meet WCAG AA for white text
+ok 327 - Premium Neon Red primary action endpoints meet WCAG AA for white text
+  ---
+  duration_ms: 0.821938
+  type: 'test'
+  ...
+# Subtest: Premium Neon Red selection and outgoing bubbles use readable foreground colors
+ok 328 - Premium Neon Red selection and outgoing bubbles use readable foreground colors
+  ---
+  duration_ms: 0.215503
+  type: 'test'
+  ...
+# Subtest: Neon glow remains decorative and focus indicators stay explicit
+ok 329 - Neon glow remains decorative and focus indicators stay explicit
+  ---
+  duration_ms: 0.805914
+  type: 'test'
+  ...
+# Subtest: Theme 3 is Premium Neon Red with a dark red-forward palette
+ok 330 - Theme 3 is Premium Neon Red with a dark red-forward palette
+  ---
+  duration_ms: 0.600308
+  type: 'test'
+  ...
+# Subtest: Every HTML page bootstraps Theme 3 as dark before styles load
+ok 331 - Every HTML page bootstraps Theme 3 as dark before styles load
+  ---
+  duration_ms: 11.83519
+  type: 'test'
+  ...
+# Subtest: simplification contract removes obsolete destinations
+ok 332 - simplification contract removes obsolete destinations
+  ---
+  duration_ms: 5.395485
+  type: 'test'
+  ...
+# Subtest: Feed no longer exposes retired destinations
+ok 333 - Feed no longer exposes retired destinations
+  ---
+  duration_ms: 0.908227
+  type: 'test'
+  ...
+# Subtest: production UI contains no known placeholder or fake-feature messaging
+ok 334 - production UI contains no known placeholder or fake-feature messaging
+  ---
+  duration_ms: 4.119958
+  type: 'test'
+  ...
+# Subtest: profile reporting uses the real abuse-case persistence boundary
+ok 335 - profile reporting uses the real abuse-case persistence boundary
+  ---
+  duration_ms: 0.162713
+  type: 'test'
+  ...
+# Subtest: conversation header profile photo has an accessible full-screen viewer
+ok 336 - conversation header profile photo has an accessible full-screen viewer
+  ---
+  duration_ms: 0.769851
+  type: 'test'
+  ...
+# Subtest: profile viewer opens the current avatar image without stretching it
+ok 337 - profile viewer opens the current avatar image without stretching it
+  ---
+  duration_ms: 0.18077
+  type: 'test'
+  ...
+# Subtest: profile viewer closes on outside tap, close button, Escape and browser Back
+ok 338 - profile viewer closes on outside tap, close button, Escape and browser Back
+  ---
+  duration_ms: 0.156274
+  type: 'test'
+  ...
+# Subtest: avatar supports keyboard activation and viewer restores scrolling/focus on close
+ok 339 - avatar supports keyboard activation and viewer restores scrolling/focus on close
+  ---
+  duration_ms: 0.112689
+  type: 'test'
+  ...
+# Subtest: Profile Edit defines all six audience selectors and two privacy switches
+ok 340 - Profile Edit defines all six audience selectors and two privacy switches
+  ---
+  duration_ms: 1.094276
+  type: 'test'
+  ...
+# Subtest: privacy selector trigger remains visible after native-select decoration
+ok 341 - privacy selector trigger remains visible after native-select decoration
+  ---
+  duration_ms: 0.322893
+  type: 'test'
+  ...
+# Subtest: privacy save payload includes every privacy field
+ok 342 - privacy save payload includes every privacy field
+  ---
+  duration_ms: 0.352647
+  type: 'test'
+  ...
+# Subtest: development dependencies are explicitly pinned
+ok 343 - development dependencies are explicitly pinned
+  ---
+  duration_ms: 4.160709
+  type: 'test'
+  ...
+# Subtest: project contains no orphaned root implementation pages
+ok 344 - project contains no orphaned root implementation pages
+  ---
+  duration_ms: 0.826996
+  type: 'test'
+  ...
+# Subtest: Supabase CDN is pinned consistently
+ok 345 - Supabase CDN is pinned consistently
+  ---
+  duration_ms: 9.917874
+  type: 'test'
+  ...
+# Subtest: Font Awesome CDN is pinned consistently
+ok 346 - Font Awesome CDN is pinned consistently
+  ---
+  duration_ms: 10.1695
+  type: 'test'
+  ...
+# Subtest: Feed has no private duplicate theme registry
+ok 347 - Feed has no private duplicate theme registry
+  ---
+  duration_ms: 1.293864
+  type: 'test'
+  ...
+# Subtest: all inline HTML JavaScript blocks are syntactically valid
+ok 348 - all inline HTML JavaScript blocks are syntactically valid
+  ---
+  duration_ms: 1925.149696
+  type: 'test'
+  ...
+# Subtest: every excluded path remains traceable to the historical baseline
+ok 349 - every excluded path remains traceable to the historical baseline
+  ---
+  duration_ms: 0.700437
+  type: 'test'
+  ...
+# Subtest: excluded paths are explicitly absent rather than silently ignored
+ok 350 - excluded paths are explicitly absent rather than silently ignored
+  ---
+  duration_ms: 7.050572
+  type: 'test'
+  ...
+# Subtest: protected baseline manifest is internally consistent
+ok 351 - protected baseline manifest is internally consistent
+  ---
+  duration_ms: 0.665065
+  type: 'test'
+  ...
+# Subtest: no protected baseline file was deleted or modified
+ok 352 - no protected baseline file was deleted or modified
+  ---
+  duration_ms: 92.471349
+  type: 'test'
+  ...
+# Subtest: existing migration files remain immutable while new migrations may be added
+ok 353 - existing migration files remain immutable while new migrations may be added
+  ---
+  duration_ms: 0.323583
+  type: 'test'
+  ...
+# Subtest: public profile checks friends visibility before exposing activity follower counts
+ok 354 - public profile checks friends visibility before exposing activity follower counts
+  ---
+  duration_ms: 0.724894
+  type: 'test'
+  ...
+# Subtest: public member profile shows each profile metric once and avoids duplicate activity summary
+ok 355 - public member profile shows each profile metric once and avoids duplicate activity summary
+  ---
+  duration_ms: 0.290485
+  type: 'test'
+  ...
+# Subtest: leveling profile RPC cannot be executed by anon
+ok 356 - leveling profile RPC cannot be executed by anon
+  ---
+  duration_ms: 0.800627
+  type: 'test'
+  ...
+# Subtest: ranking contract weights sum to exactly 1
+ok 357 - ranking contract weights sum to exactly 1
+  ---
+  duration_ms: 1.296588
+  type: 'test'
+  ...
+# Subtest: every ranking contract returns finite scores in [0,1]
+ok 358 - every ranking contract returns finite scores in [0,1]
+  ---
+  duration_ms: 1.650598
+  type: 'test'
+  ...
+# Subtest: ranking is deterministic for identical input
+ok 359 - ranking is deterministic for identical input
+  ---
+  duration_ms: 1.341596
+  type: 'test'
+  ...
+# Subtest: ranked output contains no duplicate post ids
+ok 360 - ranked output contains no duplicate post ids
+  ---
+  duration_ms: 0.31424
+  type: 'test'
+  ...
+# Subtest: diversity caps creator and media-type concentration when alternatives exist
+ok 361 - diversity caps creator and media-type concentration when alternatives exist
+  ---
+  duration_ms: 0.592326
+  type: 'test'
+  ...
+# Subtest: server hide feedback is honored by negative ranking modifier
+ok 362 - server hide feedback is honored by negative ranking modifier
+  ---
+  duration_ms: 0.225006
+  type: 'test'
+  ...
+# Subtest: saved ranking exposes a consistent base score
+ok 363 - saved ranking exposes a consistent base score
+  ---
+  duration_ms: 0.161482
+  type: 'test'
+  ...
+# Subtest: retired v4 reaction contract is not loaded in production
+ok 364 - retired v4 reaction contract is not loaded in production
+  ---
+  duration_ms: 0.824382
+  type: 'test'
+  ...
+# Subtest: reaction selection follows the current persistent pointer path
+ok 365 - reaction selection follows the current persistent pointer path
+  ---
+  duration_ms: 0.175953
+  type: 'test'
+  ...
+# Subtest: reaction picker is persistent and uses one pointer selection path
+ok 366 - reaction picker is persistent and uses one pointer selection path
+  ---
+  duration_ms: 0.786336
+  type: 'test'
+  ...
+# Subtest: reaction summary is rendered and can open the picker
+ok 367 - reaction summary is rendered and can open the picker
+  ---
+  duration_ms: 0.952414
+  type: 'test'
+  ...
+# Subtest: long press still opens the picker and suppresses native context menu
+ok 368 - long press still opens the picker and suppresses native context menu
+  ---
+  duration_ms: 0.228692
+  type: 'test'
+  ...
+# Subtest: reaction picker CSS is valid and hidden state wins
+ok 369 - reaction picker CSS is valid and hidden state wins
+  ---
+  duration_ms: 0.260039
+  type: 'test'
+  ...
+# Subtest: fresh reaction cache version is wired
+ok 370 - fresh reaction cache version is wired
+  ---
+  duration_ms: 0.125258
+  type: 'test'
+  ...
+# Subtest: Feature Suite collaboration RPC is shipped in the local migration
+ok 371 - Feature Suite collaboration RPC is shipped in the local migration
+  ---
+  duration_ms: 3.864808
+  type: 'test'
+  ...
+# Subtest: retired Impact page and dedicated Edge Functions stay removed
+ok 372 - retired Impact page and dedicated Edge Functions stay removed
+  ---
+  duration_ms: 4.226569
+  type: 'test'
+  ...
+# Subtest: retirement migration remains present and drops the feature database objects
+ok 373 - retirement migration remains present and drops the feature database objects
+  ---
+  duration_ms: 1.481836
+  type: 'test'
+  ...
+# Subtest: no later migration recreates retired Impact database objects
+ok 374 - no later migration recreates retired Impact database objects
+  ---
+  duration_ms: 9.40351
+  type: 'test'
+  ...
+# Subtest: active app and function source contain no Impact feature entry points
+ok 375 - active app and function source contain no Impact feature entry points
+  ---
+  duration_ms: 31.74234
+  type: 'test'
+  ...
+# Subtest: Room Chat critical flows are wired to real handlers and authoritative data paths
+ok 376 - Room Chat critical flows are wired to real handlers and authoritative data paths
+  ---
+  duration_ms: 3.974122
+  type: 'test'
+  ...
+# Subtest: Room Chat visual authority fixes the channel control and mobile drawer geometry
+ok 377 - Room Chat visual authority fixes the channel control and mobile drawer geometry
+  ---
+  duration_ms: 4.494279
+  type: 'test'
+  ...
+# Subtest: Room member management has one simple member workspace
+ok 378 - Room member management has one simple member workspace
+  ---
+  duration_ms: 4.145678
+  type: 'test'
+  ...
+# Subtest: Room member management uses server-authoritative ranking and role controls
+ok 379 - Room member management uses server-authoritative ranking and role controls
+  ---
+  duration_ms: 0.953676
+  type: 'test'
+  ...
+# Subtest: Member actions protect the room owner
+ok 380 - Member actions protect the room owner
+  ---
+  duration_ms: 1.770697
+  type: 'test'
+  ...
+# Subtest: Moderation RPCs enforce staff hierarchy server-side
+ok 381 - Moderation RPCs enforce staff hierarchy server-side
+  ---
+  duration_ms: 0.799496
+  type: 'test'
+  ...
+# Subtest: Room creation keeps one simple optional picture field
+ok 382 - Room creation keeps one simple optional picture field
+  ---
+  duration_ms: 0.704604
+  type: 'test'
+  ...
+# Subtest: Room picture uses the existing room-media storage bucket and room_create avatar_url
+ok 383 - Room picture uses the existing room-media storage bucket and room_create avatar_url
+  ---
+  duration_ms: 0.246539
+  type: 'test'
+  ...
+# Subtest: Room picture upload is validated before upload
+ok 384 - Room picture upload is validated before upload
+  ---
+  duration_ms: 0.376653
+  type: 'test'
+  ...
+# Subtest: Existing Room creator can change or remove the Room picture from Manage
+ok 385 - Existing Room creator can change or remove the Room picture from Manage
+  ---
+  duration_ms: 0.204827
+  type: 'test'
+  ...
+# Subtest: Room picture update is server-authoritative for the creator
+ok 386 - Room picture update is server-authoritative for the creator
+  ---
+  duration_ms: 0.192548
+  type: 'test'
+  ...
+# Subtest: Rooms keeps ranking simple and visible
+ok 387 - Rooms keeps ranking simple and visible
+  ---
+  duration_ms: 0.787798
+  type: 'test'
+  ...
+# Subtest: Room ranking is server-authoritative and activity based
+ok 388 - Room ranking is server-authoritative and activity based
+  ---
+  duration_ms: 0.301201
+  type: 'test'
+  ...
+# Subtest: Rooms has one simple directory surface
+ok 389 - Rooms has one simple directory surface
+  ---
+  duration_ms: 4.276074
+  type: 'test'
+  ...
+# Subtest: Room chat exposes only conversation controls at the surface
+ok 390 - Room chat exposes only conversation controls at the surface
+  ---
+  duration_ms: 2.328261
+  type: 'test'
+  ...
+# Subtest: Rooms keeps the canonical member path and no duplicate chat entrypoint
+ok 391 - Rooms keeps the canonical member path and no duplicate chat entrypoint
+  ---
+  duration_ms: 2.324505
+  type: 'test'
+  ...
+# Subtest: Safety Center is wired into feed without replacing existing routes
+ok 392 - Safety Center is wired into feed without replacing existing routes
+  ---
+  duration_ms: 0.848439
+  type: 'test'
+  ...
+# Subtest: all 15 new Safety Center features are implemented in the module
+ok 393 - all 15 new Safety Center features are implemented in the module
+  ---
+  duration_ms: 0.289423
+  type: 'test'
+  ...
+# Subtest: safety module uses the existing app_documents persistence boundary
+ok 394 - safety module uses the existing app_documents persistence boundary
+  ---
+  duration_ms: 0.10663
+  type: 'test'
+  ...
+# Subtest: safety protections include concrete detection hooks
+ok 395 - safety protections include concrete detection hooks
+  ---
+  duration_ms: 0.221381
+  type: 'test'
+  ...
+# Subtest: Safety Center never calls native browser dialogs and has a premium UI fallback
+ok 396 - Safety Center never calls native browser dialogs and has a premium UI fallback
+  ---
+  duration_ms: 0.336894
+  type: 'test'
+  ...
+# Subtest: premium confirmation cancellation is respected
+ok 397 - premium confirmation cancellation is respected
+  ---
+  duration_ms: 0.114622
+  type: 'test'
+  ...
+# Subtest: all Safety Center toggle aliases update their real persisted controls
+ok 398 - all Safety Center toggle aliases update their real persisted controls
+  ---
+  duration_ms: 0.235052
+  type: 'test'
+  ...
+# Subtest: automation rules are triggered by supported risky-link and interaction-burst signals
+ok 399 - automation rules are triggered by supported risky-link and interaction-burst signals
+  ---
+  duration_ms: 0.11993
+  type: 'test'
+  ...
+# Subtest: Feed cannot load the obsolete cached Safety Center filename
+ok 400 - Feed cannot load the obsolete cached Safety Center filename
+  ---
+  duration_ms: 0.330544
+  type: 'test'
+  ...
+# Subtest: Safety Code server contract is shipped and atomic under concurrent rotations
+ok 401 - Safety Code server contract is shipped and atomic under concurrent rotations
+  ---
+  duration_ms: 0.385416
+  type: 'test'
+  ...
+# Subtest: WebAuthn server rejects unconfigured production origins and rate-limits attempts
+ok 402 - WebAuthn server rejects unconfigured production origins and rate-limits attempts
+  ---
+  duration_ms: 0.260729
+  type: 'test'
+  ...
+# Subtest: Safety recovery reset page does not send a bearer token as a referrer
+ok 403 - Safety recovery reset page does not send a bearer token as a referrer
+  ---
+  duration_ms: 0.073881
+  type: 'test'
+  ...
+# Subtest: security baseline: index.html
+ok 404 - security baseline: index.html
+  ---
+  duration_ms: 10.77519
+  type: 'test'
+  ...
+# Subtest: security baseline: feed.html
+ok 405 - security baseline: feed.html
+  ---
+  duration_ms: 1.642045
+  type: 'test'
+  ...
+# Subtest: security baseline: friends.html
+ok 406 - security baseline: friends.html
+  ---
+  duration_ms: 1.165183
+  type: 'test'
+  ...
+# Subtest: security baseline: notifications.html
+ok 407 - security baseline: notifications.html
+  ---
+  duration_ms: 1.084612
+  type: 'test'
+  ...
+# Subtest: security baseline: profile.html
+ok 408 - security baseline: profile.html
+  ---
+  duration_ms: 1.941403
+  type: 'test'
+  ...
+# Subtest: security baseline: rooms.html
+ok 409 - security baseline: rooms.html
+  ---
+  duration_ms: 1.896536
+  type: 'test'
+  ...
+# Subtest: security baseline: room.html
+ok 410 - security baseline: room.html
+  ---
+  duration_ms: 2.207029
+  type: 'test'
+  ...
+# Subtest: security baseline: room_chat.html
+ok 411 - security baseline: room_chat.html
+  ---
+  duration_ms: 1.236098
+  type: 'test'
+  ...
+# Subtest: security baseline: settings.html
+ok 412 - security baseline: settings.html
+  ---
+  duration_ms: 1.316569
+  type: 'test'
+  ...
+# Subtest: security baseline: help.html
+ok 413 - security baseline: help.html
+  ---
+  duration_ms: 1.708905
+  type: 'test'
+  ...
+# Subtest: security baseline: admin.html
+ok 414 - security baseline: admin.html
+  ---
+  duration_ms: 1.846531
+  type: 'test'
+  ...
+# Subtest: security baseline: guide.html
+ok 415 - security baseline: guide.html
+  ---
+  duration_ms: 0.941558
+  type: 'test'
+  ...
+# Subtest: security baseline: legal.html
+ok 416 - security baseline: legal.html
+  ---
+  duration_ms: 0.734308
+  type: 'test'
+  ...
+# Subtest: security baseline: policy.html
+ok 417 - security baseline: policy.html
+  ---
+  duration_ms: 1.109659
+  type: 'test'
+  ...
+# Subtest: security baseline: policy_appeals.html
+ok 418 - security baseline: policy_appeals.html
+  ---
+  duration_ms: 0.814658
+  type: 'test'
+  ...
+# Subtest: security baseline: reset-password.html
+ok 419 - security baseline: reset-password.html
+  ---
+  duration_ms: 1.769246
+  type: 'test'
+  ...
+# Subtest: security baseline: share.html
+ok 420 - security baseline: share.html
+  ---
+  duration_ms: 1.527213
+  type: 'test'
+  ...
+# Subtest: security baseline: view_user.html
+ok 421 - security baseline: view_user.html
+  ---
+  duration_ms: 1.647984
+  type: 'test'
+  ...
+# Subtest: security baseline: no privileged credentials in shared JS
+ok 422 - security baseline: no privileged credentials in shared JS
+  ---
+  duration_ms: 0.872535
+  type: 'test'
+  ...
+# Subtest: Settings exposes the Feed preferences that the Feed runtime actually consumes
+ok 423 - Settings exposes the Feed preferences that the Feed runtime actually consumes
+  ---
+  duration_ms: 0.937421
+  type: 'test'
+  ...
+# Subtest: Feed consumes the same persisted Feed preference keys exposed by Settings
+ok 424 - Feed consumes the same persisted Feed preference keys exposed by Settings
+  ---
+  duration_ms: 0.232468
+  type: 'test'
+  ...
+# Subtest: Settings reports Feed preference persistence failures instead of claiming full success
+ok 425 - Settings reports Feed preference persistence failures instead of claiming full success
+  ---
+  duration_ms: 0.112698
+  type: 'test'
+  ...
+# Subtest: Settings preserves the current browser theme before falling back to the account value
+ok 426 - Settings preserves the current browser theme before falling back to the account value
+  ---
+  duration_ms: 0.774418
+  type: 'test'
+  ...
+# Subtest: Settings only reports full save success when all persistence operations succeed
+ok 427 - Settings only reports full save success when all persistence operations succeed
+  ---
+  duration_ms: 0.271977
+  type: 'test'
+  ...
+# Subtest: Settings uses one authoritative select surface renderer
+ok 428 - Settings uses one authoritative select surface renderer
+  ---
+  duration_ms: 1.438411
+  type: 'test'
+  ...
+# Subtest: Settings select controls retain their real select elements
+ok 429 - Settings select controls retain their real select elements
+  ---
+  duration_ms: 0.353128
+  type: 'test'
+  ...
+# Subtest: Theme selection writes through to account settings and reports sync failures
+ok 430 - Theme selection writes through to account settings and reports sync failures
+  ---
+  duration_ms: 0.652486
+  type: 'test'
+  ...
+# Subtest: Profile editor keeps one real select per audience setting and suppresses only redundant summary decorations
+ok 431 - Profile editor keeps one real select per audience setting and suppresses only redundant summary decorations
+  ---
+  duration_ms: 5.513744
+  type: 'test'
+  ...
+# Subtest: pages use one shared option-panel controller and no legacy native-select controller
+ok 432 - pages use one shared option-panel controller and no legacy native-select controller
+  ---
+  duration_ms: 7.9115
+  type: 'test'
+  ...
+# Subtest: incoming calls subscribe to one user-specific topic without querying DM history
+ok 433 - incoming calls subscribe to one user-specific topic without querying DM history
+  ---
+  duration_ms: 0.66235
+  type: 'test'
+  ...
+# Subtest: outgoing signals target recipient topic and preserve recipient validation
+ok 434 - outgoing signals target recipient topic and preserve recipient validation
+  ---
+  duration_ms: 0.174
+  type: 'test'
+  ...
+# Subtest: database migration authorizes only recipient topic and DM participants can signal
+ok 435 - database migration authorizes only recipient topic and DM participants can signal
+  ---
+  duration_ms: 0.098467
+  type: 'test'
+  ...
+# Subtest: Feed loads the Android header override after shared theme and polish CSS
+ok 436 - Feed loads the Android header override after shared theme and polish CSS
+  ---
+  duration_ms: 0.649081
+  type: 'test'
+  ...
+# Subtest: Header actions are anchored to the right grid lane and remain tappable
+ok 437 - Header actions are anchored to the right grid lane and remain tappable
+  ---
+  duration_ms: 0.283484
+  type: 'test'
+  ...
+# Subtest: Header preserves Android safe-area padding and responsive small-screen rules
+ok 438 - Header preserves Android safe-area padding and responsive small-screen rules
+  ---
+  duration_ms: 0.151777
+  type: 'test'
+  ...
+# Subtest: shared loader core is idempotent and versioned
+ok 439 - shared loader core is idempotent and versioned
+  ---
+  duration_ms: 1.388526
+  type: 'test'
+  ...
+# Subtest: loader operations have unique ownership tokens and idempotent end
+ok 440 - loader operations have unique ownership tokens and idempotent end
+  ---
+  duration_ms: 0.114531
+  type: 'test'
+  ...
+# Subtest: page overlay registration is idempotent and cleans up timers/listeners
+ok 441 - page overlay registration is idempotent and cleans up timers/listeners
+  ---
+  duration_ms: 0.142222
+  type: 'test'
+  ...
+# Subtest: loader CSS is namespaced to known full-screen overlays
+ok 442 - loader CSS is namespaced to known full-screen overlays
+  ---
+  duration_ms: 0.182203
+  type: 'test'
+  ...
+# Subtest: every HTML page loads the shared loader core exactly once
+ok 443 - every HTML page loads the shared loader core exactly once
+  ---
+  duration_ms: 3.760463
+  type: 'test'
+  ...
+# Subtest: Feed loader adapter delegates to shared controller
+ok 444 - Feed loader adapter delegates to shared controller
+  ---
+  duration_ms: 0.1534
+  type: 'test'
+  ...
+# Subtest: V8 menu authority stylesheet is loaded after previous menu layers
+ok 445 - V8 menu authority stylesheet is loaded after previous menu layers
+  ---
+  duration_ms: 0.763471
+  type: 'test'
+  ...
+# Subtest: V8 drawer outranks sticky header and bottom dock while open
+ok 446 - V8 drawer outranks sticky header and bottom dock while open
+  ---
+  duration_ms: 0.944852
+  type: 'test'
+  ...
+# Subtest: V8 drawer keeps scroll contained and supports Android safe areas
+ok 447 - V8 drawer keeps scroll contained and supports Android safe areas
+  ---
+  duration_ms: 0.157375
+  type: 'test'
+  ...
+# Subtest: V8 preserves the existing menu open/close navigation state contract
+ok 448 - V8 preserves the existing menu open/close navigation state contract
+  ---
+  duration_ms: 0.118387
+  type: 'test'
+  ...
+# Subtest: V8 preserves existing menu destinations and sign-out flow
+ok 449 - V8 preserves existing menu destinations and sign-out flow
+  ---
+  duration_ms: 0.551995
+  type: 'test'
+  ...
+# Subtest: Signal Studio is wired as a new publishing surface without reviving retired composer nodes
+ok 450 - Signal Studio is wired as a new publishing surface without reviving retired composer nodes
+  ---
+  duration_ms: 1.753772
+  type: 'test'
+  ...
+# Subtest: Signal Studio validates content and media, publishes to the canonical posts collection, and updates the feed
+ok 451 - Signal Studio validates content and media, publishes to the canonical posts collection, and updates the feed
+  ---
+  duration_ms: 0.139578
+  type: 'test'
+  ...
+# Subtest: Signal Studio has responsive, reduced-motion-aware presentation and media accessibility support
+ok 452 - Signal Studio has responsive, reduced-motion-aware presentation and media accessibility support
+  ---
+  duration_ms: 0.094672
+  type: 'test'
+  ...
+# Subtest: opening Signal Studio does not autofocus the text field or trigger a mobile keyboard
+ok 453 - opening Signal Studio does not autofocus the text field or trigger a mobile keyboard
+  ---
+  duration_ms: 0.142493
+  type: 'test'
+  ...
+# Subtest: Signal Studio inherits SPIKE theme tokens instead of hard-coding a single pink palette
+ok 454 - Signal Studio inherits SPIKE theme tokens instead of hard-coding a single pink palette
+  ---
+  duration_ms: 0.286569
+  type: 'test'
+  ...
+# Subtest: publishing has graceful network, authentication, permission, and upload failure handling
+ok 455 - publishing has graceful network, authentication, permission, and upload failure handling
+  ---
+  duration_ms: 0.295091
+  type: 'test'
+  ...
+# Subtest: telemetry redaction contract remains present
+ok 456 - telemetry redaction contract remains present
+  ---
+  duration_ms: 3.414255
+  type: 'test'
+  ...
+# Subtest: Exactly three original theme identities share product geometry
+ok 457 - Exactly three original theme identities share product geometry
+  ---
+  duration_ms: 2.299629
+  type: 'test'
+  ...
+# Subtest: No obsolete embedded theme systems remain in production pages
+ok 458 - No obsolete embedded theme systems remain in production pages
+  ---
+  duration_ms: 11.674987
+  type: 'test'
+  ...
+# Three-theme experience checks passed
+# Subtest: js/audit/tests/theme-experience-v3.test.mjs
+ok 91 - js/audit/tests/theme-experience-v3.test.mjs
+  ---
+  duration_ms: 36.058273
+  type: 'test'
+  ...
+# Subtest: Final theme authority is loaded after page-local visual layers
+ok 460 - Final theme authority is loaded after page-local visual layers
+  ---
+  duration_ms: 12.590205
+  type: 'test'
+  ...
+# Subtest: Legacy Beauty palette aliases are redirected to the canonical theme tokens
+ok 461 - Legacy Beauty palette aliases are redirected to the canonical theme tokens
+  ---
+  duration_ms: 1.097631
+  type: 'test'
+  ...
+# Subtest: Theme engine updates browser theme-color from canonical theme background
+ok 462 - Theme engine updates browser theme-color from canonical theme background
+  ---
+  duration_ms: 1.824257
+  type: 'test'
+  ...
+# Subtest: There is still exactly one canonical theme registry
+ok 463 - There is still exactly one canonical theme registry
+  ---
+  duration_ms: 0.870641
+  type: 'test'
+  ...
+# Subtest: nested Feed and Help menu cards use theme-owned surfaces instead of fixed dark/white fills
+ok 464 - nested Feed and Help menu cards use theme-owned surfaces instead of fixed dark/white fills
+  ---
+  duration_ms: 0.87653
+  type: 'test'
+  ...
+# Subtest: Every production HTML page loads all five shared theme layers and the central registry
+ok 465 - Every production HTML page loads all five shared theme layers and the central registry
+  ---
+  duration_ms: 12.171218
+  type: 'test'
+  ...
+# Subtest: Messaging pages retain the runtime compatibility layer
+ok 466 - Messaging pages retain the runtime compatibility layer
+  ---
+  duration_ms: 1.375582
+  type: 'test'
+  ...
+# Subtest: every production HTML page loads the shared theme registry and palette authority
+ok 467 - every production HTML page loads the shared theme registry and palette authority
+  ---
+  duration_ms: 5.213455
+  type: 'test'
+  ...
+# Subtest: every production HTML page loads the compatibility runtime token layer
+ok 468 - every production HTML page loads the compatibility runtime token layer
+  ---
+  duration_ms: 3.348897
+  type: 'test'
+  ...
+# Subtest: each theme defines a coherent glow token and shared geometry tokens
+ok 469 - each theme defines a coherent glow token and shared geometry tokens
+  ---
+  duration_ms: 0.37442
+  type: 'test'
+  ...
+# Subtest: theme runtime maps legacy component palettes to canonical --spike-* tokens
+ok 470 - theme runtime maps legacy component palettes to canonical --spike-* tokens
+  ---
+  duration_ms: 0.850802
+  type: 'test'
+  ...
+# Subtest: canonical three-theme authority is loaded last on every theme-enabled production page
+ok 471 - canonical three-theme authority is loaded last on every theme-enabled production page
+  ---
+  duration_ms: 4.52149
+  type: 'test'
+  ...
+# Subtest: canonical theme engine exposes three themes and emits the change contract
+ok 472 - canonical theme engine exposes three themes and emits the change contract
+  ---
+  duration_ms: 0.786426
+  type: 'test'
+  ...
+# Subtest: theme runtime defines every theme-experience variable it consumes
+ok 473 - theme runtime defines every theme-experience variable it consumes
+  ---
+  duration_ms: 0.22121
+  type: 'test'
+  ...
+# Subtest: Global theme persistence is shared by Feed and Settings
+ok 474 - Global theme persistence is shared by Feed and Settings
+  ---
+  duration_ms: 0.645285
+  type: 'test'
+  ...
+# Subtest: Feed has one authoritative theme-pill click runtime
+ok 475 - Feed has one authoritative theme-pill click runtime
+  ---
+  duration_ms: 0.383894
+  type: 'test'
+  ...
+# Subtest: Exactly three neutral theme slots are registered
+ok 476 - Exactly three neutral theme slots are registered
+  ---
+  duration_ms: 0.915809
+  type: 'test'
+  ...
+# Subtest: Palette authority defines exactly three IDs
+ok 477 - Palette authority defines exactly three IDs
+  ---
+  duration_ms: 0.337514
+  type: 'test'
+  ...
+# Subtest: Settings offers only three themes and uses new DB encoding
+ok 478 - Settings offers only three themes and uses new DB encoding
+  ---
+  duration_ms: 0.903471
+  type: 'test'
+  ...
+# Subtest: All HTML pages load the new palette authority
+ok 479 - All HTML pages load the new palette authority
+  ---
+  duration_ms: 16.053333
+  type: 'test'
+  ...
+# Subtest: Theme 2 final authority covers page shells, headers, sticky navigation and menu layers
+ok 480 - Theme 2 final authority covers page shells, headers, sticky navigation and menu layers
+  ---
+  duration_ms: 0.974767
+  type: 'test'
+  ...
+# Subtest: Theme 2 styles text fields, search/composer controls, native options and keyboard focus
+ok 481 - Theme 2 styles text fields, search/composer controls, native options and keyboard focus
+  ---
+  duration_ms: 0.36112
+  type: 'test'
+  ...
+# Subtest: Theme 2 coverage remains scoped and does not replace Theme 1 or Theme 3 palettes
+ok 482 - Theme 2 coverage remains scoped and does not replace Theme 1 or Theme 3 palettes
+  ---
+  duration_ms: 0.166368
+  type: 'test'
+  ...
+# Subtest: Theme 2 overrides remaining fixed-purple typing and fixed-dark premium toast surfaces
+ok 483 - Theme 2 overrides remaining fixed-purple typing and fixed-dark premium toast surfaces
+  ---
+  duration_ms: 0.155983
+  type: 'test'
+  ...
+# Subtest: UI contract: admin.html
+ok 484 - UI contract: admin.html
+  ---
+  duration_ms: 7.100597
+  type: 'test'
+  ...
+# Subtest: UI contract: feed.html
+ok 485 - UI contract: feed.html
+  ---
+  duration_ms: 1.175006
+  type: 'test'
+  ...
+# Subtest: UI contract: friends.html
+ok 486 - UI contract: friends.html
+  ---
+  duration_ms: 1.047937
+  type: 'test'
+  ...
+# Subtest: UI contract: guide.html
+ok 487 - UI contract: guide.html
+  ---
+  duration_ms: 1.226714
+  type: 'test'
+  ...
+# Subtest: UI contract: help.html
+ok 488 - UI contract: help.html
+  ---
+  duration_ms: 1.739711
+  type: 'test'
+  ...
+# Subtest: UI contract: index.html
+ok 489 - UI contract: index.html
+  ---
+  duration_ms: 1.427084
+  type: 'test'
+  ...
+# Subtest: UI contract: legal.html
+ok 490 - UI contract: legal.html
+  ---
+  duration_ms: 1.053976
+  type: 'test'
+  ...
+# Subtest: UI contract: live.html
+ok 491 - UI contract: live.html
+  ---
+  duration_ms: 0.847647
+  type: 'test'
+  ...
+# Subtest: UI contract: message.html
+ok 492 - UI contract: message.html
+  ---
+  duration_ms: 1.151401
+  type: 'test'
+  ...
+# Subtest: UI contract: messages.html
+ok 493 - UI contract: messages.html
+  ---
+  duration_ms: 1.031823
+  type: 'test'
+  ...
+# Subtest: UI contract: notifications.html
+ok 494 - UI contract: notifications.html
+  ---
+  duration_ms: 0.958913
+  type: 'test'
+  ...
+# Subtest: UI contract: policy.html
+ok 495 - UI contract: policy.html
+  ---
+  duration_ms: 0.539066
+  type: 'test'
+  ...
+# Subtest: UI contract: policy_appeals.html
+ok 496 - UI contract: policy_appeals.html
+  ---
+  duration_ms: 0.894688
+  type: 'test'
+  ...
+# Subtest: UI contract: profile.html
+ok 497 - UI contract: profile.html
+  ---
+  duration_ms: 0.887887
+  type: 'test'
+  ...
+# Subtest: UI contract: reset-password.html
+ok 498 - UI contract: reset-password.html
+  ---
+  duration_ms: 2.804313
+  type: 'test'
+  ...
+# Subtest: UI contract: room.html
+ok 499 - UI contract: room.html
+  ---
+  duration_ms: 2.791173
+  type: 'test'
+  ...
+# Subtest: UI contract: room_chat.html
+ok 500 - UI contract: room_chat.html
+  ---
+  duration_ms: 3.132974
+  type: 'test'
+  ...
+# Subtest: UI contract: rooms.html
+ok 501 - UI contract: rooms.html
+  ---
+  duration_ms: 0.760366
+  type: 'test'
+  ...
+# Subtest: UI contract: settings.html
+ok 502 - UI contract: settings.html
+  ---
+  duration_ms: 0.80255
+  type: 'test'
+  ...
+# Subtest: UI contract: share.html
+ok 503 - UI contract: share.html
+  ---
+  duration_ms: 1.015749
+  type: 'test'
+  ...
+# Subtest: UI contract: view_user.html
+ok 504 - UI contract: view_user.html
+  ---
+  duration_ms: 2.408581
+  type: 'test'
+  ...
+# Subtest: active Supabase migration version prefixes are unique
+ok 505 - active Supabase migration version prefixes are unique
+  ---
+  duration_ms: 0.994337
+  type: 'test'
+  ...
+# Subtest: archived duplicate migrations are byte-identical to their active later versions
+ok 506 - archived duplicate migrations are byte-identical to their active later versions
+  ---
+  duration_ms: 1.363619
+  type: 'test'
+  ...
+# Subtest: retained Live feature migrations remain active and uniquely versioned
+ok 507 - retained Live feature migrations remain active and uniquely versioned
+  ---
+  duration_ms: 0.358175
+  type: 'test'
+  ...
+# Subtest: SPIKE World reward hardening is server-authoritative and race-safe
+ok 508 - SPIKE World reward hardening is server-authoritative and race-safe
+  ---
+  duration_ms: 0.781598
+  type: 'test'
+  ...
+# Subtest: Community Mission capacity is serialized before counting members
+ok 509 - Community Mission capacity is serialized before counting members
+  ---
+  duration_ms: 0.38764
+  type: 'test'
+  ...
+# Subtest: Feed loads the split feature stylesheet after feed core
+ok 510 - Feed loads the split feature stylesheet after feed core
+  ---
+  duration_ms: 0.148322
+  type: 'test'
+  ...
+1..510
+# tests 510
+# suites 0
+# pass 509
+# fail 0
+# cancelled 0
+# skipped 1
+# todo 0
+# duration_ms 7134.819262

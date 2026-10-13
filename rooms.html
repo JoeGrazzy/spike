@@ -2,7 +2,7 @@
 
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link href="css/perf.css" rel="stylesheet"/>
@@ -129,7 +129,7 @@ video{contain:layout paint}
 .creatorQualification.show{display:block}.cqHead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cqTitle{font-size:15px;font-weight:900}.cqSub{font-size:11px;color:var(--muted);margin-top:3px}.cqProgress{height:7px;border-radius:999px;background:rgba(127,127,127,.18);overflow:hidden;margin:12px 0}.cqProgress span{display:block;height:100%;width:0;border-radius:inherit;background:currentColor}.cqGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.cqItem{padding:9px;border:1px solid var(--line);border-radius:13px;background:rgba(127,127,127,.06);font-size:11px}.cqItem b{display:block}.cqItem small{display:block;color:var(--muted);margin-top:3px}.cqDone{color:#16a34a}.cqLock{color:var(--muted)}.cqAction{margin-top:10px;width:100%}.cqModal .sheet{max-height:88vh;overflow:auto}.challengeQ{padding:12px;border:1px solid var(--line);border-radius:14px;margin-bottom:9px}.challengeQ b{display:block;margin-bottom:8px}.challengeOpt{display:block;padding:7px 0;font-size:12px}.challengeResult{padding:12px;border-radius:14px;background:rgba(127,127,127,.08);margin-bottom:10px;display:none}.challengeResult.show{display:block}
 @media(max-width:680px){.cqGrid{grid-template-columns:1fr}.cqHead{align-items:center}}
 </style>
-<script defer="" src="js/theme.js"></script>
+
 <link href="css/ui-fix.css" rel="stylesheet"/>
 
 
@@ -237,14 +237,14 @@ video{contain:layout paint}
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 <link rel="stylesheet" href="css/spike-identity.css"><script src="js/spike-identity.js"></script>
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-native-select.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
+
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
 </head>
 <body data-spike-page="rooms">
 <div class="app rooms-v2">
@@ -865,9 +865,11 @@ else setTimeout(install,1500);
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
   <script src="js/maintenance.js?v=20260914113000" defer></script>
 <script src="js/spike-native-v2.js"></script>
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<script src="js/spike-surface-controls.js"></script>
 </body></html>

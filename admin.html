@@ -12,7 +12,7 @@ document.documentElement.classList.add("spike-cv-ready");
 }
 }catch(_){}})();
 </script>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem('spike-feed-style')||'1',10);if(n<1||n>10)n=1;const light=n>=1&&n<=5;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=light?'light':'dark';document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.style.colorScheme=light?'light':'dark'}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=(n===1||n===3)?"dark":"light";document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":"light"}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
@@ -33,7 +33,7 @@ document.documentElement.classList.add("spike-cv-ready");
 @media(max-width:800px){.purchaseStats{grid-template-columns:repeat(2,1fr)}.purchaseGrid,.purchaseOverview{grid-template-columns:1fr}}
 @media(max-width:520px){.purchaseToolbar{align-items:stretch}.purchaseSearch{min-width:100%}.purchaseStats{gap:7px}.purchaseStat{padding:10px}.purchaseStat strong{font-size:17px}}
 @media(max-width:800px){.layout{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:6px}.side button{min-width:max-content}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.cards,.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.hero{padding:19px}.search{flex-direction:column}}
-/* ===== SPIKE PREMIUM THEME SYSTEM ===== */
+/* Shared SPIKE component styling; colors resolve through the active theme tokens. */
 :root{
 --sp-bg:#f6f7fb;
 --sp-surface:rgba(255,255,255,.88);
@@ -191,15 +191,14 @@ video{contain:layout paint}
   <link rel="stylesheet" href="css/spike-unified-v2.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-native-select.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
   <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
   
 <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
 
 <script src="js/spike-loader-core.js?v=1" defer></script>
-<link rel="stylesheet" href="css/spike-premium-theme-system.css">
-</head>
+
+<script src="js/theme.js" defer></script></head>
 <body data-spike-page="admin">
 
 <div class="app">
@@ -925,7 +924,7 @@ else setTimeout(install,1500);
 })();
 </script>
 
-  <script src="js/theme.js"></script>
+  
   <script src="js/spike-surface-controls.js"></script>
 <script>
 // SPIKE Post Operations Center
@@ -1037,11 +1036,12 @@ if(document.getElementById('policyTermsList')){document.getElementById('refreshP
 </script>
 <link rel="stylesheet" href="css/theme.css">
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
-<script defer src="js/spike-native-select.js"></script>
+
   <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=1">
 <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
 <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
 <link rel="stylesheet" href="css/admin-workspace-v1.css">
 <script src="js/presence.js?v=sitewide-presence-v5"></script>
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
 </body></html>
