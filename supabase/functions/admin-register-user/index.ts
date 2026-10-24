@@ -6,20 +6,16 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
-
 function json(body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
-
 export default {
   fetch: withSupabase({ auth: "user" }, async (req, ctx) => {
     if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
     if (req.method !== "POST") return json({ error: "POST required" }, 405);
     const callerId = ctx.userClaims?.sub;
     if (!callerId) return json({ error: "Authentication required" }, 401);
+    // Registration is deliberately restricted to the owner/super-admin.
     const { data: isSuper, error: roleError } = await ctx.supabase.rpc("admin_is_super_admin_self");
     if (roleError || isSuper !== true) return json({ error: "Super admin access required" }, 403);
     let body: Record<string, unknown>;
@@ -33,18 +29,11 @@ export default {
     if (password.length < 8) return json({ error: "Password must be at least 8 characters" }, 400);
     if (displayName.length > 100) return json({ error: "Display name is too long" }, 400);
     if (username && !/^[a-zA-Z0-9._-]{3,30}$/.test(username)) return json({ error: "Username must be 3–30 characters using letters, numbers, dot, underscore or hyphen" }, 400);
-    const { data, error } = await ctx.supabaseAdmin.auth.admin.createUser({
-      email, password, email_confirm: autoConfirm,
-      user_metadata: { ...(displayName ? { display_name: displayName, full_name: displayName } : {}), ...(username ? { username } : {}) },
-    });
+    const { data, error } = await ctx.supabaseAdmin.auth.admin.createUser({ email, password, email_confirm: autoConfirm, user_metadata: { ...(displayName ? { display_name: displayName, full_name: displayName } : {}), ...(username ? { username } : {}) } });
     if (error) return json({ error: error.message }, 400);
     if (!data.user) return json({ error: "User creation returned no account" }, 500);
+    // Auth triggers create the SPIKE profile, wallet and SP_ID. Return a safe summary only.
     const { data: profile } = await ctx.supabaseAdmin.from("profiles").select("id,email,display_name,username,sp_id,activated,role").eq("id", data.user.id).maybeSingle();
-    return json({ ok: true, user: {
-      id: data.user.id, email: data.user.email,
-      display_name: profile?.display_name ?? displayName, username: profile?.username ?? username,
-      sp_id: profile?.sp_id ?? null, activated: profile?.activated ?? false,
-      role: profile?.role ?? "user", email_confirmed: !!data.user.email_confirmed_at,
-    }});
+    return json({ ok: true, user: { id: data.user.id, email: data.user.email, display_name: profile?.display_name ?? displayName, username: profile?.username ?? username, sp_id: profile?.sp_id ?? null, activated: profile?.activated ?? false, role: profile?.role ?? "user", email_confirmed: !!data.user.email_confirmed_at } });
   }),
 };

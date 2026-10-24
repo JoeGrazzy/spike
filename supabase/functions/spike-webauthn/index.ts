@@ -11,12 +11,8 @@ const cors = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
-
-function envList(name: string) {
-  return (Deno.env.get(name) || '').split(',').map((v) => v.trim()).filter(Boolean);
-}
+const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
+function envList(name: string) { return (Deno.env.get(name) || '').split(',').map((v) => v.trim()).filter(Boolean); }
 function requireConfig() {
   const origins = envList('SPIKE_WEBAUTHN_ORIGINS');
   const rpID = Deno.env.get('SPIKE_WEBAUTHN_RP_ID')?.trim();
@@ -64,7 +60,6 @@ async function takeChallenge(admin: ReturnType<typeof adminClient>, uid: string,
   await admin.from('spike_safety_webauthn_challenges').delete().eq('user_id', uid).eq('purpose', purpose);
   return data.challenge as string;
 }
-
 export default { async fetch(req: Request) {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
@@ -75,20 +70,13 @@ export default { async fetch(req: Request) {
     const uid = await userId(req);
     const admin = adminClient();
     const { action, response } = await req.json();
-
     if (action === 'registration-options') {
       await rateLimit(admin, uid, 'registration');
       const { data: existing } = await admin.from('spike_safety_passkeys').select('credential_id,transports').eq('user_id', uid);
-      const options = await generateRegistrationOptions({
-        rpName, rpID, userName: uid, userDisplayName: uid, attestationType: 'none',
-        excludeCredentials: (existing || []).map((x) => ({ id: x.credential_id, transports: x.transports || undefined })),
-        authenticatorSelection: { residentKey: 'preferred', userVerification: 'required', authenticatorAttachment: 'platform' },
-        supportedAlgorithmIDs: [-7, -257],
-      });
+      const options = await generateRegistrationOptions({ rpName, rpID, userName: uid, userDisplayName: uid, attestationType: 'none', excludeCredentials: (existing || []).map((x) => ({ id: x.credential_id, transports: x.transports || undefined })), authenticatorSelection: { residentKey: 'preferred', userVerification: 'required', authenticatorAttachment: 'platform' }, supportedAlgorithmIDs: [-7, -257] });
       await saveChallenge(admin, uid, options.challenge, 'registration');
       return json(options);
     }
-
     if (action === 'registration-verify') {
       if (!response?.id || !response?.response) throw new Error('Invalid WebAuthn registration response.');
       const challenge = await takeChallenge(admin, uid, 'registration');
@@ -102,7 +90,6 @@ export default { async fetch(req: Request) {
       if (error) throw error;
       return json({ ok: true, credentialId });
     }
-
     if (action === 'authentication-options') {
       await rateLimit(admin, uid, 'authentication');
       const { data: creds } = await admin.from('spike_safety_passkeys').select('credential_id,transports').eq('user_id', uid);
@@ -111,7 +98,6 @@ export default { async fetch(req: Request) {
       await saveChallenge(admin, uid, options.challenge, 'authentication');
       return json(options);
     }
-
     if (action === 'authentication-verify') {
       if (!response?.id || !response?.response) throw new Error('Invalid WebAuthn authentication response.');
       const challenge = await takeChallenge(admin, uid, 'authentication');

@@ -13,7 +13,7 @@ test('every production HTML page loads the compatibility runtime token layer',()
 });
 test('each theme defines a coherent glow token and shared geometry tokens',()=>{
   const css=fs.readFileSync(path.join(root,'css/spike-three-theme-authority.css'),'utf8');
-  for(const id of [1,2,3]){assert.ok(css.includes(`html[data-spike-style="${id}"]{`),`theme ${id} palette exists`);}
-  for(const glow of ["rgba(255,128,95,.16)","rgba(8,127,112,.12)","rgba(255,36,79,.24)"]){assert.ok(css.includes(`--spike-glow:${glow}`),`missing theme glow ${glow}`);}
+  for(const id of [1,2,3,4,5]){assert.ok(css.includes(`html[data-spike-style="${id}"]{`),`theme ${id} palette exists`);}
+  for(const glow of ["rgba(167,139,250,.13)","rgba(36,89,211,.1)","rgba(53,201,139,.12)","rgba(185,95,62,.1)","rgba(232,121,249,.14)"]){assert.ok(css.includes(`--spike-glow:${glow}`),`missing theme glow ${glow}`);}
   assert.match(css,/--spike-radius:18px/);assert.match(css,/--spike-control-radius:12px/);assert.match(css,/--spike-blur:0px/);
 });

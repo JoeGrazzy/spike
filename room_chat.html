@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en"><head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#070b14"><meta name="description" content="SPIKE room chat and live community conversation."><meta name="referrer" content="strict-origin-when-cross-origin"><title>SPIKE Room Chat</title><meta name="spike-fontawesome-version" content="7.2.0"><link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link id="spike-fontawesome-primary" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" crossorigin="anonymous">
 <script id="spike-fontawesome-bootstrap">
@@ -694,5 +694,6 @@ boot();
 </style>
 <script src="js/presence.js?v=sitewide-presence-v7"></script>
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
-<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=4">
+<link href="css/spike-onboarding-help-placement-v2.css" rel="stylesheet"><script src="js/spike-onboarding-v1.js?v=2" defer></script>
 </body></html>

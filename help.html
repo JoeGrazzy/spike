@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{let n=parseInt(localStorage.getItem("spike-theme-choice-v3")||"1",10);if(n<1||n>3)n=1;document.documentElement.dataset.spikeStyle=String(n);let m="light";try{const p=localStorage.getItem("spike-theme-2-mode");m=p==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(p==="dark"?"dark":"light")}catch(_){}document.documentElement.dataset.theme=(n===1||n===3)?"dark":m;document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="3";document.documentElement.style.colorScheme=(n===1||n===3)?"dark":m}catch(_){}})();</script>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
@@ -2490,7 +2490,8 @@ video{contain:layout paint}
 <script src="js/supabase-singleton.js"></script>
 <script src="js/presence.js?v=sitewide-presence-v7"></script>
 <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
-<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=3">
+<link rel="stylesheet" href="css/spike-three-theme-authority.css?v=4">
 <script src="js/spike-surface-controls.js"></script>
+<link href="css/spike-onboarding-help-placement-v2.css" rel="stylesheet"><script src="js/spike-onboarding-v1.js?v=2" defer></script>
 </body>
 </html>

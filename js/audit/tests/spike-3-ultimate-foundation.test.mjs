@@ -31,15 +31,7 @@ test('Direct-message drafts survive reload and offline state is communicated wit
   assert.doesNotMatch(dm, /send.*automatically.*online/i);
 });
 
-test('Modern Mineral supports an OS-matched theme mode across bootstraps and live updates', async () => {
-  assert.match(theme, /mode==='system'/);
-  assert.match(theme, /prefers-color-scheme: dark/);
-  assert.match(settings, /<option value="system">Use device setting<\/option>/);
-  for (const page of (await readdir('.')).filter(x => x.endsWith('.html'))) {
-    const source = await readFile(page, 'utf8');
-    if (source.includes('spike-theme-2-mode')) assert.match(source, /prefers-color-scheme: dark/, `${page} should avoid a theme flash`);
-  }
-});
+test('Five-theme selection uses a versioned cross-page bootstrap', async () => { assert.match(theme,/const VERSION='4'/); assert.match(theme,/localStorage.setItem\(VERSION_KEY,VERSION\)/); assert.match(settings,/Midnight Luxe/); assert.match(settings,/Cosmic Pulse/); for(const page of (await readdir('.')).filter(x=>x.endsWith('.html'))){const source=await readFile(page,'utf8');if(source.includes('id=\"spike-theme-bootstrap\"'))assert.match(source,/spike-theme-version/ ,page);} });
 
 test('Trust Center and community foundations already exist and are not duplicated', async () => {
   const feed = await readFile('feed.html', 'utf8');

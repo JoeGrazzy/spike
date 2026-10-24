@@ -18,9 +18,9 @@ test('canonical three-theme authority is loaded last on every theme-enabled prod
   for(const p of themed){const s=fs.readFileSync(path.join(root,p),'utf8');assert.match(s,/css\/spike-three-theme-authority\.css/);const palette=s.indexOf('css/spike-three-theme-authority.css');assert.ok(palette>s.indexOf('css/theme.css'),`${p}: palette authority must follow base theme CSS`);}
 });
 
-test('canonical theme engine exposes three themes and emits the change contract',()=>{
+test('canonical theme engine exposes five themes and emits the change contract',()=>{
   assert.match(themeJs,/const THEMES=Object\.freeze\(\[/);
-  assert.deepEqual([...new Set([...fs.readFileSync(path.join(root,'css/spike-three-theme-authority.css'),'utf8').matchAll(/data-spike-style="([1-3])"/g)].map(m=>+m[1]))].sort(),[1,2,3]);
+  assert.deepEqual([...new Set([...fs.readFileSync(path.join(root,'css/spike-three-theme-authority.css'),'utf8').matchAll(/data-spike-style="([1-5])"/g)].map(m=>+m[1]))].sort(),[1,2,3,4,5]);
   assert.match(themeJs,/spike:theme-change/);
 });
 
