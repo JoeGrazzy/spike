@@ -5,6 +5,7 @@
   const db = window.__SPIKE_SUPABASE__ || window.supabase?.createClient?.(URL, KEY);
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeMediaUrl = value => { try { const url = new URL(String(value || ''), location.href); return ['https:','http:'].includes(url.protocol) ? url.href : ''; } catch (_) { return ''; } };
   const toast = message => {
     const el = $('roomsToast'); if (!el) return;
     el.textContent = message; el.dataset.show = 'true';
@@ -54,7 +55,8 @@
     catch (error) { grid.innerHTML = `<div class="rv-empty">${esc(error.message)}</div>`; return; }
 
     async function load() {
-      grid.innerHTML = '<div class="rv-loading">Finding your communities…</div>';
+      grid.setAttribute('aria-busy', 'true');
+      grid.innerHTML = '<div class="rv-loading"><span class="rv-loading-orb">✦</span><strong>Finding your communities…</strong><span>Good things take a moment.</span></div>';
       try {
         const [rooms, membershipResult] = await Promise.all([
           loadRooms(query, category, user),
@@ -63,13 +65,17 @@
         if (membershipResult.error) throw membershipResult.error;
         const joined = new Set((membershipResult.data || []).map(row => row.room_id));
         if (!rooms.length) {
+          grid.setAttribute('aria-busy', 'false');
           grid.innerHTML = '<div class="rv-empty"><div style="font-size:34px">✦</div><strong>No Rooms found yet</strong><br>Try another search or create the first community.</div>';
           return;
         }
         grid.innerHTML = rooms.map(room => {
           const isMember = joined.has(room.id);
-          return `<article class="rv-card"><div class="rv-card-head"><div class="rv-room-icon">${esc(room.emoji || '🌐')}</div><div><h3>${esc(room.name)}</h3><div class="rv-meta"><span>${esc(room.category || 'General')}</span><span>·</span><span>${room.featured ? 'Featured community' : 'SPIKE community'}</span></div></div></div><p>${esc(room.description || 'A new community on SPIKE.')}</p><div class="rv-card-actions">${isMember ? `<a class="rv-primary" href="room.html?id=${encodeURIComponent(room.id)}">Open Room</a>` : `<button class="rv-primary" type="button" data-join="${esc(room.id)}">Join Room</button>`}<button class="rv-secondary" type="button" data-preview="${esc(room.id)}">Details</button></div></article>`;
+          const cover = safeMediaUrl(room.cover_url);
+          const tags = (Array.isArray(room.tags) ? room.tags : []).slice(0, 3).map(tag => `<span>${esc(tag)}</span>`).join('');
+          return `<article class="rv-card"><div class="rv-card-cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy" decoding="async">` : ''}${room.featured ? '<span class="rv-featured-tag">✦ Featured</span>' : ''}</div><div class="rv-card-content"><div class="rv-card-head"><div class="rv-room-icon">${esc(room.emoji || '🌐')}</div><div><h3>${esc(room.name)}</h3><div class="rv-meta"><span>${esc(room.category || 'General')}</span><span>·</span><span>${room.featured ? 'Featured community' : 'SPIKE community'}</span></div></div></div><p>${esc(room.description || 'A new community on SPIKE.')}</p>${tags ? `<div class="rv-card-tags">${tags}</div>` : ''}<div class="rv-card-actions">${isMember ? `<a class="rv-primary" href="room.html?id=${encodeURIComponent(room.id)}">Enter Room</a>` : `<button class="rv-primary" type="button" data-join="${esc(room.id)}">Join Room</button>`}<button class="rv-secondary" type="button" data-preview="${esc(room.id)}">Details</button></div></div></article>`;
         }).join('');
+        grid.setAttribute('aria-busy', 'false');
 
         grid.querySelectorAll('[data-join]').forEach(button => button.addEventListener('click', async () => {
           setBusy(button, true, 'Joining…');
@@ -85,6 +91,7 @@
           if (room) toast(`${room.name} · ${room.category || 'General'} community`);
         }));
       } catch (error) {
+        grid.setAttribute('aria-busy', 'false');
         grid.innerHTML = `<div class="rv-empty">${esc(error.message || 'Could not load Rooms. Please try again.')}</div>`;
       }
     }
@@ -110,6 +117,7 @@
     const close = () => { backdrop.dataset.open = 'false'; backdrop.setAttribute('aria-hidden', 'true'); };
     $('openCreate')?.addEventListener('click', () => { backdrop.dataset.open = 'true'; backdrop.setAttribute('aria-hidden', 'false'); $('newRoomName')?.focus(); });
     $('closeCreate')?.addEventListener('click', close);
+    $('closeCreateSecondary')?.addEventListener('click', close);
     backdrop?.addEventListener('click', event => { if (event.target === backdrop) close(); });
     $('createForm')?.addEventListener('submit', async event => {
       event.preventDefault();

@@ -1,38 +1,91 @@
 <!doctype html>
 <html lang="en">
 <head>
-<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080b12"><meta name="description" content="Join the conversation in a SPIKE Room."><title>SPIKE Room</title>
-<link rel="icon" type="image/png" href="assets/icon/icon.png">
-<link rel="stylesheet" href="css/perf.css">
-<link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-theme-experience-v3.css">
-<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
-<link rel="stylesheet" href="css/spike-theme-runtime-v3.css">
-<link rel="stylesheet" href="css/spike-five-theme-authority.css">
-<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-<link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
-<link rel="stylesheet" href="css/spike-premium-loader.css">
-<link rel="stylesheet" href="css/spike-rooms-v2.css">
-<link rel="stylesheet" href="css/spike-rooms-responsive-v2.css?v=2">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-singleton.js"></script>
-<script src="js/spike-loader-core.js"></script>
-<script src="js/spike-dialog.js"></script>
-<script src="js/spike-dm-realtime-calls-v2.js"></script>
-<script src="js/presence.js?v=presence-v2-global-20261112"></script>
-<script src="js/spike-navigation.js"></script>
-<script src="js/theme.js"></script>
+  <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090d18">
+  <meta name="description" content="Join the conversation and connect with your SPIKE community.">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Room — SPIKE</title>
+  <link rel="icon" type="image/png" href="assets/icon/icon.png">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/spike-theme-experience-v3.css?v=theme-v3">
+  <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
+  <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
+  <link rel="stylesheet" href="css/spike-five-theme-authority.css?v=4">
+  <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=2">
+  <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+  <link rel="stylesheet" href="css/spike-touch-hover-guard-v1.css?v=1">
+  <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+  <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+  <link rel="stylesheet" href="css/spike-rooms-v2.css?v=rooms-build-1">
+  <link rel="stylesheet" href="css/spike-premium-loader.css">
+  <script src="js/spike-loader-core.js?v=1" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-singleton.js"></script>
+  <script src="js/spike-dialog.js"></script>
+  <script src="js/theme.js" defer></script>
+  <script src="js/spike-navigation.js" defer></script>
+  <script src="js/spike-room-v2.js" defer></script>
 </head>
 <body class="spike-rooms-v2" data-spike-page="room">
-<main class="rv-shell"><header class="rv-topbar"><a class="rv-brand" href="feed.html"><img src="assets/icon/icon.png" alt=""><span>SPIKE</span></a><nav class="rv-nav" aria-label="Main navigation"><a href="rooms.html">All Rooms</a><a href="feed.html">Feed</a><a href="messages.html">Messages</a></nav></header>
-<a class="rv-back" href="rooms.html">← Back to Rooms</a>
-<section class="rv-hero" id="roomHero"><div><div class="rv-eyebrow">SPIKE community</div><h1 id="roomTitle">Opening Room…</h1><p id="roomDescription">Connecting you to the conversation.</p></div><button class="rv-secondary" id="roomAction" type="button">Room options</button></section>
-<section class="rv-chat-layout" id="chatLayout"><div class="rv-chat-panel"><header class="rv-chat-head"><div><h1 id="channelTitle"># general</h1><p id="roomMemberCount">Loading members…</p></div><span class="rv-eyebrow" id="connectionState">CONNECTING</span></header><div class="rv-messages" id="messageList" aria-live="polite"><div class="rv-auth-state">Loading conversation…</div></div><div class="rv-reply-preview" id="replyPreview" hidden><span id="replyPreviewText"></span><button type="button" id="cancelReply" aria-label="Cancel reply">×</button></div><form class="rv-composer" id="messageForm"><input id="roomMediaInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,audio/webm,audio/ogg,audio/mpeg,audio/mp4" hidden><button class="rv-secondary rv-attach-button" id="attachMedia" type="button" aria-label="Attach photo, video or audio">＋</button><button class="rv-secondary rv-attach-button" id="recordVoice" type="button" aria-label="Record voice message">🎙</button><textarea id="messageInput" rows="1" maxlength="500" placeholder="Write a message…" aria-label="Message" required></textarea><button class="rv-primary" id="sendMessage" type="submit">Send</button></form></div>
-<aside class="rv-side-panel"><h3>People here</h3><div class="rv-member-list" id="memberList"><p>Loading community…</p></div><button class="rv-secondary rv-load-members" id="loadMoreMembers" type="button" hidden>Load more members</button><hr style="border:0;border-top:1px solid var(--rv-line);margin:16px 0"><p id="roomRules"></p><section id="roomStaffTools" class="rv-staff-tools" hidden><h3>Room controls</h3><form id="announcementForm"><label for="announcementBody">Post an announcement</label><textarea id="announcementBody" maxlength="2000" placeholder="Share an update with members…" required></textarea><button class="rv-secondary" type="submit">Publish announcement</button></form><form id="pollForm"><label for="pollQuestion">Create a poll</label><input id="pollQuestion" maxlength="240" placeholder="Ask your community…" required><textarea id="pollOptions" placeholder="Option 1, Option 2, Option 3" required></textarea><button class="rv-secondary" type="submit">Publish poll</button></form><label class="rv-control-label" for="slowModeSelect">Slow mode</label><select id="slowModeSelect"><option value="0">Off</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="30">30 seconds</option><option value="60">1 minute</option><option value="300">5 minutes</option></select><button class="rv-secondary" id="saveSlowMode" type="button">Save slow mode</button><button class="rv-secondary" id="toggleChatLock" type="button">Lock chat</button><form id="eventForm"><label for="eventTitle">Create a free community event</label><input id="eventTitle" maxlength="120" placeholder="Event title" required><textarea id="eventDescription" maxlength="1000" placeholder="What will happen?"></textarea><label for="eventStartsAt">Starts</label><input id="eventStartsAt" type="datetime-local" required><label for="eventEndsAt">Ends (optional)</label><input id="eventEndsAt" type="datetime-local"><button class="rv-secondary" type="submit">Publish free event</button></form><div class="rv-member-management"><label for="memberSearch">Manage members</label><input id="memberSearch" type="search" placeholder="Search members…"><div id="staffMemberList"><p>Loading members…</p></div></div></section><button class="rv-danger" id="leaveRoom" type="button" style="margin-top:16px;width:100%">Leave Room</button></aside></section>
-<section class="rv-feature-panel" id="roomAnnouncements" hidden><h2>Announcements</h2><div id="announcementList"></div></section><section class="rv-feature-panel" id="roomPolls" hidden><h2>Community polls</h2><div id="pollList"></div></section><section class="rv-feature-panel" id="roomEvents" hidden><h2>Upcoming community events</h2><div id="eventList"></div></section>
-<section class="rv-modal-backdrop" id="leaveBackdrop" data-open="false" aria-hidden="true"><section class="rv-modal" role="dialog" aria-modal="true" aria-labelledby="leaveTitle"><h2 id="leaveTitle">Leave this Room?</h2><p>You can return and join again whenever you want.</p><div class="rv-modal-actions"><button class="rv-secondary" id="cancelLeave" type="button">Stay here</button><button class="rv-danger" id="confirmLeave" type="button">Leave Room</button></div></section></section>
-<section class="rv-modal-backdrop" id="joinBackdrop" data-open="false" aria-hidden="true"><section class="rv-modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle"><h2 id="joinTitle">Join this Room?</h2><p>Join this community for free and take part in the conversation.</p><div class="rv-modal-actions"><a class="rv-secondary" href="rooms.html">Not now</a><button class="rv-primary" id="joinRoom" type="button">Join Room</button></div></section></section>
-<div class="rv-toast" id="roomToast" role="status" aria-live="polite"></div></main>
-<script src="js/spike-room-v2.js" defer></script>
-</body></html>
+  <a class="rv-skip-link" href="#messageInput">Skip to conversation</a>
+  <div class="rv-shell rv-room-shell">
+    <header class="rv-topbar" aria-label="SPIKE Room navigation">
+      <a class="rv-brand" href="feed.html" aria-label="SPIKE home"><img src="assets/icon/icon.png" alt=""><span>SPIKE</span><small>ROOMS</small></a>
+      <nav class="rv-nav" aria-label="Room navigation"><a href="rooms.html">Discover Rooms</a><a href="messages.html">Messages</a><a href="profile.html">Profile</a></nav>
+    </header>
+    <main>
+      <a class="rv-back" href="rooms.html"><span aria-hidden="true">←</span> All Rooms</a>
+      <section class="rv-room-banner" aria-label="Room details">
+        <img class="rv-room-cover-image" id="roomCoverImage" alt="" aria-hidden="true" hidden><div class="rv-room-banner-glow" aria-hidden="true"></div>
+        <div class="rv-room-banner-content"><div class="rv-room-avatar-large" aria-hidden="true"><img id="roomAvatarImage" alt="" hidden><span>✦</span></div><div class="rv-room-heading"><span class="rv-eyebrow">SPIKE COMMUNITY</span><h1 id="roomTitle">Loading Room…</h1><p id="roomDescription">Getting this community ready.</p><div class="rv-room-meta"><span class="rv-room-live-dot"></span><span id="roomMemberCount">Members loading…</span><span class="rv-meta-separator">·</span><span id="connectionState" role="status" aria-live="polite">CONNECTING</span></div></div></div>
+        <div class="rv-room-banner-actions"><button class="rv-secondary" id="roomAction" type="button">Share Room</button><button class="rv-danger" id="leaveRoom" type="button" hidden>Leave Room</button></div>
+      </section>
+
+      <div class="rv-chat-layout" id="chatLayout">
+        <section class="rv-chat-panel" aria-label="Room conversation">
+          <header class="rv-chat-head"><div><span class="rv-eyebrow">THE CONVERSATION</span><h2 id="channelTitle"># general</h2><p>Keep it kind. Keep it interesting.</p></div><span class="rv-chat-head-mark" aria-hidden="true">✧</span></header>
+          <div class="rv-chat-context"><span class="rv-context-icon">✦</span><span>You're in a community. Make someone feel welcome today.</span></div>
+          <div class="rv-messages" id="messageList" aria-live="polite" aria-relevant="additions text"><div class="rv-auth-state">Loading the conversation…</div></div>
+          <div class="rv-reply-preview" id="replyPreview" hidden><span id="replyPreviewText"></span><button id="cancelReply" type="button" aria-label="Cancel reply">×</button></div>
+          <form class="rv-composer" id="messageForm">
+            <input id="roomMediaInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,audio/webm,audio/ogg,audio/mpeg,audio/mp4" hidden>
+            <button class="rv-composer-tool" id="attachMedia" type="button" aria-label="Attach image, video or audio">＋</button>
+            <textarea id="messageInput" rows="1" maxlength="5000" placeholder="Share something with the Room…" aria-label="Write a message" required></textarea>
+            <button class="rv-composer-tool rv-voice-button" id="recordVoice" type="button" aria-label="Record voice message">🎙</button>
+            <button class="rv-primary rv-send-button" id="sendMessage" type="submit">Send <span aria-hidden="true">↗</span></button>
+          </form>
+          <p class="rv-composer-hint">Enter to send <span>·</span> Shift + Enter for a new line</p>
+        </section>
+
+        <aside class="rv-room-sidebar" aria-label="Room community information">
+          <section class="rv-side-panel rv-about-panel"><div class="rv-panel-heading"><h3>About this Room</h3><span>✧</span></div><p id="roomRules">Be respectful, keep conversations welcoming, and follow SPIKE community guidelines.</p><button class="rv-side-link" id="roomRulesToggle" type="button" onclick="this.previousElementSibling.classList.toggle('rv-rules-expanded');this.textContent=this.textContent==='Read guidelines'?'Show less':'Read guidelines'">Read guidelines</button></section>
+          <section class="rv-side-panel"><div class="rv-panel-heading"><h3>Community members</h3><span class="rv-panel-count">LIVE</span></div><div class="rv-member-list" id="memberList"><p>Loading community…</p></div><button class="rv-secondary rv-load-members" id="loadMoreMembers" type="button" hidden>Show more members</button></section>
+          <section class="rv-side-panel rv-feature-panel" id="roomAnnouncements"><div class="rv-panel-heading"><h3>Announcements</h3><span>📣</span></div><div id="announcementList"><p>No announcements yet.</p></div></section>
+          <section class="rv-side-panel rv-feature-panel" id="roomPolls"><div class="rv-panel-heading"><h3>Community polls</h3><span>📊</span></div><div id="pollList"><p>No active polls.</p></div></section>
+          <section class="rv-side-panel rv-feature-panel" id="roomEvents" hidden><div class="rv-panel-heading"><h3>Upcoming events</h3><span>📅</span></div><div id="eventList"></div></section>
+          <section class="rv-side-panel rv-staff-tools" id="roomStaffTools" hidden>
+            <div class="rv-panel-heading"><h3>Room management</h3><span>⚙</span></div>
+            <form id="announcementForm"><label for="announcementBody">Publish announcement</label><textarea id="announcementBody" maxlength="2000" placeholder="Share an update with members…" required></textarea><button class="rv-primary" type="submit">Publish update</button></form>
+            <form id="pollForm"><label for="pollQuestion">Create a poll</label><input id="pollQuestion" maxlength="300" placeholder="Ask your community…" required><input id="pollOptions" maxlength="600" placeholder="Option one, Option two, Option three" required><small>Separate 2–8 options with commas.</small><button class="rv-secondary" type="submit">Create poll</button></form>
+            <form id="eventForm"><label for="eventTitle">Create a free event</label><input id="eventTitle" maxlength="120" placeholder="Event name" required><textarea id="eventDescription" maxlength="1000" placeholder="What is happening?"></textarea><label for="eventStartsAt">Starts</label><input id="eventStartsAt" type="datetime-local" required><label for="eventEndsAt">Ends <span>Optional</span></label><input id="eventEndsAt" type="datetime-local"><button class="rv-secondary" type="submit">Publish event</button></form>
+            <div class="rv-staff-control"><label for="slowModeSelect">Chat slow mode</label><select id="slowModeSelect"><option value="0">Off</option><option value="5">5 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="30">30 seconds</option><option value="60">1 minute</option></select><button class="rv-secondary" id="saveSlowMode" type="button">Save slow mode</button><button class="rv-secondary" id="toggleChatLock" type="button">Lock chat</button></div>
+            <div class="rv-member-management"><label for="memberSearch">Manage members</label><input id="memberSearch" type="search" placeholder="Search members…"><div id="staffMemberList"><p>Member controls loading…</p></div></div>
+          </section>
+        </aside>
+      </div>
+    </main>
+    <footer class="rv-footer"><a class="rv-brand" href="feed.html"><img src="assets/icon/icon.png" alt=""><span>SPIKE</span></a><span>Make this a good place to be.</span><a href="policy.html">Community &amp; safety</a></footer>
+  </div>
+
+  <div class="rv-modal-backdrop" id="joinBackdrop" data-open="false" aria-hidden="true"><section class="rv-modal rv-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="joinTitle"><div class="rv-modal-icon">✦</div><span class="rv-eyebrow">YOU'RE INVITED</span><h2 id="joinTitle">Join this Room?</h2><p>Become part of the community to read and share messages, meet members and take part in the conversation.</p><div class="rv-modal-actions"><a class="rv-secondary" href="rooms.html">Maybe later</a><button class="rv-primary" id="joinRoom" type="button">Join Room <span aria-hidden="true">→</span></button></div></section></div>
+  <div class="rv-modal-backdrop" id="leaveBackdrop" data-open="false" aria-hidden="true"><section class="rv-modal rv-confirm-modal" role="dialog" aria-modal="true" aria-labelledby="leaveTitle"><div class="rv-modal-icon rv-modal-icon-warm">↗</div><span class="rv-eyebrow">ROOM MEMBERSHIP</span><h2 id="leaveTitle">Leave this Room?</h2><p>You can rejoin later, but you will no longer receive this community's member updates.</p><div class="rv-modal-actions"><button class="rv-secondary" id="cancelLeave" type="button">Stay here</button><button class="rv-danger" id="confirmLeave" type="button">Leave Room</button></div></section></div>
+  <div class="rv-toast" id="roomToast" role="status" aria-live="polite"></div>
+  <script src="js/presence.js?v=presence-v2-global-20261112"></script>
+  <script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+</body>
+</html>

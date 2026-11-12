@@ -5,6 +5,7 @@
   const db = window.__SPIKE_SUPABASE__ || window.supabase?.createClient?.(URL, KEY);
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeMediaUrl = value => { try { const url = new URL(String(value || ''), location.href); return ['https:','http:'].includes(url.protocol) ? url.href : ''; } catch (_) { return ''; } };
   const toast = message => { const el = $('roomToast'); if (!el) return; el.textContent = message; el.dataset.show = 'true'; clearTimeout(toast.timer); toast.timer = setTimeout(() => { el.dataset.show = 'false'; }, 3200); };
   const params = new URLSearchParams(location.search);
   const roomId = params.get('id');
@@ -48,7 +49,7 @@
     }
     const auth = await db.auth.getUser(); user = auth.data?.user;
     if (!user) { location.href = 'index.html'; return; }
-    const roomResult = await db.from('rooms').select('id,name,description,emoji,category,rules,owner_id,active').eq('id', roomId).maybeSingle();
+    const roomResult = await db.from('rooms').select('id,name,description,emoji,category,rules,owner_id,active,avatar_url,cover_url').eq('id', roomId).maybeSingle();
     if (roomResult.error || !roomResult.data || !roomResult.data.active) {
       $('roomTitle').textContent = 'Room unavailable'; $('roomDescription').textContent = 'This community may have been closed or removed.'; $('chatLayout').classList.add('rv-hidden'); return;
     }
@@ -56,6 +57,10 @@
     $('roomTitle').textContent = `${room.emoji || '🌐'} ${room.name}`;
     $('roomDescription').textContent = room.description || 'A SPIKE community.';
     $('roomRules').textContent = room.rules || 'Be respectful, keep conversations welcoming, and follow SPIKE community guidelines.';
+    const coverUrl = safeMediaUrl(room.cover_url);
+    if (coverUrl && $('roomCoverImage')) { $('roomCoverImage').src = coverUrl; $('roomCoverImage').hidden = false; }
+    const avatarUrl = safeMediaUrl(room.avatar_url);
+    if (avatarUrl && $('roomAvatarImage')) { $('roomAvatarImage').src = avatarUrl; $('roomAvatarImage').hidden = false; }
 
     const membership = await db.from('room_members').select('role,active').eq('room_id', roomId).eq('user_id', user.id).maybeSingle();
     if (membership.error) throw membership.error;
@@ -75,7 +80,6 @@
     if (channelResult.error || !channelResult.data) { toast('The conversation channel is not available yet.'); return; }
     channel = channelResult.data; $('channelTitle').textContent = `# ${channel.name}`;
     isStaff = ['owner','admin','moderator'].includes(membership.data.role) || room.owner_id === user.id;
-    // Room group calling is permanently retired; keep Rooms text/media features only.
     $('roomStaffTools').hidden = !isStaff;
     await Promise.all([loadMessages(), loadMembers(), loadAnnouncements(), loadPolls(), loadEvents(), loadRoomSettings()]);
     await initRoomControls();
@@ -86,6 +90,7 @@
     $('cancelLeave').addEventListener('click', () => { $('leaveBackdrop').dataset.open = 'false'; $('leaveBackdrop').setAttribute('aria-hidden', 'true'); });
     $('confirmLeave').addEventListener('click', leaveRoom);
     $('roomAction').addEventListener('click', async () => { try { await navigator.clipboard.writeText(location.href); toast('Room link copied.'); } catch (_) { toast(location.href); } });
+    $('roomRulesToggle')?.addEventListener('click', event => { const expanded = $('roomRules').classList.toggle('rv-rules-expanded'); event.currentTarget.textContent = expanded ? 'Show less' : 'Read guidelines'; });
     $('leaveRoom').hidden = membership.data.role === 'owner' || room.owner_id === user.id;
     window.addEventListener('pagehide', cleanup, { once: true });
     window.addEventListener('online', recoverRealtime);
@@ -314,6 +319,60 @@
     button.disabled = false;
     if (error) { toast(error.message || 'Member action was not completed.'); return; }
     toast(`Member ${action} action completed.`); await loadStaffMembers(); await loadMembers();
+  }
+
+  async function loadAnnouncements() {
+    const { data, error } = await db.from('room_announcements')
+      .select('id,body,created_by,created_at,active')
+      .eq('room_id', roomId).eq('active', true)
+      .order('created_at', { ascending: false }).limit(8);
+    if (error) { $('announcementList').innerHTML = `<p>${esc(error.message || 'Announcements are unavailable.')}</p>`; return; }
+    const rows = data || [];
+    await loadProfiles(rows.map(item => item.created_by));
+    $('announcementList').innerHTML = rows.map(item => {
+      const profile = profiles.get(item.created_by) || {};
+      const author = profile.display_name || profile.username || 'Room staff';
+      return `<article class="rv-announcement"><p>${esc(item.body)}</p><small>${esc(author)} · ${new Date(item.created_at).toLocaleString()}</small></article>`;
+    }).join('') || '<p>No announcements yet. Check back for community updates.</p>';
+  }
+
+  async function loadPolls() {
+    const { data, error } = await db.from('room_polls')
+      .select('id,question,active,created_at,ends_at')
+      .eq('room_id', roomId).eq('active', true)
+      .order('created_at', { ascending: false }).limit(8);
+    if (error) { $('pollList').innerHTML = `<p>${esc(error.message || 'Polls are unavailable.')}</p>`; return; }
+    const polls = data || [];
+    if (!polls.length) { $('pollList').innerHTML = '<p>No active polls yet.</p>'; return; }
+    const ids = polls.map(item => item.id);
+    const [optionResult, voteResult] = await Promise.all([
+      db.from('room_poll_options').select('id,poll_id,label,sort_order').in('poll_id', ids).order('sort_order', { ascending: true }),
+      db.from('room_poll_votes').select('poll_id,option_id,user_id').in('poll_id', ids)
+    ]);
+    if (optionResult.error || voteResult.error) {
+      $('pollList').innerHTML = `<p>${esc(optionResult.error?.message || voteResult.error?.message || 'Poll results are unavailable.')}</p>`;
+      return;
+    }
+    const optionsByPoll = new Map();
+    (optionResult.data || []).forEach(option => { const list = optionsByPoll.get(option.poll_id) || []; list.push(option); optionsByPoll.set(option.poll_id, list); });
+    const votesByOption = new Map();
+    const ownVotes = new Map();
+    (voteResult.data || []).forEach(vote => {
+      votesByOption.set(vote.option_id, (votesByOption.get(vote.option_id) || 0) + 1);
+      if (vote.user_id === user.id) ownVotes.set(vote.poll_id, vote.option_id);
+    });
+    $('pollList').innerHTML = polls.map(poll => {
+      const options = optionsByPoll.get(poll.id) || [];
+      const total = options.reduce((sum, option) => sum + (votesByOption.get(option.id) || 0), 0);
+      const expired = poll.ends_at && new Date(poll.ends_at) <= new Date();
+      const own = ownVotes.get(poll.id);
+      const choices = options.map(option => {
+        const count = votesByOption.get(option.id) || 0;
+        const percent = total ? Math.round(count / total * 100) : 0;
+        return `<button class="rv-poll-option${own === option.id ? ' is-selected' : ''}" type="button" data-vote-poll="${esc(poll.id)}" data-vote-option="${esc(option.id)}" aria-pressed="${own === option.id}" ${expired ? 'disabled' : ''}><span>${esc(option.label)}</span><b>${count} · ${percent}%</b></button>`;
+      }).join('');
+      return `<article class="rv-poll"><h3>${esc(poll.question)}</h3><p>${total} vote${total === 1 ? '' : 's'}${expired ? ' · Closed' : own ? ' · Your vote is saved' : ' · Choose an option'}</p><div class="rv-poll-options">${choices || '<p>No options available.</p>'}</div></article>`;
+    }).join('');
   }
 
   async function loadEvents() {

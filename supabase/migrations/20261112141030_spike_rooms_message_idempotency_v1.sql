@@ -1,5 +1,6 @@
 -- SPIKE Rooms Phase 10: sender-scoped idempotency for text message delivery.
--- Additive only. Apply only after review; this file has NOT been applied remotely.
+-- Additive only. Superseded by 20261112141145_spike_rooms_message_idempotency_v2.sql,
+-- which adds sender/room serialization to make slow-mode checks race-safe.
 
 alter table public.room_messages
   add column if not exists client_message_id uuid;
@@ -40,12 +41,8 @@ begin
   if coalesce((select rs.chat_locked from public.room_settings rs where rs.room_id=p_room_id),false) and not public.is_room_staff(p_room_id) then raise exception 'chat is locked'; end if;
   if p_reply_to_id is not null and not exists (select 1 from public.room_messages rm where rm.id=p_reply_to_id and rm.room_id=p_room_id) then raise exception 'reply target is invalid'; end if;
 
-  -- Serialize requests sharing this sender-scoped key. This closes the race
-  -- where two simultaneous retries both pass the first lookup.
   perform pg_advisory_xact_lock(hashtextextended(v_uid::text || ':' || p_client_message_id::text, 0));
 
-  -- Resolve a prior accepted request before slow-mode/rate-limit checks. This
-  -- is what makes a retry safe after the server committed but the response was lost.
   select * into v_existing
   from public.room_messages
   where user_id=v_uid and client_message_id=p_client_message_id;
@@ -81,7 +78,6 @@ begin
 
   if v_row.id is not null then return v_row; end if;
 
-  -- A concurrent retry may have inserted the same key after our first lookup.
   select * into v_existing from public.room_messages
   where user_id=v_uid and client_message_id=p_client_message_id;
   if not found then raise exception 'message could not be confirmed; retry safely'; end if;
