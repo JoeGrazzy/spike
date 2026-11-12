@@ -6,9 +6,9 @@ const html=await readFile('admin.html','utf8');
 const register=await readFile('supabase/functions/admin-register-user/index.ts','utf8');
 
 test('Admin exposes the requested operational workspaces without bypassing server authority',()=>{
-  for(const id of ['overview','users','rooms','moderation','platform','announcements','notifications','audit']) assert.match(html,new RegExp(`<section id="${id}"`));
+  for(const id of ['overview','users','platform','announcements','notifications','audit']) assert.match(html,new RegExp(`<section id="${id}"`));
   assert.doesNotMatch(html, /data-page=\"safety\"|id=\"safety\"|openSafetyRecovery/);
-  for(const rpc of ['room_member_set_role','room_moderation_mute','room_moderation_ban','room_moderation_unmute','room_moderation_unban','room_member_history','admin_spike_policy_decide_case','admin_spike_policy_decide_appeal','admin_spike_policy_terms','admin_spike_policy_term_upsert','admin_spike_policy_term_delete','admin_set_maintenance']) assert.match(html,new RegExp(rpc));
+  for(const rpc of ['admin_spike_policy_decide_case','admin_spike_policy_decide_appeal','admin_spike_policy_terms','admin_spike_policy_term_upsert','admin_spike_policy_term_delete','admin_set_maintenance']) assert.match(html,new RegExp(rpc));
   assert.match(html,/admin-register-user/);
   assert.doesNotMatch(html,/SUPABASE_SERVICE_ROLE_KEY|service_role\s*:/i);
 });

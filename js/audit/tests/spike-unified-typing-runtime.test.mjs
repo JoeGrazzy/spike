@@ -9,7 +9,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const runtime = fs.readFileSync(path.join(root, 'js/spike-typing.js'), 'utf8');
 
 test('all chat surfaces use the one shared typing runtime', () => {
-  for (const page of ['message.html', 'messages.html', 'room_chat.html', 'room.html']) {
+  for (const page of ['message.html', 'messages.html', ]) {
     const html = fs.readFileSync(path.join(root, page), 'utf8');
     assert.equal((html.match(/js\/spike-typing\.js/g) || []).length, 1, `${page} must load the runtime once`);
     assert.match(html, /SpikeTyping/, `${page} must call the shared API`);
@@ -73,10 +73,5 @@ test('same conversation activation reuses its channel and listener', async () =>
   window.SpikeTyping.setTyping(true);
   window.SpikeTyping.setTyping(false);
   assert.equal(sent.length, 2);
-  const roomInput = { value: '', addEventListener() {}, removeEventListener() {} };
-  const roomId = '33333333-3333-4333-8333-333333333333';
-  const channelId = '44444444-4444-4444-8444-444444444444';
-  assert.equal(await window.SpikeTyping.startRoom({ db, meId: ids.meId, roomId, channelId, input: roomInput, anchor: makeNode() }), true);
-  assert.equal(removed.length, 1, 'switching context must remove the previous active channel');
-  assert.equal(window.SpikeTyping.diagnostics().channels, 1, 'only the current context remains subscribed');
+  assert.equal(window.SpikeTyping.diagnostics().channels, 1, 'only the current direct conversation remains subscribed');
 });

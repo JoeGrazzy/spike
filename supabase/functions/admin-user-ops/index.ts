@@ -17,7 +17,7 @@ export default {fetch:withSupabase({auth:"user"},async(req,ctx)=>{
     const {data,error}=await ctx.supabase.rpc("admin_list_users_v2",{p_search:q,p_limit:perPage,p_offset:offset,p_filter:clean(body.filter)||"all"});
     if(error)return json({error:error.message,code:error.code||null,details:error.details||null,hint:error.hint||null},400);
     if(!Array.isArray(data))return json({error:"The admin_list_users_v2 RPC returned an unexpected response."},502);
-    return json({ok:true,users:data.map((u:any)=>({id:u.user_id,user_id:u.user_id,email:u.email,display_name:u.display_name,username:u.username,sp_id:u.sp_id,coins:u.coins,created_at:u.created_at,room_count:u.room_count,is_admin:u.is_admin,status:u.status,banned_until:u.banned_until,banned_at:u.banned_at,banned_by:u.banned_by,ban_reason:u.ban_reason,last_seen_at:u.last_seen_at,providers:Array.isArray(u.providers)?u.providers:[],verified:u.verified===true,activated:u.activated!==false}))});
+    return json({ok:true,users:data.map((u:any)=>({id:u.user_id,user_id:u.user_id,email:u.email,display_name:u.display_name,username:u.username,sp_id:u.sp_id,coins:u.coins,created_at:u.created_at,is_admin:u.is_admin,status:u.status,banned_until:u.banned_until,banned_at:u.banned_at,banned_by:u.banned_by,ban_reason:u.ban_reason,last_seen_at:u.last_seen_at,providers:Array.isArray(u.providers)?u.providers:[],verified:u.verified===true,activated:u.activated!==false}))});
   }
   if(action==="user_detail"){
     const id=clean(body.user_id);if(!id)return json({error:"User is required"},400);

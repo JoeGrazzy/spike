@@ -40,7 +40,3 @@ test('profile secondary tabs follow the safe-area-aware header', () => {
   assert.match(css, /top:calc\(54px \+ var\(--spike-header-safe-gap\)\)!important/);
 });
 
-test('room chat stacked chrome follows the safe-area-aware header', () => {
-  assert.match(css, /\.chatRoomHeader\{top:calc\(54px \+ var\(--spike-header-safe-gap\)\)!important\}/);
-  assert.match(css, /\.channelBar\{top:calc\(113px \+ var\(--spike-header-safe-gap\)\)!important\}/);
-});

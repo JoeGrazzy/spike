@@ -79,7 +79,6 @@ html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--s
 <div class="row"><div><strong>Friend requests</strong><small>New friend requests and updates.</small></div><input id="np_friend_requests" class="switch" type="checkbox" aria-label="Friend request notifications"></div>
 <div class="row"><div><strong>Messages</strong><small>New private message activity.</small></div><input id="np_messages" class="switch" type="checkbox" aria-label="Message notifications"></div>
 <div class="row"><div><strong>Calls</strong><small>Incoming call activity.</small></div><input id="np_calls" class="switch" type="checkbox" aria-label="Call notifications"></div>
-<div class="row"><div><strong>Rooms</strong><small>Activity from rooms you follow or join.</small></div><input id="np_rooms" class="switch" type="checkbox" aria-label="Rooms notifications"></div>
 <div class="row"><div><strong>Coins & rewards</strong><small>Rewards, coins and progression updates.</small></div><input id="np_coins" class="switch" type="checkbox" aria-label="Coin notifications"></div>
 <div class="row"><div><strong>Purchases</strong><small>Purchase and transaction updates.</small></div><input id="np_purchases" class="switch" type="checkbox" aria-label="Purchase notifications"></div>
 <div class="row"><div><strong>Announcements</strong><small>Important SPIKE product announcements.</small></div><input id="np_announcements" class="switch" type="checkbox" aria-label="Announcement notifications"></div>
@@ -106,7 +105,7 @@ const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.g
 const DEFAULTS={messageTone:true,incomingTone:true,outgoingTone:true,browser_notifications:false,theme_style:1};
 const PRIVACY_DEFAULTS={profile_visibility:'public',posts_visibility:'public',media_visibility:'public',friends_visibility:'public',allow_messages:'friends',allow_calls:'friends',show_online_status:true,allow_profile_discovery:true};
 const ALLOWED_THEMES=[1,2,3,4,5];
-const NOTIFICATION_KEYS=['likes','comments','mentions','follows','friend_requests','messages','calls','rooms','coins','purchases','announcements','system'];
+const NOTIFICATION_KEYS=['likes','comments','mentions','follows','friend_requests','messages','calls','coins','purchases','announcements','system'];
 const FEED_DEFAULTS={show_sensitive:true,show_spoilers:true,show_political:true,following_only:false,muted_keywords:[]};
 function normalizeFeedPrefs(v){const f=v&&typeof v==='object'?v:{};return {show_sensitive:f.show_sensitive!==false,show_spoilers:f.show_spoilers!==false,show_political:f.show_political!==false,following_only:f.following_only===true,muted_keywords:Array.isArray(f.muted_keywords)?f.muted_keywords.map(x=>String(x).trim()).filter(Boolean):[]}}
 function setFeedPrefs(f){const v=normalizeFeedPrefs(f);$('feedSensitive').checked=v.show_sensitive;$('feedSpoilers').checked=v.show_spoilers;$('feedPolitical').checked=v.show_political;$('feedFollowingOnly').checked=v.following_only;$('feedMutedKeywords').value=v.muted_keywords.join(', ')}

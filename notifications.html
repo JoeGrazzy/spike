@@ -21,6 +21,10 @@
 <script src="js/presence.js?v=presence-v2-global-20261112"></script>
 <script src="js/spike-dialog.js"></script>
 <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-experience-v3.css">
+<link rel="stylesheet" href="css/spike-theme-runtime-v3.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css">
+<link rel="stylesheet" href="css/spike-global-page-authority-v2.css">
 <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
 <link rel="stylesheet" href="css/spike-unified-v2.css">
 <link rel="stylesheet" href="css/spike-identity.css">
@@ -33,6 +37,7 @@
 <script src="js/spike-empty-state.js" defer></script>
 <script src="js/theme.js" defer></script>
 <link rel="stylesheet" href="css/spike-surface-controls.css">
+<link rel="stylesheet" href="css/spike-onboarding-help-placement-v2.css">
 
 <style>
 /* ═══════════════════════════════════════════════════════════
@@ -933,7 +938,7 @@ function firstValue(d, keys) {
 
 function targetOf(n) {
   const d = dataOf(n);
-  return firstValue(d, ["target_name", "post_title", "room_name", "conversation_name", "recipient_name"]);
+  return firstValue(d, ["target_name", "post_title", "conversation_name", "recipient_name"]);
 }
 
 function detailOf(n) {
@@ -960,9 +965,6 @@ function titleOf(n) {
     message: "New message",
     coin_received: "Coins received",
     coin_topup_completed: "Coin top-up completed",
-    room_invite: "Room invitation",
-    room_purchase_verified: "Purchase approved",
-    room_purchase_rejected: "Purchase rejected",
     broadcast: "SPIKE broadcast",
     announcement: "SPIKE announcement",
     login: "Login activity",
@@ -1007,7 +1009,6 @@ function notificationText(n) {
     mention: "mentioned you",
     message: "sent you a message",
     coin_received: `sent you ${coins || amount} coins`,
-    room_invite: "invited you to a room",
     broadcast: "SPIKE has a new announcement",
     announcement: "SPIKE has a new announcement",
     security: "Security activity on your account",
@@ -1024,7 +1025,6 @@ function notificationIcon(n) {
   if (/comment|mention/.test(t)) return "💬";
   if (/message|call/.test(t)) return "✉";
   if (/coin|purchase/.test(t)) return "◈";
-  if (/room/.test(t)) return "⌂";
   if (/security|login|policy/.test(t)) return "🛡";
   if (/broadcast|announcement|system/.test(t)) return "📣";
   return "🔔";
@@ -1057,7 +1057,7 @@ function timeBucket(iso) {
 function priorityClass(n) {
   const t = String(n.type || "").toLowerCase();
   if (/security|policy|login/.test(t)) return "priority-danger";
-  if (/friend_request|room_invite|mention/.test(t)) return "priority-high";
+  if (/friend_request|mention/.test(t)) return "priority-high";
   if (/like|comment|follow|friend_accepted|message/.test(t)) return "priority-social";
   if (/system|broadcast|announcement|coin/.test(t)) return "priority-system";
   if (/purchase_verified|accepted/.test(t)) return "priority-success";
@@ -1110,7 +1110,6 @@ function notificationHref(n) {
   const d = dataOf(n);
   const t = String(n.type || "").toLowerCase();
   const postId = firstValue(d, ["post_id", "postId", "signal_id"]);
-  const roomId = firstValue(d, ["room_id", "roomId"]);
   const actor = actorIdOf(n);
   const messageUser = firstValue(d, ["other_user_id", "otherUserId", "recipient_id", "sender_id", "from_user_id", "actor_id"]);
   const explicit = firstValue(d, ["url", "href", "link", "activity_url", "deep_link"]);
@@ -1147,7 +1146,6 @@ function notificationHref(n) {
     return "feed.html?post=" + encodeURIComponent(postId);
   }
   if (postId) return "feed.html?post=" + encodeURIComponent(postId);
-  if (roomId) return "rooms.html?room=" + encodeURIComponent(roomId);
   if (actor && UUID_RE.test(actor) && /follow|friend|story/.test(t)) {
     return "view_user.html?uid=" + encodeURIComponent(actor);
   }
@@ -1159,10 +1157,6 @@ function notificationHref(n) {
 
 function isFriendRequestType(n) {
   return /friend_request/.test(String(n.type || "").toLowerCase()) && !/accepted|declined|resolved|removed/.test(String(n.type || "").toLowerCase());
-}
-
-function isRoomInviteType(n) {
-  return /room_invite/.test(String(n.type || "").toLowerCase());
 }
 
 /* ── Render ──────────────────────────────────────────────── */
@@ -1195,7 +1189,7 @@ function render() {
         <strong>${rows.length ? "No matching activity" : "No notifications yet"}</strong>
         <div class="muted">${rows.length
           ? "Try another filter or search term."
-          : "Likes, mentions, friend requests, room invites and system updates will appear here."}</div>
+          : "Likes, mentions, friend requests and system updates will appear here."}</div>
       </div>`;
     return;
   }
@@ -1236,7 +1230,6 @@ function renderCard(n) {
   const href = notificationHref(n);
   const pClass = priorityClass(n);
   const isFR = isFriendRequestType(n);
-  const isRI = isRoomInviteType(n);
 
   let avatarHtml = notificationIcon(n);
   const profile = actorProfileOf(n) || actorProfile;
@@ -1263,11 +1256,6 @@ function renderCard(n) {
       <div class="notif-actions" data-id="${esc(n.id)}">
         <button class="btn accept" type="button" data-action="accept-friend">Accept</button>
         <button class="btn decline" type="button" data-action="decline-friend">Decline</button>
-      </div>`;
-  } else if (isRI && !n.read) {
-    actionsHtml = `
-      <div class="notif-actions" data-id="${esc(n.id)}">
-        <button class="btn accept" type="button" data-action="join-room">View room</button>
       </div>`;
   }
 
@@ -1738,12 +1726,6 @@ $("#notificationList").addEventListener("click", async e => {
       return;
     }
 
-    if (action === "join-room") {
-      const href = notificationHref(n);
-      if (href) location.href = href;
-      else openNotificationDetails(n);
-      return;
-    }
   }
 
   const card = e.target.closest(".notification");

@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 
 test('settings preference switches have programmatic accessible names', async () => {
   const html = await readFile('settings.html', 'utf8');
-  const ids = ['feedSensitive','feedSpoilers','feedPolitical','feedFollowingOnly','messageTone','incomingTone','outgoingTone','np_likes','np_comments','np_mentions','np_follows','np_friend_requests','np_messages','np_calls','np_rooms','np_coins','np_purchases','np_announcements','np_system','online','discovery'];
+  const ids = ['feedSensitive','feedSpoilers','feedPolitical','feedFollowingOnly','messageTone','incomingTone','outgoingTone','np_likes','np_comments','np_mentions','np_follows','np_friend_requests','np_messages','np_calls','np_coins','np_purchases','np_announcements','np_system','online','discovery'];
   for (const id of ids) {
     const tag = html.match(new RegExp(`<input\\b(?=[^>]*\\bid=["']${id}["'])[^>]*>`, 'i'))?.[0];
     assert.ok(tag, `missing input ${id}`);

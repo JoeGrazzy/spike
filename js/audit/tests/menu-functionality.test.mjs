@@ -12,7 +12,7 @@ const runtimeActions = {
 };
 const nativeRoutes = {
   menuProfileHero:'profile.html', menuFriends:'friends.html',
-  menuRoom:'rooms.html', menuGuide:'guide.html', menuSettings:'settings.html',
+menuGuide:'guide.html', menuSettings:'settings.html',
   menuPolicy:'policy.html', menuPolicyAppeals:'policy_appeals.html'
 };
 

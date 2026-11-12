@@ -35,10 +35,13 @@ test('Five-theme selection uses a versioned cross-page bootstrap', async () => {
 
 test('Trust Center and community foundations already exist and are not duplicated', async () => {
   const feed = await readFile('feed.html', 'utf8');
-  const rooms = await readFile('rooms.html', 'utf8');
+  
   const safety = await readFile('js/spike-safety-center-v5.js', 'utf8');
   assert.match(feed, /Safety Center/);
   assert.match(feed, /spike-safety-center-v5\.js/);
-  assert.match(rooms, /room/i);
+  const rooms = await readFile('rooms.html', 'utf8');
+  const room = await readFile('room.html', 'utf8');
+  assert.match(rooms, /data-spike-page="rooms"/);
+  assert.match(room, /data-spike-page="room"/);
   assert.match(safety, /Trusted Contact/);
 });

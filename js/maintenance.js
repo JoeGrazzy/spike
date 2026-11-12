@@ -78,7 +78,7 @@
           return true;
         }
         if (user?.id) {
-          const { data: isSuper, error } = await client.rpc('is_super_admin', { p_user_id: user.id });
+          const { data: isSuper, error } = await client.rpc('admin_is_super_admin_self');
           if (!error && isSuper === true) {
             adminBypass = true;
             return true;

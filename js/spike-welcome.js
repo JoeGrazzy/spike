@@ -28,7 +28,7 @@
       <div class="spike-welcome-card">
         <div class="spike-welcome-mark">✨</div>
         <h2>Welcome, ${display}</h2>
-        <p>You’re in. Start by saying hello to someone, exploring the feed, or joining a room.</p>
+        <p>You’re in. Start by saying hello to someone, exploring the feed.</p>
         <button type="button" class="spike-welcome-btn" id="spikeWelcomeContinue">Let’s go</button>
       </div>
     `;

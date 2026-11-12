@@ -20,7 +20,7 @@ test('Presence V2 persists server-confirmed timestamps and reads privacy-filtere
   assert.match(source, /setInterval\(lookup,LOOKUP\)/);
 });
 test('Presence V2 owns the public API and smart online-arrival notice', () => {
-  assert.match(source, /window\.AppPresence=\{version:2,start,stop,attach,heartbeat:\(\)=>track\(true\),watch,subscribe,isOnline,getState,isPublishing,setContext,getOnlineIds,getRoomOnlineCount\}/);
+  assert.match(source, /window\.AppPresence=\{version:2,start,stop,attach,heartbeat:\(\)=>track\(true\),watch,subscribe,isOnline,getState,isPublishing,getOnlineIds\}/);
   assert.match(source, /async function announce\(id\)/);
   assert.match(source, /POPUP_MS=2500/);
   assert.match(source, /DEDUPE_MS=60000/);

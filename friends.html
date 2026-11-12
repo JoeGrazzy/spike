@@ -603,7 +603,7 @@ img[loading="lazy"],video[preload="none"]{content-visibility:auto}
 </style>
 <style id="spike-performance-layer">
 /* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
-.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .room,.spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
+.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
 img,video{max-width:100%}
 video{contain:layout paint}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
@@ -746,17 +746,17 @@ linear-gradient(180deg,transparent 0%,var(--sp-bg) 52%)!important;
 background-attachment:fixed;
 }
 /* common surfaces */
-.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.room,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.cover,.room-hero,.roomgrid,.roomtab,.tabs{
+.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.covergrid,.tabs{
 border-color:var(--sp-line)!important;
 }
-.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top,.room-overview-card{
+.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top-overview-card{
 background:var(--sp-surface)!important;
 box-shadow:var(--sp-shadow-soft);
 color:var(--sp-text);
 backdrop-filter:blur(18px);
 -webkit-backdrop-filter:blur(18px);
 }
-.hero,.room-hero{
+.hero-hero{
 background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(236,72,153,.08),rgba(79,70,229,.08)),var(--sp-surface)!important;
 box-shadow:var(--sp-shadow);
 }
@@ -773,14 +773,14 @@ box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
 }
 input::placeholder,textarea::placeholder{color:var(--sp-muted)!important;opacity:.85}
 input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,237,.55)!important;box-shadow:0 0 0 3px rgba(124,58,237,.11)!important}
-.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.roomtab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
+.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
 border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:var(--sp-surface-2)!important;
 }
-.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.roomtab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hovertab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
 .primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
 .danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
 .active{border-color:rgba(124,58,237,.28)!important}
-.avatar,.friend-avatar,.room-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.avatar,.friend-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .footer{color:var(--sp-muted)!important}
 .modal,.overlay,.modal-backdrop,.premium-media-modal{background:rgba(3,5,12,.64)!important;backdrop-filter:blur(8px)}
 .toast,.notice{border-color:var(--sp-line)!important}
@@ -789,7 +789,7 @@ border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:
 :focus-visible{outline:3px solid rgba(124,58,237,.30)!important;outline-offset:2px}
 @media(max-width:720px){
 .app{padding-left:12px!important;padding-right:12px!important}
-.card,.panel,.hero,.post,.composer,.friend-card,.request-card,.room-card{border-radius:20px!important}
+.card,.panel,.hero,.post,.composer,.friend-card,.request-card-card{border-radius:20px!important}
 .header{padding-left:12px!important;padding-right:12px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}

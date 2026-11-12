@@ -31,7 +31,7 @@ test('V8 preserves the existing menu open/close navigation state contract', () =
 });
 
 test('V8 preserves existing menu destinations and sign-out flow', () => {
-  for (const id of ['menuFriends', 'menuRoom', 'menuSaved', 'menuPulse', 'menuSettings', 'menuSafety', 'menuPolicy', 'menuTheme', 'menuAudience', 'menuGuide', 'menuPolicyAppeals', 'menuSignOut']) {
+  for (const id of ['menuFriends',  'menuSaved', 'menuPulse', 'menuSettings', 'menuSafety', 'menuPolicy', 'menuTheme', 'menuAudience', 'menuGuide', 'menuPolicyAppeals', 'menuSignOut']) {
     assert.match(feed, new RegExp(`id="${id}"`), `${id} remains present`);
   }
   assert.match(runtime, /const showSignOutConfirmation = \(\) =>/);

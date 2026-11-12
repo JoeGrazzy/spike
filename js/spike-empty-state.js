@@ -6,7 +6,6 @@
   const ICONS = {
     messages: '💬',
     friends: '🤝',
-    rooms: '🏠',
     notifications: '🔔',
     feed: '✨',
     search: '🔎',
@@ -28,13 +27,6 @@
       body: 'Start one with a friend — the first message is always the hardest.',
       actionLabel: 'Find friends',
       actionHref: 'friends.html'
-    },
-    rooms: {
-      icon: 'rooms',
-      title: 'No rooms yet',
-      body: 'Create a quiet space or join one that matches your vibe.',
-      actionLabel: 'Browse rooms',
-      actionHref: 'rooms.html'
     },
     notifications: {
       icon: 'notifications',

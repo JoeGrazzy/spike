@@ -24,7 +24,7 @@ test('Help is placed in navigation or a normal header, never fixed over feed con
 test('all onboarding pages load the updated placement stylesheet and script version', () => {
   const pages = readdirSync(root).filter(name => name.endsWith('.html'));
   const onboardingPages = pages.filter(name => readFileSync(join(root, name), 'utf8').includes('js/spike-onboarding-v1.js?v=2'));
-  assert.equal(onboardingPages.length, 13);
+  assert.equal(onboardingPages.length, 10);
   for (const name of onboardingPages) {
     const html = readFileSync(join(root, name), 'utf8');
     assert.match(html, /css\/spike-onboarding-help-placement-v2\.css/);

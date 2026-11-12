@@ -1464,17 +1464,17 @@ linear-gradient(180deg,transparent 0%,var(--sp-bg) 52%)!important;
 background-attachment:fixed;
 }
 /* common surfaces */
-.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.room,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.cover,.room-hero,.roomgrid,.roomtab,.tabs{
+.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.request-card,.community,.community-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.community-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.cover,.community-hero,.communitygrid,.communitytab,.tabs{
 border-color:var(--sp-line)!important;
 }
-.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.room-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.room-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top,.room-overview-card{
+.card,.panel,.stat,.post,.story,.composer,.friend-card,.request-card,.community-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.community-overview-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top,.community-overview-card{
 background:var(--sp-surface)!important;
 box-shadow:var(--sp-shadow-soft);
 color:var(--sp-text);
 backdrop-filter:blur(18px);
 -webkit-backdrop-filter:blur(18px);
 }
-.hero,.room-hero{
+.hero,.community-hero{
 background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(236,72,153,.08),rgba(79,70,229,.08)),var(--sp-surface)!important;
 box-shadow:var(--sp-shadow);
 }
@@ -1491,18 +1491,18 @@ box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
 }
 input::placeholder,textarea::placeholder{color:var(--sp-muted)!important;opacity:.85}
 input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,237,.55)!important;box-shadow:0 0 0 3px rgba(124,58,237,.11)!important}
-.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.roomtab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.roomtab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.communitytab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.communitytab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
 .primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
 .danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
 .active{border-color:rgba(124,58,237,.28)!important}
-.avatar,.friend-avatar,.room-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.avatar,.friend-avatar,.community-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
 .footer{color:var(--sp-muted)!important}
 .progress,.xp-track{background:var(--sp-surface-2)!important}
 ::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(124,58,237,.28);border-radius:99px}
 :focus-visible{outline:3px solid rgba(124,58,237,.30)!important;outline-offset:2px}
 @media(max-width:720px){
 .app{padding-left:12px!important;padding-right:12px!important}
-.card,.panel,.hero,.post,.composer,.friend-card,.request-card,.room-card{border-radius:20px!important}
+.card,.panel,.hero,.post,.composer,.friend-card,.request-card,.community-card{border-radius:20px!important}
 .header{padding-left:12px!important;padding-right:12px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
@@ -1646,23 +1646,23 @@ button,input,textarea,select{font:inherit;max-width:100%}
 input,textarea,select{color:var(--spike-text,#111827);background:var(--spike-surface,#fff)}
 ::selection{background:var(--spike-accent,#7c3aed);color:#fff}
 /* Common SPIKE surfaces. Existing page-specific styling still wins where it is more specific. */
-.panel,.card,.room-card,.friend-card,.notification-card,.post,.composer,.section,.box,.stat,.room,.room-item,
+.panel,.card,.community-card,.friend-card,.notification-card,.post,.composer,.section,.box,.stat,.community,.community-item,
 .ownerSection,.premiumCard,.modal,.modal-card,.dialog,.drawer,.sheet,.toolbar,.field,.mediaField,.mediaPreview,
 .feed-v2-panel,.rec-item,.notice,.empty,.oauth-btn,.tab,.tabs,.nav-item{
 color:var(--spike-text);
 border-color:var(--spike-line);
 }
-.panel,.card,.room-card,.friend-card,.notification-card,.post,.composer,.section,.box,.room-item,
+.panel,.card,.community-card,.friend-card,.notification-card,.post,.composer,.section,.box,.community-item,
 .ownerSection,.premiumCard,.modal-card,.dialog,.drawer,.sheet,.field,.mediaField,.mediaPreview,
 .feed-v2-panel,.rec-item,.notice,.empty{
 background:var(--spike-surface);
 }
 /* Typography and controls */
-.muted,.sub,.meta,.time,.hint,.label,.description,.roomMeta,.friend-meta{color:var(--spike-muted)}
-.btn,.iconbtn,.icon-btn,.header-btn,.request-btn,.friend-action,.tool,.tab,.nav-item,.roomTab{
+.muted,.sub,.meta,.time,.hint,.label,.description,.communityMeta,.friend-meta{color:var(--spike-muted)}
+.btn,.iconbtn,.icon-btn,.header-btn,.request-btn,.friend-action,.tool,.tab,.nav-item,.communityTab{
 color:var(--spike-text);border-color:var(--spike-line);
 }
-.btn.primary,.primary,.accept,.send,.createBtn,.roomTab.active,.tab.active{
+.btn.primary,.primary,.accept,.send,.createBtn,.communityTab.active,.tab.active{
 background:linear-gradient(135deg,var(--spike-accent),var(--spike-accent-2))!important;
 color:#fff!important;border-color:transparent!important;
 box-shadow:0 8px 24px var(--spike-glow);
@@ -1680,10 +1680,10 @@ hr{border-color:var(--spike-line)}
 /* Prevent the mobile side-to-side shake/overflow */
 @media (max-width:760px){
 html,body{overflow-x:clip!important}
-.app,.page,.shell,.main,.rooms,.content,.container{max-width:100%!important;min-width:0!important}
-.row,.toolbar,.header,.actions,.tabs,.roomTabs{min-width:0}
-.tabs,.roomTabs,.roomTabBar{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
-.tabs::-webkit-scrollbar,.roomTabs::-webkit-scrollbar,.roomTabBar::-webkit-scrollbar{display:none}
+.app,.page,.shell,.main,.communities,.content,.container{max-width:100%!important;min-width:0!important}
+.row,.toolbar,.header,.actions,.tabs,.communityTabs{min-width:0}
+.tabs,.communityTabs,.communityTabBar{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none}
+.tabs::-webkit-scrollbar,.communityTabs::-webkit-scrollbar,.communityTabBar::-webkit-scrollbar{display:none}
 table{max-width:100%;display:block;overflow-x:auto}
 }
 @media (prefers-reduced-motion:reduce){
@@ -1702,7 +1702,7 @@ img[loading="lazy"],video[preload="none"]{content-visibility:auto}
 
 
 /* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
-.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .room,.spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
+.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .community,.spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
 img,video{max-width:100%}
 video{contain:layout paint}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
@@ -2308,20 +2308,20 @@ video{contain:layout paint}
 
 <main class="help-page">
   <nav class="help-nav card" id="helpNav" aria-label="Help sections">
-    <a href="#ai-search">AI</a><a href="#getting-started">Start</a><a href="#account">Account</a><a href="#feed">Feed</a><a href="#friends">Friends</a><a href="#messages">Messages</a><a href="#calls">Calls</a><a href="#rooms">Rooms</a><a href="#predictor">Predictor</a><a href="#notifications">Alerts</a><a href="#safety">Safety</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
+    <a href="#ai-search">AI</a><a href="#getting-started">Start</a><a href="#account">Account</a><a href="#feed">Feed</a><a href="#friends">Friends</a><a href="#messages">Messages</a><a href="#calls">Calls</a><a href="#predictor">Predictor</a><a href="#notifications">Alerts</a><a href="#safety">Safety</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
   </nav>
 
   <section class="card help-hero">
     <div class="help-kicker"><i class="fa-solid fa-circle-info"></i> SPIKE HELP CENTER</div>
     <h1>Everything you need to get the most out of SPIKE.</h1>
     <p>Welcome to SPIKE — your place to connect with people, share updates, discover communities, chat privately, and stay in touch.</p>
-    <div class="help-pills"><span class="help-pill">Connect</span><span class="help-pill">Share</span><span class="help-pill">Discover</span><span class="help-pill">Chat</span><span class="help-pill">Rooms</span></div>
+    <div class="help-pills"><span class="help-pill">Connect</span><span class="help-pill">Share</span><span class="help-pill">Discover</span><span class="help-pill">Chat</span></div>
   </section>
 
   <section class="help-section help-quick" id="help-search">
     <div class="help-search-card card">
       <div class="help-search-copy"><div class="help-kicker">QUICK HELP</div><h2>Find an answer fast</h2><p>Search this guide for a feature, action, or problem.</p></div>
-      <div class="help-search-row"><input id="helpGlobalSearch" type="search" placeholder="Search posts, Rooms, calls, QR, notifications…" aria-label="Search help topics"><button id="helpGlobalSearchBtn" type="button">Search</button></div>
+      <div class="help-search-row"><input id="helpGlobalSearch" type="search" placeholder="Search posts, calls, QR, notifications…" aria-label="Search help topics"><button id="helpGlobalSearchBtn" type="button">Search</button></div>
       <div class="help-search-result" id="helpGlobalResult" aria-live="polite"></div>
     </div>
   </section>
@@ -2345,7 +2345,7 @@ video{contain:layout paint}
       <div class="help-step"><div class="help-number">1</div><div><h3>Create your account</h3><p>Choose the sign-up option on the welcome screen and follow the prompts. If you already have an account, simply sign in.</p></div></div>
       <div class="help-step"><div class="help-number">2</div><div><h3>Set up your profile</h3><p>Choose a username and add a profile picture and information you want people to see.</p></div></div>
       <div class="help-step"><div class="help-number">3</div><div><h3>Find people</h3><p>Explore profiles, suggestions and the Friends area to discover people you know or want to connect with.</p></div></div>
-      <div class="help-step"><div class="help-number">4</div><div><h3>Start exploring</h3><p>Browse your Feed, post an update, follow people, send a friend request, start a conversation or explore Rooms.</p></div></div>
+      <div class="help-step"><div class="help-number">4</div><div><h3>Start exploring</h3><p>Browse your Feed, post an update, follow people, send a friend request, start a conversation .</p></div></div>
     </div>
     <div class="help-tip"><strong>Tip:</strong> Use the main navigation to move between the areas you use most. If you get stuck, check the FAQ below.</div>
   </section>
@@ -2365,7 +2365,7 @@ video{contain:layout paint}
     <div class="help-grid">
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-rotate"></i></div><h3>Profile keeps loading</h3><p>Wait briefly, then retry. If it still times out, check your connection and sign in again. A profile-loading problem should not prevent the rest of the app from being usable.</p></article>
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-bell"></i></div><h3>Notifications do not load</h3><p>Refresh the Notifications page. If SPIKE asks you to sign in again, your saved session may no longer be valid.</p></article>
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-wifi"></i></div><h3>Live data looks stale</h3><p>Check your connection, refresh the current page, and reopen the conversation or Room. Live presence can change as people connect or disconnect.</p></article>
+      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-wifi"></i></div><h3>Live data looks stale</h3><p>Check your connection, refresh the current page, and reopen the conversation . Live presence can change as people connect or disconnect.</p></article>
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-right-to-bracket"></i></div><h3>Sign in again</h3><p>If a page reports an expired or invalid session, return to the sign-in screen and authenticate again before retrying the action.</p></article>
     </div>
   </section>
@@ -2412,17 +2412,7 @@ video{contain:layout paint}
     <div class="help-tip"><strong>Best experience:</strong> use a stable connection and an up-to-date browser. Headphones can reduce echo.</div>
   </section>
 
-  <section class="help-section" id="rooms">
-    <div class="help-section-head"><h2>Rooms</h2><p>Find communities and join the conversation.</p></div>
-    <div class="help-grid">
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-magnifying-glass"></i></div><h3>Discover Rooms</h3><p>Browse Rooms to find communities that match your interests. Open a Room to learn more before joining.</p></article>
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-right-to-bracket"></i></div><h3>Join a Room</h3><p>Use the Room's join option. Some Room experiences may require you to complete an account step before participating.</p></article>
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-comments"></i></div><h3>Chat in a Room</h3><p>Choose a channel, read the conversation and send messages. Replies, reactions and other actions appear when supported.</p></article>
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-calendar"></i></div><h3>Community activities</h3><p>Depending on the Room, you may find polls, events, announcements, moments, rules and member information.</p></article>
-      
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-plus"></i></div><h3>Create a Room</h3><p>If Room creation is available to your account, follow the creation flow and complete any steps shown on screen.</p></article>
-    </div>
-  </section>
+  
 
   <section class="help-section" id="predictor">
     <div class="help-section-head"><h2>⚽ SPIKE Predictor</h2><p>Follow fixtures, review model picks, and keep predictions you want to revisit.</p></div>
@@ -2447,7 +2437,7 @@ video{contain:layout paint}
   <section class="help-section" id="safety">
     <div class="help-section-head"><h2>Safety & Privacy</h2><p>Stay in control of your SPIKE experience.</p></div>
     <div class="help-grid">
-      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-flag"></i></div><h3>Report</h3><p>Report inappropriate posts, profiles, messages or Room activity using the relevant report control.</p></article>
+      <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-flag"></i></div><h3>Report</h3><p>Report inappropriate posts, profiles, messages or community activity using the relevant report control.</p></article>
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-ban"></i></div><h3>Block</h3><p>Use blocking controls when you no longer want to interact with an account.</p></article>
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-eye-slash"></i></div><h3>Share carefully</h3><p>Only share information you are comfortable making available to your selected audience. Never post passwords or authentication codes.</p></article>
       <article class="card help-card"><div class="help-icon"><i class="fa-solid fa-shield-halved"></i></div><h3>Protect your account</h3><p>Never give your password or authentication codes to another person. Be cautious with unfamiliar links and requests for sensitive information.</p></article>
@@ -2462,8 +2452,8 @@ video{contain:layout paint}
       <details><summary>Why can't I upload media?</summary><p>Check your connection, file type and size, then try again. If the issue continues, try an up-to-date browser.</p></details>
       <details><summary>Why aren't my messages updating?</summary><p>Check your connection and refresh the conversation. If necessary, sign out and back in.</p></details>
       <details><summary>Why can't I make a call?</summary><p>Check that you have an eligible connection, a stable internet connection, and the required microphone/camera browser permissions.</p></details>
-      <details><summary>Why can't I send a Room message?</summary><p>The Room may temporarily restrict posting, or your membership/role may not allow it. Check the Room information or ask a Room team member.</p></details>
-      <details><summary>Why can't I see a feature?</summary><p>Some features depend on your account, connection, Room membership, device or browser capabilities. Make sure your browser is up to date and complete any steps shown in the app.</p></details>
+      
+      <details><summary>Why can't I see a feature?</summary><p>Some features depend on your account, connection, community membership, device or browser capabilities. Make sure your browser is up to date and complete any steps shown in the app.</p></details>
       <details><summary>What should I include when contacting support?</summary><p>Tell us what you were trying to do, where it happened, and what you saw. Never send passwords, authentication codes, private keys or other secrets.</p></details>
     </div>
   </section>
@@ -2492,7 +2482,7 @@ video{contain:layout paint}
     {keys:['story','stories'],answer:'Stories are not available in this SPIKE version.'},
     {keys:['friend','friends','friend request'],answer:'Open a person’s profile and use the connection option. Incoming and outgoing requests can be managed from Friends.'},
     {keys:['message','chat','dm','private message'],answer:'Open Messages, choose a person or conversation, type your message and send it. Supported conversations may also allow media or voice notes.'},
-    {keys:['room','rooms','community'],answer:'Open Rooms to discover communities, view Room information, join a Room and participate in its available conversations and activities.'},
+    
     {keys:['notification','notifications'],answer:'Open Notifications to review account activity and use the available filters or read controls to manage what you have seen.'},
     {keys:['password','forgot password','reset password'],answer:'Use the password recovery option on the sign-in screen and follow the instructions provided.'},
     {keys:['report','block','safety','privacy'],answer:'Use the available report or block controls when needed, and avoid sharing passwords, authentication codes or other sensitive information.'},
@@ -2510,11 +2500,11 @@ video{contain:layout paint}
       const n=item.keys.reduce((v,k)=>v+(text.includes(k)?1:0),0);
       if(n>score){score=n;best=item}
     }
-    return best ? best.answer : 'I could not find a matching SPIKE help topic yet. Try searching for posts, friends, messages, calls, Rooms, notifications, password recovery, safety, or privacy.';
+    return best ? best.answer : 'I could not find a matching SPIKE help topic yet. Try searching for posts, friends, messages, calls, notifications, password recovery, safety, or privacy.';
   }
   const helpGlobalSearch=document.getElementById('helpGlobalSearch'), helpGlobalResult=document.getElementById('helpGlobalResult');
   const helpTopics=[...document.querySelectorAll('.help-section[id]')].map(s=>({id:s.id,title:(s.querySelector('h2')?.textContent||s.id).trim(),text:(s.textContent||'').replace(/\s+/g,' ').toLowerCase()}));
-  function runHelpSearch(){const q=(helpGlobalSearch?.value||'').trim().toLowerCase(); if(!helpGlobalResult)return; if(!q){helpGlobalResult.classList.remove('show');helpGlobalResult.innerHTML='';return;} const hits=helpTopics.filter(x=>x.text.includes(q)||x.title.toLowerCase().includes(q)).slice(0,4); helpGlobalResult.innerHTML=hits.length?'<strong>Matching topics</strong><br>'+hits.map(x=>`<a href=\"#${x.id}\">${x.title}</a>`).join(' · '):'No exact topic found. Try <strong>messages</strong>, <strong>Rooms</strong>, <strong>calls</strong>, <strong>QR</strong>, <strong>notifications</strong>, <strong>theme</strong>, or <strong>predictor</strong>.'; helpGlobalResult.classList.add('show');}
+  function runHelpSearch(){const q=(helpGlobalSearch?.value||'').trim().toLowerCase(); if(!helpGlobalResult)return; if(!q){helpGlobalResult.classList.remove('show');helpGlobalResult.innerHTML='';return;} const hits=helpTopics.filter(x=>x.text.includes(q)||x.title.toLowerCase().includes(q)).slice(0,4); helpGlobalResult.innerHTML=hits.length?'<strong>Matching topics</strong><br>'+hits.map(x=>`<a href=\"#${x.id}\">${x.title}</a>`).join(' · '):'No exact topic found. Try <strong>messages</strong>, <strong>communities</strong>, <strong>calls</strong>, <strong>QR</strong>, <strong>notifications</strong>, <strong>theme</strong>, or <strong>predictor</strong>.'; helpGlobalResult.classList.add('show');}
   document.getElementById('helpGlobalSearchBtn')?.addEventListener('click',runHelpSearch);
   helpGlobalSearch?.addEventListener('keydown',e=>{if(e.key==='Enter')runHelpSearch()});
   document.getElementById('helpSearchBtn')?.addEventListener('click',()=>{document.getElementById('help-search')?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>helpGlobalSearch?.focus(),350)});

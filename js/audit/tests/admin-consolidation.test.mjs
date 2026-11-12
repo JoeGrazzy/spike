@@ -18,22 +18,6 @@ test('admin overview removes duplicate quick-action launcher but keeps operation
   assert.match(overview, /Control center/);
 });
 
-test('Room Members is owned by Rooms, not duplicated inside Users', () => {
-  const rooms = section('rooms');
-  const users = section('users');
-  assert.match(rooms, /id="memberRoom"/);
-  assert.match(rooms, /id="roomMembersList"/);
-  assert.doesNotMatch(users, /id="memberRoom"/);
-  assert.doesNotMatch(users, /id="roomMembersList"/);
-});
-
-test('Room Members runtime remains wired after relocation', () => {
-  assert.match(html, /admin_list_room_members/);
-  assert.match(html, /on\('memberRoom','change',loadRoomMembers\)/);
-  assert.match(html, /on\('refreshRoomMembers','click',loadRoomMembers\)/);
-  assert.match(html, /page==='rooms'\)\{ loadRooms\(\); loadRoomChoices\(\); \}/);
-});
-
 test('User registration action remains available while redundant explanatory panel is removed', () => {
   const users = section('users');
   assert.match(users, /id="registerUser"/);
@@ -42,9 +26,8 @@ test('User registration action remains available while redundant explanatory pan
   assert.match(html, /on\('registerUser','click',openRegisterUser\)/);
 });
 
-test('Admin identity is no longer mislabeled as Rooms Admin', () => {
+test('Admin identity uses the canonical SPIKE ADMIN brand', () => {
   assert.ok(html.includes('<div class="brand"><b>SPIKE</b> ADMIN</div>'));
-  assert.ok(!html.includes('<div class="brand"><b>SPIKE</b> ROOMS ADMIN</div>'));
 });
 
 test('shared modal close control is wired and backdrop closes the modal', () => {

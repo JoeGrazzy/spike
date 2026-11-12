@@ -6,7 +6,7 @@ const html = await readFile('admin.html', 'utf8');
 const css = await readFile('css/admin-workspace-v1.css', 'utf8');
 
 test('Admin workspace groups every existing navigation destination exactly once', () => {
-  const expected = ['overview','posts','roomPurchases','packages','gems','rooms','users','broadcasts','maintenance','admins','audit','policyModeration','safetyRecovery'];
+  const expected = ['overview','posts','packages','gems','users','broadcasts','maintenance','admins','audit','policyModeration','safetyRecovery'];
   for (const page of expected) {
     assert.equal((html.match(new RegExp(`data-page="${page}"`, 'g')) || []).length, 1, `${page} must have one navigation control`);
     assert.match(html, new RegExp(`<section id="${page}"`), `${page} content section must remain`);

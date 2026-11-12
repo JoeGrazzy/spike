@@ -20,7 +20,7 @@ test('Notifications page exposes its own authoritative unread badge', () => {
   assert.match(notifications, /data-spike-notification-page/);
   assert.match(notifications, /class="icon-btn notification-page-bell"[^>]*data-spike-notification-badge/);
   assert.match(notifications, /id="unreadCount"/);
-  assert.match(notifications, /window\.SPIKENotificationCenter\?\.setCount\(count\)/);
+  assert.match(notifications, /window\.SPIKENotificationCenter\?\.setCount\(unread\)/);
 });
 
 test('shared notification center uses the existing summary RPC and private user topic', () => {

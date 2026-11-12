@@ -22,7 +22,7 @@ test('onboarding is optional and never blocks authentication or core navigation'
 });
 
 test('tutorial covers the core social and safety destinations', () => {
-  for (const destination of ['feed.html','friends.html','messages.html','rooms.html','notifications.html','settings.html']) {
+  for (const destination of ['feed.html','friends.html','messages.html','notifications.html','settings.html']) {
     assert.ok(onboarding.includes(`page:'${destination}'`), `missing tutorial destination ${destination}`);
   }
   assert.match(onboarding, /const LESSONS = \[/);
@@ -51,7 +51,7 @@ test('onboarding UI inherits theme tokens and respects reduced motion', () => {
 });
 
 test('all main authenticated pages load the optional onboarding module', () => {
-  const pages = ['feed.html','friends.html','profile.html','messages.html','message.html','rooms.html','room.html','room_chat.html','notifications.html','settings.html','help.html','guide.html','view_user.html',];
+  const pages = ['feed.html','friends.html','profile.html','messages.html','message.html','notifications.html','settings.html','help.html','guide.html','view_user.html',];
   for (const page of pages) {
     assert.ok(existsSync(new URL(`../../../${page}`, import.meta.url)), `missing ${page}`);
     assert.match(read(page), /js\/spike-onboarding-v1\.js\?v=2/, `${page} does not load onboarding`);

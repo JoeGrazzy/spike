@@ -8,14 +8,14 @@
   const LOCAL_KEY = 'spike-onboarding-v1';
   const RESUME_KEY = 'spike-onboarding-auto-resume';
   const PAGE = String(document.body?.dataset?.spikePage || '').toLowerCase();
-  const ALLOWED = new Set(['feed','friends','profile','messages','message','rooms','room','room_chat','notifications','settings','help','guide','view_user','live']);
+  const ALLOWED = new Set(['feed','friends','profile','messages','message','notifications','settings','help','guide','view_user','live']);
   if (!ALLOWED.has(PAGE)) return;
 
   const LESSONS = [
     { id:'feed', title:'Explore your Feed', page:'feed.html', label:'Open Feed', description:'Your Feed is where you discover posts, updates, and conversations. Explore the available feed views and use the post actions only when you are ready.' },
     { id:'people', title:'Profiles and connections', page:'friends.html', label:'Open Friends', description:'Find people, review friend requests, explore profiles, and manage connections. You stay in control of who you connect with.' },
     { id:'messages', title:'Messages and conversations', page:'messages.html', label:'Open Messages', description:'Use Messages to find conversations and communicate privately. The tutorial never sends a message or starts a call for you.' },
-    { id:'rooms', title:'Join a community Room', page:'rooms.html', label:'Explore Rooms', description:'Rooms bring people together around shared interests. Review a Room and its rules before joining or participating.' },
+    { id:'rooms', title:'Community Rooms', page:'rooms.html', label:'Explore Rooms', description:'Discover communities, create your own Room, and join conversations around shared interests.' },
     { id:'notifications', title:'Stay up to date', page:'notifications.html', label:'View Notifications', description:'Notifications help you keep track of relevant activity. Visit notification settings to tune what you receive.' },
     { id:'safety', title:'Privacy, safety, and help', page:'settings.html', label:'Open Settings', description:'Find account preferences, privacy controls, and safety tools. Use Help for detailed guides, reporting information, and answers to common questions.' }
   ];
@@ -278,7 +278,7 @@
   function renderWelcome() {
     setContent({
       eyebrow: 'YOUR SPIKE JOURNEY', title: 'Welcome to Spike',
-      description: 'Get a quick, guided introduction to the Feed, connections, messages, Rooms, notifications, and safety tools. This tour is optional and you can skip it whenever you want.',
+      description: 'Get a quick, guided introduction to the Feed, connections, messages, notifications, and safety tools. This tour is optional and you can skip it whenever you want.',
       label: 'WELCOME', count: '', percent: 0,
       actions: [{ action:'start', text:'Start Tutorial', primary:true }, { action:'skip', text:'Skip for Now' }, { text:'Browse Help Center', href:'help.html' }]
     });

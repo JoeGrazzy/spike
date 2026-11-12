@@ -9,6 +9,8 @@ const manifestPath = path.join(root, 'js', 'audit', 'protected-baseline.json');
 const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
 const cleanupManifest = JSON.parse(await readFile(path.join(root, 'js', 'audit', 'cleanup-manifest.json'), 'utf8'));
 const retiredByPath = new Map(cleanupManifest.retired_files.map(entry => [entry.path, entry]));
+const approvalManifest = JSON.parse(await readFile(path.join(root, 'js', 'audit', 'approved-updates-rooms-phase6.json'), 'utf8'));
+const approvedUpdates = new Map((approvalManifest.approved_updates || []).map(entry => [entry.path, entry]));
 
 const digest = async rel => {
   const abs = path.join(root, rel);
@@ -29,7 +31,9 @@ test('no protected baseline file was deleted or modified unless explicitly retir
     try {
       const actual = await digest(rel);
       if (actual.bytes !== expected.bytes || actual.sha256 !== expected.sha256) {
-        failures.push(`${rel}: baseline=${expected.sha256} current=${actual.sha256}`);
+        const approved = approvedUpdates.get(rel);
+        const validApproval = approved && approved.previous_sha256 === expected.sha256 && approved.previous_bytes === expected.bytes && approved.current_sha256 === actual.sha256 && approved.current_bytes === actual.bytes;
+        if (!validApproval) failures.push(`${rel}: baseline=${expected.sha256} current=${actual.sha256}`);
       }
     } catch (error) {
       const retired = retiredByPath.get(rel);

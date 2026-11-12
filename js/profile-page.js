@@ -48,7 +48,7 @@ async function initAdminHeader(){
 const btn=$("adminBtn");
 if(!btn || !state.me) return;
 try {
-  const {data,is_error}=await (async()=>{const r=await db.rpc('is_super_admin',{p_user_id:state.me.id});return {data:r.data,is_error:!!r.error}})();
+  const {data,is_error}=await (async()=>{const r=await db.rpc('admin_is_super_admin_self');return {data:r.data,is_error:!!r.error}})();
   if(is_error||data!==true) return;
   btn.classList.remove("hidden");
   btn.classList.add("admin-btn-active");

@@ -1,5 +1,5 @@
 /* SPIKE Unified Typing Runtime v1
- * One shared realtime protocol for direct messages and public room channels.
+ * One shared realtime protocol for direct messages only.
  * No database rows are written: ephemeral, private Supabase Realtime Broadcast only.
  */
 (()=>{'use strict';
@@ -12,13 +12,12 @@
   const uuid=s=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(s||''));
   const sortedPair=(a,b)=>[String(a),String(b)].sort();
   const dmTopic=(a,b)=>`${PREFIX}dm:${sortedPair(a,b).join(':')}`;
-  const roomTopic=(room,channel)=>`${PREFIX}room:${room}:${channel}`;
   function ensureIndicator(anchor,kind){
     if(!anchor)return null;
-    const host=kind==='room'?anchor:(anchor.parentElement||anchor);
+    const host=anchor.parentElement||anchor;
     let el=host.querySelector(':scope > .spike-typing-indicator');
     if(!el){el=document.createElement('div');el.className='spike-typing-indicator';el.setAttribute('aria-live','polite');el.setAttribute('aria-atomic','true');el.hidden=true;
-      if(kind==='room')host.insertBefore(el,host.firstChild);else anchor.insertAdjacentElement('afterend',el);
+      anchor.insertAdjacentElement('afterend',el);
     }
     return el;
   }
@@ -28,9 +27,9 @@
     for(const [id,item] of remote){if(item.expiresAt<=now)remote.delete(id)}
     const names=[...remote.values()].map(x=>x.name||'Someone');
     let label='';
-    if(names.length===1)label=kind==='dm'?'Typing…':`${names[0]} is typing…`;
-    else if(names.length===2)label=kind==='dm'?'Typing…':`${names[0]} and ${names[1]} are typing…`;
-    else if(names.length>2)label=kind==='dm'?'Typing…':`${names.length} people are typing…`;
+    if(names.length===1)label='Typing…';
+    else if(names.length===2)label='Typing…';
+    else if(names.length>2)label='Typing…';
     indicator.textContent=label;indicator.hidden=!label;
     indicator.classList.toggle('is-active',!!label);
   }
@@ -64,21 +63,20 @@
     try{await entry.ch.send({type:'broadcast',event:'typing',payload:{user_id:entry.selfId,display_name:entry.displayName||'',typing:!!typing,expires_at:Date.now()+TTL}})}catch(e){if(!typing)console.debug('[SPIKE typing] stop broadcast unavailable',e?.message||e)}
   }
   function stopActive(){activationSeq++;pendingActivation=null;pendingTopic=null;pendingInput=null;if(active.idleTimer)clearTimeout(active.idleTimer);active.idleTimer=null;active.detach?.();active.detach=null;const old=active.channel,oldTopic=active.topic;if(old&&oldTopic){channels.delete(oldTopic);publish(old,false).finally(()=>{try{old.db.removeChannel(old.ch)}catch(_){}})}active.lastSent=0;active.remote.clear();drawRemote(active.remote,active.indicator,active.scope);active.channel=null;active.topic=null;active.input=null;active.indicator=null;active.meId=null;active.scope=null}
-  async function activate({db,meId,peerId,roomId,channelId,input,anchor,displayName}){
+  async function activate({db,meId,peerId,input,anchor,displayName}){
     if(!uuid(meId)||!input)return false;
-    const isRoom=!!roomId,topic=isRoom?roomTopic(roomId,channelId):dmTopic(meId,peerId);
+    const topic=dmTopic(meId,peerId);
     if(active.topic===topic&&active.input===input&&active.channel?.ready)return true;
     if(pendingActivation&&pendingTopic===topic&&pendingInput===input)return pendingActivation;
     stopActive();
-    if(isRoom&&(!uuid(roomId)||!uuid(channelId)))return false;
-    if(!isRoom&&(!uuid(peerId)||peerId===meId))return false;
+    if(!uuid(peerId)||peerId===meId)return false;
     const token=++activationSeq;
     const task=(async()=>{
-      const indicator=ensureIndicator(anchor,isRoom?'room':'dm'),remote=new Map();
-      const entry=await openChannel(db,topic,remote,indicator,isRoom?'room':'dm',meId);
+      const indicator=ensureIndicator(anchor,'dm'),remote=new Map();
+      const entry=await openChannel(db,topic,remote,indicator,'dm',meId);
       if(token!==activationSeq){if(pendingTopic!==topic){channels.delete(topic);try{await db.removeChannel(entry.ch)}catch(_){}}return false;}
       entry.displayName=clean(displayName);
-      Object.assign(active,{channel:entry,topic,meId,scope:isRoom?'room':'dm',lastSent:0,idleTimer:null,input,indicator,remote,label:clean(displayName)||'Someone'});
+      Object.assign(active,{channel:entry,topic,meId,scope:'dm',lastSent:0,idleTimer:null,input,indicator,remote,label:clean(displayName)||'Someone'});
       const onInput=()=>setTyping(!!clean(input.value));
       const onBlur=()=>setTyping(false);
       input.addEventListener('input',onInput);input.addEventListener('blur',onBlur);
@@ -98,7 +96,6 @@
     active.idleTimer=setTimeout(()=>{publish(entry,false);active.lastSent=0},2100);
   }
   async function startDM(opts){return activate({...opts,anchor:opts.anchor||document.querySelector('#sub')})}
-  async function startRoom(opts){return activate({...opts,anchor:opts.anchor||document.querySelector('.composerWrap')})}
   async function syncInbox({db,meId,peerIds}){
     const peers=[...new Set((peerIds||[]).map(String).filter(x=>uuid(x)&&x!==String(meId)))].slice(0,MAX_INBOX);
     const wanted=new Set(peers.map(peer=>dmTopic(meId,peer)));
@@ -114,5 +111,5 @@
   function cleanup(){if(disposed)return;disposed=true;if(paintTimer)clearInterval(paintTimer);stopActive();for(const entry of channels.values()){try{entry.db.removeChannel(entry.ch)}catch(_){}}channels.clear()}
   window.addEventListener('pagehide',cleanup,{once:true});
   paintTimer=setInterval(()=>{if(active.remote&&active.indicator)drawRemote(active.remote,active.indicator,active.scope);for(const entry of channels.values())entry.renderInbox?.()},700);
-  window.SpikeTyping={version:1,startDM,startRoom,setTyping,stop:stopActive,syncInbox,diagnostics:()=>({version:1,channels:channels.size,activeScope:active.scope,topic:active.topic})};
+  window.SpikeTyping={version:1,startDM,setTyping,stop:stopActive,syncInbox,diagnostics:()=>({version:1,channels:channels.size,activeScope:active.scope,topic:active.topic})};
 })();

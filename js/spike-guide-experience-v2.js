@@ -16,7 +16,7 @@
         <div class="spike-x-guide-job"><b>HOME</b><span>Feed and Live.</span></div>
         <div class="spike-x-guide-job"><b>DISCOVER</b><span>People, topics and conversations.</span></div>
         <div class="spike-x-guide-job"><b>CREATE</b><span>Discovery and content tools.</span></div>
-        <div class="spike-x-guide-job"><b>CONNECT</b><span>Messages, Rooms and Live.</span></div>
+        <div class="spike-x-guide-job"><b>CONNECT</b><span>Messages and Live.</span></div>
         <div class="spike-x-guide-job"><b>YOU</b><span>Profile, saved items and progress.</span></div>
       </div>
       <div class="spike-x-guide-vocab" aria-label="SPIKE vocabulary">
