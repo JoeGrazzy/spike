@@ -75,7 +75,7 @@
     if (channelResult.error || !channelResult.data) { toast('The conversation channel is not available yet.'); return; }
     channel = channelResult.data; $('channelTitle').textContent = `# ${channel.name}`;
     isStaff = ['owner','admin','moderator'].includes(membership.data.role) || room.owner_id === user.id;
-    window.SpikeRoomLiveCall?.init?.(db, roomId, user, room.name);
+    // Room group calling is permanently retired; keep Rooms text/media features only.
     $('roomStaffTools').hidden = !isStaff;
     await Promise.all([loadMessages(), loadMembers(), loadAnnouncements(), loadPolls(), loadEvents(), loadRoomSettings()]);
     await initRoomControls();

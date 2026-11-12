@@ -1,0 +1,332 @@
+/* SPIKE Rooms responsive authority v2. Scoped to Rooms pages only. */
+html:has(body.spike-rooms-v2),
+html:has(body.spike-rooms-v2) body {
+  width:100%;
+  min-width:0;
+  max-width:100%;
+}
+html:has(body.spike-rooms-v2) {
+  overflow-x:clip;
+  background:var(--rv-bg,#080b12);
+}
+body.spike-rooms-v2 {
+  --rv-font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  width:100%;
+  min-width:0;
+  max-width:100%;
+  margin:0;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  overflow-x:clip;
+  font-family:var(--rv-font) !important;
+  font-size:14px !important;
+  line-height:1.5 !important;
+  letter-spacing:normal !important;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+body.spike-rooms-v2 *,
+body.spike-rooms-v2 *::before,
+body.spike-rooms-v2 *::after { box-sizing:border-box; }
+body.spike-rooms-v2 img,
+body.spike-rooms-v2 video,
+body.spike-rooms-v2 audio,
+body.spike-rooms-v2 iframe { max-width:100%; }
+body.spike-rooms-v2 button,
+body.spike-rooms-v2 input,
+body.spike-rooms-v2 textarea,
+body.spike-rooms-v2 select {
+  max-width:100%;
+  min-width:0;
+  font-family:var(--rv-font) !important;
+  letter-spacing:normal !important;
+}
+body.spike-rooms-v2 button { min-height:40px; line-height:1.3; }
+body.spike-rooms-v2 :focus-visible { outline:2px solid var(--rv-cyan,#55d9ff); outline-offset:3px; }
+body.spike-rooms-v2 .rv-shell {
+  width:100%;
+  max-width:1180px;
+  min-width:0;
+  margin-inline:auto;
+  padding:clamp(12px,2.4vw,26px) clamp(12px,3vw,30px) max(32px,env(safe-area-inset-bottom));
+}
+body.spike-rooms-v2 .rv-topbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+  min-width:0;
+  padding:5px 0 18px;
+}
+body.spike-rooms-v2 .rv-brand { flex:0 0 auto; min-width:0; font-size:15px !important; line-height:1.2; letter-spacing:.1em; }
+body.spike-rooms-v2 .rv-brand img { width:34px; height:34px; flex:none; }
+body.spike-rooms-v2 .rv-nav {
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:7px;
+  min-width:0;
+  max-width:100%;
+}
+body.spike-rooms-v2 .rv-nav a,
+body.spike-rooms-v2 .rv-quiet {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:40px;
+  max-width:100%;
+  padding:8px 12px;
+  border:1px solid var(--rv-line);
+  border-radius:999px;
+  font-size:12px !important;
+  line-height:1.25;
+  white-space:nowrap;
+}
+body.spike-rooms-v2 .rv-hero {
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:18px;
+  min-width:0;
+  padding:clamp(20px,4vw,40px);
+  border-radius:24px;
+}
+body.spike-rooms-v2 .rv-hero > div { min-width:0; max-width:100%; }
+body.spike-rooms-v2 .rv-hero h1 {
+  max-width:100%;
+  font-size:clamp(29px,5vw,48px) !important;
+  line-height:1.08 !important;
+  letter-spacing:-.035em !important;
+  overflow-wrap:anywhere;
+}
+body.spike-rooms-v2 .rv-hero p { max-width:62ch; font-size:14px !important; line-height:1.6 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-eyebrow { font-size:10px !important; line-height:1.4; letter-spacing:.13em; }
+body.spike-rooms-v2 .rv-primary,
+body.spike-rooms-v2 .rv-secondary,
+body.spike-rooms-v2 .rv-danger { min-height:40px; padding:10px 15px; border-radius:12px; font-size:13px !important; font-weight:700 !important; }
+body.spike-rooms-v2 .rv-toolbar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+  min-width:0;
+  margin:22px 0 14px;
+}
+body.spike-rooms-v2 .rv-search { flex:1 1 260px; width:100%; min-width:0; max-width:440px; }
+body.spike-rooms-v2 .rv-search input,
+body.spike-rooms-v2 .rv-field input,
+body.spike-rooms-v2 .rv-field textarea,
+body.spike-rooms-v2 .rv-field select,
+body.spike-rooms-v2 .rv-staff-tools input,
+body.spike-rooms-v2 .rv-staff-tools textarea,
+body.spike-rooms-v2 .rv-staff-tools select,
+body.spike-rooms-v2 .rv-member-management input {
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  font-size:14px !important;
+  line-height:1.4;
+}
+body.spike-rooms-v2 .rv-filters {
+  display:flex;
+  flex:1 1 100%;
+  gap:7px;
+  min-width:0;
+  max-width:100%;
+  overflow-x:auto;
+  overscroll-behavior-inline:contain;
+  padding:2px 1px 7px;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+}
+body.spike-rooms-v2 .rv-filter { flex:0 0 auto; min-height:38px; white-space:nowrap; }
+body.spike-rooms-v2 .rv-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:14px;
+  min-width:0;
+}
+body.spike-rooms-v2 .rv-card {
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  max-width:100%;
+  padding:16px;
+  gap:11px;
+  border-radius:18px;
+}
+body.spike-rooms-v2 .rv-card-head { display:flex; align-items:center; gap:11px; min-width:0; }
+body.spike-rooms-v2 .rv-card-head > div:last-child { min-width:0; }
+body.spike-rooms-v2 .rv-room-icon { flex:0 0 48px; width:48px; height:48px; }
+body.spike-rooms-v2 .rv-card h3 { font-size:16px !important; line-height:1.35 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-card p { min-height:0; font-size:13px !important; line-height:1.5 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-meta { gap:6px 9px; font-size:11px !important; line-height:1.45; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-card-actions { display:flex; flex-wrap:wrap; gap:8px; min-width:0; }
+body.spike-rooms-v2 .rv-card-actions > * { flex:1 1 110px; min-width:0; min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:9px 10px; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-chat-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(220px,270px);
+  align-items:start;
+  gap:14px;
+  min-width:0;
+  margin-top:18px;
+}
+body.spike-rooms-v2 .rv-chat-panel,
+body.spike-rooms-v2 .rv-side-panel { min-width:0; max-width:100%; border-radius:18px; }
+body.spike-rooms-v2 .rv-chat-panel {
+  display:flex;
+  flex-direction:column;
+  min-height:min(72svh,760px);
+  overflow:hidden;
+}
+body.spike-rooms-v2 .rv-chat-head { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px 12px; min-width:0; padding:15px 17px; }
+body.spike-rooms-v2 .rv-chat-head > div { min-width:0; }
+body.spike-rooms-v2 .rv-chat-head h1 { font-size:18px !important; line-height:1.35 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-chat-head p,
+body.spike-rooms-v2 .rv-message-time { font-size:11px !important; }
+body.spike-rooms-v2 .rv-messages {
+  flex:1 1 auto;
+  min-width:0;
+  min-height:280px;
+  max-height:58svh;
+  padding:16px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+body.spike-rooms-v2 .rv-message { max-width:min(88%,650px); min-width:0; font-size:13px !important; line-height:1.55 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-message-body { overflow-wrap:anywhere; word-break:break-word; }
+body.spike-rooms-v2 .rv-message-media { width:auto; max-width:100%; height:auto; }
+body.spike-rooms-v2 .rv-message-audio { width:min(100%,360px); max-width:100%; }
+body.spike-rooms-v2 .rv-composer {
+  display:grid;
+  grid-template-columns:42px 42px minmax(0,1fr) auto;
+  align-items:end;
+  gap:7px;
+  min-width:0;
+  padding:10px;
+}
+body.spike-rooms-v2 .rv-composer > * { min-width:0; }
+body.spike-rooms-v2 .rv-composer .rv-attach-button { width:42px; min-width:42px; min-height:42px; padding:7px !important; }
+body.spike-rooms-v2 .rv-composer textarea {
+  width:100%;
+  min-width:0;
+  min-height:42px;
+  max-height:120px;
+  resize:vertical;
+  font-size:14px !important;
+  line-height:1.4;
+  overflow-wrap:anywhere;
+}
+body.spike-rooms-v2 .rv-composer #sendMessage { min-width:58px; padding-inline:12px; }
+body.spike-rooms-v2 .rv-side-panel { height:auto; padding:16px; overflow:hidden; }
+body.spike-rooms-v2 .rv-side-panel h3,
+body.spike-rooms-v2 .rv-feature-panel h3 { font-size:14px !important; line-height:1.4 !important; }
+body.spike-rooms-v2 .rv-side-panel p,
+body.spike-rooms-v2 .rv-feature-panel p { font-size:13px !important; line-height:1.55 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-member-list { display:grid; grid-template-columns:minmax(0,1fr); gap:9px; min-width:0; }
+body.spike-rooms-v2 .rv-member { display:flex; align-items:center; min-width:0; white-space:normal; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-member > * { min-width:0; }
+body.spike-rooms-v2 .rv-avatar { flex:0 0 30px; }
+body.spike-rooms-v2 .rv-staff-tools,
+body.spike-rooms-v2 .rv-staff-tools form,
+body.spike-rooms-v2 .rv-member-management { min-width:0; }
+body.spike-rooms-v2 .rv-staff-member { min-width:0; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-staff-member-actions { display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+body.spike-rooms-v2 .rv-feature-panel { min-width:0; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-event { min-width:0; flex-wrap:wrap; }
+body.spike-rooms-v2 .rv-event > * { min-width:0; }
+body.spike-rooms-v2 .rv-modal-backdrop {
+  position:fixed;
+  inset:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+}
+body.spike-rooms-v2 .rv-modal {
+  width:min(500px,100%);
+  max-width:100%;
+  max-height:min(88svh,760px);
+  overflow-x:hidden;
+  overflow-y:auto;
+  padding:clamp(16px,4vw,23px);
+  border-radius:20px;
+  overscroll-behavior:contain;
+}
+body.spike-rooms-v2 .rv-modal h2 { font-size:21px !important; line-height:1.25 !important; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-modal p,
+body.spike-rooms-v2 .rv-field label { font-size:13px !important; line-height:1.5 !important; }
+body.spike-rooms-v2 .rv-modal-actions { display:flex; flex-wrap:wrap; gap:8px; }
+body.spike-rooms-v2 .rv-modal-actions > * { flex:1 1 120px; min-width:0; text-align:center; }
+body.spike-rooms-v2 .rv-toast { width:max-content; max-width:min(92vw,460px); font-size:13px !important; line-height:1.45; overflow-wrap:anywhere; }
+body.spike-rooms-v2 .rv-back { min-height:36px; }
+body.spike-rooms-v2 .rv-hidden,
+body.spike-rooms-v2 [hidden] { display:none !important; }
+
+@media (max-width:900px) {
+  body.spike-rooms-v2 .rv-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  body.spike-rooms-v2 .rv-chat-layout { grid-template-columns:minmax(0,1fr); }
+  body.spike-rooms-v2 .rv-side-panel { order:0; }
+  body.spike-rooms-v2 .rv-member-list { display:flex; flex-wrap:wrap; align-items:flex-start; gap:8px 12px; }
+  body.spike-rooms-v2 .rv-member { flex:1 1 150px; max-width:100%; }
+}
+@media (max-width:600px) {
+  body.spike-rooms-v2 .rv-shell { padding:10px 12px max(28px,env(safe-area-inset-bottom)); }
+  body.spike-rooms-v2 .rv-topbar { align-items:center; gap:9px; padding:4px 0 14px; }
+  body.spike-rooms-v2 .rv-brand img { width:32px; height:32px; }
+  body.spike-rooms-v2 .rv-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); width:100%; gap:6px; }
+  body.spike-rooms-v2 .rv-nav a { min-width:0; min-height:40px; padding:7px 4px; font-size:11px !important; white-space:normal; text-align:center; }
+  body.spike-rooms-v2 .rv-hero { align-items:stretch; flex-direction:column; gap:13px; padding:20px 17px; border-radius:19px; }
+  body.spike-rooms-v2 .rv-hero h1 { font-size:clamp(28px,8vw,36px) !important; line-height:1.08 !important; }
+  body.spike-rooms-v2 .rv-hero p { font-size:13px !important; }
+  body.spike-rooms-v2 .rv-hero > .rv-primary,
+  body.spike-rooms-v2 .rv-hero > .rv-secondary { width:100%; }
+  body.spike-rooms-v2 .rv-toolbar { align-items:stretch; margin:16px 0 12px; }
+  body.spike-rooms-v2 .rv-search { flex:1 1 100%; width:100%; max-width:none; }
+  body.spike-rooms-v2 .rv-filters { flex:1 1 100%; width:100%; }
+  body.spike-rooms-v2 .rv-grid { grid-template-columns:minmax(0,1fr); gap:10px; }
+  body.spike-rooms-v2 .rv-card { padding:14px; border-radius:16px; }
+  body.spike-rooms-v2 .rv-card-actions > * { flex:1 1 0; }
+  body.spike-rooms-v2 .rv-chat-layout { gap:11px; margin-top:13px; }
+  body.spike-rooms-v2 .rv-chat-panel { min-height: min(70svh,720px); }
+  body.spike-rooms-v2 .rv-chat-head { align-items:flex-start; padding:12px; }
+  body.spike-rooms-v2 .rv-messages { min-height:260px; max-height:52svh; padding:11px; }
+  body.spike-rooms-v2 .rv-message { max-width:94%; padding:10px 11px; }
+  body.spike-rooms-v2 .rv-composer { grid-template-columns:40px 40px minmax(0,1fr) auto; gap:6px; padding:8px; }
+  body.spike-rooms-v2 .rv-composer .rv-attach-button { width:40px; min-width:40px; min-height:42px; }
+  body.spike-rooms-v2 .rv-composer #sendMessage { min-width:52px; padding:9px 10px; }
+  body.spike-rooms-v2 .rv-composer textarea { min-height:42px; padding:10px; font-size:13px !important; }
+  body.spike-rooms-v2 .rv-side-panel { padding:13px; }
+  body.spike-rooms-v2 .rv-member-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
+  body.spike-rooms-v2 .rv-member { min-width:0; font-size:11px; }
+  body.spike-rooms-v2 .rv-modal-backdrop { align-items:flex-end; padding:8px 8px max(8px,env(safe-area-inset-bottom)); }
+  body.spike-rooms-v2 .rv-modal { width:100%; max-height:90svh; border-radius:20px 20px 14px 14px; }
+}
+@media (max-width:380px) {
+  body.spike-rooms-v2 .rv-shell { padding-inline:10px; }
+  body.spike-rooms-v2 .rv-nav { gap:5px; }
+  body.spike-rooms-v2 .rv-nav a { padding-inline:2px; font-size:10px !important; }
+  body.spike-rooms-v2 .rv-card-actions { flex-direction:column; }
+  body.spike-rooms-v2 .rv-card-actions > * { flex:1 1 auto; width:100%; }
+  body.spike-rooms-v2 .rv-composer { grid-template-columns:38px 38px minmax(0,1fr) auto; gap:5px; padding:7px; }
+  body.spike-rooms-v2 .rv-composer .rv-attach-button { width:38px; min-width:38px; }
+  body.spike-rooms-v2 .rv-composer #sendMessage { min-width:48px; padding-inline:8px; }
+  body.spike-rooms-v2 .rv-member-list { grid-template-columns:minmax(0,1fr); }
+}
+@media (max-width:320px) {
+  body.spike-rooms-v2 .rv-composer { grid-template-columns:36px 36px minmax(0,1fr); }
+  body.spike-rooms-v2 .rv-composer #sendMessage { grid-column:3; justify-self:end; min-width:64px; }
+  body.spike-rooms-v2 .rv-composer textarea { grid-column:1 / -1; grid-row:2; width:100%; }
+}
+@media (min-width:901px) and (max-width:1100px) {
+  body.spike-rooms-v2 .rv-chat-layout { grid-template-columns:minmax(0,1fr) 240px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.spike-rooms-v2 *, body.spike-rooms-v2 *::before, body.spike-rooms-v2 *::after { scroll-behavior:auto !important; transition-duration:.01ms !important; animation-duration:.01ms !important; animation-iteration-count:1 !important; }
+}
