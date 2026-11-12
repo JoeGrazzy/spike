@@ -1,0 +1,666 @@
+/* SPIKE DM Theme + UX polish v1
+   Loaded after five-theme authority. Layout/JS unchanged.
+   Goals: theme coherence, clearer bubbles, calmer inbox, better composer focus.
+*/
+
+/* --- Map local DM aliases to five-theme tokens --- */
+html[data-spike-style] {
+  --bg: var(--spike-bg);
+  --panel: var(--spike-surface);
+  --panel2: var(--spike-surface-2);
+  --line: var(--spike-line);
+  --text: var(--spike-text);
+  --muted: var(--spike-muted);
+  --a: var(--spike-accent);
+  --b: var(--spike-accent-2);
+  --dm-mine-1: var(--spike-action-bg);
+  --dm-mine-2: var(--spike-accent);
+  --dm-focus: var(--spike-focus);
+  --dm-danger: var(--spike-danger);
+  --dm-shadow: var(--spike-shadow);
+}
+
+/* Fallback when authority not yet applied */
+:root {
+  --bg: var(--spike-bg, #0b1020);
+  --panel: var(--spike-surface, #121a2d);
+  --panel2: var(--spike-surface-2, #1b2540);
+  --line: var(--spike-line, #35415f);
+  --text: var(--spike-text, #f5f6ff);
+  --muted: var(--spike-muted, #c0c8df);
+  --a: var(--spike-accent, #a78bfa);
+  --b: var(--spike-accent-2, #c4b5fd);
+  --dm-mine-1: var(--spike-action-bg, #6544c8);
+  --dm-mine-2: var(--spike-accent, #a78bfa);
+  --dm-focus: var(--spike-focus, #c4b5fd);
+  --dm-danger: var(--spike-danger, #b4233c);
+  --dm-shadow: var(--spike-shadow, 0 14px 36px rgba(0,0,0,.3));
+}
+
+/* --- Shared chrome --- */
+html[data-spike-style] body {
+  background: var(--spike-bg, var(--bg)) !important;
+  color: var(--spike-text, var(--text)) !important;
+  color-scheme: inherit;
+}
+html[data-spike-style] .top {
+  background: color-mix(in srgb, var(--spike-surface, var(--panel)) 92%, transparent) !important;
+  border-bottom-color: var(--spike-line, var(--line)) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+html[data-spike-style] .back,
+html[data-spike-style] .iconbtn {
+  background: var(--spike-surface-2, var(--panel2)) !important;
+  border-color: var(--spike-line, var(--line)) !important;
+  color: var(--spike-text, var(--text)) !important;
+  transition: background .15s ease, border-color .15s ease, transform .12s ease;
+}
+html[data-spike-style] .back:hover,
+html[data-spike-style] .iconbtn:hover,
+html[data-spike-style] .back:focus-visible,
+html[data-spike-style] .iconbtn:focus-visible {
+  background: color-mix(in srgb, var(--spike-accent) 14%, var(--spike-surface-2)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 45%, var(--spike-line)) !important;
+  outline: none;
+}
+html[data-spike-style] .back:active,
+html[data-spike-style] .iconbtn:active {
+  transform: scale(.96);
+}
+html[data-spike-style] .brand { color: var(--spike-text) !important; }
+html[data-spike-style] .subtitle,
+html[data-spike-style] .meta,
+html[data-spike-style] .preview,
+html[data-spike-style] .status { color: var(--spike-muted) !important; }
+
+/* Accent word in "SPIKE Messages" header */
+html[data-spike-style] .brand span {
+  color: var(--spike-accent) !important;
+}
+
+/* --- Inbox hero --- */
+html[data-spike-style] .hero {
+  background:
+    radial-gradient(120% 120% at 0% 0%, color-mix(in srgb, var(--spike-accent) 16%, transparent), transparent 58%),
+    var(--spike-surface) !important;
+  border-color: var(--spike-line) !important;
+  box-shadow: var(--dm-shadow);
+}
+html[data-spike-style] .eyebrow {
+  color: var(--spike-accent) !important;
+  letter-spacing: .14em;
+}
+html[data-spike-style] .hero h1 {
+  color: var(--spike-text) !important;
+  letter-spacing: -.04em;
+}
+html[data-spike-style] .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 0;
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-accent)) !important;
+  color: var(--spike-action-text, #fff) !important;
+  font-weight: 800;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--spike-action-bg) 28%, transparent);
+}
+html[data-spike-style] .primary:hover,
+html[data-spike-style] .primary:focus-visible {
+  filter: brightness(1.05);
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 2px;
+}
+
+/* --- Search --- */
+html[data-spike-style] .search {
+  background: var(--spike-surface) !important;
+  border-color: var(--spike-line) !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+html[data-spike-style] .search:focus-within {
+  border-color: color-mix(in srgb, var(--spike-accent) 55%, var(--spike-line)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--spike-accent) 18%, transparent);
+}
+html[data-spike-style] .search input {
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] .search input::placeholder {
+  color: color-mix(in srgb, var(--spike-muted) 80%, transparent);
+}
+
+/* --- Filter chips --- */
+html[data-spike-style] .chip {
+  background: var(--spike-surface) !important;
+  border-color: var(--spike-line) !important;
+  color: var(--spike-muted) !important;
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+html[data-spike-style] .chip:hover {
+  border-color: color-mix(in srgb, var(--spike-accent) 40%, var(--spike-line)) !important;
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] .chip.active {
+  background: color-mix(in srgb, var(--spike-accent) 16%, var(--spike-surface)) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 50%, var(--spike-line)) !important;
+  color: var(--spike-text) !important;
+  font-weight: 750;
+}
+html[data-spike-style] .chip:focus-visible {
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 2px;
+}
+html[data-spike-style] .countBadge {
+  background: var(--spike-accent) !important;
+  color: var(--spike-action-text, #fff) !important;
+}
+html[data-spike-style] .newMessagesBadge {
+  background: var(--spike-success, #16764a) !important;
+  color: #fff !important;
+}
+
+/* --- Conversation list rows --- */
+html[data-spike-style] .item {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--spike-text) 3%, transparent), transparent),
+    var(--spike-surface) !important;
+  border-color: var(--spike-line) !important;
+  transition: border-color .15s ease, background .15s ease, transform .12s ease;
+}
+html[data-spike-style] .item:hover,
+html[data-spike-style] a.item:focus-visible {
+  border-color: color-mix(in srgb, var(--spike-accent) 42%, var(--spike-line)) !important;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--spike-accent) 8%, transparent), transparent),
+    var(--spike-surface-2) !important;
+  outline: none;
+}
+html[data-spike-style] .item:active { transform: scale(.992); }
+html[data-spike-style] .avatar {
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-accent)) !important;
+  color: var(--spike-action-text, #fff) !important;
+}
+html[data-spike-style] .name { color: var(--spike-text) !important; }
+html[data-spike-style] .rowUnreadBadge {
+  background: var(--spike-accent) !important;
+  color: var(--spike-action-text, #fff) !important;
+}
+html[data-spike-style] .empty,
+html[data-spike-style] .notice {
+  border-color: var(--spike-line) !important;
+  color: var(--spike-muted) !important;
+  background: color-mix(in srgb, var(--spike-surface) 70%, transparent);
+}
+html[data-spike-style] .skeleton {
+  background: linear-gradient(90deg, var(--spike-surface), var(--spike-surface-2), var(--spike-surface)) !important;
+  background-size: 200% 100%;
+}
+
+/* --- Thread bubbles --- */
+html[data-spike-style] .thread { gap: 12px; }
+html[data-spike-style] .bubble {
+  background: var(--spike-surface-2) !important;
+  border: 1px solid var(--spike-line) !important;
+  color: var(--spike-text) !important;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--spike-text) 4%, transparent);
+  transition: opacity .15s ease, border-color .15s ease;
+}
+html[data-spike-style] .bubble.mine {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--dm-mine-1) 92%, transparent),
+    color-mix(in srgb, var(--dm-mine-2) 88%, transparent)
+  ) !important;
+  border-color: color-mix(in srgb, var(--dm-mine-1) 35%, transparent) !important;
+  color: var(--spike-action-text, #fff) !important;
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--dm-mine-1) 22%, transparent);
+}
+html[data-spike-style] .bubble time {
+  opacity: .72;
+  color: inherit;
+}
+html[data-spike-style] .bubble.mine time { opacity: .78; }
+html[data-spike-style] .bubble.is-pending { opacity: .7; }
+html[data-spike-style] .bubble.is-failed {
+  border-color: color-mix(in srgb, var(--dm-danger) 40%, transparent) !important;
+}
+html[data-spike-style] .bubble.is-failed time { color: color-mix(in srgb, var(--dm-danger) 70%, #fff) !important; }
+html[data-spike-style] .bubble-retry {
+  border-color: color-mix(in srgb, var(--dm-danger) 35%, transparent) !important;
+  background: color-mix(in srgb, var(--dm-danger) 12%, transparent) !important;
+  color: color-mix(in srgb, var(--dm-danger) 85%, #fff) !important;
+}
+html[data-spike-style] .bubble .msgReaction {
+  background: var(--spike-surface) !important;
+  border-color: var(--spike-line) !important;
+  box-shadow: var(--dm-shadow);
+}
+
+/* --- Composer --- */
+html[data-spike-style] .composer {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--spike-bg) 70%, transparent),
+    var(--spike-bg) 28%
+  ) !important;
+  border-top-color: var(--spike-line) !important;
+}
+html[data-spike-style] .composebox {
+  background: var(--spike-surface) !important;
+  border: 1px solid var(--spike-line) !important;
+  border-radius: 18px;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+html[data-spike-style] .composebox:focus-within {
+  border-color: color-mix(in srgb, var(--spike-accent) 50%, var(--spike-line)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--spike-accent) 16%, transparent);
+}
+html[data-spike-style] .composebox textarea {
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] .send,
+html[data-spike-style] .mediaPlus,
+html[data-spike-style] #sendRecording {
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-accent)) !important;
+  border: 0 !important;
+  color: var(--spike-action-text, #fff) !important;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--spike-action-bg) 25%, transparent);
+  transition: filter .15s ease, transform .12s ease;
+}
+html[data-spike-style] .send:hover,
+html[data-spike-style] .mediaPlus:hover,
+html[data-spike-style] .send:focus-visible,
+html[data-spike-style] .mediaPlus:focus-visible {
+  filter: brightness(1.06);
+  outline: 2px solid var(--dm-focus);
+  outline-offset: 2px;
+}
+html[data-spike-style] .send:active,
+html[data-spike-style] .mediaPlus:active { transform: scale(.96); }
+html[data-spike-style] .voiceNoteBtn {
+  background: var(--spike-surface-2) !important;
+  border-color: var(--spike-line) !important;
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] .voiceNoteBtn:hover,
+html[data-spike-style] .voiceNoteBtn:focus-visible {
+  border-color: color-mix(in srgb, var(--spike-accent) 45%, var(--spike-line)) !important;
+  color: var(--spike-accent) !important;
+  outline: none;
+}
+html[data-spike-style] .voiceNoteBtn.recording {
+  color: var(--dm-danger) !important;
+  border-color: var(--dm-danger) !important;
+}
+html[data-spike-style] .replyPreview {
+  border-left-color: var(--spike-accent) !important;
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-muted) !important;
+}
+html[data-spike-style] .recordingTray {
+  border-color: color-mix(in srgb, var(--dm-danger) 35%, var(--spike-line)) !important;
+  background: color-mix(in srgb, var(--dm-danger) 10%, var(--spike-surface)) !important;
+}
+html[data-spike-style] .recordDot {
+  background: var(--dm-danger) !important;
+}
+html[data-spike-style] .mediaPreview {
+  border-color: var(--spike-line) !important;
+  background: var(--spike-surface-2) !important;
+}
+
+/* --- Message action menu --- */
+html[data-spike-style] .messageMenuShade {
+  background: color-mix(in srgb, var(--spike-bg) 78%, transparent) !important;
+}
+html[data-spike-style] .messageMenu {
+  background: var(--spike-surface) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 28%, var(--spike-line)) !important;
+  color: var(--spike-text) !important;
+  box-shadow: var(--dm-shadow) !important;
+}
+
+/* --- Call action tint --- */
+html[data-spike-style] .callActions .iconbtn {
+  color: var(--spike-text) !important;
+}
+
+/* --- Incoming toast (if present) --- */
+html[data-spike-style] .spike-message-toast {
+  border-color: var(--spike-line) !important;
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  box-shadow: var(--dm-shadow);
+}
+
+/* Reduced motion already handled in page CSS; keep focus rings visible */
+@media (prefers-reduced-motion: reduce) {
+  html[data-spike-style] .back,
+  html[data-spike-style] .iconbtn,
+  html[data-spike-style] .item,
+  html[data-spike-style] .send,
+  html[data-spike-style] .mediaPlus,
+  html[data-spike-style] .chip {
+    transition: none !important;
+  }
+}
+
+
+/* ===== DM polish v1.1 — touch targets, empty states, composer comfort ===== */
+
+html[data-spike-style] .mediaPlus,
+html[data-spike-style] .voiceNoteBtn,
+html[data-spike-style] .send {
+  width: 48px !important;
+  height: 48px !important;
+  flex: 0 0 48px !important;
+  border-radius: 16px !important;
+  font-size: 18px !important;
+}
+html[data-spike-style] .composebox {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 8px !important;
+  padding: 8px !important;
+  min-height: 56px;
+}
+html[data-spike-style] .composebox textarea {
+  min-height: 40px !important;
+  padding: 10px 8px !important;
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+}
+html[data-spike-style] .composer {
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom)) !important;
+}
+html[data-spike-style] .composer .status {
+  font-size: 11px !important;
+  padding: 6px 4px 0 !important;
+  opacity: .9;
+}
+
+@media (max-width: 720px) {
+  html[data-spike-style] .back,
+  html[data-spike-style] .iconbtn {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 15px !important;
+  }
+  html[data-spike-style] .callActions .iconbtn {
+    width: 44px !important;
+    height: 44px !important;
+  }
+  html[data-spike-style] .item .avatar,
+  html[data-spike-style] .person .avatar {
+    width: 44px !important;
+    height: 44px !important;
+    flex-basis: 44px !important;
+  }
+  html[data-spike-style] .item {
+    padding: 14px 12px !important;
+    border-radius: 16px !important;
+  }
+  html[data-spike-style] .chip {
+    padding: 10px 14px !important;
+    min-height: 40px;
+  }
+  html[data-spike-style] .bubble {
+    max-width: 88% !important;
+    padding: 12px 14px !important;
+    font-size: 15px;
+  }
+  html[data-spike-style] .top {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+  html[data-spike-style] .content {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+}
+
+html[data-spike-style] .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 36px 20px !important;
+  text-align: center;
+  border: 1px dashed color-mix(in srgb, var(--spike-line) 85%, transparent) !important;
+  border-radius: 20px !important;
+  background:
+    radial-gradient(80% 80% at 50% 0%, color-mix(in srgb, var(--spike-accent) 8%, transparent), transparent 55%),
+    color-mix(in srgb, var(--spike-surface) 80%, transparent) !important;
+  color: var(--spike-muted) !important;
+  line-height: 1.55 !important;
+}
+html[data-spike-style] .empty b,
+html[data-spike-style] .empty strong {
+  color: var(--spike-text) !important;
+  font-size: 16px;
+  font-weight: 800;
+  display: block;
+  margin-top: 4px;
+}
+html[data-spike-style] .empty i.fa-regular,
+html[data-spike-style] .empty i.fa-solid {
+  color: var(--spike-accent) !important;
+  opacity: .9;
+}
+
+html[data-spike-style] .spike-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 40px 22px;
+  border-radius: 22px;
+  border: 1px dashed var(--spike-line);
+  background:
+    radial-gradient(90% 90% at 50% 0%, color-mix(in srgb, var(--spike-accent) 10%, transparent), transparent 50%),
+    var(--spike-surface);
+  color: var(--spike-muted);
+}
+html[data-spike-style] .spike-empty-icon { font-size: 32px; line-height: 1; }
+html[data-spike-style] .spike-empty-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 850;
+  letter-spacing: -.02em;
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] .spike-empty-body {
+  margin: 0;
+  max-width: 32ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--spike-muted) !important;
+}
+html[data-spike-style] .spike-empty-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 18px;
+  margin-top: 6px;
+  border-radius: 14px;
+  border: 0;
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-accent));
+  color: var(--spike-action-text, #fff) !important;
+  font-weight: 800;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: 0 8px 22px color-mix(in srgb, var(--spike-action-bg) 24%, transparent);
+}
+html[data-spike-style] .spike-empty-action:hover,
+html[data-spike-style] .spike-empty-action:focus-visible {
+  filter: brightness(1.05);
+  outline: 2px solid var(--spike-focus);
+  outline-offset: 2px;
+}
+
+html[data-spike-style] .list { gap: 10px !important; }
+html[data-spike-style] .filters {
+  gap: 8px !important;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+html[data-spike-style] .filters::-webkit-scrollbar { display: none; }
+html[data-spike-style] .thread {
+  padding: 10px 0 20px !important;
+  gap: 12px !important;
+}
+html[data-spike-style] .bubble.mine {
+  border-bottom-right-radius: 8px !important;
+}
+html[data-spike-style] .bubble:not(.mine) {
+  border-bottom-left-radius: 8px !important;
+}
+html[data-spike-style] #loadOlderMessages.chip {
+  justify-content: center;
+  font-weight: 700;
+}
+html[data-spike-style] .mediaPreview,
+html[data-spike-style] .replyPreview.show {
+  border-radius: 14px !important;
+  padding: 10px 12px !important;
+}
+html[data-spike-style] .mediaPreview button,
+html[data-spike-style] .replyPreview button {
+  min-height: 36px;
+  min-width: 36px;
+  border-radius: 10px;
+  color: var(--spike-text) !important;
+}
+
+
+/* ===== DM polish v1.2 — unread / pin emphasis + keyboard-safe composer ===== */
+
+html[data-spike-style] .itemRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+html[data-spike-style] .itemRow .item {
+  flex: 1;
+  min-width: 0;
+}
+html[data-spike-style] .item.is-unread {
+  border-color: color-mix(in srgb, var(--spike-accent) 42%, var(--spike-line)) !important;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--spike-accent) 10%, transparent), transparent 55%),
+    var(--spike-surface) !important;
+}
+html[data-spike-style] .item.is-unread .name {
+  font-weight: 900 !important;
+}
+html[data-spike-style] .item.is-unread .preview {
+  color: var(--spike-text) !important;
+  font-weight: 650;
+}
+html[data-spike-style] .itemRow.is-pinned .item {
+  box-shadow: inset 3px 0 0 var(--spike-accent);
+}
+html[data-spike-style] .pinAction {
+  flex: 0 0 44px;
+  width: 44px;
+  min-height: 44px;
+  align-self: center;
+  border: 1px solid var(--spike-line) !important;
+  border-radius: 14px !important;
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-muted) !important;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease, background .15s ease;
+}
+html[data-spike-style] .pinAction[aria-pressed="true"],
+html[data-spike-style] .itemRow.is-pinned .pinAction {
+  color: var(--spike-accent) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 45%, var(--spike-line)) !important;
+  background: color-mix(in srgb, var(--spike-accent) 12%, var(--spike-surface-2)) !important;
+}
+html[data-spike-style] .pinAction:hover,
+html[data-spike-style] .pinAction:focus-visible {
+  color: var(--spike-accent) !important;
+  outline: 2px solid var(--spike-focus);
+  outline-offset: 2px;
+}
+html[data-spike-style] .unarchive:not(.pinAction) {
+  align-self: center;
+  min-height: 40px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--spike-line);
+  background: var(--spike-surface-2);
+  color: var(--spike-text);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+
+
+
+
+
+  40% { opacity: 1; transform: translateY(-2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  
+}
+
+/* Keyboard-safe composer: use visualViewport bottom inset when available */
+html[data-spike-style] .composer {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom) + var(--dm-keyboard-inset, 0px)) !important;
+  transition: padding-bottom .18s ease;
+}
+html[data-spike-style] body.dm-keyboard-open .composer {
+  box-shadow: 0 -8px 28px color-mix(in srgb, var(--spike-bg) 55%, transparent);
+}
+html[data-spike-style] body.dm-keyboard-open .top {
+  /* keep header visible; thread scrolls underneath */
+}
+
+
+/* ===== DM polish v1.3 — kill tap underlines on Android/WebKit ===== */
+html[data-spike-style] a,
+html[data-spike-style] a:link,
+html[data-spike-style] a:visited,
+html[data-spike-style] a:hover,
+html[data-spike-style] a:active,
+html[data-spike-style] a:focus,
+html[data-spike-style] a:focus-visible {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  text-decoration-line: none !important;
+}
+html[data-spike-style] .item,
+html[data-spike-style] .item *,
+html[data-spike-style] .itemRow,
+html[data-spike-style] .itemRow * {
+  text-decoration: none !important;
+  -webkit-text-decoration: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+/* Keep intentional attachment download links underlined inside bubbles only */
+html[data-spike-style] .attachmentCard a {
+  text-decoration: underline !important;
+  text-underline-offset: 2px;
+}
+html[data-spike-style] .pinAction {
+  color: var(--spike-muted, var(--muted)) !important;
+  border-color: var(--spike-line, var(--line)) !important;
+}
+html[data-spike-style] .pinAction[aria-pressed="true"] {
+  color: var(--spike-accent) !important;
+  border-color: color-mix(in srgb, var(--spike-accent) 50%, var(--spike-line)) !important;
+  background: color-mix(in srgb, var(--spike-accent) 12%, var(--spike-surface-2)) !important;
+}
+html[data-spike-style] .avatar {
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-accent)) !important;
+}

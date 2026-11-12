@@ -1,0 +1,166 @@
+/* SPIKE Touch / Hover Guard v1
+   Prevents sticky :hover styles on touch devices (Android/iOS WebView).
+   Real mouse users still get hover via (hover: hover) and (pointer: fine).
+   Load this AFTER page feature CSS so it can neutralize unguarded :hover rules. */
+
+/* ── Kill sticky hover elevation / transforms on coarse pointers ───── */
+@media (hover: none), (pointer: coarse) {
+  /* Header / chrome */
+  .icon:hover,
+  .spike-ask-ai:hover,
+  .spike-theme-pill:hover {
+    transform: none !important;
+    border-color: inherit;
+    box-shadow: none !important;
+    filter: none !important;
+  }
+
+  /* Feed cards & posts */
+  .post:hover,
+  .card:hover,
+  .signal-pick:hover {
+    transform: none !important;
+    box-shadow: inherit !important;
+    border-color: inherit;
+  }
+
+  /* Actions & buttons */
+  .more:hover,
+  .post-actions button:hover,
+  .react-trigger:hover,
+  .comments-close:hover,
+  .comment .reply-btn:hover,
+  .comment-replying button:hover,
+  .comment-form button[type="submit"]:hover,
+  .comment-emoji:hover,
+  .comment-emoji-picker button:hover,
+  .spike-share-person:hover,
+  .spike-menu-sheet .menu-list button:hover,
+  .spike-menu-sheet .menu-list a:hover,
+  .spike-quick-actions button:hover,
+  .spike-ai-close:hover,
+  .spike-ai-go:hover,
+  .spike-ai-chip:hover,
+  .spike-ai-result:hover,
+  .toast-close:hover,
+  .spn-close:hover,
+  .spike-media-longpress-actions button:hover,
+  .spike-reaction-tray button:hover {
+    transform: none !important;
+    background: inherit !important;
+    color: inherit !important;
+    border-color: inherit !important;
+    filter: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Image viewer chrome */
+  .spike-image-viewer-nav:hover,
+  .spike-image-viewer-close:hover {
+    transform: translateY(-50%) !important;
+    background: inherit !important;
+  }
+  .spike-image-viewer-close:hover {
+    transform: none !important;
+  }
+
+  /* Generic interactive leftovers */
+  a:hover,
+  button:hover,
+  [role="button"]:hover,
+  .btn:hover,
+  .menu-item:hover,
+  .list-item:hover {
+    text-decoration-line: none !important;
+  }
+}
+
+/* ── Re-enable intentional hover only for real pointers ───────────── */
+@media (hover: hover) and (pointer: fine) {
+  .icon:hover { border-color: rgba(167, 139, 250, .35); transform: translateY(-1px); }
+  .spike-ask-ai:hover {
+    transform: translateY(-1px);
+    border-color: rgba(167, 139, 250, .65);
+    box-shadow: 0 7px 22px rgba(124, 58, 237, .24);
+  }
+  .spike-theme-pill:hover { transform: translateY(-1px) scale(1.03); }
+  .post:hover { box-shadow: 0 12px 40px rgba(0, 0, 0, .18); }
+  .more:hover { background: var(--surface3); }
+  .post-actions button:hover { background: var(--surface3); color: var(--text); }
+  .react-trigger:hover { color: var(--text); background: var(--surface3); }
+  .spike-reaction-tray button:hover {
+    transform: translateY(-5px) scale(1.12) !important;
+    background: rgba(255, 255, 255, .07) !important;
+  }
+  .comments-close:hover { color: var(--text); background: var(--surface3); }
+  .comment .reply-btn:hover { color: var(--primary); }
+  .comment-replying button:hover { background: var(--surface2); color: var(--text); }
+  .comment-form button[type="submit"]:hover { background: var(--primary2); }
+  .comment-emoji:hover { background: var(--surface3); color: var(--text); }
+  .comment-emoji-picker button:hover { background: var(--surface3); }
+  .spike-share-person:hover { background: var(--surface3); }
+  .spike-menu-sheet .menu-list button:hover,
+  .spike-menu-sheet .menu-list a:hover {
+    transform: translateY(-1px);
+    border-color: rgba(167, 139, 250, .32);
+    background: rgba(139, 92, 246, .09);
+  }
+  .spike-quick-actions button:hover {
+    background: rgba(139, 92, 255, .14) !important;
+    border-color: rgba(139, 92, 255, .32) !important;
+  }
+  .spike-ai-close:hover { background: var(--surface2); }
+  .spike-ai-go:hover { filter: brightness(1.08); transform: translateY(-1px); }
+  .spike-ai-chip:hover { border-color: rgba(167, 139, 250, .45); background: var(--surface2); }
+  .spike-ai-result:hover {
+    transform: translateY(-1px);
+    border-color: rgba(167, 139, 250, .4);
+    background: var(--surface2);
+  }
+  .toast-close:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .spn-close:hover { background: rgba(255, 255, 255, .08); color: #fff; }
+  .spike-media-longpress-actions button:hover { background: rgba(255, 255, 255, .1); }
+  .spike-image-viewer-nav:hover {
+    background: rgba(255, 255, 255, .14);
+    transform: translateY(-50%) scale(1.04);
+  }
+  .spike-image-viewer-close:hover {
+    background: rgba(255, 255, 255, .12);
+    transform: scale(1.04);
+  }
+  .signal-pick:hover {
+    transform: translateY(-2px);
+    border-color: rgba(167, 139, 250, .56);
+    box-shadow: 0 12px 30px rgba(124, 58, 237, .18);
+  }
+}
+
+/* ── Touch target floor (primary controls) ────────────────────────── */
+@media (pointer: coarse) {
+  .icon,
+  .spike-ask-ai,
+  .spike-theme-pill,
+  .comments-close,
+  .post-actions button,
+  .react-trigger,
+  .comment-emoji,
+  .spike-bottom-nav a,
+  .spike-bottom-nav button,
+  #spikeBottomNav a,
+  #spikeBottomNav button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .post-actions {
+    min-height: 44px;
+    gap: 8px;
+  }
+
+  /* iOS: prevent focus-zoom on form controls */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+  textarea,
+  select {
+    font-size: max(16px, 1em);
+  }
+}

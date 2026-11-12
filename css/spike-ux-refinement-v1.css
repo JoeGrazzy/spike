@@ -1,0 +1,359 @@
+/* SPIKE UX refinement v1 → Nicer UX pass
+   Accessibility, touch ergonomics, calm interactions, consistent spacing,
+   better empty states, and mobile comfort. Theme tokens remain authoritative. */
+
+:root {
+  --spike-ux-focus: color-mix(in srgb, var(--spike-accent, #55dbc6) 78%, white);
+  --spike-ux-ease: cubic-bezier(.2, .75, .25, 1);
+  --spike-ux-fast: 140ms;
+  --spike-ux-base: 190ms;
+  --spike-ux-radius: var(--spike-radius, 18px);
+  --spike-ux-radius-sm: var(--spike-radius-sm, 12px);
+  --spike-ux-control-h: 44px;
+  --spike-ux-gap: 12px;
+  --spike-ux-gap-lg: 18px;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent !important;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Re-enable selection only on real text targets */
+input,
+textarea,
+[contenteditable="true"],
+[contenteditable=""],
+.post-body,
+.post-content,
+.message-body,
+.message-text,
+.message-content,
+.caption,
+.caption-text,
+.post-caption,
+.comment-text,
+.comment-body,
+.bio,
+.profile-bio,
+.dm-message,
+.chat-message,
+.selectable,
+.allow-select {
+  user-select: text;
+  -webkit-user-select: text;
+  -webkit-touch-callout: default;
+}
+
+/* Global safety net – kill residual tap chrome everywhere */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Focus & interaction ─────────────────────────────────────────── */
+:where(button, a, input, select, textarea, summary, [role="button"], [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--spike-ux-focus) !important;
+  outline-offset: 3px !important;
+}
+
+:where(button, [role="button"], input[type="button"], input[type="submit"], input[type="reset"]) {
+  touch-action: manipulation;
+  min-height: var(--spike-ux-control-h);
+  transition:
+    transform var(--spike-ux-fast) var(--spike-ux-ease),
+    box-shadow var(--spike-ux-base) var(--spike-ux-ease),
+    filter var(--spike-ux-base) var(--spike-ux-ease),
+    background-color var(--spike-ux-fast) var(--spike-ux-ease),
+    border-color var(--spike-ux-fast) var(--spike-ux-ease),
+    color var(--spike-ux-fast) var(--spike-ux-ease);
+}
+
+:where(button, input, select, textarea) { font: inherit; }
+:where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) { max-width: 100%; }
+:where(img, video, canvas, iframe) { max-width: 100%; }
+:where(img, video) { height: auto; }
+
+@media (hover: hover) and (pointer: fine) {
+  :where(button, input[type="button"], input[type="submit"], input[type="reset"]):not(:disabled):hover {
+    filter: brightness(1.045);
+  }
+  :where(button, input[type="button"], input[type="submit"], input[type="reset"]):not(:disabled):active {
+    transform: translateY(1px) scale(.985);
+  }
+}
+
+:where(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+  opacity: .62;
+}
+
+:where(input, select, textarea):where(:not([type="checkbox"]):not([type="radio"])):focus-visible {
+  border-color: var(--spike-accent, #55dbc6);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--spike-accent, #55dbc6) 32%, transparent);
+}
+
+:where(p, h1, h2, h3, h4, label, small, li, a, button, .message, .post, .card) {
+  overflow-wrap: anywhere;
+}
+
+/* ── Calm cards & posts ──────────────────────────────────────────── */
+html[data-spike-style] :where(.card, .post, .message-card, .room-card, .notif-item, .friend-card) {
+  border-radius: var(--spike-ux-radius);
+  transition:
+    box-shadow var(--spike-ux-base) var(--spike-ux-ease),
+    border-color var(--spike-ux-base) var(--spike-ux-ease),
+    background-color var(--spike-ux-base) var(--spike-ux-ease);
+}
+
+html[data-spike-style] :where(.post, .card):not(.no-hover) {
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--spike-shadow, rgba(0,0,0,.25)) 55%, transparent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  html[data-spike-style] :where(.post, .card):not(.no-hover):hover {
+    box-shadow: 0 8px 28px color-mix(in srgb, var(--spike-shadow, rgba(0,0,0,.3)) 70%, transparent);
+  }
+}
+
+/* Slightly more breathing room between feed items */
+html[data-spike-style] .posts > .post,
+html[data-spike-style] .posts > article,
+html[data-spike-style] #posts > .post {
+  margin-bottom: 14px;
+}
+
+/* ── Bottom navigation comfort ───────────────────────────────────── */
+html[data-spike-style] .spike-bottom-nav a,
+html[data-spike-style] .spike-bottom-nav button,
+html[data-spike-style] #spikeBottomNav a,
+html[data-spike-style] #spikeBottomNav button {
+  min-height: 52px;
+  min-width: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background var(--spike-ux-fast) var(--spike-ux-ease),
+    color var(--spike-ux-fast) var(--spike-ux-ease),
+    transform var(--spike-ux-fast) var(--spike-ux-ease),
+    border-color var(--spike-ux-fast) var(--spike-ux-ease);
+}
+
+html[data-spike-style] .spike-bottom-nav a:active,
+html[data-spike-style] .spike-bottom-nav button:active,
+html[data-spike-style] #spikeBottomNav a:active,
+html[data-spike-style] #spikeBottomNav button:active {
+  transform: scale(.96);
+}
+
+/* Active state gets a soft accent glow instead of harsh contrast */
+html[data-spike-style] .spike-bottom-nav a.active,
+html[data-spike-style] .spike-bottom-nav button.active,
+html[data-spike-style] #spikeBottomNav a.active,
+html[data-spike-style] #spikeBottomNav button.active,
+html[data-spike-style] .spike-bottom-nav a[aria-current="page"] {
+  background: color-mix(in srgb, var(--spike-accent, #a78bfa) 16%, transparent);
+  color: var(--spike-text, #f5f6ff);
+}
+
+/* ── Empty states (shared visual language) ───────────────────────── */
+.spike-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 52px 28px;
+  min-height: 200px;
+  gap: 10px;
+  border-radius: var(--spike-ux-radius);
+}
+
+.spike-empty-icon {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 4px;
+  opacity: .9;
+  filter: saturate(.95);
+}
+
+.spike-empty-title {
+  margin: 0;
+  font-size: 17.5px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--spike-text, var(--text, #f5f6ff));
+}
+
+.spike-empty-body {
+  margin: 0;
+  max-width: 300px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--spike-muted, var(--muted, #a8a0bb));
+}
+
+.spike-empty-action {
+  margin-top: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--spike-ux-radius-sm);
+  border: 1px solid var(--spike-line, var(--line, rgba(255,255,255,.12)));
+  background: color-mix(in srgb, var(--spike-surface-2, rgba(255,255,255,.06)) 88%, var(--spike-accent, #a78bfa) 12%);
+  color: var(--spike-text, var(--text, #fff));
+  font-size: 13.5px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background var(--spike-ux-fast) var(--spike-ux-ease),
+    border-color var(--spike-ux-fast) var(--spike-ux-ease),
+    transform var(--spike-ux-fast) var(--spike-ux-ease);
+}
+
+.spike-empty-action:hover,
+.spike-empty-action:focus-visible {
+  background: color-mix(in srgb, var(--spike-surface-3, rgba(255,255,255,.1)) 80%, var(--spike-accent, #a78bfa) 20%);
+  outline: none;
+}
+
+.spike-empty-action:active {
+  transform: scale(.98);
+}
+
+/* Legacy empty-state class gets the same calm treatment */
+html[data-spike-style] :where(.empty, .empty-state, .discover-empty-state) {
+  text-align: center;
+  color: var(--spike-muted, var(--muted));
+  padding: 28px 18px;
+  border-radius: var(--spike-ux-radius-sm);
+  line-height: 1.45;
+}
+
+/* ── Skeleton loaders (calmer pulse) ─────────────────────────────── */
+@keyframes spike-skeleton-pulse {
+  0%, 100% { opacity: .55; }
+  50% { opacity: .92; }
+}
+
+html[data-spike-style] .skeleton,
+html[data-spike-style] .skeleton-text,
+html[data-spike-style] .skeleton-avatar {
+  background: color-mix(in srgb, var(--spike-surface-3, var(--surface3, #1b2540)) 82%, var(--spike-line, #35415f) 18%);
+  border-radius: 10px;
+  animation: spike-skeleton-pulse 1.5s var(--spike-ux-ease) infinite;
+}
+
+html[data-spike-style] .skeleton-text {
+  height: 12px;
+  margin: 7px 0;
+}
+
+html[data-spike-style] .skeleton-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Feed skeleton row */
+.spike-feed-skeleton {
+  display: flex;
+  gap: 12px;
+  padding: 16px 14px;
+  margin-bottom: 12px;
+  border-radius: var(--spike-ux-radius);
+  background: color-mix(in srgb, var(--spike-surface, transparent) 90%, transparent);
+}
+
+.spike-feed-skeleton .skeleton-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.spike-feed-skeleton .skeleton-line {
+  height: 11px;
+  margin: 8px 0;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--spike-surface-3, #1b2540) 80%, var(--spike-line, #35415f) 20%);
+  animation: spike-skeleton-pulse 1.5s var(--spike-ux-ease) infinite;
+}
+
+.spike-feed-skeleton .skeleton-line.short { width: 55%; }
+.spike-feed-skeleton .skeleton-line.medium { width: 78%; }
+
+/* ── Toast / feedback calm ───────────────────────────────────────── */
+html[data-spike-style] :where(.toast, .spike-toast, .notice, .snackbar) {
+  border-radius: 14px;
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--spike-shadow, rgba(0,0,0,.3)) 65%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 13.5px;
+  line-height: 1.4;
+  transition: opacity var(--spike-ux-base) var(--spike-ux-ease), transform var(--spike-ux-base) var(--spike-ux-ease);
+}
+
+/* ── Mobile density & comfort ────────────────────────────────────── */
+@media (max-width: 480px) {
+  body { max-width: 100%; }
+
+  :where(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea) {
+    min-width: 0;
+  }
+
+  :where(button, [role="button"]) {
+    max-width: 100%;
+  }
+
+  /* Give posts a little more air on small screens */
+  html[data-spike-style] .posts > .post,
+  html[data-spike-style] #posts > .post {
+    margin-bottom: 16px;
+  }
+
+  /* Ensure primary actions are easy to hit */
+  html[data-spike-style] :where(.post-actions button, .post-actions a, .composer-actions button) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+
+  html[data-spike-style] .skeleton,
+  html[data-spike-style] .skeleton-text,
+  html[data-spike-style] .skeleton-avatar,
+  .spike-feed-skeleton .skeleton-line {
+    animation: none !important;
+    opacity: .7;
+  }
+}

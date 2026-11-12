@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="robots" content="noindex,nofollow">
+<title>SPIKE — Admin Command Center</title>
+<meta name="description" content="SPIKE platform administration, moderation, and operations.">
+<link rel="icon" type="image/png" href="assets/icon/icon.png">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-theme-experience-v3.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css?v=4">
+<link rel="stylesheet" href="css/spike-theme-runtime-v3.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
+<link rel="stylesheet" href="css/spike-admin-brand-v4.css?v=4">
+<link rel="stylesheet" href="css/admin-workspace-v1.css">
+<link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link rel="stylesheet" href="css/premium-back.css">
+<link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+<link rel="stylesheet" href="css/spike-admin-responsive-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-admin-command-center-v2.css?v=5">
+<script src="js/spike-navigation.js"></script>
+<script src="js/presence.js?v=presence-v2-global-20261112"></script>
+<script src="js/spike-loader-core.js?v=1" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-singleton.js"></script>
+<script src="js/theme.js" defer></script>
+</head>
+<body data-spike-page="admin">
+<script src="js/spike-dialog.js?v=global-dialog-v3"></script>
+<div class="side-backdrop" id="sideBackdrop" hidden></div>
+<div class="admin-shell">
+<header class="admin-top">
+<button type="button" class="spike-premium-back" data-spike-premium-back="1" data-back-fallback="feed.html" aria-label="Go back to the previous SPIKE page" title="Go back">‹</button>
+<button type="button" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+<div class="admin-brand"><div class="brand"><b>SPIKE</b> ADMIN</div></div>
+<div class="spacer"></div>
+<span class="role-badge" id="roleBadge">CHECKING</span>
+<div class="admin-identity"><div id="adminIdentity">—</div><div class="muted" id="systemStatus">Booting…</div></div>
+<button class="btn" id="refreshAll" type="button">Refresh</button>
+<button class="btn" id="signOut" type="button">Sign out</button>
+<a class="btn" href="feed.html">Exit</a>
+</header>
+<nav class="side" id="adminSide" aria-label="Admin sections">
+<div class="group">Command</div>
+<button type="button" data-page="overview" class="active">Overview</button>
+<div class="group">People &amp; content</div>
+<button type="button" data-page="users">Users</button>
+<button type="button" data-page="posts">Posts &amp; content</button>
+<button type="button" data-page="rooms">Rooms &amp; members</button>
+<button type="button" data-page="moderation">Room moderation</button>
+<button type="button" data-page="roomPurchases">Room purchases</button>
+<div class="group">Economy</div>
+<button type="button" data-page="packages">Packages</button>
+<button type="button" data-page="gems">SPID / Coins</button>
+<div class="group">Comms</div>
+<button type="button" data-page="broadcasts">Broadcasts</button>
+<button type="button" data-page="announcements">Announcements</button>
+<button type="button" data-page="notifications">Notifications</button>
+
+<div class="group">Trust &amp; safety</div>
+<button type="button" data-page="reports">Reports inbox</button>
+<button type="button" data-page="policyModeration">Policy moderation</button>
+<button type="button" data-page="safetyRecovery">Safety &amp; recovery</button>
+<button type="button" data-page="audit">Audit log</button>
+<div class="group">Platform</div>
+<button type="button" data-page="maintenance">Maintenance</button>
+<button type="button" data-page="admins">Admins &amp; permissions</button>
+<button type="button" data-page="platform">Edge &amp; platform</button>
+</nav>
+<main class="workspace">
+
+<section id="overview" class="admin-section active">
+<div class="row" style="justify-content:space-between"><div><h1>Control center</h1><p class="muted">Operational snapshot. Privileged actions are server-validated.</p></div>
+<button class="btn primary" id="refreshOverview" type="button">Refresh snapshot</button></div>
+<div class="stats">
+<div class="stat"><span class="muted">Users</span><strong id="statUsers">—</strong><small id="userCount">Directory</small></div>
+<div class="stat"><span class="muted">Posts</span><strong id="statPosts">—</strong><small>Content corpus</small></div>
+<div class="stat"><span class="muted">Rooms</span><strong id="statRooms">—</strong><small>Communities</small></div>
+<div class="stat"><span class="muted">Status</span><strong id="statStatus">—</strong><small id="statStatusNote">Auth guard</small></div>
+</div>
+<div class="status-strip" id="systemStatusStrip">Waiting for admin verification…</div>
+<div class="panel"><div class="row" style="justify-content:space-between"><h2>Recent activity</h2><button class="btn" id="viewAuditFromOverview" type="button">View audit log</button></div><div id="overviewAudit" class="muted">Refresh to load audit preview.</div></div>
+</section>
+
+<section id="users" class="admin-section">
+<h1>User directory</h1>
+<p class="muted">Search accounts via Edge <code>admin-user-ops</code>. Register via <code>admin-register-user</code>. Identity providers include Google, GitHub and email/OAuth.</p>
+<div class="row"><input id="userSearch" placeholder="Search name, email or user ID" style="flex:1;min-width:180px">
+<select id="userFilter" aria-label="Filter users"><option value="all">All users</option><option value="active">Active</option><option value="banned">Restricted</option><option value="admin">Admins</option><option value="verified">Verified</option><option value="unverified">Unverified</option></select>
+<button class="btn primary" id="loadUsers" type="button">Search users</button>
+<button class="btn" id="registerUser" type="button">Register user</button></div>
+<div id="usersList" class="panel table-wrap">Use search to load users.</div><div class="row" id="usersPager" aria-label="User directory pagination"><button class="btn" id="usersPrev" type="button" disabled>Previous</button><span id="usersPageLabel" class="muted">Page 1</span><button class="btn" id="usersNext" type="button" disabled>Next</button></div>
+<div id="userDetail" class="panel" hidden></div><section class="panel activation-panel" aria-labelledby="activationHeading"><div class="activation-heading"><div><h2 id="activationHeading">Account activation</h2><p class="muted">Activate or deactivate a SPIKE account without changing its restriction status.</p></div></div><form id="activationForm" class="activation-form"><label class="activation-field" for="activationUserId">User ID<input id="activationUserId" name="user_id" autocomplete="off" spellcheck="false" placeholder="Enter the user's UUID" required></label><label class="activation-toggle" for="activationValue"><input id="activationValue" name="activated" type="checkbox" checked><span><strong>Account activated</strong><small>Turn off to deactivate this account.</small></span></label><label class="activation-field" for="activationReason">Reason <span class="muted">(optional)</span><textarea id="activationReason" name="reason" rows="3" maxlength="500" placeholder="Explain why this account state is changing"></textarea></label><div class="activation-actions"><button class="btn primary" id="activationSubmit" type="submit">Update activation</button><span id="activationStatus" class="muted" role="status" aria-live="polite"></span></div></form></section>
+</section>
+
+<section id="posts" class="admin-section">
+<h1>Posts &amp; content</h1>
+<p class="muted">Bulk moderate via <code>admin_post_bulk_action</code> (delete, hide, locks, distribution).</p>
+<div class="row"><input id="postSearch" placeholder="Filter loaded posts" style="flex:1">
+<button class="btn primary" id="loadPosts" type="button">Load posts</button></div>
+<div id="postsList" class="panel table-wrap">Load posts to review.</div>
+</section>
+
+<section id="rooms" class="admin-section">
+<h1>Rooms &amp; member moderation</h1>
+<div class="row"><button class="btn primary" id="loadRooms" type="button">Load rooms</button>
+<select id="memberRoom"><option value="">Choose room</option></select>
+<button class="btn" id="refreshRoomMembers" type="button">Refresh members</button></div>
+<div id="roomsList" class="panel table-wrap"></div>
+<div class="panel"><h2>Room members</h2><div id="roomMembersList" class="table-wrap">Choose a room above.</div></div>
+</section>
+
+<section id="moderation" class="admin-section">
+<h1>Room moderation</h1>
+<p class="muted">Moderation actions are executed by server-guarded RPCs. Mutes require an explicit duration.</p>
+<div class="panel"><form id="moderationForm">
+<div class="row">
+<label class="field">Room ID<input id="moderationRoomId" required placeholder="Room UUID"></label>
+<label class="field">Member user ID<input id="moderationUserId" required placeholder="User UUID"></label>
+<label class="field">Mute duration (seconds)<input id="moderationDuration" type="number" min="60" max="2592000" value="3600"></label>
+</div>
+<label class="field">Reason<input id="moderationReason" maxlength="500"></label>
+<div class="row"><button class="btn primary" id="moderationMute" type="button">Mute</button><button class="btn" id="moderationBan" type="button">Ban</button><button class="btn" id="moderationUnmute" type="button">Unmute</button><button class="btn" id="moderationUnban" type="button">Unban</button><button class="btn" id="moderationHistory" type="button">View history</button></div>
+<pre id="moderationResult" class="muted" style="white-space:pre-wrap"></pre>
+</form></div>
+</section>
+
+<section id="roomPurchases" class="admin-section">
+<h1>Room purchases</h1>
+<div class="row"><button class="btn primary" id="loadRoomPurchases" type="button">Load purchases</button></div>
+<div id="roomPurchasesList" class="panel table-wrap">Load to review purchase records.</div>
+</section>
+
+<section id="packages" class="admin-section">
+<h1>Packages</h1>
+<div class="row"><button class="btn primary" id="loadPackages" type="button">Load packages</button></div>
+<div id="packagesList" class="panel table-wrap">Load packages to manage them.</div>
+<div class="panel"><h2>Create coin package</h2><form id="packageForm"><div class="row">
+<label class="field">Name<input id="packageName" required maxlength="100"></label>
+<label class="field">Coins<input id="packageCoins" type="number" min="1" required></label>
+<label class="field">Bonus coins<input id="packageBonus" type="number" min="0" value="0" required></label>
+<label class="field">Price (minor units)<input id="packagePrice" type="number" min="1" required></label>
+<label class="field">Currency<input id="packageCurrency" value="NGN" maxlength="3" required></label>
+<label class="field">Display order<input id="packageOrder" type="number" value="0"></label></div><button class="btn primary" type="submit">Create package</button></form></div>
+</section>
+
+<section id="gems" class="admin-section">
+<h1>SPID / Coins</h1>
+<p class="muted">Grants are transactional, bounded, and audited (<code>admin_grant_coins</code>).</p>
+<div class="panel"><form id="coinForm">
+<div class="row">
+<label class="field">User ID<input id="coinUserId" required></label>
+<label class="field">Amount (max 1,000,000)<input id="coinAmount" type="number" min="1" max="1000000" required></label>
+<label class="field">Reason<input id="coinReason" required maxlength="500"></label>
+</div>
+<button class="btn primary" type="submit">Grant SPID</button>
+</form></div>
+</section>
+
+<section id="broadcasts" class="admin-section">
+<h1>Broadcasts</h1>
+<div class="row"><button class="btn" id="loadBroadcasts" type="button">Load broadcasts</button></div><div id="broadcastsList" class="panel table-wrap"></div>
+<div class="panel"><form id="broadcastForm">
+<label class="field">Title<input id="broadcastTitle" required maxlength="200"></label>
+<label class="field">Body<textarea id="broadcastBody" rows="4" required maxlength="5000"></textarea></label>
+<button class="btn primary" type="submit">Send broadcast</button>
+</form></div>
+</section>
+
+<section id="announcements" class="admin-section">
+<h1>Announcements</h1>
+<div class="row"><button class="btn primary" id="loadAnnouncements" type="button">Load announcements</button>
+<button class="btn" id="processAnnouncements" type="button">Process scheduled</button></div>
+<div id="announcementsList" class="panel table-wrap"></div>
+<div class="panel"><h2>Create announcement</h2>
+<form id="announcementForm">
+<label class="field">Title<input id="annTitle" required></label>
+<label class="field">Body<textarea id="annBody" rows="3" required></textarea></label>
+<div class="row"><label class="field">Audience<select id="annAudience"><option value="all">All users</option><option value="active">Active users</option></select></label>
+<label class="field">Publish timestamp<input id="annPublishAt" type="datetime-local"></label>
+<label class="field">Expiration timestamp<input id="annExpiresAt" type="datetime-local"></label>
+<label class="field">Severity<select id="annSeverity"><option value="info">Info</option><option value="success">Success</option><option value="warning">Warning</option><option value="critical">Critical</option></select></label></div>
+<button class="btn primary" type="submit">Create</button>
+</form></div>
+</section>
+
+<section id="notifications" class="admin-section">
+<h1>Notifications</h1>
+<div class="panel"><form id="notifyForm">
+<label class="field">User ID<input id="notifyUserId" required></label>
+<label class="field">Title<input id="notifyTitle" required></label>
+<label class="field">Body<textarea id="notifyBody" rows="3" required></textarea></label>
+<button class="btn primary" type="submit">Send notification</button>
+</form></div>
+</section>
+
+
+<section id="reports" class="admin-section">
+<h1>Reports &amp; moderation</h1><p class="muted">Review user-submitted reports from SPIKE's existing abuse-case system. Case updates are protected by the live super-admin RLS policy and written to the administrator audit log.</p>
+<div class="row" style="justify-content:space-between"><div class="muted" id="reportsLoadStatus" role="status" aria-live="polite">Reports have not been loaded yet.</div><button class="btn primary" id="refreshReports" type="button">Refresh reports</button></div>
+<div class="stats reports-stats"><div class="stat"><span class="muted">All reports</span><strong id="reportStatAll">—</strong><small>All recorded cases</small></div><div class="stat"><span class="muted">Open</span><strong id="reportStatOpen">—</strong><small>Awaiting review</small></div><div class="stat"><span class="muted">Reviewing</span><strong id="reportStatReviewing">—</strong><small>Being investigated</small></div><div class="stat"><span class="muted">Actioned</span><strong id="reportStatActioned">—</strong><small>Enforcement recorded</small></div></div>
+<div class="panel reports-filter-panel"><div class="row"><label class="field">Status<select id="reportStatusFilter"><option value="all">All statuses</option><option value="open">Open</option><option value="reviewing">Reviewing</option><option value="actioned">Actioned</option><option value="dismissed">Dismissed</option><option value="closed">Closed</option></select></label><label class="field">Source<select id="reportSourceFilter"><option value="all">All sources</option><option value="profile">Profile</option><option value="post">Post</option><option value="comment">Comment</option><option value="message">Message</option><option value="room">Room</option><option value="call">Call</option><option value="payment">Payment</option><option value="system">System</option></select></label><label class="field">Search<input id="reportSearch" placeholder="Report ID, user ID or complaint text"></label><button class="btn" id="applyReportFilters" type="button">Apply filters</button></div></div>
+<div class="panel table-wrap" id="reportsList" aria-live="polite">Select Reports inbox to load submitted reports.</div><div class="row reports-pager"><button class="btn" id="reportsPrev" type="button" disabled>Previous</button><span class="muted" id="reportsPageLabel">Page 1</span><button class="btn" id="reportsNext" type="button" disabled>Next</button></div><div class="panel reports-detail" id="reportDetail" hidden aria-live="polite"></div>
+</section>
+<section id="policyModeration" class="admin-section">
+<h1>Policy moderation</h1>
+<div class="row"><button class="btn primary" id="loadPolicyCases" type="button">Load cases</button>
+<button class="btn" id="loadPolicyAppeals" type="button">Load appeals</button>
+<button class="btn" id="loadPolicyTerms" type="button">Load policy terms</button></div>
+<div class="panel"><h2>Cases</h2><div id="policyCases"></div></div>
+<div class="panel"><h2>Appeals</h2><div id="policyAppeals"></div></div>
+<div class="panel"><h2>Prohibited terms</h2><div id="policyTerms"></div></div>
+<div class="panel"><h2>Add / update prohibited term</h2><form id="policyTermForm">
+<label class="field">Term<input id="policyTermValue" required maxlength="200"></label>
+<label class="field">Policy ID<input id="policyTermPolicy" required list="policyIds" value="POL-CONTENT-005"><datalist id="policyIds"><option value="POL-CORE-002"><option value="POL-CORE-003"><option value="POL-SAFETY-001"><option value="POL-SAFETY-002"><option value="POL-CONTENT-001"><option value="POL-CONTENT-005"><option value="POL-CONDUCT-002"><option value="POL-PRIVACY-001"><option value="POL-PLATFORM-001"></datalist></label>
+<div class="row"><label class="field">Match mode<select id="policyTermMatch"><option value="word">Whole word</option><option value="phrase">Phrase</option></select></label>
+<label class="field">Severity<select id="policyTermSeverity"><option value="low">Low</option><option value="medium">Medium</option><option value="high" selected>High</option><option value="critical">Critical</option></select></label>
+<label class="field">Enforcement<select id="policyTermEnforcement"><option value="review">Review</option><option value="remove" selected>Remove</option><option value="warn">Warn</option><option value="restrict">Restrict</option></select></label>
+<label class="field">Locale<input id="policyTermLocale" value="und" maxlength="16"></label></div>
+<label class="field">Notes<input id="policyTermNotes" maxlength="1000"></label>
+<button class="btn primary" type="submit">Save prohibited term</button>
+</form></div>
+</section>
+
+
+<section id="safetyRecovery" class="admin-section">
+<h1>Safety &amp; recovery</h1>
+<p class="muted">Issue or verify safety recovery codes. Never expose service-role credentials in the browser.</p>
+<div class="panel">
+<div class="row">
+<label class="field">Existing Safety code<input id="safetyCode" placeholder="0000-0000-0000" maxlength="14" autocomplete="off"></label>
+<button class="btn primary" type="button" id="issueSafetyBtn">Issue 15-minute recovery token</button>
+</div>
+<div class="row">
+<button class="btn" type="button" id="verifySafetyBtn">Verify code and identify account</button>
+</div>
+<pre id="safetyResult" class="muted" style="white-space:pre-wrap;font-size:12px"></pre>
+</div>
+</section>
+
+<section id="audit" class="admin-section">
+<h1>Audit log</h1>
+<div class="row"><button class="btn primary" id="loadAudit" type="button">Load audit</button></div>
+<div id="auditList" class="panel table-wrap"></div>
+</section>
+
+<section id="maintenance" class="admin-section">
+<h1>Maintenance controls</h1>
+<div class="row"><button class="btn" id="refreshMaintenance" type="button">Reload current settings</button><span id="maintenanceStatus" class="muted" role="status">Settings not loaded yet.</span></div><div class="panel"><form id="maintenanceForm">
+<label class="field">Mode<select id="maintenanceMode"><option value="off">Off</option><option value="on">On</option></select></label>
+<label class="field">Title<input id="maintenanceTitle" maxlength="160" value="SPIKE maintenance"></label>
+<label class="field">Message<input id="maintenanceMessage" maxlength="500"></label>
+<button class="btn primary" id="saveMaintenance" type="submit">Update maintenance</button>
+</form></div>
+</section>
+
+<section id="admins" class="admin-section">
+<h1>Admins &amp; permissions</h1>
+<div class="row"><button class="btn primary" id="loadAdmins" type="button">List admins</button></div>
+<div id="adminsList" class="panel table-wrap"></div>
+<div class="panel"><h2>Set user role</h2>
+<form id="roleForm">
+<label class="field">User ID<input id="roleUserId" required></label>
+<label class="field">Role<select id="roleValue"><option value="user">user</option><option value="moderator">moderator</option><option value="admin">admin</option><option value="super_admin">super_admin</option></select></label>
+<button class="btn primary" type="submit">Update role</button>
+</form></div>
+</section>
+
+<section id="platform" class="admin-section">
+<h1>Edge &amp; platform</h1>
+<div class="panel">
+<h2>Deployed function surface</h2>
+<p class="muted">Intentionally user-bound functions retain user JWT validation; JWT validation stays enabled and there is no admin impersonation.</p>
+<ul class="muted">
+<li><code>admin-user-ops</code> — list_users, user_detail, force_signout</li>
+<li><code>admin-register-user</code> — privileged registration</li>
+<li><code>spike-webauthn</code> — passkey register/auth (user-bound)</li>
+</ul>
+<button class="btn primary" id="loadEdgeFunctions" type="button">Review function matrix</button>
+<div id="edge-functions"></div>
+</div>
+</section>
+</main>
+</div>
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-content"><div class="row" style="justify-content:space-between"><h2 id="modalTitle">Admin action</h2><button class="btn" id="close" type="button">Close</button></div><div id="modalBody"></div></div></div>
+<div class="toast" id="toast"></div>
+<script>
+
+(()=>{'use strict';
+const URL='https://cjqpyndceqyqsijihxbb.supabase.co',KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
+const admin_guard='is_super_admin';const sb=window.__SPIKE_SUPABASE__||window.supabase.createClient(URL,KEY);window.__SPIKE_SUPABASE__=sb;
+const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(msg,type='ok'){const el=$('toast');el.textContent=msg;el.style.display='block';el.style.border=type==='error'?'1px solid #ef4444':'1px solid #22c55e';setTimeout(()=>el.style.display='none',3500)}
+function on(id,event,fn){$(id)?.addEventListener(event,fn)}
+let adminDialogResolve=null,adminDialogPreviousFocus=null;
+function closeAdminDialog(value=null){const modal=$('modal');if(!modal)return;modal.classList.remove('open');const done=adminDialogResolve;adminDialogResolve=null;if(done)done(value);if(adminDialogPreviousFocus?.isConnected)adminDialogPreviousFocus.focus();adminDialogPreviousFocus=null}
+function adminDialog({title='Admin action',description='',fields=[],confirmText='Save',danger=false,confirmOnly=false}={}){
+  const modal=$('modal'),body=$('modalBody');if(!modal||!body)return Promise.resolve(null);
+  if(adminDialogResolve)closeAdminDialog(null);
+  adminDialogPreviousFocus=document.activeElement; $('modalTitle').textContent=title;
+  body.innerHTML=`${description?`<p class="muted admin-dialog-description">${esc(description)}</p>`:''}<form id="adminDialogForm" class="admin-dialog-form">${fields.map((f,i)=>{const id='adminDialogField'+i,label=esc(f.label||f.name||'Value'),value=esc(f.value??''),required=f.required?'required':'';let control='';if(f.type==='textarea')control=`<textarea id="${id}" name="${esc(f.name)}" rows="${f.rows||4}" ${required} maxlength="${f.maxlength||4000}">${value}</textarea>`;else if(f.type==='select')control=`<select id="${id}" name="${esc(f.name)}" ${required}>${(f.options||[]).map(o=>`<option value="${esc(o.value)}" ${String(o.value)===String(f.value)?'selected':''}>${esc(o.label)}</option>`).join('')}</select>`;else control=`<input id="${id}" name="${esc(f.name)}" type="${esc(f.type||'text')}" value="${value}" ${required} ${f.min!==undefined?`min="${esc(f.min)}"`:''} ${f.max!==undefined?`max="${esc(f.max)}"`:''} ${f.step!==undefined?`step="${esc(f.step)}"`:''} ${f.maxlength?`maxlength="${f.maxlength}"`:''}>`;return `<label class="field">${label}${control}</label>`}).join('')}<div class="admin-dialog-actions"><button type="button" class="btn" id="adminDialogCancel">Cancel</button><button type="submit" class="btn ${danger?'danger':'primary'}">${esc(confirmText)}</button></div></form>`;
+  modal.classList.add('open');
+  return new Promise(resolve=>{adminDialogResolve=resolve;const form=$('adminDialogForm');form.addEventListener('submit',e=>{e.preventDefault();const out={};for(const f of fields){const el=form.elements.namedItem(f.name);out[f.name]=f.type==='number'?Number(el.value):el.value}closeAdminDialog(out)});$('adminDialogCancel').addEventListener('click',()=>closeAdminDialog(null));(form.querySelector('input,textarea,select')||$('close'))?.focus()});
+}
+async function adminConfirm(message,{title='Confirm action',confirmText='Continue',danger=true}={}){const r=await adminDialog({title,description:message,confirmText,danger});return r!==null}
+async function safeRpc(name,args,context=name){try{const {data,error}=await sb.rpc(name,args);if(error)throw error;return data}catch(e){console.error(context,e);if(name==='admin_dashboard_stats')$('systemStatus').textContent='Connection issue';toast(`${context}: ${e.message||e}`,'error');return null}}
+let reportPage=0,reportCount=0,reportRows=[],reportProfiles=new Map(),reportAdminId=null,reportLoading=false;
+const reportStatuses=['open','reviewing','actioned','dismissed','closed'];
+function reportDate(v){if(!v)return '—';const d=new Date(v);return Number.isNaN(d.getTime())?String(v):d.toLocaleString()}
+function reportStatusLabel(v){return ({open:'Open',reviewing:'Reviewing',actioned:'Actioned',dismissed:'Dismissed',closed:'Closed'})[v]||String(v||'Unknown')}
+function reportUserLabel(id){if(!id)return 'Not available';const p=reportProfiles.get(String(id));return p?(p.display_name||p.username||id):id}
+async function loadReportStats(){for(const [id,status] of [['reportStatAll',null],['reportStatOpen','open'],['reportStatReviewing','reviewing'],['reportStatActioned','actioned']]){let q=sb.from('spike_abuse_cases').select('id',{count:'exact',head:true});if(status)q=q.eq('status',status);const z=await q;if(z.error)throw z.error;$(id).textContent=String(z.count??0)}}
+async function loadReports(page=reportPage){if(reportLoading)return;reportLoading=true;reportPage=Math.max(0,page);$('reportsLoadStatus').textContent='Loading reports…';$('reportsList').innerHTML='<p class="muted" role="status">Loading reports securely…</p>';$('reportsPrev').disabled=true;$('reportsNext').disabled=true;try{const {data:{user},error:userError}=await sb.auth.getUser();if(userError)throw userError;if(!user?.id)throw new Error('Your admin session has expired. Sign in again.');reportAdminId=user.id;const status=$('reportStatusFilter').value,source=$('reportSourceFilter').value,term=$('reportSearch').value.trim();let q=sb.from('spike_abuse_cases').select('id,reporter_id,subject_user_id,source,source_id,category,details,status,severity,assigned_to,resolution,created_at,updated_at',{count:'exact'}).order('created_at',{ascending:false}).range(reportPage*50,reportPage*50+49);if(status!=='all')q=q.eq('status',status);if(source!=='all')q=q.eq('source',source);if(term){if(/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(term))q=q.or(`id.eq.${term},reporter_id.eq.${term},subject_user_id.eq.${term}`);else q=q.ilike('details',`%${term.replace(/[%,]/g,' ')}%`)}const {data,error,count}=await q;if(error)throw error;if(!Array.isArray(data))throw new Error('Unexpected report inbox response.');reportRows=data;reportCount=count??data.length;reportProfiles=new Map();const ids=[...new Set(data.flatMap(x=>[x.reporter_id,x.subject_user_id,x.assigned_to]).filter(Boolean))];if(ids.length){const pr=await sb.from('profiles').select('id,display_name,username,role').in('id',ids);if(!pr.error)for(const p of pr.data||[])reportProfiles.set(String(p.id),p)}await loadReportStats();$('reportsList').innerHTML=data.length?`<table class="table reports-table"><thead><tr><th>Submitted</th><th>Reporter</th><th>Reported account</th><th>Source</th><th>Category</th><th>Severity</th><th>Status</th><th>Assigned to</th><th>Case</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(reportDate(x.created_at))}</td><td>${esc(reportUserLabel(x.reporter_id))}</td><td>${esc(reportUserLabel(x.subject_user_id))}</td><td>${esc(x.source)}</td><td>${esc(x.category)}</td><td>${esc(x.severity)}/5</td><td><span class="report-status report-status-${esc(x.status)}">${esc(reportStatusLabel(x.status))}</span></td><td>${esc(reportUserLabel(x.assigned_to))}</td><td><button class="btn" type="button" data-report-open="${esc(x.id)}">Open</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No reports match these filters.</p>';$('reportsPageLabel').textContent=`Page ${reportPage+1} · ${reportCount} matching reports`;$('reportsPrev').disabled=reportPage===0;$('reportsNext').disabled=(reportPage+1)*50>=reportCount;$('reportsLoadStatus').textContent=`Loaded ${data.length} report${data.length===1?'':'s'} · ${reportCount} matching total`}catch(e){console.error('SPIKE report inbox:',e);$('reportsList').innerHTML=`<div class="report-error" role="alert"><strong>Unable to load reports.</strong><p>${esc(e.message||'Unknown error')}</p><button class="btn" type="button" id="retryReports">Try again</button></div>`;$('reportsLoadStatus').textContent='Report loading failed';toast(e.message||'Could not load reports','error')}finally{reportLoading=false;$('reportsPrev').disabled=reportPage===0}}
+function showReportDetail(id){const x=reportRows.find(r=>String(r.id)===String(id));if(!x)return;const host=$('reportDetail');host.hidden=false;host.dataset.reportId=x.id;host.innerHTML=`<div class="row" style="justify-content:space-between;align-items:flex-start"><div><h2>Report investigation</h2><p class="muted">Case ${esc(x.id)} · submitted ${esc(reportDate(x.created_at))}</p></div><button class="btn" type="button" id="closeReportDetail">Close</button></div><div class="reports-detail-grid"><div><small>Reporter</small><strong>${esc(reportUserLabel(x.reporter_id))}</strong><code>${esc(x.reporter_id||'—')}</code></div><div><small>Reported account</small><strong>${esc(reportUserLabel(x.subject_user_id))}</strong><code>${esc(x.subject_user_id||'—')}</code></div><div><small>Source / item ID</small><strong>${esc(x.source)}</strong><code>${esc(x.source_id||'—')}</code></div><div><small>Category / severity</small><strong>${esc(x.category)} · ${esc(x.severity)}/5</strong></div><div><small>Status</small><strong>${esc(reportStatusLabel(x.status))}</strong></div><div><small>Assigned administrator</small><strong>${esc(reportUserLabel(x.assigned_to))}</strong><code>${esc(x.assigned_to||'Unassigned')}</code></div></div><div class="report-complaint"><small>Complaint details</small><p>${esc(x.details||'No additional details were provided.')}</p></div><div class="report-complaint"><small>Resolution / administrator note</small><p>${esc(x.resolution||'No resolution recorded.')}</p></div><div class="row reports-actions"><button class="btn primary" type="button" data-report-action="take" data-report-id="${esc(x.id)}">Assign to me</button><button class="btn" type="button" data-report-action="unassign" data-report-id="${esc(x.id)}">Unassign</button><button class="btn" type="button" data-report-action="edit" data-report-id="${esc(x.id)}">Update case</button>${x.subject_user_id?`<button class="btn danger" type="button" data-report-action="restrict" data-report-id="${esc(x.id)}">Restrict account (30 days)</button><button class="btn" type="button" data-report-action="user" data-report-id="${esc(x.id)}">Open user directory</button>`:''}${['post','comment'].includes(x.source)&&x.source_id?`<button class="btn" type="button" data-report-action="content" data-report-id="${esc(x.id)}">Open related content</button>`:''}</div>`;host.scrollIntoView({behavior:'smooth',block:'start'})}
+async function updateReport(id,patch){const {data,error}=await sb.from('spike_abuse_cases').update({...patch,updated_at:new Date().toISOString()}).eq('id',id).select('id').maybeSingle();if(error)throw error;if(!data)throw new Error('No report was updated. Check administrator permissions and refresh.');toast('Report case updated');await loadReports(reportPage);showReportDetail(id)}
+async function handleReportAction(action,id){const x=reportRows.find(r=>String(r.id)===String(id));if(!x)return;try{if(action==='take')return await updateReport(id,{assigned_to:reportAdminId});if(action==='unassign')return await updateReport(id,{assigned_to:null});if(action==='edit'){const v=await adminDialog({title:'Update report case',description:'Record the investigation status, priority and outcome. Use the resolution field for a concise internal case note.',confirmText:'Save case',fields:[{name:'status',label:'Case status',type:'select',value:x.status,options:reportStatuses.map(v=>({value:v,label:reportStatusLabel(v)}))},{name:'severity',label:'Severity (1 low – 5 critical)',type:'number',value:String(x.severity||1),min:1,max:5},{name:'resolution',label:'Resolution / internal note',type:'textarea',value:x.resolution||'',maxlength:3000}]});if(!v)return;const sev=Number(v.severity);if(!Number.isInteger(sev)||sev<1||sev>5)throw new Error('Severity must be between 1 and 5.');if(['actioned','dismissed','closed'].includes(v.status)&&!v.resolution.trim())throw new Error('Add a resolution note before completing or dismissing a case.');return await updateReport(id,{status:v.status,severity:sev,resolution:v.resolution.trim()||null})}if(action==='restrict'){if(!await adminConfirm('Apply the existing 30-day account restriction to the reported account? This is a real enforcement action and will be recorded by the existing admin RPC.',{title:'Restrict reported account',confirmText:'Restrict account'}))return;const v=await adminDialog({title:'Reason for restriction',description:'Enter the enforcement reason. This is sent to the existing server-guarded restriction RPC.',confirmText:'Apply restriction',fields:[{name:'reason',label:'Reason',type:'textarea',required:true,maxlength:500}]});if(!v?.reason?.trim())return;const result=await safeRpc('admin_ban_user',{p_user_id:x.subject_user_id,p_days:30,p_reason:v.reason.trim()});if(result===null)throw new Error('Account restriction was not confirmed by the server.');await updateReport(id,{status:'actioned',resolution:`30-day account restriction applied: ${v.reason.trim()}`});return}if(action==='user'){showAdminPage('users');$('userSearch').value=x.subject_user_id;await loadUsers(0);return}if(action==='content'){showAdminPage('posts');$('postSearch').value=x.source_id;await loadPosts();return}}catch(e){console.error('Report action failed:',e);toast(e.message||'Report action failed','error')}}
+on('refreshReports','click',()=>loadReports(0));on('applyReportFilters','click',()=>loadReports(0));on('reportStatusFilter','change',()=>loadReports(0));on('reportSourceFilter','change',()=>loadReports(0));on('reportSearch','keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadReports(0)}});on('reportsPrev','click',()=>loadReports(reportPage-1));on('reportsNext','click',()=>loadReports(reportPage+1));document.addEventListener('click',e=>{const open=e.target.closest('[data-report-open]');if(open){showReportDetail(open.dataset.reportOpen);return}const action=e.target.closest('[data-report-action]');if(action){handleReportAction(action.dataset.reportAction,action.dataset.reportId);return}if(e.target.id==='closeReportDetail')$('reportDetail').hidden=true;if(e.target.id==='retryReports')loadReports(reportPage)});
+
+async function edgeCall(action,payload={}){const {data:{session},error:sessionError}=await sb.auth.getSession();if(sessionError)throw new Error(sessionError.message||'Could not read the current session');if(!session?.access_token)throw new Error('Your admin session has expired. Sign in again.');const r=await fetch(`${URL}/functions/v1/admin-user-ops`,{method:'POST',cache:'no-store',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`,'apikey':KEY,'Accept':'application/json'},body:JSON.stringify({action,...payload})});const raw=await r.text();let j={};try{j=raw?JSON.parse(raw):{}}catch{throw new Error(`Admin service returned an invalid response (HTTP ${r.status}).`)}if(!r.ok||j.error)throw new Error(j.error||j.message||`Admin service request failed (HTTP ${r.status}).`);if(j.ok===false)throw new Error(j.message||'Admin service rejected the request.');return j}
+function showAdminPage(page, button){document.querySelectorAll('.admin-section').forEach(s=>s.classList.toggle('active',s.id===page));document.querySelectorAll('.side button[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));$('adminSide').classList.remove('open');if(page==='rooms'){ loadRooms(); loadRoomChoices(); }if(page==='audit')loadAudit();if(page==='users')loadUsers();if(page==='posts')loadPosts();if(page==='roomPurchases')loadRoomPurchases();if(page==='packages')loadPackages();if(page==='broadcasts')loadBroadcasts();if(page==='announcements')loadAnnouncements();if(page==='reports')loadReports(0);if(page==='policyModeration'){loadPolicyCases();loadPolicyAppeals();loadPolicyTerms()}if(page==='maintenance')loadMaintenance();if(page==='admins')$('adminsList').textContent='Select List admins to load records.'}
+const side=$('adminSide');side.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)showAdminPage(b.dataset.page,b)});
+document.querySelectorAll('[data-page]').forEach(b=>{if(b.tagName!=='BUTTON'||b.closest('.side'))return;b.addEventListener('click',()=>showAdminPage(b.dataset.page,b))});
+on('viewAuditFromOverview','click',()=>showAdminPage('audit'));
+on('close','click',()=>closeAdminDialog(null));
+$('#modal')?.addEventListener('click',e=>{if(e.target.id==='modal')closeAdminDialog(null)});
+document.addEventListener('keydown',e=>{if(!$('#modal')?.classList.contains('open'))return;if(e.key==='Escape'){closeAdminDialog(null);return}if(e.key==='Tab'){const nodes=[...$('#modal').querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);if(!nodes.length)return;const first=nodes[0],last=nodes[nodes.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
+function table(rows,cols){if(rows===null||rows===undefined)return '<p class="muted" role="status">Could not load records. Retry; this is not an empty result.</p>';if(!Array.isArray(rows))return '<p class="muted">Unexpected response format.</p>';if(!rows.length)return '<p class="muted">No records found.</p>';return `<table class="table"><thead><tr>${cols.map(c=>`<th>${esc(c.label)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td>${esc(typeof c.value==='function'?c.value(r):r[c.key])}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+async function stats(){const data=await safeRpc('admin_dashboard_stats');if(data===null)return null;const d=Array.isArray(data)?data[0]||{}:data;$('statUsers').textContent=d.users??d.user_count??'—';$('statPosts').textContent=d.posts??d.post_count??'—';$('statRooms').textContent=d.rooms??d.room_count??'—';$('statStatus').textContent='Authorized';$('statStatusNote').textContent='Admin guard passed';$('systemStatus').textContent='Connected · refreshed';$('systemStatusStrip').textContent='Admin RPC response received.';return data}
+function userCard(u){const coinBalance=u.coins??u.spid??null;return `<article class="user-card"><strong>${esc(u.display_name||u.username||u.email||u.id)}</strong><span>${coinBalance===null?'Coins unavailable':esc(coinBalance)}</span></article>`}
+let usersPage=0,usersHasNext=false,usersLoading=false;
+async function loadUsers(page=usersPage){if(usersLoading)return;usersLoading=true;usersPage=Math.max(0,page);$('usersList').innerHTML='<p class="muted" role="status">Loading users…</p>';$('usersPrev').disabled=true;$('usersNext').disabled=true;try{const result=await edgeCall('list_users',{query:$('userSearch').value.trim(),offset:usersPage*50,per_page:51,filter:$('userFilter')?.value||'all'});const fetched=result.users;if(!Array.isArray(fetched))throw new Error('The user directory response was invalid: expected a users array.');const users=fetched.slice(0,50);usersHasNext=fetched.length>50;$('usersList').innerHTML=users.length?`<table class="table"><thead><tr><th>User</th><th>Email</th><th>Provider</th><th>Status</th><th>Verified</th><th>Actions</th></tr></thead><tbody>${users.map(u=>{const id=u.id||u.user_id;const restricted=u.status==='banned'||!!u.banned_until;return `<tr><td>${esc(u.display_name||u.username||id)}</td><td>${esc(u.email||'—')}</td><td>${esc((u.providers||[]).join(', ')||'Email')}</td><td>${esc(restricted?'Restricted':u.status||'Active')}</td><td>${u.verified?'Yes':'No'}</td><td><div class="user-actions"><button class="btn" data-user-detail="${esc(id)}">Details</button> <button class="btn" data-user-verify="${esc(id)}" data-verified="${u.verified?'false':'true'}">${u.verified?'Unverify':'Verify'}</button> <button class="btn" data-user-signout="${esc(id)}">Force sign out</button> <button class="btn danger" data-user-restrict="${esc(id)}" data-restricted="${restricted?'false':'true'}">${restricted?'Unrestrict':'Restrict'}</button></div></td></tr>`}).join('')}</tbody></table>`:'<p class="muted">No users found for this search/filter.</p>';$('userCount').textContent=`${users.length} shown · page ${usersPage+1}`;$('usersPageLabel').textContent=`Page ${usersPage+1} · ${users.length} users shown`;$('usersPrev').disabled=usersPage===0;$('usersNext').disabled=!usersHasNext}catch(e){console.error('SPIKE user directory:',e);$('usersList').innerHTML=`<div class="user-load-error" role="alert"><strong>Unable to load users.</strong><span>${esc(e.message||'Unknown admin service error')}</span><button class="btn" type="button" id="retryUsers">Try again</button></div>`;$('usersPageLabel').textContent=`Page ${usersPage+1} · unavailable`;$('usersNext').disabled=true;toast(e.message||'Unable to load users','error')}finally{usersLoading=false;$('usersPrev').disabled=usersPage===0}}
+on('usersPrev','click',()=>loadUsers(usersPage-1));on('usersNext','click',()=>{if(usersHasNext)loadUsers(usersPage+1)});$('usersList').addEventListener('click',e=>{if(e.target.closest('#retryUsers'))loadUsers(usersPage)});
+on('userSearch','keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadUsers(0)}});on('userFilter','change',()=>loadUsers(0));
+async function showUserDetail(id){try{const r=await edgeCall('user_detail',{user_id:id});const u=r.user||{};$('userDetail').hidden=false;$('userDetail').innerHTML=`<h2>User details</h2><pre style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(JSON.stringify({profile:u.profile,auth:{id:u.auth?.id,email:u.auth?.email,created_at:u.auth?.created_at,last_sign_in_at:u.auth?.last_sign_in_at},wallet:u.wallet},null,2))}</pre>`;$('userDetail').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){toast(e.message,'error')}}
+async function loadPosts(){
+  const r=await safeRpc('admin_list_posts',{p_search:$('postSearch').value.trim()||null,p_status:'all',p_sort:'newest',p_limit:100,p_offset:0});
+  const rows=r||[];
+  window.__adminPosts=rows;
+  if(!rows.length){$('postsList').innerHTML='<p class="muted">No posts found.</p>';return}
+  $('postsList').innerHTML=`<div class="bulk-bar"><label class="check"><input type="checkbox" id="postSelectAll"> Select all</label>
+    <select id="postBulkAction"><option value="">Bulk action…</option>
+      <option value="delete">Delete permanently</option><option value="hide">Hide</option><option value="restore">Restore</option>
+      <option value="mark_reviewed">Mark reviewed</option><option value="restrict_distribution">Restrict distribution</option>
+      <option value="unrestrict_distribution">Unrestrict distribution</option>
+      <option value="lock_comments">Lock comments</option><option value="unlock_comments">Unlock comments</option>
+      <option value="lock_reactions">Lock reactions</option><option value="unlock_reactions">Unlock reactions</option>
+      <option value="disable_sharing">Disable sharing</option><option value="enable_sharing">Enable sharing</option>
+    </select>
+    <input id="postBulkReason" placeholder="Reason (optional)" maxlength="500">
+    <button class="btn danger" id="runPostBulk" type="button">Run on selected</button></div>
+    <table class="table"><thead><tr><th></th><th>Post</th><th>Author</th><th>Created</th></tr></thead>
+    <tbody>${rows.map((x)=>`<tr>
+      <td><input type="checkbox" class="post-check" value="${esc(x.post_id||x.id||x.document_id||'')}"></td>
+      <td>${esc(x.content||x.post_id||x.id||'')}</td>
+      <td>${esc(x.author_name||x.owner_id||x.user_id||'')}</td>
+      <td>${esc(x.created_at||'')}</td></tr>`).join('')}</tbody></table>`;
+  const all=$('postSelectAll'); if(all) all.onchange=()=>document.querySelectorAll('.post-check').forEach(c=>c.checked=all.checked);
+  const run=$('runPostBulk'); if(run) run.onclick=runPostBulk;
+}
+async function runPostBulk(){
+  const action=$('postBulkAction')?.value; if(!action){toast('Choose a bulk action','error');return}
+  const ids=[...document.querySelectorAll('.post-check:checked')].map(c=>c.value).filter(Boolean);
+  if(!ids.length){toast('Select at least one post','error');return}
+  if(action==='delete' && !await adminConfirm('Permanently delete '+ids.length+' post(s)? This cannot be undone.',{title:'Delete posts',confirmText:'Delete permanently'}))return;
+  const reason=$('postBulkReason')?.value||null;
+  const data=await safeRpc('admin_post_bulk_action',{p_post_ids:ids,p_action:action,p_reason:reason},'admin_post_bulk_action');
+  if(data!==null){toast('Bulk '+action+' done');loadPosts()}
+}
+async function loadRooms(){const r=await safeRpc('admin_list_rooms');$('roomsList').innerHTML=table(r,[{label:'Room',value:x=>x.name||x.title||x.id},{label:'ID',key:'id'},{label:'Owner',key:'owner_id'}])}
+async function loadRoomChoices(){const r=await safeRpc('admin_list_rooms');if(!r)return;$('memberRoom').innerHTML='<option value="">Choose room</option>'+r.map(x=>`<option value="${esc(x.id)}">${esc(x.name||x.title||x.id)}</option>`).join('')}
+async function loadRoomMembers(){const room=$('memberRoom').value;if(!room)return;const r=await safeRpc('admin_list_room_members',{p_room_id:room,p_search:null,p_limit:100,p_offset:0});const rows=r||[];$('roomMembersList').innerHTML=rows.length?`<table class="table"><thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Joined</th><th>Change role</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.display_name||x.username||x.user_id)}</td><td>${esc(x.email)}</td><td>${esc(x.role)}</td><td>${esc(x.joined_at)}</td><td><select data-room-role="${esc(x.user_id)}"><option value="member" ${x.role==='member'?'selected':''}>member</option><option value="moderator" ${x.role==='moderator'?'selected':''}>moderator</option><option value="admin" ${x.role==='admin'?'selected':''}>admin</option></select><button class="btn" data-room-role-save="${esc(x.user_id)}">Save</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No room members found.</p>'}
+async function admin_list_audit(args={p_limit:100}){return safeRpc('admin_list_audit',args)}
+async function loadAudit(){const r=await safeRpc('admin_audit_list',{p_limit:100});$('auditList').innerHTML=table(r||[],[{label:'When',key:'created_at'},{label:'Actor',key:'actor_id'},{label:'Action',key:'action'},{label:'Details',value:x=>JSON.stringify(x.details||{})}]);$('overviewAudit').textContent=(r||[]).slice(0,3).map(x=>`${x.action} · ${x.created_at}`).join(' | ')||'No recent audit events.'}
+async function loadAnnouncements(){const rows=await safeRpc('admin_announcement_list',{p_status:null,p_limit:100})||[];$('announcementsList').innerHTML=rows.length?`<table class="table"><thead><tr><th>Title</th><th>Status</th><th>Audience</th><th>Publish</th><th>Expires</th><th>Action</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.status)}</td><td>${esc(x.audience)}</td><td>${esc(x.publish_at)}</td><td>${esc(x.expires_at||x.ends_at)}</td><td><button class="btn" data-announcement-edit="${esc(x.id)}" data-ann-title="${esc(x.title)}" data-ann-body="${esc(x.body)}" data-ann-audience="${esc(x.audience)}" data-ann-publish="${esc(x.publish_at)}" data-ann-expires="${esc(x.expires_at||x.ends_at||'')}" data-ann-severity="${esc(x.severity||'info')}">Edit</button> <button class="btn danger" data-announcement-cancel="${esc(x.id)}">Cancel</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No announcements found.</p>'}
+async function loadPolicyCases(){const r=await safeRpc('admin_spike_policy_cases',{p_status:null,p_limit:100});const rows=r||[];$('policyCases').innerHTML=rows.length?`<table class="table"><thead><tr><th>Case</th><th>Owner</th><th>Policy</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.owner_id)}</td><td>${esc(x.policy_id)}</td><td>${esc(x.status)}</td><td>${esc(x.created_at)}</td><td><button class="btn" data-case-id="${esc(x.id)}" data-case-decision="upheld">Uphold</button> <button class="btn" data-case-id="${esc(x.id)}" data-case-decision="dismissed">Dismiss</button> <button class="btn" data-case-id="${esc(x.id)}" data-case-decision="restored">Restore</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No policy cases.</p>'}
+async function loadPolicyAppeals(){const r=await safeRpc('admin_spike_policy_appeals',{p_status:null,p_limit:100});const rows=r||[];$('policyAppeals').innerHTML=rows.length?`<table class="table"><thead><tr><th>Appeal</th><th>Case</th><th>Appellant</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.case_id)}</td><td>${esc(x.appellant_id)}</td><td>${esc(x.status)}</td><td>${esc(x.created_at)}</td><td><button class="btn" data-appeal-id="${esc(x.id)}" data-appeal-decision="approved">Approve</button> <button class="btn" data-appeal-id="${esc(x.id)}" data-appeal-decision="rejected">Reject</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No policy appeals.</p>'}
+
+async function loadPolicyTerms(){const host=$('policyTerms');host.textContent='Loading policy terms…';const rows=await safeRpc('admin_spike_policy_terms');if(rows===null){host.textContent='Could not load policy terms. Retry; no empty-state assumption was made.';return}if(!Array.isArray(rows)) {host.textContent='Unexpected policy-term response.';return}host.innerHTML=rows.length?`<table class="table"><thead><tr><th>Term</th><th>Policy</th><th>Severity</th><th>Enforcement</th><th>Enabled</th><th>Actions</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.term)}</td><td>${esc(x.policy_id)}</td><td>${esc(x.severity)}</td><td>${esc(x.enforcement)}</td><td>${x.enabled?'Yes':'No'}</td><td><button class="btn" data-term-edit="${esc(x.id)}" data-term="${esc(x.term)}" data-policy="${esc(x.policy_id)}" data-match="${esc(x.match_mode)}" data-severity="${esc(x.severity)}" data-enforcement="${esc(x.enforcement)}" data-enabled="${x.enabled?'true':'false'}" data-locale="${esc(x.locale||'und')}" data-notes="${esc(x.notes||'')}">Edit</button> <button class="btn danger" data-term-delete="${esc(x.id)}">Delete</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No prohibited terms configured.</p>'}
+async function editPolicyTerm(btn){const v=await adminDialog({title:'Edit prohibited term',confirmText:'Save changes',fields:[{name:'term',label:'Term',value:btn.dataset.term,required:true,maxlength:200},{name:'policy',label:'Policy ID',value:btn.dataset.policy,required:true,maxlength:100},{name:'match',label:'Match mode',type:'select',value:btn.dataset.match,options:[{value:'word',label:'Whole word'},{value:'phrase',label:'Phrase'}]},{name:'severity',label:'Severity',type:'select',value:btn.dataset.severity,options:['low','medium','high','critical'].map(x=>({value:x,label:x}))},{name:'enforcement',label:'Enforcement',type:'select',value:btn.dataset.enforcement,options:['review','remove','warn','restrict'].map(x=>({value:x,label:x}))},{name:'enabled',label:'Enabled',type:'select',value:btn.dataset.enabled,options:[{value:'true',label:'Enabled'},{value:'false',label:'Disabled'}]},{name:'locale',label:'Locale',value:btn.dataset.locale,maxlength:16},{name:'notes',label:'Notes',type:'textarea',value:btn.dataset.notes,maxlength:1000}]});if(!v)return;const r=await admin_spike_policy_term_upsert(v.term.trim(),v.policy.trim(),v.match,v.severity,v.enforcement,v.enabled==='true',v.locale.trim()||'und',v.notes.trim()||null,btn.dataset.termEdit);if(r!==null){toast('Policy term updated');loadPolicyTerms()}}
+
+async function refreshAll(){const refreshed=await stats();if(refreshed===null){toast('Dashboard refresh failed — check connection and retry','error');return}await loadAudit();toast('Dashboard refreshed')}
+on('postSearch','keydown',e=>{if(e.key==='Enter'){e.preventDefault();loadPosts()}});
+on('refreshAll','click',refreshAll);on('refreshOverview','click',refreshAll);on('loadUsers','click',loadUsers);on('loadPosts','click',loadPosts);on('loadRooms','click',loadRooms);on('refreshRoomMembers','click',loadRoomMembers);on('memberRoom','change',loadRoomMembers);on('loadAudit','click',loadAudit);on('loadAnnouncements','click',loadAnnouncements);on('loadPolicyCases','click',loadPolicyCases);on('loadPolicyAppeals','click',loadPolicyAppeals);on('loadPolicyTerms','click',loadPolicyTerms);
+async function room_member_set_role(room_id,user_id,role){return safeRpc('room_member_set_role',{p_room_id:room_id,p_user_id:user_id,p_role:role})}
+async function roomModeration(action){const room=$('moderationRoomId')?.value.trim(),user=$('moderationUserId')?.value.trim(),reason=$('moderationReason')?.value.trim()||null;if(!room||!user)return toast('Room ID and member user ID are required','error');const rpc={mute:'room_moderation_mute',ban:'room_moderation_ban',unmute:'room_moderation_unmute',unban:'room_moderation_unban',history:'room_member_history'}[action];const args={p_room_id:room,p_user_id:user,p_reason:reason};if(action==='mute'){const duration=Number($('moderationDuration')?.value);if(!Number.isInteger(duration)||duration<60||duration>2592000)return toast('Mute duration must be 60–2,592,000 seconds','error');args.p_duration_seconds=duration}if(action==='history'){delete args.p_reason;args.p_limit=100;}const r=await safeRpc(rpc,args);if(r!==null)$('moderationResult').textContent=JSON.stringify(r,null,2)}
+on('moderationMute','click',()=>roomModeration('mute'));on('moderationBan','click',()=>roomModeration('ban'));on('moderationUnmute','click',()=>roomModeration('unmute'));on('moderationUnban','click',()=>roomModeration('unban'));on('moderationHistory','click',()=>roomModeration('history'));
+
+async function loadRoomPurchases(){const rows=await safeRpc('admin_list_room_purchase_requests',{p_status:null,p_limit:100});const data=rows||[];$('roomPurchasesList').innerHTML=data.length?`<table class="table"><thead><tr><th>Request</th><th>User</th><th>Room/event</th><th>Status</th><th>Actions</th></tr></thead><tbody>${data.map(x=>`<tr><td>${esc(x.id)}</td><td>${esc(x.user_id||x.owner_id||'')}</td><td>${esc(x.event_id||x.room_id||'')}</td><td>${esc(x.status||'')}</td><td><button class="btn primary" data-purchase-id="${esc(x.id)}" data-purchase-approve="true">Approve</button> <button class="btn danger" data-purchase-id="${esc(x.id)}" data-purchase-approve="false">Reject</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No purchase requests.</p>'}
+on('loadRoomPurchases','click',loadRoomPurchases);
+async function loadPackages(){const rows=await safeRpc('admin_list_coin_packages')||[];$('packagesList').innerHTML=rows.length?`<table class="table"><thead><tr><th>Name</th><th>Coins</th><th>Bonus</th><th>Price</th><th>Currency</th><th>Active</th><th>Action</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.coins)}</td><td>${esc(x.bonus_coins)}</td><td>${esc(x.price_minor)}</td><td>${esc(x.currency)}</td><td>${x.active?'Yes':'No'}</td><td><button class="btn" data-package-edit="${esc(x.id)}" data-package-name="${esc(x.name)}" data-package-coins="${esc(x.coins)}" data-package-bonus="${esc(x.bonus_coins)}" data-package-price="${esc(x.price_minor)}" data-package-currency="${esc(x.currency)}" data-package-order="${esc(x.display_order)}" data-package-active="${x.active?'true':'false'}">Edit</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No coin packages found.</p>'}
+on('loadPackages','click',loadPackages);
+on('packageForm','submit',async e=>{e.preventDefault();const coins=Number($('packageCoins').value),bonus=Number($('packageBonus').value),price=Number($('packagePrice').value);if(!Number.isSafeInteger(coins)||coins<1||!Number.isSafeInteger(bonus)||bonus<0||!Number.isSafeInteger(price)||price<1)return toast('Enter valid package amounts and price','error');const r=await safeRpc('admin_create_coin_package',{p_name:$('packageName').value.trim(),p_coins:coins,p_bonus_coins:bonus,p_price_minor:price,p_currency:$('packageCurrency').value.trim().toUpperCase(),p_display_order:Number($('packageOrder').value)||0});if(r!==null){toast('Coin package created');$('packageForm').reset();loadPackages()}});
+on('loadAdmins','click',async()=>{$('adminsList').innerHTML=table(await safeRpc('admin_list_admins'),[{label:'User ID',key:'user_id'},{label:'Email',key:'email'},{label:'Name',key:'display_name'},{label:'Role',key:'role'}])});
+async function loadBroadcasts(){const rows=await safeRpc('admin_list_broadcasts',{p_limit:100})||[];$('broadcastsList').innerHTML=rows.length?`<table class="table"><thead><tr><th>Title</th><th>Channel</th><th>Audience</th><th>Status</th><th>Created</th><th>Action</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.title)}</td><td>${esc(x.channel)}</td><td>${esc(x.audience)}</td><td>${esc(x.status)}</td><td>${esc(x.created_at)}</td><td><button class="btn" data-broadcast-process="${esc(x.id)}">Process queue</button></td></tr>`).join('')}</tbody></table>`:'<p class="muted">No broadcasts found.</p>'}
+on('loadBroadcasts','click',loadBroadcasts);
+on('loadEdgeFunctions','click',()=>{$('edge-functions').innerHTML=table(EDGE_FUNCTIONS,[{label:'Function',key:'name'},{label:'Version',key:'version'},{label:'Auth',key:'auth'}])});
+const EDGE_FUNCTIONS=[{name:'create-private-call',version:37,auth:'JWT'},{name:'spike-predictor-sync',version:41,auth:'JWT'},{name:'admin-register-user',version:36,auth:'Super-admin'},{name:'spike-media-download',version:36,auth:'JWT'},{name:'spike-paystack-init',version:36,auth:'JWT'},{name:'spike-b2-media',version:38,auth:'JWT'},{name:'spike-webauthn',version:27,auth:'JWT'},{name:'spike-paystack-verify',version:2,auth:'JWT'},{name:'admin-user-ops',version:6,auth:'Super-admin + JWT'}];
+on('coinForm','submit',async e=>{e.preventDefault();const n=Number($('coinAmount').value);if(!Number.isInteger(n)||n<1||n>1000000)return toast('Amount must be 1–1,000,000','error');const r=await safeRpc('admin_grant_coins',{p_user_id:$('coinUserId').value.trim(),p_amount:n,p_reason:$('coinReason').value.trim()});if(r!==null)toast('SPID grant completed')});
+on('activationForm','submit',async e=>{e.preventDefault();const button=$('activationSubmit'),status=$('activationStatus'),id=$('activationUserId').value.trim();if(!id){$('activationUserId').focus();return}button.disabled=true;status.textContent='Updating account…';try{const result=await sb.rpc('admin_set_user_activation',{p_user_id:id,p_activated:$('activationValue').checked,p_reason:$('activationReason').value.trim()});if(result.error)throw result.error;status.textContent=$('activationValue').checked?'Account activated successfully.':'Account deactivated successfully.';toast(status.textContent);$('userDetail').hidden=true;loadUsers(0)}catch(err){console.error('Account activation:',err);status.textContent=err.message||'Could not update account activation.';toast(status.textContent,'error')}finally{button.disabled=false}});
+async function setUserVerified(user_id,verified){return safeRpc('admin_set_user_verified',{p_target_user_id:user_id,p_verified:verified})}
+async function admin_announcement_update(id,patch){return safeRpc('admin_announcement_update',{p_id:id,p_title:patch.title,p_body:patch.body,p_audience:patch.audience,p_publish_at:patch.publish_at,p_expires_at:patch.expires_at,p_severity:patch.severity,p_reason:patch.reason||null})}
+async function admin_announcement_cancel(id){return safeRpc('admin_announcement_cancel',{p_id:id,p_reason:'Cancelled from admin console'})}
+async function admin_spike_policy_decide_case(case_id,decision,reason){return safeRpc('admin_spike_policy_decide_case',{p_case_id:case_id,p_decision:decision,p_note:reason||''})}
+async function admin_spike_policy_decide_appeal(appeal_id,decision,reason){return safeRpc('admin_spike_policy_decide_appeal',{p_appeal_id:appeal_id,p_decision:decision,p_note:reason||''})}
+async function admin_spike_policy_term_upsert(term,policyId,matchMode='word',severity='high',enforcement='remove',enabled=true,locale='und',notes=null,id=null){return safeRpc('admin_spike_policy_term_upsert',{p_id:id,p_policy_id:policyId,p_term:term,p_match_mode:matchMode,p_severity:severity,p_enforcement:enforcement,p_enabled:enabled,p_locale:locale,p_notes:notes})}
+async function admin_spike_policy_term_delete(term_id){return safeRpc('admin_spike_policy_term_delete',{p_id:term_id})}
+document.addEventListener('click',async e=>{
+const annEdit=e.target.closest('[data-announcement-edit]');if(annEdit){const values=await adminDialog({title:'Edit announcement',description:'Update the announcement details and scheduling.',confirmText:'Save changes',fields:[{name:'title',label:'Title',value:annEdit.dataset.annTitle,required:true,maxlength:200},{name:'body',label:'Message',type:'textarea',value:annEdit.dataset.annBody||'',required:true,maxlength:5000},{name:'audience',label:'Audience',type:'select',value:annEdit.dataset.annAudience||'all',options:[{value:'all',label:'All users'},{value:'active',label:'Active users'}]},{name:'publish',label:'Publish timestamp (ISO 8601)',value:annEdit.dataset.annPublish||new Date().toISOString(),required:true},{name:'expires',label:'Expiration timestamp (ISO 8601; optional)',value:annEdit.dataset.annExpires||''},{name:'severity',label:'Severity',type:'select',value:annEdit.dataset.annSeverity||'info',options:['info','success','warning','critical'].map(x=>({value:x,label:x[0].toUpperCase()+x.slice(1)}))}]});if(!values)return;const result=await admin_announcement_update(annEdit.dataset.announcementEdit,{title:values.title.trim(),body:values.body.trim(),audience:values.audience,publish_at:values.publish,expires_at:values.expires||null,severity:values.severity,reason:'Updated from admin console'});if(result!==null){toast('Announcement updated');loadAnnouncements()}return}
+const broadcast=e.target.closest('[data-broadcast-process]');if(broadcast){const result=await safeRpc('admin_process_broadcast',{p_broadcast_id:broadcast.dataset.broadcastProcess,p_batch_size:250});if(result!==null){toast(`Broadcast processed: ${result} notification(s)`);loadBroadcasts()}return}
+const packageEdit=e.target.closest('[data-package-edit]');if(packageEdit){const id=packageEdit.dataset.packageEdit;const values=await adminDialog({title:'Edit coin package',description:'Prices are entered in the currency minor unit (for NGN, kobo).',confirmText:'Save package',fields:[{name:'name',label:'Package name',value:packageEdit.dataset.packageName,required:true,maxlength:100},{name:'coins',label:'Coin amount',type:'number',value:packageEdit.dataset.packageCoins,min:1,required:true},{name:'bonus',label:'Bonus coins',type:'number',value:packageEdit.dataset.packageBonus,min:0,required:true},{name:'price',label:'Price in minor units',type:'number',value:packageEdit.dataset.packagePrice,min:1,required:true},{name:'currency',label:'Currency code',value:packageEdit.dataset.packageCurrency,required:true,maxlength:3},{name:'order',label:'Display order',type:'number',value:packageEdit.dataset.packageOrder||'0'},{name:'active',label:'Package status',type:'select',value:packageEdit.dataset.packageActive||'true',options:[{value:'true',label:'Active'},{value:'false',label:'Inactive'}]}]});if(!values)return;const name=values.name.trim(),coins=values.coins,bonus=values.bonus,price=values.price,currency=values.currency.trim().toUpperCase(),order=values.order,active=values.active==='true';if(!name||!Number.isSafeInteger(coins)||coins<1||!Number.isSafeInteger(bonus)||bonus<0||!Number.isSafeInteger(price)||price<1||!currency)return toast('Invalid package details','error');const result=await safeRpc('admin_update_coin_package',{p_id:id,p_name:name,p_coins:coins,p_bonus_coins:bonus,p_price_minor:price,p_currency:currency,p_display_order:Number.isFinite(order)?order:0,p_active:active});if(result!==null){toast('Package updated');loadPackages()}return}
+const roomRole=e.target.closest('[data-room-role-save]');if(roomRole){const room=$('memberRoom').value,uid=roomRole.dataset.roomRoleSave,role=document.querySelector(`[data-room-role="${CSS.escape(uid)}"]`)?.value;if(!room||!role)return toast('Select a room and role','error');const result=await room_member_set_role(room,uid,role);if(result!==null){toast('Room member role updated');loadRoomMembers()}return}
+const annCancel=e.target.closest('[data-announcement-cancel]');if(annCancel){if(!await adminConfirm('Cancel this announcement? This cannot be undone.',{title:'Cancel announcement',confirmText:'Cancel announcement'}))return;const result=await admin_announcement_cancel(annCancel.dataset.announcementCancel);if(result!==null){toast('Announcement cancelled');loadAnnouncements()}return}
+const detail=e.target.closest('[data-user-detail]');if(detail){showUserDetail(detail.dataset.userDetail);return}
+const verify=e.target.closest('[data-user-verify]');if(verify){const ok=await setUserVerified(verify.dataset.userVerify,verify.dataset.verified==='true');if(ok!==null){toast('Verification updated');loadUsers()}return}
+const signout=e.target.closest('[data-user-signout]');if(signout){if(!await adminConfirm('Force this user to sign out of all active sessions?',{title:'Force sign out',confirmText:'Sign out user'}))return;try{await force_signout(signout.dataset.userSignout);toast('User signed out');}catch(err){toast(err.message,'error')}return}
+const restrict=e.target.closest('[data-user-restrict]');if(restrict){const id=restrict.dataset.userRestrict;const isRestrict=restrict.dataset.restricted==='true';if(!await adminConfirm(isRestrict?'Restrict this account for 30 days?':'Remove this account restriction?',{title:isRestrict?'Restrict account':'Unrestrict account',confirmText:isRestrict?'Restrict account':'Remove restriction'}))return;const result=await safeRpc(isRestrict?'admin_ban_user':'admin_unrestrict_user',isRestrict?{p_user_id:id,p_days:30,p_reason:'Admin console restriction'}:{p_user_id:id});if(result!==null){toast(isRestrict?'Account restricted for 30 days':'Account restriction removed');loadUsers()}return}
+const purchase=e.target.closest('[data-purchase-id][data-purchase-approve]');if(purchase){const approve=purchase.dataset.purchaseApprove==='true';if(!await adminConfirm((approve?'Approve':'Reject')+' this room purchase request?',{title:approve?'Approve purchase':'Reject purchase',confirmText:approve?'Approve request':'Reject request'}))return;const result=await safeRpc('admin_review_room_purchase',{p_request_id:purchase.dataset.purchaseId,p_approve:approve,p_note:approve?'Approved from admin console':'Rejected from admin console'});if(result!==null){toast('Purchase request reviewed');loadRoomPurchases()}return}
+const caseBtn=e.target.closest('[data-case-id][data-case-decision]');if(caseBtn){const values=await adminDialog({title:'Moderation decision',description:'Add an optional note to the audit record.',confirmText:'Apply decision',fields:[{name:'reason',label:'Decision note (optional)',type:'textarea',value:''}]});if(!values)return;const r=await admin_spike_policy_decide_case(caseBtn.dataset.caseId,caseBtn.dataset.caseDecision,values.reason);if(r!==null){toast('Policy case updated');loadPolicyCases()}return}const appealBtn=e.target.closest('[data-appeal-id][data-appeal-decision]');if(appealBtn){const values=await adminDialog({title:'Appeal decision',description:'Add an optional note to the audit record.',confirmText:'Save decision',fields:[{name:'reason',label:'Decision note (optional)',type:'textarea',value:''}]});if(!values)return;const r=await admin_spike_policy_decide_appeal(appealBtn.dataset.appealId,appealBtn.dataset.appealDecision,values.reason);if(r!==null){toast('Appeal decision saved');loadPolicyAppeals();loadPolicyCases()}return}const termEdit=e.target.closest('[data-term-edit]');if(termEdit){await editPolicyTerm(termEdit);return}const termBtn=e.target.closest('[data-term-delete]');if(termBtn){if(!await adminConfirm('Delete this prohibited term from the active policy list?',{title:'Delete prohibited term',confirmText:'Delete term'}))return;const r=await admin_spike_policy_term_delete(termBtn.dataset.termDelete);if(r!==null){toast('Prohibited term deleted');loadPolicyTerms()}}});
+on('policyTermForm','submit',async e=>{e.preventDefault();const r=await admin_spike_policy_term_upsert($('policyTermValue').value.trim(),$('policyTermPolicy').value.trim(),$('policyTermMatch').value,$('policyTermSeverity').value,$('policyTermEnforcement').value,true,$('policyTermLocale').value.trim()||'und',$('policyTermNotes').value.trim()||null);if(r!==null){toast('Prohibited term saved');$('policyTermForm').reset();loadPolicyTerms()}});
+
+on('roleForm','submit',async e=>{e.preventDefault();const r=await safeRpc('admin_set_user_role',{p_user_id:$('roleUserId').value.trim(),p_role:$('roleValue').value,p_reason:'Updated from admin console'});if(r!==null)toast('Role updated')});
+on('announcementForm','submit',async e=>{e.preventDefault();const toIso=v=>v?new Date(v).toISOString():new Date().toISOString();const publish=toIso($('annPublishAt').value),expires=$('annExpiresAt').value?toIso($('annExpiresAt').value):null;if(expires&&new Date(expires)<=new Date(publish))return toast('Expiration must be after publish time','error');const r=await safeRpc('admin_announcement_create',{p_title:$('annTitle').value.trim(),p_body:$('annBody').value.trim(),p_audience:$('annAudience').value,p_publish_at:publish,p_expires_at:expires,p_severity:$('annSeverity').value});if(r!==null){toast('Announcement created');loadAnnouncements()}});
+on('processAnnouncements','click',async()=>{const r=await safeRpc('admin_process_scheduled_announcements',{p_batch_size:250});if(r!==null){toast(`Processed ${r} notification(s)`);loadAnnouncements()}});
+on('broadcastForm','submit',async e=>{e.preventDefault();const r=await safeRpc('admin_queue_broadcast',{p_title:$('broadcastTitle').value.trim(),p_body:$('broadcastBody').value.trim(),p_channel:'in_app',p_audience:'all',p_room_id:null});if(r!==null)toast('Broadcast queued')});
+on('notifyForm','submit',async e=>{e.preventDefault();try{const r=await edgeCall('send_notification',{user_id:$('notifyUserId').value.trim(),title:$('notifyTitle').value.trim(),message:$('notifyBody').value.trim()});toast(r.ok?'Notification sent':'Notification request completed')}catch(err){toast(err.message,'error')}});
+async function loadMaintenance(){const status=$('maintenanceStatus');status.textContent='Loading saved settings…';try{const {data,error}=await sb.from('app_maintenance').select('enabled,title,message,starts_at,ends_at,updated_at').eq('id',true).maybeSingle();if(error)throw error;if(!data){status.textContent='No saved maintenance row found. Saving will create it.';$('saveMaintenance').disabled=false;return} $('maintenanceMode').value=data.enabled?'on':'off';$('maintenanceTitle').value=data.title||'';$('maintenanceMessage').value=data.message||'';status.textContent=`Loaded saved settings · ${data.updated_at?new Date(data.updated_at).toLocaleString():'timestamp unavailable'}`;$('saveMaintenance').disabled=false}catch(e){status.textContent='Could not read saved settings. Editing is disabled until settings can be verified.';$('saveMaintenance').disabled=true;toast(`Maintenance load failed: ${e.message||e}`,'error')}}
+on('refreshMaintenance','click',loadMaintenance);on('maintenanceForm','submit',async e=>{e.preventDefault();$('saveMaintenance').disabled=true;try{const r=await safeRpc('admin_set_maintenance',{p_enabled:$('maintenanceMode').value==='on',p_title:$('maintenanceTitle').value.trim(),p_message:$('maintenanceMessage').value.trim(),p_starts_at:null,p_ends_at:null});if(r!==null){toast('Maintenance setting saved');$('maintenanceStatus').textContent='Saved successfully';await loadMaintenance()}}finally{$('saveMaintenance').disabled=false}});
+on('registerUser','click',openRegisterUser);
+function openRegisterUser(){$('modalTitle').textContent='Register user';$('modalBody').innerHTML='<form id="registerForm"><label class="field">Email<input id="regEmail" type="email" required></label><label class="field">Password<input id="regPassword" type="password" minlength="8" required></label><label class="field">Display name<input id="regName"></label><button class="btn primary">Create account</button></form>';$('modal').classList.add('open');$('registerForm').addEventListener('submit',async e=>{e.preventDefault();try{const {data:{session}}=await sb.auth.getSession();if(!session)throw new Error('Sign in required');const r=await fetch(`${URL}/functions/v1/admin-register-user`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${session.access_token}`,'apikey':KEY},body:JSON.stringify({email:$('regEmail').value,password:$('regPassword').value,display_name:$('regName').value})});const j=await r.json();if(!r.ok)throw Error(j.error||'Registration failed');toast('User registered');$('modal').classList.remove('open');loadUsers()}catch(err){toast(err.message,'error')}})}
+async function force_signout(user_id){return edgeCall('force_signout',{user_id})}
+on('signOut','click',async()=>{await sb.auth.signOut();location.href='index.html'});
+async function issueSafetyRecovery(){
+  const code=$('safetyCode')?.value?.trim();
+  if(!code){toast('Existing Safety code required','error');return}
+  const data=await safeRpc('admin_issue_safety_recovery',{p_code:code},'admin_issue_safety_recovery');
+  if(data!==null){toast('Safety recovery issued'); const out=$('safetyResult'); if(out) out.textContent=JSON.stringify(data,null,2)}
+}
+async function verifySafetyCode(){
+  const code=$('safetyCode')?.value?.trim();
+  if(!code){toast('Code required','error');return}
+  const data=await safeRpc('admin_verify_safety_code',{p_code:code},'admin_verify_safety_code');
+  if(data!==null){toast('Code verified'); const out=$('safetyResult'); if(out) out.textContent=JSON.stringify(data,null,2)}
+}
+
+async function init(){try{const {data:{session}}=await sb.auth.getSession();if(!session){$('adminIdentity').textContent='No signed-in session';$('systemStatus').textContent='Sign in required';$('systemStatusStrip').textContent='Please sign in using the SPIKE app, then return to admin.';$('statStatus').textContent='Locked';return}const {data:user}=await sb.auth.getUser();$('adminIdentity').textContent=user.user?.email||user.user?.id||'Authenticated';const guard=await safeRpc('admin_is_super_admin_self');if(guard!==true&&guard?.is_super_admin!==true){$('systemStatus').textContent='Access denied';$('statStatus').textContent='Denied';$('systemStatusStrip').textContent='Administrator authorization could not be confirmed. Admin controls remain server-guarded.';return}$('roleBadge').textContent='SUPER ADMIN';$('systemStatus').textContent='Super admin verified';$('statStatus').textContent='Authorized';$('systemStatusStrip').textContent='Super-admin verification passed.';await refreshAll();await loadMaintenance()}catch(e){console.error('Admin initialization failed',e);$('systemStatus').textContent='Initialization error';$('systemStatusStrip').textContent='Admin initialization failed: '+(e.message||e);toast(e.message||'Admin initialization failed','error')}}
+on('issueSafetyBtn','click',issueSafetyRecovery);
+on('verifySafetyBtn','click',verifySafetyCode);
+init();
+})();
+
+</script>
+
+<script>
+(()=>{const side=document.getElementById('adminSide');const backdrop=document.getElementById('sideBackdrop');const toggle=document.getElementById('menuToggle');
+const closeNav=()=>{side&&side.classList.remove('open');backdrop&&backdrop.classList.remove('open');if(backdrop)backdrop.hidden=true;toggle&&toggle.setAttribute('aria-expanded','false')};
+const openNav=()=>{side&&side.classList.add('open');backdrop&&backdrop.classList.add('open');if(backdrop)backdrop.hidden=false;toggle&&toggle.setAttribute('aria-expanded','true')};
+toggle&&toggle.addEventListener('click',()=>side&&side.classList.contains('open')?closeNav():openNav());
+backdrop&&backdrop.addEventListener('click',closeNav);
+side&&side.addEventListener('click',e=>{if(e.target.closest('button[data-page]'))closeNav()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav()});
+})();
+</script>
+<script>
+/* Accessible dark select enhancement. Keeps the original select as the source of truth. */
+(()=>{'use strict';
+const enhanced=new WeakMap();let active=null;
+const labelFor=select=>select.getAttribute('aria-label')||select.labels?.[0]?.textContent?.trim()||'Choose an option';
+function close(){if(!active)return;active.menu.classList.remove('open');active.trigger.setAttribute('aria-expanded','false');active=null}
+function place(item){const r=item.trigger.getBoundingClientRect(),gap=6,maxH=Math.min(300,innerHeight*.45);item.menu.style.width=Math.max(r.width,160)+'px';const below=innerHeight-r.bottom,above=r.top;const top=below>=Math.min(maxH,item.menu.scrollHeight+12)||below>=above?r.bottom+gap:Math.max(8,r.top-Math.min(maxH,item.menu.scrollHeight)-gap);item.menu.style.top=Math.max(8,Math.min(top,innerHeight-maxH-8))+'px';item.menu.style.left=Math.max(8,Math.min(r.left,innerWidth-r.width-8))+'px';item.menu.style.maxHeight=maxH+'px'}
+function refresh(item){const s=item.select;item.menu.replaceChildren();[...s.options].forEach((o,i)=>{const b=document.createElement('button');b.type='button';b.className='spike-select-option';b.setAttribute('role','option');b.setAttribute('aria-selected',String(i===s.selectedIndex));b.disabled=o.disabled;b.textContent=o.textContent;b.dataset.index=String(i);b.addEventListener('click',()=>{if(o.disabled)return;s.selectedIndex=i;s.dispatchEvent(new Event('change',{bubbles:true}));sync(item);close();item.trigger.focus()});item.menu.append(b)});sync(item)}
+function sync(item){const s=item.select,o=s.options[s.selectedIndex];item.value.textContent=o?.textContent||s.getAttribute('placeholder')||'Choose an option';item.trigger.disabled=s.disabled;item.trigger.setAttribute('aria-label',labelFor(s)+': '+item.value.textContent);item.menu.querySelectorAll('[role=option]').forEach((b,i)=>b.setAttribute('aria-selected',String(i===s.selectedIndex)))}
+function open(item){if(item.select.disabled)return;close();active=item;refresh(item);place(item);item.menu.classList.add('open');item.trigger.setAttribute('aria-expanded','true');const selected=item.menu.querySelector('[aria-selected=true]:not([disabled])')||item.menu.querySelector('button:not([disabled])');selected?.focus({preventScroll:true})}
+function enhance(s){if(!(s instanceof HTMLSelectElement)||enhanced.has(s)||s.multiple||s.size>1||s.closest('[data-native-select]'))return;const wrap=document.createElement('span');wrap.className='spike-select-enhanced';s.parentNode.insertBefore(wrap,s);wrap.append(s);s.classList.add('spike-select-source');s.tabIndex=-1;s.setAttribute('aria-hidden','true');const trigger=document.createElement('button');trigger.type='button';trigger.className='spike-select-trigger';trigger.setAttribute('aria-haspopup','listbox');trigger.setAttribute('aria-expanded','false');const value=document.createElement('span');trigger.append(value);const menu=document.createElement('div');menu.className='spike-select-menu';menu.setAttribute('role','listbox');menu.id='spike-select-menu-'+Math.random().toString(36).slice(2,9);menu.setAttribute('aria-label',labelFor(s));trigger.setAttribute('aria-controls',menu.id);document.body.append(menu);const item={select:s,wrap,trigger,value,menu};enhanced.set(s,item);wrap.append(trigger);trigger.addEventListener('click',()=>menu.classList.contains('open')?close():open(item));trigger.addEventListener('keydown',e=>{if(['ArrowDown','ArrowUp','Enter',' '].includes(e.key)){e.preventDefault();open(item)} });menu.addEventListener('keydown',e=>{const opts=[...menu.querySelectorAll('button:not([disabled])')],i=opts.indexOf(document.activeElement);if(e.key==='Escape'){e.preventDefault();close();trigger.focus()}else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();opts[Math.max(0,Math.min(opts.length-1,i+(e.key==='ArrowDown'?1:-1)))]?.focus()}else if(e.key==='Home'||e.key==='End'){e.preventDefault();(e.key==='Home'?opts[0]:opts.at(-1))?.focus()}else if(e.key==='Tab'){e.preventDefault();close();const all=[...document.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x!==s&&x!==trigger&&x.offsetParent!==null);const at=all.indexOf(trigger);(e.shiftKey?all[at-1]:all[at+1])?.focus()||trigger.focus()}});s.addEventListener('change',()=>sync(item));new MutationObserver(()=>{refresh(item);if(active===item)place(item)}).observe(s,{childList:true,subtree:true,attributes:true});sync(item)}
+document.querySelectorAll('select').forEach(enhance);new MutationObserver(records=>records.forEach(r=>r.addedNodes.forEach(n=>{if(n.nodeType!==1)return;if(n.matches?.('select'))enhance(n);n.querySelectorAll?.('select').forEach(enhance)}))).observe(document.body,{childList:true,subtree:true});document.addEventListener('click',e=>{if(active&&!active.wrap.contains(e.target)&&!active.menu.contains(e.target))close()});window.addEventListener('resize',()=>{if(active)place(active)});window.addEventListener('scroll',()=>{if(active)place(active)},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+})();
+</script>
+<script src="js/premium-back.js" defer></script>
+<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v16"></script>
+</body>
+</html>

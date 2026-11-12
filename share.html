@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
+<meta name="theme-color" content="#070b10">
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
+<title>SPIKE — Shared</title>
+<meta name="description" content="Shared from SPIKE — connect, pass and discover.">
+<meta property="og:site_name" content="SPIKE">
+<meta property="og:type" content="website">
+<meta property="og:title" content="SPIKE — Shared">
+<meta property="og:description" content="Shared from SPIKE — connect, pass and discover.">
+<meta property="og:url" content="https://spike.mediachat.workers.dev/share.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SPIKE — Shared">
+<meta name="twitter:description" content="Shared from SPIKE — connect, pass and discover.">
+<style>
+html,body{margin:0;min-height:100%;background:#070b10;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif}body{display:grid;place-items:center;padding:24px;box-sizing:border-box}.card{width:min(520px,100%);text-align:center;border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:32px;background:rgba(255,255,255,.05);box-shadow:0 20px 60px rgba(0,0,0,.35)}.card h1{margin:20px 0 8px;font-size:30px}.card p{margin:0 0 22px;color:rgba(255,255,255,.72)}a{display:inline-block;padding:13px 20px;border-radius:14px;background:#fff;color:#090b10;text-decoration:none;font-weight:800}
+</style>
+
+  <link rel="stylesheet" href="css/spike-unified-v2.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
+  <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
+  
+<link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link href="css/premium-back.css" rel="stylesheet">
+
+<script src="js/spike-loader-core.js?v=1" defer></script>
+
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+</head>
+<body data-spike-page="share">
+<script src="js/spike-dialog.js?v=global-dialog-v3"></script>
+<button type="button" data-spike-premium-back="true" aria-label="Back" class="premium-back">‹</button>
+<main class="card">
+<h1>SPIKE</h1>
+<p>Opening the shared SPIKE content…</p>
+<a id="open" href="feed.html">Open SPIKE</a>
+</main>
+<script>
+(()=>{
+  const params=new URLSearchParams(location.search);
+  const raw=params.get('target')||'';
+  let target='feed.html';
+  try{
+    const u=new URL(raw||'feed.html',location.origin);
+    if(u.origin===location.origin && u.pathname!=='/share.html') target=u.pathname+u.search+u.hash;
+  }catch(_){ }
+  const a=document.getElementById('open');
+  if(a)a.href=target;
+  setTimeout(()=>{ try{ location.replace(target); }catch(_){} },80);
+})();
+</script>
+  <script src="js/maintenance.js?v=20260914113000" defer></script>
+
+  <link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=2">
+<link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+<link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
+<script defer src="js/premium-back.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-singleton.js"></script>
+<script src="js/presence.js?v=presence-v2-global-20261112"></script>
+<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<link rel="stylesheet" href="css/spike-five-theme-authority.css?v=4">
+<link rel="stylesheet" href="css/spike-touch-hover-guard-v1.css?v=1">
+<link rel="stylesheet" href="css/ui-fix.css?v=2">
+<script src="js/spike-surface-controls.js"></script>
+</body>
+</html>

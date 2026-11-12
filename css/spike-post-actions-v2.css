@@ -1,0 +1,84 @@
+/* SPIKE Post Action Bar V3 — one clean, theme-native interaction rail. */
+.spike-post-action-bar{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:2px!important;
+  width:100%!important;
+  margin:10px 0 0!important;
+  padding:7px 4px 5px!important;
+  border-top:1px solid var(--spike-line)!important;
+  border-bottom:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.spike-post-action-bar .spike-post-action{
+  position:relative!important;
+  min-width:0!important;
+  width:100%!important;
+  min-height:54px!important;
+  padding:7px 4px!important;
+  display:grid!important;
+  grid-template-columns:auto auto!important;
+  grid-template-rows:1fr auto!important;
+  align-content:center!important;
+  justify-content:center!important;
+  column-gap:4px!important;
+  row-gap:3px!important;
+  border:1px solid transparent!important;
+  border-radius:var(--spike-control-radius)!important;
+  background:transparent!important;
+  color:var(--spike-text)!important;
+  box-shadow:none!important;
+  font-size:inherit!important;
+  transition:transform .16s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease,color .18s ease!important;
+  overflow:hidden!important;
+}
+.spike-post-action-bar .spike-post-action::after{content:none!important;display:none!important}
+.spike-post-action-bar .spike-post-action:hover,
+.spike-post-action-bar .spike-post-action:focus-visible{
+  transform:translateY(-1px)!important;
+  border-color:color-mix(in srgb,var(--spike-accent) 34%,transparent)!important;
+  background:color-mix(in srgb,var(--spike-accent) 8%,transparent)!important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--spike-glow) 72%,transparent)!important;
+  outline:none!important;
+}
+.spike-post-action-bar .spike-post-action:active{transform:scale(.985)!important}
+.spike-post-action-bar .spike-action-icon{grid-row:1;align-self:end;font-size:18px;line-height:1;color:var(--spike-muted);transition:transform .18s ease,color .18s ease,filter .18s ease}
+.spike-post-action-bar .spike-action-count{grid-row:1;align-self:end;min-width:0;font-size:12px;font-weight:850;line-height:1;color:var(--spike-text)}
+.spike-post-action-bar .spike-action-label{grid-column:1/-1;grid-row:2;font-size:9px;line-height:1.1;font-weight:800;color:var(--spike-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spike-post-action-bar .spike-post-action[data-like].active{border-color:color-mix(in srgb,var(--spike-accent) 42%,transparent)!important;background:color-mix(in srgb,var(--spike-accent) 10%,transparent)!important;box-shadow:0 0 18px color-mix(in srgb,var(--spike-glow) 80%,transparent)!important}
+.spike-post-action-bar .spike-post-action[data-like].active .spike-action-icon{color:var(--spike-accent);font-weight:900;transform:scale(1.08)}
+.spike-post-action-bar .spike-post-action[data-comments] .spike-action-icon{color:var(--spike-accent-2)}
+.spike-post-action-bar .spike-post-action[data-share] .spike-action-icon{color:var(--spike-accent)}
+.spike-post-action-bar .spike-post-action[data-save].active{border-color:color-mix(in srgb,var(--spike-accent-2) 42%,transparent)!important;background:color-mix(in srgb,var(--spike-accent-2) 9%,transparent)!important}
+.spike-post-action-bar .spike-post-action[data-save].active .spike-action-icon{color:var(--spike-accent-2);transform:scale(1.08)}
+/* Legacy viewer metrics must never reappear underneath the new rail. */
+.post > .post-stats,
+.post > .signal-activity-row,
+.post > .reaction-picker{display:none!important}
+/* Ranking is for discovery/selection, not a dashboard element inside every post. */
+.post .rank-badge,
+.post .signal-featured-badge{display:none!important}
+/* Theme geometry is intentionally shared in Theme Authority V18. */
+/* Dedicated Share sheet. */
+.spike-post-share-overlay{z-index:100700!important;align-items:center!important;justify-content:center!important;padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important}
+.spike-post-share-sheet{width:min(560px,calc(100vw - 28px))!important;max-height:min(82svh,720px)!important;overflow:auto!important;margin:0!important;padding:0!important;border:1px solid var(--spike-line)!important;border-radius:calc(var(--spike-radius) * .75)!important;background:var(--spike-surface)!important;color:var(--spike-text)!important;box-shadow:var(--spike-shadow),0 0 42px var(--spike-glow)!important;backdrop-filter:blur(var(--spike-blur))!important;-webkit-backdrop-filter:blur(var(--spike-blur))!important}
+.spike-post-share-head{display:flex;justify-content:space-between;gap:14px;padding:20px 20px 14px;border-bottom:1px solid var(--spike-line)}
+.spike-post-share-head h2{margin:3px 0 4px;font-size:20px;color:var(--spike-text)}
+.spike-post-share-head p{margin:0;color:var(--spike-muted);font-size:11px}
+.spike-post-share-kicker{display:block;font-size:8px;letter-spacing:.16em;font-weight:900;color:var(--spike-accent);text-transform:uppercase}
+.spike-post-share-close{width:36px;height:36px;flex:0 0 auto;border:1px solid var(--spike-line);border-radius:var(--spike-control-radius);background:var(--spike-surface-2);color:var(--spike-text);font-size:20px}
+.spike-share-preview{display:grid;gap:5px;margin:14px 16px;padding:13px;border:1px solid var(--spike-line);border-radius:var(--spike-control-radius);background:var(--spike-surface-2)}
+.spike-share-preview b{font-size:12px}.spike-share-preview>span:last-child{font-size:10px;color:var(--spike-muted);line-height:1.4}.spike-share-preview-kicker{font-size:7px!important;letter-spacing:.12em;color:var(--spike-accent)!important;font-weight:900}
+.spike-post-share-options{display:grid;gap:8px;padding:2px 16px 18px}
+.spike-post-share-options button{display:grid;grid-template-columns:40px minmax(0,1fr) 22px;align-items:center;gap:10px;width:100%;padding:12px;border:1px solid var(--spike-line);border-radius:var(--spike-control-radius);background:var(--spike-surface-2);color:var(--spike-text);text-align:left}
+.spike-post-share-options button:hover,.spike-post-share-options button:focus-visible{border-color:var(--spike-accent);background:color-mix(in srgb,var(--spike-accent) 9%,var(--spike-surface-2));outline:none}
+.spike-post-share-options button>span:first-child{width:40px;height:40px;display:grid;place-items:center;border-radius:calc(var(--spike-control-radius) * .8);background:color-mix(in srgb,var(--spike-accent) 11%,var(--spike-surface-3));font-size:18px}
+.spike-post-share-options b{display:block;font-size:11px}.spike-post-share-options small{display:block;margin-top:3px;color:var(--spike-muted);font-size:8.5px;line-height:1.35}.spike-post-share-options i{font-style:normal;color:var(--spike-accent);font-size:22px;text-align:right}
+@media(max-width:520px){.spike-post-action-bar{gap:1px!important;padding:7px 2px 4px!important}.spike-post-action-bar .spike-post-action{min-height:52px!important;padding:7px 2px!important}.spike-post-action-bar .spike-action-icon{font-size:16px}.spike-post-action-bar .spike-action-count{font-size:11px}.spike-post-action-bar .spike-action-label{font-size:8.5px}.spike-post-share-sheet{width:min(94vw,560px)!important;border-radius:var(--spike-control-radius)!important}.spike-post-share-head{padding:17px 15px 12px}.spike-share-preview{margin:12px 12px}.spike-post-share-options{padding:2px 12px 14px}}
+@media(max-width:360px){.spike-post-action-bar{gap:0!important}.spike-post-action-bar .spike-post-action{min-height:48px!important}.spike-post-action-bar .spike-action-icon{font-size:14px}.spike-post-action-bar .spike-action-count{font-size:10px}.spike-post-action-bar .spike-action-label{font-size:7.5px}}
+@media(prefers-reduced-motion:reduce){.spike-post-action-bar .spike-post-action{transition:none!important}}
+/* Reactions inherit the same theme language; they appear only after a long press. */
+.spike-reaction-tray{border:1px solid var(--spike-line)!important;border-radius:var(--spike-control-radius)!important;background:var(--spike-surface)!important;color:var(--spike-text)!important;box-shadow:var(--spike-shadow),0 0 26px var(--spike-glow)!important;backdrop-filter:blur(var(--spike-blur))!important;-webkit-backdrop-filter:blur(var(--spike-blur))!important}
+.spike-reaction-tray button{color:var(--spike-text)!important;border-radius:var(--spike-control-radius)!important}
+.spike-reaction-tray button:hover,.spike-reaction-tray button:active,.spike-reaction-tray button:focus-visible{background:color-mix(in srgb,var(--spike-accent) 13%,transparent)!important;outline:none!important;box-shadow:0 0 14px var(--spike-glow)!important}

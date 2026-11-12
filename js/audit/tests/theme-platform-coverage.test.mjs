@@ -1,0 +1,19 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root=process.cwd();
+const pages=fs.readdirSync(root).filter(f=>f.endsWith('.html'));
+test('every production HTML page loads the shared theme registry and palette authority',()=>{
+  for(const page of pages){const html=fs.readFileSync(path.join(root,page),'utf8');assert.match(html,/js\/theme\.js/,`${page} must load theme.js`);assert.match(html,/css\/spike-five-theme-authority\.css/,`${page} must load theme authority`);}
+});
+test('every production HTML page loads the compatibility runtime token layer',()=>{
+  for(const page of pages){const html=fs.readFileSync(path.join(root,page),'utf8');assert.match(html,/css\/spike-theme-runtime-v3\.css/,`${page} must load runtime token aliases`);}
+});
+test('each theme defines a coherent glow token and shared geometry tokens',()=>{
+  const css=fs.readFileSync(path.join(root,'css/spike-five-theme-authority.css'),'utf8');
+  for(const id of [1,2,3,4,5]){assert.ok(css.includes(`html[data-spike-style="${id}"]{`),`theme ${id} palette exists`);}
+  for(const glow of ["rgba(167,139,250,.13)","rgba(36,89,211,.1)","rgba(53,201,139,.12)","rgba(185,95,62,.1)","rgba(232,121,249,.14)"]){assert.ok(css.includes(`--spike-glow:${glow}`),`missing theme glow ${glow}`);}
+  assert.match(css,/--spike-radius:18px/);assert.match(css,/--spike-control-radius:12px/);assert.match(css,/--spike-blur:0px/);
+});

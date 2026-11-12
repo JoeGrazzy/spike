@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b10">
+<meta name="description" content="SPIKE notifications">
+<title>SPIKE — Notifications</title>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
+<link rel="stylesheet" href="css/perf.css">
+<link rel="stylesheet" href="css/ui-fix.css">
+<link rel="stylesheet" href="css/premium-back.css">
+<link rel="stylesheet" href="css/spike-adaptive-nav.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-singleton.js"></script>
+<script src="js/spike-notification-sound-v1.js"></script>
+<script defer src="js/spike-notification-center-v1.js"></script>
+<script src="js/presence.js?v=presence-v2-global-20261112"></script>
+<script src="js/spike-dialog.js"></script>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
+<link rel="stylesheet" href="css/spike-unified-v2.css">
+<link rel="stylesheet" href="css/spike-identity.css">
+<script src="js/spike-identity.js"></script>
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-beauty-v1.css">
+<link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<script src="js/spike-loader-core.js?v=1" defer></script>
+<link rel="stylesheet" href="css/spike-premium-loader.css">
+<script src="js/spike-empty-state.js" defer></script>
+<script src="js/theme.js" defer></script>
+<link rel="stylesheet" href="css/spike-surface-controls.css">
+
+<style>
+/* ═══════════════════════════════════════════════════════════
+   SPIKE Notifications — Original experience
+   Built from scratch for SPIKE. Not a clone of any viral app.
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --page-bg: var(--spike-bg);
+  --surface: var(--spike-surface);
+  --surface-2: var(--spike-surface-2);
+  --border: var(--spike-line);
+  --text: var(--spike-text);
+  --muted: var(--spike-muted);
+  --accent: var(--spike-accent);
+  --accent-2: var(--spike-accent-2);
+  --danger: var(--btn-danger, #ef4444);
+  --success: #22c55e;
+  --strip-radius: 18px;
+  --card-radius: 16px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--page-bg);
+  color: var(--text);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Sticky Header ─────────────────────────────────────── */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 64px;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background: color-mix(in srgb, var(--spike-bg) 92%, transparent);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
+
+.header .brand {
+  min-width: 0;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+}
+
+.brand-title {
+  display: block;
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+}
+
+.brand-subtitle {
+  display: block;
+  margin-top: 1px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.header-title {
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+  color: var(--muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-btn,
+.smart-back {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 12px;
+  min-width: 40px;
+  height: 40px;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:active,
+.smart-back:active {
+  background: color-mix(in srgb, var(--spike-accent) 12%, var(--surface-2));
+}
+
+.smart-back {
+  padding: 0 12px;
+  display: flex;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+/* ── Main ──────────────────────────────────────────────── */
+.main {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 12px 12px 32px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Status Strip (replaces large hero) ────────────────── */
+.status-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  background: linear-gradient(145deg, var(--surface), var(--surface-2));
+  border: 1px solid var(--border);
+  border-radius: var(--strip-radius);
+}
+
+.status-strip .status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 50%, transparent);
+  animation: status-ring 2.4s ease-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes status-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent); }
+  70% { box-shadow: 0 0 0 8px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.status-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-meta .count-line {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.status-meta .count-line span {
+  color: var(--accent-2);
+}
+
+.status-meta .sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.status-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn {
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--spike-accent), var(--spike-accent-2));
+  border-color: transparent;
+  color: #fff;
+}
+
+.btn.ghost {
+  background: transparent;
+}
+
+.btn.danger-soft {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
+}
+
+/* ── Toolbar ───────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 90%, transparent);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.seg::-webkit-scrollbar { display: none; }
+
+.seg-btn {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 9px 13px;
+  border-radius: 10px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.seg-btn.active {
+  background: color-mix(in srgb, var(--spike-accent) 18%, var(--surface-2));
+  color: var(--text);
+}
+
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.search-wrap span {
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.search-wrap input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  outline: none;
+  min-width: 0;
+}
+
+.search-wrap input::placeholder {
+  color: var(--muted);
+}
+
+/* ── Time Sections ─────────────────────────────────────── */
+.time-section {
+  margin-bottom: 18px;
+}
+
+.time-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 8px;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.time-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+  opacity: 0.7;
+}
+
+/* ── Notification Cards ────────────────────────────────── */
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 14px 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--card-radius);
+  background: var(--surface);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
+  overflow: hidden;
+}
+
+.notification::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--accent);
+  opacity: 0.35;
+  border-radius: 3px 0 0 3px;
+}
+
+.notification.unread {
+  background: color-mix(in srgb, var(--spike-accent) 6%, var(--surface));
+  border-color: color-mix(in srgb, var(--spike-accent) 22%, var(--border));
+}
+
+.notification.unread::before {
+  opacity: 1;
+  width: 4px;
+}
+
+.notification.priority-high::before {
+  background: var(--accent-2);
+  opacity: 1;
+  width: 4px;
+}
+
+.notification.priority-social::before { background: #38bdf8; }
+.notification.priority-system::before { background: #a78bfa; }
+.notification.priority-danger::before { background: var(--danger); }
+.notification.priority-success::before { background: var(--success); }
+
+.notification:active {
+  transform: scale(0.985);
+}
+
+.notif-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  font-size: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.notif-avatar img,
+.notif-avatar .spike-avatar,
+.notif-avatar .spike-generated-avatar,
+.notif-avatar [data-spike-identity="avatar"] {
+  width: 44px !important;
+  height: 44px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  object-fit: cover !important;
+  border-radius: 14px !important;
+  display: block !important;
+}
+.notif-avatar img {
+  background: var(--surface-2);
+}
+
+.notif-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.notif-title {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.notif-preview {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.notif-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.notif-time {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.notif-chip {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--spike-surface-2) 90%, transparent);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.notif-chip.smart {
+  background: color-mix(in srgb, var(--spike-accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--spike-accent) 25%, var(--border));
+  color: var(--accent-2);
+}
+
+.notif-new {
+  flex-shrink: 0;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--spike-accent), var(--spike-accent-2));
+  color: #fff;
+  align-self: flex-start;
+}
+
+/* Inline actions for friend requests / invites */
+.notif-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.notif-actions .btn {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
+}
+
+.notif-actions .btn.accept {
+  background: linear-gradient(135deg, var(--spike-accent), var(--spike-accent-2));
+  border-color: transparent;
+  color: #fff;
+}
+
+.notif-actions .btn.decline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+/* ── Empty State ───────────────────────────────────────── */
+.empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+}
+
+.empty .empty-icon {
+  font-size: 42px;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.empty strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.empty .muted {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.empty.error {
+  color: var(--danger);
+}
+
+/* ── Modal ─────────────────────────────────────────────── */
+.notif-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: end center;
+  background: rgba(0,0,0,0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.notif-modal[aria-hidden="false"] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.notif-modal-card {
+  width: min(480px, 100%);
+  max-height: 78vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px 22px 18px 18px;
+  padding: 18px;
+  transform: translateY(24px);
+  transition: transform 0.22s ease;
+}
+
+.notif-modal[aria-hidden="false"] .notif-modal-card {
+  transform: translateY(0);
+}
+
+.notif-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.notif-modal-icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border-radius: 14px;
+}
+
+.notif-modal-title {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.notif-modal-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+  font-weight: 600;
+}
+
+.notif-modal-close {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.notif-modal-body {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notif-modal-section {
+  margin-bottom: 12px;
+}
+
+.notif-modal-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.notif-modal-text {
+  color: var(--text);
+}
+
+/* ── Bottom Nav — hardened SPIKE dock contract ─────────── */
+.bottom-nav { display: none !important; }
+
+/* Notifications dock: explicitly restore the complete visual contract used by SPIKE's Feed dock. */
+html body #spikeBottomNav.spike-bottom-nav{
+  box-sizing:border-box!important;display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:stretch!important;justify-items:stretch!important;gap:6px!important;
+  position:fixed!important;left:12px!important;right:12px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;transform:none!important;
+  width:auto!important;max-width:760px!important;margin:0 auto!important;min-height:0!important;padding:8px!important;
+  border:1px solid color-mix(in srgb,var(--spike-accent) 24%,var(--spike-line))!important;border-radius:25px!important;
+  background:color-mix(in srgb,var(--spike-bg) 96%,transparent)!important;color:var(--spike-text)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.32),0 0 0 1px rgba(255,255,255,.025) inset!important;
+  backdrop-filter:blur(18px) saturate(140%)!important;-webkit-backdrop-filter:blur(18px) saturate(140%)!important;
+  z-index:90000!important;
+}
+html body #spikeBottomNav.spike-bottom-nav>a,
+html body #spikeBottomNav.spike-bottom-nav>button{
+  box-sizing:border-box!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:5px!important;
+  min-width:0!important;width:100%!important;min-height:52px!important;margin:0!important;padding:7px 3px!important;
+  border:1px solid transparent!important;border-radius:17px!important;background:transparent!important;color:var(--spike-muted)!important;
+  font:inherit!important;line-height:1!important;text-decoration:none!important;white-space:normal!important;cursor:pointer!important;
+}
+html body #spikeBottomNav.spike-bottom-nav>a>span,
+html body #spikeBottomNav.spike-bottom-nav>button>span{display:block!important;font-size:20px!important;line-height:1!important}
+html body #spikeBottomNav.spike-bottom-nav>a>small,
+html body #spikeBottomNav.spike-bottom-nav>button>small{display:block!important;font-size:10px!important;font-weight:800!important;line-height:1.1!important;white-space:nowrap!important}
+html body #spikeBottomNav.spike-bottom-nav>[aria-current="page"],
+html body #spikeBottomNav.spike-bottom-nav>.active{
+  background:color-mix(in srgb,var(--spike-accent) 20%,var(--spike-surface-2))!important;
+  border-color:color-mix(in srgb,var(--spike-accent) 38%,var(--spike-line))!important;
+  color:var(--spike-accent-2)!important;
+}
+html body #spikeBottomNav.spike-bottom-nav>a:focus-visible,
+html body #spikeBottomNav.spike-bottom-nav>button:focus-visible{outline:2px solid var(--spike-accent-2)!important;outline-offset:2px!important}
+@media(max-width:560px){
+  html body #spikeBottomNav.spike-bottom-nav{left:10px!important;right:10px!important;bottom:max(6px,env(safe-area-inset-bottom))!important;padding:6px!important;border-radius:20px!important}
+  html body #spikeBottomNav.spike-bottom-nav>a,
+  html body #spikeBottomNav.spike-bottom-nav>button{min-height:48px!important;border-radius:14px!important}
+  html body #spikeBottomNav.spike-bottom-nav>a>small,
+  html body #spikeBottomNav.spike-bottom-nav>button>small{font-size:9px!important}
+  body{padding-bottom:calc(92px + env(safe-area-inset-bottom));}
+}
+@media(prefers-reduced-motion:reduce){
+  html body #spikeBottomNav.spike-bottom-nav,
+  html body #spikeBottomNav.spike-bottom-nav>*{transition:none!important}
+}
+
+/* Loader / Toast (project shared) */
+.loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: color-mix(in srgb, var(--spike-bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+}
+
+.loader.hide { display: none; }
+
+.loader-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-weight: 700;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(100px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(20px);
+  z-index: 90;
+  max-width: min(360px, 90vw);
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  font-weight: 700;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .status-strip .status-dot,
+  .notification,
+  .notif-modal,
+  .notif-modal-card,
+  .spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+</style>
+</head>
+<body data-spike-page="notifications" data-spike-notification-page>
+<div class="app">
+  <header class="header">
+    <button class="smart-back" id="spikeSmartBack" type="button" data-spike-premium-back="1" data-back-fallback="feed.html">
+      <span aria-hidden="true">←</span><span>Back</span>
+    </button>
+    <a class="brand" href="feed.html" aria-label="SPIKE home">
+      <span class="brand-title">SPIKE</span>
+      <span class="brand-subtitle">CONNECT • SHARE • DISCOVER</span>
+    </a>
+    <span class="header-title">Notifications</span>
+    <div class="header-actions">
+      <a class="icon-btn notification-page-bell" data-spike-notification-badge href="notifications.html" aria-label="Notifications" title="Notifications">
+        <span aria-hidden="true">🔔</span>
+        <span class="spike-notification-badge-count" hidden>0</span>
+      </a>
+      <button class="icon-btn" id="refreshBtn" type="button" aria-label="Refresh notifications">↻</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <!-- Compact status strip -->
+    <div class="status-strip">
+      <div class="status-dot" aria-hidden="true"></div>
+      <div class="status-meta">
+        <div class="count-line"><span id="unreadCount">0</span> unread</div>
+        <div class="sub" id="statusSub">Activity from people on SPIKE</div>
+      </div>
+      <div class="status-actions">
+        <button class="btn primary" id="markAll" type="button" disabled>Mark all</button>
+        <button class="btn ghost" id="moreActionsBtn" type="button" aria-haspopup="true" aria-expanded="false">•••</button>
+      </div>
+    </div>
+
+    <!-- Hidden bulk actions (revealed via more menu) -->
+    <div id="bulkPanel" hidden style="display:none; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+      <button class="btn" id="clearAll" type="button">Clear all</button>
+      <button class="btn danger-soft" id="deleteRead" type="button">Delete read</button>
+    </div>
+
+    <!-- Filters + Search -->
+    <div class="toolbar">
+      <div class="seg" role="tablist" aria-label="Notification filters">
+        <button class="seg-btn active" id="tabAll" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
+        <button class="seg-btn" id="tabUnread" type="button" role="tab" aria-selected="false" data-filter="unread">Unread</button>
+        <button class="seg-btn" id="tabMentions" type="button" role="tab" aria-selected="false" data-filter="mentions">Mentions</button>
+        <button class="seg-btn" id="tabAnnouncements" type="button" role="tab" aria-selected="false" data-filter="announcements">Announce</button>
+        <button class="seg-btn" id="tabSystem" type="button" role="tab" aria-selected="false" data-filter="system">System</button>
+      </div>
+      <label class="search-wrap">
+        <span aria-hidden="true">⌕</span>
+        <input id="notificationSearch" type="search" autocomplete="off" placeholder="Search notifications…" aria-label="Search notifications">
+      </label>
+    </div>
+
+    <!-- List -->
+    <section class="list" id="notificationList" aria-live="polite">
+      <div class="empty">
+        <div class="empty-icon">🔔</div>
+        <strong>Loading notifications…</strong>
+        <div class="muted">Pulling the latest activity from SPIKE</div>
+      </div>
+    </section>
+  </main>
+
+  <nav aria-label="Main navigation" class="spike-bottom-nav" id="spikeBottomNav" style="grid-template-columns:repeat(4,minmax(0,1fr))!important">
+    <a data-spike-nav="home" href="feed.html"><span aria-hidden="true">⌂</span><small>Home</small></a>
+    <button data-spike-nav="discover" type="button"><span aria-hidden="true">⌕</span><small>Discover</small></button>
+    <a aria-current="page" class="active" data-spike-nav="activity" href="notifications.html"><span aria-hidden="true">🔔</span><small>Alerts</small></a>
+    <a data-spike-nav="profile" href="profile.html"><span aria-hidden="true">◉</span><small>Me</small></a>
+  </nav>
+</div>
+
+<!-- Detail modal -->
+<div class="notif-modal" id="notificationModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="notif-modal-card">
+    <div class="notif-modal-head">
+      <span class="notif-modal-icon" id="notificationModalIcon">🔔</span>
+      <div>
+        <div class="notif-modal-title" id="notificationModalTitle">Notification</div>
+        <div class="notif-modal-meta" id="notificationModalMeta"></div>
+      </div>
+      <button class="notif-modal-close" id="notificationModalClose" type="button" aria-label="Close">×</button>
+    </div>
+    <div class="notif-modal-body" id="notificationModalBody"></div>
+  </div>
+</div>
+
+<audio id="notificationTone" preload="auto" src="assets/mp3/notifications.mp3" aria-hidden="true"></audio>
+<div class="loader" id="loader" role="status" aria-live="polite">
+  <div class="loader-card"><span class="spinner" aria-hidden="true"></span>Loading SPIKE…</div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/premium-back.js" defer></script>
+<script src="js/telemetry.js" defer></script>
+<script src="js/spike-adaptive-nav.js" defer></script>
+<script src="js/ui-fix.js"></script>
+
+<script>
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════
+   SPIKE Notifications — Core Logic
+   Preserves original data contracts, RPCs, realtime, deep links.
+   Presentation rebuilt from scratch.
+   ═══════════════════════════════════════════════════════════ */
+
+const SUPABASE_URL = "https://cjqpyndceqyqsijihxbb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, flowType: "pkce" }
+});
+window.sb = sb;
+window.supabaseClient = sb;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+
+let me = null;
+let rows = [];
+let channel = null;
+let profileCache = new Map();
+let appPrefs = { message_tone: true, browser_notifications: false };
+let notificationFilter = "all";
+let notificationQuery = "";
+let isUserScrolling = false;
+let pendingSilentRefresh = false;
+let lastRealtimeAt = 0;
+let pollTimer = null;
+let bc = null;
+let authReady = false;
+let authRecoveryInProgress = false;
+let authListenerBound = false;
+
+const PROJECT_REF = new URL(SUPABASE_URL).hostname.split(".")[0];
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/* ── Helpers ─────────────────────────────────────────────── */
+function dataOf(n) {
+  return n && n.data && typeof n.data === "object" ? n.data : {};
+}
+
+function firstValue(d, keys) {
+  for (const k of keys) {
+    const v = d?.[k];
+    if (v !== undefined && v !== null && String(v).trim() !== "") return String(v);
+  }
+  return "";
+}
+
+function targetOf(n) {
+  const d = dataOf(n);
+  return firstValue(d, ["target_name", "post_title", "room_name", "conversation_name", "recipient_name"]);
+}
+
+function detailOf(n) {
+  const d = dataOf(n);
+  return firstValue(d, ["body", "description", "detail", "details", "preview", "content", "message"]);
+}
+
+function titleOf(n) {
+  const d = dataOf(n);
+  if (d.title) return String(d.title);
+  const t = String(n.type || "").toLowerCase();
+  const map = {
+    friend_request: "Friend request",
+    friend_accepted: "Friend request accepted",
+    friend_request_declined: "Friend request declined",
+    friend_declined: "Friend request declined",
+    friend_request_resolved: "Friend request resolved",
+    new_follower: "New follower",
+    follow: "New follower",
+    like: "New like",
+    post_like: "New like",
+    comment: "New comment",
+    mention: "You were mentioned",
+    message: "New message",
+    coin_received: "Coins received",
+    coin_topup_completed: "Coin top-up completed",
+    room_invite: "Room invitation",
+    room_purchase_verified: "Purchase approved",
+    room_purchase_rejected: "Purchase rejected",
+    broadcast: "SPIKE broadcast",
+    announcement: "SPIKE announcement",
+    login: "Login activity",
+    security: "Security alert",
+    system: "System update",
+    friend_removed: "Friend removed",
+    friend_unfriended: "Friend removed",
+    call_incoming: "Incoming call",
+    call_missed: "Missed call",
+    call_ended: "Call ended",
+    message_deleted: "Message deleted",
+    mention_reply: "Mention reply",
+    spike_policy_content_removed: "Your Signal was removed",
+    spike_policy_appeal_decision: "SPIKE Policy appeal decision",
+    spike_policy_case_update: "SPIKE Policy case updated"
+  };
+  return map[t] || String(n.type || "Notification").replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function notificationText(n) {
+  const d = dataOf(n);
+  const explicit = firstValue(d, ["message", "body", "description", "detail", "preview"]);
+  if (explicit) return explicit;
+  const actor = actorOf(n);
+  const target = targetOf(n);
+  const amount = Number(d.amount || 0).toLocaleString();
+  const coins = Number(d.coins || 0).toLocaleString();
+  const t = String(n.type || "").toLowerCase();
+  const map = {
+    spike_policy_content_removed: "SPIKE removed your content under the Prohibited Content Policy",
+    spike_policy_appeal_decision: "SPIKE updated your Policy appeal",
+    spike_policy_case_update: "SPIKE updated your Policy case",
+    friend_request: "sent you a friend request",
+    friend_accepted: "accepted your friend request",
+    friend_request_declined: "declined your friend request",
+    friend_declined: "declined your friend request",
+    new_follower: "started following you",
+    follow: "started following you",
+    like: "liked your Signal",
+    post_like: "liked your Signal",
+    comment: "commented on your Signal",
+    mention: "mentioned you",
+    message: "sent you a message",
+    coin_received: `sent you ${coins || amount} coins`,
+    room_invite: "invited you to a room",
+    broadcast: "SPIKE has a new announcement",
+    announcement: "SPIKE has a new announcement",
+    security: "Security activity on your account",
+    system: "System update from SPIKE"
+  };
+  const base = map[t] || "activity on SPIKE";
+  return actor ? `${actor} ${base}` : base;
+}
+
+function notificationIcon(n) {
+  const t = String(n.type || "").toLowerCase();
+  if (/friend_request|friend_accepted|follow|new_follower/.test(t)) return "👥";
+  if (/like|post_like|reaction/.test(t)) return "♥";
+  if (/comment|mention/.test(t)) return "💬";
+  if (/message|call/.test(t)) return "✉";
+  if (/coin|purchase/.test(t)) return "◈";
+  if (/room/.test(t)) return "⌂";
+  if (/security|login|policy/.test(t)) return "🛡";
+  if (/broadcast|announcement|system/.test(t)) return "📣";
+  return "🔔";
+}
+
+function formatTime(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const now = Date.now();
+  const diff = (now - d.getTime()) / 1000;
+  if (diff < 45) return "Just now";
+  if (diff < 3600) return Math.floor(diff / 60) + "m";
+  if (diff < 86400) return Math.floor(diff / 3600) + "h";
+  if (diff < 604800) return Math.floor(diff / 86400) + "d";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function timeBucket(iso) {
+  if (!iso) return "earlier";
+  const d = new Date(iso);
+  const now = new Date();
+  const diffMs = now - d;
+  const diffH = diffMs / 3600000;
+  if (diffH < 1) return "now";
+  if (d.toDateString() === now.toDateString()) return "today";
+  if (diffH < 168) return "week";
+  return "earlier";
+}
+
+function priorityClass(n) {
+  const t = String(n.type || "").toLowerCase();
+  if (/security|policy|login/.test(t)) return "priority-danger";
+  if (/friend_request|room_invite|mention/.test(t)) return "priority-high";
+  if (/like|comment|follow|friend_accepted|message/.test(t)) return "priority-social";
+  if (/system|broadcast|announcement|coin/.test(t)) return "priority-system";
+  if (/purchase_verified|accepted/.test(t)) return "priority-success";
+  return "";
+}
+
+function categoryOf(n) {
+  const t = String(n.type || "").toLowerCase();
+  if (/announcement|broadcast/.test(t)) return "announcements";
+  if (/mention|mention_reply/.test(t)) return "mentions";
+  if (/system|security|login|policy|coin|purchase/.test(t)) return "system";
+  return "activity";
+}
+
+function actorIdOf(n) {
+  const d = dataOf(n);
+  for (const key of ["actor_id", "from_user_id", "sender_id", "from_id", "other_user_id", "otherUserId", "senderId", "fromUserId"]) {
+    const id = d?.[key];
+    if (id && /^[0-9a-f-]{36}$/i.test(String(id))) return String(id);
+  }
+  return "";
+}
+
+function actorOf(n) {
+  const d = dataOf(n);
+  return firstValue(d, ["actor_name", "from_name", "sender_name", "username", "display_name", "name"]) ||
+    (actorProfileOf(n)?.display_name || actorProfileOf(n)?.username || "");
+}
+
+function actorProfileOf(n) {
+  const id = actorIdOf(n);
+  if (id && profileCache.has(id)) return profileCache.get(id);
+  const d = dataOf(n);
+  if (d.actor_profile && typeof d.actor_profile === "object") return d.actor_profile;
+  const avatar = firstValue(d, ["actor_avatar", "actor_avatar_url", "avatar_url", "photo_url", "image_url", "sender_avatar", "from_avatar"]);
+  const name = firstValue(d, ["actor_name", "from_name", "sender_name", "display_name", "username", "name"]);
+  if (id || avatar || name) {
+    return {
+      id: id || undefined,
+      username: d.username || d.actor_username || undefined,
+      display_name: name || undefined,
+      full_name: name || undefined,
+      avatar_url: avatar || undefined
+    };
+  }
+  return null;
+}
+
+function notificationHref(n) {
+  const d = dataOf(n);
+  const t = String(n.type || "").toLowerCase();
+  const postId = firstValue(d, ["post_id", "postId", "signal_id"]);
+  const roomId = firstValue(d, ["room_id", "roomId"]);
+  const actor = actorIdOf(n);
+  const messageUser = firstValue(d, ["other_user_id", "otherUserId", "recipient_id", "sender_id", "from_user_id", "actor_id"]);
+  const explicit = firstValue(d, ["url", "href", "link", "activity_url", "deep_link"]);
+  const sourceRaw = d.source_page || d.sourcePage || d.page || d.route || "";
+
+  if (/^spike_policy_/.test(t)) return "policy_appeals.html";
+
+  const sameOriginUrl = (raw) => {
+    try {
+      const u = new URL(String(raw), window.location.href);
+      return u.origin === window.location.origin ? u : null;
+    } catch (_) { return null; }
+  };
+
+  if (explicit) {
+    const u = sameOriginUrl(explicit);
+    if (u) {
+      if (/(^|\/)(message|messages)(?:\.html)?$/i.test(u.pathname)) {
+        // message.html only accepts ?to= or ?id= (not private_uid)
+        const existing = u.searchParams.get("to") || u.searchParams.get("id") || u.searchParams.get("private_uid") || messageUser;
+        if (existing) {
+          u.searchParams.delete("private_uid");
+          u.searchParams.delete("user");
+          if (!u.searchParams.get("to") && !u.searchParams.get("id")) u.searchParams.set("to", existing);
+        }
+      } else if (/(^|\/)feed(?:\.html)?$/i.test(u.pathname) && postId && !u.searchParams.get("post")) {
+        u.searchParams.set("post", postId);
+      }
+      return u.href;
+    }
+  }
+
+  if (/like|post_like|comment|mention|mention_reply|reaction|repost|post/.test(t) && postId) {
+    return "feed.html?post=" + encodeURIComponent(postId);
+  }
+  if (postId) return "feed.html?post=" + encodeURIComponent(postId);
+  if (roomId) return "rooms.html?room=" + encodeURIComponent(roomId);
+  if (actor && UUID_RE.test(actor) && /follow|friend|story/.test(t)) {
+    return "view_user.html?uid=" + encodeURIComponent(actor);
+  }
+  if (/message/.test(t) && messageUser) {
+    return "message.html?to=" + encodeURIComponent(messageUser);
+  }
+  return "";
+}
+
+function isFriendRequestType(n) {
+  return /friend_request/.test(String(n.type || "").toLowerCase()) && !/accepted|declined|resolved|removed/.test(String(n.type || "").toLowerCase());
+}
+
+function isRoomInviteType(n) {
+  return /room_invite/.test(String(n.type || "").toLowerCase());
+}
+
+/* ── Render ──────────────────────────────────────────────── */
+function render() {
+  const box = $("#notificationList");
+  if (!box) return;
+
+  const unread = rows.filter(n => !n.read).length;
+  window.SPIKENotificationCenter?.setCount(unread);
+  $("#unreadCount").textContent = unread > 99 ? "99+" : String(unread);
+  $("#markAll").disabled = !unread;
+  $("#clearAll") && ($("#clearAll").disabled = !rows.length);
+  $("#statusSub").textContent = unread
+    ? `${unread} need${unread === 1 ? "s" : ""} your attention`
+    : rows.length ? "You're all caught up" : "Activity from people on SPIKE";
+
+  const q = notificationQuery.trim().toLowerCase();
+  const visible = rows.filter(n => {
+    if (notificationFilter === "unread" && n.read) return false;
+    if (["announcements", "mentions", "system"].includes(notificationFilter) && categoryOf(n) !== notificationFilter) return false;
+    if (!q) return true;
+    const hay = [titleOf(n), notificationText(n), detailOf(n), actorOf(n), targetOf(n), n.type].join(" ").toLowerCase();
+    return hay.includes(q);
+  });
+
+  if (!visible.length) {
+    box.innerHTML = `
+      <div class="empty">
+        <div class="empty-icon">${rows.length ? "⌕" : "🔔"}</div>
+        <strong>${rows.length ? "No matching activity" : "No notifications yet"}</strong>
+        <div class="muted">${rows.length
+          ? "Try another filter or search term."
+          : "Likes, mentions, friend requests, room invites and system updates will appear here."}</div>
+      </div>`;
+    return;
+  }
+
+  // Group by time bucket
+  const buckets = { now: [], today: [], week: [], earlier: [] };
+  for (const n of visible) {
+    buckets[timeBucket(n.created_at)].push(n);
+  }
+
+  const labels = {
+    now: "Now",
+    today: "Today",
+    week: "This week",
+    earlier: "Earlier"
+  };
+
+  let html = "";
+  for (const key of ["now", "today", "week", "earlier"]) {
+    const list = buckets[key];
+    if (!list.length) continue;
+    html += `<div class="time-section">
+      <div class="time-label">${labels[key]}</div>
+      <div class="notif-list">`;
+    for (const n of list) {
+      html += renderCard(n);
+    }
+    html += `</div></div>`;
+  }
+  box.innerHTML = html;
+}
+
+function renderCard(n) {
+  const d = dataOf(n);
+  const actor = actorOf(n);
+  const preview = detailOf(n);
+  const actorProfile = actorProfileOf(n);
+  const href = notificationHref(n);
+  const pClass = priorityClass(n);
+  const isFR = isFriendRequestType(n);
+  const isRI = isRoomInviteType(n);
+
+  let avatarHtml = notificationIcon(n);
+  const profile = actorProfileOf(n) || actorProfile;
+  if (profile) {
+    const rawUrl = profile.avatar_url || profile.avatarUrl || profile.photo_url || profile.photoUrl
+      || profile.image_url || profile.imageUrl || profile.picture || profile.avatar || "";
+    const url = String(rawUrl || "").trim();
+    const label = actor || profile.display_name || profile.username || "User";
+    if (url) {
+      // Prefer real photo directly (works for http(s), protocol-relative, and storage paths)
+      avatarHtml = `<img class="spike-avatar" src="${esc(url)}" alt="${esc(label)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';if(window.SPIKE_IDENTITY){const f=window.SPIKE_IDENTITY.avatarMarkup({id:'${esc(String(profile.id||""))}',display_name:'${esc(label)}',gender:'${esc(String(profile.gender||""))}'},'spike-avatar','${esc(label)}');this.insertAdjacentHTML('afterend',f);}">`;
+    } else if (window.SPIKE_IDENTITY?.avatarMarkup) {
+      avatarHtml = window.SPIKE_IDENTITY.avatarMarkup(
+        { ...profile, avatar_url: url || undefined },
+        "spike-avatar",
+        label
+      );
+    }
+  }
+
+  let actionsHtml = "";
+  if (isFR && !n.read) {
+    actionsHtml = `
+      <div class="notif-actions" data-id="${esc(n.id)}">
+        <button class="btn accept" type="button" data-action="accept-friend">Accept</button>
+        <button class="btn decline" type="button" data-action="decline-friend">Decline</button>
+      </div>`;
+  } else if (isRI && !n.read) {
+    actionsHtml = `
+      <div class="notif-actions" data-id="${esc(n.id)}">
+        <button class="btn accept" type="button" data-action="join-room">View room</button>
+      </div>`;
+  }
+
+  const smartChips = [];
+  if (n.smart_bucket) smartChips.push(`<span class="notif-chip smart">${esc(n.smart_bucket)}</span>`);
+  if (n.group_count > 1) smartChips.push(`<span class="notif-chip">+${esc(n.group_count - 1)} more</span>`);
+
+  return `
+    <button class="notification ${n.read ? "" : "unread"} ${pClass}" data-id="${esc(n.id)}" type="button" aria-label="View notification">
+      <span class="notif-avatar">${avatarHtml}</span>
+      <span class="notif-body">
+        <span class="notif-title">${esc(titleOf(n))}</span>
+        <span class="notif-preview">${esc(notificationText(n))}</span>
+        ${preview && preview !== notificationText(n) ? `<span class="notif-preview">${esc(preview)}</span>` : ""}
+        <span class="notif-meta">
+          <span class="notif-time">${esc(formatTime(n.created_at))}</span>
+          ${actor ? `<span class="notif-chip">${esc(actor)}</span>` : ""}
+          ${smartChips.join("")}
+        </span>
+        ${actionsHtml}
+      </span>
+      ${n.read ? "" : `<span class="notif-new">NEW</span>`}
+    </button>`;
+}
+
+/* ── Data / Network ──────────────────────────────────────── */
+function withTimeout(p, ms, label = "Request timed out") {
+  return Promise.race([
+    p,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(label)), ms))
+  ]);
+}
+
+async function load(opts = {}) {
+  if (!me) throw new Error("Not authenticated");
+  if (opts.silent && isUserScrolling) {
+    pendingSilentRefresh = true;
+    return rows;
+  }
+  const r = await withTimeout(
+    sb.rpc("get_smart_notification_page", {
+      p_limit: 100,
+      p_before_created_at: null,
+      p_before_id: null
+    }),
+    12000,
+    "Notifications request timed out."
+  );
+  if (r.error) throw r.error;
+  const seen = new Set();
+  rows = (r.data || [])
+    .map(n => ({
+      ...n,
+      smart_score: Number(n.smart_score || 0),
+      smart_rank: Number(n.smart_rank || 0),
+      group_count: Number(n.group_count || 1)
+    }))
+    .filter(n => {
+      const id = String(n.id);
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
+  await hydrateNotificationActors(rows);
+  render();
+  // Second pass after profiles land so real photos replace icons
+  if (profileCache.size) render();
+  return rows;
+}
+
+async function hydrateNotificationActors(list) {
+  const ids = [...new Set((list || []).flatMap(n => {
+    const d = dataOf(n);
+    const v = [d.actor_id, d.from_user_id, d.sender_id, d.from_id, d.other_user_id, d.otherUserId];
+    return v.filter(x => x && /^[0-9a-f-]{36}$/i.test(String(x))).map(String);
+  }))];
+  const missing = ids.filter(id => !profileCache.has(id));
+  if (!missing.length) return;
+  try {
+    const r = await sb.rpc("get_public_profiles", { p_user_ids: missing });
+    if (r.error) throw r.error;
+    (r.data || []).forEach(p => {
+      if (!p?.id) return;
+      const url = p.avatar_url || p.avatarUrl || p.photo_url || p.image_url || p.picture || "";
+      if (url && !p.avatar_url) p.avatar_url = url;
+      profileCache.set(String(p.id), p);
+    });
+  } catch (e) {
+    console.warn("SPIKE notification actor lookup unavailable", e);
+    // Last-resort direct read (may fail under RLS)
+    try {
+      const r2 = await sb.from("profiles").select("id,username,display_name,full_name,avatar_url").in("id", missing);
+      if (!r2.error) (r2.data || []).forEach(p => { if (p?.id) profileCache.set(String(p.id), p); });
+    } catch (_) {}
+  }
+}
+
+async function markRead(id) {
+  const r = await sb.rpc("mark_notification_read", { p_id: id });
+  if (r.error) throw r.error;
+  const row = rows.find(n => String(n.id) === String(id));
+  if (row) row.read = true;
+  render();
+}
+
+async function markAll() {
+  const r = await withTimeout(sb.rpc("mark_all_notifications_read"), 10000, "Could not mark all as read.");
+  if (r.error) throw r.error;
+  rows.forEach(n => { n.read = true; });
+  render();
+  window.spikePremiumToast?.("All marked as read", "success", 2200);
+}
+
+async function clearAllNotifications() {
+  const ok = await window.SPIKEPremiumDialog.confirm({title:"Clear all notifications?",message:"This removes them from your list.",confirmText:"Clear notifications",cancelText:"Keep notifications",danger:true,kicker:"SPIKE NOTIFICATIONS"});
+  if (!ok) return;
+  const r = await withTimeout(sb.rpc("clear_all_notifications"), 10000, "Could not clear.");
+  if (r.error) throw r.error;
+  rows = [];
+  render();
+  window.spikePremiumToast?.("Notifications cleared", "success", 2200);
+}
+
+async function deleteReadNotifications() {
+  const ok = await window.SPIKEPremiumDialog.confirm({title:"Delete all read notifications?",message:"Unread items will stay.",confirmText:"Delete read items",cancelText:"Keep them",danger:true,kicker:"SPIKE NOTIFICATIONS"});
+  if (!ok) return;
+  const r = await withTimeout(sb.rpc("delete_read_notifications"), 10000, "Could not delete read items.");
+  if (r.error) throw r.error;
+  rows = rows.filter(n => !n.read);
+  render();
+  window.spikePremiumToast?.("Read items removed", "success", 2200);
+}
+
+function upsertRow(n) {
+  const idx = rows.findIndex(x => String(x.id) === String(n.id));
+  if (idx >= 0) rows[idx] = { ...rows[idx], ...n };
+  else rows.unshift(n);
+  render();
+}
+
+function removeRow(id) {
+  rows = rows.filter(n => String(n.id) !== String(id));
+  render();
+}
+
+/* ── Preferences & Sound ─────────────────────────────────── */
+function notificationToneEnabled() {
+  try {
+    return localStorage.getItem("spike-notification-tone") !== "0";
+  } catch (_) {
+    return true;
+  }
+}
+
+async function loadAppPrefs() {
+  try {
+    const { data } = await sb.from("user_preferences").select("message_tone,browser_notifications").eq("user_id", me.id).maybeSingle();
+    if (data) {
+      appPrefs.message_tone = data.message_tone !== false;
+      appPrefs.browser_notifications = !!data.browser_notifications;
+    }
+  } catch (e) {
+    console.warn("notification preferences unavailable", e);
+  }
+}
+
+function playNotificationTone() {
+  if (appPrefs.message_tone === false || !notificationToneEnabled()) return;
+  const a = $("#notificationTone");
+  if (!a) return;
+  try {
+    a.currentTime = 0;
+    const p = a.play();
+    if (p?.catch) p.catch(() => {});
+  } catch (_) {}
+}
+
+function showBrowserNotification(n) {
+  if (appPrefs.browser_notifications !== true) return;
+  if (typeof Notification !== "function" || Notification.permission !== "granted") return;
+  if (!document.hidden) return;
+  try {
+    new Notification("SPIKE", {
+      body: notificationText(n),
+      icon: "assets/icon/icon.png",
+      tag: "spike-notification-" + n.id
+    });
+  } catch (_) {}
+}
+
+function notifyLocal(n) {
+  if (!n || String(n.user_id) !== String(me.id)) return;
+  const existed = rows.some(x => String(x.id) === String(n.id));
+  upsertRow(n);
+  lastRealtimeAt = Date.now();
+  if (!existed && !n.read) {
+    showBrowserNotification(n);
+    playNotificationTone();
+  }
+  if (!n.read && window.spikePremiumToast) {
+    window.spikePremiumToast(notificationText(n), /error|fail|denied/i.test(String(n.type || "")) ? "error" : "info", 5200);
+  }
+}
+
+/* ── Realtime ────────────────────────────────────────────── */
+async function subscribe() {
+  if (channel) try { await sb.removeChannel(channel); } catch (_) {}
+  try {
+    const sr = await sb.auth.getSession();
+    const token = sr.data?.session?.access_token;
+    if (token) await sb.realtime.setAuth(token);
+  } catch (e) {
+    console.warn("SPIKE realtime auth setup unavailable", e);
+  }
+  const topic = "user:" + me.id + ":notifications";
+  channel = sb.channel(topic, { config: { private: true } })
+    .on("broadcast", { event: "notification_created" }, () => {
+      lastRealtimeAt = Date.now();
+      load({ silent: true }).catch(e => console.warn("notification realtime refresh failed", e));
+    })
+    .on("broadcast", { event: "notification_updated" }, () => {
+      lastRealtimeAt = Date.now();
+      load({ silent: true }).catch(e => console.warn("notification realtime refresh failed", e));
+    })
+    .on("broadcast", { event: "notification_deleted" }, () => {
+      lastRealtimeAt = Date.now();
+      load({ silent: true }).catch(e => console.warn("notification realtime refresh failed", e));
+    })
+    .subscribe(status => {
+      if (status === "SUBSCRIBED") {
+        lastRealtimeAt = Date.now();
+        console.info("SPIKE notifications realtime connected");
+      }
+      if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+        lastRealtimeAt = 0;
+        console.warn("Notifications realtime channel status:", status);
+      }
+    });
+
+  try {
+    if (bc) bc.close();
+    bc = new BroadcastChannel("spike-notifications");
+    bc.onmessage = e => {
+      const n = e.data?.notification || e.data;
+      if (n) notifyLocal(n);
+    };
+  } catch (_) {}
+
+  clearInterval(pollTimer);
+  pollTimer = setInterval(() => {
+    if (document.hidden || isUserScrolling) return;
+    load({ silent: true }).catch(() => {});
+  }, 60000);
+}
+
+/* ── Auth Recovery ───────────────────────────────────────── */
+function isInvalidRefreshTokenError(e) {
+  const text = [e?.code, e?.name, e?.message].filter(Boolean).join(" ").toLowerCase();
+  return text.includes("refresh_token_not_found") || text.includes("invalid refresh token") || text.includes("refresh token not found");
+}
+
+function clearSupabaseAuthStorage() {
+  try {
+    const exact = "sb-" + PROJECT_REF + "-auth-token";
+    localStorage.removeItem(exact);
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i) || "";
+      if (k === exact || k.startsWith("sb-" + PROJECT_REF + "-")) localStorage.removeItem(k);
+    }
+  } catch (err) {
+    console.warn("SPIKE could not clear stale auth storage", err);
+  }
+}
+
+function showAuthRecovery() {
+  authReady = true;
+  authRecoveryInProgress = true;
+  clearSupabaseAuthStorage();
+  if (channel) { try { sb.removeChannel(channel); } catch (_) {} channel = null; }
+  $("#loader").classList.add("hide");
+  $("#notificationList").innerHTML = `
+    <div class="empty error">
+      <div class="empty-icon">🔒</div>
+      <strong>Your SPIKE session has expired</strong>
+      <div class="muted">Sign in again to continue receiving notifications.</div>
+      <button class="btn primary" id="reauthBtn" type="button" style="margin-top:16px">Sign in again</button>
+    </div>`;
+  $("#reauthBtn").onclick = () => {
+    const next = encodeURIComponent(location.pathname + location.search);
+    location.href = "index.html?reauth=1&next=" + next;
+  };
+}
+
+/* ── Boot ────────────────────────────────────────────────── */
+async function boot() {
+  try {
+    const sessionResult = await withTimeout(sb.auth.getSession(), 15000, "Session check timed out.");
+    if (sessionResult.error) {
+      if (isInvalidRefreshTokenError(sessionResult.error)) { showAuthRecovery(); return; }
+      throw sessionResult.error;
+    }
+    const session = sessionResult.data?.session;
+    if (!session?.user) {
+      authReady = true;
+      $("#loader").classList.add("hide");
+      location.href = "index.html?reauth=1";
+      return;
+    }
+    me = session.user;
+    authReady = true;
+    try {
+      if (session.access_token) await sb.realtime.setAuth(session.access_token);
+    } catch (e) {
+      console.warn("SPIKE realtime auth initialization unavailable", e);
+    }
+    if (!authListenerBound) {
+      authListenerBound = true;
+      sb.auth.onAuthStateChange((event, nextSession) => {
+        if (event === "TOKEN_REFRESHED" && nextSession?.access_token) {
+          authRecoveryInProgress = false;
+          sb.realtime.setAuth(nextSession.access_token).then(() => subscribe()).catch(e => console.warn("SPIKE notification realtime reauth failed", e));
+        }
+        if (event === "SIGNED_OUT" && authReady && !authRecoveryInProgress) {
+          location.href = "index.html?reauth=1";
+        }
+      });
+    }
+    window.AppPresence?.start(sb);
+    await loadAppPrefs();
+    await load();
+    await subscribe();
+    $("#loader").classList.add("hide");
+  } catch (e) {
+    console.error("SPIKE notifications auth/load error:", e);
+    if (isInvalidRefreshTokenError(e)) { showAuthRecovery(); return; }
+    authReady = true;
+    $("#notificationList").innerHTML = `
+      <div class="empty error">
+        <div class="empty-icon">⚠</div>
+        <strong>Could not load notifications</strong>
+        <div class="muted">${esc(e?.message || "Please try again.")}</div>
+        <button class="btn" id="retryNotifications" type="button" style="margin-top:14px">Retry</button>
+      </div>`;
+    $("#loader").classList.add("hide");
+    $("#retryNotifications")?.addEventListener("click", () => { boot().catch(() => {}); });
+  }
+}
+
+/* ── Modal ───────────────────────────────────────────────── */
+function openNotificationDetails(n) {
+  if (!n) return;
+  const modal = $("#notificationModal");
+  $("#notificationModalIcon").textContent = notificationIcon(n);
+  $("#notificationModalTitle").textContent = titleOf(n);
+  $("#notificationModalMeta").textContent = [formatTime(n.created_at), n.read ? "Read" : "Unread"].filter(Boolean).join(" • ");
+  const detail = detailOf(n) || notificationText(n);
+  const actor = actorOf(n);
+  const href = notificationHref(n);
+  let html = `<div class="notif-modal-section"><div class="notif-modal-label">Full alert</div><div class="notif-modal-text">${esc(detail)}</div></div>`;
+  if (actor) html += `<div class="notif-modal-section"><div class="notif-modal-label">From</div><div class="notif-modal-text">${esc(actor)}</div></div>`;
+  if (href) {
+    html += `<div class="notif-modal-section" style="margin-top:16px">
+      <a class="btn primary" href="${esc(href)}" style="display:inline-flex;text-decoration:none">Open related</a>
+    </div>`;
+  }
+  $("#notificationModalBody").innerHTML = html;
+  modal.setAttribute("aria-hidden", "false");
+  if (!n.read) markRead(n.id).catch(() => {});
+}
+
+function closeNotificationDetails() {
+  $("#notificationModal").setAttribute("aria-hidden", "true");
+}
+
+/* ── Event wiring ────────────────────────────────────────── */
+$("#notificationSearch").addEventListener("input", e => {
+  notificationQuery = e.target.value || "";
+  render();
+});
+
+$("#markAll")?.addEventListener("click", () => {
+  markAll().catch(e => {
+    console.error(e);
+    window.spikePremiumToast?.(e?.message || "Could not mark as read.", "error", 4200);
+  });
+});
+
+$("#clearAll")?.addEventListener("click", () => {
+  clearAllNotifications().catch(e => {
+    console.error(e);
+    window.spikePremiumToast?.(e?.message || "Could not clear.", "error", 4200);
+  });
+});
+
+$("#deleteRead")?.addEventListener("click", () => {
+  deleteReadNotifications().catch(e => {
+    console.error(e);
+    window.spikePremiumToast?.(e?.message || "Could not delete read items.", "error", 4200);
+  });
+});
+
+$("#moreActionsBtn")?.addEventListener("click", () => {
+  const panel = $("#bulkPanel");
+  const open = panel.style.display === "flex";
+  panel.style.display = open ? "none" : "flex";
+  panel.hidden = open;
+  $("#moreActionsBtn").setAttribute("aria-expanded", String(!open));
+});
+
+$("#refreshBtn").onclick = async () => {
+  const b = $("#refreshBtn");
+  if (b.disabled || !me) return;
+  b.disabled = true;
+  b.setAttribute("aria-busy", "true");
+  try {
+    await load();
+    window.spikePremiumToast?.("Notifications refreshed", "success", 1800);
+  } catch (e) {
+    console.error(e);
+    window.spikePremiumToast?.(e?.message || "Could not refresh.", "error", 4200);
+  } finally {
+    b.disabled = false;
+    b.removeAttribute("aria-busy");
+  }
+};
+
+// Filter tabs
+document.querySelectorAll(".seg-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".seg-btn").forEach(b => {
+      b.classList.remove("active");
+      b.setAttribute("aria-selected", "false");
+    });
+    btn.classList.add("active");
+    btn.setAttribute("aria-selected", "true");
+    notificationFilter = btn.dataset.filter || "all";
+    render();
+  });
+});
+
+// Card clicks + inline actions (delegation)
+$("#notificationList").addEventListener("click", async e => {
+  const actionBtn = e.target.closest("[data-action]");
+  if (actionBtn) {
+    e.stopPropagation();
+    const card = actionBtn.closest(".notification");
+    const id = card?.dataset.id;
+    const action = actionBtn.dataset.action;
+    const n = rows.find(x => String(x.id) === String(id));
+    if (!n) return;
+
+    if (action === "accept-friend" || action === "decline-friend") {
+      try {
+        actionBtn.disabled = true;
+        const rpc = action === "accept-friend" ? "accept_friend_request" : "decline_friend_request";
+        const d = dataOf(n);
+        const reqId = d.request_id || d.friend_request_id || d.requestId || actorIdOf(n);
+        const r = await withTimeout(sb.rpc(rpc, { p_request_id: reqId }), 10000, "Action failed.");
+        if (r.error) throw r.error;
+        await markRead(id);
+        window.spikePremiumToast?.(action === "accept-friend" ? "Friend request accepted" : "Request declined", "success", 2400);
+        setTimeout(() => load({ silent: true }).catch(() => {}), 600);
+      } catch (err) {
+        console.error(err);
+        window.spikePremiumToast?.(err?.message || "Could not complete action.", "error", 4200);
+        actionBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (action === "join-room") {
+      const href = notificationHref(n);
+      if (href) location.href = href;
+      else openNotificationDetails(n);
+      return;
+    }
+  }
+
+  const card = e.target.closest(".notification");
+  if (!card) return;
+  const id = card.dataset.id;
+  const n = rows.find(x => String(x.id) === String(id));
+  if (!n) return;
+
+  const href = notificationHref(n);
+  if (href && !e.metaKey && !e.ctrlKey) {
+    if (!n.read) markRead(n.id).catch(() => {});
+    location.href = href;
+    return;
+  }
+  openNotificationDetails(n);
+});
+
+$("#notificationModalClose")?.addEventListener("click", closeNotificationDetails);
+$("#notificationModal")?.addEventListener("click", e => {
+  if (e.target === $("#notificationModal")) closeNotificationDetails();
+});
+
+// Scroll awareness for silent refresh
+let scrollTimer;
+window.addEventListener("scroll", () => {
+  isUserScrolling = true;
+  clearTimeout(scrollTimer);
+  scrollTimer = setTimeout(() => {
+    isUserScrolling = false;
+    if (pendingSilentRefresh) {
+      pendingSilentRefresh = false;
+      load({ silent: true }).catch(() => {});
+    }
+  }, 900);
+}, { passive: true });
+
+// Safety timeout
+setTimeout(() => {
+  const loader = $("#loader");
+  if (loader && !loader.classList.contains("hide")) {
+    loader.classList.add("hide");
+    if (!me) {
+      $("#notificationList").innerHTML = `
+        <div class="empty error">
+          <strong>SPIKE could not finish loading</strong>
+          <button class="btn" id="retryNotificationsTimeout" type="button" style="margin-top:12px">Retry</button>
+        </div>`;
+      $("#retryNotificationsTimeout")?.addEventListener("click", () => location.reload());
+    }
+  }
+}, 20000);
+
+
+/* Force correct bottom-nav active state on this page */
+(function enforceNavActive(){
+  function apply(){
+    const nav = document.getElementById("spikeBottomNav");
+    if(!nav) return;
+    nav.querySelectorAll("a,button").forEach(el=>{
+      const isActivity = el.getAttribute("data-spike-nav")==="activity";
+      el.classList.toggle("active", isActivity);
+      if(isActivity) el.setAttribute("aria-current","page");
+      else el.removeAttribute("aria-current");
+    });
+  }
+  apply();
+  // Re-apply after other scripts may have mutated the dock
+  setTimeout(apply, 120);
+  setTimeout(apply, 600);
+  document.addEventListener("DOMContentLoaded", apply);
+})();
+
+boot();
+</script>
+
+<script src="js/maintenance.js?v=20260914113000" defer></script>
+<script src="js/spike-native-v2.js"></script>
+<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v14"></script>
+<script src="js/spike-surface-controls.js"></script>
+<script src="js/spike-onboarding-v1.js?v=2" defer></script>
+</body>
+</html>

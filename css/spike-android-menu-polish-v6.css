@@ -1,0 +1,68 @@
+/* SPIKE Android menu V6 — targeted width, disclosure, scroll and footer corrections. */
+#menuOverlay.spike-menu-overlay {
+  align-items: flex-end !important;
+  justify-content: center !important;
+  padding: 8px 4vw max(8px, env(safe-area-inset-bottom, 0px)) !important;
+  overflow: hidden !important;
+}
+#menuOverlay .spike-command-menu {
+  width: min(92vw, 640px) !important;
+  max-width: 640px !important;
+  max-height: min(88dvh, 860px) !important;
+  min-height: 0 !important;
+  padding: 12px 16px max(14px, env(safe-area-inset-bottom, 0px)) !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(239, 114, 189, .22) transparent !important;
+  border-radius: 24px !important;
+}
+/* The handle was decorative, not draggable; hide it to avoid implying a gesture that is unsupported. */
+#menuOverlay .spike-menu-handle { display: none !important; }
+/* One real chevron only: remove legacy pseudo-element arrows that caused the stray left-side glyph. */
+#menuOverlay .spike-command-more > summary::after,
+#menuOverlay .spike-command-more > summary::before { content: none !important; display: none !important; }
+#menuOverlay .spike-command-more > summary {
+  grid-template-columns: 40px minmax(0, 1fr) 20px !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+  padding: 6px 4px !important;
+  cursor: pointer !important;
+}
+#menuOverlay .spike-command-more > summary .spike-command-chevron {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  justify-self: end !important;
+  line-height: 1 !important;
+  transform: rotate(0deg) !important;
+  transition: transform .18s ease !important;
+}
+#menuOverlay .spike-command-more[open] > summary .spike-command-chevron { transform: rotate(180deg) !important; }
+#menuOverlay .spike-command-more > summary::-webkit-details-marker { display: none !important; }
+#menuOverlay .spike-command-secondary { display: flex !important; flex-direction: column !important; gap: 3px !important; padding: 2px 0 8px !important; }
+#menuOverlay .spike-command-row { min-height: 56px !important; }
+#menuOverlay .spike-command-footer {
+  position: sticky !important;
+  bottom: calc(-1 * max(14px, env(safe-area-inset-bottom, 0px))) !important;
+  z-index: 2 !important;
+  margin-top: 8px !important;
+  padding: 10px 0 max(14px, env(safe-area-inset-bottom, 0px)) !important;
+  background: linear-gradient(180deg, rgba(32,18,31,0), #20121f 18%) !important;
+}
+#menuOverlay .spike-command-footer #menuSignOut { min-height: 50px !important; }
+@media (max-width: 420px) {
+  #menuOverlay.spike-menu-overlay { padding-left: 3vw !important; padding-right: 3vw !important; }
+  #menuOverlay .spike-command-menu { width: 94vw !important; padding-left: 12px !important; padding-right: 12px !important; }
+}
+@media (max-height: 700px) {
+  #menuOverlay .spike-command-menu { max-height: 86dvh !important; }
+  #menuOverlay .spike-command-row { min-height: 52px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #menuOverlay .spike-command-chevron { transition: none !important; }
+}

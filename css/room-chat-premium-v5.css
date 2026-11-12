@@ -1,0 +1,50 @@
+/* SPIKE Room Experience V5 — shared visual system, theme-token driven.
+   Presentation only: no database, auth, realtime, message, moderation or storage logic. */
+:root{--spike-room-v5-radius:20px;--spike-room-v5-shadow:0 18px 48px rgba(0,0,0,.16)}
+html:has(body[data-spike-page="room_chat"]),html:has(body[data-spike-page="room"]),html:has(body[data-spike-page="rooms"]){background:var(--spike-bg,var(--bg,#090d18))}
+body[data-spike-page="room_chat"],body[data-spike-page="room"],body[data-spike-page="rooms"]{color:var(--spike-text,var(--text,#f5f7ff));background:var(--spike-bg,var(--bg,#090d18));-webkit-tap-highlight-color:transparent}
+/* Main room chat */
+body[data-spike-page="room_chat"] .page{width:min(100%,980px);height:100dvh;min-height:0;margin-inline:auto;padding-top:env(safe-area-inset-top);padding-bottom:0;overflow:hidden;border-inline:1px solid color-mix(in srgb,var(--spike-line) 45%,transparent);background:radial-gradient(ellipse at 50% -18%,color-mix(in srgb,var(--spike-accent) 15%,transparent),transparent 60%),var(--spike-bg);box-shadow:0 0 70px rgba(0,0,0,.12)}
+body[data-spike-page="room_chat"] .top{position:relative;isolation:isolate;min-height:66px;padding:9px 14px;gap:12px;border-bottom:1px solid var(--spike-line);background:color-mix(in srgb,var(--spike-surface) 91%,transparent);box-shadow:0 8px 28px rgba(0,0,0,.08)}
+body[data-spike-page="room_chat"] .roomTitle{flex:1}body[data-spike-page="room_chat"] .roomTitle b{display:block;font-size:15px;line-height:1.25;letter-spacing:-.3px}body[data-spike-page="room_chat"] .roomTitle span{display:inline-flex;align-items:center;gap:6px;margin-top:3px;font-size:10px;line-height:1.2}
+body[data-spike-page="room_chat"] body[data-spike-page="room_chat"] .topActions{display:flex;align-items:center;gap:7px}.topActions .icon,.back{width:42px;min-width:42px;height:42px;min-height:42px;border-radius:14px}
+body[data-spike-page="room_chat"] .toolbar{min-height:48px;padding:7px 12px;gap:7px;align-items:center;background:var(--spike-surface);border-bottom:1px solid var(--spike-line)}
+body[data-spike-page="room_chat"] .channel{min-height:34px;padding:0 13px;font-size:11px;font-weight:750;white-space:nowrap}
+body[data-spike-page="room_chat"] .communityBanner{padding:8px 14px;gap:10px;font-size:11px;line-height:1.4}
+body[data-spike-page="room_chat"] body[data-spike-page="room_chat"] .messages{display:flex;flex-direction:column;gap:10px;padding:18px clamp(12px,3.5vw,26px) 24px;scrollbar-width:thin;scrollbar-color:var(--spike-line) transparent;scroll-padding-block:20px}
+body[data-spike-page="room_chat"] body[data-spike-page="room_chat"] .msg{max-width:min(78%,720px);gap:9px;margin:1px 0;align-items:flex-end}
+body[data-spike-page="room_chat"] .msg.grouped{margin-top:-5px}
+body[data-spike-page="room_chat"] .msg .avatar{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--spike-line);box-shadow:0 3px 12px rgba(0,0,0,.12)}
+body[data-spike-page="room_chat"] .bubble{padding:10px 13px;border:1px solid var(--spike-line);border-radius:18px 18px 18px 6px;background:var(--spike-surface);box-shadow:0 4px 18px rgba(0,0,0,.07)}
+body[data-spike-page="room_chat"] .mine .bubble{border-radius:18px 18px 6px 18px;background:color-mix(in srgb,var(--spike-accent) 12%,var(--spike-surface));border-color:color-mix(in srgb,var(--spike-accent) 34%,var(--spike-line))}
+body[data-spike-page="room_chat"] .who{font-size:11px;font-weight:800;line-height:1.3}.handle,.when{font-size:10px;opacity:.82}body[data-spike-page="room_chat"] .body{font-size:14px;line-height:1.52;overflow-wrap:anywhere}
+body[data-spike-page="room_chat"] .day{margin:12px auto;padding:6px 12px;border:1px solid var(--spike-line);border-radius:999px;background:var(--spike-surface-2);font-size:10px;font-weight:800;letter-spacing:.03em}
+body[data-spike-page="room_chat"] .msgActions{gap:5px}.msgActions .mini{min-height:30px;border-radius:10px}
+body[data-spike-page="room_chat"] .composerWrap{padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--spike-line);background:color-mix(in srgb,var(--spike-surface) 94%,transparent);box-shadow:0 -10px 30px rgba(0,0,0,.08)}
+body[data-spike-page="room_chat"] .composer{gap:9px;align-items:flex-end}.inputBox{min-width:0;flex:1}.input{min-height:48px;max-height:min(150px,27dvh);padding:13px 50px 13px 15px;border:1px solid var(--spike-line);border-radius:17px;background:var(--spike-surface-2);font-size:14px;line-height:1.45}.input:focus{outline:none;border-color:var(--spike-accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--spike-accent) 14%,transparent)}
+body[data-spike-page="room_chat"] .send{width:52px;min-width:52px;height:48px;padding:0;border-radius:16px;font-size:0}.send:after{content:'➤';font-size:18px}
+body[data-spike-page="room_chat"] .drawer{border:1px solid var(--spike-line);background:var(--spike-surface);box-shadow:var(--spike-room-v5-shadow)}
+/* Alternate room route: keep its account, tabs and channel behaviors; polish the visual hierarchy. */
+body[data-spike-page="room"]>.top{position:sticky;top:0;z-index:40;min-height:64px;padding:calc(8px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 8px max(14px,env(safe-area-inset-left));display:flex;align-items:center;gap:12px;background:color-mix(in srgb,var(--spike-surface,var(--panel)) 94%,transparent);border-bottom:1px solid var(--spike-line,var(--line));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+body[data-spike-page="room"] .top .brand{flex:1;font-size:15px;font-weight:900;letter-spacing:.02em}body[data-spike-page="room"] .top .iconbtn{min-height:42px;border-radius:14px}
+body[data-spike-page="room"] .wrap{width:min(100% - 24px,980px);margin:16px auto 40px}
+body[data-spike-page="room"] .hero,body[data-spike-page="room"] .panel{border:1px solid var(--spike-line,var(--line));border-radius:22px;background:var(--spike-surface,var(--panel));box-shadow:var(--spike-room-v5-shadow)}
+body[data-spike-page="room"] .roomhead{gap:14px;padding:16px}body[data-spike-page="room"] .headcopy h1{font-size:clamp(20px,4vw,27px);letter-spacing:-.6px}
+body[data-spike-page="room"] .tabs{position:sticky;top:64px;z-index:20;gap:7px;padding:9px 0;background:color-mix(in srgb,var(--spike-bg,var(--bg)) 90%,transparent);backdrop-filter:blur(12px)}
+body[data-spike-page="room"] .tab{min-height:40px;padding:0 14px;border-radius:13px}body[data-spike-page="room"] .view .panel{padding:clamp(14px,3vw,22px)}
+body[data-spike-page="room"] .chatList{max-height:min(58dvh,650px);gap:9px;padding:8px 2px 14px;scrollbar-width:thin;overscroll-behavior:contain}
+body[data-spike-page="room"] .chatMsg{padding:12px 14px;border-radius:17px;background:var(--spike-surface-2,var(--panel2));border-color:var(--spike-line,var(--line));box-shadow:0 3px 14px rgba(0,0,0,.06)}
+body[data-spike-page="room"] .composer{display:flex;align-items:flex-end;gap:9px;padding-top:10px;border-top:1px solid var(--spike-line,var(--line))}
+body[data-spike-page="room"] .composer input{min-height:46px;max-height:130px;flex:1;padding:12px 14px;border:1px solid var(--spike-line,var(--line));border-radius:15px;background:var(--spike-surface-2,var(--panel2));color:var(--spike-text,var(--text));font:inherit}
+body[data-spike-page="room"] .composer .btn{min-height:46px;border-radius:14px}
+/* Rooms directory shares the same premium surfaces without forcing a chat layout onto it. */
+body[data-spike-page="rooms"] .rooms-v2-header{position:sticky;top:0;z-index:40;padding-top:calc(8px + env(safe-area-inset-top));min-height:62px;background:color-mix(in srgb,var(--spike-surface,var(--panel)) 94%,transparent);border-bottom:1px solid var(--spike-line,var(--line));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+body[data-spike-page="rooms"] .rooms-v2-main{width:min(100% - 24px,1100px);margin-inline:auto}
+body[data-spike-page="rooms"] .rooms-v2-hero{border-radius:0 0 26px 26px}
+body[data-spike-page="rooms"] .roomCard,body[data-spike-page="rooms"] .room-card,body[data-spike-page="rooms"] .trendCard{border-radius:19px;border-color:var(--spike-line,var(--line));box-shadow:0 8px 28px rgba(0,0,0,.08)}
+/* Dialogs, sheets, media and action menus stay in the active theme and above chat chrome. */
+body[data-spike-page="room_chat"] .actionSheet,body[data-spike-page="room_chat"] .userActionSheet,body[data-spike-page="room_chat"] .modalCard,body[data-spike-page="room_chat"] .deleteCard{border:1px solid var(--spike-line);border-radius:22px;background:var(--spike-surface);color:var(--spike-text);box-shadow:0 24px 80px rgba(0,0,0,.38)}
+body[data-spike-page="room_chat"] img,body[data-spike-page="room_chat"] video{max-width:100%}body[data-spike-page="room_chat"] audio{max-width:100%}
+@media(max-width:650px){body[data-spike-page="room_chat"] .top{min-height:60px;padding:7px 9px;gap:8px}body[data-spike-page="room_chat"] .roomTitle b{font-size:14px}body[data-spike-page="room_chat"] .topActions{gap:5px}.topActions .icon,.back{width:40px;min-width:40px;height:40px;min-height:40px}body[data-spike-page="room_chat"] .messages{padding:13px 9px 18px;gap:8px}body[data-spike-page="room_chat"] .msg{max-width:88%}.msg .avatar{width:29px;height:29px;flex-basis:29px}.bubble{padding:9px 11px}.composerWrap{padding-left:8px;padding-right:8px}.input{min-height:46px;font-size:16px}.send{width:48px;min-width:48px;height:46px}body[data-spike-page="room"] .wrap{width:calc(100% - 16px);margin-top:10px}body[data-spike-page="room"] .tabs{top:60px;overflow:auto}body[data-spike-page="room"] .roomhead{flex-wrap:wrap}}
+@media(max-width:390px){body[data-spike-page="room_chat"] .communityBanner{font-size:10px;padding:7px 9px}body[data-spike-page="room_chat"] .msg{max-width:92%}body[data-spike-page="room_chat"] .body{font-size:13px}body[data-spike-page="room"] .wrap{width:calc(100% - 12px)}}
+@media(prefers-reduced-motion:reduce){body[data-spike-page="room_chat"] *,body[data-spike-page="room"] *,body[data-spike-page="rooms"] *{scroll-behavior:auto!important;transition-duration:.01ms!important;animation-duration:.01ms!important}}
