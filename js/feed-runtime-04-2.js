@@ -16,8 +16,9 @@ async function loadTrendingFeatures(posts){const ids=posts.map(p=>String(p.id)).
 function rankingContext(posts){return{userId:state.user?.id||'',following:state.following||new Set(),signals:Object.fromEntries(Object.entries(readSignalStore()).map(([id,v])=>[id,{...(serverSignalProfile[id]||{}),...v}])),creatorAffinity:{},topicAffinity:{},explorationIds:new Set(),recentEngagement:trendingFeatureCache,now:Date.now(),posts}}
 function rankSignals(candidates,mode='forYou'){return FeedRankingEngine.rank(candidates,rankingContext(candidates),mode,candidates.length).map(x=>{x.post.__signalStrength=Math.round(x.score*100);x.post.__signalBreakdown={...x.parts,...x.modifiers,baseScore:Math.round(x.baseScore*100),finalScore:Math.round(x.score*100),contract:mode,selectionReason:x.selectionReason||'Base rank'};x.post.__signalWhy=x.why;x.post.__signalQuality=Math.round(Number(x.parts.quality||0)*100);return x.post})}
 function signalScore(p){return Number(p?.__signalStrength||0)}function signalRankBadge(p){const s=signalScore(p);return s>=80?'🔥 Top Signal':s>=60?'✦ Strong Signal':s>=40?'• Signal':''}function explainSignalStrength(p){return p?.__signalWhy||'Ranked for this feed'}
-function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&String(p?.moderation?.status||'').toLowerCase()!=='removed'&&String(p?.moderation?.status||'').toLowerCase()!=='blocked'&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));const cf=state.customFeed||window.SPIKE_ACTIVE_CUSTOM_FEED;if(cf?.rules?.topics?.length){const topics=cf.rules.topics.map(t=>String(t).toLowerCase().trim()).filter(Boolean);x=x.filter(p=>{const text=String(p.content||'').toLowerCase();return topics.some(t=>text.includes(t)||(Array.isArray(p.topics)&&p.topics.some(pt=>String(pt).toLowerCase()===t)));});}return rankSignals(x,mode)}
-function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>`<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${signalScore(p)} out of 100"><span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#${i+1}</span><strong class="signal-pick-score">${signalScore(p)}<em>/100</em></strong></span><span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(String(p.content||'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${signalScore(p)}%"></i></span></button>`).join('')}
+function spikeSignalPreview(p,fallback='Untitled'){if(p?.sensitive===true||p?.is_sensitive===true)return 'Sensitive content · open to view';if(String(p?.visibility||'public').toLowerCase()==='friends')return 'Friends-only Signal on SPIKE';return String(p?.content||fallback)}
+function filteredPosts(mode){mode=mode||({following:'following',saved:'saved'}[state.filter]||state.filter||'forYou');let x=state.posts.filter(p=>p&&!p.deleted&&String(p?.moderation?.status||'').toLowerCase()!=='removed'&&String(p?.moderation?.status||'').toLowerCase()!=='blocked'&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid));const prefs=window.SPIKE_APP_PREFS?.feed||{},keywords=Array.isArray(prefs.muted_keywords)?prefs.muted_keywords.map(x=>String(x).toLowerCase().trim()).filter(Boolean):[];x=x.filter(p=>{const t=String(p.content||'').toLowerCase();return !keywords.some(k=>t.includes(k))&&(!prefs.following_only||state.following.has(p.authorUid)||p.authorUid===state.user.id)&&(prefs.show_sensitive!==false||!(p.sensitive||p.is_sensitive))&&(prefs.show_spoilers!==false||!(p.spoiler||p.is_spoiler))&&(prefs.show_political!==false||!(p.political||p.is_political))});if(mode==='following')x=x.filter(p=>state.following.has(p.authorUid)||p.authorUid===state.user.id);if(mode==='saved')x=x.filter(p=>state.saved.has(p.id));return rankSignals(x,mode)}
+function renderSignalTopPicks(ranked){const box=$('signalTopPicks'),list=$('signalTopPicksList');if(!box||!list)return;const top=ranked.slice(0,5);box.hidden=!top.length;list.innerHTML=top.map((p,i)=>`<button type="button" class="signal-pick" data-signal-pick="${esc(p.id)}" aria-label="Rank ${i+1}, score ${signalScore(p)} out of 100"><span class="signal-pick-media is-empty">✦<span class="signal-pick-rank">#${i+1}</span><strong class="signal-pick-score">${signalScore(p)}<em>/100</em></strong></span><span class="signal-pick-main"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(spikeSignalPreview(p,'Untitled').slice(0,70))}</span><small title="${esc(explainSignalStrength(p))}">${esc(explainSignalStrength(p))}</small></span><span class="signal-pick-bar"><i style="width:${signalScore(p)}%"></i></span></button>`).join('')}
 function refreshSignalRanking({render=true,force=false}={}){
   const mode=state.filter==='following'?'following':state.filter==='saved'?'saved':(state.filter||'forYou');
   const raw=state.posts.slice();
@@ -37,8 +38,8 @@ function scheduleSignalRefresh({render=false}={}){
   if(!render||signalRefreshQueued)return;
   signalRefreshQueued=true;
   queueMicrotask(()=>{signalRefreshQueued=false;refreshSignalRanking({render:true})});
-}function startSignalAutoRefresh(){clearInterval(signalRefreshTimer);signalRefreshTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshSignalRanking({render:false})},300000)}
-const feedVisibility=new Map();let feedObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}});if(!creatorEngagementViewSessions.has(id)){creatorEngagementViewSessions.add(id);recordCreatorEngagement(id,'view').catch(()=>{})}}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
+}function startSignalAutoRefresh(){bindFeedRefreshLifecycle();clearInterval(signalRefreshTimer);signalRefreshTimer=null;if(document.visibilityState==='visible')signalRefreshTimer=setInterval(()=>refreshSignalRanking({render:false}),300000)}
+const feedVisibility=new Map();let feedObserver=null;let feedVideoSourceObserver=null;function initFeedImpressionTracking(){if(!('IntersectionObserver'in window))return;feedObserver?.disconnect();feedObserver=new IntersectionObserver(es=>es.forEach(e=>{const id=e.target.dataset.post;if(!id)return;let v=feedVisibility.get(id)||{since:0,impressed:false,past:false,timer:null};if(e.isIntersecting&&e.intersectionRatio>=feedCfg.impression.threshold){if(!v.since)v.since=Date.now();if(!v.impressed&&!v.timer)v.timer=setTimeout(()=>{const x=feedVisibility.get(id);if(x&&!x.impressed){x.impressed=true;queueFeedEvent(id,'impression',{dwell_ms:Date.now()-x.since,metadata:{visibility_ratio:e.intersectionRatio}});if(!creatorEngagementViewSessions.has(id)){creatorEngagementViewSessions.add(id);recordCreatorEngagement(id,'view').catch(()=>{})}}},feedCfg.impression.dwellMs)}else if(v.since){const d=Date.now()-v.since;clearTimeout(v.timer);v.timer=null;if(!v.impressed&&d>=feedCfg.impression.pastMs&&!v.past){v.past=true;queueFeedEvent(id,'scrolled_past',{dwell_ms:d,metadata:{visibility_ratio:e.intersectionRatio}})}v.since=0}feedVisibility.set(id,v)}),{threshold:[0,.5,.75,1]});document.querySelectorAll('#posts .post[data-post]').forEach(x=>feedObserver.observe(x))}
 function feedbackMenu(p){ openSignalMoreMenu(p, document.querySelector(`[data-more="${CSS.escape(String(p.id))}"]`)); }
 function ago(v) {
   const d = new Date(v);
@@ -179,7 +180,7 @@ function videoMarkupForFeed(mediaItem, post, index='') {
   if(!media) return '';
   const original=safeHttpUrl(mediaItem?.originalUrl||mediaItem?.url||media)||media;
   const label=index!==''?`SPIKE video ${Number(index)+1}`:'SPIKE video';
-  return `<div class="post-video-inline${index!=='' ? ' post-grid-video' : ''}" data-video-ready="0" data-video-mode="preview"><video class="post-feed-video" data-original-src="${esc(original)}" data-playback-src="${esc(media)}" src="${esc(media)}" poster="${esc(cloudinaryVideoPosterUrl(original))}" preload="metadata" muted autoplay loop playsinline controlslist="nodownload" disablepictureinpicture aria-label="${esc(label)}"></video>${videoWatermarkForSignal(mediaItem,post)}<span class="grid-video-play" aria-hidden="true">▶</span><span class="video-duration-badge" data-video-duration aria-hidden="true">Video</span><div class="feed-video-error" role="alert">Video unavailable · <button type="button" data-video-retry>Retry</button></div></div>`;
+  return `<div class="post-video-inline${index!=='' ? ' post-grid-video' : ''}" data-video-ready="0" data-video-mode="preview"><video class="post-feed-video" data-original-src="${esc(original)}" data-playback-src="${esc(media)}" data-poster-src="${esc(cloudinaryVideoPosterUrl(original))}" preload="none" muted loop playsinline controlslist="nodownload" disablepictureinpicture aria-label="${esc(label)}"></video>${videoWatermarkForSignal(mediaItem,post)}<span class="grid-video-play" aria-hidden="true">▶</span><span class="video-duration-badge" data-video-duration aria-hidden="true">Video</span><div class="feed-video-error" role="alert">Video unavailable · <button type="button" data-video-retry>Retry</button></div></div>`;
 }
 
 function mediaMarkup(p) {
@@ -239,6 +240,7 @@ function signalHTML(p) {
   const commentsHtml = renderComments(comments);
   const m = signalMetrics(p);
   const isOwner = p.authorUid === state.user.id;
+  const isSensitive = p.sensitive === true || p.is_sensitive === true;
   return `<article class="post" data-post="${esc(p.id)}">
 <div class="post-head">
 <a class="post-author" href="${profileLink(p.authorUid)}">
@@ -251,6 +253,7 @@ function signalHTML(p) {
 <button class="more" data-more="${esc(p.id)}" aria-label="More">⋯</button>
 </div>
 
+${isSensitive?`<div class="spike-sensitive-warning" data-sensitive-warning="${esc(p.id)}"><span class="spike-sensitive-warning-icon" aria-hidden="true">◉</span><div class="spike-sensitive-warning-copy"><b>Sensitive content</b><small>This Signal may contain material some people prefer not to see.</small></div><button type="button" data-sensitive-reveal="${esc(p.id)}" aria-expanded="false">View Signal</button></div><div class="spike-sensitive-body" data-sensitive-body="${esc(p.id)}" hidden>`:""}
 ${p.content?`<div class="post-content ${state.expandedCaptions?.has(String(p.id))?'':'is-collapsed'}" data-caption><span class="caption-body">${markdownToHTML(p.content)}</span><button type="button" class="caption-more" data-caption-toggle aria-label="Expand caption"></button></div>`:""}
 ${mediaMarkup(p)}
 ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl(p.linkUrl))}" target="_blank" rel="noopener noreferrer">${esc(p.linkUrl)}</a></div>`:""}
@@ -261,7 +264,7 @@ ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl
 <button class="spike-post-action" data-share="${esc(p.id)}" aria-label="Share Signal" title="Share"><span class="spike-action-icon" aria-hidden="true">↗</span><span class="spike-action-label">Share</span></button>
 <button class="spike-post-action ${saved?"active":""}" data-save="${esc(p.id)}" aria-pressed="${saved?"true":"false"}" aria-label="${saved?"Remove from Saved":"Save Signal"}" title="${saved?"Saved":"Save"}"><span class="spike-action-icon" aria-hidden="true">🔖</span><span class="spike-action-label">${saved?"Saved":"Save"}</span></button>
 </div>
-${isOwner ? `<div class="owner-insights" id="insights-${esc(p.id)}" hidden><span>👁 ${Number(p.views||0)} views</span><span>❤️ ${m.totalReactions} reactions</span><span>💬 ${m.comments} comments</span><span>🔖 ${m.saves} saves</span></div>` : ""}
+
 <div class="comments" id="comments-${esc(p.id)}" data-comments-panel="${esc(p.id)}">
   <div class="comments-head">
     <span class="comments-title">Echoes</span>
@@ -281,6 +284,7 @@ ${isOwner ? `<div class="owner-insights" id="insights-${esc(p.id)}" hidden><span
     <button type="submit">Echo</button>
   </form>
 </div>
+${isSensitive?`</div>`:""}
 </article>`;
 }
 
@@ -301,6 +305,23 @@ function renderSignalsFromRanked(list) {
 
 function renderSignals() {
   refreshSignalRanking();
+}
+
+// Sensitive Signals stay covered until the viewer deliberately reveals them.
+if (!window.__SPIKE_SENSITIVE_REVEAL_BOUND__) {
+  window.__SPIKE_SENSITIVE_REVEAL_BOUND__ = true;
+  document.addEventListener('click', event => {
+    const button = event.target.closest('[data-sensitive-reveal]');
+    if (!button) return;
+    const id = button.getAttribute('data-sensitive-reveal');
+    const article = button.closest('[data-post]');
+    const body = article?.querySelector(`[data-sensitive-body="${CSS.escape(String(id))}"]`);
+    const warning = article?.querySelector(`[data-sensitive-warning="${CSS.escape(String(id))}"]`);
+    if (!body || !warning) return;
+    body.hidden = false;
+    warning.hidden = true;
+    button.setAttribute('aria-expanded', 'true');
+  });
 }
 
 // ─── SETTINGS ──────────────────────────────────────────
@@ -335,6 +356,20 @@ async function saveSettings() {
 
 // ─── BADGES ────────────────────────────────────────────
 let notificationBadgeTimer = null;
+let feedRefreshLifecycleBound = false;
+function bindFeedRefreshLifecycle(){
+  if(feedRefreshLifecycleBound)return;
+  feedRefreshLifecycleBound=true;
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden'){
+      clearInterval(signalRefreshTimer);signalRefreshTimer=null;
+      clearInterval(notificationBadgeTimer);notificationBadgeTimer=null;
+    }else{
+      startSignalAutoRefresh();
+      startNotificationBadge();
+    }
+  });
+}
 function setNotificationBadge(count){
   const navBtn=document.querySelector('[data-spike-nav="activity"]');
   if(!navBtn)return;
@@ -359,8 +394,11 @@ async function refreshNotificationBadge(){
   }catch(e){console.debug('[SPIKE notification badge]',e);}
 }
 function startNotificationBadge(){
-  clearInterval(notificationBadgeTimer);refreshNotificationBadge();
-  notificationBadgeTimer=setInterval(()=>{if(document.visibilityState==='visible')refreshNotificationBadge()},30000);
+  bindFeedRefreshLifecycle();
+  clearInterval(notificationBadgeTimer);notificationBadgeTimer=null;
+  if(document.visibilityState!=='visible')return;
+  refreshNotificationBadge();
+  notificationBadgeTimer=setInterval(refreshNotificationBadge,30000);
 }
 async function loadBadges(){await refreshNotificationBadge();}
 
@@ -393,7 +431,7 @@ async function updateSignal(id, patch) {
   if(serverRemoved){
     state.posts = state.posts.filter(x => String(x.id) !== String(id));
     rankingDirty=true; rankingCache.clear();
-    toast('Signal removed by SPIKE Policy. Check Notifications and Policy & Appeals.','error');
+    toast('Signal removed by SPIKE Policy. Check Notifications and the Policy Center.','error');
     renderSignals();
     return false;
   }
@@ -488,11 +526,6 @@ function syncReactionDom(id, post) {
     summary.setAttribute('aria-label', m.totalReactions ? `${m.totalReactions} reactions` : 'React to Signal');
     summary.innerHTML = m.totalReactions ? `${top}<span>${m.totalReactions}</span>` : '<span>React</span>';
   }
-  const insights = article.querySelector('.owner-insights');
-  if (insights) {
-    const spans = insights.querySelectorAll('span');
-    if (spans[1]) spans[1].textContent = `❤️ ${m.totalReactions} reactions`;
-  }
 }
 
 function syncLikeDom(id, post) {
@@ -531,11 +564,6 @@ function syncCommentDom(id, post) {
   if (commentButton) commentButton.setAttribute('aria-label', comments.length ? `Open ${comments.length} comments` : 'Open comments');
 
   const m = signalMetrics(post);
-  const insights = article.querySelector('.owner-insights');
-  if (insights) {
-    const spans = insights.querySelectorAll('span');
-    if (spans[2]) spans[2].textContent = `💬 ${m.comments} comments`;
-  }
 
   if (window.SPIKEComments?.activePostId === String(id)) section.classList.add('open');
 }
@@ -706,10 +734,29 @@ async function addComment(postId, text, parentCommentId = null) {
   syncCommentDom(postId, p);
 
   try {
-    const data = await mutateSignalInteraction(postId, 'comment', null, comment);
-    if (data && typeof data === 'object') Object.assign(p, data);
-    // If the RPC returned the authoritative comment list, use it. Otherwise
-    // retain the optimistic comment so the UI never briefly disappears.
+    // Comments use the canonical RPC so the JSON post document and the
+    // relational comments table are committed together in one transaction.
+    const { data, error } = await withTimeout(
+      db.rpc('add_post_comment', {
+        p_post_id: String(postId),
+        p_text: clean,
+        p_parent_comment_id: parentCommentId ? String(parentCommentId) : null
+      }),
+      12000,
+      'Comment'
+    );
+    if (error) throw error;
+
+    const authoritative = data?.data && typeof data.data === 'object' ? data.data : data;
+    if (Array.isArray(authoritative?.comments)) {
+      p.comments = authoritative.comments;
+    } else if (authoritative?.comment && typeof authoritative.comment === 'object') {
+      p.comments = [...oldComments, authoritative.comment];
+    } else {
+      // Keep the optimistic comment only when an older compatible backend
+      // returns no comment payload; never discard a successful submission.
+      p.comments = [...oldComments, comment];
+    }
     syncCommentDom(postId, p);
     recordSignal(postId, 'comments', 1);
     toast('Comment added', 'success');
@@ -864,7 +911,7 @@ function closePostShare(){
 async function sharePostExternally(id){
   const p=state.posts.find(x=>String(x.id)===String(id));
   if(!p||!window.SPIKEShare){toast('Sharing is unavailable right now','error');return;}
-  const payload={title:`${nameOf(authorFor(p))} on SPIKE`,text:String(p.content||'A Signal from SPIKE').trim(),url:spikePostShareUrl(id)};
+  const payload={title:`${nameOf(authorFor(p))} on SPIKE`,text:spikeSignalPreview(p,'A Signal from SPIKE').trim(),url:spikePostShareUrl(id)};
   try{
     const prepared=await window.SPIKEShare.prepare(payload);
     const result=await window.SPIKEShare.sharePrepared(prepared);
@@ -923,7 +970,7 @@ function spikePassRenderLink(url){
     <button type="button" class="spike-pass-primary spike-native-share" id="spikeNativeSignalShare">${navigator.share?'SHARE TO APPS':'COPY SIGNAL LINK'}</button>
     <button type="button" class="spike-pass-secondary" id="spikeCopySignalLink">COPY SIGNAL LINK</button>
   </div>`;
-  spikePassShareData={title:`${nameOf(authorFor(p))} on SPIKE`,text:String(p.content||'A Signal from SPIKE').trim(),url:url};
+  spikePassShareData={title:`${nameOf(authorFor(p))} on SPIKE`,text:spikeSignalPreview(p,'A Signal from SPIKE').trim(),url:url};
   panel.querySelector('#spikeCopySignalLink')?.addEventListener('click',async()=>{try{await copyTextSafe(url);toast('Signal link copied','success')}catch{toast('Copy unavailable — press and hold the link.')}});
   panel.querySelector('#spikeNativeSignalShare')?.addEventListener('click',async()=>{
     if(!spikePassShareData){toast('Share is unavailable.','warning');return;}
@@ -972,7 +1019,7 @@ function closeOverlay(id) { $(id)?.classList.remove('open'); }
 
 
 // ─── FEED V2 PANELS ────────────────────────────────────
-function renderTrending(){const ranked=filteredPosts('trending').slice(0,8),list=$('v2TrendingList');list.innerHTML=ranked.length?ranked.map(p=>{const b=p.__signalBreakdown||{};return `<div class="stat" style="margin-bottom:7px"><b>${signalScore(p)}</b><span>${esc((p.content||'Untitled').slice(0,100))}<small style="display:block;color:var(--muted)">${b.acceleration>.65?'↑ Accelerating':'↑ Rising'} · ${Math.round((b.recentVelocity||0)*100)}% momentum</small></span></div>`}).join(''):'<div class="empty">No trends yet.</div>'}
+function renderTrending(){const ranked=filteredPosts('trending').slice(0,8),list=$('v2TrendingList');list.innerHTML=ranked.length?ranked.map(p=>{const b=p.__signalBreakdown||{};return `<div class="stat" style="margin-bottom:7px"><b>${signalScore(p)}</b><span>${esc(spikeSignalPreview(p,'Untitled').slice(0,100))}<small style="display:block;color:var(--muted)">${b.acceleration>.65?'↑ Accelerating':'↑ Rising'} · ${Math.round((b.recentVelocity||0)*100)}% momentum</small></span></div>`}).join(''):'<div class="empty">No trends yet.</div>'}
 function momentTopicTokens(p){
   const text=String(p?.content||'').toLowerCase();
   const tags=[...(text.match(/#[a-z0-9_]+/g)||[])].map(x=>x.slice(1));
@@ -985,7 +1032,7 @@ function momentTopicTokens(p){
 function renderMoments(){
   const list=$('v2MomentsList'); if(!list)return;
   const nowMs=Date.now(), windowMs=72*60*60*1000;
-  const eligible=(state.posts||[]).filter(p=>{const t=new Date(p.createdAt||p.created_at||0).getTime();return p&&!p.deleted&&Number.isFinite(t)&&nowMs-t<=windowMs&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid)});
+  const eligible=(state.posts||[]).filter(p=>{const t=new Date(p.createdAt||p.created_at||0).getTime();return p&&!p.deleted&&p.sensitive!==true&&p.is_sensitive!==true&&Number.isFinite(t)&&nowMs-t<=windowMs&&!state.blocked.has(p.authorUid)&&!state.muted.has(p.authorUid)});
   const groups=new Map();
   eligible.forEach(p=>{
     const tokens=momentTopicTokens(p);
@@ -1004,16 +1051,8 @@ function renderMoments(){
     const top=m.posts.sort((a,b)=>new Date(b.createdAt||b.created_at||0)-new Date(a.createdAt||a.created_at||0))[0];
     const topic=m.key==='community'?'Community pulse':`#${m.key}`;
     const age=SPIKETime?.relativeTime?.(m.latest)||'now';
-    return `<article class="moment-card" data-moment-key="${esc(m.key)}"><div class="moment-kicker"><span>✨ MOMENT ${i+1}</span><small>${esc(age)}</small></div><h3>${esc(topic)}</h3><p>${m.posts.length} recent posts · ${m.authors} people${m.media?` · ${m.media} with media`:''}</p><div class="moment-posts">${m.posts.slice(0,3).map(p=>`<button type="button" class="moment-post" data-moment-post="${esc(p.id)}"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc((p.content||'Untitled').slice(0,96))}</span></button>`).join('')}</div><div class="moment-footer"><span>${[...m.tokens].slice(0,3).map(x=>`#${esc(x)}`).join(' · ')}</span><button type="button" class="moment-open" data-moment-post="${esc(top.id)}">Open</button></div></article>`;
+    return `<article class="moment-card" data-moment-key="${esc(m.key)}"><div class="moment-kicker"><span>✨ MOMENT ${i+1}</span><small>${esc(age)}</small></div><h3>${esc(topic)}</h3><p>${m.posts.length} recent posts · ${m.authors} people${m.media?` · ${m.media} with media`:''}</p><div class="moment-posts">${m.posts.slice(0,3).map(p=>`<button type="button" class="moment-post" data-moment-post="${esc(p.id)}"><b>${esc(nameOf(authorFor(p)))}</b><span>${esc(spikeSignalPreview(p,'Untitled').slice(0,96))}</span></button>`).join('')}</div><div class="moment-footer"><span>${[...m.tokens].slice(0,3).map(x=>`#${esc(x)}`).join(' · ')}</span><button type="button" class="moment-open" data-moment-post="${esc(top.id)}">Open</button></div></article>`;
   }).join('');
-}
-function renderAnalytics() {
-  const mine = state.posts.filter(p => p.authorUid === state.user.id);
-  const likes = mine.reduce((n, p) => n + reactionLikeCount(p), 0);
-  const comments = mine.reduce((n, p) => n + (Array.isArray(p.comments) ? p.comments.length : 0), 0);
-  const views = mine.reduce((n, p) => n + Number(p.views || 0), 0);
-  const saves = mine.filter(p => state.saved.has(p.id)).length;
-  $('v2StatsGrid').innerHTML = `<div class="stat"><b>${mine.length}</b><span>Your posts</span></div><div class="stat"><b>${likes}</b><span>Likes received</span></div><div class="stat"><b>${comments}</b><span>Comments received</span></div><div class="stat"><b>${views}</b><span>Views</span></div><div class="stat"><b>${saves}</b><span>Saved posts</span></div><div class="stat"><b>${state.following.size}</b><span>Following</span></div>`;
 }
 function renderGamify() {
   // Gamification permanently disabled (see migrations 20261010120000 / 20261012120000).
@@ -1023,16 +1062,35 @@ function renderGamify() {
   const list = document.getElementById("v2BadgeList");
   if (list) list.innerHTML = "";
 }
-function renderReels(){const reels=filteredPosts('forYou').filter(p=>p.mediaType==='video'&&p.mediaUrl&&!isGifUrl(p.mediaUrl)).slice(0,10);$('v2ReelsList').innerHTML=reels.length?reels.map(p=>`<div class="v2-reel-card"><video src="${esc(signalVideoPlaybackUrl({url:p.mediaUrl,playbackUrl:p.mediaUrl,watermarked:!!p.mediaWatermarked,normalized:!!p.mediaNormalized}))}" muted playsinline loop preload="metadata"></video>${videoWatermarkForSignal({watermarked:!!p.mediaWatermarked},p)}<button class="v2-reel-overlay" data-open-reel="${esc(p.id)}" type="button"><span>▶ ${esc((p.content||'Video').slice(0,70))}<small>${esc(nameOf(authorFor(p)))}</small></span><span>↗</span></button></div>`).join(''):'<div class="empty">No video posts yet.</div>';if('IntersectionObserver'in window){const io=new IntersectionObserver(es=>es.forEach(e=>e.isIntersecting?e.target.play().catch(()=>{}):e.target.pause()),{threshold:.5});$('v2ReelsList').querySelectorAll('video').forEach(v=>io.observe(v))}}
-function renderCreator() {
-  const mine = state.posts.filter(p => p.authorUid === state.user.id);
-  const signals = readSignalStore();
-  const interactions = Object.values(signals).reduce((n, x) => n + Number(x.likes||0) + Number(x.saves||0) + Number(x.comments||0) + Number(x.reactions||0), 0);
-  const top = rankSignals(mine.slice())[0];
-  const engagement = mine.length ? Math.round((mine.reduce((n,p)=>n+reactionLikeCount(p)+(Array.isArray(p.comments)?p.comments.length:0),0)/mine.length)*10)/10 : 0;
-  $('v2CreatorGrid').innerHTML = `<div class="stat"><b>${mine.length}</b><span>Signals released</span></div><div class="stat"><b>${engagement}</b><span>Avg. interactions/Signal</span></div><div class="stat"><b>${interactions}</b><span>Your Signal interactions</span></div><div class="stat"><b>${top ? signalScore(top) : 0}</b><span>Top Signal Strength</span></div>`;
-  $('v2CreatorBadges').textContent = top ? `Top Signal: ${(top.content || 'Untitled').slice(0, 90)}` : 'Release your first Signal to unlock creator insights.';
+let reelObserver=null;
+function renderReels(){
+  const reels=filteredPosts('forYou').filter(p=>p.mediaType==='video'&&p.mediaUrl&&!isGifUrl(p.mediaUrl)&&p.sensitive!==true&&p.is_sensitive!==true).slice(0,10);
+  const list=$('v2ReelsList');
+  const supportsObserver='IntersectionObserver'in window;
+  reelObserver?.disconnect();reelObserver=null;
+  list.innerHTML=reels.length?reels.map(p=>{
+    const src=signalVideoPlaybackUrl({url:p.mediaUrl,playbackUrl:p.mediaUrl,watermarked:!!p.mediaWatermarked,normalized:!!p.mediaNormalized});
+    return `<div class="v2-reel-card"><video data-reel-src="${esc(src)}" muted playsinline loop preload="none"></video>${videoWatermarkForSignal({watermarked:!!p.mediaWatermarked},p)}<button class="v2-reel-overlay" data-open-reel="${esc(p.id)}" type="button"><span>▶ ${esc((p.content||'Video').slice(0,70))}<small>${esc(nameOf(authorFor(p)))}</small></span><span>↗</span></button></div>`;
+  }).join(''):'<div class="empty">No video posts yet.</div>';
+  const videos=list.querySelectorAll('video[data-reel-src]');
+  const attachSource=v=>{
+    if(!v||v.getAttribute('src'))return;
+    const src=safeHttpUrl(v.dataset.reelSrc||'');
+    if(!src)return;
+    v.preload='metadata';v.src=src;v.load();
+  };
+  if(supportsObserver){
+    reelObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+      const v=entry.target;
+      if(entry.isIntersecting){attachSource(v);if(v.getAttribute('src'))v.play().catch(()=>{});}
+      else v.pause();
+    }),{rootMargin:'300px 0px',threshold:.5});
+    videos.forEach(v=>reelObserver.observe(v));
+  }else{
+    videos.forEach(v=>{attachSource(v);v.preload='metadata'});
+  }
 }
+
 function findNearby() {
   const out = $('v2NearbyList');
   if (!navigator.geolocation) { out.innerHTML = '<div class="empty">Location is unavailable on this device.</div>'; return; }
@@ -1046,7 +1104,7 @@ function findNearby() {
       return {...p, distance:Math.sqrt(dLat*dLat+dLng*dLng)};
     }).filter(Boolean).sort((a,b)=>a.distance-b.distance).slice(0,8);
     if (!candidates.length) { out.innerHTML='<div class="empty">No location-tagged posts nearby yet.</div>'; return; }
-    out.innerHTML=candidates.map(p=>`<div class="v2-nearby-card"><div class="nearby-icon">📍</div><div><strong>${esc(nameOf(authorFor(p)))}</strong><small>${esc((p.content||'Untitled').slice(0,120))} · ${p.distance<1 ? `${Math.round(p.distance*1000)}m` : `${p.distance.toFixed(1)}km`} away</small></div></div>`).join('');
+    out.innerHTML=candidates.map(p=>`<div class="v2-nearby-card"><div class="nearby-icon">📍</div><div><strong>${esc(nameOf(authorFor(p)))}</strong><small>${esc(spikeSignalPreview(p,'Untitled').slice(0,120))} · ${p.distance<1 ? `${Math.round(p.distance*1000)}m` : `${p.distance.toFixed(1)}km`} away</small></div></div>`).join('');
   }, () => { out.innerHTML='<div class="empty">Location permission was not granted.</div>'; }, {enableHighAccuracy:false, timeout:8000, maximumAge:300000});
 }
 
@@ -1083,7 +1141,7 @@ function renderSavedPanel(saved,cols){
     ${edit?`<div class="spike-premium-card" style="margin-bottom:10px"><div class="spike-premium-card-main"><b>Rename collection</b><small>Choose a new name for “${esc(edit.name)}”.</small></div><input id="spikeRenameValue" value="${esc(edit.name)}" style="flex:1;min-width:90px"><button class="spike-premium-btn primary" id="spikeRenameSave">Save</button><button class="spike-premium-btn" id="spikeRenameCancel">Cancel</button></div>`:''}
     ${active&&!edit?`<div class="spike-premium-card" style="margin-bottom:10px"><div class="spike-premium-card-main"><b>${esc(active.name)}</b><small>${active.postIds?.length||0} saved posts</small></div><button class="spike-premium-btn" data-col-rename="${esc(active.id)}">Rename</button><button class="spike-premium-btn danger" data-col-delete="${esc(active.id)}">Delete</button></div>`:''}
     ${!active&&cols.length?`<div class="spike-premium-search"><select id="spikeAddCollection" style="flex:1"><option value="">Choose collection for Add…</option>${collectionOptions}</select></div>`:''}
-    <div class="spike-premium-grid">${(active?signalList.filter(p=>active.postIds?.includes(p.id)):signalList).map(p=>`<div class="spike-premium-card"><div class="spike-premium-card-main"><b>${esc((p.content||'Untitled post').slice(0,100))}</b><small>${esc(nameOf(state.users.get(p.authorUid)||{}))} · ${active?'In collection':'Saved'}</small></div>${active?`<button class="spike-premium-btn" data-col-remove="${esc(p.id)}">Remove</button>`:(cols.length?`<button class="spike-premium-btn primary" data-col-add="${esc(p.id)}">Add</button>`:'')}</div>`).join('') || '<div class="spike-premium-empty">No saved posts here yet.<br>Tap the bookmark on a post to save it.</div>'}</div>`);
+    <div class="spike-premium-grid">${(active?signalList.filter(p=>active.postIds?.includes(p.id)):signalList).map(p=>`<div class="spike-premium-card"><div class="spike-premium-card-main"><b>${esc(spikeSignalPreview(p,'Untitled post').slice(0,100))}</b><small>${esc(nameOf(state.users.get(p.authorUid)||{}))} · ${active?'In collection':'Saved'}</small></div>${active?`<button class="spike-premium-btn" data-col-remove="${esc(p.id)}">Remove</button>`:(cols.length?`<button class="spike-premium-btn primary" data-col-add="${esc(p.id)}">Add</button>`:'')}</div>`).join('') || '<div class="spike-premium-empty">No saved posts here yet.<br>Tap the bookmark on a post to save it.</div>'}</div>`);
 }
 async function saveCollections(){ const me=await getDoc(`users/${state.user.id}`).catch(()=>({})); await putDoc(`users/${state.user.id}`,{...(me||{}),savedCollections:spikePremiumData.collections},'users'); }
 async function openCloseFriends(){
@@ -1340,6 +1398,7 @@ function initVideoControls() {
   const observed = new WeakSet();
   const previewTimers = new WeakMap();
   const retryTokens = new WeakMap();
+  let feedMediaSuspended = document.visibilityState !== 'visible';
   let switchingVideo = false;
 
   const wrap = video => video?.closest('.post-video-inline');
@@ -1374,6 +1433,20 @@ function initVideoControls() {
       badge.textContent = `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
     }
   };
+  const ensureVideoSource = video => {
+    if (!video || !video.isConnected) return;
+    // Keep Cloudinary poster requests deferred with the video source itself.
+    if (!video.getAttribute('poster')) {
+      const poster = safeHttpUrl(video.dataset.posterSrc || video.getAttribute('data-poster-src') || '');
+      if (poster) video.poster = poster;
+    }
+    if (video.getAttribute('src')) return;
+    const source = safeHttpUrl(video.dataset.spikePlaybackSrc || video.getAttribute('data-playback-src') || '');
+    if (!source) return;
+    video.preload = 'metadata';
+    video.src = source;
+    video.load();
+  };
   const clearPreviewTimer = video => {
     const t = previewTimers.get(video);
     if (t) clearTimeout(t);
@@ -1383,6 +1456,8 @@ function initVideoControls() {
     if (!video || !video.isConnected) return false;
     const w = wrap(video);
     if (!w || w.dataset.videoReloading === '1') return false;
+    // Never start an automatic preview while the document is backgrounded.
+    if (reason === 'preview' && (feedMediaSuspended || document.visibilityState !== 'visible')) return false;
     try {
       await video.play();
       return true;
@@ -1417,7 +1492,7 @@ function initVideoControls() {
   const schedulePreviewLoop = video => {
     clearPreviewTimer(video);
     const w = wrap(video);
-    if (!w || w.dataset.videoMode !== 'preview') return;
+    if (!w || w.dataset.videoMode !== 'preview' || feedMediaSuspended || document.visibilityState !== 'visible') return;
     if (!Number.isFinite(video.duration) || video.duration <= 0) return;
 
     const target = Math.min(PREVIEW_SECONDS, video.duration);
@@ -1430,6 +1505,35 @@ function initVideoControls() {
       schedulePreviewLoop(video);
     }, remaining));
   };
+
+  // Suspend feed media work when SPIKE is not visible. Resume only preview
+  // videos that are actually in the viewport; full-playback videos stay paused
+  // until the viewer explicitly resumes them.
+  const syncFeedVideoVisibility = (forcePause = false) => {
+    feedMediaSuspended = forcePause || document.visibilityState !== 'visible';
+    const visible = !feedMediaSuspended;
+    document.querySelectorAll(SELECTOR).forEach(video => {
+      const w = wrap(video);
+      if (!w) return;
+      if (!visible) {
+        clearPreviewTimer(video);
+        if (!video.paused) video.pause();
+        return;
+      }
+      if (w.dataset.videoMode !== 'preview' || w.dataset.videoReloading === '1') return;
+      const rect = video.getBoundingClientRect();
+      const inViewport = rect.bottom > 0 && rect.right > 0 &&
+        rect.top < window.innerHeight && rect.left < window.innerWidth;
+      if (inViewport && video.paused) {
+        video.muted = true;
+        safePlay(video, 'preview').catch(() => {});
+      }
+      if (inViewport) schedulePreviewLoop(video);
+    });
+  };
+  document.addEventListener('visibilitychange', syncFeedVideoVisibility);
+  window.addEventListener('pagehide', () => syncFeedVideoVisibility(true));
+  window.addEventListener('pageshow', () => syncFeedVideoVisibility(false));
 
   const pauseOthers = current => {
     switchingVideo = true;
@@ -1457,6 +1561,7 @@ function initVideoControls() {
     const w = wrap(video);
     if (!w) return;
 
+    ensureVideoSource(video);
     clearPreviewTimer(video);
     clearError(video);
     pauseOthers(video);
@@ -1596,6 +1701,8 @@ function initVideoControls() {
       const playback = v.getAttribute('data-playback-src') || v.getAttribute('src') || '';
       if (playback) v.dataset.spikePlaybackSrc = playback;
     }
+    // Feed videos do not receive a network source until they approach the viewport.
+    v.preload = 'none';
 
     const w = wrap(v);
     if (w) {
@@ -1704,6 +1811,25 @@ function initVideoControls() {
       setError(v, message);
     });
   });
+
+  const videos = document.querySelectorAll(SELECTOR);
+  feedVideoSourceObserver?.disconnect();
+  feedVideoSourceObserver = null;
+  if ('IntersectionObserver' in window) {
+    feedVideoSourceObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const video = entry.target;
+        ensureVideoSource(video);
+        feedVideoSourceObserver?.unobserve(video);
+      });
+    }, { rootMargin: '600px 0px', threshold: 0 });
+    videos.forEach(video => {
+      if (!video.getAttribute('src')) feedVideoSourceObserver.observe(video);
+    });
+  } else {
+    videos.forEach(ensureVideoSource);
+  }
 
   document.addEventListener('click', async e => {
     const downloadBtn = e.target.closest('[data-download-video]');

@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
 <link rel="stylesheet" href="css/perf.css">
 <script id="spike-performance-bootstrap">
 /* SPIKE performance bootstrap — no application logic changes */
@@ -14,8 +18,6 @@ document.documentElement.classList.add("spike-cv-ready");
 </script>
 <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b10">
@@ -661,12 +663,12 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 <main class="main"><section class="card">
 <div class="cover" id="coverArea">
 <div id="generatedCover" aria-hidden="true"></div>
-<img id="coverImg" alt="" class="hidden" loading="lazy" decoding="async">
+<img id="coverImg" alt="" class="hidden" loading="eager" decoding="async" fetchpriority="high">
 <div class="cover-actions hidden" id="coverActions"><button class="cover-edit" id="coverEdit" type="button" title="Choose cover photo">▣ <span>Change cover</span></button><button class="cover-edit cover-adjust" id="coverAdjust" type="button" title="Adjust how your cover appears">⌗ <span>Adjust</span></button></div>
-<input id="coverFile" class="upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+<input id="coverFile" class="upload-input" type="file" aria-label="Choose a profile cover photo" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
 </div>
 <div class="profile"><div class="avatar-wrap"><button class="avatar" id="avatar" type="button" aria-label="Change profile picture">U</button>
-<input id="avatarFile" class="upload-input" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden></div>
+<input id="avatarFile" class="upload-input" type="file" aria-label="Choose a profile picture" accept="image/jpeg,image/png,image/webp,image/gif" hidden></div>
 <div class="profile-top"><div class="identity"><div class="name-row"><h1 class="name" id="displayName">User</h1><span class="verified hidden" id="verified">✓</span></div><div class="handle" id="username">@spike</div><div class="bio" id="bio"></div><div class="meta" id="meta"></div>
 <div class="spid-card" id="spidCard"><div class="spid-inner"><div class="spid-spark">✦</div><div class="spid-copy"><div class="spid-label">SPIKE Lifetime ID</div><div class="spid-value" id="spidValue">SP-••••••</div><div class="spid-sub">Permanent account identity</div></div><div class="spid-actions"><button class="spid-btn" id="copySpid" type="button">Copy</button><button class="spid-btn" id="shareSpid" type="button">Share</button></div></div></div>
 
@@ -674,8 +676,8 @@ body.spike-profile-page{background:radial-gradient(circle at 50% -10%,rgba(124,5
 <div class="stats" id="profileStats" aria-label="Profile statistics">
 <button class="stat stat-action" type="button" data-stat="posts" aria-label="View posts"><b id="postCount">0</b><span>Posts</span></button>
 <button class="stat stat-action" type="button" data-stat="followers" aria-label="View followers"><b id="followerCount">0</b><span>Followers</span></button>
-<button class="stat stat-action" type="button" data-stat="following" aria-label="View following"><b id="followingCount">0</b><span>Following</span></button></div><button class="spike-blocked-list-link" id="openBlockedList" type="button">Manage blocked members</button><a class="spike-blocked-list-link" id="mutualConnectionsShortcut" href="mutuals.html" hidden>✦ See mutual connections</a></div>
-<div class="profile-tools" id="profileTools"><div class="profile-feature-card"><h3><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 5v14"/></svg>Presence</h3><div class="presence-line"><span class="presence-dot" id="profilePresenceDot"></span><span id="profilePresenceText">Checking status…</span></div><div class="feature-muted">Live status is shared across SPIKE.</div></div><div class="profile-feature-card"><h3><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Activity</h3><div class="feature-row"><span>Public posts</span><b id="activityPosts">0</b></div><div class="feature-row"><span>Media posts</span><b id="activityMedia">0</b></div><div class="feature-row"><span>Followers</span><b id="activityFollowers">0</b></div></div><div class="profile-feature-card" id="insightsCard"><h3><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/></svg>Profile insights</h3><div class="feature-row"><span>Public posts</span><b id="insightPosts">0</b></div><div class="feature-row"><span>Media</span><b id="insightMedia">0</b></div><div class="feature-row"><span>Profile views</span><b id="insightViews">—</b></div><div class="feature-muted">Private to the profile owner.</div></div></div><nav class="tabs"><button class="tab active" data-tab="media">Media</button><button class="tab" data-tab="about">About</button></nav>
+<button class="stat stat-action" type="button" data-stat="following" aria-label="View following"><b id="followingCount">0</b><span>Following</span></button></div><button class="spike-blocked-list-link" id="openBlockedList" type="button">Manage blocked members</button><a class="spike-blocked-list-link" id="mutualConnectionsShortcut" href="followers.html?kind=mutuals" hidden>✦ See mutual connections</a></div>
+<div class="profile-tools" id="profileTools"><div class="profile-feature-card"><h3><svg class="feature-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 5v14"/></svg>Presence</h3><div class="presence-line"><span class="presence-dot" id="profilePresenceDot"></span><span id="profilePresenceText">Checking status…</span></div><div class="feature-muted">Live status is shared across SPIKE.</div></div><nav class="tabs"><button class="tab active" data-tab="media">Media</button><button class="tab" data-tab="about">About</button></nav>
 <div class="panel" id="mediaPanel"><div class="media-gallery-head"><div><h2>Media</h2><span id="mediaCountLabel">0 items</span></div></div><div class="media-gallery" id="mediaPosts"></div></div><div class="panel hidden" id="aboutPanel"><div class="about-grid" id="aboutGrid"></div></div>
 <section class="spike-social-list" id="socialListOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="socialListTitle"><div class="spike-social-backdrop" data-social-close></div><div class="spike-social-sheet"><header><div><small>SPIKE COMMUNITY · CONNECTIONS</small><h2 id="socialListTitle">Followers</h2><p class="spike-social-subtitle" id="socialListSubtitle">Your community, all in one place</p></div><button type="button" id="socialListClose" aria-label="Close social connections">×</button></header><div class="spike-social-tools"><label class="spike-social-search"><span aria-hidden="true">⌕</span><input id="socialListSearch" type="search" placeholder="Search by name or username…" autocomplete="off" aria-label="Search connections"></label><label class="spike-social-sort"><span>Sort</span><select id="socialListSort" aria-label="Sort connections"><option value="default">Default order</option><option value="az">Name A–Z</option><option value="za">Name Z–A</option></select></label></div><div class="spike-social-items" id="socialListItems"><p class="spike-social-loading">Loading…</p></div><footer class="spike-social-footer" id="socialListFooter">Connections are updated from your SPIKE account.</footer></div></section>
 <div class="media-viewer" id="mediaViewer" aria-hidden="true">
@@ -854,7 +856,9 @@ function openSocialDestination(kind){
  }
  openSocialList(kind);
 }
+let profilePostPreviewObserver=null;
 function openProfilePosts(){
+ profilePostPreviewObserver?.disconnect();profilePostPreviewObserver=null;
  const overlay=document.getElementById('socialListOverlay'),title=document.getElementById('socialListTitle'),items=document.getElementById('socialListItems');if(!overlay||!items)return;
  title.textContent='Posts';overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
  if(state.canSeePosts===false){items.innerHTML='<div class="spike-social-empty">Posts are private.</div>';return;}
@@ -870,10 +874,16 @@ function openProfilePosts(){
   return `<article class="spike-post-preview" data-post-id="${escapeSocialText(p.id)}">
    <div class="spike-post-preview-head"><span class="spike-social-avatar">✦</span><span class="spike-post-preview-meta"><strong>${escapeSocialText(nameOf(state.profile))}</strong><small>${escapeSocialText(when)}</small></span><details class="spike-post-options"><summary aria-label="Post options" title="Post options">⋯</summary><div class="spike-post-options-menu"><button type="button" data-post-action="save" data-post-id="${escapeSocialText(p.id)}">${savedNow?'Remove saved':'Save post'}</button><button type="button" data-post-action="share" data-post-id="${escapeSocialText(p.id)}">Share post</button><button type="button" data-post-action="copy" data-post-id="${escapeSocialText(p.id)}">Copy link</button>${state.uid===state.me?.id?`<button type="button" data-post-action="edit" data-post-id="${escapeSocialText(p.id)}">Edit post</button><button type="button" class="danger" data-post-action="delete" data-post-id="${escapeSocialText(p.id)}">Delete post</button>`:`<button type="button" data-post-action="report" data-post-id="${escapeSocialText(p.id)}">Report post</button>`}</div></details></div>
    ${body?`<p class="spike-post-preview-copy">${body}</p>`:''}
-   ${media?`<button class="spike-post-preview-media" type="button" data-post-action="media" data-post-id="${escapeSocialText(p.id)}">${isVideo?`<video src="${escapeSocialText(media)}" muted playsinline preload="metadata"></video><span class="spike-post-play">▶</span>`:`<img src="${escapeSocialText(media)}" alt="Post media" loading="lazy" decoding="async">`}</button>`:''}
+   ${media?`<button class="spike-post-preview-media" type="button" data-post-action="media" data-post-id="${escapeSocialText(p.id)}">${isVideo?`<video data-post-preview-video="${escapeSocialText(media)}" muted playsinline preload="none"></video><span class="spike-post-play">▶</span>`:`<img src="${escapeSocialText(media)}" alt="Post media" loading="lazy" decoding="async">`}</button>`:''}
    <div class="spike-post-preview-actions"><button type="button" data-post-action="like" data-post-id="${escapeSocialText(p.id)}" class="${likedNow?'active':''}">♥ <span>${likeCount(p)}</span></button><button type="button" data-post-action="comment" data-post-id="${escapeSocialText(p.id)}">💬 <span>${Array.isArray(p.comments)?p.comments.length:0}</span></button><button type="button" data-post-action="save" data-post-id="${escapeSocialText(p.id)}" class="${savedNow?'active':''}">${savedNow?'🔖 Saved':'🔖 Save'}</button><button type="button" data-post-action="share" data-post-id="${escapeSocialText(p.id)}">↗ Share</button></div>
   </article>`;
  }).join('');
+ const previewVideos=items.querySelectorAll('video[data-post-preview-video]');
+ const attachPreviewVideo=v=>{if(!v||v.getAttribute('src'))return;const src=v.dataset.postPreviewVideo||'';if(!/^https?:\/\//i.test(src))return;v.preload='metadata';v.src=src;v.load();};
+ if('IntersectionObserver' in window){
+  profilePostPreviewObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;attachPreviewVideo(entry.target);profilePostPreviewObserver?.unobserve(entry.target)}),{root:items,rootMargin:'250px 0px',threshold:0});
+  previewVideos.forEach(v=>profilePostPreviewObserver.observe(v));
+ }else previewVideos.forEach(attachPreviewVideo);
 }
 async function runSocialPersonAction(action,id,name){
  if(!id||id===state.me?.id)return;
@@ -883,7 +893,7 @@ async function runSocialPersonAction(action,id,name){
   if(result.following!==false)throw new Error('The follow service did not confirm the unfollow.');
   syncProfileToFeed('follow',false,id);
   await loadSocial();render();toast('Unfollowed','success');
-  location.href=`following.html?uid=${encodeURIComponent(state.uid)}`;return;
+  location.href=`followers.html?kind=following&uid=${encodeURIComponent(state.uid)}`;return;
  }
  if(action==='unblock'){
   if(!await window.SPIKEPremiumDialog.confirm({title:`Unblock ${name||'this member'}?`,message:'This member will be allowed to interact with you again.',confirmText:'Unblock member',cancelText:'Cancel',kicker:'SPIKE CONNECTION'}))return;
@@ -893,7 +903,7 @@ async function runSocialPersonAction(action,id,name){
  if(action==='block'){
   if(!await window.SPIKEPremiumDialog.confirm({title:`Block ${name||'this member'}?`,message:'This will restrict their interactions with you.',confirmText:'Block member',cancelText:'Cancel',danger:true,kicker:'SPIKE CONNECTION'}))return;
   const r=await db.rpc('dm_block_user',{p_other_user_id:id});if(r.error)throw r.error;
-  toast('Member blocked','success');await loadSocial();location.href=`followers.html?uid=${encodeURIComponent(state.uid)}`;return;
+  toast('Member blocked','success');await loadSocial();location.href=`followers.html?kind=followers&uid=${encodeURIComponent(state.uid)}`;return;
  }
  if(action==='report'){
   const reason=await window.SPIKEPremiumDialog.input({title:`Report ${name||'this member'}`,message:'Tell us why you are reporting this member.',placeholder:'Describe the issue…',confirmText:'Submit report',cancelText:'Cancel',kicker:'SPIKE SAFETY',maxLength:500});if(!reason||!reason.trim())return;

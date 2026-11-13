@@ -9,6 +9,8 @@
   let lastState = null;
   let adminBypass = false;
   let adminCheckDone = false;
+  let pollTimer = null;
+  let checkInFlight = false;
 
   function ensureOverlay() {
     if (overlay) return overlay;
@@ -92,6 +94,8 @@
   }
 
   async function check() {
+    if (checkInFlight || document.visibilityState === 'hidden') return;
+    checkInFlight = true;
     try {
       if (await resolveAdminBypass()) {
         const root = ensureOverlay();
@@ -117,14 +121,30 @@
     } catch (e) {
       console.warn('[SPIKE maintenance] status check failed', e);
       // Never lock users out merely because the maintenance status endpoint is unreachable.
+    } finally {
+      checkInFlight = false;
     }
+  }
+
+  function stopPolling() {
+    if (pollTimer === null) return;
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  function startPolling() {
+    if (pollTimer !== null || document.visibilityState === 'hidden') return;
+    check();
+    pollTimer = setInterval(check, POLL_MS);
   }
 
   function boot() {
     if (!document.body) return setTimeout(boot, 0);
-    check();
-    setInterval(check, POLL_MS);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) check(); });
+    startPolling();
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') startPolling();
+      else stopPolling();
+    });
   }
   boot();
 })();

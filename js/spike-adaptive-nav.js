@@ -126,10 +126,26 @@
     }
 
     // Programmatic overlays are checked periodically instead of observing the
-    // DOM we mutate. This eliminates mutation feedback loops completely.
-    const contextTimer=window.setInterval(contextCheck,750);
-    const measureTimer=window.setInterval(measure,2000);
-    window.addEventListener('pagehide',e=>{if(e.persisted)return;clearInterval(contextTimer);clearInterval(measureTimer)});
+    // DOM we mutate. Keep these maintenance timers off while the page is hidden
+    // or in the back/forward cache.
+    let contextTimer=null, measureTimer=null;
+    function stopMaintenance(){
+      if(contextTimer!==null){clearInterval(contextTimer);contextTimer=null;}
+      if(measureTimer!==null){clearInterval(measureTimer);measureTimer=null;}
+    }
+    function startMaintenance(){
+      if(document.visibilityState!=='visible' || contextTimer!==null || measureTimer!==null) return;
+      contextCheck(); measure();
+      contextTimer=window.setInterval(contextCheck,750);
+      measureTimer=window.setInterval(measure,2000);
+    }
+    document.addEventListener('visibilitychange',()=>{
+      if(document.visibilityState==='visible') startMaintenance();
+      else stopMaintenance();
+    });
+    window.addEventListener('pagehide',stopMaintenance);
+    window.addEventListener('pageshow',startMaintenance);
+    startMaintenance();
 
     setTimeout(()=>{if(!state.contextHidden&&!state.keyboard){state.scrollHidden=false;state.lastScroll=window.scrollY||0;apply()}},1300);
     setTimeout(()=>{contextCheck();measure()},1600);

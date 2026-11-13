@@ -37,11 +37,11 @@ const state = {
   user: null, profile: {}, posts: [], users: new Map(),
   saved: new Set(), following: new Set(), muted: new Set(), blocked: new Set(),
   filter: "forYou", media: null, mediaType: null, mediaItems: [], activeMediaIndex: 0, mediaLayout: "auto",
-  activePost: null, activeComment: null, customFeed: null,
+  activePost: null, activeComment: null,
   visiblePosts: 20, loadingMore: !1, allLoaded: !1, expandedCaptions: new Set(), realtimeRetryTimer: null, realtimeRetryAttempt: 0, realtimeStarting: false, realtimeRefreshTimer: null, postsLoadGeneration: 0
 };
 window.state = state;
-try { const cf=JSON.parse(localStorage.getItem('spike-active-custom-feed')||'null'); if(cf&&typeof cf==='object') { state.customFeed=cf; window.SPIKE_ACTIVE_CUSTOM_FEED=cf; } } catch(_) {}
+try { localStorage.removeItem('spike-active-custom-feed'); } catch (_) {}
 
 // ─── SUPABASE HELPERS ───────────────────────────────────
 const SPIKE_VIDEO_DELIVERY_TRANSFORM = 'f_mp4,vc_h264:baseline:3.1,ac_aac,q_auto:good';
@@ -263,6 +263,7 @@ async function requireUser() {
   if (p.error) throw p.error;
   const ext = await withTimeout(getDoc(`users/${state.user.id}`).catch(() => null), 6000, "User settings").catch(() => null);
   state.profile = { ...(p.data?.[0] || {}), ...(ext || {}), id: state.user.id };
+  document.dispatchEvent(new CustomEvent('spike:profile-ready', { detail: { userId: state.user.id } }));
   return true;
 }
 

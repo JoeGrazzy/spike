@@ -15,7 +15,6 @@
     { id:'feed', title:'Explore your Feed', page:'feed.html', label:'Open Feed', description:'Your Feed is where you discover posts, updates, and conversations. Explore the available feed views and use the post actions only when you are ready.' },
     { id:'people', title:'Profiles and connections', page:'friends.html', label:'Open Friends', description:'Find people, review friend requests, explore profiles, and manage connections. You stay in control of who you connect with.' },
     { id:'messages', title:'Messages and conversations', page:'messages.html', label:'Open Messages', description:'Use Messages to find conversations and communicate privately. The tutorial never sends a message or starts a call for you.' },
-    { id:'rooms', title:'Community Rooms', page:'rooms.html', label:'Explore Rooms', description:'Discover communities, create your own Room, and join conversations around shared interests.' },
     { id:'notifications', title:'Stay up to date', page:'notifications.html', label:'View Notifications', description:'Notifications help you keep track of relevant activity. Visit notification settings to tune what you receive.' },
     { id:'safety', title:'Privacy, safety, and help', page:'settings.html', label:'Open Settings', description:'Find account preferences, privacy controls, and safety tools. Use Help for detailed guides, reporting information, and answers to common questions.' }
   ];
@@ -100,7 +99,13 @@
             // Prefer newer local state so a stale read cannot move the lesson backwards.
             progress = local && localUpdated > remoteUpdated ? normalize(local) : remoteProgress;
             safeWriteLocal(user.id, progress);
-            if (local && localUpdated > remoteUpdated) void persist(progress);
+            if (local && localUpdated > remoteUpdated) {
+              // Restore the newer device-local progress to the account after a successful remote read.
+              void persist(progress);
+            }
+          } else if (local) {
+            // First sign-in on a device with saved local progress: seed the account row immediately.
+            void persist(local);
           }
         } else {
           // Missing table/migration is an expected rollout state; never block the app.

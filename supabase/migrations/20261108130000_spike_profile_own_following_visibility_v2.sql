@@ -1,6 +1,0 @@
--- Let members see their own Following list even when a followed account
--- is not discoverable to other members. Other users still obey privacy rules.
--- Also exclude blocked relationships and keep counts consistent with the list.
--- This migration replaces both RPCs with the v2 definitions deployed to Supabase.
--- See the live schema functions get_spike_profile_social_list and
--- get_spike_profile_follow_counts for the full applied definitions.

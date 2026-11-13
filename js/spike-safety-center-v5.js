@@ -2,7 +2,7 @@
  * Native-dialog-free, cache-busted interaction surface with resilient premium notifications.
  *
  * Uses the existing authenticated Supabase client and app_documents store.
- * It intentionally does not duplicate Settings, Blocking/Mute UI, Reports, Policy, Appeals, or Notifications.
+ * It intentionally does not duplicate Settings, Blocking/Mute UI, Reports, Policy, or Notifications.
  */
 (() => {
   'use strict';

@@ -1,0 +1,276 @@
+/* SPIKE Friends — final page-scoped layout and media authority.
+   Keep these rules scoped so shared profile/feed components remain untouched. */
+#content,
+#content section,
+#friendsContainer,
+#requestsContainer,
+#sentRequestsContainer,
+#suggestionsContainer,
+#networkRecommendationsContainer {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.friend-card,
+.request-card,
+.suggestion-card,
+.network-recommendation-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  gap: 0;
+  box-sizing: border-box;
+}
+
+/* Fixed avatar frame; the photo is clipped independently so the presence dot
+   remains visible and no source image can enlarge the row. */
+.friend-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 46px;
+  width: 46px;
+  min-width: 46px;
+  max-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  max-height: 46px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  isolation: isolate;
+  line-height: 1;
+  overflow: visible;
+}
+
+.friend-avatar > img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  flex: none;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0;
+  padding: 0;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  object-position: center;
+  clip-path: circle(50%);
+}
+
+.friend-avatar .status-dot {
+  z-index: 2;
+  right: -1px;
+  bottom: -1px;
+  width: 11px;
+  height: 11px;
+  box-shadow: 0 0 0 2px var(--sp-surface-solid, #fff);
+}
+
+.friend-info {
+  flex: 1 1 0%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.friend-info .name,
+.friend-info .sub {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.friend-info .name {
+  font-size: 13px;
+  line-height: 1.35;
+  font-weight: 750;
+  letter-spacing: -.01em;
+}
+
+.friend-info .sub {
+  margin-top: 3px;
+  font-size: 10.5px;
+  line-height: 1.35;
+}
+
+.friend-action {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  max-width: 46%;
+  margin-left: auto;
+  gap: 6px;
+}
+
+.friend-action button,
+.friend-action .request-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.friend-card,
+.request-card,
+.suggestion-card,
+.network-recommendation-card {
+  border-radius: 17px;
+  transition: background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.friend-card:hover,
+.suggestion-card:hover,
+.network-recommendation-card:hover {
+  transform: translateY(-1px);
+}
+
+.friend-profile-link:focus-visible {
+  outline: 2px solid var(--sp-accent, #7c3aed);
+  outline-offset: 3px;
+}
+
+.network-recommendation-card .friend-info {
+  flex: 1 1 0%;
+}
+
+.network-recommendation-card .network-reason {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.request-card .friend-action {
+  max-width: none;
+  gap: 5px;
+}
+
+.request-card .request-btn {
+  min-width: 52px;
+  padding: 7px 9px;
+  font-size: 10px;
+}
+
+#content {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+}
+
+.bottom-nav {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.tab {
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease;
+}
+
+.tab:hover {
+  color: var(--sp-text, #172033);
+  background: var(--sp-surface-2, rgba(124, 58, 237, .08));
+}
+
+.search-wrap input {
+  border-radius: 15px;
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+
+.search-wrap input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--sp-accent, #7c3aed) 16%, transparent);
+}
+
+.friends-load-more {
+  min-height: 42px;
+  border-radius: 13px;
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+
+.friends-load-more:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--sp-accent, #7c3aed) 35%, var(--sp-line, transparent));
+}
+
+@media (max-width: 420px) {
+  .friend-avatar {
+    flex-basis: 40px;
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+  }
+
+  .friend-info {
+    margin-left: 9px;
+  }
+
+  .friend-info .name {
+    font-size: 12.5px;
+  }
+
+  .friend-action {
+    gap: 4px;
+    margin-left: 6px;
+  }
+
+  .friend-action .icon-btn {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .request-card .friend-action {
+    gap: 4px;
+  }
+
+  .request-card .request-btn {
+    min-width: 0;
+    padding: 7px 7px;
+    font-size: 9.5px;
+  }
+}
+
+@media (max-width: 350px) {
+  .friend-avatar {
+    flex-basis: 36px;
+    width: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    max-height: 36px;
+  }
+
+  .friend-info {
+    margin-left: 7px;
+  }
+
+  .friend-action .icon-btn {
+    width: 29px;
+    min-width: 29px;
+    height: 29px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .friend-card,
+  .request-card,
+  .suggestion-card,
+  .network-recommendation-card,
+  .tab,
+  .search-wrap input,
+  .friends-load-more {
+    transition: none !important;
+  }
+}

@@ -48,8 +48,24 @@
     });
   }
   window.SPIKETime = { dateValue, relativeTime, refresh };
-  setInterval(refresh, 30000);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refresh(); });
+
+  // Avoid waking the Feed every 30 seconds while its tab is backgrounded.
+  let refreshTimer = null;
+  function startRefreshTimer() {
+    if (refreshTimer !== null || document.visibilityState !== "visible") return;
+    refresh();
+    refreshTimer = window.setInterval(refresh, 30000);
+  }
+  function stopRefreshTimer() {
+    if (refreshTimer === null) return;
+    window.clearInterval(refreshTimer);
+    refreshTimer = null;
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") startRefreshTimer();
+    else stopRefreshTimer();
+  });
+  startRefreshTimer();
 })();
 
 // Edit detection

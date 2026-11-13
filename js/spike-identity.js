@@ -21,7 +21,11 @@
     return generatedAvatar(u,c,name);
   }
   function installImageFallbacks(root=document){
-    root.querySelectorAll('img[data-spike-avatar-fallback],img[data-spike-avatar-gender],img[data-spike-remote-avatar]').forEach(img=>{
+    const selector='img[data-spike-avatar-fallback],img[data-spike-avatar-gender],img[data-spike-remote-avatar]';
+    const images=[];
+    if(root.matches?.(selector)) images.push(root);
+    root.querySelectorAll?.(selector).forEach(img=>images.push(img));
+    images.forEach(img=>{
       if(img.dataset.spikeBound==='1')return;
       img.dataset.spikeBound='1';
       img.addEventListener('error',function(){
@@ -40,5 +44,13 @@
   const refresh=()=>document.querySelectorAll('[data-spike-identity="avatar"],[data-spike-identity="cover"]').forEach(el=>{el.dataset.spikeTheme=String(theme())});
   document.addEventListener('spike:theme-change',refresh,{passive:true});
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>installImageFallbacks(),{once:true});else installImageFallbacks();
-  new MutationObserver(()=>installImageFallbacks()).observe(document.documentElement,{childList:true,subtree:true});
+  // Process only newly inserted subtrees; rescanning the entire document for
+  // every DOM insertion made large dynamic pages do repeated redundant work.
+  new MutationObserver(records=>{
+    for(const record of records){
+      for(const node of record.addedNodes){
+        if(node.nodeType===1) installImageFallbacks(node);
+      }
+    }
+  }).observe(document.documentElement,{childList:true,subtree:true});
 })();

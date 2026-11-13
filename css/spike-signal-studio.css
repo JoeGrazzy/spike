@@ -42,3 +42,81 @@ body.spike-studio-open{overflow:hidden!important;overscroll-behavior:none!import
 .spike-studio-status[data-kind="error"]{color:var(--btn-danger,#ef4444)!important}.spike-studio-status[data-kind="success"]{color:var(--btn-success,#22c55e)!important}
 .spike-studio :disabled{cursor:not-allowed!important;opacity:.62;filter:saturate(.75)}
 @media(forced-colors:active){.spike-studio,.spike-studio button,.spike-studio textarea{border:1px solid CanvasText!important}.spike-studio-publish{forced-color-adjust:auto}}
+
+/* v33: restrained, consistent media-picker icon treatment */
+.spike-studio-media-choice{grid-template-columns:40px minmax(0,1fr);column-gap:11px;min-height:72px;padding:11px 12px}
+.spike-studio-media-choice>span{width:38px;height:38px;border-radius:12px;font-size:0;line-height:1}
+.spike-studio-media-choice>span i{display:block;font-size:17px;line-height:1}
+.spike-studio-media-choice b{font-size:12px;line-height:1.25}
+.spike-studio-media-choice small{font-size:10px;line-height:1.3}
+@media(max-width:380px){.spike-studio-media-tools{gap:8px}.spike-studio-media-choice{grid-template-columns:34px minmax(0,1fr);column-gap:8px;padding:10px}.spike-studio-media-choice>span{width:34px;height:34px}.spike-studio-media-choice>span i{font-size:16px}}
+
+/* Feed launcher identity: the signed-in profile photo stays beside Your thought, outside Signal Studio. */
+.spike-studio-launch-avatar{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;overflow:hidden;border-radius:50%;border:2px solid var(--spike-line,rgba(255,255,255,.18));background:var(--spike-surface-2,#202638);box-shadow:0 3px 12px rgba(0,0,0,.18)}
+.spike-studio-launch-avatar-image,.spike-studio-launch-avatar-fallback{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;object-fit:cover;font-size:16px;font-weight:850;color:var(--spike-text,#fff);background:var(--spike-surface-2,#202638)}
+.spike-studio-launch-avatar .spike-generated-avatar{width:100%;height:100%;border-radius:50%}
+@media(max-width:600px){.spike-studio-launch-avatar{flex-basis:44px;width:44px;height:44px}}
+
+/* v35: show the authenticated user's identity inside Signal Studio as well as on the Feed launcher. */
+.spike-studio-identity{display:flex;align-items:center;gap:11px;margin:0 0 15px;padding:10px 12px;border:1px solid var(--spike-line,rgba(255,255,255,.12));border-radius:15px;background:color-mix(in srgb,var(--spike-surface-2) 78%,transparent)}
+.spike-studio-identity-avatar{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;overflow:hidden;border:2px solid var(--spike-line,rgba(255,255,255,.16));border-radius:50%;background:var(--spike-surface-2,#202638)}
+.spike-studio-identity-avatar-image,.spike-studio-identity-avatar-fallback{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;object-fit:cover;font-size:14px;font-weight:850;color:var(--spike-text,#fff);background:var(--spike-surface-2,#202638)}
+.spike-studio-identity-avatar .spike-generated-avatar{width:100%;height:100%;border-radius:50%}
+.spike-studio-identity-copy{display:grid;gap:3px;min-width:0}
+.spike-studio-identity-copy strong{overflow:hidden;color:var(--spike-text);font-size:12px;font-weight:850;text-overflow:ellipsis;white-space:nowrap}
+.spike-studio-identity-copy small{color:var(--spike-muted);font-size:10px}
+
+
+/* v36: account identity belongs in the creator modal header, never in the writing area. */
+.spike-studio-head{display:flex;align-items:center;gap:12px;min-width:0}
+.spike-studio-head .spike-studio-brand{flex:1 1 auto;min-width:0}
+.spike-studio-head .spike-studio-identity{flex:0 1 auto;min-width:0;max-width:min(42%,260px);margin:0;padding:6px 9px;gap:8px;border-radius:13px}
+.spike-studio-head .spike-studio-identity-avatar{flex-basis:36px;width:36px;height:36px}
+.spike-studio-head .spike-studio-identity-copy strong{max-width:150px}
+.spike-studio-head .spike-studio-identity-copy small{font-size:9px}
+.spike-studio-head .spike-studio-close{flex:0 0 auto}
+@media(max-width:600px){.spike-studio-head{gap:8px}.spike-studio-head .spike-studio-brand{flex:1 1 0}.spike-studio-head .spike-studio-brand h2{font-size:17px}.spike-studio-head .spike-studio-sigil{width:34px;height:34px;flex:0 0 34px}.spike-studio-head .spike-studio-identity{max-width:38%;padding:5px 6px;gap:6px}.spike-studio-head .spike-studio-identity-avatar{flex-basis:32px;width:32px;height:32px}.spike-studio-head .spike-studio-identity-copy strong{max-width:82px;font-size:10px}.spike-studio-head .spike-studio-identity-copy small{font-size:8px}.spike-studio-head .spike-studio-close{width:34px;height:34px;flex:0 0 34px}}
+@media(max-width:360px){.spike-studio-head .spike-studio-brand p{font-size:8px}.spike-studio-head .spike-studio-brand h2{font-size:15px}.spike-studio-head .spike-studio-identity{max-width:35%}.spike-studio-head .spike-studio-identity-copy small{display:none}}
+
+/* Header identity: replace the original creator sigil in-place with the signed-in avatar. */
+.spike-studio-header-avatar{width:43px;height:43px;flex:0 0 43px;border-radius:15px;overflow:hidden;padding:0;background:rgba(226,80,171,.11)}
+.spike-studio-header-avatar img{display:block;width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.spike-studio-header-account{display:block;margin-top:4px;color:var(--muted,#9aa5bb);font-size:11px;font-weight:650;letter-spacing:0}
+
+
+/* v37: compact, deliberate audience and sensitive-content controls. */
+.spike-studio-options{display:grid;grid-template-columns:minmax(0,1fr);gap:9px;margin:13px 0 15px}
+.spike-studio-audience-control{min-width:0;margin:0;padding:10px 11px 11px;border:1px solid var(--spike-line,rgba(255,255,255,.1));border-radius:14px;background:var(--spike-surface-2,rgba(255,255,255,.025))}
+.spike-studio-audience-control legend{padding:0 4px}
+.spike-studio-option-title{display:block;color:var(--spike-text,#f5f5fb);font-size:11px;font-weight:850;letter-spacing:.1px}
+.spike-studio-audience-control legend small{display:block;margin-top:2px;color:var(--spike-muted,#929bb0);font-size:10px;font-weight:450}
+.spike-studio-audience-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:5px}
+.spike-studio-audience-choice{position:relative;display:block;min-width:0;cursor:pointer}
+.spike-studio-audience-choice input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.spike-studio-audience-choice>span{display:flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding:7px 10px;border:1px solid var(--spike-line,rgba(255,255,255,.1));border-radius:10px;background:var(--spike-surface,rgba(0,0,0,.08));color:var(--spike-muted,#a0a9bc);font-size:11px;transition:border-color .16s,background .16s,color .16s,box-shadow .16s}
+.spike-studio-audience-choice i{font-size:12px}
+.spike-studio-audience-choice b{font-size:11px;font-weight:800}
+.spike-studio-audience-choice input:checked+span{border-color:var(--spike-accent,#d65ba9);background:color-mix(in srgb,var(--spike-accent,#d65ba9) 12%,var(--spike-surface,#151a28));color:var(--spike-text,#fff);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--spike-accent,#d65ba9) 22%,transparent)}
+.spike-studio-audience-choice input:focus-visible+span{outline:2px solid var(--spike-accent,#d65ba9);outline-offset:2px}
+.spike-studio-sensitive-option{display:flex;align-items:center;gap:9px;min-width:0;padding:9px 11px;border:1px solid var(--spike-line,rgba(255,255,255,.1));border-radius:13px;background:color-mix(in srgb,var(--spike-surface-2,#202638) 80%,transparent);cursor:pointer}
+.spike-studio-sensitive-option>input{width:16px;height:16px;flex:0 0 16px;margin:0;accent-color:var(--spike-accent,#d65ba9)}
+.spike-studio-sensitive-icon{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--spike-accent,#d65ba9) 12%,var(--spike-surface));color:var(--spike-accent,#d65ba9);font-size:12px}
+.spike-studio-sensitive-copy{display:grid;gap:2px;min-width:0;flex:1}
+.spike-studio-sensitive-copy b{color:var(--spike-text,#f5f5fb);font-size:11px;font-weight:850}
+.spike-studio-sensitive-copy small{color:var(--spike-muted,#929bb0);font-size:10px;line-height:1.35}
+.spike-studio-optional{flex:0 0 auto;padding:4px 7px;border:1px solid var(--spike-line,rgba(255,255,255,.12));border-radius:99px;color:var(--spike-muted,#929bb0);font-size:9px;font-weight:750}
+.spike-studio-sensitive-option:has(input:checked){border-color:color-mix(in srgb,var(--spike-accent,#d65ba9) 55%,var(--spike-line));background:color-mix(in srgb,var(--spike-accent,#d65ba9) 7%,var(--spike-surface-2))}
+@media(min-width:520px){.spike-studio-options{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:stretch}.spike-studio-sensitive-option{align-self:stretch}}
+@media(max-width:380px){.spike-studio-audience-control{padding:8px}.spike-studio-audience-choice>span{gap:6px;min-height:36px;padding:6px}.spike-studio-sensitive-option{gap:7px;padding:8px}.spike-studio-sensitive-copy small{font-size:9px}.spike-studio-optional{font-size:8px;padding:3px 6px}}
+.spike-sensitive-warning{display:flex;align-items:center;gap:10px;margin:12px 0;padding:12px;border:1px solid color-mix(in srgb,var(--spike-accent,#d65ba9) 34%,var(--spike-line));border-radius:14px;background:color-mix(in srgb,var(--spike-accent,#d65ba9) 7%,var(--spike-surface-2));color:var(--spike-text)}
+.spike-sensitive-warning[hidden],.spike-sensitive-body[hidden]{display:none!important}
+.spike-sensitive-warning-icon{display:grid;place-items:center;flex:0 0 32px;width:32px;height:32px;border-radius:10px;background:color-mix(in srgb,var(--spike-accent,#d65ba9) 15%,var(--spike-surface));color:var(--spike-accent,#d65ba9);font-size:14px}
+.spike-sensitive-warning-copy{display:grid;gap:3px;min-width:0;flex:1}
+.spike-sensitive-warning-copy b{font-size:11px;font-weight:850}
+.spike-sensitive-warning-copy small{color:var(--spike-muted);font-size:10px;line-height:1.4}
+.spike-sensitive-warning button{flex:0 0 auto;min-height:32px;padding:0 10px;border:1px solid var(--spike-accent);border-radius:9px;background:color-mix(in srgb,var(--spike-accent) 12%,var(--spike-surface));color:var(--spike-text);font-size:10px;font-weight:850;cursor:pointer}
+.spike-sensitive-body{padding-top:2px}
+@media(prefers-reduced-motion:reduce){.spike-studio-audience-choice>span{transition:none}}
+
+.spike-studio-audience-note{display:block;margin:7px 2px 0;color:var(--spike-muted,#929bb0);font-size:9px;line-height:1.4}
+.spike-studio-audience-note[hidden]{display:none!important}

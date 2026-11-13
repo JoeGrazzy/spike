@@ -85,19 +85,6 @@
     if (head) head.prepend(note); else box.prepend(note);
   }
 
-  function setupFeatureCenter() {
-    const hub = $('#spikeFeatureHub');
-    if (!hub) return;
-    const title = $('#spikeFeatureTitle');
-    if (title) title.textContent = 'Explore SPIKE';
-    const sub = $('.spike-feature-head-copy small', hub);
-    if (sub) sub.textContent = 'Powerful tools stay one step away until you need them.';
-    const labels = { overview: 'Explore', feeds: 'Custom Feeds', polls: 'Polls', series: 'Series', collab: 'Collaborate', creator: 'Create', search: 'Search', reputation: 'Grow', resume: 'Resume', dashboard: 'My Space' };
-    $$('.spike-feature-tabs [data-feature-tab]', hub).forEach(btn => {
-      const label = labels[btn.dataset.featureTab];
-      if (label) btn.textContent = label;
-    });
-  }
 
   function setupMenu() {
     const overlay = $('#menuOverlay');
@@ -124,7 +111,6 @@
     setupHeader();
     setupFeedNavigation();
     setupTopPicks();
-    setupFeatureCenter();
     setupMenu();
     setupBottomNav();
   }

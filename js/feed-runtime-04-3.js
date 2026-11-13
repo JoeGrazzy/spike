@@ -6,14 +6,14 @@ function renderDiscover(q=''){
   const ps=state.posts || [];
   const matched=ps.filter(p=>!needle||JSON.stringify(p).toLowerCase().includes(needle)).slice(0,8);
   const tagCounts=new Map();
-  ps.forEach(p=>{(String(p.content||'').match(/#[a-z0-9_]+/ig)||[]).forEach(t=>tagCounts.set(t.toLowerCase(),(tagCounts.get(t.toLowerCase())||0)+1));});
+  ps.filter(p=>p.sensitive!==true&&p.is_sensitive!==true).forEach(p=>{(String(p.content||'').match(/#[a-z0-9_]+/ig)||[]).forEach(t=>tagCounts.set(t.toLowerCase(),(tagCounts.get(t.toLowerCase())||0)+1));});
   let tags=[...tagCounts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
   if(needle)tags=tags.filter(([t])=>t.includes(needle));
   el.innerHTML=`
     <div class="discover-section-title">#️⃣ Topics & communities</div>
     <div class="spike-chip-row">${tags.map(([t,n])=>`<button class="spike-chip" data-discover-tag="${esc(t)}">${esc(t)} <small>(${n})</small></button>`).join('')||'<span class="meta">Hashtags from current posts will appear here.</span>'}</div>
     <div class="discover-section-title">📝 ${needle?'Search results':'Explore posts'}</div>
-    <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc((p.content||'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
+    <div class="discover-list">${matched.map(p=>`<div class="discover-item"><div class="discover-main"><b>${esc(spikeSignalPreview(p,'Untitled').slice(0,100))}</b><small>${reactionLikeCount(p)} likes · ${Array.isArray(p.comments)?p.comments.length:0} comments</small></div></div>`).join('')||'<div class="empty">No matching posts yet.</div>'}</div>`;
 }
 
 // ─── PROFILE PREVIEW ──────────────────────────────────
@@ -79,9 +79,10 @@ async function openSpikeProfilePreview(id, seed){
       <div class="spike-quick-actions"><button type="button" data-pq="pass">SPIKE Pass Signal</button><button type="button" data-pq="copy">🔗 Copy link</button><button type="button" data-pq="mute">🔕 Mute</button><button type="button" data-pq="report">⚑ Report</button></div>
       <div class="spike-profile-actions"><button class="spike-profile-primary" data-profile-primary="${esc(id)}">${esc(rel.primary)}</button><button class="spike-profile-secondary" data-profile-secondary="${esc(id)}">${esc(rel.secondary)}</button><button class="spike-profile-tertiary" data-profile-tertiary="${esc(id)}">${esc(rel.tertiary)}</button></div>
     </div>
-    <section class="spike-profile-section" aria-labelledby="spikeProfileRecentTitle"><div class="spike-profile-section-head"><strong id="spikeProfileRecentTitle">Recent Posts</strong>${posts.length?`<span class="spike-profile-count">${posts.length}</span>`:''}</div><div class="spike-profile-posts">${posts.length?posts.map(p=>{const bodyText=String(p.content||p.text||p.body||'');const media=safeHttpUrl(p.media_url||p.image_url||'');return `<article class="spike-profile-post"><div class="spike-profile-post-time">${esc(ago(p.createdAt||p.created_at))}</div>${bodyText?`<div>${esc(bodyText).slice(0,420)}</div>`:''}${media?`<img class="spike-profile-post-media" src="${esc(media)}" alt="Signal media" loading="lazy" decoding="async">`:''}</article>`}).join(''):'<div class="spike-profile-empty">No public posts yet.</div>'}</div></section>
+    <section class="spike-profile-section" aria-labelledby="spikeProfileRecentTitle"><div class="spike-profile-section-head"><strong id="spikeProfileRecentTitle">Recent Posts</strong>${posts.length?`<span class="spike-profile-count">${posts.length}</span>`:''}</div><div class="spike-profile-posts">${posts.length?posts.map(p=>{const bodyText=String(p.content||p.text||p.body||'');const media=safeHttpUrl(p.mediaUrl||p.media_url||p.image_url||'');return `<article class="spike-profile-post"><div class="spike-profile-post-time">${esc(ago(p.createdAt||p.created_at))}</div>${p.sensitive===true||p.is_sensitive===true?`<div class="spike-profile-sensitive-warning"><b>Sensitive content</b><small>This Signal may contain material some people prefer not to see.</small><button type="button" data-profile-sensitive-reveal>View Signal</button></div><div class="spike-profile-sensitive-body" hidden>${bodyText?`<div>${esc(bodyText).slice(0,420)}</div>`:''}${media?`<img class="spike-profile-post-media" src="${esc(media)}" alt="Signal media" loading="lazy" decoding="async">`:''}</div>`:`${bodyText?`<div>${esc(bodyText).slice(0,420)}</div>`:''}${media?`<img class="spike-profile-post-media" src="${esc(media)}" alt="Signal media" loading="lazy" decoding="async">`:''}`}</article>`}).join(''):'<div class="spike-profile-empty">No public posts yet.</div>'}</div></section>
     <div class="spike-profile-privacy-note"><span aria-hidden="true">🛡️</span><span>Only information allowed by this person’s privacy settings is shown here.</span></div>`;
 
+  body.querySelectorAll('[data-profile-sensitive-reveal]').forEach(btn=>btn.addEventListener('click',()=>{const article=btn.closest('.spike-profile-post');const warning=btn.closest('.spike-profile-sensitive-warning');const content=article?.querySelector('.spike-profile-sensitive-body');if(content&&warning){content.hidden=false;warning.hidden=true;btn.setAttribute('aria-expanded','true')}}));
   body.querySelectorAll('[data-pq]').forEach(btn=>btn.addEventListener('click',async()=>{
     const act=btn.dataset.pq;
     if(act==='share'||act==='copy'){
@@ -241,12 +242,12 @@ function initAISearch(){
       ['Password recovery','Use the password recovery option on the sign-in screen if you forget your password.']
     ];
     help.forEach(x=>docs.push({type:'help',title:x[0],text:x[1],url:null}));
-    posts().slice(0,100).forEach(p=>docs.push({type:'post',title:String(p.content||'Post').slice(0,90),text:String(p.content||''),url:null,raw:p}));
+    posts().filter(p=>p.sensitive!==true&&p.is_sensitive!==true).slice(0,100).forEach(p=>docs.push({type:'post',title:String(p.content||'Post').slice(0,90),text:String(p.content||''),url:null,raw:p}));
     users().slice(0,100).forEach(u=>docs.push({type:'person',title:u.display_name||u.username||u.name||'SPIKE user',text:[u.username,u.bio,u.location].filter(Boolean).join(' '),url:profileLink(u.id),raw:u}));
     return docs;
   };
   function score(q,doc){ const qs=clean(q), text=(doc.title+' '+doc.text).toLowerCase(), title=doc.title.toLowerCase(); let n=0; qs.forEach(w=>{if(title.includes(w))n+=5; if(text.includes(w))n+=2;}); return n; }
-  function answer(q,results){ const l=q.toLowerCase(); if(/video.*call|call.*video/.test(l))return 'To make a video call, open an eligible private conversation and choose the video-call option.'; if(/audio.*call|call.*audio/.test(l))return 'To make an audio call, open an eligible private conversation and choose the audio-call option.'; if(/create|make|post|publish|story|stories/.test(l))return 'Create a public Signal from Home using Share a Signal. Signal Studio supports text, one photo or video, accessible media descriptions, and a sensitive-content heads-up. Stories are not available.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
+  function answer(q,results){ const l=q.toLowerCase(); if(/video.*call|call.*video/.test(l))return 'To make a video call, open an eligible private conversation and choose the video-call option.'; if(/audio.*call|call.*audio/.test(l))return 'To make an audio call, open an eligible private conversation and choose the audio-call option.'; if(/create|make|post|publish|story|stories/.test(l))return 'Create a Signal from Home using Your thought. Choose Public or Friends, attach one photo or video if you like, and optionally add a sensitive-content warning. Stories are not available.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
   function run(q){ q=q.trim(); if(!q)return; const docs=corpus().map(d=>({...d,_score:score(q,d)})).filter(d=>d._score>0).sort((a,b)=>b._score-a._score).slice(0,8); const ans=answer(q,docs); body.innerHTML=`<div class="spike-ai-answer"><div class="spike-ai-answer-label">✦ Local answer</div><p>${esc(ans)}</p></div><div class="spike-ai-related-title">Related results</div><div class="spike-ai-results">${docs.length?docs.slice(0,6).map((d,i)=>`<div class="spike-ai-result" data-url="${esc(d.url||'')}"><b>${esc(d.title)}</b><small>${esc((d.text||'').slice(0,180))}${(d.text||'').length>180?'…':''}</small></div>`).join(''):'<div class="spike-ai-empty">No matching SPIKE content found.</div>'}</div>`; }
   function openAI(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); setTimeout(()=>input.focus(),30); }
   function closeAI(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
@@ -386,7 +387,6 @@ function bindEvents() {
       button.classList.toggle('active', button === target);
     });
     if (tab === 'trending') renderTrending();
-    if (tab === 'analytics') renderAnalytics();
     if (tab === 'gamify') renderGamify();
     if (tab === 'reels') renderReels();
     if (tab === 'discover') renderDiscover(document.getElementById('v2DiscoverSearch')?.value || '');
@@ -424,21 +424,13 @@ function bindEvents() {
     overlay.setAttribute('aria-hidden', 'false');
     window.setTimeout(() => $('logoutCancel')?.focus(), 0);
   };
+  try { localStorage.removeItem('spike-feature-center-v1'); localStorage.removeItem('spike-feature-suite-v1'); } catch {}
   const menuActions = {
     'ask-spike': openAskSpike,
     theme: () => {
       closeFeedMenu();
       if (window.SPIKE_THEME?.next) window.SPIKE_THEME.next();
       else toast('Theme controls are still loading. Please try again in a moment.', 'warning');
-    },
-    pulse: () => {
-      closeFeedMenu();
-      if (typeof window.SPIKE_OPEN_PULSE === 'function') window.SPIKE_OPEN_PULSE();
-      else {
-        const hub = document.getElementById('spikeFeatureHub');
-        if (hub) { hub.hidden = false; hub.classList.add('open'); hub.setAttribute('aria-hidden', 'false'); document.body.classList.add('spike-feature-open'); }
-        else toast('My Pulse is unavailable right now. Please reload and try again.', 'error');
-      }
     },
     saved: async () => { closeFeedMenu(); await openSavedCollections(); },
     audience: async () => { closeFeedMenu(); await openCloseFriends(); },
@@ -609,7 +601,6 @@ function bindEvents() {
     document.querySelectorAll('[data-v2-panel]').forEach(x => x.classList.toggle('open', x.dataset.v2Panel === b.dataset.v2));
     document.querySelectorAll('[data-v2]').forEach(x => x.classList.toggle('active', x === b));
     if (b.dataset.v2 === 'trending') renderTrending();
-    if (b.dataset.v2 === 'analytics') renderAnalytics();
     if (b.dataset.v2 === 'gamify') renderGamify();
     if (b.dataset.v2 === 'reels') renderReels();
     if (b.dataset.v2 === 'discover') setTimeout(() => renderDiscover($('v2DiscoverSearch')?.value||''), 0);
@@ -633,7 +624,20 @@ function bindEvents() {
   $('spikePassClose')?.addEventListener('click', () => closeOverlay('spikePassOverlay'));
   document.querySelectorAll('[data-pass-mode]').forEach(b => b.addEventListener('click', async () => { document.querySelectorAll('[data-pass-mode]').forEach(x=>x.classList.toggle('active',x===b)); const p=state.posts.find(x=>x.id===state.activePost); if(!p)return; if(b.dataset.passMode==='friends'){await spikeLoadPassFriends();spikePassSelected=new Set();spikePassRender();}else spikePassRenderLink(spikePassUrl(p.id)); }));
 
-  // Reels
+  // Reels: only the currently visible full-screen item requests video data.
+  let reelsFullObserver=null;
+  const stopFullReels=()=>{
+    reelsFullObserver?.disconnect();reelsFullObserver=null;
+    $('reelsFullList')?.querySelectorAll('video').forEach(v=>v.pause());
+  };
+  const activateFullReel=v=>{
+    if(!v)return;
+    if(!v.getAttribute('src')){
+      const source=safeHttpUrl(v.dataset.reelSrc||'');
+      if(source){v.preload='metadata';v.src=source;v.load();}
+    }
+    if(v.getAttribute('src'))v.play().catch(()=>{});
+  };
   document.addEventListener('click', e => {
     const b = e.target.closest('[data-open-reel]');
     if (!b) return;
@@ -645,10 +649,23 @@ function bindEvents() {
       const items = Array.isArray(x.mediaItems) && x.mediaItems.length ? x.mediaItems : [{url:x.mediaUrl,type:x.mediaType||'image',originalUrl:x.mediaOriginalUrl}];
       return items.some(m => mediaKindOf(m)==='video');
     }),'forYou').slice(0,10);
-    $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video src="${esc(signalVideoPlaybackUrl({url:x.mediaUrl,playbackUrl:x.mediaUrl,watermarked:!!x.mediaWatermarked,normalized:!!x.mediaNormalized}))}" controls autoplay muted playsinline loop style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${videoWatermarkForSignal({watermarked:!!x.mediaWatermarked},x)}</div>`).join('');
+    stopFullReels();
+    $('reelsFullList').innerHTML = list.map(x => `<div style="position:relative;min-height:100%;display:grid;place-items:center;padding:24px 8px;scroll-snap-align:start"><video data-reel-src="${esc(signalVideoPlaybackUrl({url:x.mediaUrl,playbackUrl:x.mediaUrl,watermarked:!!x.mediaWatermarked,normalized:!!x.mediaNormalized}))}" controls muted playsinline loop preload="none" style="width:min(100%,520px);max-height:88vh;border-radius:16px;background:#000"></video>${videoWatermarkForSignal({watermarked:!!x.mediaWatermarked},x)}</div>`).join('');
     openOverlay('reelsShell');
+    const container=$('reelsFullList'),videos=container.querySelectorAll('video[data-reel-src]');
+    if('IntersectionObserver'in window){
+      reelsFullObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+        const v=entry.target;
+        if(entry.isIntersecting&&entry.intersectionRatio>=.6){activateFullReel(v);}
+        else v.pause();
+      }),{root:container,threshold:[0,.6,1]});
+      videos.forEach(v=>reelsFullObserver.observe(v));
+    }else if(videos.length){
+      // Legacy fallback: load only the first item rather than all ten at once.
+      activateFullReel(videos[0]);
+    }
   }, true);
-  bindClick('reelsClose', () => closeOverlay('reelsShell'));
+  bindClick('reelsClose', () => {stopFullReels();closeOverlay('reelsShell')});
 
   // Signal reading controls
   $('posts')?.addEventListener('click', e => {
@@ -814,6 +831,9 @@ function renderFeedImageViewer(){
   if(counter) counter.textContent=`${feedImageViewerIndex+1} / ${feedImageViewerItems.length}`;
   if(prev) prev.disabled=feedImageViewerIndex<=0;
   if(next) next.disabled=feedImageViewerIndex>=feedImageViewerItems.length-1;
+  img.loading='eager';
+  img.decoding='async';
+  img.fetchPriority='high';
   img.onload=()=>{load.hidden=true; img.hidden=false;};
   img.onerror=()=>{load.hidden=true; err.classList.add('show');};
   img.src=item.url;
@@ -1006,7 +1026,6 @@ function openSignalMoreMenu(p,anchor){
   menu.className='spike-signal-more-menu';
   menu.setAttribute('role','menu');
   const items=owner ? [
-    ['insights','Insights','View activity for this Signal','◉'],
     ['delete','Delete Signal','Remove your Signal from SPIKE','×']
   ] : [
     ['not_interested','Not interested','Show fewer Signals like this','−'],
@@ -1023,11 +1042,6 @@ function openSignalMoreMenu(p,anchor){
     const action=b.dataset.moreAction;
     closeSignalMoreMenu();
     if(owner){
-      if(action==='insights'){
-        const article=getSignalArticle(p.id), panel=article?.querySelector('.owner-insights');
-        if(panel){panel.hidden=!panel.hidden; panel.classList.toggle('is-open',!panel.hidden);}
-        return;
-      }
       if(action==='delete'){await deleteSignal(p.id);return;}
     } else {
       const fake=document.createElement('button'); fake.dataset.feedback=action;
@@ -1059,7 +1073,7 @@ async function applySignalFeedback(p,k,b=null){
 function handleSignalClick(e) {
   const b = e.target.closest('button');
   if (!b) return;
-  const id = b.dataset.like || b.dataset.comments || b.dataset.share || b.dataset.save || b.dataset.pass || b.dataset.more || b.dataset.reactMenu || b.dataset.insights || b.dataset.video || b.dataset.replyTo || b.dataset.image;
+  const id = b.dataset.like || b.dataset.comments || b.dataset.share || b.dataset.save || b.dataset.pass || b.dataset.more || b.dataset.reactMenu || b.dataset.video || b.dataset.replyTo || b.dataset.image;
   if (!id || b.dataset.busy === '1') return;
   if (b.dataset.longpressFired === '1') { delete b.dataset.longpressFired; e.preventDefault(); return; }
   const lock = () => { b.dataset.busy = '1'; b.disabled = true; };
@@ -1068,7 +1082,6 @@ function handleSignalClick(e) {
   if (b.dataset.save) { lock(); return toggleSave(id).then(() => { recordSignal(id, 'saves', state.saved.has(id) ? 1 : -1); scheduleSignalRefresh({ render: false }); }).catch(x => toast(x?.message || 'Could not update saved post','error')).finally(unlock); }
   if (b.dataset.comments) { recordSignal(id, 'opens', 1); window.SPIKEComments?.toggle(id); scheduleSignalRefresh({ render: false }); return; }
   if (b.dataset.share) { state.activePost=id; openPostShare(id); return; }
-  if (b.dataset.insights) { const panel = $(`insights-${id}`); if(panel){ const opening=panel.hidden; panel.hidden=!opening; b.textContent=opening?'📊 Hide insights':'📊 Insights'; } return; }
   if (b.dataset.pass) { lock(); return Promise.resolve(passSignal(id)).catch(x => toast(x?.message || 'Could not open Pass','error')).finally(unlock); }
   if (b.dataset.more) { state.activePost = id; const p = state.posts.find(x => x.id === id); if (p) openSignalMoreMenu(p, b); return; }
   if (b.dataset.reactMenu) {

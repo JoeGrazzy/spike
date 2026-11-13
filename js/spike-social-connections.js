@@ -11,9 +11,14 @@
     pageSize: 30
   };
   const params = new URLSearchParams(location.search);
-  const kind = document.body.dataset.socialKind;
+  // One canonical list renderer serves followers, following and mutual connections.
+  // Query-string kind wins so legacy routes can forward without duplicating page code.
+  const requestedKind = new URLSearchParams(location.search).get('kind');
+  const kind = ['followers', 'following', 'mutuals'].includes(requestedKind)
+    ? requestedKind
+    : document.body.dataset.socialKind;
   const ownerId = params.get('uid') || '';
-  const validKinds = new Set(['followers', 'following']);
+  const validKinds = new Set(['followers', 'following', 'mutuals']);
   const $ = id => document.getElementById(id);
   const state = {
     db: null, me: null, offset: 0, loading: false, request: 0,
@@ -334,7 +339,7 @@
     document.title = `${titles[kind]} · SPIKE`;
     const mutualLink = $('mutualLink');
     if (mutualLink && !state.ownerIsMe && kind !== 'mutuals') {
-      mutualLink.href = `mutuals.html?uid=${encodeURIComponent(ownerId)}`;
+      mutualLink.href = `followers.html?kind=mutuals&uid=${encodeURIComponent(ownerId)}`;
     }
     if (kind === 'mutuals' && state.ownerIsMe) {
       setStatus('Mutual connections are available when viewing another member profile.', 'error');

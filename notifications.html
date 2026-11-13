@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b10">
@@ -366,19 +368,36 @@ body {
 
 .notification {
   position: relative;
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
+  display: block;
   width: 100%;
-  padding: 14px 14px 14px 16px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: var(--card-radius);
   background: var(--surface);
   color: inherit;
   text-align: left;
-  cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.12s ease;
   overflow: hidden;
+}
+
+.notification-open {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
+  padding: 14px 14px 14px 16px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.notification-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
 }
 
 .notification::before {
@@ -415,7 +434,7 @@ body {
 .notification.priority-success::before { background: var(--success); }
 
 .notification:active {
-  transform: scale(0.985);
+  transform: scale(0.99);
 }
 
 .notif-avatar {
@@ -517,8 +536,9 @@ body {
 /* Inline actions for friend requests / invites */
 .notif-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  margin-top: 8px;
+  margin: 0 14px 14px 72px;
 }
 
 .notif-actions .btn {
@@ -827,12 +847,12 @@ html body #spikeBottomNav.spike-bottom-nav>button:focus-visible{outline:2px soli
 
     <!-- Filters + Search -->
     <div class="toolbar">
-      <div class="seg" role="tablist" aria-label="Notification filters">
-        <button class="seg-btn active" id="tabAll" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
-        <button class="seg-btn" id="tabUnread" type="button" role="tab" aria-selected="false" data-filter="unread">Unread</button>
-        <button class="seg-btn" id="tabMentions" type="button" role="tab" aria-selected="false" data-filter="mentions">Mentions</button>
-        <button class="seg-btn" id="tabAnnouncements" type="button" role="tab" aria-selected="false" data-filter="announcements">Announce</button>
-        <button class="seg-btn" id="tabSystem" type="button" role="tab" aria-selected="false" data-filter="system">System</button>
+      <div class="seg" role="group" aria-label="Filter notifications">
+        <button class="seg-btn active" id="tabAll" type="button" aria-pressed="true" data-filter="all">All</button>
+        <button class="seg-btn" id="tabUnread" type="button" aria-pressed="false" data-filter="unread">Unread</button>
+        <button class="seg-btn" id="tabMentions" type="button" aria-pressed="false" data-filter="mentions">Mentions</button>
+        <button class="seg-btn" id="tabAnnouncements" type="button" aria-pressed="false" data-filter="announcements">Announce</button>
+        <button class="seg-btn" id="tabSystem" type="button" aria-pressed="false" data-filter="system">System</button>
       </div>
       <label class="search-wrap">
         <span aria-hidden="true">⌕</span>
@@ -919,6 +939,7 @@ let bc = null;
 let authReady = false;
 let authRecoveryInProgress = false;
 let authListenerBound = false;
+let notificationModalReturnFocus = null;
 
 const PROJECT_REF = new URL(SUPABASE_URL).hostname.split(".")[0];
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -978,7 +999,6 @@ function titleOf(n) {
     message_deleted: "Message deleted",
     mention_reply: "Mention reply",
     spike_policy_content_removed: "Your Signal was removed",
-    spike_policy_appeal_decision: "SPIKE Policy appeal decision",
     spike_policy_case_update: "SPIKE Policy case updated"
   };
   return map[t] || String(n.type || "Notification").replaceAll("_", " ").replace(/\b\w/g, c => c.toUpperCase());
@@ -995,7 +1015,6 @@ function notificationText(n) {
   const t = String(n.type || "").toLowerCase();
   const map = {
     spike_policy_content_removed: "SPIKE removed your content under the Prohibited Content Policy",
-    spike_policy_appeal_decision: "SPIKE updated your Policy appeal",
     spike_policy_case_update: "SPIKE updated your Policy case",
     friend_request: "sent you a friend request",
     friend_accepted: "accepted your friend request",
@@ -1115,7 +1134,7 @@ function notificationHref(n) {
   const explicit = firstValue(d, ["url", "href", "link", "activity_url", "deep_link"]);
   const sourceRaw = d.source_page || d.sourcePage || d.page || d.route || "";
 
-  if (/^spike_policy_/.test(t)) return "policy_appeals.html";
+  if (/^spike_policy_/.test(t)) return "policy.html";
 
   const sameOriginUrl = (raw) => {
     try {
@@ -1169,6 +1188,7 @@ function render() {
   $("#unreadCount").textContent = unread > 99 ? "99+" : String(unread);
   $("#markAll").disabled = !unread;
   $("#clearAll") && ($("#clearAll").disabled = !rows.length);
+  $("#deleteRead") && ($("#deleteRead").disabled = !rows.some(n => !!n.read));
   $("#statusSub").textContent = unread
     ? `${unread} need${unread === 1 ? "s" : ""} your attention`
     : rows.length ? "You're all caught up" : "Activity from people on SPIKE";
@@ -1240,7 +1260,7 @@ function renderCard(n) {
     const label = actor || profile.display_name || profile.username || "User";
     if (url) {
       // Prefer real photo directly (works for http(s), protocol-relative, and storage paths)
-      avatarHtml = `<img class="spike-avatar" src="${esc(url)}" alt="${esc(label)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';if(window.SPIKE_IDENTITY){const f=window.SPIKE_IDENTITY.avatarMarkup({id:'${esc(String(profile.id||""))}',display_name:'${esc(label)}',gender:'${esc(String(profile.gender||""))}'},'spike-avatar','${esc(label)}');this.insertAdjacentHTML('afterend',f);}">`;
+      avatarHtml = `<img class="spike-avatar" src="${esc(url)}" alt="${esc(label)}" loading="lazy" decoding="async" data-spike-avatar-fallback data-avatar-user-id="${esc(String(profile.id || ""))}" data-avatar-label="${esc(label)}" data-avatar-gender="${esc(String(profile.gender || ""))}">`;
     } else if (window.SPIKE_IDENTITY?.avatarMarkup) {
       avatarHtml = window.SPIKE_IDENTITY.avatarMarkup(
         { ...profile, avatar_url: url || undefined },
@@ -1264,21 +1284,23 @@ function renderCard(n) {
   if (n.group_count > 1) smartChips.push(`<span class="notif-chip">+${esc(n.group_count - 1)} more</span>`);
 
   return `
-    <button class="notification ${n.read ? "" : "unread"} ${pClass}" data-id="${esc(n.id)}" type="button" aria-label="View notification">
-      <span class="notif-avatar">${avatarHtml}</span>
-      <span class="notif-body">
-        <span class="notif-title">${esc(titleOf(n))}</span>
-        <span class="notif-preview">${esc(notificationText(n))}</span>
-        ${preview && preview !== notificationText(n) ? `<span class="notif-preview">${esc(preview)}</span>` : ""}
-        <span class="notif-meta">
-          <span class="notif-time">${esc(formatTime(n.created_at))}</span>
-          ${actor ? `<span class="notif-chip">${esc(actor)}</span>` : ""}
-          ${smartChips.join("")}
+    <article class="notification ${n.read ? "" : "unread"} ${pClass}" data-id="${esc(n.id)}">
+      <button class="notification-open" type="button" aria-label="View ${esc(titleOf(n))}">
+        <span class="notif-avatar">${avatarHtml}</span>
+        <span class="notif-body">
+          <span class="notif-title">${esc(titleOf(n))}</span>
+          <span class="notif-preview">${esc(notificationText(n))}</span>
+          ${preview && preview !== notificationText(n) ? `<span class="notif-preview">${esc(preview)}</span>` : ""}
+          <span class="notif-meta">
+            <span class="notif-time">${esc(formatTime(n.created_at))}</span>
+            ${actor ? `<span class="notif-chip">${esc(actor)}</span>` : ""}
+            ${smartChips.join("")}
+          </span>
         </span>
-        ${actionsHtml}
-      </span>
-      ${n.read ? "" : `<span class="notif-new">NEW</span>`}
-    </button>`;
+        ${n.read ? "" : `<span class="notif-new">NEW</span>`}
+      </button>
+      ${actionsHtml}
+    </article>`;
 }
 
 /* ── Data / Network ──────────────────────────────────────── */
@@ -1354,7 +1376,7 @@ async function hydrateNotificationActors(list) {
 }
 
 async function markRead(id) {
-  const r = await sb.rpc("mark_notification_read", { p_id: id });
+  const r = await sb.rpc("mark_notification_read", { p_notification_id: id });
   if (r.error) throw r.error;
   const row = rows.find(n => String(n.id) === String(id));
   if (row) row.read = true;
@@ -1362,31 +1384,54 @@ async function markRead(id) {
 }
 
 async function markAll() {
-  const r = await withTimeout(sb.rpc("mark_all_notifications_read"), 10000, "Could not mark all as read.");
-  if (r.error) throw r.error;
-  rows.forEach(n => { n.read = true; });
-  render();
-  window.spikePremiumToast?.("All marked as read", "success", 2200);
+  const button = $("#markAll");
+  if (!rows.some(n => !n.read) || button?.dataset.busy === "1") return;
+  if (button) { button.dataset.busy = "1"; button.disabled = true; button.setAttribute("aria-busy", "true"); }
+  try {
+    const r = await withTimeout(sb.rpc("mark_all_notifications_read"), 10000, "Could not mark all as read.");
+    if (r.error) throw r.error;
+    rows.forEach(n => { n.read = true; });
+    render();
+    window.spikePremiumToast?.("All marked as read", "success", 2200);
+  } finally {
+    if (button) { delete button.dataset.busy; button.removeAttribute("aria-busy"); button.disabled = !rows.some(n => !n.read); }
+  }
 }
 
 async function clearAllNotifications() {
-  const ok = await window.SPIKEPremiumDialog.confirm({title:"Clear all notifications?",message:"This removes them from your list.",confirmText:"Clear notifications",cancelText:"Keep notifications",danger:true,kicker:"SPIKE NOTIFICATIONS"});
-  if (!ok) return;
-  const r = await withTimeout(sb.rpc("clear_all_notifications"), 10000, "Could not clear.");
-  if (r.error) throw r.error;
-  rows = [];
-  render();
-  window.spikePremiumToast?.("Notifications cleared", "success", 2200);
+  const button = $("#clearAll");
+  if (!rows.length || button?.dataset.busy === "1") return;
+  if (button) { button.dataset.busy = "1"; button.disabled = true; button.setAttribute("aria-busy", "true"); }
+  try {
+    const ok = await window.SPIKEPremiumDialog.confirm({title:"Clear all notifications?",message:"This removes every notification from your list. This cannot be undone.",confirmText:"Clear notifications",cancelText:"Keep notifications",danger:true,kicker:"SPIKE NOTIFICATIONS"});
+    if (!ok) return;
+    const r = await withTimeout(sb.rpc("clear_notifications"), 10000, "Could not clear notifications.");
+    if (r.error) throw r.error;
+    const deletedCount = Number(r.data || 0);
+    rows = [];
+    render();
+    window.spikePremiumToast?.(deletedCount ? `${deletedCount.toLocaleString()} notifications cleared` : "Notifications cleared", "success", 2200);
+  } finally {
+    if (button) { delete button.dataset.busy; button.removeAttribute("aria-busy"); button.disabled = !rows.length; }
+  }
 }
 
 async function deleteReadNotifications() {
-  const ok = await window.SPIKEPremiumDialog.confirm({title:"Delete all read notifications?",message:"Unread items will stay.",confirmText:"Delete read items",cancelText:"Keep them",danger:true,kicker:"SPIKE NOTIFICATIONS"});
-  if (!ok) return;
-  const r = await withTimeout(sb.rpc("delete_read_notifications"), 10000, "Could not delete read items.");
-  if (r.error) throw r.error;
-  rows = rows.filter(n => !n.read);
-  render();
-  window.spikePremiumToast?.("Read items removed", "success", 2200);
+  const button = $("#deleteRead");
+  if (!rows.some(n => !!n.read) || button?.dataset.busy === "1") return;
+  if (button) { button.dataset.busy = "1"; button.disabled = true; button.setAttribute("aria-busy", "true"); }
+  try {
+    const ok = await window.SPIKEPremiumDialog.confirm({title:"Delete all read notifications?",message:"Only notifications you have already read will be removed. Unread items will stay.",confirmText:"Delete read items",cancelText:"Keep them",danger:true,kicker:"SPIKE NOTIFICATIONS"});
+    if (!ok) return;
+    const r = await withTimeout(sb.rpc("delete_read_notifications"), 10000, "Could not delete read items.");
+    if (r.error) throw r.error;
+    const deletedCount = Number(r.data || 0);
+    rows = rows.filter(n => !n.read);
+    render();
+    window.spikePremiumToast?.(deletedCount ? `${deletedCount.toLocaleString()} read notifications removed` : "Read items removed", "success", 2200);
+  } finally {
+    if (button) { delete button.dataset.busy; button.removeAttribute("aria-busy"); button.disabled = !rows.some(n => !!n.read); }
+  }
 }
 
 function upsertRow(n) {
@@ -1622,12 +1667,21 @@ function openNotificationDetails(n) {
     </div>`;
   }
   $("#notificationModalBody").innerHTML = html;
+  notificationModalReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   modal.setAttribute("aria-hidden", "false");
-  if (!n.read) markRead(n.id).catch(() => {});
+  $("#notificationModalClose")?.focus();
+  if (!n.read) markRead(n.id).catch(e => {
+    console.error("SPIKE could not mark notification read:", e);
+    window.spikePremiumToast?.(e?.message || "Could not mark this notification as read.", "error", 4200);
+  });
 }
 
 function closeNotificationDetails() {
-  $("#notificationModal").setAttribute("aria-hidden", "true");
+  const modal = $("#notificationModal");
+  if (!modal || modal.getAttribute("aria-hidden") === "true") return;
+  modal.setAttribute("aria-hidden", "true");
+  if (notificationModalReturnFocus?.isConnected) notificationModalReturnFocus.focus();
+  notificationModalReturnFocus = null;
 }
 
 /* ── Event wiring ────────────────────────────────────────── */
@@ -1682,19 +1736,36 @@ $("#refreshBtn").onclick = async () => {
   }
 };
 
-// Filter tabs
+// Notification filter buttons
 document.querySelectorAll(".seg-btn").forEach(btn => {
   btn.addEventListener("click", () => {
     document.querySelectorAll(".seg-btn").forEach(b => {
       b.classList.remove("active");
-      b.setAttribute("aria-selected", "false");
+      b.setAttribute("aria-pressed", "false");
     });
     btn.classList.add("active");
-    btn.setAttribute("aria-selected", "true");
+    btn.setAttribute("aria-pressed", "true");
     notificationFilter = btn.dataset.filter || "all";
     render();
   });
 });
+
+// Avatar fallback is delegated so untrusted profile names never enter inline JavaScript.
+$("#notificationList").addEventListener("error", e => {
+  const img = e.target.closest?.("img[data-spike-avatar-fallback]");
+  if (!img || img.dataset.fallbackApplied) return;
+  img.dataset.fallbackApplied = "1";
+  img.style.display = "none";
+  if (window.SPIKE_IDENTITY?.avatarMarkup) {
+    const label = img.dataset.avatarLabel || "User";
+    const fallback = window.SPIKE_IDENTITY.avatarMarkup({
+      id: img.dataset.avatarUserId || undefined,
+      display_name: label,
+      gender: img.dataset.avatarGender || undefined
+    }, "spike-avatar", label);
+    if (fallback) img.insertAdjacentHTML("afterend", fallback);
+  }
+}, true);
 
 // Card clicks + inline actions (delegation)
 $("#notificationList").addEventListener("click", async e => {
@@ -1712,8 +1783,19 @@ $("#notificationList").addEventListener("click", async e => {
         actionBtn.disabled = true;
         const rpc = action === "accept-friend" ? "accept_friend_request" : "decline_friend_request";
         const d = dataOf(n);
-        const reqId = d.request_id || d.friend_request_id || d.requestId || actorIdOf(n);
-        const r = await withTimeout(sb.rpc(rpc, { p_request_id: reqId }), 10000, "Action failed.");
+        const rawRequestId = firstValue(d, ["request_id", "friend_request_id", "requestId"]);
+        const requestId = UUID_RE.test(rawRequestId) ? rawRequestId : null;
+        const senderId = actorIdOf(n) || firstValue(d, ["sender_id", "from_user_id", "actor_id"]);
+        if (action === "accept-friend" && !requestId) {
+          throw new Error("This friend request is missing its request ID. Refresh notifications and try again.");
+        }
+        if (action === "decline-friend" && !requestId && !UUID_RE.test(senderId)) {
+          throw new Error("This friend request is missing its sender details. Refresh notifications and try again.");
+        }
+        const args = action === "accept-friend"
+          ? { p_request_id: requestId }
+          : { p_request_id: requestId, p_sender_id: UUID_RE.test(senderId) ? senderId : null };
+        const r = await withTimeout(sb.rpc(rpc, args), 10000, "Action failed.");
         if (r.error) throw r.error;
         await markRead(id);
         window.spikePremiumToast?.(action === "accept-friend" ? "Friend request accepted" : "Request declined", "success", 2400);
@@ -1728,7 +1810,9 @@ $("#notificationList").addEventListener("click", async e => {
 
   }
 
-  const card = e.target.closest(".notification");
+  const openButton = e.target.closest(".notification-open");
+  if (!openButton) return;
+  const card = openButton.closest(".notification");
   if (!card) return;
   const id = card.dataset.id;
   const n = rows.find(x => String(x.id) === String(id));
@@ -1736,7 +1820,10 @@ $("#notificationList").addEventListener("click", async e => {
 
   const href = notificationHref(n);
   if (href && !e.metaKey && !e.ctrlKey) {
-    if (!n.read) markRead(n.id).catch(() => {});
+    if (!n.read) markRead(n.id).catch(e => {
+      console.error("SPIKE could not mark notification read:", e);
+      window.spikePremiumToast?.(e?.message || "Could not mark this notification as read.", "error", 4200);
+    });
     location.href = href;
     return;
   }
@@ -1746,6 +1833,26 @@ $("#notificationList").addEventListener("click", async e => {
 $("#notificationModalClose")?.addEventListener("click", closeNotificationDetails);
 $("#notificationModal")?.addEventListener("click", e => {
   if (e.target === $("#notificationModal")) closeNotificationDetails();
+});
+$("#notificationModal")?.addEventListener("keydown", e => {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeNotificationDetails();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  const modal = $("#notificationModal");
+  const focusable = [...modal.querySelectorAll('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])')];
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && (document.activeElement === first || !modal.contains(document.activeElement))) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
 });
 
 // Scroll awareness for silent refresh

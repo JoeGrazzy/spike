@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
 <link rel="stylesheet" href="css/perf.css">
 <script id="spike-performance-bootstrap">
 /* SPIKE performance bootstrap — no application logic changes */
@@ -14,10 +18,6 @@ document.documentElement.classList.add("spike-cv-ready");
 </script>
 <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="4"){if(prior!==null){if(n<1||n>3)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"4");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="4";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-<link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Friends</title>
@@ -36,17 +36,6 @@ height: 100vh;
 overflow: hidden;
 display: flex;
 flex-direction: column;
-}
-/* ── scrollbar ── */
-::-webkit-scrollbar {
-width: 3px;
-}
-::-webkit-scrollbar-track {
-background: transparent;
-}
-::-webkit-scrollbar-thumb {
-background: rgba(233, 69, 96, 0.4);
-border-radius: 10px;
 }
 /* ── header ── */
 .header {
@@ -74,7 +63,6 @@ gap: 16px;
 }
 .header-actions button {
 background: rgba(255, 255, 255, 0.06);
-border: none;
 color: #ccc;
 width: 38px;
 height: 38px;
@@ -185,7 +173,7 @@ background: rgba(255, 255, 255, 0.07);
 .search-wrap .icon {
 position: relative;
 }
-.search-wrap .icon i {
+.search-wrap .icon button{border:0;background:transparent;color:inherit;padding:6px;cursor:pointer}.search-wrap .icon button[hidden]{display:none}.search-wrap .icon i {
 position: absolute;
 left: 16px;
 top: 50%;
@@ -391,7 +379,7 @@ background: rgba(255, 255, 255, 0.08);
 color: #fff;
 }
 /* ── suggestion card ── */
-.network-recommendation-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:9px;border-radius:17px;background:linear-gradient(135deg,rgba(233,69,96,.09),rgba(255,255,255,.025));border:1px solid rgba(233,69,96,.12);box-shadow:0 8px 28px rgba(0,0,0,.12);transition:transform .2s,border-color .2s,background .2s}.network-recommendation-card:hover{transform:translateY(-1px);border-color:rgba(233,69,96,.24);background:linear-gradient(135deg,rgba(233,69,96,.12),rgba(255,255,255,.04))}.network-recommendation-card .network-reason{margin-top:3px;font-size:10px;color:rgba(255,255,255,.42);display:flex;align-items:center;gap:5px}.network-recommendation-card .network-reason i{font-size:9px;color:#e94560}.network-score{position:absolute;top:9px;right:9px;font-size:9px;font-weight:800;letter-spacing:.4px;color:rgba(255,255,255,.28);text-transform:uppercase}.network-recommendation-card .friend-info{min-width:0;flex:1;padding-right:38px}.network-recommendation-card .request-btn{flex-shrink:0}
+.network-recommendation-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:9px;border-radius:17px;background:linear-gradient(135deg,rgba(233,69,96,.09),rgba(255,255,255,.025));border:1px solid rgba(233,69,96,.12);box-shadow:0 8px 28px rgba(0,0,0,.12);transition:transform .2s,border-color .2s,background .2s}.network-recommendation-card:hover{transform:translateY(-1px);border-color:rgba(233,69,96,.24);background:linear-gradient(135deg,rgba(233,69,96,.12),rgba(255,255,255,.04))}.network-recommendation-card .network-reason{margin-top:3px;font-size:10px;color:rgba(255,255,255,.42);display:flex;align-items:center;gap:5px}.network-recommendation-card .network-reason i{font-size:9px;color:#e94560}.network-recommendation-card .friend-info{min-width:0;flex:1}.network-recommendation-card .request-btn{flex-shrink:0}
 .suggestion-card {
 display: flex;
 align-items: center;
@@ -604,7 +592,6 @@ img[loading="lazy"],video[preload="none"]{content-visibility:auto}
 <style id="spike-performance-layer">
 /* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
 .spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
-img,video{max-width:100%}
 video{contain:layout paint}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
 @media (hover:none){button,.btn,a{touch-action:manipulation}}
@@ -673,6 +660,27 @@ video{contain:layout paint}
 
 <script src="js/spike-empty-state.js" defer></script>
 <script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+
+<style id="friends-page-quality-fix">
+/* Keep Friends readable in every SPIKE theme and compact on touch screens. */
+.friend-info .name{color:var(--sp-text,#172033)!important}
+.friend-info .sub,.request-card .friend-info .sub,.network-recommendation-card .network-reason{color:var(--sp-muted,#667085)!important}
+.friend-info .sub i{color:var(--sp-muted,#667085)!important}
+.network-recommendation-card{background:linear-gradient(135deg,rgba(233,69,96,.07),transparent),var(--sp-surface,rgba(255,255,255,.88))!important;border-color:var(--sp-line,rgba(17,24,39,.10))!important;box-shadow:var(--sp-shadow-soft,0 8px 28px rgba(31,41,55,.07))!important}
+.network-recommendation-card:hover{border-color:color-mix(in srgb,var(--sp-accent,#7c3aed) 28%,var(--sp-line,rgba(17,24,39,.10)))!important}
+.friend-info .name .mutual{color:var(--sp-muted,#667085)!important;background:var(--sp-surface-2,rgba(17,24,39,.06))!important}
+.friend-avatar.spike-presence-target::after{display:none!important}
+.friend-avatar .status-dot{border-color:var(--sp-surface-solid,#fff)!important}
+.tabs{background:var(--sp-bg,#f6f7fb)!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;min-width:max-content;padding-left:13px;padding-right:13px;white-space:nowrap;scroll-snap-align:start;color:var(--sp-muted,#667085)}
+.tab.active{color:var(--sp-text,#172033)!important;background:var(--sp-surface-2,rgba(124,58,237,.10))!important}
+.search-wrap .icon>i{left:16px}
+.search-wrap .icon button{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:2}
+.search-wrap input{padding-right:42px}
+@media(max-width:420px){.tabs{padding-left:8px;padding-right:8px;overflow-x:hidden}.tab{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px;font-size:10px;letter-spacing:0}.tab .count{padding-left:3px;padding-right:3px;margin-left:1px;font-size:8.5px}}
+</style>
+<link rel="stylesheet" href="css/friends-page-polish.css?v=20261113-1">
 </head>
 <body data-spike-page="friends">
 <header class="header">
@@ -683,20 +691,25 @@ video{contain:layout paint}
 <button id="searchButton" aria-label="Search friends"><i class="fas fa-search"></i></button>
 </div>
 </header>
-<div class="tabs" id="tabs">
-<button class="tab active" data-tab="all">All <span class="count" id="allCount">0</span></button>
-<button class="tab" data-tab="online">Online <span class="count" id="onlineCount">0</span></button>
-<button class="tab" data-tab="pending">Pending <span class="count" id="pendingCount">0</span></button>
-<button class="tab" data-tab="suggestions">Suggestions</button>
+<div class="tabs" id="tabs" role="tablist" aria-label="Friend lists">
+<button class="tab active" type="button" role="tab" aria-selected="true" aria-controls="pendingSection friendsSection" tabindex="0" data-tab="all">All <span class="count" id="allCount">0</span></button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="friendsSection" tabindex="-1" data-tab="online">Online <span class="count" id="onlineCount">0</span></button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="pendingSection" tabindex="-1" data-tab="pending">Requests <span class="count" id="pendingCount">0</span></button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="sentSection" tabindex="-1" data-tab="sent">Sent <span class="count" id="sentCount">0</span></button>
+<button class="tab" type="button" role="tab" aria-selected="false" aria-controls="suggestionsSection" tabindex="-1" data-tab="suggestions">Suggestions</button>
 </div>
 <div class="search-wrap" id="searchWrap">
-<div class="icon"><i class="fas fa-search"></i><input type="text" placeholder="Search friends or people…" id="searchInput" autocomplete="off" / aria-label="Search friends or people"></div>
+<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search friends or people…" id="searchInput" autocomplete="off" aria-label="Search friends or people"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
 </div>
 <div class="content" id="content">
-<div id="notice" class="notice" hidden></div>
+<div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 <section id="pendingSection">
 <div class="section-label">Friend Requests <span id="requestCount">0</span></div>
 <div id="requestsContainer"></div>
+</section>
+<section id="sentSection" hidden>
+<div class="section-label">Sent Requests <span id="sentRequestsCount">0</span></div>
+<div id="sentRequestsContainer"></div>
 </section>
 <section id="friendsSection">
 <div class="section-label">All Friends <span id="friendsCount">0</span></div>
@@ -716,7 +729,7 @@ video{contain:layout paint}
   <a class="nav-item" href="profile.html"><i class="fas fa-user" aria-hidden="true"></i><span>Profile</span></a>
 </nav>
 <style>
-.notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.friend-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.request-btn{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.request-btn.accept{background:#22c55e;color:#fff}.request-btn.decline,.request-btn.cancel{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.request-btn:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.friend-profile-link{cursor:pointer}.friend-profile-link:focus-visible{outline:2px solid var(--sp-accent,#e94560);outline-offset:3px}.friends-load-more{display:block;width:calc(100% - 28px);margin:12px 14px 20px;padding:12px;border:1px solid var(--sp-line,rgba(255,255,255,.12));border-radius:14px;background:var(--sp-surface,rgba(255,255,255,.06));color:var(--sp-text,#fff);font:inherit;font-weight:700;cursor:pointer}.friends-load-more:disabled{opacity:.55;cursor:wait}
 /* Shared SPIKE component styling; colors resolve through the active theme tokens. */
 :root{
 --sp-bg:#f6f7fb;
@@ -776,7 +789,7 @@ input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,23
 .btn,.ghost,.icon-btn,.header-btn,.request-btn,.tab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
 border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:var(--sp-surface-2)!important;
 }
-.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hovertab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
 .primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
 .danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
 .active{border-color:rgba(124,58,237,.28)!important}
@@ -891,8 +904,9 @@ const db = window.__SPIKE_SUPABASE__ || window.supabaseClient || window.supabase
 window.sb = db;
 window.supabaseClient = db;
 const $ = id => document.getElementById(id);
-const state = { friends: [], people: [], requests: [], suggestions: [], networkRecommendations: [], tab: 'all', query: '', user: null, requestChannel: null, requestPollTimer: null };
+const state = { friends: [], friendOffset: 0, friendHasMore: false, friendLoading: false, people: [], peopleOffset: 0, peopleHasMore: false, peopleLoading: false, peopleSearchToken: 0, requests: [], sentRequests: [], sentOffset: 0, sentHasMore: false, sentLoading: false, sentLoaded: false, suggestions: [], networkRecommendations: [], tab: 'all', query: '', user: null, requestChannel: null, requestPollTimer: null, lastRefreshAt: 0 };
 function esc(v) { const d=document.createElement('div'); d.textContent=v ?? ''; return d.innerHTML; }
+function attr(v){return String(v??'').replace(/[&<>\"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[ch]));}
 // UUID guard: never send an empty/invalid id to a Supabase UUID parameter.
 const UUID_RE=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 function validUuid(v){ return typeof v==='string' && UUID_RE.test(v.trim()); }
@@ -922,8 +936,9 @@ return rid ? `request:${rid.toLowerCase()}` : '';
 function initials(name) { return (name || '?').trim().split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase(); }
 function avatar(p) {
 const name = p.display_name || p.username || '?';
-return p.avatar_url ? `<img src="${esc(p.avatar_url)}" alt="${esc(name)}" loading="lazy" decoding="async">` : esc(initials(name));
+return p.avatar_url ? `<img src="${attr(p.avatar_url)}" alt="${attr(name)}" data-fallback="${attr(initials(name))}" loading="lazy" decoding="async">` : esc(initials(name));
 }
+document.addEventListener('error',event=>{const img=event.target;if(!(img instanceof HTMLImageElement)||!img.matches('img[data-fallback]'))return;const wrapper=img.closest('.friend-avatar');if(!wrapper)return;img.replaceWith(document.createTextNode(img.dataset.fallback||'?'));},true);
 function timeAgo(iso) {
 if (!iso) return ''; const n=Math.max(0, Date.now()-new Date(iso).getTime()); const m=Math.floor(n/60000);
 if(m<1) return 'just now'; if(m<60) return `${m}m ago`; const h=Math.floor(m/60); if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`;
@@ -963,35 +978,119 @@ try {
   throw err;
 }
 }
-async function loadFriends() {
-loading('friendsContainer');
-const {data,error}=await db.rpc('get_friends_public',{p_limit:100,p_offset:0});
-if(error) throw error;
-state.friends=uniqueBy((data||[]).map(f=>({...f,user_id:personId(f)})),friendKey);
-try { window.AppPresence?.watch?.(state.friends.map(personId).filter(Boolean)); } catch (presenceError) { console.warn('[SPIKE Friends] Could not watch friend presence:', presenceError); }
-renderFriends();
+async function loadFriends(reset=true) {
+if(state.friendLoading) return;
+const previousFriends=state.friends,previousOffset=state.friendOffset,previousHasMore=state.friendHasMore;
+if(reset){state.friendOffset=0;state.friendHasMore=false;}
+state.friendLoading=true;
+if(!state.friends.length) loading('friendsContainer');
+try {
+  const {data,error}=await db.rpc('get_friends_public',{p_limit:100,p_offset:state.friendOffset});
+  if(error) throw error;
+  const rawRows=data||[];
+  const page=rawRows.map(f=>({...f,user_id:personId(f)}));
+  state.friends=uniqueBy(reset?page:[...state.friends,...page],friendKey);
+  state.friendOffset+=rawRows.length;
+  state.friendHasMore=rawRows.length===100;
+  try { window.AppPresence?.watch?.(page.map(personId).filter(Boolean)); } catch (presenceError) { console.warn('[SPIKE Friends] Could not watch friend presence:', presenceError); }
+  renderFriends();
+} catch(error) {
+  console.error('[SPIKE Friends] Friends list failed:',error);
+  if(reset){state.friends=previousFriends;state.friendOffset=previousOffset;state.friendHasMore=previousHasMore;}
+  if(state.friends.length)renderFriends();
+  else {
+    empty('friendsContainer','Could not load your friends. Check your connection and try again.');
+    $('friendsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="retryFriends">Retry</button>');
+  }
+  throw error;
+} finally {state.friendLoading=false;}
 }
-async function loadNetworkRecommendations() {
+async function loadMoreFriends(){
+if(!state.friendHasMore||state.friendLoading)return;
+const button=$('loadMoreFriends');if(button){button.disabled=true;button.textContent='Loading…';}
+try{await loadFriends(false);}catch(error){notice(error.message||'Could not load more friends.',true);const retry=$('loadMoreFriends');if(retry){retry.disabled=false;retry.textContent='Try again';}}
+}
+async function loadSentRequests(reset=true){
+if(state.sentLoading)return;
+const previousSentRequests=state.sentRequests,previousSentOffset=state.sentOffset,previousSentHasMore=state.sentHasMore,previousSentLoaded=state.sentLoaded;
+if(reset){state.sentOffset=0;state.sentHasMore=false;}
+state.sentLoading=true;
+if(!state.sentRequests.length)loading('sentRequestsContainer');
+try{
+ const {data,error}=await db.from('friend_requests').select('id,recipient_id,created_at').eq('sender_id',state.user.id).eq('status','pending').order('created_at',{ascending:false}).range(state.sentOffset,state.sentOffset+99);
+ if(error)throw error;
+ const rawRows=data||[];const ids=[...new Set(rawRows.map(r=>r.recipient_id).filter(validUuid))];
+ let profiles=[];
+ if(ids.length){const result=await db.rpc('get_public_profiles',{p_user_ids:ids});if(!result.error)profiles=result.data||[];else console.warn('[SPIKE Friends] Sent-request profile details unavailable:',result.error.message);}
+ const byId=new Map(profiles.map(profile=>[personId(profile),profile]));
+ const page=rawRows.map(r=>({...r,profile:byId.get(r.recipient_id)||null}));
+ state.sentRequests=uniqueBy(reset?page:[...state.sentRequests,...page],r=>r.recipient_id||r.id);
+ state.sentOffset+=rawRows.length;state.sentHasMore=rawRows.length===100;state.sentLoaded=true;
+ renderSentRequests();updateCounts();
+}catch(error){
+ if(reset){state.sentRequests=previousSentRequests;state.sentOffset=previousSentOffset;state.sentHasMore=previousSentHasMore;state.sentLoaded=previousSentLoaded;}
+ console.warn('[SPIKE Friends] Sent requests unavailable:',error);
+ if(state.sentRequests.length)renderSentRequests();
+ else {empty('sentRequestsContainer','Could not load sent requests. Please try again.');$('sentRequestsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="retrySentRequests">Retry</button>');}
+ throw error;
+}
+finally{state.sentLoading=false;}
+}
+async function loadMoreSentRequests(){
+ if(!state.sentHasMore||state.sentLoading)return;
+ const button=$('loadMoreSentRequests');if(button){button.disabled=true;button.textContent='Loading…';}
+ try{await loadSentRequests(false);}catch(error){notice(error.message||'Could not load more sent requests.',true);const retry=$('loadMoreSentRequests');if(retry){retry.disabled=false;retry.textContent='Try again';}}
+}
+function renderSentRequests(){
+ let rows=state.sentRequests;
+ if(state.query)rows=rows.filter(r=>(r.profile?.display_name||'').toLowerCase().includes(state.query)||(r.profile?.username||'').toLowerCase().includes(state.query));
+ $('sentRequestsCount').textContent=rows.length;
+ if(!rows.length){empty('sentRequestsContainer',state.query?'No sent requests match your search.':'You have no outgoing friend requests.');if(state.sentHasMore)$('sentRequestsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMoreSentRequests">Load more sent requests</button>');return;}
+ $('sentRequestsContainer').innerHTML=rows.map(r=>{const profile=r.profile||{},uid=r.recipient_id,name=profile.display_name||profile.username||'SPIKE member';const profileClass=r.profile?'friend-profile-link':'';return `<div class="request-card ${profileClass}" data-user-id="${esc(uid)}" ${r.profile?'role="link" tabindex="0"':''} aria-label="${r.profile?'Open recipient profile':'Outgoing friend request'}">
+ <div class="friend-avatar">${r.profile?avatar(profile):'SP'}</div>
+ <div class="friend-info"><div class="name">${esc(name)}</div><div class="sub"><i class="fas fa-clock"></i> Sent ${timeAgo(r.created_at)}</div></div>
+ <div class="friend-action"><button type="button" class="request-btn cancel" data-cancel-sent="${esc(uid)}">Cancel</button></div>
+ </div>`;}).join('');
+ if(state.sentHasMore)$('sentRequestsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMoreSentRequests">Load more sent requests</button>');
+}
+async function cancelSentRequest(recipientId,btn){
+ recipientId=String(recipientId||'').trim();if(!validUuid(recipientId)){notice('This request has an invalid recipient.',true);return;}if(btn)btn.disabled=true;
+ try{const {error}=await db.rpc('cancel_friend_request',{p_recipient_id:recipientId});if(error)throw error;
+  const hadSentRow=state.sentRequests.some(r=>r.recipient_id===recipientId);
+  state.sentRequests=state.sentRequests.filter(r=>r.recipient_id!==recipientId);if(hadSentRow)state.sentOffset=Math.max(0,state.sentOffset-1);
+  for(const person of [...state.suggestions,...state.networkRecommendations])if(personId(person)===recipientId)person.relationship_status='none';
+  renderSentRequests();renderSuggestions();renderNetworkRecommendations();updateCounts();notice('Friend request cancelled.');
+ }catch(error){notice(error.message||'Could not cancel the sent request.',true);if(btn)btn.disabled=false;}
+}
+
+async function loadNetworkRecommendations(searchToken=null) {
   if(state.tab==='suggestions') loading('networkRecommendationsContainer');
   const {data,error}=await db.rpc('get_spike_network_recommendations',{p_limit:12});
+  if(searchToken!==null && searchToken!==state.peopleSearchToken)return;
   if(error) { console.warn('[SPIKE Friends] Network recommendations unavailable; showing registered people instead:', error.message); state.networkRecommendations=[]; }
   else state.networkRecommendations=uniqueBy((data||[]).map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id) && p.user_id!==state.user?.id),friendKey);
   if(state.tab==='suggestions') renderNetworkRecommendations();
 }
-async function loadRegisteredUsers(q='') {
-if(state.tab==='suggestions') loading('suggestionsContainer');
-const {data,error}=await db.rpc('get_registered_users_public',{
-p_query:q || '',
-p_limit:500,
-p_offset:0
-});
-if(error) throw error;
-state.people=uniqueBy(
-(data||[]).map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id) && p.user_id!==state.user?.id),
-friendKey
-);
-state.suggestions=state.people;
-if(state.tab==='suggestions') { renderNetworkRecommendations(); renderSuggestions(); }
+async function loadRegisteredUsers(q='',searchToken=null,reset=true) {
+if(state.peopleLoading&&!reset)return;
+if(reset){state.peopleOffset=0;state.peopleHasMore=false;state.people=[];}
+state.peopleLoading=true;
+if(state.tab==='suggestions'&&!state.people.length) loading('suggestionsContainer');
+try{
+ const {data,error}=await db.rpc('get_registered_users_public',{p_query:q||'',p_limit:100,p_offset:state.peopleOffset});
+ if(error)throw error;
+ if(searchToken!==null&&searchToken!==state.peopleSearchToken)return;
+ const rawRows=data||[];
+ const page=rawRows.map(p=>({...p,user_id:personId(p)})).filter(p=>validUuid(p.user_id)&&p.user_id!==state.user?.id);
+ state.people=uniqueBy(reset?page:[...state.people,...page],friendKey);
+ state.peopleOffset+=rawRows.length;state.peopleHasMore=rawRows.length===100;state.suggestions=state.people;
+ if(state.tab==='suggestions'){renderNetworkRecommendations();renderSuggestions();}
+}finally{state.peopleLoading=false;}
+}
+async function loadMorePeople(){
+ if(!state.peopleHasMore||state.peopleLoading)return;
+ const button=$('loadMorePeople');if(button){button.disabled=true;button.textContent='Loading…';}
+ try{await loadRegisteredUsers(state.query,state.peopleSearchToken,false);}catch(error){notice(error.message||'Could not load more people.',true);const retry=$('loadMorePeople');if(retry){retry.disabled=false;retry.textContent='Try again';}}
 }
 function renderNetworkRecommendations(){
   const rows=state.query ? state.networkRecommendations.filter(p=>(p.display_name||'').toLowerCase().includes(state.query)||(p.username||'').toLowerCase().includes(state.query)) : state.networkRecommendations;
@@ -1000,31 +1099,40 @@ function renderNetworkRecommendations(){
   $('networkRecommendationsContainer').innerHTML=rows.map(p=>{
     const uid=personId(p), name=esc(p.display_name||p.username||'User');
     const reason=esc(p.reason_text||'A new person from your wider network');
-    const score=Number(p.network_score||0);
-    return `<div class="network-recommendation-card" data-user-id="${esc(uid)}">
-      <span class="network-score">${score} match</span>
+    const action=p.relationship_status==='outgoing_pending'?`<button type="button" class="request-btn cancel" data-cancel-request="${esc(uid)}">Sent · Cancel</button>`:`<button class="request-btn accept" data-send="${esc(uid)}">Add</button>`;
+    return `<div class="network-recommendation-card friend-profile-link" data-user-id="${esc(uid)}" role="link" tabindex="0" aria-label="View ${attr(p.display_name||p.username||'member')} profile">
       <div class="friend-avatar spike-presence-target" data-presence-user="${esc(uid)}" data-presence-status="Offline">${avatar(p)}<span class="status-dot"></span></div>
       <div class="friend-info"><div class="name">${name}</div><div class="sub">@${esc(p.username||'')}</div><div class="network-reason"><i class="fas fa-sparkles"></i>${reason}</div></div>
-      <div class="friend-action"><button class="request-btn accept" data-send="${esc(uid)}">Add</button></div>
+      <div class="friend-action">${action}</div>
     </div>`;
   }).join('');
 }
 
 async function loadRequests() {
-loading('requestsContainer');
-const {data,error}=await db.rpc('get_friend_requests');
-if(error) throw error;
-state.requests=uniqueBy(data||[],requestKey);
-renderRequests(); updateCounts();
+if(!state.requests.length) loading('requestsContainer');
+try {
+  const {data,error}=await db.rpc('get_friend_requests');
+  if(error) throw error;
+  state.requests=uniqueBy(data||[],requestKey);
+  renderRequests(); updateCounts();
+} catch(error) {
+  console.error('[SPIKE Friends] Incoming requests failed:',error);
+  if(!state.requests.length){
+    empty('requestsContainer','Could not load friend requests. Check your connection and try again.');
+    $('requestsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="retryRequests">Retry</button>');
+  }
+  throw error;
+}
 }
 function renderRequests() {
 if(!state.requests.length){ empty('requestsContainer','No pending friend requests.'); return; }
-const rows=uniqueBy(state.requests.filter(r=>requestId(r)),requestKey);
-if(!rows.length){ empty('requestsContainer','No valid pending friend requests.'); return; }
+let rows=uniqueBy(state.requests.filter(r=>requestId(r)),requestKey);
+if(state.query) rows=rows.filter(r=>(r.display_name||'').toLowerCase().includes(state.query)||(r.username||'').toLowerCase().includes(state.query));
+if(!rows.length){ empty('requestsContainer',state.query?'No requests match your search.':'No valid pending friend requests.'); return; }
 $('requestsContainer').innerHTML=rows.map(r=>{
 const rid=requestId(r), uid=personId(r);
 return `
-<div class="request-card" data-id="${esc(rid)}">
+<div class="request-card friend-profile-link" data-id="${esc(rid)}" data-user-id="${esc(uid)}" role="link" tabindex="0" aria-label="View ${attr(r.display_name||r.username||'member')} profile">
 <div class="friend-avatar spike-presence-target" data-presence-user="${esc(uid)}" data-presence-status="Offline">${avatar(r)}<span class="status-dot"></span></div>
 <div class="friend-info"><div class="name">${esc(r.display_name||r.username||'User')}</div><div class="sub"><i class="fas fa-clock"></i> ${timeAgo(r.created_at)}</div></div>
 <div class="friend-action"><button class="request-btn accept" data-action="accept" data-id="${esc(rid)}">Accept</button><button class="request-btn decline" data-action="decline" data-id="${esc(rid)}">Decline</button></div>
@@ -1035,10 +1143,10 @@ function renderFriends() {
 let rows=uniqueBy(state.friends,friendKey);
 if(state.query) rows=rows.filter(f=>(f.display_name||'').toLowerCase().includes(state.query)||(f.username||'').toLowerCase().includes(state.query));
 if(state.tab==='online') rows=rows.filter(f=>AppPresence.isOnline(personId(f)));
-$('friendsCount').textContent=rows.length; $('allCount').textContent=state.friends.length;
-if(!rows.length){empty('friendsContainer',state.friends.length?'No friends match your search.':'You have no friends yet.');return;}
+$('friendsCount').textContent=rows.length; $('allCount').textContent=state.friendHasMore?`${state.friends.length}+`:state.friends.length;
+if(!rows.length){const message=state.tab==='online'?(state.query?'No online friends match your search.':'No friends are online right now.'):(state.query?'No friends match your search.':(state.friends.length?'No friends match your search.':'You have no friends yet.'));empty('friendsContainer',message);if(state.friendHasMore)$('friendsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMoreFriends">Load more friends</button>');return;}
 $('friendsContainer').innerHTML=rows.map(f=>`
-<div class="friend-card" data-user-id="${esc(f.user_id)}">
+<div class="friend-card friend-profile-link" data-user-id="${esc(f.user_id)}" role="link" tabindex="0" aria-label="View ${attr(f.display_name||f.username||'friend')} profile">
 <div class="friend-avatar spike-presence-target" data-presence-user="${esc(f.user_id)}" data-presence-status="Offline">${avatar(f)}<span class="status-dot"></span></div>
 <div class="friend-info"><div class="name">${esc(f.display_name||f.username||'User')}</div><div class="sub">@${esc(f.username||'')}</div></div>
 <div class="friend-action">
@@ -1046,16 +1154,22 @@ $('friendsContainer').innerHTML=rows.map(f=>`
 <button class="icon-btn unfriend-btn" aria-label="Unfriend ${esc(f.display_name||f.username||'friend')}" title="Unfriend" data-unfriend="${esc(f.user_id)}"><i class="fas fa-user-minus"></i></button>
 </div>
 </div>`).join('');
+if(state.friendHasMore){$('friendsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMoreFriends">Load more friends</button>');}
+}
+async function loadSuggestionsData(q=state.query){
+const token=++state.peopleSearchToken;
+await Promise.all([loadRegisteredUsers(q.trim(),token),loadNetworkRecommendations(token)]);
 }
 async function searchPeople(q) {
 state.query=q.trim().toLowerCase();
-await Promise.all([loadRegisteredUsers(q.trim()), loadNetworkRecommendations()]);
+await loadSuggestionsData(q.trim());
 }
 function renderSuggestions() {
 state.suggestions=uniqueBy(state.suggestions.filter(p=>personId(p)),friendKey);
 $('suggestionCount').textContent=state.suggestions.length;
 if(!state.suggestions.length){
 empty('suggestionsContainer',state.query?'No registered users match your search.':'No other registered users found.');
+if(state.peopleHasMore)$('suggestionsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMorePeople">Load more people</button>');
 return;
 }
 $('suggestionsContainer').innerHTML=state.suggestions.filter(p=>personId(p)).map(p=>{
@@ -1064,7 +1178,7 @@ let action='';
 if(p.relationship_status==='accepted'){
 action='<span class="request-btn" style="background:rgba(34,197,94,.12);color:#86efac">Friends</span>';
 }else if(p.relationship_status==='outgoing_pending'){
-action='<span class="request-btn" style="background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)">Sent</span>';
+action=`<button type="button" class="request-btn cancel" data-cancel-request="${esc(uid)}">Sent · Cancel</button>`;
 }else if(p.relationship_status==='incoming_pending'){
 action=`<button class="request-btn accept" data-open-pending="1">Pending</button>`;
 }else if(p.relationship_status==='blocked'){
@@ -1073,7 +1187,7 @@ action='<span class="request-btn" style="background:rgba(255,255,255,.04);color:
 action=`<button class="request-btn accept" data-send="${esc(uid)}">Add</button>`;
 }
 return `
-<div class="friend-card">
+<div class="friend-card friend-profile-link" data-user-id="${esc(uid)}" role="link" tabindex="0" aria-label="View ${attr(p.display_name||p.username||'member')} profile">
 <div class="friend-avatar spike-presence-target" data-presence-user="${esc(uid)}" data-presence-status="Offline">${avatar(p)}<span class="status-dot"></span></div>
 <div class="friend-info">
 <div class="name">${esc(p.display_name||p.username||'User')}</div>
@@ -1082,16 +1196,22 @@ return `
 <div class="friend-action">${action}</div>
 </div>`;
 }).join('');
+if(state.peopleHasMore)$('suggestionsContainer').insertAdjacentHTML('beforeend','<button type="button" class="friends-load-more" id="loadMorePeople">Load more people</button>');
 }
 async function actRequest(id, action) {
 id=String(id||'').trim();
-if(!validUuid(id)){ notice('This friend request is missing a valid ID. Refreshing…',true); await loadRequests().catch(()=>{}); return; }
-const btn=document.querySelector(`[data-action="${action}"][data-id="${CSS.escape(id)}"]`); if(btn) btn.disabled=true;
-const fn=action==='accept'?'accept_friend_request':'decline_friend_request';
-const args=action==='decline'?{p_request_id:id,p_sender_id:null}:{p_request_id:id};
-const {error}=await db.rpc(fn,args);
-if(error){notice(error.message||'Could not update request.',true);if(btn)btn.disabled=false;return;}
-await refresh(); notice(action==='accept'?'Friend request accepted.':'Friend request declined.');
+if(!validUuid(id)){notice('This friend request is missing a valid ID. Refreshing…',true);await loadRequests().catch(()=>{});return;}
+const btn=document.querySelector(`[data-action="${action}"][data-id="${CSS.escape(id)}"]`);
+const requestCard=btn?.closest('.request-card');
+const actionButtons=requestCard?[...requestCard.querySelectorAll('[data-action]')]:[];
+if(actionButtons.some(button=>button.disabled))return;
+actionButtons.forEach(button=>button.disabled=true);
+try{
+ const fn=action==='accept'?'accept_friend_request':'decline_friend_request';
+ const args=action==='decline'?{p_request_id:id,p_sender_id:null}:{p_request_id:id};
+ const {error}=await db.rpc(fn,args);if(error)throw error;
+ await refresh();notice(action==='accept'?'Friend request accepted.':'Friend request declined.');
+}catch(error){notice(error.message||'Could not update this friend request.',true);actionButtons.forEach(button=>button.disabled=false);}
 }
 async function unfriend(id, btn) {
 id=String(id||'').trim();
@@ -1124,15 +1244,30 @@ try {
 
 async function sendRequest(id,btn) {
 id=String(id||'').trim();
-if(!validUuid(id)){ if(btn) btn.disabled=false; notice('Could not add this user because their profile ID is unavailable. Refreshing people…',true); await loadRegisteredUsers(state.query).catch(()=>{}); return; }
-if(state.user?.id===id){ if(btn) btn.disabled=false; notice('You cannot add yourself.',true); return; }
-if(btn) btn.disabled=true;
-const {error}=await db.rpc('send_friend_request',{p_user_id:id});
-if(error){notice(error.message||'Could not send friend request.',true);if(btn)btn.disabled=false;return;}
-notice('Friend request sent.');
-if(btn){btn.textContent='Sent';btn.classList.remove('accept');btn.classList.add('cancel');}
-state.suggestions=state.suggestions.filter(p=>p.user_id!==id); state.networkRecommendations=state.networkRecommendations.filter(p=>p.user_id!==id); renderNetworkRecommendations(); renderSuggestions();
+if(!validUuid(id)){if(btn)btn.disabled=false;notice('Could not add this user because their profile ID is unavailable. Refreshing people…',true);await loadSuggestionsData(state.query).catch(()=>{});return;}
+if(state.user?.id===id){if(btn)btn.disabled=false;notice('You cannot add yourself.',true);return;}
+if(btn)btn.disabled=true;
+try{
+ const {error}=await db.rpc('send_friend_request',{p_user_id:id});if(error)throw error;
+ const sentProfile=[...state.suggestions,...state.networkRecommendations].find(person=>personId(person)===id)||null;
+ for(const person of [...state.suggestions,...state.networkRecommendations])if(personId(person)===id)person.relationship_status='outgoing_pending';
+ if(!state.sentRequests.some(r=>r.recipient_id===id)){state.sentRequests.unshift({recipient_id:id,created_at:new Date().toISOString(),profile:sentProfile});if(state.sentLoaded)state.sentOffset+=1;}
+ state.sentLoaded=true;renderSentRequests();updateCounts();renderNetworkRecommendations();renderSuggestions();notice('Friend request sent.');
+}catch(error){notice(error.message||'Could not send friend request.',true);if(btn)btn.disabled=false;}
 }
+async function cancelRequest(recipientId,btn){
+recipientId=String(recipientId||'').trim();
+if(!validUuid(recipientId)){notice('This request has an invalid recipient. Refresh and try again.',true);return;}
+if(btn)btn.disabled=true;
+try{
+  const {error}=await db.rpc('cancel_friend_request',{p_recipient_id:recipientId});
+  if(error)throw error;
+  for(const person of [...state.suggestions,...state.networkRecommendations])if(personId(person)===recipientId)person.relationship_status='none';
+  const hadSentRow=state.sentRequests.some(r=>r.recipient_id===recipientId);state.sentRequests=state.sentRequests.filter(r=>r.recipient_id!==recipientId);if(hadSentRow)state.sentOffset=Math.max(0,state.sentOffset-1);renderSentRequests();updateCounts();renderNetworkRecommendations();renderSuggestions();
+  notice('Friend request cancelled.');
+}catch(error){notice(error.message||'Could not cancel the friend request.',true);if(btn)btn.disabled=false;}
+}
+
 function updateCounts(){
 const friends=uniqueBy(state.friends,friendKey);
 const requests=uniqueBy(state.requests,requestKey);
@@ -1142,6 +1277,7 @@ $('pendingCount').textContent=n;
 $('requestBadge').textContent=n;
 $('requestBadge').style.display=n?'flex':'none';
 $('onlineCount').textContent=String(friends.filter(x=>AppPresence.isOnline(personId(x))).length);
+$('sentCount').textContent=state.sentRequests.length+(state.sentHasMore?'+':'');
 }
 if (typeof window.AppPresence?.subscribe === 'function') {
   window.AppPresence.subscribe(() => {
@@ -1151,14 +1287,28 @@ if (typeof window.AppPresence?.subscribe === 'function') {
 }
 
 function setTab(tab){
-state.tab=tab; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
-$('pendingSection').hidden=tab!=='all'&&tab!=='pending'; $('friendsSection').hidden=tab==='pending'||tab==='suggestions'; $('suggestionsSection').hidden=tab!=='suggestions';
+state.tab=tab; document.querySelectorAll('.tab').forEach(b=>{const active=b.dataset.tab===tab;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));b.tabIndex=active?0:-1;});
+$('pendingSection').hidden=tab!=='all'&&tab!=='pending'; $('sentSection').hidden=tab!=='sent'; $('friendsSection').hidden=tab==='pending'||tab==='sent'||tab==='suggestions'; $('suggestionsSection').hidden=tab!=='suggestions';
 if(tab==='pending') $('pendingSection').hidden=false;
-if(tab==='suggestions'){ $('searchWrap').style.display='block'; Promise.allSettled([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]).then(results=>{const failed=results.find(r=>r.status==='rejected');if(failed)notice(failed.reason?.message||'Could not load all people.',true);}); }
-else if(tab==='online'){ $('searchWrap').style.display='block'; renderFriends(); }
-else $('searchWrap').style.display='block';
+if(tab==='sent'){if(!state.sentLoaded)loadSentRequests(true).catch(error=>notice(error.message||'Could not load sent requests.',true));else renderSentRequests();}
+if(tab==='suggestions'){
+  $('searchWrap').style.display='block';
+  loadSuggestionsData(state.query).catch(error=>notice(error.message||'Could not load people.',true));
+} else {
+  $('searchWrap').style.display='block';
+  // Always repaint the friends list when entering either friends tab. Without
+  // this, returning from Online to All leaves the previously filtered DOM in place.
+  if(tab==='all'||tab==='online') renderFriends();
 }
-async function refresh(){ await Promise.all([loadFriends(),loadRequests()]); if(state.tab==='suggestions') await Promise.allSettled([loadNetworkRecommendations(),loadRegisteredUsers(state.query)]); }
+}
+async function refresh(){
+ const results=await Promise.allSettled([loadFriends(true),loadRequests()]);
+ state.lastRefreshAt=Date.now();
+ await loadSentRequests(true).catch(error=>{console.warn('[SPIKE Friends] Sent-request list refresh failed:',error);notice('Sent requests are temporarily unavailable. Your friends and incoming requests are still available.',true);});
+ if(state.tab==='suggestions') await loadSuggestionsData(state.query).catch(error=>notice(error.message||'Could not refresh people.',true));
+ const failed=results.find(result=>result.status==='rejected');
+ if(failed)notice('Some Friends information could not refresh. Use the Retry controls in the affected section.',true);
+}
 async function subscribeRequestUpdates(){
   if(!state.user?.id||!db?.channel)return;
   try{
@@ -1180,17 +1330,40 @@ window.addEventListener('pagehide',event=>{if(event.persisted)return;clearInterv
 window.addEventListener('pageshow',event=>{if(event.persisted&&state.user)subscribeRequestUpdates().catch(e=>console.warn('[SPIKE FRIEND REQUEST REALTIME RESTORE]',e));});
 document.addEventListener('click', async e=>{
 const tab=e.target.closest('.tab'); if(tab){setTab(tab.dataset.tab);return;}
+if(e.target.closest('#retryFriends')){await loadFriends(true).catch(error=>notice(error.message||'Could not load friends.',true));return;}
+if(e.target.closest('#retryRequests')){await loadRequests().catch(error=>notice(error.message||'Could not load friend requests.',true));return;}
+if(e.target.closest('#retrySentRequests')){await loadSentRequests(true).catch(error=>notice(error.message||'Could not load sent requests.',true));return;}
+const more=e.target.closest('#loadMoreFriends');if(more){await loadMoreFriends();return;}
+const morePeople=e.target.closest('#loadMorePeople');if(morePeople){await loadMorePeople();return;}
+const moreSent=e.target.closest('#loadMoreSentRequests');if(moreSent){await loadMoreSentRequests();return;}
+const cancelSent=e.target.closest('[data-cancel-sent]');if(cancelSent){await cancelSentRequest(cancelSent.dataset.cancelSent,cancelSent);return;}
+const cancel=e.target.closest('[data-cancel-request]');if(cancel){await cancelRequest(cancel.dataset.cancelRequest,cancel);return;}
 const a=e.target.closest('[data-action]'); if(a){await actRequest(a.dataset.id,a.dataset.action);return;}
 const send=e.target.closest('[data-send]'); if(send){await sendRequest(send.dataset.send,send);return;}
 const unfriendBtn=e.target.closest('[data-unfriend]'); if(unfriendBtn){await unfriend(unfriendBtn.dataset.unfriend,unfriendBtn);return;}
 const messageBtn=e.target.closest('[data-message]'); if(messageBtn){const id=String(messageBtn.dataset.message||'').trim();if(!validUuid(id)){notice('This friend does not have a valid profile ID. Refresh the page and try again.',true);return;}location.href='message.html?to='+encodeURIComponent(id);return;}
 if(e.target.closest('[data-open-pending]')){setTab('pending');return;}
+const profile=e.target.closest('.friend-profile-link');if(profile&&!e.target.closest('button')){const id=String(profile.dataset.userId||'').trim();if(validUuid(id))location.href='view_user.html?uid='+encodeURIComponent(id);return;}
 
 if(e.target.closest('#requestsButton')) setTab('pending');
 if(e.target.closest('#searchButton')) $('searchInput').focus();
 });
+document.addEventListener('keydown',e=>{
+ if(e.target.matches('.tab[role="tab"]')){
+  const tabs=[...document.querySelectorAll('.tab[role="tab"]')];
+  const index=tabs.indexOf(e.target);let next=index;
+  if(e.key==='ArrowRight')next=(index+1)%tabs.length;
+  else if(e.key==='ArrowLeft')next=(index-1+tabs.length)%tabs.length;
+  else if(e.key==='Home')next=0;
+  else if(e.key==='End')next=tabs.length-1;
+  if(next!==index){e.preventDefault();tabs[next].focus();setTab(tabs[next].dataset.tab);return;}
+ }
+ if((e.key==='Enter'||e.key===' ')&&e.target.matches('.friend-profile-link')&&!e.target.closest('button')){e.preventDefault();const id=String(e.target.dataset.userId||'').trim();if(validUuid(id))location.href='view_user.html?uid='+encodeURIComponent(id);}
+});
 let timer;
+$('clearSearchButton').addEventListener('click',()=>{$('searchInput').value='';$('clearSearchButton').hidden=true;$('searchInput').dispatchEvent(new Event('input',{bubbles:true}));$('searchInput').focus();});
 $('searchInput').addEventListener('input',e=>{
+$('clearSearchButton').hidden=!e.target.value;
 clearTimeout(timer);
 const q=e.target.value;
 timer=setTimeout(async()=>{
@@ -1199,13 +1372,14 @@ state.query=q.trim().toLowerCase();
 if(state.tab==='suggestions'){
 await searchPeople(q);
 }else{
-renderFriends();
+renderFriends();renderRequests();renderSentRequests();
 }
 }catch(err){
 notice(err.message||'Search failed.',true);
 }
 },250);
 });
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.user&&navigator.onLine&&Date.now()-state.lastRefreshAt>20000){refresh().catch(error=>console.warn('[SPIKE Friends] Resume refresh failed:',error));}});
 window.addEventListener('app-presence-sync', () => {
   if (state.tab === 'online') renderFriends();
   updateCounts();

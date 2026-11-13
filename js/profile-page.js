@@ -181,17 +181,16 @@ async function loadSocial(){
   const counts=await social.getCounts(db,state.uid);
   state.followers=counts.followers;
   state.profile.following_count=counts.following;
-  state.views=state.uid===state.me.id?Number(meDoc?.profileViews||0):0;
 }
 
 async function loadPosts(){
   if(!state.canSeePosts){ state.posts=[]; return; }
   if(state.uid!==state.me.id){
-    const r=await db.rpc('get_public_profile_posts',{p_owner:state.uid,p_limit:12});
+    const r=await db.rpc('get_public_profile_posts_v3',{p_owner:state.uid,p_limit:12});
     if(r.error) throw r.error;
     state.posts=(r.data||[]).map(x=>({
       id:x.id, authorUid:state.uid, content:x.content||'',
-      createdAt:x.created_at, mediaUrl:x.media_url||'', mediaType:x.media_type||''
+      createdAt:x.created_at, mediaUrl:x.media_url||'', mediaType:x.media_type||'', sensitive:x.sensitive===true, visibility:x.visibility||'public'
     }));
     return;
   }
@@ -215,7 +214,7 @@ function likeCount(p){
   return Number.isFinite(count)?count:likeUsers(p).length;
 }
 function liked(p){return likeUsers(p).includes(state.me.id)}function saved(p){return (state.profile.savedPosts||[]).includes(p.id)}
-function renderFeatures(){const own=state.uid===state.me.id,p=state.profile||{},media=state.posts.filter(x=>x.mediaUrl).length;$("activityPosts").textContent=state.canSeePosts===false?'—':state.posts.length;$("activityMedia").textContent=state.canSeeMedia===false?'—':media;$("activityFollowers").textContent=state.canSeeFriends===false?'—':state.followers;$("insightPosts").textContent=state.posts.length;$("insightMedia").textContent=media;$("insightViews").textContent=own?(state.views||0):"—";$("insightsCard").classList.toggle("hidden",!own);const visibleOnline=state.uid===state.me.id ? state.privacy?.show_online_status!==false : state.canSeeOnline!==false; const online=visibleOnline && String(p.presence_status||p.presence||"").toLowerCase()==="online";$("profilePresenceDot").classList.toggle("online",online);$("profilePresenceText").textContent=visibleOnline?(online?"Online":"Offline"):"Offline";}function openShareProfile(){const text=`Check out ${nameOf(state.profile)} on SPIKE`;if(navigator.share)navigator.share({title:"SPIKE Profile",text,url:location.href}).catch(()=>{});else navigator.clipboard?.writeText(location.href).then(()=>toast("Profile link copied","success")).catch(()=>toast(location.href,"info"))}
+function renderFeatures(){const p=state.profile||{};const visibleOnline=state.uid===state.me.id ? state.privacy?.show_online_status!==false : state.canSeeOnline!==false; const online=visibleOnline && String(p.presence_status||p.presence||"").toLowerCase()==="online";$("profilePresenceDot").classList.toggle("online",online);$("profilePresenceText").textContent=visibleOnline?(online?"Online":"Offline"):"Offline";}function openShareProfile(){const text=`Check out ${nameOf(state.profile)} on SPIKE`;if(navigator.share)navigator.share({title:"SPIKE Profile",text,url:location.href}).catch(()=>{});else navigator.clipboard?.writeText(location.href).then(()=>toast("Profile link copied","success")).catch(()=>toast(location.href,"info"))}
 function mediaItemsOf(p){
   const items=Array.isArray(p?.mediaItems)&&p.mediaItems.length
     ? p.mediaItems
@@ -230,17 +229,33 @@ function mediaTypeOfItem(item){
 function galleryMedia(){
   if(!state.canSeeMedia)return [];
   const out=[];
-  state.posts.forEach(p=>mediaItemsOf(p).forEach((item,index)=>out.push({post:p,item,index})));
+  state.posts.forEach(p=>{if(p.sensitive===true||p.is_sensitive===true)return;mediaItemsOf(p).forEach((item,index)=>out.push({post:p,item,index}))});
   return out;
 }
+let profileMediaVideoObserver=null;
 function renderMediaGallery(){
+  profileMediaVideoObserver?.disconnect();profileMediaVideoObserver=null;
   const items=galleryMedia();
   $("mediaCountLabel").textContent=`${items.length} ${items.length===1?"item":"items"}`;
-  if(!items.length){$("mediaPosts").innerHTML='<div class="media-empty"><div style="font-size:26px;margin-bottom:8px">▧</div><b>No media yet</b><div style="margin-top:5px">Photos and videos shared on this profile will appear here.</div></div>';return}
+  if(!items.length){const hasSensitive=state.posts.some(p=>p.sensitive===true||p.is_sensitive===true);$("mediaPosts").innerHTML=`<div class="media-empty"><div style="font-size:26px;margin-bottom:8px">${hasSensitive?'◉':'▧'}</div><b>${hasSensitive?'Sensitive media is protected':'No media yet'}</b><div style="margin-top:5px">${hasSensitive?'Open the Signal itself to review its content warning.':'Photos and videos shared on this profile will appear here.'}</div></div>`;return}
   $("mediaPosts").innerHTML=items.map((entry,i)=>{
     const item=entry.item, type=mediaTypeOfItem(item), url=esc(item.url||item.mediaUrl), multi=mediaItemsOf(entry.post).length>1;
-    return `<button class="media-tile" type="button" data-gallery-index="${i}" aria-label="Open ${type} ${i+1} of ${items.length}">${type==="video"?`<video src="${url}" muted playsinline preload="metadata"></video>`:`<img src="${url}" alt="" loading="lazy" decoding="async">`}${type==="video"?'<span class="media-tile-badge">▶</span>':""}${multi?'<span class="media-tile-badge media-tile-stack">▣</span>':""}</button>`;
+    return `<button class="media-tile" type="button" data-gallery-index="${i}" aria-label="Open ${type} ${i+1} of ${items.length}">${type==="video"?`<video data-gallery-video-src="${url}" muted playsinline preload="none"></video>`:`<img src="${url}" alt="" loading="lazy" decoding="async">`}${type==="video"?'<span class="media-tile-badge">▶</span>':""}${multi?'<span class="media-tile-badge media-tile-stack">▣</span>':""}</button>`;
   }).join("");
+  const galleryVideos=$("mediaPosts").querySelectorAll("video[data-gallery-video-src]");
+  const attachGalleryVideo=v=>{
+    if(!v||v.getAttribute("src"))return;
+    const source=v.dataset.galleryVideoSrc||"";
+    if(!/^https?:\/\//i.test(source))return;
+    v.preload="metadata";v.src=source;v.load();
+  };
+  if("IntersectionObserver" in window){
+    profileMediaVideoObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+      if(!entry.isIntersecting)return;
+      attachGalleryVideo(entry.target);profileMediaVideoObserver?.unobserve(entry.target);
+    }),{rootMargin:"300px 0px",threshold:0});
+    galleryVideos.forEach(v=>profileMediaVideoObserver.observe(v));
+  }else galleryVideos.forEach(attachGalleryVideo);
 }
 function render(){renderMediaGallery();$("postCount").textContent=state.posts.length;renderFeatures();$("followerCount").textContent=state.canSeeFriends===false?"—":Number(state.followers||0);$("followingCount").textContent=state.canSeeFriends===false?"—":Number(state.profile?.following_count||0)}
 // Social totals use the same server-authoritative RPC counts for own and other profiles.
@@ -257,10 +272,10 @@ async function loadCoverSettings(){
   const legacy=state.profile||{};
   if(!state.cover.url) state.cover.url=legacy.cover_url||legacy.coverUrl||legacy.banner_url||legacy.banner||"";
 }
-function renderCover(){const c=state.cover||{};const img=$("coverImg"),gen=$("generatedCover");if(!img)return;const has=!!c.url;if(gen){gen.innerHTML=has?"":(window.SPIKE_IDENTITY?.coverMarkup?.(state.profile)||"");gen.setAttribute("aria-hidden",has?"true":"false")}if(has){img.src=c.url;img.classList.remove("hidden");applyCoverStyle()}else{img.removeAttribute("src");img.classList.add("hidden")};const own=state.uid===state.me.id;$("coverActions")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!has||!own)}
+function renderCover(){const c=state.cover||{};const img=$("coverImg"),gen=$("generatedCover");if(!img)return;const has=!!c.url;if(gen){gen.innerHTML=has?"":(window.SPIKE_IDENTITY?.coverMarkup?.(state.profile)||"");gen.setAttribute("aria-hidden",has?"true":"false")}if(has){img.loading="eager";img.decoding="async";img.fetchPriority="high";if(img.getAttribute("src")!==c.url)img.src=c.url;img.classList.remove("hidden");applyCoverStyle()}else{if(img.hasAttribute("src"))img.removeAttribute("src");img.classList.add("hidden")};const own=state.uid===state.me.id;$("coverActions")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!has||!own)}
 function openCoverEditor(){
   if(!state.cover?.url){toast("Add a cover photo first.","info");return}
-  const img=$("coverEditorImg");img.src=state.cover.url;$("coverZoom").value=Math.round(clamp(Number(state.cover.zoom||1),1,2.5)*100);$("coverZoomValue").textContent=$("coverZoom").value+"%";updateCoverEditorTransform();open("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","false")
+  const img=$("coverEditorImg");img.loading="eager";img.decoding="async";if(img.getAttribute("src")!==state.cover.url)img.src=state.cover.url;$("coverZoom").value=Math.round(clamp(Number(state.cover.zoom||1),1,2.5)*100);$("coverZoomValue").textContent=$("coverZoom").value+"%";updateCoverEditorTransform();open("coverEditorOverlay");$("coverEditorOverlay").setAttribute("aria-hidden","false")
 }
 function updateCoverEditorTransform(){const z=Number($("coverZoom")?.value||100)/100,x=clamp(Number(state.cover.position_x||0),-40,40),y=clamp(Number(state.cover.position_y||0),-40,40);const img=$("coverEditorImg");if(img)img.style.transform=`translate3d(${x}%,${y}%,0) scale(${z})`;if($("coverZoomValue"))$("coverZoomValue").textContent=Math.round(z*100)+"%"}
 function resetCoverEditor(){state.cover.position_x=0;state.cover.position_y=0;state.cover.zoom=1;$("coverZoom").value=100;updateCoverEditorTransform()}
@@ -284,7 +299,7 @@ function initCoverEditor(){
   $("coverEditorOverlay")?.addEventListener("click",e=>{if(e.target.id==="coverEditorOverlay"){$("coverEditorCancel").click()}});
 }
 function renderIdentity(){const p=state.profile||{},n=nameOf(p),a=avatarOf(p);$("headerTitle").textContent=n;$("displayName").textContent=n;const handle=String(p.username||"").replace(/^@/,"");$("username").textContent=handle?"@"+handle:"";$("bio").textContent=p.bio||p.about||"";$("verified").classList.toggle("hidden",p.verified!==true);$("verified").setAttribute("aria-label",p.verified===true?"Verified account":"");$("avatar").innerHTML=window.SPIKE_IDENTITY?.avatarMarkup?.(p,"profile-avatar",n)|| (a?`<img src="${esc(a)}" alt="${esc(n)}" loading="lazy" decoding="async">`:esc(n[0]||"U"));renderCover();const m=[];if(p.location)m.push(`<span>📍 ${esc(p.location)}</span>`);if(p.website)m.push(`<span>🔗 <a href="${esc(/^https?:\/\//i.test(p.website)?p.website:"https://"+p.website)}" target="_blank" rel="noopener noreferrer">${esc(p.website.replace(/^https?:\/\//i,""))}</a></span>`);if(p.created_at||p.createdAt)m.push(`<span>◷ Joined ${esc(dateLabel(p.created_at||p.createdAt))}</span>`);$("meta").innerHTML=m.join("");const sp=p.sp_id||"";$("spidValue").textContent=sp||"SP-••••••";$("copySpid").onclick=async()=>{if(!sp)return;try{await navigator.clipboard.writeText(sp);toast("SP ID copied","success")}catch{toast(sp,"info")}};$("shareSpid").onclick=async()=>{if(!sp)return;const text=`${n} • ${sp}`;try{if(navigator.share)await navigator.share({title:"SPIKE Profile",text,url:location.href});else{await navigator.clipboard.writeText(location.href);toast("Profile link copied","success")}}catch{}}}
-function renderActions(){const own=state.uid===state.me.id;const mutualLink=$("mutualConnectionsShortcut");if(mutualLink){mutualLink.hidden=own||state.canSeeFriends===false;mutualLink.href=`mutuals.html?uid=${encodeURIComponent(state.uid)}`;}$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("openBlockedList")?.classList.toggle("hidden",!own);$("coverActions")?.classList.toggle("hidden",!own);$("coverEdit")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!own||!state.cover?.url);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
+function renderActions(){const own=state.uid===state.me.id;const mutualLink=$("mutualConnectionsShortcut");if(mutualLink){mutualLink.hidden=own||state.canSeeFriends===false;mutualLink.href=`followers.html?kind=mutuals&uid=${encodeURIComponent(state.uid)}`;}$("actions").innerHTML=own?`<button class="btn primary" id="editBtn">Edit profile</button><a class="btn" href="feed.html">← Feed</a>`:`<button class="btn primary" id="followBtn">${state.following?"Following":"Follow"}</button><button class="btn" id="shareProfileBtn" type="button">↗ Share</button>`;$("openBlockedList")?.classList.toggle("hidden",!own);$("coverActions")?.classList.toggle("hidden",!own);$("coverEdit")?.classList.toggle("hidden",!own);$("coverAdjust")?.classList.toggle("hidden",!own||!state.cover?.url);$("editBtn")?.addEventListener("click",fillEdit);$("followBtn")?.addEventListener("click",toggleFollow)}
 function renderAbout(){const p=state.profile,items=[["Username",p.username?"@"+String(p.username).replace(/^@/,""):"Not set"],["Display name",nameOf(p)],["Location",p.location||"Not provided"],["Website",p.website||"Not provided"],["Joined",dateLabel(p.created_at||p.createdAt)||"Not available"],["Status",(p.disabled||p.suspended)?"Restricted":"Active"]];$("aboutGrid").innerHTML=items.map(x=>`<div class="about-item"><small>${esc(x[0])}</small><div>${esc(x[1])}</div></div>`).join("")}
 function syncProfileToFeed(action,active,targetId=state.uid){
   const msg={id:String(targetId),action,active:!!active,at:Date.now()};
@@ -521,7 +536,7 @@ function renderMediaViewer(){
   $("mediaViewerCount").textContent=`${mediaViewerIndex+1} / ${items.length}`;
   $("mediaViewerPrev").disabled=mediaViewerIndex===0;
   $("mediaViewerNext").disabled=mediaViewerIndex===items.length-1;
-  $("mediaViewerStage").innerHTML=type==="video"?`<video src="${url}" controls playsinline autoplay preload="metadata"></video>`:`<img src="${url}" alt="SPIKE media" decoding="async">`;
+  $("mediaViewerStage").innerHTML=type==="video"?`<video src="${url}" controls playsinline autoplay preload="metadata"></video>`:`<img src="${url}" alt="SPIKE media" loading="eager" decoding="async" fetchpriority="high">`;
   const n=esc(p.authorName||nameOf(state.profile)),a=avatarOf(state.profile);
   $("mediaViewerAuthor").textContent=p.authorName||nameOf(state.profile);
   $("mediaViewerTime").textContent=ago(p.createdAt||p.created_at);
