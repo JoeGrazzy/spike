@@ -92,7 +92,7 @@
 
   function renderMomentum(body) {
     const rows=topMomentum(10);
-    body.innerHTML=rows.length?`<div class="spike-native-grid">${rows.map(({p,m},i)=>`<article class="spike-native-card"><b>${i+1}. ${esc((p.content||'Untitled Signal').slice(0,90))}</b><small>${m.momentum}/100 Momentum · ${m.comments} Echoes · ${m.shares} passes · ${m.saves} saves</small><div class="spike-native-meter"><i style="width:${m.momentum}%"></i></div><div class="spike-native-actions"><button type="button" data-native-open-signal="${esc(p.id)}">Open Signal</button><button type="button" data-native-chain="${esc(p.id)}">Start Chain</button></div></article>`).join('')}</div>`:'<div class="spike-native-empty">Release the first Signals to create Momentum.</div>';
+    body.innerHTML=rows.length?`<div class="spike-native-grid">${rows.map(({p,m},i)=>`<article class="spike-native-card"><b>${i+1}. ${esc((p.content||'Untitled Signal').slice(0,90))}</b><small>${m.momentum}/100 Momentum · ${m.comments} comments · ${m.shares} shares · ${m.saves} saves</small><div class="spike-native-meter"><i style="width:${m.momentum}%"></i></div><div class="spike-native-actions"><button type="button" data-native-open-signal="${esc(p.id)}">Open Signal</button><button type="button" data-native-chain="${esc(p.id)}">Start Chain</button></div></article>`).join('')}</div>`:'<div class="spike-native-empty">Release the first Signals to create Momentum.</div>';
   }
 
   function renderTopics(body) {

@@ -267,21 +267,21 @@ ${safeHttpUrl(p.linkUrl)?`<div class="link-card">🔗 <a href="${esc(safeHttpUrl
 
 <div class="comments" id="comments-${esc(p.id)}" data-comments-panel="${esc(p.id)}">
   <div class="comments-head">
-    <span class="comments-title">Echoes</span>
+    <span class="comments-title">Comments</span>
     <button type="button" class="comments-close" data-comments-close="${esc(p.id)}" aria-label="Close comments">×</button>
   </div>
   <div class="comment-list">${commentsHtml||`<div class="meta">No comments yet.</div>`}</div>
   <form class="comment-form" data-comment-form="${esc(p.id)}" novalidate>
     <div class="comment-input-wrap">
       <div class="comment-replying" data-comment-replying="${esc(p.id)}" hidden><span>Replying to <b data-comment-reply-name>User</b></span><button type="button" data-comment-reply-cancel aria-label="Cancel reply">×</button></div>
-      <textarea id="commentInput-${esc(p.id)}" maxlength="500" rows="1" autocomplete="off" placeholder="Add an Echo…" aria-label="Add an Echo"></textarea>
+      <textarea id="commentInput-${esc(p.id)}" maxlength="500" rows="1" autocomplete="off" placeholder="Add a comment…" aria-label="Add a comment"></textarea>
       <button type="button" class="comment-emoji" data-comment-emoji="${esc(p.id)}" aria-label="Add emoji">☺</button>
       <div class="comment-emoji-picker" data-comment-emoji-picker="${esc(p.id)}" role="menu">
         ${["❤️","😂","👍","🔥","😍","😮","😢","👏","🎉","🙏","💯","✨"].map(x=>`<button type="button" data-comment-emoji-value="${esc(x)}" aria-label="${esc(x)}">${esc(x)}</button>`).join('')}
       </div>
       <div class="comment-char-counter" data-comment-counter="${esc(p.id)}">0/500</div>
     </div>
-    <button type="submit">Echo</button>
+    <button type="submit">Comment</button>
   </form>
 </div>
 ${isSensitive?`</div>`:""}
