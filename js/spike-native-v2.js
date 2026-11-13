@@ -45,33 +45,6 @@
     return posts().map(p => ({p, m: signalMetrics(p)})).sort((a,b)=>b.m.acceleration-a.m.acceleration || b.m.depth-a.m.depth).slice(0,limit);
   }
 
-  function applyBrandLanguage(root=document) {
-    const replacements = new Map([
-      ['Close Friends','Circles'],['Close friends','Circles'],
-      ['Reels','Signal Stream'],['Reel','Signal Stream'],['reels','Signal Stream'],['reel','Signal Stream'],
-      ['Trending','Momentum'],['trending','Momentum'],['Popular','Momentum'],['popular','Momentum'],
-      ['Comments','Echoes'],['Comment','Echo'],['comments','Echoes'],['comment','Echo'],
-      ['Saved & Collections','Signal Vault'],['Saved','Signal Vault'],['saved','Signal Vault'],
-      ['Friends','Connections'],['Friend','Connection'],['friends','Connections'],['friend','Connection']
-    ]);
-    const nodes = root.querySelectorAll('button,a,h1,h2,h3,h4,p,small,strong,span,label,summary,[aria-label],[title],[placeholder]');
-    for (const el of nodes) {
-      if (el.dataset?.spikeNativeSkip === '1') continue;
-      if (el.children.length === 0 && el.textContent) {
-        const old = el.textContent.trim();
-        if (replacements.has(old)) el.textContent = replacements.get(old);
-      }
-      for (const attr of ['aria-label','title','placeholder']) {
-        const v = el.getAttribute?.(attr); if (!v) continue;
-        let next=v;
-        for (const [a,b] of replacements) next=next.replaceAll(a,b);
-        if (next!==v) el.setAttribute(attr,next);
-      }
-    }
-    const direct = [];
-    for (const [id,attr,value] of direct) { const el=$(id); if(!el) continue; if(attr==='textContent') el.textContent=value; else el.setAttribute(attr,value); }
-  }
-
   function ensureStyles() {
     if ($('spikeNativeV2Style')) return;
     const s=document.createElement('style'); s.id='spikeNativeV2Style'; s.textContent=`
@@ -185,31 +158,12 @@
     const lens=e.target.closest('[data-native-apply-lens]'); if(lens){ const rows=await loadLenses(); const x=rows.find(r=>String(r.id)===String(lens.dataset.nativeApplyLens)); const topic=x?.rules?.keywords?.[0]; if(topic) applyTopic(topic); else toast('This Lens has no keyword rule yet','info'); }
   }
 
-  function patchExistingLabels() {
-    const scope = document.body?.dataset?.spikeNativeGlobal === '1' ? document : ($('feedV2Hub') || document);
-    // Keep primary Feed vocabulary plain. Native concepts are labeled directly
-    // inside the secondary discovery-tools panel instead of rewriting the whole Feed.
-    const filters=$('filters');
-    if(filters){
-      const map={latest:'Latest Signals',following:'Following',popular:'Popular',trending:'Trending',saved:'Saved'};
-      filters.querySelectorAll('[data-filter]').forEach(b=>{ if(map[b.dataset.filter]) b.textContent=map[b.dataset.filter]; });
-    }
-    const search=$('v2DiscoverSearch'); if(search) search.placeholder='Search Signals or Topics…';
-    const reelPanel=document.querySelector('[data-v2-panel="reels"]'); if(reelPanel){ const empty=reelPanel.querySelector('.empty'); if(empty) empty.textContent='Loading Signal Stream…'; }
-  }
-
-  function observeBranding() {
-    const root=$('feedV2Hub')||document.querySelector('[data-spike-native-global=\"1\"]')||null;
-    if(!root) return;
-    let scheduled=false;
-    const obs=new MutationObserver(()=>{ if(scheduled)return; scheduled=true; requestAnimationFrame(()=>{scheduled=false;applyBrandLanguage(root);}); });
-    obs.observe(root,{subtree:true,childList:true});
-    setTimeout(()=>obs.disconnect(),30000);
-  }
-
   function boot() {
-    ensureStyles(); patchExistingLabels(); ensureNativeNavButton(); ensurePanel();
-    renderNative('momentum'); observeBranding();
+    // This enhancement belongs only to the Feed's discovery hub. Never rewrite
+    // labels across the app or run its polling loop on unrelated pages.
+    if (!$('feedV2Hub')) return;
+    ensureStyles(); ensureNativeNavButton(); ensurePanel();
+    renderNative('momentum');
     setInterval(()=>{ if($('spikeNativePanelBody') && document.visibilityState==='visible'){ const active=document.querySelector('#spikeNativePanel [data-native-tab].active')?.dataset.nativeTab; if(active==='momentum') renderMomentum($('spikeNativePanelBody')); } },30000);
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
