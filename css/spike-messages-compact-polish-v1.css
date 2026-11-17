@@ -1,0 +1,132 @@
+/* SPIKE Messages — compact premium presentation. Behaviour remains in messages.html. */
+body[data-spike-page="messages"] {
+  --spike-msg-radius: 14px;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body[data-spike-page="messages"] .app { max-width: 720px; }
+body[data-spike-page="messages"] .top {
+  gap: 9px;
+  padding: calc(8px + env(safe-area-inset-top)) 13px 9px;
+  backdrop-filter: blur(18px);
+}
+body[data-spike-page="messages"] .back,
+body[data-spike-page="messages"] .iconbtn {
+  width: 36px; height: 36px; border-radius: 12px;
+}
+body[data-spike-page="messages"] .brand { font-size: 16px; letter-spacing: -.035em; }
+body[data-spike-page="messages"] .subtitle { font-size: 10px; margin-top: 1px; }
+body[data-spike-page="messages"] .content { padding: 11px 12px calc(18px + env(safe-area-inset-bottom)); }
+body[data-spike-page="messages"] .hero {
+  padding: 12px 14px; border-radius: 16px; margin-bottom: 10px;
+  background: radial-gradient(120% 120% at 0 0,rgba(168,85,247,.13),transparent 62%),var(--panel);
+}
+body[data-spike-page="messages"] .eyebrow { font-size: 9px; letter-spacing: .11em; }
+body[data-spike-page="messages"] .hero h1 { font-size: 21px; margin: 4px 0; letter-spacing: -.045em; }
+body[data-spike-page="messages"] .hero p { font-size: 11px; line-height: 1.4; }
+body[data-spike-page="messages"] .search {
+  gap: 8px; border-radius: 12px; padding: 0 11px; margin: 10px 0;
+}
+body[data-spike-page="messages"] .search input { padding: 10px 0; font-size: 12px; }
+body[data-spike-page="messages"] .filters { gap: 6px; margin: 9px 0; padding-bottom: 1px; scrollbar-width: none; }
+body[data-spike-page="messages"] .filters::-webkit-scrollbar { display:none; }
+body[data-spike-page="messages"] .chip { padding: 7px 10px; font-size: 10px; border-radius: 10px; }
+body[data-spike-page="messages"] .countBadge { min-width: 17px; height: 17px; font-size: 9px; margin-left: 3px; }
+body[data-spike-page="messages"] .list { gap: 6px; }
+body[data-spike-page="messages"] .itemRow { gap: 6px; }
+body[data-spike-page="messages"] .item {
+  gap: 9px; padding: 9px 10px; border-radius: var(--spike-msg-radius);
+  transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+body[data-spike-page="messages"] .item:active { transform: scale(.992); }
+body[data-spike-page="messages"] .itemRow.is-unread .item {
+  border-color: color-mix(in srgb,var(--spike-accent,#a78bfa) 42%,var(--line));
+  background: linear-gradient(110deg,color-mix(in srgb,var(--spike-accent,#a78bfa) 8%,transparent),transparent 65%),var(--panel);
+}
+body[data-spike-page="messages"] .avatar { width: 40px; height: 40px; flex-basis: 40px; font-size: 13px; }
+body[data-spike-page="messages"] .name { font-size: 12px; line-height: 1.25; }
+body[data-spike-page="messages"] .preview { font-size: 10.5px; margin-top: 3px; line-height: 1.35; }
+body[data-spike-page="messages"] .meta { font-size: 9px; min-width: 44px; max-width: 68px; }
+body[data-spike-page="messages"] .presence-time-label { font-size: 9px; margin-top: 2px; }
+body[data-spike-page="messages"] .rowUnreadBadge { min-width: 17px; height: 17px; font-size: 9px; margin-top: 3px; }
+body[data-spike-page="messages"] .pinAction { min-width: 34px; width: 34px; font-size: 16px; border-radius: 11px; }
+body[data-spike-page="messages"] .unarchive { padding: 7px 8px; font-size: 10px; border-radius: 10px; }
+body[data-spike-page="messages"] .empty,
+body[data-spike-page="messages"] .notice { padding: 17px 12px; border-radius: 14px; font-size: 11px; }
+body[data-spike-page="messages"] .skeleton { border-radius: 14px; }
+body[data-spike-page="messages"] .itemRow { animation: spikeMsgRowIn .24s both; }
+body[data-spike-page="messages"] .itemRow:nth-child(2) { animation-delay: .025s; }
+body[data-spike-page="messages"] .itemRow:nth-child(3) { animation-delay: .05s; }
+body[data-spike-page="messages"] .itemRow:nth-child(4) { animation-delay: .075s; }
+body[data-spike-page="messages"] .itemRow:nth-child(5) { animation-delay: .1s; }
+@keyframes spikeMsgRowIn { from { opacity:0; transform:translateY(5px); } to { opacity:1; transform:translateY(0); } }
+@media (max-width:380px) {
+  body[data-spike-page="messages"] .content { padding-left: 9px; padding-right: 9px; }
+  body[data-spike-page="messages"] .item { padding: 8px; gap: 7px; }
+  body[data-spike-page="messages"] .avatar { width: 36px; height: 36px; flex-basis: 36px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body[data-spike-page="messages"] *, body[data-spike-page="messages"] *::before, body[data-spike-page="messages"] *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+
+/* v2 — wallet-matched compact authority: dense, calm and consistent on every screen. */
+body[data-spike-page="messages"]{
+  --spike-msg-radius:13px;
+  --msg-green:#83e6b4;
+  --msg-green-soft:rgba(131,230,180,.12);
+  background:radial-gradient(ellipse at 50% -20%,rgba(27,104,79,.16),transparent 48%),#07130f;
+  color:#f3faf6;
+  font-size:12px;
+}
+body[data-spike-page="messages"] .app{width:min(calc(100% - 24px),860px);max-width:860px;min-height:100dvh}
+body[data-spike-page="messages"] .top{gap:9px;padding:calc(9px + env(safe-area-inset-top)) 0 9px;background:rgba(7,19,15,.94);border-color:rgba(170,236,207,.11);backdrop-filter:blur(18px)}
+body[data-spike-page="messages"] .back,body[data-spike-page="messages"] .iconbtn{width:36px;height:36px;border-radius:11px;background:#10251e;border-color:rgba(208,241,223,.12);font-size:12px}
+body[data-spike-page="messages"] .brand{font-size:16px;letter-spacing:-.04em}
+body[data-spike-page="messages"] .subtitle{font-size:9px;margin-top:1px;color:#91aea1}
+body[data-spike-page="messages"] .content{padding:10px 0 calc(22px + env(safe-area-inset-bottom))}
+body[data-spike-page="messages"] .hero{padding:10px 12px;margin:0 0 9px;border:1px solid rgba(170,236,207,.10);border-radius:15px;background:linear-gradient(145deg,#10271f,#0c211a);box-shadow:0 8px 22px rgba(0,0,0,.12)}
+body[data-spike-page="messages"] .eyebrow{font-size:8px;letter-spacing:.15em;color:#83e6b4}
+body[data-spike-page="messages"] .hero h1{font-size:16px;line-height:1.15;letter-spacing:-.04em;margin:4px 0}
+body[data-spike-page="messages"] .hero p{font-size:10px;line-height:1.35;color:#a9c4b6}
+body[data-spike-page="messages"] .hero[style*="margin-top"]{margin-top:10px!important}
+body[data-spike-page="messages"] .hero[style*="margin-top"] p{margin:4px 0 8px!important}
+body[data-spike-page="messages"] .primary{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 10px;border-radius:10px;background:linear-gradient(135deg,#176044,#10432f);border:1px solid rgba(131,230,180,.18);font-size:10px;box-shadow:inset 0 1px rgba(255,255,255,.04)}
+body[data-spike-page="messages"] .search{gap:8px;margin:8px 0;padding:0 10px;border-radius:11px;background:#0c211a;border-color:rgba(170,236,207,.12);font-size:11px}
+body[data-spike-page="messages"] .search input{padding:9px 0;font-size:11px;color:#f3faf6}
+body[data-spike-page="messages"] .search input::placeholder{color:#789889}
+body[data-spike-page="messages"] .filters{gap:6px;margin:8px 0;padding:0 0 2px;scrollbar-width:none}
+body[data-spike-page="messages"] .filters::-webkit-scrollbar{display:none}
+body[data-spike-page="messages"] .chip{padding:6px 9px;border-radius:9px;border-color:rgba(170,236,207,.12);background:#0d241c;color:#a9c4b6;font-size:9px;font-weight:750;transition:background .18s,border-color .18s,transform .18s}
+body[data-spike-page="messages"] .chip.active{background:#153c2d;border-color:rgba(131,230,180,.32);color:#baf6d5}
+body[data-spike-page="messages"] .countBadge{min-width:16px;height:16px;padding:0 4px;margin-left:3px;font-size:8px;background:#236b4b;color:#eafff2}
+body[data-spike-page="messages"] .newMessagesBadge{background:#236b4b;color:#eafff2}
+body[data-spike-page="messages"] .list{gap:5px}
+body[data-spike-page="messages"] .itemRow{gap:5px;align-items:stretch}
+body[data-spike-page="messages"] .item{gap:8px;min-height:0;padding:8px 9px;border-radius:13px;border-color:rgba(170,236,207,.10);background:linear-gradient(145deg,rgba(255,255,255,.025),transparent),#0d211a;box-shadow:0 5px 14px rgba(0,0,0,.09);transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease}
+body[data-spike-page="messages"] .item:active{transform:scale(.994);box-shadow:0 2px 7px rgba(0,0,0,.12)}
+body[data-spike-page="messages"] .itemRow.is-unread .item{border-color:rgba(131,230,180,.34);background:linear-gradient(110deg,rgba(131,230,180,.075),transparent 68%),#0d241c}
+body[data-spike-page="messages"] .itemRow.is-pinned .item{border-color:rgba(131,230,180,.22)}
+body[data-spike-page="messages"] .avatar{width:36px;height:36px;flex:0 0 36px;font-size:11px;background:linear-gradient(135deg,#176044,#2a8b60);box-shadow:0 0 0 2px rgba(131,230,180,.07)}
+body[data-spike-page="messages"] .name{font-size:10px;line-height:1.2;font-weight:800;color:#effaf3}
+body[data-spike-page="messages"] .presence-dot{width:6px;height:6px;margin-left:4px}
+body[data-spike-page="messages"] .presence-time-label{font-size:8px;line-height:1.2;margin-top:2px;color:#789889}
+body[data-spike-page="messages"] .preview{font-size:9px;line-height:1.3;margin-top:3px;color:#a9c4b6}
+body[data-spike-page="messages"] .meta{min-width:42px;max-width:62px;padding-top:1px;font-size:8px;color:#789889}
+body[data-spike-page="messages"] .message-time{font-size:8px;line-height:1.25}
+body[data-spike-page="messages"] .rowUnreadBadge{min-width:15px;height:15px;padding:0 4px;margin-top:3px;font-size:8px;background:#236b4b;color:#eafff2}
+body[data-spike-page="messages"] .pinAction{width:30px;min-width:30px;align-self:center;padding:0;border-radius:9px;background:#10271f;border:1px solid rgba(170,236,207,.11);font-size:15px;color:#b8d8c6}
+body[data-spike-page="messages"] .pinAction[aria-pressed="true"]{color:#9aefbd;border-color:rgba(131,230,180,.35);background:#153c2d}
+body[data-spike-page="messages"] .unarchive:not(.pinAction){padding:6px 7px;border-radius:9px;background:#153c2d;border-color:rgba(131,230,180,.18);font-size:8px;color:#c8f6dc}
+body[data-spike-page="messages"] .empty,body[data-spike-page="messages"] .notice{padding:15px 11px;border-radius:13px;border-color:rgba(170,236,207,.15);background:#0d211a;font-size:10px;line-height:1.4;color:#a9c4b6}
+body[data-spike-page="messages"] .empty b{font-size:11px;color:#e8f7ee}
+body[data-spike-page="messages"] .empty i{font-size:20px!important;margin-bottom:5px!important;color:#83e6b4}
+body[data-spike-page="messages"] .notice{margin:0 0 8px}
+body[data-spike-page="messages"] .skeleton{height:54px;border-radius:12px;background:linear-gradient(90deg,#0d211a,#17372a,#0d211a);background-size:200% 100%}
+body[data-spike-page="messages"] .spike-message-toast{top:calc(9px + env(safe-area-inset-top));left:12px;right:12px;padding:10px 12px;border-radius:13px;border-color:rgba(131,230,180,.3);background:#10271f;box-shadow:0 12px 32px rgba(0,0,0,.34)}
+body[data-spike-page="messages"] .spike-message-toast strong{font-size:10px;color:#9aefbd;margin-bottom:3px}
+body[data-spike-page="messages"] .spike-message-toast span{font-size:9px;color:#b8d8c6}
+body[data-spike-page="messages"] :is(button,a,input):focus-visible{outline:2px solid #83e6b4;outline-offset:2px}
+@media(max-width:620px){body[data-spike-page="messages"] .app{width:calc(100% - 24px)}body[data-spike-page="messages"] .content{padding-top:9px}body[data-spike-page="messages"] .item{padding:7px 8px}body[data-spike-page="messages"] .avatar{width:34px;height:34px;flex-basis:34px}}
+@media(max-width:360px){body[data-spike-page="messages"] .app{width:calc(100% - 20px)}body[data-spike-page="messages"] .item{gap:6px;padding:7px}body[data-spike-page="messages"] .avatar{width:31px;height:31px;flex-basis:31px}body[data-spike-page="messages"] .name{font-size:9px}body[data-spike-page="messages"] .preview{font-size:8px}body[data-spike-page="messages"] .chip{padding:6px 7px;font-size:8px}}
+@media(prefers-reduced-motion:reduce){body[data-spike-page="messages"] .itemRow,body[data-spike-page="messages"] .skeleton{animation:none!important}body[data-spike-page="messages"] *{scroll-behavior:auto!important}}

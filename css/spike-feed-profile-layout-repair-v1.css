@@ -1,0 +1,9 @@
+/* SPIKE Feed + Profile layout repair — scoped, mobile-first */
+/* Profile: counteract legacy 720–780px caps and use the available viewport width. */
+body.spike-profile-page .main{width: min(100%, 1080px)!important;max-width:1080px!important;margin-inline:auto!important;padding:12px clamp(12px,2.2vw,24px) 48px!important;box-sizing:border-box!important}
+body.spike-profile-page .main > .card{width:100%!important;max-width:none!important}
+body.spike-profile-page .profile,body.spike-profile-page .profile-content,body.spike-profile-page .profile-body,body.spike-profile-page .profile-sections{width:100%!important;max-width:none!important;box-sizing:border-box!important}
+@media(max-width:650px){
+ body.spike-profile-page .main{width:100%!important;max-width:none!important;padding:7px 10px 36px!important}
+ body.spike-profile-page .cover{width:100%!important}
+}

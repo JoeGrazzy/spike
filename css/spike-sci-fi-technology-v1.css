@@ -1,0 +1,73 @@
+/* SPIKE SCI-FI TECHNOLOGY SYSTEM v1
+   Theme-aware visual layer. It decorates existing components without changing their layout or behaviour. */
+:root {
+  --spike-tech-cyan: var(--spike-accent, #55dfff);
+  --spike-tech-violet: var(--spike-accent-2, #9a83ff);
+  --spike-tech-glass: color-mix(in srgb, var(--spike-surface, #101b2b) 86%, transparent);
+  --spike-tech-edge: color-mix(in srgb, var(--spike-tech-cyan) 28%, var(--spike-line, #536579));
+  --spike-tech-edge-hot: color-mix(in srgb, var(--spike-tech-cyan) 58%, var(--spike-line, #536579));
+  --spike-tech-glow: color-mix(in srgb, var(--spike-tech-cyan) 13%, transparent);
+  --spike-tech-shadow: 0 18px 48px color-mix(in srgb, var(--spike-shadow, #000) 24%, transparent), inset 0 1px color-mix(in srgb, var(--spike-text, #fff) 8%, transparent);
+}
+html[data-spike-style] body.spike-tech-enabled {
+  background-image:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb,var(--spike-tech-cyan) 8%,transparent), transparent 36%),
+    radial-gradient(ellipse at 94% 12%, color-mix(in srgb,var(--spike-tech-violet) 7%,transparent), transparent 32%);
+  background-attachment: fixed;
+}
+/* Fine instrument-grid: ambient only, never captures pointer or touch input. */
+body.spike-tech-enabled::after {
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.20;
+  background-image:linear-gradient(color-mix(in srgb,var(--spike-tech-cyan) 7%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--spike-tech-cyan) 7%,transparent) 1px,transparent 1px);
+  background-size:48px 48px; mask-image:linear-gradient(to bottom,#000,transparent 88%);
+}
+body.spike-tech-enabled > * { position:relative; }
+body.spike-tech-enabled > #spike-future-field { position:fixed; }
+/* Existing feature surfaces receive a layered, precision-machined material. */
+html[data-spike-style] body.spike-tech-enabled :is(
+  .card,.panel,.post,.composer,.hero,.stat,.list,.friend-card,.fr-card,
+  .notification-card,.settings-card,.adminbox,.section,.premiumCard,.modal-card,.dialog,.drawer,.sheet,
+  .toolbar,.control-card,.feature-panel,.features-panel,.feature-menu,.features-menu,
+  .feed-v2-panel,.sc-hero,.sc-section,.scv-activity-panel,.sc-modal-card,
+  .wallet-feature,.wallet-table-wrap,.coin-success-card,.profile-command-action,.profile-panel,
+  .admin-section,.coin-order-card,.scv-sidebar,.scv-chat-panel,.scv-banner,.spid-card
+) {
+  border-color:var(--spike-tech-edge);
+  box-shadow:var(--spike-tech-shadow);
+  -webkit-backdrop-filter:blur(14px) saturate(125%);
+  backdrop-filter:blur(14px) saturate(125%);
+}
+html[data-spike-style] body.spike-tech-enabled :is(
+  .card,.panel,.post,.composer,.hero,.stat,.feature-panel,.profile-panel,
+  .wallet-feature,.scv-sidebar,.scv-chat-panel,.sc-modal-card
+) { background-image:linear-gradient(135deg,var(--spike-tech-glow),transparent 48%,color-mix(in srgb,var(--spike-tech-violet) 5%,transparent)); }
+/* Instrument labels and micro-typography. */
+body.spike-tech-enabled :is(.eyebrow,.section-label,.sc-eyebrow,.wallet-subheading,[data-tech-label]) {
+  letter-spacing:.14em; text-transform:uppercase;
+}
+body.spike-tech-enabled :is(.eyebrow,.section-label,.sc-eyebrow,[data-tech-label])::before {
+  content:""; display:inline-block; width:5px; height:5px; margin:0 8px 2px 0; border-radius:50%;
+  background:var(--spike-tech-cyan); box-shadow:0 0 10px var(--spike-tech-cyan);
+}
+/* Controls feel like precise console hardware without changing their hit area. */
+body.spike-tech-enabled :is(button,.btn,.primary,.btn-primary,.sc-primary,.wallet-action,.post-btn,.iconbtn,.icon-btn) {
+  transition:box-shadow .2s ease,border-color .2s ease,filter .2s ease,transform .2s ease;
+}
+body.spike-tech-enabled :is(button,.btn,.primary,.btn-primary,.sc-primary,.wallet-action,.post-btn,.iconbtn,.icon-btn):focus-visible,
+body.spike-tech-enabled :is(input,textarea,select):focus-visible {
+  outline:2px solid var(--spike-tech-cyan); outline-offset:3px;
+  box-shadow:0 0 0 5px var(--spike-tech-glow),0 0 22px var(--spike-tech-glow);
+}
+@media(hover:hover) and (pointer:fine) {
+  body.spike-tech-enabled :is(button,.btn,.primary,.btn-primary,.sc-primary,.wallet-action,.post-btn,.iconbtn,.icon-btn):hover {
+    border-color:var(--spike-tech-edge-hot); box-shadow:0 0 20px var(--spike-tech-glow),inset 0 1px color-mix(in srgb,var(--spike-tech-cyan) 18%,transparent);
+  }
+}
+body.spike-tech-enabled ::selection { background:var(--spike-tech-glow); }
+@media(max-width:680px) {
+  body.spike-tech-enabled::after { opacity:.10; background-size:36px 36px; }
+  html[data-spike-style] body.spike-tech-enabled :is(.card,.panel,.post,.composer,.hero,.stat,.feature-panel,.profile-panel,.wallet-feature,.scv-sidebar,.scv-chat-panel,.sc-modal-card) { -webkit-backdrop-filter:none; backdrop-filter:none; }
+}
+@media(prefers-reduced-motion:reduce) {
+  body.spike-tech-enabled :is(*,*::before,*::after) { scroll-behavior:auto!important; animation-duration:.01ms!important; transition-duration:.01ms!important; }
+}

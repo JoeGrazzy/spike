@@ -1,0 +1,36 @@
+/* SPIKE Admin · refined motion system — expressive, quiet, accessible */
+.admin-shell{--spike-motion-fast:150ms;--spike-motion-base:230ms;--spike-motion-slow:360ms}
+.admin-shell .admin-hero{animation:spikeHeroIn 520ms cubic-bezier(.2,.75,.25,1) both}
+.admin-shell .admin-hero:after{animation:spikeHaloDrift 14s ease-in-out infinite alternate}
+.admin-shell .wallet-grid>.wallet-panel,
+.admin-shell .admin-stat-card,
+.admin-shell .verify-stats>article,
+.admin-shell .purchase-stats>.wallet-panel{animation:spikeCardIn 430ms cubic-bezier(.2,.75,.25,1) both}
+.admin-shell .wallet-grid>.wallet-panel:nth-child(2),.admin-shell .admin-stat-card:nth-child(2),.admin-shell .verify-stats>article:nth-child(2),.admin-shell .purchase-stats>.wallet-panel:nth-child(2){animation-delay:45ms}
+.admin-shell .wallet-grid>.wallet-panel:nth-child(3),.admin-shell .admin-stat-card:nth-child(3),.admin-shell .verify-stats>article:nth-child(3),.admin-shell .purchase-stats>.wallet-panel:nth-child(3){animation-delay:90ms}
+.admin-shell .wallet-grid>.wallet-panel:nth-child(4),.admin-shell .admin-stat-card:nth-child(4),.admin-shell .verify-stats>article:nth-child(4),.admin-shell .purchase-stats>.wallet-panel:nth-child(4){animation-delay:135ms}
+.admin-shell .wallet-panel,.admin-shell .admin-stat-card,.admin-shell .verify-stats>article{transition:transform var(--spike-motion-base) cubic-bezier(.2,.7,.2,1),border-color var(--spike-motion-base),box-shadow var(--spike-motion-base)}
+.admin-shell .wallet-panel:hover,.admin-shell .admin-stat-card:hover,.admin-shell .verify-stats>article:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent,var(--primary)) 34%,var(--line));box-shadow:0 9px 24px rgba(0,0,0,.09)}
+.admin-shell .admin-tab,.admin-shell .detail-tab,.admin-shell .admin-refresh,.admin-shell .admin-close-button,.admin-shell button{transition:transform var(--spike-motion-fast) ease,background-color var(--spike-motion-fast) ease,border-color var(--spike-motion-fast) ease,box-shadow var(--spike-motion-fast) ease}
+.admin-shell .admin-tab:active,.admin-shell .detail-tab:active,.admin-shell .admin-refresh:active,.admin-shell .admin-close-button:active,.admin-shell button:active{transform:scale(.975)}
+.admin-shell .admin-tab.is-active{box-shadow:inset 0 -2px 0 var(--accent,var(--primary)),0 2px 9px rgba(0,0,0,.08)}
+.admin-shell .admin-view{transform-origin:top center;animation:spikeViewIn 260ms cubic-bezier(.2,.75,.25,1) both}
+.admin-shell .user-detail,.admin-shell .verify-detail,.admin-shell .report-detail,.admin-shell .purchase-detail{animation:spikeDetailIn 300ms cubic-bezier(.2,.75,.25,1) both}
+.admin-shell .user-row,.admin-shell .verify-row,.admin-shell .report-row,.admin-shell .purchase-row{transition:transform var(--spike-motion-fast) ease,border-color var(--spike-motion-fast) ease,background-color var(--spike-motion-fast) ease,box-shadow var(--spike-motion-fast) ease}
+.admin-shell .user-row:hover,.admin-shell .verify-row:hover,.admin-shell .report-row:hover,.admin-shell .purchase-row:hover{transform:translateX(2px);box-shadow:0 4px 13px rgba(0,0,0,.07)}
+.admin-shell .admin-close-button{position:relative;overflow:hidden}
+.admin-shell .admin-close-button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.admin-shell .admin-close-button:focus-visible,.admin-shell button:focus-visible,.admin-shell a:focus-visible{outline:2px solid var(--accent,var(--primary));outline-offset:3px}
+.admin-shell .admin-close-button::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%);transform:translateX(-120%);transition:transform 430ms ease;pointer-events:none}
+.admin-shell .admin-close-button:hover::after{transform:translateX(120%)}
+.admin-shell .admin-stat-icon{transition:transform 260ms cubic-bezier(.2,.8,.2,1),background-color 260ms ease}
+.admin-shell .admin-stat-card:hover .admin-stat-icon{transform:rotate(-7deg) scale(1.07);background:var(--surface)}
+.admin-shell .admin-refresh[aria-busy="true"]{animation:spikeSoftPulse 1.1s ease-in-out infinite}
+@keyframes spikeHeroIn{from{opacity:0;transform:translateY(9px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spikeCardIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spikeViewIn{from{opacity:.45;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spikeDetailIn{from{opacity:0;transform:translateY(7px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spikeHaloDrift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-13px,9px,0) scale(1.06)}}
+@keyframes spikeSoftPulse{0%,100%{opacity:1}50%{opacity:.62}}
+@media(hover:none){.admin-shell .wallet-panel:hover,.admin-shell .admin-stat-card:hover,.admin-shell .user-row:hover,.admin-shell .verify-row:hover,.admin-shell .report-row:hover,.admin-shell .purchase-row:hover{transform:none;box-shadow:none}}
+@media(prefers-reduced-motion:reduce){.admin-shell *, .admin-shell *::before,.admin-shell *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;transform:none!important}}

@@ -1,0 +1,100 @@
+/* SPIKE Friends — compact premium presentation. Existing tabs/actions/data flows are untouched. */
+body[data-spike-page="friends"] {
+  font-size: 12px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body[data-spike-page="friends"] .header {
+  padding: calc(9px + env(safe-area-inset-top)) 13px 8px;
+  backdrop-filter: blur(16px);
+}
+body[data-spike-page="friends"] .header h1 { font-size: 19px; letter-spacing: -.04em; }
+body[data-spike-page="friends"] .header-actions { gap: 8px; }
+body[data-spike-page="friends"] .header-actions button {
+  width: 34px; height: 34px; font-size: 13px;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+}
+body[data-spike-page="friends"] .header-actions button:active,
+body[data-spike-page="friends"] .friend-action button:active,
+body[data-spike-page="friends"] .tab:active { transform: scale(.96); }
+body[data-spike-page="friends"] #tabs.tabs {
+  gap: 3px; padding: 0 10px 8px; overflow-x: auto; scrollbar-width: none;
+}
+body[data-spike-page="friends"] #tabs.tabs::-webkit-scrollbar { display:none; }
+body[data-spike-page="friends"] #tabs .tab {
+  min-width: 0; padding: 7px 5px; border-radius: 10px;
+  font-size: 10px; line-height: 1.2; letter-spacing: 0;
+  white-space: nowrap; transition: background .18s ease,color .18s ease,transform .18s ease;
+}
+body[data-spike-page="friends"] #tabs .tab .count { padding: 1px 5px; margin-left: 2px; font-size: 9px; }
+body[data-spike-page="friends"] .search-wrap { padding: 0 12px 8px; }
+body[data-spike-page="friends"] .search-wrap input {
+  min-height: 36px; padding: 8px 12px 8px 36px; border-radius: 11px; font-size: 11px;
+}
+body[data-spike-page="friends"] .search-wrap .icon i { left: 12px; font-size: 12px; }
+body[data-spike-page="friends"] .content {
+  padding: 0 12px calc(82px + env(safe-area-inset-bottom));
+  overscroll-behavior: contain; scrollbar-width: thin;
+}
+body[data-spike-page="friends"] .section-label {
+  margin: 12px 0 7px; gap: 6px; font-size: 10px; letter-spacing: .07em;
+}
+body[data-spike-page="friends"] .section-label span { padding: 2px 7px; font-size: 9px; }
+body[data-spike-page="friends"] .friend-card,
+body[data-spike-page="friends"] .request-card,
+body[data-spike-page="friends"] .suggestion-card,
+body[data-spike-page="friends"] .network-recommendation-card {
+  min-height: 0; padding: 8px 9px; margin-bottom: 6px; border-radius: 13px;
+  transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+body[data-spike-page="friends"] .friend-card:active,
+body[data-spike-page="friends"] .request-card:active,
+body[data-spike-page="friends"] .network-recommendation-card:active { transform: scale(.993); }
+body[data-spike-page="friends"] .friend-avatar { width: 38px; height: 38px; font-size: 14px; border-width: 1px; }
+body[data-spike-page="friends"] .friend-avatar .status-dot { width: 9px; height: 9px; border-width: 1.5px; }
+body[data-spike-page="friends"] .friend-info { margin-left: 9px; }
+body[data-spike-page="friends"] .friend-info .name { gap: 5px; font-size: 12px; line-height: 1.25; }
+body[data-spike-page="friends"] .friend-info .name .mutual { padding: 1px 5px; font-size: 8px; }
+body[data-spike-page="friends"] .friend-info .sub,
+body[data-spike-page="friends"] .request-card .friend-info .sub,
+body[data-spike-page="friends"] .network-recommendation-card .network-reason {
+  margin-top: 2px; font-size: 9.5px; line-height: 1.35;
+}
+body[data-spike-page="friends"] .friend-action { gap: 5px; }
+body[data-spike-page="friends"] .friend-action button,
+body[data-spike-page="friends"] .request-btn,
+body[data-spike-page="friends"] .icon-btn {
+  min-height: 29px; min-width: 29px; padding: 5px 8px; border-radius: 9px; font-size: 10px;
+}
+body[data-spike-page="friends"] .friend-action button.icon-btn { padding: 5px; }
+body[data-spike-page="friends"] .request-btn { min-height: 28px; }
+body[data-spike-page="friends"] .friends-load-more { min-height: 32px; padding: 7px 11px; border-radius: 10px; font-size: 10px; }
+body[data-spike-page="friends"] .empty-state { padding: 22px 12px; }
+body[data-spike-page="friends"] .empty-state i { font-size: 24px; }
+body[data-spike-page="friends"] .empty-state p { font-size: 11px; line-height: 1.45; }
+body[data-spike-page="friends"] .notice { padding: 10px 12px; border-radius: 11px; font-size: 11px; }
+body[data-spike-page="friends"] .bottom-nav { min-height: 55px; padding-bottom: env(safe-area-inset-bottom); }
+body[data-spike-page="friends"] .nav-item { gap: 2px; }
+body[data-spike-page="friends"] .nav-item i { font-size: 16px; }
+body[data-spike-page="friends"] .nav-item span { font-size: 9px; }
+body[data-spike-page="friends"] #content .section-label { scroll-margin-top: 12px; }
+body[data-spike-page="friends"] .friend-card,
+body[data-spike-page="friends"] .request-card,
+body[data-spike-page="friends"] .network-recommendation-card { animation: spikeFriendIn .22s both; }
+body[data-spike-page="friends"] .friend-card:nth-child(2),
+body[data-spike-page="friends"] .request-card:nth-child(2) { animation-delay: .025s; }
+body[data-spike-page="friends"] .friend-card:nth-child(3),
+body[data-spike-page="friends"] .request-card:nth-child(3) { animation-delay: .05s; }
+@keyframes spikeFriendIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:translateY(0); } }
+@media (max-width:420px) {
+  body[data-spike-page="friends"] .content { padding-left: 9px; padding-right: 9px; }
+  body[data-spike-page="friends"] #tabs.tabs { padding-left: 8px; padding-right: 8px; }
+  body[data-spike-page="friends"] #tabs .tab { padding-left: 3px; padding-right: 3px; font-size: 9px; }
+  body[data-spike-page="friends"] .friend-card,
+  body[data-spike-page="friends"] .request-card,
+  body[data-spike-page="friends"] .network-recommendation-card { padding: 7px; }
+  body[data-spike-page="friends"] .friend-avatar { width: 35px; height: 35px; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body[data-spike-page="friends"] *, body[data-spike-page="friends"] *::before, body[data-spike-page="friends"] *::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}

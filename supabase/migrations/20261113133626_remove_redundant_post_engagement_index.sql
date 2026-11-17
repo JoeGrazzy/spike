@@ -1,0 +1,1 @@
+drop index if exists public.post_engagement_events_post_created_idx;

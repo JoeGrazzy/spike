@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="google" content="notranslate">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090b14">
+  <meta name="description" content="Join the conversation in a SPIKE room.">
+  <title>SPIKE — Room</title>
+  <script id="spike-theme-bootstrap">(()=>{try{const k='spike-theme-choice-v3';let n=parseInt(localStorage.getItem(k)||'1',10);if(n<1||n>5)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=[1,3,5].includes(n)?'dark':'light';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(_){}})();</script>
+  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
+  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
+  <link rel="stylesheet" href="css/perf.css">
+  <link rel="stylesheet" href="css/spike-identity.css?v=identity-build14">
+  <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+  <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=2">
+  <link rel="stylesheet" href="css/spike-room-page.css?v=room-ui-v69-live-pulse">
+  <link rel="stylesheet" href="css/spike-room-compact-premium-v1.css?v=1">
+  <link rel="stylesheet" href="css/spike-room-bottom-nav-v1.css?v=1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase-singleton.js"></script>
+  <script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
+  <script src="js/spike-identity.js?v=identity-build14"></script>
+  <script src="js/spike-navigation.js"></script>
+</head>
+<body data-spike-page="room">
+  <div class="room-shell">
+    <header class="room-header">
+      <a class="room-brand" href="rooms.html" aria-label="Back to SPIKE Rooms"><span class="brand-mark">S</span><span>SPIKE <small>ROOMS</small></span></a>
+      <div class="header-actions">
+        <button class="room-live-speaker" id="roomLiveAudioSpeaker" type="button" data-room-feature="audio" hidden aria-label="Open live room audio controls" title="Live room audio">🔊</button>
+        <a class="header-link" href="wallet.html">Wallet</a>
+        <a class="header-avatar" href="profile.html" aria-label="Your profile">◉</a>
+        <button class="room-menu-toggle" id="roomMenuToggle" type="button" aria-expanded="false" aria-controls="roomMenu" aria-label="Open room menu">⋮<span class="room-audio-request-badge" id="roomAudioRequestBadge" hidden>0</span></button>
+      </div>
+      <div class="room-menu" id="roomMenu" hidden>
+        <div class="room-menu-title"><span class="room-menu-live-dot"></span><div><strong id="roomLiveTitle">SPIKE Room</strong><small id="roomLiveSubtitle">Room options</small></div></div>
+        <div class="room-menu-info" id="roomMenuInfo"></div>
+        <div class="room-feature-grid" aria-label="Room features">
+          <button type="button" class="room-feature-tile" data-room-feature="chat"><span class="feature-icon">☏</span><span><strong>Chat</strong><small>Return to conversation</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="people"><span class="feature-icon">♟</span><span><strong>People</strong><small><span id="roomMenuMemberCount">0</span> members · private messages</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="invites" hidden><span class="feature-icon">＋</span><span><strong>Invite members</strong><small>Bring friends into this room</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="info"><span class="feature-icon">ⓘ</span><span><strong>Room information</strong><small>Details, rules and host</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="audio"><span class="feature-icon" id="roomAudioFeatureIcon">✋</span><span><strong id="roomAudioFeatureTitle">Request to go LIVE</strong><small>Member requests · owner approval</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="gifts"><span class="feature-icon">🎁</span><span><strong>Gift a room member</strong><small>Gift any eligible member, live or not</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="share"><span class="feature-icon">↗</span><span><strong>Share room</strong><small>Copy or share the room link</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="report"><span class="feature-icon">⚑</span><span><strong>Report room</strong><small>Tell SPIKE about a concern</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="customize" hidden><span class="feature-icon">✧</span><span><strong>Customize room</strong><small>Design the room for your members</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="settings" hidden><span class="feature-icon">☷</span><span><strong>Room settings</strong><small>Update details and chat access</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="host" hidden><span class="feature-icon">⬡</span><span><strong>Host controls</strong><small>Manage participants and room</small></span></button>
+          <button type="button" class="room-feature-tile is-danger" data-room-feature="end" hidden><span class="feature-icon">■</span><span><strong>End room</strong><small>Close this room for everyone</small></span></button>
+          <button type="button" class="room-feature-tile is-danger" data-room-feature="leave"><span class="feature-icon">⇥</span><span><strong>Leave room</strong><small>Leave without ending the room</small></span></button>
+        </div>
+        <a class="room-menu-item" href="rooms.html"><span>⌂</span><span><strong>Browse rooms</strong><small>Find another conversation</small></span></a>
+      </div>
+    </header>
+
+    <main class="room-main">
+
+
+      <section class="room-hero" aria-labelledby="roomTitle">
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-content">
+          <div class="room-kicker"><span class="status-dot" id="statusDot"></span><span id="roomStatusLabel">ROOM PREVIEW</span><span class="kicker-divider">/</span><span id="roomCategory">SPIKE COMMUNITY</span></div>
+          <h1 id="roomTitle">Your next conversation starts here.</h1>
+          <p id="roomDescription">A place to connect, share ideas and meet your people.</p>
+          <div class="room-facts">
+            <span><span class="fact-icon">♙</span><span id="roomHost">Room host</span></span>
+            <span><span class="fact-icon">◎</span><span id="roomCapacity">Participant limit</span></span>
+            <span><span class="fact-icon">⌁</span><span id="roomAccess">Public room</span></span>
+          </div>
+        </div>
+        <div class="hero-orbit" aria-hidden="true"><div class="orbit-ring ring-a"></div><div class="orbit-ring ring-b"></div><div class="orbit-core">S</div><span class="orbit-spark spark-a"></span><span class="orbit-spark spark-b"></span><span class="orbit-spark spark-c"></span></div>
+      </section>
+
+      <section class="connection-card" aria-live="polite">
+        <div class="connection-icon" id="connectionIcon" aria-hidden="true">⌁</div>
+        <div class="connection-copy">
+          <span class="eyebrow" id="connectionEyebrow">GETTING THINGS READY</span>
+          <h2 id="connectionTitle">Connecting to your room</h2>
+          <p id="connectionMessage">SPIKE is securely checking your session and room access.</p>
+          <div class="progress-track" id="progressTrack"><span id="progressBar"></span></div>
+        </div>
+        <div class="connection-actions" id="connectionActions">
+          <button class="primary-button" id="retryButton" type="button" hidden>Try again <span aria-hidden="true">↻</span></button>
+          <button class="secondary-button" id="leaveButton" type="button" hidden>Leave room</button>
+          <a class="secondary-button" id="walletButton" href="wallet.html" hidden>View Verified access</a>
+          <a class="secondary-button" id="roomsButton" href="rooms.html" hidden>Browse rooms</a>
+        </div>
+      </section>
+
+      <section class="room-chat-workspace" id="roomChatWorkspace" hidden aria-label="Room chat">
+        <div class="room-chat-column">
+          <div class="room-custom-welcome" id="roomCustomWelcome" hidden></div>
+          <div class="chat-panel-head">
+            <div class="chat-room-heading"><span class="chat-eyebrow"><span class="status-dot live" id="chatStatusDot"></span> <span id="chatRoomCategory">SPIKE ROOMS</span></span><h2 id="chatRoomHeading">Room chat</h2><p id="chatConnectionState">Loading recent messages…</p></div>
+            <div class="chat-head-actions"><button class="chat-refresh" id="chatRefreshButton" type="button" aria-label="Refresh chat">↻</button><button class="chat-refresh" id="chatMembersOpen" type="button" aria-label="View members">♙</button></div>
+          </div>
+          <div class="chat-message-list" id="chatMessageList" role="log" aria-live="polite" aria-relevant="additions text">
+            <div class="chat-empty-state"><span>✦</span><strong>Getting the conversation ready</strong><p>Recent room messages will appear here.</p></div>
+          </div>
+          <div class="chat-reply-context" id="chatReplyContext" hidden><span id="chatReplyLabel">Replying to a message</span><button id="chatCancelReply" type="button" aria-label="Cancel reply">×</button></div>
+          <form class="chat-composer" id="chatComposer">
+            <label class="sr-only" for="chatMessageInput">Write a message</label>
+            <textarea id="chatMessageInput" rows="1" maxlength="3000" placeholder="Write a message…" autocomplete="off"></textarea>
+            <button type="submit" id="chatSendButton"><span>Send</span><b aria-hidden="true">➤</b></button>
+          </form>
+          <p class="chat-composer-note" id="chatComposerNote">Be kind. Keep the conversation welcoming.</p>
+        </div>
+        <aside class="room-members-column">
+          <div class="members-panel-head"><div><span class="chat-eyebrow">IN THIS ROOM</span><h2>Members <span id="roomMemberCount">0</span></h2></div><button id="membersRefreshButton" class="chat-refresh" type="button" aria-label="Refresh members">↻</button></div>
+          <div class="room-members-list" id="roomMembersList"><p class="members-loading">Loading members…</p></div>
+          <div class="presence-footnote"><span class="presence-dot"></span> Live presence when available</div>
+        </aside>
+      </section>
+</main>
+
+    <footer class="room-footer"><span>SPIKE ROOMS</span><span>Make space for good conversations.</span></footer>
+  </div>
+  <nav class="spike-room-bottom-nav" id="spikeRoomBottomNav" aria-label="SPIKE main navigation">
+    <a data-spike-nav="home" href="feed.html" aria-label="Home"><span class="room-nav-icon" aria-hidden="true">⌂</span><small>Home</small></a>
+    <a data-spike-nav="discover" href="feed.html#discover" aria-label="Discover"><span class="room-nav-icon" aria-hidden="true">⌕</span><small>Discover</small></a>
+    <a data-spike-nav="rooms" class="active" href="rooms.html" aria-current="page" aria-label="Rooms"><span class="room-nav-icon" aria-hidden="true">◉</span><small>Rooms</small></a>
+    <a data-spike-nav="messages" href="messages.html" aria-label="Messages"><span class="room-nav-icon" aria-hidden="true">▤</span><small>Messages</small></a>
+    <a data-spike-nav="profile" href="profile.html" aria-label="Profile"><span class="room-nav-icon" aria-hidden="true">◌</span><small>Me</small></a>
+  </nav>
+  <div class="room-members-drawer" id="roomMembersDrawer" hidden>
+    <button class="drawer-backdrop" id="roomMembersClose" type="button" aria-label="Close members"></button>
+    <section class="room-members-sheet" role="dialog" aria-modal="true" aria-labelledby="membersDrawerTitle">
+      <div class="drawer-head"><div><span class="chat-eyebrow">IN THIS ROOM</span><h2 id="membersDrawerTitle">Members <span id="drawerMemberCount">0</span></h2></div><button class="chat-refresh" id="drawerMembersRefresh" type="button" aria-label="Refresh members">↻</button><button class="chat-refresh" id="roomMembersDismiss" type="button" aria-label="Close members">×</button></div>
+      <div id="roomMembersMount"></div>
+    </section>
+  </div>
+
+  <div class="room-feature-overlay" id="roomFeatureOverlay" hidden>
+    <button class="room-feature-backdrop" type="button" data-feature-close aria-label="Close room feature"></button>
+    <section class="room-feature-sheet" role="dialog" aria-modal="true" aria-labelledby="roomFeatureTitle">
+      <header class="room-feature-head"><div><span class="chat-eyebrow" id="roomFeatureEyebrow">SPIKE ROOM</span><h2 id="roomFeatureTitle">Room features</h2></div><button class="chat-refresh" type="button" data-feature-close aria-label="Close">×</button></header>
+      <div class="room-feature-content" id="roomFeatureContent"><p class="members-loading">Loading…</p></div>
+    </section>
+  </div>
+  <div class="sr-status" id="roomLiveStatus" role="status" aria-live="polite">Starting room connection…</div>
+  <script src="js/spike-dialog.js?v=room-dialog-v1" defer></script>
+  <script src="js/spike-room-page.js?v=room-ui-v42" defer></script>
+  <script src="js/spike-room-chat-v2.js?v=compact-v36-perf" defer></script>
+  <script src="js/spike-room-fullscreen.js?v=compact-v38" defer></script>
+  <script src="js/spike-select-experience-v1.js?v=2" defer></script>
+  <script src="js/spike-room-audio-v1.js?v=room-audio-v70-voice-stun-20261117" defer></script>
+  <script src="js/spike-room-features-v1.js?v=room-ui-v53-background-polling" defer></script>
+</body>
+</html>

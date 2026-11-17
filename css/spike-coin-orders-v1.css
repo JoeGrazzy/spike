@@ -1,0 +1,23 @@
+/* SPIKE SP Coin purchase review — scoped to Economy purchase cards */
+#coinOrdersList{margin-top:16px}
+.coin-orders-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:14px}
+.coin-order-card{min-width:0;border:1px solid var(--line);border-radius:16px;padding:16px;background:linear-gradient(145deg,rgba(20,145,99,.075),var(--surface,rgba(10,25,20,.6)));box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.coin-order-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:13px;border-bottom:1px solid var(--line)}
+.coin-order-kicker,.coin-order-meta span,.coin-order-metrics span{display:block;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+.coin-order-reference{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere;letter-spacing:.025em}
+.coin-order-state{flex:none;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:900;letter-spacing:.04em}
+.coin-order-state.is-pending{background:rgba(214,160,55,.14);color:#e6bb68;border:1px solid rgba(214,160,55,.28)}
+.coin-order-state.is-reported{background:rgba(24,165,111,.14);color:#51d6a0;border:1px solid rgba(24,165,111,.3)}
+.coin-order-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:15px 0}
+.coin-order-metrics>div{background:var(--surface2,rgba(255,255,255,.035));border:1px solid var(--line);border-radius:12px;padding:11px;min-width:0}
+.coin-order-metrics strong{display:block;margin-top:5px;font-size:19px;overflow-wrap:anywhere}
+.coin-order-metrics small{display:block;margin-top:3px;color:var(--muted);font-size:11px}
+.coin-order-meta{display:grid;gap:9px;padding:12px 0;border-top:1px solid var(--line)}
+.coin-order-meta code,.coin-order-meta time,.coin-order-meta strong{display:block;margin-top:4px;font-size:12px;overflow-wrap:anywhere}
+.coin-order-actions{display:flex;flex-wrap:wrap;align-items:center;gap:9px;padding-top:13px;border-top:1px solid var(--line)}
+.coin-order-actions .btn{min-height:40px}
+.coin-order-actions .btn.primary{box-shadow:0 5px 16px rgba(0,160,108,.18)}
+.coin-order-waiting{flex:1 1 100%;padding:10px 12px;border:1px solid rgba(214,160,55,.22);background:rgba(214,160,55,.07);border-radius:11px;color:var(--muted);font-size:12px;line-height:1.5}
+.coin-orders-empty{padding:20px;border:1px dashed var(--line);border-radius:14px;text-align:center}
+.coin-orders-empty strong{display:block;margin-bottom:5px}
+@media(max-width:520px){.coin-order-card{padding:13px}.coin-order-head{flex-direction:column}.coin-order-metrics strong{font-size:17px}.coin-order-actions{align-items:stretch}.coin-order-actions .btn{flex:1 1 100%}}

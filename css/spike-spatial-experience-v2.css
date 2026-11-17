@@ -1,0 +1,27 @@
+/* SPIKE SPATIAL EXPERIENCE v2 — dimensional feature interfaces. */
+:root{--spx-cyan:#54e7ff;--spx-blue:#4c8dff;--spx-violet:#9b7bff;--spx-glass:rgba(8,20,38,.68);--spx-line:rgba(92,219,255,.24)}
+.spike-future-enabled :is(.sc-hero,.wallet-balance-card,#feedV2Hub .spike-discover-head){position:relative;isolation:isolate;transform-style:preserve-3d;overflow:hidden}
+.spike-future-enabled :is(.sc-hero,.wallet-balance-card,#feedV2Hub .spike-discover-head)::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at var(--spx-light-x,78%) var(--spx-light-y,22%),rgba(67,211,255,.13),transparent 42%),linear-gradient(115deg,transparent 35%,rgba(97,161,255,.045) 50%,transparent 68%);opacity:.9}
+.spike-future-enabled .sc-hero{perspective:1100px;border-color:var(--spx-line);box-shadow:0 26px 75px rgba(0,0,0,.28),inset 0 1px rgba(198,245,255,.09)}
+.spike-future-enabled .sc-orbit{transform:translateZ(24px);filter:drop-shadow(0 0 24px rgba(54,204,255,.16))}
+.spike-future-enabled .sc-orbit-ring{border-color:rgba(87,222,255,.42);box-shadow:0 0 22px rgba(48,197,255,.12),inset 0 0 18px rgba(48,197,255,.07)}
+.spike-future-enabled .sc-orbit-core{background:radial-gradient(circle at 34% 28%,rgba(151,245,255,.42),rgba(27,95,153,.28) 34%,rgba(5,16,35,.92) 72%);border:1px solid rgba(112,233,255,.7);box-shadow:0 0 26px rgba(49,205,255,.32),inset 0 0 24px rgba(80,201,255,.18);transform:translateZ(35px)}
+.spike-future-enabled .wallet-balance-card{perspective:1000px;border-color:rgba(92,219,255,.34);box-shadow:0 28px 70px rgba(0,0,0,.3),inset 0 1px rgba(207,246,255,.13)}
+.spike-future-enabled .wallet-balance{position:relative;z-index:2;text-shadow:0 0 26px rgba(75,220,255,.2)}
+.spike-future-enabled .wallet-quick-actions button,.spike-future-enabled .wallet-feature{transform-style:preserve-3d;backface-visibility:hidden}
+.spike-future-enabled #feedV2Hub .spike-discover-head{border-color:var(--spx-line);box-shadow:0 20px 58px rgba(0,0,0,.24),inset 0 1px rgba(190,240,255,.08)}
+.spike-future-enabled .feed-v2-panel,.spike-future-enabled .sc-section,.spike-future-enabled .wallet-activity-preview{backdrop-filter:blur(14px) saturate(1.12);-webkit-backdrop-filter:blur(14px) saturate(1.12)}
+.spx-spatial-mark{position:absolute;right:clamp(12px,3vw,34px);top:50%;width:clamp(94px,17vw,164px);aspect-ratio:1;transform:translateY(-50%) translateZ(34px);pointer-events:none;opacity:.76;z-index:0}
+.spx-spatial-mark svg{display:block;width:100%;height:100%;overflow:visible;filter:drop-shadow(0 0 12px rgba(70,211,255,.2))}
+.spx-spatial-mark .spx-spin{transform-origin:50px 50px;animation:spx-rotate 26s linear infinite}
+.spx-spatial-mark .spx-counter{transform-origin:50px 50px;animation:spx-rotate 19s linear infinite reverse}
+.spx-spatial-mark .spx-pulse{animation:spx-pulse 3.2s ease-in-out infinite}
+#feedV2Hub .spike-discover-head{padding-right:clamp(112px,20vw,190px)}
+.wallet-balance-card .spx-spatial-mark{right:18px;width:clamp(88px,15vw,138px);opacity:.54}
+.wallet-balance-card .wallet-balance-head,.wallet-balance-card .wallet-balance,.wallet-balance-card .wallet-balance-caption,.wallet-balance-card .wallet-balance-foot{position:relative;z-index:1}
+.sc-hero .spx-spatial-mark{right:clamp(14px,4vw,40px);opacity:.36}
+.spx-depth-ready{transition:transform .24s ease-out,box-shadow .24s ease-out}
+@keyframes spx-rotate{to{transform:rotate(360deg)}}
+@keyframes spx-pulse{0%,100%{opacity:.38}50%{opacity:.95}}
+@media(max-width:680px){.spx-spatial-mark{width:88px;right:10px;opacity:.34}.sc-hero .spx-spatial-mark{width:94px;right:8px;opacity:.3}#feedV2Hub .spike-discover-head{padding-right:100px}.wallet-balance-card .spx-spatial-mark{width:82px;right:8px;opacity:.27}.spike-future-enabled .sc-orbit{transform:scale(.9)}}
+@media(prefers-reduced-motion:reduce){.spx-spatial-mark .spx-spin,.spx-spatial-mark .spx-counter,.spx-spatial-mark .spx-pulse{animation:none!important}.spx-depth-ready{transition:none!important}}

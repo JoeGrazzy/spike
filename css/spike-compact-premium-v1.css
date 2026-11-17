@@ -1,0 +1,55 @@
+/* SPIKE COMPACT PREMIUM SYSTEM V1
+   App-wide density refinement. Keeps page-specific colors and behavior intact. */
+:root{
+  --spike-density-gutter:clamp(10px,2.4vw,22px);
+  --spike-density-gap:clamp(8px,1.5vw,14px);
+  --spike-density-radius:14px;
+  --spike-density-control:40px;
+  --spike-density-body:14px;
+  --spike-density-muted:12px;
+}
+html{font-size:15px;scroll-padding-top:76px;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{font-size:var(--spike-density-body);line-height:1.48;letter-spacing:0;}
+body :where(p,li,dd,dt){line-height:1.5;}
+body :where(h1,h2,h3,h4,h5,h6){line-height:1.22;letter-spacing:-.025em;text-wrap:pretty;}
+body h1{font-size:clamp(1.55rem,2.8vw,2rem);}
+body h2{font-size:clamp(1.25rem,2.2vw,1.55rem);}
+body h3{font-size:1.08rem;}
+body h4{font-size:.98rem;}
+body :where(.subtitle,.sub-title,.description,.helper-text,.muted,.meta,.eyebrow,.section-kicker){line-height:1.45;}
+body :where(.subtitle,.sub-title,.helper-text,.meta,.muted,.eyebrow,.section-kicker){font-size:var(--spike-density-muted);}
+body :where(button,.btn,[role="button"],input[type="button"],input[type="submit"]){min-height:var(--spike-density-control);font-size:.88rem;line-height:1.2;padding-block:.52rem;padding-inline:.82rem;border-radius:10px;}
+body :where(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),select,textarea){font-size:.9rem;line-height:1.35;min-height:40px;padding:.58rem .72rem;border-radius:10px;}
+body :where(input[type="checkbox"],input[type="radio"]){accent-color:var(--spike-accent,#39cfff);}
+body :where(label){font-size:.82rem;line-height:1.4;}
+body :where(.card,.panel,.surface,.section-card,.settings-card,.list-card,.workspace-card,.content-card,.stat-card,.dashboard-card,.feed-card,.post-card,.profile-card,.wallet-card,.notification-card,.friend-card){border-radius:var(--spike-density-radius);}
+body :where(.page-header,.section-header,.section-head,.panel-header,.card-header){gap:10px;margin-bottom:12px;}
+body :where(.toolbar,.action-row,.header-actions,.filter-row,.filters-row){gap:8px;}
+body :where(.badge,.pill,.chip,.tag){font-size:.72rem;line-height:1.25;padding:.25rem .55rem;border-radius:999px;}
+body :where(.icon-button,.btn-icon,[aria-label][type="button"]){min-width:36px;min-height:36px;padding:0;}
+body :where(.divider,hr){opacity:.75;}
+body :where(.empty-state,.loading-state){padding:22px 16px;font-size:.88rem;}
+body :where(.modal-card,.dialog-card,.sheet-card,.drawer-panel){border-radius:16px;}
+body :where(.modal-card,.dialog-card,.sheet-card) :where(h1,h2,h3){margin-top:0;}
+body :where(.modal-card,.dialog-card,.sheet-card) :where(form){gap:11px;}
+body :where(.modal-card,.dialog-card,.sheet-card) :where(label){gap:5px;}
+body :where(.modal-card,.dialog-card,.sheet-card) :where(input,select,textarea){min-height:40px;}
+body :where(.table-wrap,table){font-size:.84rem;}
+body :where(th,td){padding:9px 10px;}
+:focus-visible{outline-color:var(--spike-accent,#42cfff);outline-offset:2px;}
+
+
+
+@media(max-width:760px){
+  html{font-size:14.5px;}
+  body{font-size:13.5px;}
+  body h1{font-size:clamp(1.35rem,5vw,1.7rem);}
+  body h2{font-size:clamp(1.15rem,4.2vw,1.38rem);}
+  body :where(.page-header,.section-header,.section-head,.panel-header,.card-header){gap:8px;margin-bottom:10px;}
+  body :where(.card,.panel,.surface,.section-card,.settings-card,.list-card,.workspace-card,.content-card,.stat-card,.dashboard-card,.feed-card,.post-card,.profile-card,.wallet-card,.notification-card,.friend-card){border-radius:12px;}
+}
+@media(max-width:380px){
+}
+@media(prefers-reduced-motion:reduce){
+  body :where(*,*::before,*::after){scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}

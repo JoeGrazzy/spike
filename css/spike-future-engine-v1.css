@@ -1,0 +1,90 @@
+/* SPIKE FUTURE ENGINE v1 — spatial atmosphere + restrained interface material system.
+   Additive layer: intentionally avoids replacing feature-specific layout or behavior. */
+:root {
+  --spike-future-void: #050914;
+  --spike-future-panel: rgba(11, 21, 38, .72);
+  --spike-future-edge: rgba(77, 211, 255, .22);
+  --spike-future-edge-hot: rgba(72, 224, 255, .52);
+  --spike-future-cyan: #49dcff;
+  --spike-future-blue: #658cff;
+  --spike-future-violet: #9b83ff;
+  --spike-future-text: #e8f6ff;
+  --spike-future-muted: #8fa8bc;
+  --spike-future-depth: 0 18px 54px rgba(0, 0, 0, .24), inset 0 1px rgba(190, 240, 255, .045);
+}
+
+/* Ambient system layer. It never intercepts touch, clicks, or scrolling. */
+body.spike-future-enabled { isolation: isolate; }
+body.spike-future-enabled::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  opacity: .46;
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(24, 132, 190, .13), transparent 36%),
+    radial-gradient(ellipse at 88% 20%, rgba(100, 78, 210, .105), transparent 34%),
+    linear-gradient(rgba(88, 190, 226, .026) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(88, 190, 226, .026) 1px, transparent 1px);
+  background-size: auto, auto, 42px 42px, 42px 42px;
+  mask-image: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.65) 62%, transparent 100%);
+}
+#spike-future-field {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: .48;
+  contain: strict;
+}
+
+/* A common precision-material treatment across the existing feature surfaces. */
+body.spike-future-enabled :is(
+  .feed-v2-panel, .sc-hero, .sc-section, .scv-activity-panel, .sc-modal-card,
+  .wallet-feature, .wallet-table-wrap, .coin-success-card, .panel, .friend-card,
+  .request-card, .profile-command-action, .profile-panel, .admin-section,
+  .coin-order-card, .stat, .card, .content-panel
+) {
+  border-color: var(--spike-future-edge);
+  box-shadow: var(--spike-future-depth);
+}
+
+
+body.spike-future-enabled :is(button, .btn, .sc-primary, .wallet-action, .post-btn, .iconbtn, .icon-btn):focus-visible,
+body.spike-future-enabled :is(input, textarea, select):focus-visible {
+  outline: 2px solid rgba(73, 220, 255, .82);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(73, 220, 255, .10), 0 0 24px rgba(73, 220, 255, .12);
+}
+body.spike-future-enabled :is(input, textarea, select) {
+  accent-color: var(--spike-future-cyan);
+}
+body.spike-future-enabled :is(.sc-primary, .wallet-action, .post-btn, .profile-command-action, .spike-command-row) {
+  transition: border-color .22s ease, box-shadow .22s ease, filter .22s ease, transform .22s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  body.spike-future-enabled :is(.sc-primary, .wallet-action, .post-btn, .profile-command-action, .spike-command-row):hover {
+    filter: brightness(1.08);
+    border-color: var(--spike-future-edge-hot);
+    box-shadow: 0 0 22px rgba(73, 220, 255, .10), inset 0 1px rgba(200,245,255,.08);
+  }
+}
+
+/* Fine HUD details remain subtle and never cover content. */
+body.spike-future-enabled :is(.sc-eyebrow, .wallet-subheading, .section-label, .eyebrow) {
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+body.spike-future-enabled ::selection { background: rgba(73, 220, 255, .28); color: #fff; }
+
+@media (max-width: 680px) {
+  body.spike-future-enabled::before { opacity: .30; background-size: auto, auto, 34px 34px, 34px 34px; }
+  #spike-future-field { opacity: .25; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #spike-future-field { display: none; }
+  body.spike-future-enabled :is(*, *::before, *::after) { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
