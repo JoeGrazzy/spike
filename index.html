@@ -154,6 +154,7 @@
 </div>
 
 <script src="js/spike-navigation.js"></script>
+<script src="js/video-call-incoming.js?v=video-call-live-v2" defer></script>
 <script>
 /* SPIKE boot loader: shared controller with a bounded safety release. */
 (()=>{const loader=document.getElementById("loader");if(!loader)return;let controller=null,released=false;const register=()=>{controller=window.SpikeLoader?.register(loader,{hideClass:"hide",minVisibleMs:320})||null;if(released)controller?.hide()};if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",register,{once:true});else register();const hide=()=>{if(released)return;released=true;if(controller)controller.hide();else loader.classList.add("hide")};window.SPIKE_HIDE_BOOT_LOADER=hide;window.setTimeout(hide,12000)})();

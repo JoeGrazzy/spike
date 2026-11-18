@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080811"><meta name="description" content="SPIKE secure video calling">
+<title>SPIKE — Video Call</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin><link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
+<link rel="stylesheet" href="css/perf.css"><link rel="stylesheet" href="css/spike-identity.css?v=identity-build14">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
+<script src="js/supabase-singleton.js"></script><script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
+<link rel="stylesheet" href="css/video-call.css?v=video-call-live-v2">
+</head>
+<body data-spike-page="video-call">
+<div class="vc-app">
+<header class="vc-top"><a class="vc-back" id="backLink" href="messages.html" aria-label="Back to messages"><i class="fa-solid fa-arrow-left"></i></a><div class="vc-brand"><span class="vc-mark"><i class="fa-solid fa-bolt"></i></span><span><b>SPIKE</b><small>PRIVATE VIDEO CALL</small></span></div><span class="vc-secure"><i class="fa-solid fa-shield-halved"></i> Private</span></header>
+<main class="vc-main">
+<section class="vc-stage" aria-label="Video call preview">
+  <div class="vc-remote" id="remoteStage"><div class="vc-remote-placeholder"><div class="vc-avatar" id="peerAvatar">S</div><strong id="peerName">SPIKE member</strong><span id="callStatus">Preparing your call…</span><div class="vc-pulse"><i></i><i></i><i></i></div></div><video id="remoteVideo" autoplay playsinline></video><audio id="remoteAudio" autoplay></audio></div>
+  <div class="vc-self" id="selfTile"><video id="localVideo" autoplay muted playsinline></video><div class="vc-self-placeholder" id="selfPlaceholder"><i class="fa-solid fa-user"></i><span>Your camera preview</span></div><span class="vc-self-label">You</span></div>
+  <div class="vc-stage-top"><span class="vc-live-dot"></span><span id="stageLabel">READY</span><span class="vc-stage-spacer"></span><span class="vc-quality" id="qualityLabel"><i class="fa-solid fa-signal"></i> Waiting</span></div>
+</section>
+<section class="vc-person"><div class="vc-person-meta"><span class="vc-eyebrow" id="modeLabel">VIDEO CALL</span><h1 id="heading">Connect face to face.</h1><p id="subheading">Your camera and microphone stay off until you choose to enable them.</p></div><div class="vc-permission" id="permissionNotice" role="status"><i class="fa-solid fa-lock"></i><span>Camera access is requested only when you tap the camera button.</span></div></section>
+<section class="vc-controls" aria-label="Call controls">
+  <button class="vc-control vc-accept" id="acceptCall" type="button" hidden><span><i class="fa-solid fa-phone"></i></span><small>Accept</small></button>
+  <button class="vc-control" id="micToggle" type="button" aria-pressed="false" disabled><span><i class="fa-solid fa-microphone-slash"></i></span><small>Mic</small></button>
+  <button class="vc-control vc-camera" id="cameraToggle" type="button" aria-pressed="false"><span><i class="fa-solid fa-video"></i></span><small>Camera</small></button>
+  <button class="vc-control" id="switchCamera" type="button" disabled><span><i class="fa-solid fa-camera-rotate"></i></span><small>Flip</small></button>
+  <button class="vc-control" id="speakerToggle" type="button" aria-pressed="false" disabled><span><i class="fa-solid fa-volume-high"></i></span><small>Sound</small></button>
+  <button class="vc-control vc-end" id="endCall" type="button"><span><i class="fa-solid fa-phone-slash"></i></span><small>Leave</small></button>
+</section>
+<section class="vc-footer"><div class="vc-footer-icon"><i class="fa-solid fa-circle-info"></i></div><p id="footerMessage">This is the new SPIKE call interface. Live calling will become available after the secure signaling service is installed.</p></section>
+</main>
+<nav class="spike-bottom-nav" id="spikeBottomNav" aria-label="Main navigation"><a data-spike-nav="home" href="feed.html"><span>⌂</span><small>Home</small></a><a data-spike-nav="discover" href="feed.html#discover"><span>⌕</span><small>Discover</small></a><a data-spike-nav="rooms" href="rooms.html"><span>◉</span><small>Rooms</small></a><a data-spike-nav="messages" class="active" aria-current="page" href="messages.html"><span>💬</span><small>Messages</small></a><a data-spike-nav="profile" href="profile.html"><span>◉</span><small>Me</small></a></nav>
+</div>
+<script src="js/video-call.js?v=video-call-live-v2"></script><script src="js/spike-navigation.js"></script>
+</body></html>
