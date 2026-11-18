@@ -791,6 +791,8 @@ html body #spikeBottomNav.spike-bottom-nav>button:focus-visible{outline:2px soli
 <link rel="stylesheet" href="css/spike-mobile-compact-authority-v1.css?v=20261114">
 <link rel="stylesheet" href="css/spike-compact-premium-v1.css?v=20261116">
   <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=1">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+<link rel="stylesheet" href="css/spike-calling-v2.css?v=20261118072414">
 </head>
 <body data-spike-page="notifications" data-spike-notification-page>
 <div class="app">
@@ -1085,7 +1087,7 @@ function notificationIcon(n) {
   if (/friend_request|friend_accepted|follow|new_follower/.test(t)) return "👥";
   if (/like|post_like|reaction/.test(t)) return "♥";
   if (/comment|mention/.test(t)) return "💬";
-  if (/message|call/.test(t)) return "✉";
+  if (/message/.test(t)) return "✉";
   if (/sp[_-]?coin|coin|purchase|wallet_coin/.test(t)) return "🪙";
   if (/security|login|policy/.test(t)) return "🛡";
   if (/broadcast|announcement|system/.test(t)) return "📣";
@@ -1989,5 +1991,7 @@ boot();
 <script src="js/spike-feedback-center-v1.js?v=global-toast-v2"></script>
     <script src="js/spike-future-engine-v1.js?v=2" defer></script>
   <script src="js/spike-select-experience-v1.js?v=1"></script>
+
+<script src="js/spike-calling-v2.js?v=spike-calling-v2-20261118072414"></script>
 </body>
 </html>
