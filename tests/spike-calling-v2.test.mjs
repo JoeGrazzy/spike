@@ -10,11 +10,19 @@ test('new call runtime is a separate module with voice and video WebRTC handling
   const js = read('js/spike-calling-v2.js');
   for (const token of ['spike_dm_calls_v2','spike_dm_call_ice_v2','RTCPeerConnection','getUserMedia','createOffer','createAnswer','setRemoteDescription','addIceCandidate','switchCamera','toggleMute','finish']) assert.ok(js.includes(token), `missing ${token}`);
   assert.ok(js.includes("'voice','video'"));
+  assert.ok(js.includes('window.SPIKE_CALL_TURN_SERVERS') && js.includes('...configuredTurnServers'), 'runtime must accept provisioned TURN relays without embedding credentials');
   assert.ok(js.includes('startRingtone') && js.includes('stopRingtone'));
   assert.ok(js.includes('startHeartbeat') && js.includes('caller_heartbeat_at') && js.includes('callee_heartbeat_at'));
   assert.ok(js.includes('armConnectionTimeout'));
+  assert.ok(js.includes('startCallRecovery') && js.includes('statePollTimer') && js.includes('icePollTimer'), 'active call state and ICE must have recovery polling if Realtime drops events');
   assert.ok(js.includes('db.auth.onAuthStateChange'), 'boot must resume when auth becomes ready after the call module loads');
   assert.ok(js.includes('pollIncomingInbox') && js.includes('startInboxRecovery'), 'incoming calls need a database recovery path if Realtime misses an INSERT');
+  assert.ok(js.includes('postgres_changes_options:{ wait:true }'), 'incoming inbox must wait for the server to confirm the Postgres Changes subscription');
+  assert.equal((js.match(/postgres_changes_options:\{ wait:true \}/g) || []).length, 3, 'inbox, call-state and ICE listeners must all wait for confirmed Postgres Changes readiness');
+  assert.ok(js.includes('const confirmation = new Promise') && js.includes('await confirmation'), 'inbox reconciliation must wait for the subscription handshake');
+  assert.ok(js.indexOf('startInboxRecovery();\n        await subscribeInbox();') > -1, 'polling fallback must start before waiting for Realtime');
+  assert.ok(js.includes("event === 'SIGNED_OUT'") && js.includes('inboxGeneration++'), 'sign-out must invalidate inbox subscriptions and retry timers');
+  assert.ok(js.includes('db.realtime.setAuth(token)'), 'Realtime auth must be refreshed with the current session token');
   assert.ok(js.includes('setTimeout(() => { bootPromise = null; void boot(); }, 1200)'), 'missing Supabase client must trigger a bounded initialization retry');
   assert.ok(js.includes('Answered on another device'));
   assert.ok(js.includes('!current.answerApplying') && js.includes('current.answerApplying = true'), 'duplicate Realtime/SELECT answer delivery must be serialized');
@@ -31,6 +39,12 @@ test('all Supabase-enabled pages load the global incoming-call receiver', () => 
     assert.ok(read(name).includes('js/spike-calling-v2.js'), `${name} missing global call receiver`);
     assert.ok(read(name).includes('css/spike-calling-v2.css'), `${name} missing global call overlay styles`);
   }
+});
+
+test('call overlay stays above SPIKE menus and global modal layers', () => {
+  const css = read('css/spike-calling-v2.css');
+  assert.ok(css.includes('z-index:2147483647!important'), 'call UI must be above global SPIKE overlays');
+  assert.ok(css.includes('.spike-call-overlay[hidden]{display:none!important}'), 'hidden call overlay must stay hidden until a call is active');
 });
 
 test('DM header gets dedicated voice and video controls without mixing with voice notes', () => {

@@ -11,12 +11,18 @@
   const SUPABASE_URL = 'https://cjqpyndceqyqsijihxbb.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
   const RING_MS = 45000;
-  const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }];
+  const configuredTurnServers = Array.isArray(window.SPIKE_CALL_TURN_SERVERS)
+    ? window.SPIKE_CALL_TURN_SERVERS.filter(server => {
+        const urls = Array.isArray(server?.urls) ? server.urls : [server?.urls];
+        return urls.some(url => typeof url === 'string' && /^turns?:/i.test(url));
+      })
+    : [];
+  const ICE_SERVERS = [{ urls: 'stun:stun.l.google.com:19302' }, ...configuredTurnServers];
   const esc = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[char]));
   const $ = id => document.getElementById(id);
   let db = null, me = null, inboxChannel = null, current = null, initialized = false, ringContext = null, ringTimer = null;
   let pagePeer = null, pagePeerName = 'SPIKE member', pagePeerAvatar = '';
-  let bootPromise = null, authListenerBound = false, authBootRequested = false, inboxRecoveryBound = false, inboxPollTimer = null, inboxPollBusy = false;
+  let bootPromise = null, authListenerBound = false, authBootRequested = false, inboxRecoveryBound = false, inboxPollTimer = null, inboxPollBusy = false, inboxRetryTimer = null, inboxRetryDelay = 2000, inboxGeneration = 0;
 
   function mount() {
     if ($('spikeCallOverlay')) return;
@@ -124,6 +130,8 @@
     if (current.disconnectTimer) clearTimeout(current.disconnectTimer);
     try { current.notification?.close?.(); } catch (_) {}
     if (current.expiryTimer) clearTimeout(current.expiryTimer);
+    if (current.statePollTimer) clearInterval(current.statePollTimer);
+    if (current.icePollTimer) clearInterval(current.icePollTimer);
     if (current.pc) { current.pc.onicecandidate = null; current.pc.ontrack = null; current.pc.onconnectionstatechange = null; try { current.pc.close(); } catch (_) {} }
     for (const stream of [current.localStream, current.remoteStream]) stream?.getTracks?.().forEach(track => { try { track.stop(); } catch (_) {} });
     removeChannel(current.callChannel); removeChannel(current.iceChannel);
@@ -247,10 +255,36 @@
       catch (error) { console.warn('[SPIKE call v2] queued ICE candidate rejected:', error.message); }
     }
   }
+  function startCallRecovery(callId) {
+    const call = current;
+    if (!call || call.callId !== callId) return;
+    if (call.statePollTimer) clearInterval(call.statePollTimer);
+    if (call.icePollTimer) clearInterval(call.icePollTimer);
+    // Realtime is the fast path; these low-frequency reads recover call state
+    // and trickled ICE candidates if a mobile socket silently drops an event.
+    call.statePollTimer = setInterval(async () => {
+      if (current !== call || call.statePollBusy || call.finishing) return;
+      call.statePollBusy = true;
+      try {
+        const { data, error } = await db.from(TABLE).select('*').eq('id', callId).maybeSingle();
+        if (!error && data && current === call) await onCallUpdate(data);
+      } catch (error) { console.warn('[SPIKE call v2] call-state recovery check failed:', error?.message || error); }
+      finally { call.statePollBusy = false; }
+    }, 5000);
+    call.icePollTimer = setInterval(async () => {
+      if (current !== call || call.icePollBusy || call.finishing || !call.pc) return;
+      call.icePollBusy = true;
+      try {
+        const { data, error } = await db.from(ICE_TABLE).select('id,sender_id,candidate').eq('call_id', callId).order('created_at', { ascending:true }).limit(200);
+        if (!error && current === call) for (const row of data || []) await addRemoteCandidate(row);
+      } catch (error) { console.warn('[SPIKE call v2] ICE recovery check failed:', error?.message || error); }
+      finally { call.icePollBusy = false; }
+    }, 5000);
+  }
   async function watchCall(callId) {
     if (!current || current.callId !== callId) return;
     removeChannel(current.callChannel); removeChannel(current.iceChannel);
-    current.callChannel = db.channel('spike-dm-call-v2-state-' + callId)
+    current.callChannel = db.channel('spike-dm-call-v2-state-' + callId, { config:{ postgres_changes_options:{ wait:true } } })
       .on('postgres_changes', { event:'UPDATE', schema:'public', table:TABLE, filter:'id=eq.'+callId }, payload => { void onCallUpdate(payload.new); })
       .subscribe(async status => {
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setStatus('Reconnecting to call…');
@@ -259,13 +293,14 @@
           if (!error && data) await onCallUpdate(data);
         }
       });
-    current.iceChannel = db.channel('spike-dm-call-v2-ice-' + callId)
+    current.iceChannel = db.channel('spike-dm-call-v2-ice-' + callId, { config:{ postgres_changes_options:{ wait:true } } })
       .on('postgres_changes', { event:'INSERT', schema:'public', table:ICE_TABLE, filter:'call_id=eq.'+callId }, payload => { void addRemoteCandidate(payload.new); })
       .subscribe(async status => {
         if (status !== 'SUBSCRIBED' || !current || current.callId !== callId) return;
         const { data, error } = await db.from(ICE_TABLE).select('id,sender_id,candidate').eq('call_id', callId).order('created_at', { ascending:true }).limit(200);
         if (!error) for (const row of data || []) await addRemoteCandidate(row);
       });
+    startCallRecovery(callId);
   }
   async function onCallUpdate(row) {
     if (!current || !row || row.id !== current.callId) return;
@@ -322,22 +357,63 @@
       console.warn('[SPIKE call v2] incoming-call recovery check failed:', error?.message || error);
     } finally { inboxPollBusy = false; }
   }
+  function scheduleInboxRetry() {
+    if (inboxRetryTimer || !initialized || !me) return;
+    const delay = inboxRetryDelay;
+    inboxRetryDelay = Math.min(30000, Math.round(inboxRetryDelay * 1.8));
+    inboxRetryTimer = setTimeout(() => {
+      inboxRetryTimer = null;
+      if (initialized && me && (!inboxChannel || inboxChannel.state !== 'joined')) void subscribeInbox();
+    }, delay);
+  }
   function startInboxRecovery() {
     if (inboxPollTimer) clearInterval(inboxPollTimer);
     inboxPollTimer = setInterval(() => { void pollIncomingInbox(); }, 5000);
     if (!inboxRecoveryBound) {
       inboxRecoveryBound = true;
-      document.addEventListener('visibilitychange', () => { if (!document.hidden) void pollIncomingInbox(); });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) { void pollIncomingInbox(); if (!inboxChannel) scheduleInboxRetry(); } });
       window.addEventListener('focus', () => { void pollIncomingInbox(); });
+      window.addEventListener('online', () => { void pollIncomingInbox(); scheduleInboxRetry(); });
     }
   }
   async function subscribeInbox() {
+    if (!db || !me || !initialized) return false;
+    const userId = me.id;
+    const generation = ++inboxGeneration;
     removeChannel(inboxChannel);
-    inboxChannel = db.channel('spike-dm-call-v2-inbox-' + me.id)
-      .on('postgres_changes', { event:'INSERT', schema:'public', table:TABLE, filter:'callee_id=eq.'+me.id }, payload => { void receiveIncoming(payload.new); })
-      .subscribe(status => { if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') console.warn('[SPIKE call v2] inbox listener reconnecting:', status); });
-    const { data, error } = await db.from(TABLE).select('*').eq('callee_id', me.id).eq('status','ringing').gt('expires_at',new Date().toISOString()).order('created_at',{ascending:false}).limit(1);
-    if (!error && data?.[0]) await receiveIncoming(data[0]);
+    let resolveConfirmation;
+    let confirmationSettled = false;
+    const confirmation = new Promise(resolve => { resolveConfirmation = resolve; });
+    const settle = value => { if (!confirmationSettled) { confirmationSettled = true; resolveConfirmation(value); } };
+    const channel = db.channel('spike-dm-call-v2-inbox-' + userId + '-' + generation, { config:{ postgres_changes_options:{ wait:true } } })
+      .on('postgres_changes', { event:'INSERT', schema:'public', table:TABLE, filter:'callee_id=eq.'+userId }, payload => { void receiveIncoming(payload.new); });
+    inboxChannel = channel;
+    channel.subscribe(status => {
+      if (inboxChannel !== channel || !me || me.id !== userId) return;
+      if (status === 'SUBSCRIBED') {
+        inboxRetryDelay = 2000;
+        settle(true);
+        // Reconcile only after Realtime confirms its listener is active. This closes
+        // the query/subscribe race without relying on an INSERT event being replayed.
+        void pollIncomingInbox();
+      } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
+        console.warn('[SPIKE call v2] inbox listener reconnecting:', status);
+        settle(false);
+        // Supabase Realtime automatically rejoins errored/timed-out channels.
+        // Only a fully closed channel needs an explicit fresh subscription.
+        if (status === 'CLOSED') scheduleInboxRetry();
+      }
+    });
+    const timeout = setTimeout(() => settle(false), 8000);
+    const subscribed = await confirmation;
+    clearTimeout(timeout);
+    if (inboxChannel !== channel || !me || me.id !== userId) return false;
+    if (!subscribed) {
+      scheduleInboxRetry();
+      return false; // Five-second polling remains active while Realtime recovers.
+    }
+    await pollIncomingInbox();
+    return true;
   }
   async function receiveIncoming(row) {
     if (!me || !row || row.callee_id !== me.id || row.status !== 'ringing') return;
@@ -503,17 +579,32 @@
         authListenerBound = true;
         db.auth.onAuthStateChange((event, session) => {
           if (session?.user) {
+            const previousUserId = me?.id;
+            if (previousUserId && previousUserId !== session.user.id) {
+              if (current) cleanup();
+              removeChannel(inboxChannel); inboxChannel = null;
+              if (inboxRetryTimer) clearTimeout(inboxRetryTimer);
+              inboxRetryTimer = null; inboxGeneration++;
+              initialized = false;
+            }
             me = session.user;
+            // Keep Realtime's JWT in step with refreshed sessions. Defer the
+            // network-facing call out of the auth callback to avoid auth deadlocks.
+            if (session.access_token && db.realtime?.setAuth) {
+              const token = session.access_token;
+              setTimeout(() => { Promise.resolve(db.realtime.setAuth(token)).catch(error => console.warn('[SPIKE call v2] Realtime auth refresh failed:', error?.message || error)); }, 0);
+            }
             if (!initialized) {
               if (bootPromise) authBootRequested = true;
-              else void boot();
+              else setTimeout(() => { if (!initialized) void boot(); }, 0);
             }
           } else if (event === 'SIGNED_OUT') {
             if (current) cleanup();
             initialized = false; me = null;
             removeChannel(inboxChannel); inboxChannel = null;
             if (inboxPollTimer) clearInterval(inboxPollTimer);
-            inboxPollTimer = null;
+            if (inboxRetryTimer) clearTimeout(inboxRetryTimer);
+            inboxPollTimer = null; inboxRetryTimer = null; inboxGeneration++;
           }
         });
       }
@@ -526,8 +617,10 @@
         if (initialized) return;
         initialized = true;
         mount();
-        await subscribeInbox();
+        // Start the fallback before waiting for Realtime's handshake so an
+        // offline/slow subscription cannot leave the inbox without recovery.
         startInboxRecovery();
+        await subscribeInbox();
         const params = new URLSearchParams(location.search);
         if (document.body?.dataset.spikePage === 'message') {
           pagePeer = params.get('to') || params.get('id');
@@ -566,5 +659,12 @@
   }
   window.SpikeCallingV2 = { init:boot, start, end:() => finish('ended'), getState:() => current ? { id:current.callId,type:current.type,status:current.status,role:current.role } : null };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { mount(); void boot(); }, { once:true }); else { mount(); void boot(); }
-  window.addEventListener('pagehide', () => { if (current) { try { current.pc?.close(); } catch (_) {} } removeChannel(inboxChannel); });
+  window.addEventListener('pagehide', () => {
+    if (current) { try { current.pc?.close(); } catch (_) {} }
+    removeChannel(inboxChannel); inboxChannel = null;
+  });
+  window.addEventListener('pageshow', () => {
+    if (initialized && me && !inboxChannel) { startInboxRecovery(); void subscribeInbox(); }
+    else if (!initialized) void boot();
+  });
 })();
