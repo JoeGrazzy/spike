@@ -14,7 +14,7 @@
   const LESSONS = [
     { id:'feed', title:'Explore your Feed', page:'feed.html', label:'Open Feed', description:'Your Feed is where you discover posts, updates, and conversations. Explore the available feed views and use the post actions only when you are ready.' },
     { id:'people', title:'Profiles and connections', page:'friends.html', label:'Open Friends', description:'Find people, review friend requests, explore profiles, and manage connections. You stay in control of who you connect with.' },
-    { id:'messages', title:'Messages and conversations', page:'messages.html', label:'Open Messages', description:'Use Messages to find conversations and communicate privately. The tutorial never sends a message or starts a call for you.' },
+    { id:'messages', title:'Messages and conversations', page:'messages.html', label:'Open Messages', description:'Use Messages to find conversations and communicate privately. The tutorial never sends a message for you.' },
     { id:'notifications', title:'Stay up to date', page:'notifications.html', label:'View Notifications', description:'Notifications help you keep track of relevant activity. Visit notification settings to tune what you receive.' },
     { id:'safety', title:'Privacy, safety, and help', page:'settings.html', label:'Open Settings', description:'Find account preferences, privacy controls, and safety tools. Use Help for detailed guides, reporting information, and answers to common questions.' }
   ];

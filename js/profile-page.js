@@ -103,7 +103,7 @@ const userPatch={...(old||{}),[field]:url,updated_at:now(),id:state.me.id};
 // Only write columns that actually exist in public.profiles.
 // cover_url is stored in the users document because profiles has no cover_url column.
 if(field==="avatar_url"){
-const privacy=state.privacy||{profile_visibility:"public",posts_visibility:"public",media_visibility:"public",friends_visibility:"public",allow_messages:"friends",allow_calls:"friends",show_online_status:true,allow_profile_discovery:true};
+const privacy=state.privacy||{profile_visibility:"public",posts_visibility:"public",media_visibility:"public",friends_visibility:"public",allow_messages:"friends",show_online_status:true,allow_profile_discovery:true};
 const profile={username:state.profile?.username||"",display_name:state.profile?.display_name||state.profile?.full_name||"",bio:state.profile?.bio||"",avatar_url:url,website:state.profile?.website||""};
 const r=await db.rpc("spike_update_profile_v1",{p_profile:profile,p_privacy:privacy,p_user_doc:userPatch});
 if(r.error) { console.error("[SPIKE PROFILE MEDIA]["+stage+"] RPC spike_update_profile_v1 failed", {code:r.error.code,message:r.error.message,details:r.error.details,hint:r.error.hint}); throw r.error; }
@@ -162,12 +162,12 @@ async function loadPrivacy(){
  const own=state.uid===state.me.id;
  let privacy=null;
  if(own){
-   const r=await db.from("profile_privacy").select("user_id,profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,allow_calls,show_online_status,allow_profile_discovery").eq("user_id",state.uid).maybeSingle();
+   const r=await db.from("profile_privacy").select("user_id,profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,show_online_status,allow_profile_discovery").eq("user_id",state.uid).maybeSingle();
    state.privacyLoadError=!!r.error || !r.data;
    if(r.error) console.warn("[SPIKE PRIVACY LOAD]",r.error.message);
    privacy=r.data;
  }
- state.privacy=privacy||{user_id:state.uid,profile_visibility:"private",posts_visibility:"private",media_visibility:"private",friends_visibility:"private",allow_messages:"friends",allow_calls:"friends",show_online_status:false,allow_profile_discovery:false};
+ state.privacy=privacy||{user_id:state.uid,profile_visibility:"private",posts_visibility:"private",media_visibility:"private",friends_visibility:"private",allow_messages:"friends",show_online_status:false,allow_profile_discovery:false};
  await (window.SPIKE_ACCESS?.ready||Promise.resolve());
  if(own){
    // The owner can still inspect their own content, but a failed privacy read
@@ -612,7 +612,6 @@ async function saveProfile(e){
       media_visibility:state.privacy?.media_visibility||"public",
       friends_visibility:state.privacy?.friends_visibility||"public",
       allow_messages:state.privacy?.allow_messages||"friends",
-      allow_calls:state.privacy?.allow_calls||"friends",
       show_online_status:state.privacy?.show_online_status!==false,
       allow_profile_discovery:state.privacy?.allow_profile_discovery!==false,
       updated_at:state.privacy?.updated_at||timestamp
@@ -633,7 +632,7 @@ async function saveProfile(e){
       updated_at:timestamp
     };
     const rpcProfile={username:next.username,display_name:next.display_name,bio:next.bio,avatar_url:next.avatar_url,website:next.website};
-    const rpcPrivacy={profile_visibility:privacyPatch.profile_visibility,posts_visibility:privacyPatch.posts_visibility,media_visibility:privacyPatch.media_visibility,friends_visibility:privacyPatch.friends_visibility,allow_messages:privacyPatch.allow_messages,allow_calls:privacyPatch.allow_calls,show_online_status:privacyPatch.show_online_status,allow_profile_discovery:privacyPatch.allow_profile_discovery};
+    const rpcPrivacy={profile_visibility:privacyPatch.profile_visibility,posts_visibility:privacyPatch.posts_visibility,media_visibility:privacyPatch.media_visibility,friends_visibility:privacyPatch.friends_visibility,allow_messages:privacyPatch.allow_messages,show_online_status:privacyPatch.show_online_status,allow_profile_discovery:privacyPatch.allow_profile_discovery};
     const profileSave=await db.rpc("spike_update_profile_v1",{p_profile:rpcProfile,p_privacy:rpcPrivacy,p_user_doc:userDoc});
     if(profileSave.error) throw new Error("Profile could not be saved: "+profileSave.error.message);
     profileSaved = true;

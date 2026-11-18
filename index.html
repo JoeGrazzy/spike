@@ -165,7 +165,7 @@ const SUPABASE_KEY = "sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw";
 const AUTH_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/`;
 const PASSWORD_RESET_REDIRECT_URL = `${window.location.origin.replace(/\/$/, "")}/reset-password.html`;
 // Canonical client configuration. Keep this defined before any auth bootstrap
-// path can call ensureClient(); expose it for the shared call receiver as well.
+// path can call ensureClient(); expose it for shared platform modules as well.
 const SPIKE_CONFIG = Object.freeze({
   supabaseUrl: SUPABASE_URL,
   supabaseKey: SUPABASE_KEY,
@@ -1012,11 +1012,6 @@ boot();
 <script src="js/telemetry.js" defer></script>
 
 <script src="js/maintenance.js?v=20260914113000" defer></script>
-  
-
-
-
-<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v23"></script>
 
 
 

@@ -1674,7 +1674,6 @@ db.auth.onAuthStateChange((event,session)=>{
     friends:(owner)=>call('can_view_spike_friends',{p_viewer:state.viewerId,p_owner:owner}),
     online:(owner)=>call('can_view_spike_online_status',{p_viewer:state.viewerId,p_owner:owner}),
     message:(owner)=>call('can_message_spike_user',{p_sender:state.viewerId,p_recipient:owner}),
-    call:(owner)=>call('can_call_spike_user',{p_caller:state.viewerId,p_callee:owner}),
     ready:null
   };
   state.ready=(async()=>{const u=await viewer(); state.viewerId=u?.id||null; return u})(); window.SPIKE_ACCESS.ready=state.ready;
@@ -1723,11 +1722,6 @@ db.auth.onAuthStateChange((event,session)=>{
 
 
   <script src="js/maintenance.js?v=20260914113000" defer></script>
-
-  
-
-
-<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v23"></script>
 
 
 <script src="js/spike-surface-controls.js"></script>

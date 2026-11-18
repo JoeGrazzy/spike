@@ -113,7 +113,7 @@
   async function fetchRoom() {
     setPanel('loading', 'Finding your room', 'Loading the room details and checking whether it is still available.', 'ROOM LOOKUP');
     setProgress(55);
-    const columns = 'id,host_id,title,description,category,visibility,status,cover_url,appearance,max_participants,allow_chat,allow_speaker_requests,scheduled_at,started_at,ended_at,created_at,updated_at,active_host_id';
+    const columns = 'id,host_id,title,description,category,visibility,status,cover_url,appearance,max_participants,allow_chat,scheduled_at,started_at,ended_at,created_at,updated_at,active_host_id';
     const result = await withTimeout(() => state.client.from('spike_rooms').select(columns).eq('id', state.roomId).maybeSingle(), TIMEOUTS.room, 'Room lookup');
     if (result?.error) throw result.error;
     if (!result?.data) throw new Error('This room could not be found. It may be private, unavailable, or the link may have expired.');

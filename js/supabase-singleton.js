@@ -1,6 +1,6 @@
 /* SPIKE Supabase singleton guard.
    Keeps one GoTrueClient per browser page/storage key and reuses it across
-   feature modules (maintenance, call receiver, page code, etc.). */
+   feature modules (maintenance, page code, etc.). */
 (() => {
   'use strict';
   if (!window.supabase?.createClient || window.__SPIKE_SUPABASE_FACTORY_PATCHED__) return;

@@ -531,17 +531,17 @@ nav.bottom-nav{bottom:env(safe-area-inset-bottom,0px)!important}
 }
 
 /* Full-screen overlays remain fullscreen, but their interactive chrome is safe. */
-:where(.scanner-top,.call-top,.media-top,.viewer-top,.modal-header,.sheet-header){
+:where(.scanner-top,.media-top,.viewer-top,.modal-header,.sheet-header){
   padding-top:max(14px,calc(10px + env(safe-area-inset-top,0px)))!important;
   padding-left:max(14px,calc(10px + env(safe-area-inset-left,0px)))!important;
   padding-right:max(14px,calc(10px + env(safe-area-inset-right,0px)))!important;
 }
-:where(.scanner-bottom,.call-bottom,.media-bottom,.viewer-bottom,.modal-actions,.sheet-actions){
+:where(.scanner-bottom,.media-bottom,.viewer-bottom,.modal-actions,.sheet-actions){
   padding-bottom:max(14px,calc(10px + env(safe-area-inset-bottom,0px)))!important;
 }
 
 /* Absolute top controls inside fullscreen media must also respect the cutout. */
-:where(.scanner-top,.call-top,.media-top,.viewer-top,[data-safe-top]){
+:where(.scanner-top,.media-top,.viewer-top,[data-safe-top]){
   top:0!important;
 }
 

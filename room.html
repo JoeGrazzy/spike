@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="css/spike-identity.css?v=identity-build14">
   <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
   <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=2">
-  <link rel="stylesheet" href="css/spike-room-page.css?v=room-ui-v69-live-pulse">
+  <link rel="stylesheet" href="css/spike-room-page.css?v=room-ui-v70-chat-only">
   <link rel="stylesheet" href="css/spike-room-compact-premium-v1.css?v=1">
   <link rel="stylesheet" href="css/spike-room-bottom-nav-v1.css?v=1">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
@@ -28,10 +28,9 @@
     <header class="room-header">
       <a class="room-brand" href="rooms.html" aria-label="Back to SPIKE Rooms"><span class="brand-mark">S</span><span>SPIKE <small>ROOMS</small></span></a>
       <div class="header-actions">
-        <button class="room-live-speaker" id="roomLiveAudioSpeaker" type="button" data-room-feature="audio" hidden aria-label="Open live room audio controls" title="Live room audio">🔊</button>
         <a class="header-link" href="wallet.html">Wallet</a>
         <a class="header-avatar" href="profile.html" aria-label="Your profile">◉</a>
-        <button class="room-menu-toggle" id="roomMenuToggle" type="button" aria-expanded="false" aria-controls="roomMenu" aria-label="Open room menu">⋮<span class="room-audio-request-badge" id="roomAudioRequestBadge" hidden>0</span></button>
+        <button class="room-menu-toggle" id="roomMenuToggle" type="button" aria-expanded="false" aria-controls="roomMenu" aria-label="Open room menu">⋮</button>
       </div>
       <div class="room-menu" id="roomMenu" hidden>
         <div class="room-menu-title"><span class="room-menu-live-dot"></span><div><strong id="roomLiveTitle">SPIKE Room</strong><small id="roomLiveSubtitle">Room options</small></div></div>
@@ -41,7 +40,6 @@
           <button type="button" class="room-feature-tile" data-room-feature="people"><span class="feature-icon">♟</span><span><strong>People</strong><small><span id="roomMenuMemberCount">0</span> members · private messages</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="invites" hidden><span class="feature-icon">＋</span><span><strong>Invite members</strong><small>Bring friends into this room</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="info"><span class="feature-icon">ⓘ</span><span><strong>Room information</strong><small>Details, rules and host</small></span></button>
-          <button type="button" class="room-feature-tile" data-room-feature="audio"><span class="feature-icon" id="roomAudioFeatureIcon">✋</span><span><strong id="roomAudioFeatureTitle">Request to go LIVE</strong><small>Member requests · owner approval</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="gifts"><span class="feature-icon">🎁</span><span><strong>Gift a room member</strong><small>Gift any eligible member, live or not</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="share"><span class="feature-icon">↗</span><span><strong>Share room</strong><small>Copy or share the room link</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="report"><span class="feature-icon">⚑</span><span><strong>Report room</strong><small>Tell SPIKE about a concern</small></span></button>
@@ -142,11 +140,9 @@
   <div class="sr-status" id="roomLiveStatus" role="status" aria-live="polite">Starting room connection…</div>
   <script src="js/spike-dialog.js?v=room-dialog-v1" defer></script>
   <script src="js/spike-room-page.js?v=room-ui-v42" defer></script>
-  <script src="js/spike-room-chat-v2.js?v=compact-v36-perf" defer></script>
+  <script src="js/spike-room-chat-v2.js?v=compact-v37-room-gifts" defer></script>
   <script src="js/spike-room-fullscreen.js?v=compact-v38" defer></script>
   <script src="js/spike-select-experience-v1.js?v=2" defer></script>
-  <script src="js/spike-room-audio-v1.js?v=room-audio-v70-voice-stun-20261117" defer></script>
-  <script src="js/spike-room-features-v1.js?v=room-ui-v53-background-polling" defer></script>
-<script src="js/spike-dm-realtime-calls-v2.js?v=sitewide-calls-v24" defer></script>
+  <script src="js/spike-room-features-v1.js?v=room-ui-v54-chat-only" defer></script>
 </body>
 </html>

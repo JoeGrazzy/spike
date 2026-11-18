@@ -61,7 +61,7 @@ async function openSpikeProfilePreview(id, seed){
   const avatarUrl = safeHttpUrl(profile.avatar_url || profile.avatar || profile.photo_url || '');
   const avatarHtml = identityAvatar(profile,'spike-profile-avatar',name);
   const rel = {
-    friend:{badge:'✓ Friends',primary:'💬 Message',secondary:'📞 Voice Call',tertiary:'🎥 Video Call'},
+    friend:{badge:'✓ Friends',primary:'💬 Message',secondary:'View Profile',tertiary:'Copy Link'},
     request_sent:{badge:'⏳ Request sent',primary:'Request Sent',secondary:'Cancel Request',tertiary:'Message'},
     request_received:{badge:'💌 Wants to connect',primary:'Accept',secondary:'Decline',tertiary:'Message'},
     stranger:{badge:'Suggested connection',primary:'Add Friend',secondary:'Follow',tertiary:'Message'}
@@ -93,7 +93,7 @@ async function openSpikeProfilePreview(id, seed){
   }));
   body.querySelector('[data-profile-primary]')?.addEventListener('click',async()=>{if(relationship==='friend')location.href='?private_uid='+encodeURIComponent(id);else if(relationship==='request_sent')await cancelFriendRequest(id);else if(relationship==='request_received')await acceptFriendRequest(id);else await sendFriendRequest(id,null);});
   body.querySelector('[data-profile-secondary]')?.addEventListener('click',async()=>{
-    if(relationship==='friend'){if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?to='+encodeURIComponent(id);return;}
+    if(relationship==='friend'){location.href=profileLink(id);return;}
     if(relationship==='request_sent'){await cancelFriendRequest(id);return;}
     if(relationship==='request_received'){await declineFriendRequest(id);return;}
     const btn=body.querySelector('[data-profile-secondary]');
@@ -113,7 +113,7 @@ async function openSpikeProfilePreview(id, seed){
       toast(e?.message||'Could not update following','error');
     }finally{if(btn)btn.disabled=false;}
   });
-  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',()=>{if(relationship==='friend'&&typeof window.startCall==='function')window.startCall(id,'video');else location.href='message.html?to='+encodeURIComponent(id);});
+  body.querySelector('[data-profile-tertiary]')?.addEventListener('click',async()=>{if(relationship==='friend'){const url=location.origin+location.pathname+'?profile='+encodeURIComponent(id);try{await copyTextSafe(url);toast('Profile link copied','success')}catch(e){toast('Could not copy profile link','error')}return;}location.href='message.html?to='+encodeURIComponent(id);});
   body.querySelector('[data-profile-more]')?.addEventListener('click',()=>showProfileActions(id,relationship,name));
   setTimeout(()=>body.querySelector('[data-profile-more]')?.focus(),0);
 }
@@ -163,8 +163,6 @@ function showProfileActions(id, relationship, name){
   items.push(['👤','View profile',()=>{ closeProfileActions(); window.location.href=profileLink(id); }]);
   if(relationship==='friend'){
     items.push(['💬','Message',()=>{ location.href='?private_uid='+encodeURIComponent(id); }]);
-    items.push(['📞','Voice call',()=>{ if(typeof window.startCall==='function')window.startCall(id,'audio');else location.href='message.html?to='+encodeURIComponent(id); }]);
-    items.push(['🎥','Video call',()=>{ if(typeof window.startCall==='function')window.startCall(id,'video');else location.href='message.html?to='+encodeURIComponent(id); }]);
     items.push(['❌','Unfriend',()=>run(async ()=>{
       const ok=await premiumConfirm({title:'Unfriend user', message:`Remove ${name} from your friends?`, confirmText:'Unfriend', cancelText:'Cancel', icon:'🗑️', danger:true });
       if(!ok)return;
@@ -236,7 +234,6 @@ function initAISearch(){
       
       ['Friends','Send friend requests, manage incoming requests and build connections.'],
       ['Messages','Open Messages, choose a conversation, type a message and send it.'],
-      ['Calls','Open an eligible private conversation and choose audio or video call.'],
       ['Notifications','Review activity such as mentions, announcements and system updates.'],
       ['Safety','Report inappropriate content, block accounts when needed, choose audiences carefully.'],
       ['Password recovery','Use the password recovery option on the sign-in screen if you forget your password.']
@@ -247,7 +244,7 @@ function initAISearch(){
     return docs;
   };
   function score(q,doc){ const qs=clean(q), text=(doc.title+' '+doc.text).toLowerCase(), title=doc.title.toLowerCase(); let n=0; qs.forEach(w=>{if(title.includes(w))n+=5; if(text.includes(w))n+=2;}); return n; }
-  function answer(q,results){ const l=q.toLowerCase(); if(/video.*call|call.*video/.test(l))return 'To make a video call, open an eligible private conversation and choose the video-call option.'; if(/audio.*call|call.*audio/.test(l))return 'To make an audio call, open an eligible private conversation and choose the audio-call option.'; if(/create|make|post|publish|story|stories/.test(l))return 'Create a Signal from Home using Your thought. Choose Public or Friends, attach one photo or video if you like, and optionally add a sensitive-content warning. Stories are not available.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
+  function answer(q,results){ const l=q.toLowerCase(); if(/create|make|post|publish|story|stories/.test(l))return 'Create a Signal from Home using Your thought. Choose Public or Friends, attach one photo or video if you like, and optionally add a sensitive-content warning. Stories are not available.'; if(/friend|connect/.test(l))return 'Use Friends or a person\'s profile to send connection requests.'; if(/message|chat/.test(l))return 'Open Messages, choose a person or existing conversation, type your message and send it.'; if(/password|forgot/.test(l))return 'Use the password recovery option on the sign-in screen.'; if(/profile|username|avatar/.test(l))return 'Open your profile to update your username, profile picture and other information.'; if(results[0])return `I found information related to “${q}”. The most relevant result is “${results[0].title}”.`; return `I couldn't find a strong match for “${q}” in the information currently available. Try a shorter question or include a feature name.`; }
   function run(q){ q=q.trim(); if(!q)return; const docs=corpus().map(d=>({...d,_score:score(q,d)})).filter(d=>d._score>0).sort((a,b)=>b._score-a._score).slice(0,8); const ans=answer(q,docs); body.innerHTML=`<div class="spike-ai-answer"><div class="spike-ai-answer-label">✦ Local answer</div><p>${esc(ans)}</p></div><div class="spike-ai-related-title">Related results</div><div class="spike-ai-results">${docs.length?docs.slice(0,6).map((d,i)=>`<div class="spike-ai-result" data-url="${esc(d.url||'')}"><b>${esc(d.title)}</b><small>${esc((d.text||'').slice(0,180))}${(d.text||'').length>180?'…':''}</small></div>`).join(''):'<div class="spike-ai-empty">No matching SPIKE content found.</div>'}</div>`; }
   function openAI(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); setTimeout(()=>input.focus(),30); }
   function closeAI(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }

@@ -1,1 +1,0 @@
--- No-op migration marker retained to match the remote Supabase migration history.

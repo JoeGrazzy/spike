@@ -55,7 +55,7 @@
     if(scroll||nearBottom)host.scrollTop=host.scrollHeight;
   }
   async function loadMembers() {
-    const r=await timeout(state.client.from('spike_room_members').select('room_id,user_id,role,member_state,is_muted,speaker_requested,joined_at').eq('room_id',state.room.id).eq('member_state','active').order('joined_at',{ascending:true}).limit(200),12000,'Member list refresh');
+    const r=await timeout(state.client.from('spike_room_members').select('room_id,user_id,role,member_state,joined_at').eq('room_id',state.room.id).eq('member_state','active').order('joined_at',{ascending:true}).limit(200),12000,'Member list refresh');
     if(r.error)throw r.error;
     state.members=r.data||[];
     await loadProfiles(state.members.map(m=>m.user_id));
@@ -65,8 +65,8 @@
     const host=$('roomMembersList'); if(!host)return;
     $('roomMemberCount').textContent=String(state.members.length);
     if(!state.members.length){host.innerHTML='<p class="members-loading">No active members are visible yet.</p>';return;}
-    const order={host:0,moderator:1,speaker:2,member:3};
-    host.innerHTML=[...state.members].sort((a,b)=>(order[a.role]??4)-(order[b.role]??4)).map(m=>`<div class="room-member-row"><div class="member-avatar">${avatar(m.user_id)}</div><div class="member-copy"><strong>${esc(profileName(m.user_id))}${m.user_id===state.user.id?' <small>(you)</small>':''}</strong><span>${esc(m.role||'member')}${m.is_muted?' · muted':''}</span></div><span class="member-state-dot" title="Active member"></span></div>`).join('');
+    const order={host:0,moderator:1,cohost:2,member:3};
+    host.innerHTML=[...state.members].sort((a,b)=>(order[a.role]??4)-(order[b.role]??4)).map(m=>`<div class="room-member-row"><div class="member-avatar">${avatar(m.user_id)}</div><div class="member-copy"><strong>${esc(profileName(m.user_id))}${m.user_id===state.user.id?' <small>(you)</small>':''}</strong><span>${esc(m.role||'member')}</span></div><span class="member-state-dot" title="Active member"></span></div>`).join('');
   }
   function setReply(message) {
     const row=state.messages.find(m=>m.id===message); if(!row)return;
@@ -107,7 +107,7 @@
   async function refreshRoomMeta(){
     if(state.stopped||document.hidden||!navigator.onLine)return;
     try{
-      const r=await timeout(state.client.from('spike_rooms').select('title,status,allow_chat,allow_speaker_requests,active_host_id').eq('id',state.room.id).maybeSingle(),10000,'Room status refresh');
+      const r=await timeout(state.client.from('spike_rooms').select('title,status,allow_chat,active_host_id').eq('id',state.room.id).maybeSingle(),10000,'Room status refresh');
       if(r.error)throw r.error; if(!r.data)return; Object.assign(state.room,r.data);
       const enabled=state.room.status==='live'&&state.room.allow_chat===true;
       $('chatMessageInput').disabled=!enabled; $('chatSendButton').disabled=!enabled;
@@ -125,10 +125,12 @@
       state.channel.on('broadcast',{event:'room_message'},()=>void refreshAll(true));
       state.channel.on('broadcast',{event:'room_message_update'},()=>void refreshAll(false));
       state.channel.on('broadcast',{event:'room_reaction'},()=>void refreshAll(false,true));
+      state.channel.on('broadcast',{event:'room_gift'},event=>{const gift=event?.payload||{};if(gift.sender_id===state.user.id)return;const message=`${gift.gift_icon||'🎁'} ${gift.sender_name||'A member'} sent ${gift.gift_name||'a gift'} to ${gift.receiver_name||'a room member'}.`;if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(message,'success');});
       state.channel.on('presence',{event:'sync'},()=>{const count=Object.keys(state.channel.presenceState()||{}).length;const node=$('chatConnectionState');if(node)node.textContent='Live updates connected · '+count+' online';});
       state.channel.subscribe(async result=>{if(result==='SUBSCRIBED'){state.realtimeConnected=true;try{await state.channel.track({user_id:state.user.id,display_name:profileName(state.user.id),joined_at:new Date().toISOString()});status('Live chat connected.');}catch(e){console.info('[SPIKE Room Chat] Presence tracking unavailable:',e.message);}}else if(result==='CHANNEL_ERROR'||result==='TIMED_OUT'||result==='CLOSED'){state.realtimeConnected=false;console.info('[SPIKE Room Chat] Realtime unavailable; automatic refresh remains active.');status('Live updates reconnecting · automatic refresh is active');}});
     }catch(e){console.info('[SPIKE Room Chat] Realtime unavailable:',e.message);}
   }
+  function broadcastGift(payload){if(!state.channel||!state.room?.id)return Promise.resolve(false);return state.channel.send({type:'broadcast',event:'room_gift',payload:{...payload,room_id:state.room.id}})}
   function cleanup(){state.stopped=true;clearInterval(state.poll);clearInterval(state.memberPoll);clearInterval(state.metaPoll);if(state.channel&&state.client?.removeChannel)state.client.removeChannel(state.channel).catch(()=>{});}
   function bind(){
     $('chatComposer')?.addEventListener('submit',sendMessage);
@@ -153,6 +155,7 @@
     if(initial[1].status==='rejected'){ $('roomMembersList').innerHTML='<p class="members-loading">The member list is temporarily unavailable. Use refresh to try again.</p>'; console.info('[SPIKE Room Chat] Initial member list:',initial[1].reason?.message); }
     if(initial[0].status==='rejected')status('Chat could not load yet: '+(initial[0].reason?.message||'please retry'),true);
     connectPresence();
+    window.SPIKERoomChat={broadcastGift};
     // Realtime broadcasts are the primary update path. These slower checks are safety nets.
     state.poll=setInterval(()=>void refreshAll(false,false),30000);
     state.memberPoll=setInterval(refreshMemberList,45000);
