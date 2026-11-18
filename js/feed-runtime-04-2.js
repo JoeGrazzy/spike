@@ -820,14 +820,24 @@ function ensureReactionTray(){
 
 function positionReactionTray(anchor){
   const tray=ensureReactionTray();
-  const r=anchor.getBoundingClientRect();
-  const trayWidth=Math.min(window.innerWidth-20,312);
-  let left=Math.max(10,Math.min(window.innerWidth-trayWidth-10,r.left));
-  let top=r.top-62;
-  if(top<8) top=r.bottom+8;
+  // Use the visible viewport (not the layout viewport) so Android browser
+  // chrome, safe areas and the on-screen keyboard cannot push the picker away.
+  const vv=window.visualViewport;
+  const viewportLeft=vv?vv.offsetLeft:0;
+  const viewportTop=vv?vv.offsetTop:0;
+  const viewportWidth=vv?vv.width:document.documentElement.clientWidth;
+  const viewportHeight=vv?vv.height:window.innerHeight;
+  const trayWidth=Math.max(0,Math.min(viewportWidth-20,312));
+  tray.style.minWidth=`${trayWidth}px`;
+  tray.style.maxWidth=`${Math.max(0,viewportWidth-20)}px`;
+  tray.style.transform='none';
+  const rect=tray.getBoundingClientRect();
+  const width=Math.min(viewportWidth-20,Math.max(trayWidth,rect.width||trayWidth));
+  const height=rect.height||54;
+  const left=viewportLeft+Math.max(10,(viewportWidth-width)/2);
+  const top=viewportTop+Math.max(10,(viewportHeight-height)/2);
   tray.style.left=`${Math.round(left)}px`;
   tray.style.top=`${Math.round(top)}px`;
-  tray.style.minWidth=`${Math.min(trayWidth,312)}px`;
 }
 
 function closeReactionTray(){
