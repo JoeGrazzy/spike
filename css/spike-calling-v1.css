@@ -1,0 +1,30 @@
+/* SPIKE Calling V1 — isolated overlay and conversation actions */
+.spike-call-actions{display:flex;align-items:center;gap:7px;flex:0 0 auto}
+.spike-call-action{width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--line);border-radius:13px;background:var(--panel2);color:var(--text);cursor:pointer;transition:transform .16s ease,border-color .16s ease}
+.spike-call-action:active{transform:scale(.94)}
+.spike-call-action:focus-visible,.spike-call-control:focus-visible{outline:2px solid var(--a);outline-offset:3px}
+.spike-call-action[disabled]{opacity:.45;cursor:wait}
+.spike-call-shade{position:fixed;inset:0;z-index:5000;display:none;align-items:center;justify-content:center;padding:max(18px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));background:rgba(4,6,15,.94);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.spike-call-shade.show{display:flex;animation:spikeCallFade .18s ease-out}
+.spike-call-panel{position:relative;width:min(520px,100%);max-height:100%;display:flex;flex-direction:column;align-items:center;gap:17px;padding:24px 18px calc(22px + env(safe-area-inset-bottom));border:1px solid rgba(196,181,253,.22);border-radius:28px;background:radial-gradient(120% 80% at 50% 0,rgba(139,92,246,.22),transparent 65%),#111426;box-shadow:0 25px 90px #0009;overflow:auto}
+.spike-call-person{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center}
+.spike-call-avatar{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#6d28d9,#db2777);font-size:30px;font-weight:900;color:#fff;box-shadow:0 0 0 7px rgba(167,139,250,.12)}
+.spike-call-avatar img{width:100%;height:100%;object-fit:cover}
+.spike-call-title{font-size:22px;font-weight:850;letter-spacing:-.03em;color:#fff}
+.spike-call-subtitle,.spike-call-status{font-size:13px;color:#c7c9df;text-align:center}
+.spike-call-status{min-height:20px;font-variant-numeric:tabular-nums;border:0;background:transparent;padding:4px 8px;cursor:default;font:inherit}.spike-call-status[data-enable-audio="1"]{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.spike-call-video-stage{position:relative;width:100%;min-height:220px;max-height:48dvh;aspect-ratio:4/3;border-radius:20px;background:#070a13;overflow:hidden}
+.spike-call-video-stage video{width:100%;height:100%;object-fit:cover}
+#spikeCallRemoteVideo{position:absolute;inset:0}
+#spikeCallLocalVideo{position:absolute;right:10px;bottom:10px;width:28%;height:34%;border:1px solid #ffffff66;border-radius:13px;box-shadow:0 5px 20px #0008;z-index:2}
+#spikeCallRemoteAudio{position:absolute;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none}
+.spike-call-controls{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:5px}
+.spike-call-control{width:54px;height:54px;border:1px solid #ffffff24;border-radius:50%;display:grid;place-items:center;background:#ffffff17;color:#fff;font-size:19px;cursor:pointer}
+.spike-call-control[hidden]{display:none!important}
+.spike-call-control.danger{width:62px;height:62px;background:#dc2626;border-color:#ef4444}
+.spike-call-control.accept{background:#16a34a;border-color:#22c55e}
+.spike-call-control:disabled{opacity:.45;cursor:wait}
+body.spike-call-open{overflow:hidden!important;touch-action:none}
+@keyframes spikeCallFade{from{opacity:0}to{opacity:1}}
+@media(max-width:420px){.spike-call-action{width:37px;height:37px}.spike-call-actions{gap:5px}.spike-call-panel{border-radius:24px;padding-inline:14px}}
+@media(prefers-reduced-motion:reduce){.spike-call-shade.show{animation:none}.spike-call-action{transition:none}}
