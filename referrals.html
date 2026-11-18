@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080d16"><meta name="description" content="SPIKE Referral Center — invite friends and earn SP Points.">
+<meta name="theme-color" content="#080d16"><meta name="description" content="SPIKE Referral Center — referral rewards are not yet active.">
 <title>SPIKE — Referral Center</title>
-<link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
-<link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/spike-global-page-authority-v2.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-singleton.js"></script><script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
+<link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/spike-global-page-authority.css">
+
+
 <style>
 :root{color-scheme:dark;--ref-bg:#080d16;--ref-panel:#111a27;--ref-line:rgba(148,163,184,.16);--ref-muted:#91a0b4;--ref-cyan:#5ce1ed;--ref-gold:#e9c46a}
 *{box-sizing:border-box}body{margin:0;background:var(--ref-bg);color:#edf4fb;font-family:Inter,system-ui,-apple-system,sans-serif;min-height:100vh}
@@ -15,21 +17,22 @@
 @media(max-width:720px){.ref-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.ref-two{grid-template-columns:1fr}.ref-wrap{width:min(100% - 20px,980px);padding-top:12px}.ref-linkrow{align-items:stretch;flex-direction:column}.ref-link{width:100%}}
 @media(prefers-reduced-motion:no-preference){.ref-hero{animation:refIn .35s ease-out both}@keyframes refIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}}
 </style>
-<link rel="stylesheet" href="css/spike-compact-premium-v1.css?v=20261116">
-  <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 </head>
 <body data-spike-page="referrals">
 <main class="ref-wrap">
 <header class="ref-top"><div class="ref-brand">SPIKE <span>REFERRALS</span></div><a class="ref-back" href="profile.html">← Profile</a></header>
-<section class="ref-hero" aria-labelledby="refHeading"><div class="ref-kicker">SPIKE GROWTH NETWORK</div><h1 id="refHeading">Invite your people.<br>Earn SP Points.</h1><p id="refIntro">Share your personal referral link. When a new member confirms their email or phone and completes their profile, your referral becomes successful and eligible points are credited.</p><div class="ref-code" id="refCode">Loading…</div><div class="ref-muted" style="font-size:11px">YOUR PERSONAL REFERRAL CODE</div><div class="ref-linkrow"><div class="ref-link" id="refLink">Preparing your referral link…</div><button class="ref-btn" id="copyRefLink" type="button">Copy</button></div><div class="ref-actions"><button class="ref-btn primary" id="shareRefLink" type="button">Share invitation ↗</button><button class="ref-btn" id="whatsAppRef" type="button">WhatsApp</button></div><div class="ref-note">Referral points are promotional SP Points. They are separate from SP Coins and cannot be withdrawn as cash.</div></section>
-<section class="ref-grid" aria-label="Referral statistics"><article class="ref-stat"><small>People invited</small><strong id="refTotal">—</strong></article><article class="ref-stat"><small>Successful</small><strong id="refQualified">—</strong></article><article class="ref-stat"><small>Pending</small><strong id="refPending">—</strong></article><article class="ref-stat gold"><small>SP Points balance</small><strong id="refPoints">—</strong></article></section>
-<div class="ref-two"><section class="ref-panel"><h2>Your referral activity</h2><div class="ref-list" id="refRecent"><div class="ref-empty">Loading referrals…</div></div></section><section class="ref-panel"><h2>SP Points history</h2><div class="ref-list" id="refHistory"><div class="ref-empty">Loading point history…</div></div></section></div>
-<section class="ref-panel" style="margin-top:12px"><h2>Public referral leaderboard</h2><p class="ref-muted" style="font-size:12px;margin-top:-7px">Top SPIKE members by successful referrals.</p><div class="ref-list" id="refLeaderboard"><div class="ref-empty">Loading leaderboard…</div></div></section>
-<div class="ref-note">A referral is counted only once per new account. Self-referrals and existing accounts are not eligible. SPIKE verifies eligibility on its secure server.</div>
+<section class="ref-hero" aria-labelledby="refHeading"><div class="ref-kicker">SPIKE GROWTH NETWORK</div><h1 id="refHeading">Invite your people.<br>Grow SPIKE together.</h1><p id="refIntro">The referral rewards backend is not active yet. Referral codes, qualification tracking and SP Points credits are unavailable until the secure server-side reward workflow is deployed.</p><div class="ref-code" id="refCode">Not active</div><div class="ref-muted" style="font-size:11px">YOUR PERSONAL REFERRAL CODE</div><div class="ref-linkrow"><div class="ref-link" id="refLink">Referral links are not available yet.</div><button class="ref-btn" id="copyRefLink" type="button" disabled aria-disabled="true">Unavailable</button></div><div class="ref-actions"><button class="ref-btn primary" id="shareRefLink" type="button" disabled aria-disabled="true">Unavailable</button><button class="ref-btn" id="whatsAppRef" type="button" disabled aria-disabled="true">Unavailable</button></div><div class="ref-note">Referral points are promotional SP Points. They are separate from SP Coins and cannot be withdrawn as cash.</div></section>
+<section class="ref-grid" aria-label="Referral statistics"><article class="ref-stat"><small>People invited</small><strong id="refTotal">Not active</strong></article><article class="ref-stat"><small>Successful</small><strong id="refQualified">Not active</strong></article><article class="ref-stat"><small>Pending</small><strong id="refPending">Not active</strong></article><article class="ref-stat gold"><small>SP Points balance</small><strong id="refPoints">Not active</strong></article></section>
+<div class="ref-two"><section class="ref-panel"><h2>Your referral activity</h2><div class="ref-list" id="refRecent"><div class="ref-empty">Referral tracking is not configured yet.</div></div></section><section class="ref-panel"><h2>SP Points history</h2><div class="ref-list" id="refHistory"><div class="ref-empty">SP Points history is not configured yet.</div></div></section></div>
+<section class="ref-panel" style="margin-top:12px"><h2>Public referral leaderboard</h2><p class="ref-muted" style="font-size:12px;margin-top:-7px">Top SPIKE members by successful referrals.</p><div class="ref-list" id="refLeaderboard"><div class="ref-empty">Referral leaderboard is not available yet.</div></div></section>
+<div class="ref-note">Do not promise or issue referral rewards manually. Qualification, anti-abuse checks and SP Points settlement must be implemented server-side before this feature is enabled.</div>
 </main>
 <div id="refToast" role="status" aria-live="polite" style="position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#172232;border:1px solid var(--ref-line);border-radius:12px;padding:11px 16px;display:none;z-index:10;box-shadow:0 12px 40px #0008"></div>
-<script src="js/referrals-page.js?v=referrals-v1-20261115"></script>
-<script src="js/spike-dialog.js?v=global-dialog-v5"></script>
-  <script src="js/spike-select-experience-v1.js?v=1"></script>
+
+<script src="js/spike-dialog.js"></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
 </body></html>

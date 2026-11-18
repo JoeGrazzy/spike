@@ -6,11 +6,6 @@
   'use strict';
 
   const NAV = window.SPIKENavigation = window.SPIKENavigation || {};
-  // Keep the private call inbox alive across the main SPIKE pages, not only inside a DM.
-  if (!window.__SPIKE_CALLING_BOOTSTRAP__) {
-    window.__SPIKE_CALLING_BOOTSTRAP__ = true;
-    import('./spike-calling-v1.js?v=calling-v1-agora-20261118').catch(error => console.warn('[SPIKE calling] module load failed:', error?.message || error));
-  }
   const VERSION = 1;
   const KEY = 'spike.navigation.state.v1';
   const TTL = 30 * 60 * 1000;

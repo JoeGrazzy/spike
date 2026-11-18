@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="en" translate="no">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
 <meta name="google" content="notranslate">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
-  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#080a10">
   <title>Followers · SPIKE</title>
   <script id="spike-theme-bootstrap">(()=>{try{const k='spike-theme-choice-v3',v='spike-theme-version';const prior=localStorage.getItem(k);let n=parseInt(prior||'1',10);if(localStorage.getItem(v)!=='5'){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,'5');localStorage.removeItem('spike-theme-2-mode')}if(n<1||n>5)n=1;const t={1:'dark',2:'light',3:'dark',4:'light',5:'dark'};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion='5';document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
   <link rel="stylesheet" href="css/theme.css">
-  <link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
-  <link rel="stylesheet" href="css/spike-theme-experience-v3.css?v=theme-v3">
-  <link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
-  <link rel="stylesheet" href="css/spike-five-theme-authority.css?v=4">
+  <link rel="stylesheet" href="css/spike-theme-runtime.css">
+  <link rel="stylesheet" href="css/spike-theme-experience.css">
+  <link rel="stylesheet" href="css/spike-theme-final-authority.css">
+  <link rel="stylesheet" href="css/spike-five-theme-authority.css">
   <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-  <link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
-  <link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
+  <link rel="stylesheet" href="css/spike-android-fullscreen.css">
+  <link rel="stylesheet" href="css/spike-global-page-authority.css">
   <script src="js/spike-navigation.js"></script>
-  <script src="js/spike-loader-core.js?v=1" defer></script>
+  <script src="js/spike-loader-core.js" defer></script>
   <style>
     .social-verified-badge{display:inline-grid;place-items:center;width:15px;height:15px;margin-left:4px;border-radius:50%;background:linear-gradient(135deg,#34d7f0,#168bbd);color:#06131a;font-size:10px;font-weight:950;vertical-align:middle;box-shadow:0 0 10px rgba(52,215,240,.28)}
     :root{--social-bg:var(--spike-bg,#080a10);--social-panel:var(--spike-surface,#111522);--social-line:var(--spike-line,rgba(255,255,255,.12));--social-text:var(--spike-text,#f5f7ff);--social-muted:var(--spike-muted,#9ca8ba);--social-accent:var(--spike-primary,#42d8ef)}
@@ -33,17 +34,17 @@
     @media(max-width:420px){.social-page{padding-left:14px;padding-right:14px}.social-avatar{width:44px;height:44px}.social-follow-button{padding:0 9px}.social-person{gap:7px}.social-person-actions{max-width:126px;flex-wrap:wrap;justify-content:flex-end}.social-secondary-action{display:inline-flex;align-items:center;justify-content:center;min-height:30px;padding:0 7px;font-size:9px}}
     @media(prefers-reduced-motion:no-preference){.social-person{animation:social-in .18s ease both}@keyframes social-in{from{opacity:.65;transform:translateY(3px)}to{opacity:1;transform:none}}}
   </style>
-<link rel="stylesheet" href="css/spike-theme-page-bridge-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
 
-<link rel="stylesheet" href="css/spike-future-engine-v1.css?v=1">
-<link rel="stylesheet" href="./css/spike-sci-fi-technology-v1.css?v=1">
-<link rel="stylesheet" href="css/spike-mobile-compact-authority-v1.css?v=20261114">
-<link rel="stylesheet" href="css/spike-compact-premium-v1.css?v=20261116">
-  <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-future-engine.css">
+<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
+<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 </head>
 <body data-spike-page="followers" data-social-kind="followers">
-<script src="js/spike-dialog.js?v=global-dialog-v5"></script>
+<script src="js/spike-dialog.js"></script>
   <main class="social-page">
     <header class="social-top">
       <button class="social-back" id="backButton" type="button" aria-label="Back to profile">‹</button>
@@ -61,16 +62,17 @@
     <button class="social-load-more" id="loadMore" type="button" hidden>Load more</button>
   </main>
   <div class="social-toast" id="socialToast" role="status" hidden></div>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-  <script src="js/supabase-singleton.js"></script>
-<script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
-<script src="js/presence.js?v=presence-privacy-polling-v3-20261113"></script>
+  
+  
+
+
   
   <script src="js/theme.js"></script>
-  <script src="js/spike-social.js?v=identity-social-build13"></script>
-  <script src="js/spike-social-connections.js?v=identity-social-build13"></script>
-<script src="js/spike-feedback-center-v1.js?v=global-toast-v2"></script>
-    <script src="js/spike-future-engine-v1.js?v=2" defer></script>
-  <script src="js/spike-select-experience-v1.js?v=1"></script>
+  
+  <script src="js/spike-social-connections.js"></script>
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
 </body>
 </html>

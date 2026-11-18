@@ -18,7 +18,7 @@
   const $ = id => document.getElementById(id);
   const state = {
     db: null, me: null, offset: 0, loading: false, request: 0,
-    rows: [], followingIds: new Set(), followingLoaded: false, ownerIsMe: false, hasMore: false,
+    rows: [], allResults: null, searchTruncated: false, followingIds: new Set(), followingLoaded: false, ownerIsMe: false, hasMore: false,
     pendingReload: false, mutualTotal: null, followStateUnavailable: false, socialChannels: [], realtimeTimer: null, pollTimer: null, searchTimer: null
   };
 
@@ -112,6 +112,15 @@
       button.disabled = false;
       actions.append(button);
 
+      if (!missing) {
+        const message = document.createElement('a');
+        message.className = 'social-secondary-action';
+        message.href = `message.html?user_id=${encodeURIComponent(id)}`;
+        message.textContent = 'Message';
+        message.setAttribute('aria-label', `Message ${name}`);
+        actions.append(message);
+      }
+
       if (state.ownerIsMe && !missing) {
         const report = document.createElement('button');
         report.type = 'button';
@@ -177,6 +186,22 @@
     }, 60000);
   }
 
+  async function fetchAllConnections() {
+    const pageSize = 100;
+    const all = [];
+    state.searchTruncated = false;
+    for (let offset = 0; offset < 10000; offset += pageSize) {
+      const options = { limit: pageSize, offset };
+      const page = kind === 'mutuals'
+        ? await window.SPIKE.social.getMutuals(state.db, ownerId, options)
+        : await window.SPIKE.social.getList(state.db, ownerId, kind, options);
+      all.push(...page);
+      if (page.length < pageSize) return all;
+    }
+    state.searchTruncated = true;
+    return all;
+  }
+
   async function loadPage(append = false) {
     if (state.loading) {
       if (!append) state.pendingReload = true;
@@ -187,18 +212,40 @@
     const list = $('socialList');
     const loadMore = $('loadMore');
     const search = String($('socialSearch')?.value || '').trim();
+    const searching = Boolean(search);
     if (!append) {
       list.replaceChildren();
-      setStatus('Loading connections…');
+      state.allResults = null;
+      state.offset = 0;
+      setStatus(searching ? 'Searching all connections…' : 'Loading connections…');
     } else {
       loadMore.disabled = true;
       loadMore.textContent = 'Loading…';
     }
     try {
-      const options = { limit: CONFIG.pageSize, offset: append ? state.offset : 0, search };
-      const people = kind === 'mutuals'
-        ? await window.SPIKE.social.getMutuals(state.db, ownerId, options)
-        : await window.SPIKE.social.getList(state.db, ownerId, kind, options);
+      let people;
+      if (append && state.allResults) {
+        people = state.allResults.slice(state.offset, state.offset + CONFIG.pageSize);
+      } else if (!append && (searching || kind === 'mutuals')) {
+        // The list RPC has no search argument. Fetch its paginated, privacy-filtered
+        // projection before filtering locally; never claim to search only the visible page.
+        const all = await fetchAllConnections();
+        if (request !== state.request) return;
+        if (kind === 'mutuals') {
+          state.mutualTotal = all.length;
+          $('connectionCount').textContent = state.mutualTotal.toLocaleString();
+        }
+        const needle = search.toLocaleLowerCase();
+        state.allResults = searching
+          ? all.filter(person => [person.display_name, person.username, person.spike_id]
+              .some(value => String(value || '').toLocaleLowerCase().includes(needle)))
+          : all;
+        people = state.allResults.slice(0, CONFIG.pageSize);
+      } else {
+        people = kind === 'mutuals'
+          ? await window.SPIKE.social.getMutuals(state.db, ownerId, { limit: CONFIG.pageSize, offset: state.offset })
+          : await window.SPIKE.social.getList(state.db, ownerId, kind, { limit: CONFIG.pageSize, offset: state.offset });
+      }
       if (request !== state.request) return;
       // The list RPC intentionally returns a narrow connection projection.
       // Ask the public-profile RPC for verification only; denied/missing rows
@@ -218,16 +265,16 @@
       const mutualLink = $('mutualLink');
       if (mutualLink && !state.ownerIsMe && kind !== 'mutuals') mutualLink.hidden = false;
       state.offset = (append ? state.offset : 0) + people.length;
-      state.hasMore = people.length === CONFIG.pageSize;
+      state.hasMore = state.allResults
+        ? state.offset < state.allResults.length
+        : people.length === CONFIG.pageSize;
       loadMore.hidden = !state.hasMore;
       loadMore.disabled = false;
       loadMore.textContent = 'Load more';
-      if (kind === 'mutuals' && !search && state.mutualTotal === null) {
-        state.mutualTotal = Number(people[0]?.total_count || 0);
-        $('connectionCount').textContent = state.mutualTotal.toLocaleString();
-      }
       $('socialSearchEmpty').hidden = true;
-      setStatus(people.length || state.rows.length ? '' : (search ? 'No matching members found.' : `No ${kind === 'mutuals' ? 'mutual connections' : kind} yet.`));
+      setStatus(people.length || state.rows.length ?
+        (state.searchTruncated && !state.hasMore ? 'Showing the first 10,000 connections. Refine your search for more specific results.' : '') :
+        (searching ? 'No matching members found.' : `No ${kind === 'mutuals' ? 'mutual connections' : kind} yet.`));
       applySearch();
     } catch (error) {
       if (request !== state.request) return;

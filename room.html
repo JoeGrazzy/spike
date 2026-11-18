@@ -1,6 +1,9 @@
 <!doctype html>
 <html lang="en" translate="no">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
   <meta charset="utf-8">
   <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -8,19 +11,17 @@
   <meta name="description" content="Join the conversation in a SPIKE room.">
   <title>SPIKE — Room</title>
   <script id="spike-theme-bootstrap">(()=>{try{const k='spike-theme-choice-v3';let n=parseInt(localStorage.getItem(k)||'1',10);if(n<1||n>5)n=1;document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=[1,3,5].includes(n)?'dark':'light';document.documentElement.style.colorScheme=document.documentElement.dataset.theme}catch(_){}})();</script>
-  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
-  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
   <link rel="stylesheet" href="css/perf.css">
-  <link rel="stylesheet" href="css/spike-identity.css?v=identity-build14">
+  <link rel="stylesheet" href="css/spike-identity.css">
   <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-  <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=2">
-  <link rel="stylesheet" href="css/spike-room-page.css?v=room-ui-v70-chat-only">
-  <link rel="stylesheet" href="css/spike-room-compact-premium-v1.css?v=1">
-  <link rel="stylesheet" href="css/spike-room-bottom-nav-v1.css?v=1">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-  <script src="js/supabase-singleton.js"></script>
-  <script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
-  <script src="js/spike-identity.js?v=identity-build14"></script>
+  <link rel="stylesheet" href="css/spike-select-experience.css">
+  <link rel="stylesheet" href="css/spike-room-page.css">
+  <link rel="stylesheet" href="css/spike-room-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-room-bottom-nav.css">
+  
+  
+  
+  <script src="js/spike-identity.js"></script>
   <script src="js/spike-navigation.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 </head>
@@ -41,7 +42,7 @@
           <button type="button" class="room-feature-tile" data-room-feature="people"><span class="feature-icon">♟</span><span><strong>People</strong><small><span id="roomMenuMemberCount">0</span> members · private messages</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="invites" hidden><span class="feature-icon">＋</span><span><strong>Invite members</strong><small>Bring friends into this room</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="info"><span class="feature-icon">ⓘ</span><span><strong>Room information</strong><small>Details, rules and host</small></span></button>
-          <button type="button" class="room-feature-tile" data-room-feature="gifts"><span class="feature-icon">🎁</span><span><strong>Gift a room member</strong><small>Gift any eligible member, live or not</small></span></button>
+          <button type="button" class="room-feature-tile" data-room-feature="gifts" hidden><span class="feature-icon">🎁</span><span><strong>Gift a room member</strong><small>Gift any eligible member, live or not</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="share"><span class="feature-icon">↗</span><span><strong>Share room</strong><small>Copy or share the room link</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="report"><span class="feature-icon">⚑</span><span><strong>Report room</strong><small>Tell SPIKE about a concern</small></span></button>
           <button type="button" class="room-feature-tile" data-room-feature="customize" hidden><span class="feature-icon">✧</span><span><strong>Customize room</strong><small>Design the room for your members</small></span></button>
@@ -72,7 +73,7 @@
         <div class="hero-orbit" aria-hidden="true"><div class="orbit-ring ring-a"></div><div class="orbit-ring ring-b"></div><div class="orbit-core">S</div><span class="orbit-spark spark-a"></span><span class="orbit-spark spark-b"></span><span class="orbit-spark spark-c"></span></div>
       </section>
 
-      <section class="connection-card" aria-live="polite">
+      <section class="connection-card" id="connectionCard" aria-live="polite">
         <div class="connection-icon" id="connectionIcon" aria-hidden="true">⌁</div>
         <div class="connection-copy">
           <span class="eyebrow" id="connectionEyebrow">GETTING THINGS READY</span>
@@ -82,6 +83,7 @@
         </div>
         <div class="connection-actions" id="connectionActions">
           <button class="primary-button" id="retryButton" type="button" hidden>Try again <span aria-hidden="true">↻</span></button>
+          <button class="primary-button" id="startRoomButton" type="button" hidden>Start room now <span aria-hidden="true">▶</span></button>
           <button class="secondary-button" id="leaveButton" type="button" hidden>Leave room</button>
           <a class="secondary-button" id="walletButton" href="wallet.html" hidden>View Verified access</a>
           <a class="secondary-button" id="roomsButton" href="rooms.html" hidden>Browse rooms</a>
@@ -139,11 +141,13 @@
     </section>
   </div>
   <div class="sr-status" id="roomLiveStatus" role="status" aria-live="polite">Starting room connection…</div>
-  <script src="js/spike-dialog.js?v=room-dialog-v1" defer></script>
-  <script src="js/spike-room-page.js?v=room-ui-v42" defer></script>
-  <script src="js/spike-room-chat-v2.js?v=compact-v37-room-gifts" defer></script>
-  <script src="js/spike-room-fullscreen.js?v=compact-v38" defer></script>
-  <script src="js/spike-select-experience-v1.js?v=2" defer></script>
-  <script src="js/spike-room-features-v1.js?v=room-ui-v54-chat-only" defer></script>
+  <script src="js/spike-dialog.js" defer></script>
+  
+  <script src="js/spike-room-chat.js" defer></script>
+  <script src="js/spike-room-fullscreen.js" defer></script>
+  <script src="js/spike-select-experience.js" defer></script>
+  <script src="js/spike-room-features.js" defer></script>
+<script src="js/spike-room-bootstrap.js" defer></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
 </body>
 </html>

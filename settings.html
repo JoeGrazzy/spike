@@ -1,20 +1,21 @@
 <!DOCTYPE html>
 <html lang="en" translate="no"><head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
 <meta name="google" content="notranslate">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://cjqpyndceqyqsijihxbb.supabase.co" crossorigin>
-  <link rel="dns-prefetch" href="//cjqpyndceqyqsijihxbb.supabase.co">
-<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+  <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
 <script src="js/spike-navigation.js"></script>
 
 <link rel="stylesheet" href="css/perf.css">
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b10"><title>SPIKE — Settings</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.min.js"></script>
-<script src="js/supabase-singleton.js"></script>
-<script src="js/spike-platform-core-v1.js?v=platform-core-v1-20261114"></script>
-<script src="js/presence.js?v=presence-privacy-polling-v3-20261113"></script>
+
+
+
+
 
 <link rel="stylesheet" href="css/ui-fix.css">
 <style>
@@ -36,33 +37,33 @@ html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--s
 <meta name="theme-color" content="#0b0b10">
 <link rel="stylesheet" href="css/premium-back.css">
 
-<script src="js/spike-dialog.js?v=global-dialog-v5"></script><link rel="stylesheet" href="css/spike-surface-controls.css">
-  <link rel="stylesheet" href="css/spike-unified-v2.css">
+<script src="js/spike-dialog.js"></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+  <link rel="stylesheet" href="css/spike-unified.css">
 
 <link rel="stylesheet" href="css/spike-mobile-safe-area.css">
-    <link rel="stylesheet" href="css/spike-beauty-v1.css">
-  <link href="css/spike-theme-experience-v3.css?v=theme-v3" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/spike-beauty.css">
+  <link href="css/spike-theme-experience.css" rel="stylesheet"/>
   
-<link rel="stylesheet" href="css/spike-android-fullscreen-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-android-fullscreen.css">
 
-<script src="js/spike-loader-core.js?v=1" defer></script>
+<script src="js/spike-loader-core.js" defer></script>
 
 
 <link rel="stylesheet" href="css/theme.css">
-<link rel="stylesheet" href="css/spike-theme-final-authority-v1.css">
-<link rel="stylesheet" href="css/spike-ux-refinement-v1.css?v=2">
-<link rel="stylesheet" href="css/spike-global-page-authority-v2.css?v=global-v1">
-<link rel="stylesheet" href="css/spike-theme-runtime-v3.css?v=theme-v3">
-<link rel="stylesheet" href="css/spike-five-theme-authority.css?v=4">
-<link rel="stylesheet" href="css/spike-touch-hover-guard-v1.css?v=1">
-<link href="css/spike-onboarding-help-placement-v2.css" rel="stylesheet">
-<script src="js/theme.js?v=five-theme-controller-v5"></script>
-<link rel="stylesheet" href="css/spike-theme-page-bridge-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-theme-final-authority.css">
+<link rel="stylesheet" href="css/spike-ux-refinement.css">
+<link rel="stylesheet" href="css/spike-global-page-authority.css">
+<link rel="stylesheet" href="css/spike-theme-runtime.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css">
+<link rel="stylesheet" href="css/spike-touch-hover-guard.css">
+<link href="css/spike-onboarding-help-placement.css" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
 
 <!-- Settings uses always-visible compact sections; shared smart panels remain enabled on other pages. -->
-    <link rel="stylesheet" href="css/spike-future-engine-v1.css?v=1">
-<link rel="stylesheet" href="./css/spike-sci-fi-technology-v1.css?v=1">
-<link rel="stylesheet" href="css/spike-mobile-compact-authority-v1.css?v=20261114">
+    <link rel="stylesheet" href="css/spike-future-engine.css">
+<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
+<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
 <style id="spike-settings-compact-v2">
 /* SPIKE Settings compact control center — all original controls remain visible and functional. */
 .wrap{width:min(100%,900px);padding:12px 14px 34px}
@@ -147,8 +148,8 @@ html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--s
 @media(prefers-reduced-motion:reduce){.settings-category,.settings-pages [data-settings-panel]{animation:none!important;transition:none!important}}
 
 </style>
-<link rel="stylesheet" href="css/spike-compact-premium-v1.css?v=20261116">
-  <link rel="stylesheet" href="css/spike-select-experience-v1.css?v=1">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 </head><body data-spike-page="settings"><main class="wrap">
 <header class="top"><button class="back spike-premium-back" id="back" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back" type="button">‹</button><div><h1>Settings</h1><small id="accountLabel" style="color:var(--muted)">Loading…</small></div></header>
@@ -208,7 +209,20 @@ html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--s
 <div class="row"><div><strong>Friends visibility</strong><small>Who can view your friends list.</small></div><select id="friends" class="control" aria-label="Friends list visibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
 <div class="row"><div><strong>Profile discovery</strong><small>Allow your profile to appear in profile discovery.</small></div><input id="discovery" class="switch" type="checkbox" aria-label="Allow profile discovery"></div>
 </section>
-<section class="card" data-settings-panel="security-tools" hidden><div class="section" id="security-tools">Security &amp; Tools</div><div class="row"><div><strong>Security, backups &amp; chat tools</strong><small>Set up authenticator-based 2FA, export message backups, add reminders, organize conversations, check suspicious messages, and compress images before sharing.</small></div><a class="btn" href="spike-tools.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap">Open tools</a></div></section>
+<section class="card" data-settings-panel="security-tools" hidden>
+<div class="section" id="security-tools">Security &amp; Tools</div>
+<div class="row"><div><strong>Change your password</strong><small>Confirm your current password before setting a new one. Use a unique password you do not reuse elsewhere.</small></div></div>
+<form id="spikePasswordChangeForm" class="spike-password-change" novalidate>
+<div class="field"><label class="label" for="securityCurrentPassword">Current password</label><input id="securityCurrentPassword" class="control" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
+<div class="field"><label class="label" for="securityNewPassword">New password</label><input id="securityNewPassword" class="control" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+<div class="field"><label class="label" for="securityConfirmPassword">Confirm new password</label><input id="securityConfirmPassword" class="control" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+<button id="spikePasswordChangeBtn" class="btn" type="submit">Update password</button><p id="spikePasswordChangeStatus" role="status" aria-live="polite"></p>
+</form>
+<div class="row"><div><strong>Authenticator app (2-step verification)</strong><small>Protect sign-ins with a time-based code from an authenticator app. Set up a second factor on another device as a backup before relying on this.</small></div></div>
+<div class="row" style="display:block"><div id="spikeMfaStatus" role="status" aria-live="polite">Checking authenticator status…</div><div id="spikeMfaEnrollArea"><button class="btn" id="spikeMfaEnroll" type="button">Set up authenticator</button></div><div id="spikeMfaPending" hidden><p>Scan this QR code with your authenticator app, or enter the secret manually. Keep the secret private.</p><img id="spikeMfaQr" alt="Authenticator setup QR code" style="display:block;max-width:220px;background:#fff;padding:10px;border-radius:10px"><p><strong>Manual setup key</strong></p><code id="spikeMfaSecret" style="overflow-wrap:anywhere"></code><form id="spikeMfaVerifyForm"><label for="spikeMfaCode">6-digit authenticator code</label><input id="spikeMfaCode" class="control" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required><button class="btn" type="submit">Confirm and enable</button><button class="btn" id="spikeMfaCancel" type="button">Cancel setup</button></form></div><div id="spikeMfaEnabled" hidden><p>Authenticator verification is enabled for this account.</p><button class="btn" id="spikeMfaRemove" type="button">Remove authenticator</button></div></div>
+<div class="row" style="display:block"><div><strong>One-time recovery codes</strong><small>Use a recovery code if you lose access to your authenticator. Each code works once. SPIKE only displays the codes when they are generated or regenerated; save them somewhere secure.</small></div><p id="spikeRecoveryStatus" role="status" aria-live="polite">Checking recovery-code status…</p><button class="btn" id="spikeRecoveryGenerate" type="button" hidden>Generate recovery codes</button><button class="btn" id="spikeRecoveryRegenerate" type="button" hidden>Replace recovery codes</button><div id="spikeRecoveryOutput" hidden><p><strong>Save these codes now. They will not be shown again.</strong></p><pre id="spikeRecoveryCodes" style="white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#111827;border-radius:10px"></pre><button class="btn" id="spikeRecoveryCopy" type="button">Copy recovery codes</button></div></div>
+<div class="row"><div><strong>Security, backups &amp; chat tools</strong><small>Open supported account tools. Authenticator-based 2FA is not enabled yet; do not assume your account has 2FA protection.</small></div><a class="btn" href="spike-tools.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap">Open tools</a></div>
+</section>
 <section class="card" data-settings-panel="account" hidden><div class="section" id="account">Account</div><div class="row"><div><strong>Profile details</strong><small>Edit your display name, username, bio, avatar, cover image, website and location. Privacy controls remain in this Settings page.</small></div><a class="btn" href="profile.html?edit=1" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap">Edit profile ↗</a></div><div class="row"><div><strong>Sign out</strong><small>End this session on this device.</small></div><button id="signout" class="btn danger" type="button">Sign out</button></div></section>
 </div>
 <div class="settings-savebar" id="settingsSavebar"><div class="settings-save-status"><span class="save-status-dot"></span><span id="status" role="status" aria-live="polite">Changes are saved to your SPIKE account.</span></div><button id="save" class="btn settings-save-button" type="button">Save changes <span aria-hidden="true">→</span></button></div>
@@ -226,79 +240,7 @@ html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--s
   select.addEventListener('change',()=>apply(select.value));
   document.addEventListener('spike:theme-change',e=>{if(e.detail?.id)select.value=String(e.detail.id)});
 })();</script>
-<script>
-'use strict';
-const SUPABASE_URL='https://cjqpyndceqyqsijihxbb.supabase.co';
-const SUPABASE_KEY='sb_publishable_Tqz0TbLLRLwu4XirPTVuiw_sSC9o4Jw';
-const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const $=id=>document.getElementById(id);let authSubscription=null,destroyed=false,saveBusy=false;
-const DEFAULTS={messageTone:true,browser_notifications:false,theme_style:1};
-const PRIVACY_DEFAULTS={profile_visibility:'public',posts_visibility:'public',media_visibility:'public',friends_visibility:'public',allow_messages:'friends',show_online_status:true,allow_profile_discovery:true};
-const ALLOWED_THEMES=[1,2,3,4,5];
-const NOTIFICATION_KEYS=['likes','comments','mentions','follows','friend_requests','messages','coins','purchases','announcements','system'];
-const FEED_DEFAULTS={show_sensitive:true,show_spoilers:true,show_political:true,following_only:false,muted_keywords:[]};
-function normalizeFeedPrefs(v){const f=v&&typeof v==='object'?v:{};return {show_sensitive:f.show_sensitive!==false,show_spoilers:f.show_spoilers!==false,show_political:f.show_political!==false,following_only:f.following_only===true,muted_keywords:Array.isArray(f.muted_keywords)?f.muted_keywords.map(x=>String(x).trim()).filter(Boolean):[]}}
-function setFeedPrefs(f){const v=normalizeFeedPrefs(f);$('feedSensitive').checked=v.show_sensitive;$('feedSpoilers').checked=v.show_spoilers;$('feedPolitical').checked=v.show_political;$('feedFollowingOnly').checked=v.following_only;$('feedMutedKeywords').value=v.muted_keywords.join(', ')}
-function readFeedPrefs(){return normalizeFeedPrefs({show_sensitive:$('feedSensitive').checked,show_spoilers:$('feedSpoilers').checked,show_political:$('feedPolitical').checked,following_only:$('feedFollowingOnly').checked,muted_keywords:$('feedMutedKeywords').value.split(',').map(x=>x.trim()).filter(Boolean)})}
-const NOTIFICATION_DEFAULTS=Object.freeze(Object.fromEntries(NOTIFICATION_KEYS.map(k=>[k,true])));
-const THEME_NAMES=Object.freeze({1:'Midnight Luxe',2:'Arctic Glass',3:'Emerald Obsidian',4:'Sandstone Studio',5:'Cosmic Pulse'});
-function setNotificationPrefs(q){const prefs={...NOTIFICATION_DEFAULTS,...(q||{})};NOTIFICATION_KEYS.forEach(k=>{const el=$('np_'+k);if(el)el.checked=prefs[k]!==false})}
-function getNotificationPrefs(){return Object.fromEntries(NOTIFICATION_KEYS.map(k=>[k,$('np_'+k)?.checked!==false]))}
-function updateSetupSummary(){const theme=Number($('theme')?.value||1);const profile=$('profile')?.value||'public';const online=$('online')?.checked!==false;const enabled=NOTIFICATION_KEYS.filter(k=>$('np_'+k)?.checked!==false).length;const browser=$('notify')?.textContent==='Enabled';const pretty=v=>v.charAt(0).toUpperCase()+v.slice(1);if($('setupTheme'))$('setupTheme').textContent=THEME_NAMES[theme]||'Theme';if($('setupPrivacy'))$('setupPrivacy').textContent='Profile: '+pretty(profile);if($('setupPresence'))$('setupPresence').textContent=online?'Online':'Hidden';if($('setupNotifications'))$('setupNotifications').textContent=(browser?'Browser · ':'')+enabled+' types enabled';}
-
-function toneKey(k){return 'spike-setting-'+k}
-function getTone(k){try{const v=localStorage.getItem(toneKey(k));return v===null?DEFAULTS[k]:v==='1'}catch{return DEFAULTS[k]}}
-function setTone(k,v){try{localStorage.setItem(toneKey(k),v?'1':'0')}catch{}}
-function setLocal(k,v){try{localStorage.setItem('spike-setting-'+k,String(v))}catch{}}
-function getLocal(k,d){try{const v=localStorage.getItem('spike-setting-'+k);return v===null?d:v}catch{return d}}
-function setStatus(text){$('status').textContent=text}
-function setPrivacy(q){$('online').checked=q.show_online_status!==false;$('messages').value=q.allow_messages||'friends';$('profile').value=q.profile_visibility||'public';$('posts').value=q.posts_visibility||'public';$('media').value=q.media_visibility||'public';$('friends').value=q.friends_visibility||'public';$('discovery').checked=q.allow_profile_discovery!==false}
-async function getSession(){const r=await db.auth.getSession();if(r.error)throw r.error;return r.data?.session||null}
-async function load(){if(destroyed)return;const session=await getSession();if(!session?.user){location.replace('index.html');return}const uid=session.user.id;$('accountLabel').textContent=session.user.email||uid;
-const [privacyResult,appResult,notificationResult,feedResult]=await Promise.all([
- db.from('profile_privacy').select('profile_visibility,posts_visibility,media_visibility,friends_visibility,allow_messages,show_online_status,allow_profile_discovery').eq('user_id',uid).maybeSingle(),
- db.from('user_app_settings').select('theme_style,message_tone,browser_notifications').eq('user_id',uid).maybeSingle(),
- db.rpc('get_notification_preferences'),
- db.from('app_documents').select('data').eq('path',`users/${uid}/settings/feed`).maybeSingle()
-]);
-if(privacyResult.error)throw privacyResult.error;if(appResult.error)throw appResult.error;
-if(notificationResult.error){console.warn('[SPIKE SETTINGS NOTIFICATION PREFS]',notificationResult.error);setNotificationPrefs(NOTIFICATION_DEFAULTS)}else setNotificationPrefs(notificationResult.data||NOTIFICATION_DEFAULTS);
-setPrivacy({...PRIVACY_DEFAULTS,...(privacyResult.data||{})});
-const app={...DEFAULTS,...(appResult.data||{})};
-if(feedResult.error){console.warn('[SPIKE SETTINGS FEED PREFS]',feedResult.error);setFeedPrefs(FEED_DEFAULTS)}else setFeedPrefs(feedResult.data?.data?.feed||FEED_DEFAULTS);
-$('messageTone').checked=app.message_tone!==false;
-// Prefer the current browser choice so a stale account value cannot overwrite a newer local selection. The Save action syncs this choice to the account.
-let theme=null;try{const shared=Number(localStorage.getItem('spike-theme-choice-v3'));if(ALLOWED_THEMES.includes(shared))theme=shared}catch{}if(theme===null){const dbTheme=Number(appResult.data?.theme_style);if(ALLOWED_THEMES.includes(dbTheme))theme=dbTheme}if(theme===null)theme=DEFAULTS.theme_style;$('theme').value=String(theme);if(window.SPIKE_THEME)window.SPIKE_THEME.set(theme,false);else window.SPIKE_THEME?.set?.(theme,false);
-const notificationSupported='Notification' in window;const granted=notificationSupported&&Notification.permission==='granted';$('notify').textContent=app.browser_notifications&&granted?'Enabled':granted?'Enable':'Enable';setLocal('browser_notifications',app.browser_notifications===true&&granted);updateSetupSummary();
-window.__SPIKE_ONLINE_ALLOWED__=$('online').checked;if(window.AppPresence){if($('online').checked)await window.AppPresence.start(db);else await window.AppPresence.stop()}
-}
-let themeWriteVersion=0;
-$('theme').addEventListener('change',async e=>{const n=Number(e.target.value);if(!ALLOWED_THEMES.includes(n))return;updateSetupSummary();const version=++themeWriteVersion;setStatus('Theme applied. Syncing to your account…');try{const session=await getSession();if(!session?.user)throw new Error('Sign in again to sync this theme to your account.');const result=await db.from('user_app_settings').upsert({user_id:session.user.id,theme_style:n,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(result.error)throw result.error;if(version===themeWriteVersion){setStatus('Theme saved to your account.');updateSetupSummary()}}catch(err){console.error('[SPIKE THEME PERSISTENCE]',err);if(version===themeWriteVersion)setStatus(`Theme applied on this device, but account sync failed: ${err.message||'Please use Save or retry.'}`)}});
-
-document.addEventListener('spike:theme-change',e=>{const n=Number(e.detail?.id);if(ALLOWED_THEMES.includes(n)&&$('theme').value!==String(n))$('theme').value=String(n)},{passive:true});
-['messageTone'].forEach(k=>$(k).onchange=e=>{setTone(k,e.target.checked);setStatus('Changes ready to save.');updateSetupSummary()});
-NOTIFICATION_KEYS.forEach(k=>{const el=$('np_'+k);if(el)el.onchange=()=>{setStatus('Changes ready to save.');updateSetupSummary()}});
-['online','profile','posts','media','friends','discovery','messages'].forEach(k=>{const el=$(k);if(el)el.onchange=()=>{setStatus('Changes ready to save.');updateSetupSummary()}});
-['feedSensitive','feedSpoilers','feedPolitical','feedFollowingOnly','feedMutedKeywords'].forEach(k=>$(k)?.addEventListener('input',()=>setStatus('Changes ready to save.')));
-$('notify').onclick=async()=>{if(!('Notification' in window)){setStatus('Browser notifications are not supported.');return}try{const p=await Notification.requestPermission();const enabled=p==='granted';$('notify').textContent=enabled?'Enabled':'Retry';setLocal('browser_notifications',enabled);const session=await getSession();if(!session?.user)return location.replace('index.html');const r=await db.from('user_app_settings').upsert({user_id:session.user.id,browser_notifications:enabled,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(r.error)throw r.error;setStatus('Browser notifications: '+p);updateSetupSummary()}catch(e){console.error('[SPIKE SETTINGS NOTIFICATIONS]',e);setStatus(e.message||'Could not update browser notifications.')}};
-$('save').onclick=async()=>{if(saveBusy)return;saveBusy=true;const session=await getSession();if(!session?.user)return location.replace('index.html');const uid=session.user.id;$('save').disabled=true;setStatus('Saving…');try{
-const privacyPatch={user_id:uid,profile_visibility:$('profile').value,posts_visibility:$('posts').value,media_visibility:$('media').value,friends_visibility:$('friends').value,allow_messages:$('messages').value,show_online_status:$('online').checked,allow_profile_discovery:$('discovery').checked,updated_at:new Date().toISOString()};
-const appPatch={user_id:uid,theme_style:Number($('theme').value),message_tone:$('messageTone').checked,browser_notifications:('Notification' in window&&Notification.permission==='granted')&&getLocal('browser_notifications','false')==='true',updated_at:new Date().toISOString()};
-const feed=readFeedPrefs();
-const feedPath=`users/${uid}/settings/feed`;
-const existingFeed=await db.from('app_documents').select('created_at').eq('path',feedPath).maybeSingle();
-const feedDoc={path:feedPath,parent_path:`users/${uid}/settings`,collection_name:`users/${uid}/settings`,document_id:'feed',owner_id:uid,data:{feed,updated_at:new Date().toISOString()},updated_at:new Date().toISOString(),created_at:existingFeed.data?.created_at||new Date().toISOString()};
-const [pr,ar,nr,fr]=await Promise.all([db.from('profile_privacy').upsert(privacyPatch,{onConflict:'user_id'}),db.from('user_app_settings').upsert(appPatch,{onConflict:'user_id'}),db.rpc('set_notification_preferences',{p_preferences:getNotificationPrefs()}),existingFeed.error?Promise.resolve({error:existingFeed.error}):db.from('app_documents').upsert(feedDoc,{onConflict:'path'})]);
-const failures=[];if(pr.error)failures.push('privacy');if(ar.error)failures.push('app settings');if(nr.error)failures.push('notification preferences');if(fr.error)failures.push('Feed preferences');
-if(failures.length){console.error('[SPIKE SETTINGS SAVE PARTIAL FAILURE]',{privacy:pr.error,appSettings:ar.error,notificationPreferences:nr.error});const succeeded=[];if(!pr.error)succeeded.push('privacy');if(!ar.error)succeeded.push('app settings');if(!nr.error)succeeded.push('notification preferences');if(!fr.error)succeeded.push('Feed preferences');setStatus(succeeded.length?`Saved ${succeeded.join(' and ')}, but ${failures.join(', ')} failed. Please retry.`:`Could not save settings: ${failures.join(', ')} failed.`);return}
-try{localStorage.setItem('spike-theme-choice-v3',String(Number($('theme').value)))}catch{};['messageTone'].forEach(k=>setTone(k,$(k).checked));setLocal('browser_notifications',appPatch.browser_notifications);window.__SPIKE_ONLINE_ALLOWED__=privacyPatch.show_online_status;if(window.AppPresence){if(privacyPatch.show_online_status)await window.AppPresence.start(db);else await window.AppPresence.stop()}
-setStatus('Saved.');updateSetupSummary();
-}catch(e){console.error('[SPIKE SETTINGS SAVE]',e);setStatus(e.message||'Could not save settings.')}finally{$('save').disabled=false;saveBusy=false}};
-$('signout').onclick=async()=>{try{await window.AppPresence?.stop?.(true);if(db.removeAllChannels)await db.removeAllChannels();const r=await db.auth.signOut({scope:'local'});if(r.error)throw r.error;location.replace('index.html?logged_out=1')}catch(e){setStatus(e.message||'Sign out failed')}};
-document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.href=b.dataset.go);
-authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
-window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{window.AppPresence?.stop?.()}catch{};});
-load().catch(e=>{console.error('[SPIKE SETTINGS LOAD]',e);setStatus(e.message||'Settings failed to load')});
-</script><script id="spike-settings-navigation-v3">
+<script id="spike-settings-navigation-v3">
 (()=>{
   const home=document.getElementById('settingsHome'),pages=document.getElementById('settingsPages'),head=document.getElementById('settingsDetailHead');
   if(!home||!pages||!head)return;
@@ -321,16 +263,19 @@ load().catch(e=>{console.error('[SPIKE SETTINGS LOAD]',e);setStatus(e.message||'
 <script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
 
 
-<script src="js/premium-back.js?v=back-nav-v2" defer></script>
-<script src="js/telemetry.js" defer></script>
+<script type="module" src="js/spike-mfa-settings.js"></script>
+<script src="js/spike-settings-controller.js" defer></script>
+<script src="js/premium-back.js" defer></script>
+
 <script src="js/spike-surface-controls.js"></script>
 
 
-  <script src="js/maintenance.js?v=20260914113000" defer></script>
+  
 
 
-<script src="js/spike-onboarding-v1.js?v=2" defer></script>
-<script src="js/spike-feedback-center-v1.js?v=global-toast-v2"></script>
-    <script src="js/spike-future-engine-v1.js?v=2" defer></script>
-  <script src="js/spike-select-experience-v1.js?v=1"></script>
+
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
 </body></html>

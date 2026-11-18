@@ -1,0 +1,11 @@
+{
+  "name": "spike-frontend",
+  "private": true,
+  "description": "SPIKE frontend source handoff",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "check:javascript": "for file in js/*.js; do node --check \"$file\" || exit 1; done",
+    "check": "npm run check:javascript && npm test"
+  },
+  "type": "module"
+}
