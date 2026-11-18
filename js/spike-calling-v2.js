@@ -16,6 +16,7 @@
   const $ = id => document.getElementById(id);
   let db = null, me = null, inboxChannel = null, current = null, initialized = false, ringContext = null, ringTimer = null;
   let pagePeer = null, pagePeerName = 'SPIKE member', pagePeerAvatar = '';
+  let bootPromise = null, authListenerBound = false, authBootRequested = false, inboxRecoveryBound = false, inboxPollTimer = null, inboxPollBusy = false;
 
   function mount() {
     if ($('spikeCallOverlay')) return;
@@ -307,6 +308,29 @@
       }
     }
   }
+  async function pollIncomingInbox() {
+    if (!initialized || !db || !me || current || inboxPollBusy) return;
+    inboxPollBusy = true;
+    try {
+      const { data, error } = await db.from(TABLE).select('*')
+        .eq('callee_id', me.id).eq('status', 'ringing')
+        .gt('expires_at', new Date().toISOString())
+        .order('created_at', { ascending: false }).limit(1);
+      if (error) throw error;
+      if (data?.[0] && !current) await receiveIncoming(data[0]);
+    } catch (error) {
+      console.warn('[SPIKE call v2] incoming-call recovery check failed:', error?.message || error);
+    } finally { inboxPollBusy = false; }
+  }
+  function startInboxRecovery() {
+    if (inboxPollTimer) clearInterval(inboxPollTimer);
+    inboxPollTimer = setInterval(() => { void pollIncomingInbox(); }, 5000);
+    if (!inboxRecoveryBound) {
+      inboxRecoveryBound = true;
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) void pollIncomingInbox(); });
+      window.addEventListener('focus', () => { void pollIncomingInbox(); });
+    }
+  }
   async function subscribeInbox() {
     removeChannel(inboxChannel);
     inboxChannel = db.channel('spike-dm-call-v2-inbox-' + me.id)
@@ -466,22 +490,65 @@
   }
   async function boot() {
     if (initialized) return;
-    db = window.__SPIKE_SUPABASE__ || window.supabaseClient || window.sb || (window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
-    if (!db?.auth?.getSession) return;
-    try {
-      const { data, error } = await db.auth.getSession(); if (error) throw error;
-      me = data.session?.user; if (!me) return;
-      if (data.session?.access_token && db.realtime?.setAuth) await db.realtime.setAuth(data.session.access_token);
-      initialized = true; mount(); await subscribeInbox();
-      const params = new URLSearchParams(location.search);
-      if (document.body?.dataset.spikePage === 'message') {
-        pagePeer = params.get('to') || params.get('id');
-        const nameNode = $('name'), avatarNode = $('avatar');
-        pagePeerName = nameNode?.textContent || 'SPIKE member';
-        pagePeerAvatar = avatarNode?.querySelector('img')?.src || '';
-        addMessageCallButtons();
+    if (bootPromise) return bootPromise;
+    bootPromise = (async () => {
+      db = window.__SPIKE_SUPABASE__ || window.supabaseClient || window.sb ||
+        (window.supabase?.createClient ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null);
+      if (!db?.auth?.getSession) {
+        // Some pages initialize the shared Supabase client after feature scripts.
+        setTimeout(() => { bootPromise = null; void boot(); }, 1200);
+        return;
       }
-    } catch (error) { console.warn('[SPIKE call v2] initialization failed:', error.message); }
+      if (!authListenerBound && db.auth.onAuthStateChange) {
+        authListenerBound = true;
+        db.auth.onAuthStateChange((event, session) => {
+          if (session?.user) {
+            me = session.user;
+            if (!initialized) {
+              if (bootPromise) authBootRequested = true;
+              else void boot();
+            }
+          } else if (event === 'SIGNED_OUT') {
+            if (current) cleanup();
+            initialized = false; me = null;
+            removeChannel(inboxChannel); inboxChannel = null;
+            if (inboxPollTimer) clearInterval(inboxPollTimer);
+            inboxPollTimer = null;
+          }
+        });
+      }
+      try {
+        const { data, error } = await db.auth.getSession();
+        if (error) throw error;
+        me = data.session?.user || null;
+        if (!me) return; // Auth listener will resume initialization after sign-in.
+        if (data.session?.access_token && db.realtime?.setAuth) await db.realtime.setAuth(data.session.access_token);
+        if (initialized) return;
+        initialized = true;
+        mount();
+        await subscribeInbox();
+        startInboxRecovery();
+        const params = new URLSearchParams(location.search);
+        if (document.body?.dataset.spikePage === 'message') {
+          pagePeer = params.get('to') || params.get('id');
+          const nameNode = $('name'), avatarNode = $('avatar');
+          pagePeerName = nameNode?.textContent || 'SPIKE member';
+          pagePeerAvatar = avatarNode?.querySelector('img')?.src || '';
+          addMessageCallButtons();
+        }
+      } catch (error) {
+        initialized = false;
+        console.warn('[SPIKE call v2] initialization failed; will retry:', error?.message || error);
+        setTimeout(() => { bootPromise = null; void boot(); }, 2500);
+      }
+    })();
+    try { await bootPromise; } finally {
+      bootPromise = null;
+      if (authBootRequested && !initialized) {
+        authBootRequested = false;
+        setTimeout(() => { if (!initialized) void boot(); }, 0);
+      }
+    }
   }
   function addMessageCallButtons() {
     const header = document.querySelector('body[data-spike-page="message"] .top');
@@ -498,6 +565,6 @@
     header.insertBefore(make('spikeVideoCallButton','fa-video','Start video call','video'), $('refresh'));
   }
   window.SpikeCallingV2 = { init:boot, start, end:() => finish('ended'), getState:() => current ? { id:current.callId,type:current.type,status:current.status,role:current.role } : null };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once:true }); else void boot();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { mount(); void boot(); }, { once:true }); else { mount(); void boot(); }
   window.addEventListener('pagehide', () => { if (current) { try { current.pc?.close(); } catch (_) {} } removeChannel(inboxChannel); });
 })();

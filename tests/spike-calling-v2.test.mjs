@@ -13,6 +13,9 @@ test('new call runtime is a separate module with voice and video WebRTC handling
   assert.ok(js.includes('startRingtone') && js.includes('stopRingtone'));
   assert.ok(js.includes('startHeartbeat') && js.includes('caller_heartbeat_at') && js.includes('callee_heartbeat_at'));
   assert.ok(js.includes('armConnectionTimeout'));
+  assert.ok(js.includes('db.auth.onAuthStateChange'), 'boot must resume when auth becomes ready after the call module loads');
+  assert.ok(js.includes('pollIncomingInbox') && js.includes('startInboxRecovery'), 'incoming calls need a database recovery path if Realtime misses an INSERT');
+  assert.ok(js.includes('setTimeout(() => { bootPromise = null; void boot(); }, 1200)'), 'missing Supabase client must trigger a bounded initialization retry');
   assert.ok(js.includes('Answered on another device'));
   assert.ok(js.includes('!current.answerApplying') && js.includes('current.answerApplying = true'), 'duplicate Realtime/SELECT answer delivery must be serialized');
   assert.ok(js.includes('current.finishing'), 'call teardown must be idempotent');
