@@ -289,12 +289,22 @@
         if (current.role === 'callee') setStatus('Connecting securely…');
       }
     }
-    if (row.status === 'accepted' && row.answer && current.role === 'caller' && !current.answerApplied) {
+    if (row.status === 'accepted' && row.answer && current.role === 'caller' && !current.answerApplied && !current.answerApplying) {
+      // Realtime UPDATE and the initial SELECT can deliver the same accepted row
+      // almost simultaneously. Lock before awaiting setRemoteDescription so the
+      // same SDP is never applied twice to one RTCPeerConnection.
+      current.answerApplying = true;
+      const call = current;
       try {
-        await current.pc.setRemoteDescription(new RTCSessionDescription(row.answer));
-        current.answerApplied = true; await flushRemoteCandidates();
+        await call.pc.setRemoteDescription(new RTCSessionDescription(row.answer));
+        if (current !== call) return;
+        call.answerApplied = true; await flushRemoteCandidates();
         setStatus('Connecting securely…');
-      } catch (error) { console.error('[SPIKE call v2] answer apply failed', error); await finish('failed', 'Could not establish the call.'); }
+      } catch (error) {
+        if (current === call) { console.error('[SPIKE call v2] answer apply failed', error); await finish('failed', 'Could not establish the call.'); }
+      } finally {
+        call.answerApplying = false;
+      }
     }
   }
   async function subscribeInbox() {
@@ -399,8 +409,9 @@
     }
   }
   async function finish(status, reason) {
-    if (!current) return;
+    if (!current || current.finishing) return;
     const call = current;
+    call.finishing = true;
     let finalStatus = status;
     if (status === 'cancelled' && call.role === 'caller' && call.callId) {
       try {
@@ -439,14 +450,19 @@
   }
   async function switchCamera() {
     if (!current?.localStream || current.type !== 'video') return;
-    const oldTrack = current.localStream.getVideoTracks()[0];
+    const call = current;
+    const oldTrack = call.localStream.getVideoTracks()[0];
     try {
       const next = await navigator.mediaDevices.getUserMedia({ video:{ facingMode: oldTrack?.getSettings?.().facingMode === 'environment' ? 'user' : 'environment' }, audio:false });
-      const newTrack = next.getVideoTracks()[0]; const sender = current.pc?.getSenders().find(item => item.track?.kind === 'video');
+      const newTrack = next.getVideoTracks()[0];
+      if (current !== call) { next.getTracks().forEach(track => track.stop()); return; }
+      const sender = call.pc?.getSenders().find(item => item.track?.kind === 'video');
       if (!newTrack || !sender) throw new Error('Camera switch is not supported on this device.');
-      await sender.replaceTrack(newTrack); current.localStream.removeTrack(oldTrack); current.localStream.addTrack(newTrack); oldTrack?.stop(); $('spikeCallLocalVideo').srcObject = current.localStream;
+      await sender.replaceTrack(newTrack);
+      if (current !== call) { newTrack.stop(); return; }
+      call.localStream.removeTrack(oldTrack); call.localStream.addTrack(newTrack); oldTrack?.stop(); $('spikeCallLocalVideo').srcObject = call.localStream;
       next.getTracks().filter(track => track !== newTrack).forEach(track => track.stop());
-    } catch (error) { setStatus(error.message || 'Could not switch camera.'); }
+    } catch (error) { if (current === call) setStatus(error.message || 'Could not switch camera.'); }
   }
   async function boot() {
     if (initialized) return;

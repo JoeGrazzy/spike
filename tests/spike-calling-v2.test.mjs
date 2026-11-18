@@ -14,6 +14,9 @@ test('new call runtime is a separate module with voice and video WebRTC handling
   assert.ok(js.includes('startHeartbeat') && js.includes('caller_heartbeat_at') && js.includes('callee_heartbeat_at'));
   assert.ok(js.includes('armConnectionTimeout'));
   assert.ok(js.includes('Answered on another device'));
+  assert.ok(js.includes('!current.answerApplying') && js.includes('current.answerApplying = true'), 'duplicate Realtime/SELECT answer delivery must be serialized');
+  assert.ok(js.includes('current.finishing'), 'call teardown must be idempotent');
+  assert.ok(js.includes('if (current !== call) { next.getTracks().forEach(track => track.stop()); return; }'), 'camera permission completion after hangup must clean up its stream');
   assert.ok(!/sitewide-calls-v\d+|spike-dm-realtime-calls-v\d+/.test(js), 'legacy call runtime must not be imported');
 });
 
