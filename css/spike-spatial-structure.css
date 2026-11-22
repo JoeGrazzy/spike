@@ -1,0 +1,41 @@
+/* SPIKE NEXUS spatial structure v4 — real layout redesign, existing controls and data flow retained */
+:root{--nx-cyan:#62e5ff;--nx-blue:#327ba8;--nx-violet:#a58aff;--nx-edge:rgba(104,211,255,.24);--nx-panel:rgba(7,19,34,.94);--nx-panel-hi:rgba(13,34,55,.96)}
+/* Inbox becomes a command workspace rather than a narrow stacked page. */
+[data-spike-page="messages"] .app{width:min(1180px,100%);max-width:1180px;padding:0 22px 24px}
+[data-spike-page="messages"] .top{margin:0 -22px;padding-left:clamp(22px,4vw,48px);padding-right:clamp(22px,4vw,48px);background:rgba(5,13,25,.94);border-bottom:1px solid var(--nx-edge);box-shadow:0 12px 36px #0005}
+[data-spike-page="messages"] .content{display:grid;grid-template-columns:minmax(0,1fr) 300px;grid-template-areas:"intro intro" "notice notice" "search rail" "filters rail" "list rail";align-content:start;gap:0 22px;padding:28px 0}
+[data-spike-page="messages"] .content>.hero:first-child{grid-area:intro;min-height:150px;margin:0 0 22px;padding:28px 32px;display:flex;flex-direction:column;justify-content:center;border-radius:22px;border:1px solid var(--nx-edge);background:radial-gradient(ellipse at 86% 10%,rgba(57,207,255,.2),transparent 35%),radial-gradient(ellipse at 100% 100%,rgba(132,91,255,.16),transparent 40%),linear-gradient(110deg,#0a1c30,#0b1428 65%,#11132d);box-shadow:0 22px 55px #0005,inset 0 1px #ffffff12;position:relative;overflow:hidden}
+[data-spike-page="messages"] .content>.hero:first-child:after{content:"COMMUNICATION / NODE 01";position:absolute;right:26px;bottom:20px;color:#74dffb80;font:800 9px/1.2 ui-monospace,monospace;letter-spacing:.2em}
+[data-spike-page="messages"] .hero h1{font-size:clamp(30px,5vw,48px);letter-spacing:-.06em;max-width:680px}
+[data-spike-page="messages"] .search{grid-area:search;margin:0 0 14px;min-height:54px;border-radius:14px;background:linear-gradient(120deg,#0b1e31,#0b1527);border-color:var(--nx-edge)}
+[data-spike-page="messages"] .filters{grid-area:filters;margin:0 0 14px;padding:2px 0 8px}
+[data-spike-page="messages"] .list{grid-area:list;align-content:start;gap:10px}
+[data-spike-page="messages"] .item{min-height:82px;padding:14px 16px;border-radius:15px;border-color:rgba(100,186,225,.17);background:linear-gradient(110deg,rgba(15,39,61,.98),rgba(8,21,37,.98));box-shadow:0 8px 22px #0002;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+[data-spike-page="messages"] .item:active{transform:scale(.99)}
+[data-spike-page="messages"] .content>.hero:last-of-type{grid-area:rail;align-self:start;position:sticky;top:100px;margin:0;min-height:245px;padding:24px;border-radius:18px;border:1px solid rgba(151,127,255,.28);background:radial-gradient(circle at 100% 0,rgba(149,115,255,.2),transparent 48%),linear-gradient(150deg,#171a39,#0a1c31 75%);box-shadow:0 20px 50px #0004}
+[data-spike-page="messages"] .content>.hero:last-of-type:before{content:"✳";display:grid;place-items:center;width:46px;height:46px;margin-bottom:18px;border:1px solid #9a8aff66;border-radius:14px;color:#c4b4ff;font-size:23px;background:#a58aff16;box-shadow:0 0 28px #9b8aff22}
+[data-spike-page="messages"] .content>.hero:last-of-type .primary{display:inline-flex;align-items:center;justify-content:center;min-height:44px}
+/* Direct conversation: immersive, full-height communication chamber. */
+[data-spike-page="message"] .app{width:min(1080px,100%);max-width:1080px;min-height:100dvh;background:radial-gradient(ellipse at 50% -15%,rgba(47,151,208,.12),transparent 42%),#070f1c;border-left:1px solid #6bdcff12;border-right:1px solid #6bdcff12}
+[data-spike-page="message"] .top{padding:calc(14px + env(safe-area-inset-top)) clamp(14px,3vw,28px) 14px;background:rgba(5,14,26,.96);border-bottom:1px solid var(--nx-edge)}
+[data-spike-page="message"] .content{flex:1;min-height:0;padding:20px clamp(14px,4vw,44px) 12px;background-image:linear-gradient(rgba(100,194,240,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(100,194,240,.025) 1px,transparent 1px);background-size:36px 36px}
+[data-spike-page="message"] .thread{max-width:820px;margin:0 auto;min-height:100%;justify-content:flex-end;padding:18px 0 28px}
+[data-spike-page="message"] .bubble{max-width:min(76%,620px);padding:13px 16px;border-radius:17px;background:linear-gradient(145deg,#122a40,#0d1c30);border-color:#6bcdfb25;box-shadow:0 8px 24px #0002}
+[data-spike-page="message"] .bubble.mine{background:linear-gradient(135deg,#285b82,#4c438c);border:1px solid #92e8ff35;box-shadow:0 8px 26px #235f9250}
+[data-spike-page="message"] .composer{position:sticky;z-index:4;bottom:0;padding:14px clamp(14px,4vw,44px) calc(14px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(7,15,28,.9),#070f1c 32%);border-top:1px solid var(--nx-edge)}
+[data-spike-page="message"] .composebox{max-width:900px;margin:auto;border-radius:17px;padding:8px;background:#0e2033;border-color:#70d5fa3d;box-shadow:0 12px 34px #0005,inset 0 1px #ffffff0b}
+/* Profile identity becomes a layered identity deck with a true two-column workspace. */
+[data-spike-page="profile"] .main{width:min(1160px,calc(100% - 32px));margin:24px auto 48px}
+[data-spike-page="profile"] .main>.card{overflow:hidden;border:1px solid var(--nx-edge);border-radius:24px;background:linear-gradient(145deg,rgba(11,28,46,.98),rgba(8,15,30,.98));box-shadow:0 28px 80px #0006}
+[data-spike-page="profile"] .cover{height:clamp(190px,27vw,310px);border-bottom:1px solid var(--nx-edge);background:radial-gradient(ellipse at 76% 12%,rgba(77,211,255,.28),transparent 38%),radial-gradient(ellipse at 22% 100%,rgba(134,94,255,.2),transparent 48%),linear-gradient(120deg,#102f49,#11172f 62%,#1c1940)}
+[data-spike-page="profile"] .cover:before{content:"SPIKE IDENTITY FIELD";position:absolute;right:26px;top:22px;color:#a4eaff9c;font:800 9px/1 ui-monospace,monospace;letter-spacing:.22em}
+[data-spike-page="profile"] .profile{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,340px);column-gap:28px;align-items:start;padding:0 clamp(18px,4vw,42px) 30px}
+[data-spike-page="profile"] .profile>.avatar-wrap{grid-column:1/-1;margin-top:-62px;z-index:2}
+[data-spike-page="profile"] .profile>.avatar-wrap .avatar{width:124px;height:124px;border:5px solid #0b1b2d;box-shadow:0 0 0 1px #6bdcff80,0 15px 40px #0008}
+[data-spike-page="profile"] .profile-top{grid-column:1;grid-row:2;min-width:0;padding-top:14px}
+[data-spike-page="profile"] .profile-tools{grid-column:2;grid-row:2;min-width:0;margin-top:18px;padding:18px;border:1px solid rgba(105,202,242,.2);border-radius:18px;background:linear-gradient(145deg,#10263b,#0b1729);box-shadow:0 15px 40px #0003}
+[data-spike-page="profile"] .profileStats{border:1px solid #70d5fa26;border-radius:15px;background:#0b1c2d;padding:10px}
+[data-spike-page="profile"] .spid-card{border-color:#70d5fa35;background:linear-gradient(115deg,#102e45,#171b3b)}
+[data-spike-page="profile"] .recommendations{margin-top:18px}
+@media(max-width:820px){[data-spike-page="messages"] .app{padding:0 14px 20px}[data-spike-page="messages"] .top{margin:0 -14px}[data-spike-page="messages"] .content{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "notice" "search" "filters" "list" "rail";padding:18px 0}[data-spike-page="messages"] .content>.hero:first-child{min-height:132px;padding:22px}[data-spike-page="messages"] .content>.hero:last-of-type{position:static;min-height:0;margin-top:18px}[data-spike-page="messages"] .content>.hero:last-of-type:before{display:none}[data-spike-page="profile"] .profile{grid-template-columns:minmax(0,1fr);padding:0 18px 24px}[data-spike-page="profile"] .profile-top,[data-spike-page="profile"] .profile-tools{grid-column:1;grid-row:auto}[data-spike-page="profile"] .profile-tools{margin-top:20px}}
+@media(prefers-reduced-motion:reduce){[data-spike-page="messages"] .item,[data-spike-page="message"] .bubble{transition:none!important}}

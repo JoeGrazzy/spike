@@ -1,0 +1,173 @@
+/* SPIKE Admin — wallet-inspired compact visual system. Presentation only; no data or auth behavior. */
+.admin-shell{
+  --admin-card-radius:14px;
+  --admin-card-gap:9px;
+  --admin-ink:var(--text);
+  width:min(1120px,calc(100% - 28px));
+  padding-top:12px;
+  padding-bottom:max(28px,env(safe-area-inset-bottom));
+  font-size:12px;
+}
+.admin-shell .wallet-top{gap:10px;margin-bottom:12px;align-items:center}
+.admin-shell .wallet-top>a{width:34px;height:34px;display:grid;place-items:center;padding:0;border-radius:11px;font-size:19px;line-height:1;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.admin-shell .wallet-top>a:hover{transform:translateX(-2px);border-color:var(--accent,var(--primary))}
+.admin-shell .admin-brand h1{font-size:clamp(18px,3vw,22px);font-weight:900;letter-spacing:-.045em;line-height:1.1}
+.admin-shell .admin-brand p{font-size:10px;line-height:1.3;margin-top:3px}
+.admin-shell .admin-control-label{margin:0;font-size:8px;letter-spacing:.16em;padding:6px 8px;border:1px solid rgba(130,220,180,.2);border-radius:999px;background:rgba(35,145,100,.08)}
+.admin-shell .admin-tabs{position:sticky;top:max(6px,env(safe-area-inset-top));z-index:20;gap:5px;padding:4px;margin-bottom:11px;border-radius:13px;background:color-mix(in srgb,var(--surface2) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 5px 18px rgba(0,0,0,.06)}
+.admin-shell .admin-tab{min-height:38px;gap:6px;padding:6px 8px;border-radius:10px;font-size:10px;font-weight:850;letter-spacing:-.01em;transition:background .18s ease,color .18s ease,transform .18s ease}
+.admin-shell .admin-tab:active{transform:scale(.98)}
+.admin-shell .admin-tab.is-active{background:var(--surface);color:var(--text);box-shadow:0 2px 10px rgba(0,0,0,.09),inset 0 0 0 1px color-mix(in srgb,var(--line) 75%,transparent)}
+.admin-shell .admin-hero{padding:15px 16px 14px;border-radius:16px;box-shadow:0 10px 26px rgba(0,65,48,.15)}
+.admin-shell .admin-hero h2{font-size:clamp(17px,3vw,20px);line-height:1.12;letter-spacing:-.045em}
+.admin-shell .admin-hero p{max-width:54ch;font-size:10px;line-height:1.45;margin-top:5px}
+.admin-shell .admin-kicker{font-size:8px;letter-spacing:.15em;margin-bottom:5px}
+.admin-shell .admin-section-head{margin:13px 1px 8px;align-items:baseline}
+.admin-shell .admin-section-head h2{font-size:12px;font-weight:900;letter-spacing:-.025em}
+.admin-shell .admin-section-head span{font-size:9px}
+
+/* The 14 live overview metrics become a tidy, responsive wallet-style card grid. */
+.admin-shell #adminMetrics.wallet-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.admin-shell #adminMetrics .admin-stat-card{position:relative;isolation:isolate;min-height:78px;gap:9px;padding:10px 11px;border-radius:13px;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.admin-shell #adminMetrics .admin-stat-card:after{content:"";position:absolute;z-index:-1;width:82px;height:82px;right:-42px;bottom:-48px;border-radius:50%;background:color-mix(in srgb,var(--accent,var(--primary)) 9%,transparent);pointer-events:none}
+.admin-shell #adminMetrics .admin-stat-card:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--accent,var(--primary)) 40%,var(--line));box-shadow:0 8px 20px rgba(0,0,0,.07)}
+.admin-shell .admin-stat-icon{width:29px;height:29px;flex-basis:29px;border-radius:10px;font-size:14px;background:color-mix(in srgb,var(--accent,var(--primary)) 9%,var(--surface2));border-color:color-mix(in srgb,var(--accent,var(--primary)) 16%,var(--line))}
+.admin-shell .admin-stat-label{font-size:9px;font-weight:750;line-height:1.28;letter-spacing:-.01em}
+.admin-shell .admin-stat-value{font-size:clamp(17px,2.2vw,21px);line-height:1.05;margin-top:4px;letter-spacing:-.05em}
+.admin-shell .admin-stat-note{font-size:8px;line-height:1.3;margin-top:3px}
+.admin-shell #adminMetrics[aria-busy="true"] .admin-stat-value{opacity:.55}
+
+/* Consistent compact surfaces for directories, details, forms and history. */
+.admin-shell .wallet-panel{border-radius:var(--admin-card-radius);padding:12px;box-shadow:0 3px 14px rgba(0,0,0,.035)}
+.admin-shell .user-hero{margin-bottom:11px}
+.admin-shell .user-workspace,.admin-shell .verify-workspace{grid-template-columns:minmax(245px,300px) minmax(0,1fr);gap:9px}
+.admin-shell .user-directory,.admin-shell .user-detail,.admin-shell .verify-directory,.admin-shell .verify-detail{padding:10px}
+.admin-shell .user-search{gap:6px}
+.admin-shell .user-search input,.admin-shell .user-search select,.admin-shell .user-action-form input,.admin-shell .user-action-form textarea,.admin-shell .user-action-fields input,.admin-shell .user-action-fields select,.admin-shell .user-action-block>input{min-height:38px;padding:8px 9px;border-radius:9px;font-size:10px}
+.admin-shell .user-search button,.admin-shell .admin-refresh,.admin-shell .user-more{min-height:36px;padding:7px 10px;border-radius:9px;font-size:10px;transition:transform .16s ease,border-color .16s ease,background .16s ease}
+.admin-shell .admin-refresh:hover,.admin-shell .user-more:hover{border-color:var(--accent,var(--primary))}
+.admin-shell .admin-refresh:active,.admin-shell .verify-actions button:active{transform:scale(.985)}
+.admin-shell .user-list{gap:5px;max-height:620px}
+.admin-shell .user-row,.admin-shell .verify-row{gap:8px;padding:7px 8px;border-radius:10px}
+.admin-shell .user-avatar{width:31px;height:31px;flex-basis:31px;border-radius:9px;font-size:12px}
+.admin-shell .user-row-main strong,.admin-shell .verify-row-main strong{font-size:10px}
+.admin-shell .user-row-main small,.admin-shell .verify-row-main small{font-size:8px}
+.admin-shell .user-badge,.admin-shell .verify-state{font-size:7px;padding:2px 5px}
+.admin-shell .user-quick-stats{gap:5px;margin:10px 0}
+.admin-shell .user-quick-stats>div,.admin-shell .user-info-grid>div,.admin-shell .verify-info-grid>div{padding:7px;border-radius:9px}
+.admin-shell .user-quick-stats small,.admin-shell .user-info-grid small{font-size:8px}
+.admin-shell .user-quick-stats strong,.admin-shell .user-info-grid strong{font-size:9px;line-height:1.35}
+.admin-shell .detail-tabs{gap:4px;padding:2px 0 7px}
+.admin-shell .detail-tab{padding:6px 8px;border-radius:8px;font-size:8px}
+.admin-shell .user-detail-content{padding-top:8px}
+.admin-shell .user-subheading,.admin-shell .verify-subhead{font-size:10px;margin:11px 0 6px}
+.admin-shell .user-table{font-size:8px}
+.admin-shell .user-table th,.admin-shell .user-table td{padding:6px 7px}
+.admin-shell .user-table th{font-size:7px}
+.admin-shell .user-action-block{padding:9px;border-radius:10px;margin:7px 0}
+.admin-shell .user-action-block>strong{font-size:10px}
+.admin-shell .user-action-block p,.admin-shell .user-hint{font-size:8px}
+.admin-shell .verify-stats{gap:7px;margin:9px 0}
+.admin-shell .verify-stats article{min-height:65px;padding:9px 10px;border-radius:12px;gap:4px}
+.admin-shell .verify-stats small{font-size:8px}
+.admin-shell .verify-stats strong{font-size:18px;line-height:1.05}
+.admin-shell .verify-info-grid{gap:6px;margin:10px 0}
+.admin-shell .verify-info-grid small{font-size:8px}
+.admin-shell .verify-info-grid strong{font-size:9px;line-height:1.35}
+.admin-shell .verify-actions{gap:5px;margin:10px 0}
+.admin-shell .verify-actions button{min-height:35px;padding:7px 9px;border-radius:8px;font-size:9px}
+.admin-shell .verify-history{gap:6px}
+.admin-shell .verify-history-item strong{font-size:9px}
+.admin-shell .verify-history-item small{font-size:8px;line-height:1.4}
+.admin-shell .verify-note{margin-top:10px;padding:9px 10px;border-radius:10px;font-size:8px}
+.admin-shell .user-empty{min-height:230px;padding:16px}
+.admin-shell .user-empty-icon{font-size:23px}
+.admin-shell .user-empty strong{font-size:12px}
+.admin-shell .user-empty p{font-size:9px}
+.admin-shell .admin-controls{gap:9px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.admin-shell .admin-status{font-size:9px}
+.admin-shell .admin-updated{font-size:8px}
+
+@media(max-width:900px){
+  .admin-shell #adminMetrics.wallet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .admin-shell .user-workspace,.admin-shell .verify-workspace{grid-template-columns:minmax(220px,270px) minmax(0,1fr)}
+}
+@media(max-width:700px){
+  .admin-shell{width:calc(100% - 20px);padding-top:9px}
+  .admin-shell .wallet-top{margin-bottom:10px}
+  .admin-shell .admin-tabs{top:max(4px,env(safe-area-inset-top));margin-bottom:9px}
+  .admin-shell .admin-tab{min-height:36px;font-size:9px;gap:4px;padding:6px 5px}
+  .admin-shell .admin-hero{padding:13px 14px;border-radius:14px}
+  .admin-shell .admin-hero h2{font-size:17px}
+  .admin-shell .admin-hero p{font-size:9px}
+  .admin-shell .admin-section-head{margin:11px 1px 7px}
+  .admin-shell #adminMetrics.wallet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .admin-shell #adminMetrics .admin-stat-card{min-height:70px;padding:9px;gap:7px;border-radius:11px}
+  .admin-shell .admin-stat-icon{width:26px;height:26px;flex-basis:26px;border-radius:8px;font-size:12px}
+  .admin-shell .admin-stat-label{font-size:8px}
+  .admin-shell .admin-stat-value{font-size:17px}
+  .admin-shell .admin-stat-note{font-size:7px}
+  .admin-shell .user-workspace,.admin-shell .verify-workspace{grid-template-columns:1fr;gap:8px}
+  .admin-shell .user-directory,.admin-shell .verify-directory{order:1}
+  .admin-shell .user-detail,.admin-shell .verify-detail{order:2;min-height:220px}
+  .admin-shell .user-list{max-height:310px}
+  .admin-shell .verify-list{max-height:310px}
+  .admin-shell .wallet-panel{padding:10px}
+  .admin-shell .verify-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .admin-shell .verify-stats article{min-height:59px;padding:8px 9px}
+  .admin-shell .admin-controls{align-items:flex-start}
+}
+@media(max-width:430px){
+  .admin-shell .admin-brand h1{font-size:18px}
+  .admin-shell .admin-brand p{font-size:9px}
+  .admin-shell .admin-control-label{font-size:7px;padding:5px 6px}
+  .admin-shell .admin-tab{font-size:8px}
+  .admin-shell .user-search{grid-template-columns:minmax(0,1fr) 108px}
+  .admin-shell .user-search button{grid-column:1/-1}
+  .admin-shell .user-quick-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-shell .user-quick-stats>div:last-child{grid-column:1/-1}
+}
+@media(prefers-reduced-motion:reduce){
+  .admin-shell .admin-stat-card,.admin-shell .admin-tab,.admin-shell .admin-refresh,.admin-shell .user-row{transition:none!important;animation:none!important}
+}
+
+
+/* SPIKE Admin v2 — unified icon language, refined controls and compact surfaces */
+.admin-shell{--admin-accent:#26c995;--admin-accent-soft:rgba(38,201,149,.12);--admin-danger:#e36b78;--admin-warm:#e2ad58}
+.admin-shell .admin-tabs{gap:5px;padding:4px;background:color-mix(in srgb,var(--surface2) 88%,transparent);border-color:color-mix(in srgb,var(--line) 82%,var(--admin-accent) 18%);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.admin-shell .admin-tab{position:relative;min-width:0;min-height:39px;padding:7px 9px;gap:7px;border:1px solid transparent;border-radius:10px;font-size:10px;letter-spacing:-.01em;transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+.admin-shell .admin-tab:hover{background:var(--admin-accent-soft);color:var(--text)}
+.admin-shell .admin-tab.is-active{border-color:color-mix(in srgb,var(--admin-accent) 25%,var(--line));background:linear-gradient(145deg,color-mix(in srgb,var(--admin-accent) 14%,var(--surface)),var(--surface));color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.09),inset 0 1px 0 rgba(255,255,255,.05)}
+.admin-shell .admin-tab-icon{display:inline-grid;place-items:center;min-width:21px;height:21px;border-radius:7px;background:var(--surface2);font-size:13px;line-height:1}
+.admin-shell .admin-tab.is-active .admin-tab-icon{background:var(--admin-accent-soft)}
+.admin-shell .admin-hero{box-shadow:0 12px 30px rgba(0,65,48,.16),inset 0 1px 0 rgba(255,255,255,.09)}
+.admin-shell .admin-section-head h2,.admin-shell .user-subheading,.admin-shell .verify-subhead{display:flex;align-items:center;gap:7px;letter-spacing:-.025em}
+.admin-shell .admin-stat-card,.admin-shell .report-stat,.admin-shell .verify-stats article{position:relative;overflow:hidden;border-color:color-mix(in srgb,var(--line) 84%,var(--admin-accent) 16%);background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--surface2) 78%,transparent));box-shadow:0 5px 16px rgba(0,0,0,.045),inset 0 1px 0 rgba(255,255,255,.035);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.admin-shell .admin-stat-card:hover,.admin-shell .report-stat:hover,.admin-shell .verify-stats article:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--admin-accent) 40%,var(--line));box-shadow:0 9px 22px rgba(0,0,0,.085)}
+.admin-shell .admin-stat-icon{border-color:color-mix(in srgb,var(--admin-accent) 22%,var(--line));background:linear-gradient(145deg,var(--admin-accent-soft),var(--surface2));box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+.admin-shell .admin-stat-label,.admin-shell .report-stat small,.admin-shell .verify-stats small{letter-spacing:.005em}
+.admin-shell button,.admin-shell select,.admin-shell input,.admin-shell textarea{accent-color:var(--admin-accent)}
+.admin-shell button{ -webkit-tap-highlight-color:transparent }
+.admin-shell .admin-refresh,.admin-shell .user-more,.admin-shell .verify-actions button{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid color-mix(in srgb,var(--line) 78%,var(--admin-accent) 22%);background:linear-gradient(145deg,var(--surface2),var(--surface));box-shadow:inset 0 1px 0 rgba(255,255,255,.045);font-weight:800;letter-spacing:-.01em}
+.admin-shell .admin-refresh:hover,.admin-shell .user-more:hover,.admin-shell .verify-actions button:hover{border-color:color-mix(in srgb,var(--admin-accent) 55%,var(--line));background:var(--admin-accent-soft);color:var(--text);transform:translateY(-1px)}
+.admin-shell .danger-button,.admin-shell .verify-danger{border-color:rgba(227,107,120,.35)!important;background:linear-gradient(145deg,rgba(227,107,120,.13),var(--surface2))!important;color:var(--admin-danger)!important}
+.admin-shell .verify-approve{border-color:rgba(38,201,149,.38)!important;background:linear-gradient(145deg,rgba(38,201,149,.17),var(--surface2))!important;color:var(--admin-accent)!important}
+.admin-shell .user-action-block,.admin-shell .report-directory,.admin-shell .report-detail,.admin-shell .verify-directory,.admin-shell .verify-detail{border-color:color-mix(in srgb,var(--line) 88%,var(--admin-accent) 12%);box-shadow:0 5px 18px rgba(0,0,0,.035),inset 0 1px 0 rgba(255,255,255,.025)}
+.admin-shell .user-row,.admin-shell .verify-row,.admin-shell .report-row{border-color:color-mix(in srgb,var(--line) 90%,var(--admin-accent) 10%);transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.admin-shell .user-row:hover,.admin-shell .verify-row:hover,.admin-shell .report-row:hover{border-color:color-mix(in srgb,var(--admin-accent) 48%,var(--line));box-shadow:0 4px 13px rgba(0,0,0,.055)}
+.admin-shell .user-row.is-selected,.admin-shell .verify-row.is-selected,.admin-shell .report-row.is-selected{border-color:var(--admin-accent);background:color-mix(in srgb,var(--admin-accent) 8%,var(--surface));box-shadow:inset 3px 0 0 var(--admin-accent)}
+.admin-shell .detail-tab{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid transparent;white-space:nowrap;transition:background .16s ease,border-color .16s ease,color .16s ease}
+.admin-shell .detail-tab.is-active{border-color:color-mix(in srgb,var(--admin-accent) 35%,var(--line));background:var(--admin-accent-soft);color:var(--text)}
+.admin-shell input:focus-visible,.admin-shell select:focus-visible,.admin-shell textarea:focus-visible,.admin-shell button:focus-visible,.admin-shell a:focus-visible{outline:2px solid color-mix(in srgb,var(--admin-accent) 80%,white 20%);outline-offset:2px}
+.admin-shell .report-pill,.admin-shell .verify-state,.admin-shell .user-badge{font-weight:850;letter-spacing:.025em}
+.admin-shell .admin-status{display:flex;align-items:center;gap:7px;min-height:28px}
+.admin-shell .admin-status:not(.is-error)::before{content:"ℹ";font-size:10px;color:var(--admin-accent)}
+.admin-shell .admin-status.is-error::before{content:"⚠️";font-size:11px}
+.admin-shell .report-stat{min-height:65px;padding:10px 11px;border-radius:12px}
+.admin-shell .report-stat strong{font-size:18px;letter-spacing:-.04em}
+.admin-shell .report-toolbar{padding-bottom:7px;border-bottom:1px solid var(--line)}
+.admin-shell .user-empty,.admin-shell .report-empty{border:1px dashed color-mix(in srgb,var(--line) 70%,var(--admin-accent) 30%);border-radius:12px;background:color-mix(in srgb,var(--surface2) 62%,transparent)}
+.admin-shell .user-empty-icon{display:grid;place-items:center;width:43px;height:43px;border-radius:14px;background:var(--admin-accent-soft);font-size:21px}
+.admin-shell .admin-footer-actions{display:flex;align-items:center;gap:9px}
+@media(max-width:700px){.admin-shell .admin-tabs{overflow-x:auto;scrollbar-width:none}.admin-shell .admin-tabs::-webkit-scrollbar{display:none}.admin-shell .admin-tab{flex:1 0 auto;min-width:max-content}.admin-shell .report-stat{min-height:59px}.admin-shell .admin-footer-actions{flex-wrap:wrap;justify-content:flex-end}}
+@media(prefers-reduced-motion:reduce){.admin-shell .admin-stat-card,.admin-shell .report-stat,.admin-shell .verify-stats article,.admin-shell .admin-tab,.admin-shell .admin-refresh,.admin-shell .user-row,.admin-shell .verify-row,.admin-shell .report-row{transition:none!important;transform:none!important}}

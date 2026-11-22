@@ -1,0 +1,47 @@
+body[data-spike-page="messages"] .contact-picker{position:fixed;z-index:10020;inset:0;display:flex;flex-direction:column;width:min(100% - 24px,560px);max-height:min(82dvh,760px);margin:auto;padding:16px;border:1px solid var(--msg-line);border-radius:20px;background:var(--msg-panel2);color:var(--msg-ink);box-shadow:0 24px 80px rgba(0,0,0,.48),0 0 0 100vmax rgba(2,4,12,.68);overflow:hidden}
+body[data-spike-page="messages"] .contact-picker[hidden]{display:none}
+body[data-spike-page="messages"] .contact-picker-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+body[data-spike-page="messages"] .contact-picker-head h2{margin:4px 0;font-size:19px;letter-spacing:-.04em}
+body[data-spike-page="messages"] .contact-picker-head p,.contact-picker-note{margin:0;color:var(--msg-muted);font-size:11px;line-height:1.45}
+body[data-spike-page="messages"] .contact-close{width:34px;height:34px;flex:0 0 34px;border:1px solid var(--msg-line);border-radius:11px;background:var(--msg-panel);color:var(--msg-ink);font-size:23px;line-height:1}
+body[data-spike-page="messages"] .contact-tabs{display:flex;gap:7px;margin:14px 0 9px}
+body[data-spike-page="messages"] .contact-tab{flex:1;min-height:36px;border:1px solid var(--msg-line);border-radius:11px;background:var(--msg-panel);color:var(--msg-muted);font-size:11px;font-weight:800}
+body[data-spike-page="messages"] .contact-tab.active{border-color:color-mix(in srgb,var(--msg-accent) 55%,var(--msg-line));background:color-mix(in srgb,var(--msg-accent) 13%,var(--msg-panel));color:var(--msg-accent)}
+body[data-spike-page="messages"] .contact-search{display:flex;align-items:center;gap:9px;min-height:40px;padding:0 11px;border:1px solid var(--msg-line);border-radius:11px;background:var(--msg-panel)}
+body[data-spike-page="messages"] .contact-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--msg-ink);font-size:12px}
+body[data-spike-page="messages"] .contact-list{display:grid;gap:6px;min-height:90px;margin:10px -2px 8px;padding:1px 2px;overflow:auto;overscroll-behavior:contain}
+body[data-spike-page="messages"] .contact-row{display:flex;align-items:center;gap:10px;min-width:0;padding:8px;border:1px solid var(--msg-line);border-radius:13px;background:var(--msg-panel)}
+body[data-spike-page="messages"] .contact-avatar{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;overflow:hidden;border-radius:50%;background:linear-gradient(135deg,#176044,#2a8b60);color:white;font-size:13px;font-weight:900}
+body[data-spike-page="messages"] .contact-avatar img{width:100%;height:100%;object-fit:cover}
+body[data-spike-page="messages"] .contact-details{display:grid;gap:2px;flex:1;min-width:0}
+body[data-spike-page="messages"] .contact-details strong{overflow:hidden;color:var(--msg-ink);font-size:12px;text-overflow:ellipsis;white-space:nowrap}
+body[data-spike-page="messages"] .contact-details small{color:var(--msg-muted);font-size:10px}
+body[data-spike-page="messages"] .contact-message-button{min-height:32px;padding:0 11px;border:1px solid color-mix(in srgb,var(--msg-accent) 38%,var(--msg-line));border-radius:9px;background:color-mix(in srgb,var(--msg-accent) 12%,var(--msg-panel));color:var(--msg-accent);font-size:10px;font-weight:850}
+body[data-spike-page="messages"] .contact-empty{padding:22px 12px;border:1px dashed var(--msg-line);border-radius:12px;color:var(--msg-muted);font-size:11px;text-align:center}
+body[data-spike-page="messages"] .contact-empty.error{color:#fca5a5}
+body[data-spike-page="messages"] .contact-picker-note{margin-top:auto;padding-top:8px;border-top:1px solid var(--msg-line);font-size:9px}
+@media(max-width:480px){body[data-spike-page="messages"] .contact-picker{width:calc(100% - 18px);max-height:84dvh;padding:13px;border-radius:17px}}
+
+/* Phase 2 screenshot repair: keep the chooser content-sized instead of stretching it. */
+body[data-spike-page="messages"] .contact-picker{
+  height:auto;
+  max-height:min(68dvh,640px);
+  padding:12px;
+  gap:0;
+}
+body[data-spike-page="messages"] .contact-picker-head h2{font-size:17px;line-height:1.2}
+body[data-spike-page="messages"] .contact-picker-head p{font-size:10px}
+body[data-spike-page="messages"] .contact-tabs{margin:10px 0 8px;gap:6px}
+body[data-spike-page="messages"] .contact-tab{min-height:32px;padding:6px 8px;font-size:10px}
+body[data-spike-page="messages"] .contact-search{min-height:38px;flex:0 0 38px}
+body[data-spike-page="messages"] .contact-search input{font-size:12px;outline:none!important;box-shadow:none!important}
+body[data-spike-page="messages"] .contact-search:focus-within{border-color:color-mix(in srgb,var(--msg-accent) 55%,var(--msg-line));box-shadow:0 0 0 2px color-mix(in srgb,var(--msg-accent) 16%,transparent)}
+body[data-spike-page="messages"] .contact-list{flex:1 1 auto;min-height:70px;max-height:34dvh;margin:8px -1px 6px;gap:5px}
+body[data-spike-page="messages"] .contact-row{gap:8px;padding:7px 8px;border-radius:11px}
+body[data-spike-page="messages"] .contact-avatar{width:36px;height:36px;flex-basis:36px}
+body[data-spike-page="messages"] .contact-details strong{font-size:11px}
+body[data-spike-page="messages"] .contact-details small{font-size:9px}
+body[data-spike-page="messages"] .contact-message-button{min-height:29px;padding:0 10px;font-size:9px}
+body[data-spike-page="messages"] .contact-picker-note{flex:0 0 auto;margin-top:6px;padding-top:7px;font-size:8px;line-height:1.35}
+body[data-spike-page="messages"] .contact-selection-footer{flex:0 0 auto;margin-top:7px;padding:8px}
+@media(max-width:480px){body[data-spike-page="messages"] .contact-picker{width:calc(100% - 20px);max-height:min(68dvh,640px);padding:11px}}

@@ -1,0 +1,151 @@
+/* SPIKE v84 · Compact Intelligence UI
+   Presentation-only layer. Keeps the existing admin DOM, IDs, events and RPC workflows intact. */
+.admin-shell{
+  --admin-density-gap:7px;
+  --admin-motion-fast:140ms;
+  --admin-motion-base:210ms;
+  width:min(1160px,calc(100% - 22px));
+  padding:9px 0 max(24px,env(safe-area-inset-bottom));
+  font-size:11px;
+}
+.admin-shell .wallet-top{gap:8px;margin-bottom:9px}
+.admin-shell .wallet-top>a{width:31px;height:31px;border-radius:9px;font-size:17px}
+.admin-shell .admin-brand h1{font-size:19px;line-height:1.08}
+.admin-shell .admin-brand p{font-size:9px;margin-top:2px}
+.admin-shell .admin-control-label{font-size:7px;padding:5px 7px}
+.admin-shell .admin-tabs{gap:4px;padding:3px;margin-bottom:9px;border-radius:11px}
+.admin-shell .admin-tab{min-height:34px;padding:5px 7px;gap:5px;font-size:9px;border-radius:8px}
+.admin-shell .admin-tab-icon{min-width:18px;height:18px;border-radius:6px;font-size:11px}
+.admin-shell .admin-hero{padding:12px 14px;border-radius:14px;margin-bottom:9px}
+.admin-shell .admin-hero h2{font-size:17px;line-height:1.12}
+.admin-shell .admin-hero p{font-size:9px;line-height:1.4;margin-top:4px}
+.admin-shell .admin-kicker{font-size:7px;margin-bottom:4px}
+.admin-shell .admin-section-head{margin:9px 1px 6px}
+.admin-shell .admin-section-head h2{font-size:11px}
+.admin-shell .admin-section-head span{font-size:8px}
+.admin-shell .wallet-panel{padding:9px;border-radius:11px}
+
+/* Overview: dense but readable metrics, with fewer wasted rows on every screen. */
+.admin-shell #adminMetrics.wallet-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.admin-shell #adminMetrics .admin-stat-card{min-height:62px;padding:8px 9px;gap:7px;border-radius:10px}
+.admin-shell #adminMetrics .admin-stat-icon{width:25px;height:25px;flex-basis:25px;border-radius:8px;font-size:12px}
+.admin-shell #adminMetrics .admin-stat-label{font-size:8px;line-height:1.25}
+.admin-shell #adminMetrics .admin-stat-value{font-size:17px;margin-top:3px;line-height:1}
+.admin-shell #adminMetrics .admin-stat-note{font-size:7px;margin-top:2px;line-height:1.2}
+
+/* Compact shared controls without removing comfortable touch targets. */
+.admin-shell input,.admin-shell select,.admin-shell textarea{font-size:10px!important}
+.admin-shell .admin-refresh,.admin-shell .user-more,.admin-shell .verify-actions button,
+.admin-shell .purchase-toolbar button,.admin-shell .report-toolbar button{min-height:32px;padding:6px 9px;border-radius:8px;font-size:9px}
+.admin-shell .user-search input,.admin-shell .user-search select,
+.admin-shell .user-action-form input,.admin-shell .user-action-form textarea,
+.admin-shell .user-action-fields input,.admin-shell .user-action-fields select,
+.admin-shell .user-action-block>input{min-height:34px;padding:7px 8px;border-radius:8px;font-size:9px}
+.admin-shell .user-workspace,.admin-shell .verify-workspace,.admin-shell .report-workspace{gap:7px}
+.admin-shell .user-directory,.admin-shell .user-detail,.admin-shell .verify-directory,
+.admin-shell .verify-detail,.admin-shell .report-directory,.admin-shell .report-detail{padding:9px}
+.admin-shell .user-list,.admin-shell .verify-list,.admin-shell .report-queue,.admin-shell .purchase-list{gap:5px}
+.admin-shell .user-row,.admin-shell .verify-row,.admin-shell .report-row,.admin-shell .purchase-row{padding:7px;gap:7px;border-radius:9px}
+.admin-shell .user-row-main strong,.admin-shell .verify-row-main strong,.admin-shell .report-row-main strong{font-size:9px}
+.admin-shell .user-row-main small,.admin-shell .verify-row-main small{font-size:8px}
+.admin-shell .user-badge,.admin-shell .verify-state,.admin-shell .report-pill,.admin-shell .purchase-state{font-size:7px}
+.admin-shell .user-profile-main strong{font-size:12px}
+.admin-shell .user-profile-main small,.admin-shell .user-hint,.admin-shell .user-action-block p{font-size:8px}
+.admin-shell .user-quick-stats{gap:5px;margin:8px 0}
+.admin-shell .user-quick-stats>div,.admin-shell .user-info-grid>div,.admin-shell .verify-info-grid>div,.admin-shell .report-info-grid>div,.admin-shell .purchase-fact{padding:7px;border-radius:8px}
+.admin-shell .user-quick-stats small,.admin-shell .user-info-grid small,.admin-shell .verify-info-grid small,.admin-shell .report-info-grid small{font-size:7px}
+.admin-shell .user-quick-stats strong,.admin-shell .user-info-grid strong,.admin-shell .verify-info-grid strong,.admin-shell .report-info-grid strong{font-size:9px}
+.admin-shell .detail-tabs{gap:4px;padding:2px 0 6px}
+.admin-shell .detail-tab{padding:5px 7px;font-size:8px;border-radius:7px}
+.admin-shell .user-table{font-size:8px}
+.admin-shell .user-table th,.admin-shell .user-table td{padding:5px 6px}
+.admin-shell .user-action-block{padding:8px;margin:6px 0;border-radius:9px}
+.admin-shell .user-action-block>strong,.admin-shell .user-subheading,.admin-shell .verify-subhead{font-size:9px}
+.admin-shell .user-empty,.admin-shell .report-empty{min-height:175px;padding:13px;gap:6px}
+.admin-shell .user-empty-icon{width:36px;height:36px;font-size:18px}
+.admin-shell .user-empty strong{font-size:11px}
+.admin-shell .user-empty p{font-size:8px}
+
+/* Verification, reports and purchase overview cards share a tighter rhythm. */
+.admin-shell .verify-stats,.admin-shell .purchase-stats{gap:6px;margin:8px 0}
+.admin-shell .verify-stats article,.admin-shell .purchase-stats>.wallet-panel{min-height:54px;padding:8px;border-radius:9px;gap:3px}
+.admin-shell .verify-stats small,.admin-shell .purchase-stats small{font-size:7px;line-height:1.25}
+.admin-shell .verify-stats strong,.admin-shell .purchase-stats strong{font-size:16px;line-height:1.05}
+.admin-shell .report-stats{gap:6px;margin:8px 0}
+.admin-shell .report-stat{min-height:52px;padding:8px;border-radius:9px}
+.admin-shell .report-stat small{font-size:7px;line-height:1.25}
+.admin-shell .report-stat strong{font-size:16px;line-height:1.05}
+.admin-shell .verify-note,.admin-shell .report-hint,.admin-shell .purchase-detail>p{font-size:8px;line-height:1.4;padding:8px;margin-top:8px}
+.admin-shell .purchase-toolbar,.admin-shell .report-toolbar{gap:7px;padding-bottom:6px}
+.admin-shell .purchase-toolbar strong,.admin-shell .report-toolbar strong{font-size:10px}
+.admin-shell .purchase-toolbar small,.admin-shell .purchase-search span{font-size:8px}
+.admin-shell .purchase-panel-head h3{font-size:10px}
+.admin-shell .purchase-search{gap:6px;margin:7px 0}
+.admin-shell .purchase-facts{gap:5px}
+.admin-shell .purchase-fact small{font-size:7px}
+.admin-shell .purchase-fact strong{font-size:9px}
+.admin-shell .admin-status{font-size:8px;min-height:24px}
+.admin-shell .admin-updated{font-size:7px}
+
+/* Restrained motion: quick entrances, no perpetual animation on dense data. */
+.admin-shell .admin-view{animation:spikeCompactViewIn 190ms cubic-bezier(.2,.75,.25,1) both}
+.admin-shell .admin-stat-card,.admin-shell .verify-stats>article,.admin-shell .purchase-stats>.wallet-panel,
+.admin-shell .user-row,.admin-shell .verify-row,.admin-shell .report-row,.admin-shell .purchase-row,
+.admin-shell .admin-tab,.admin-shell .admin-refresh,.admin-shell .admin-close-button{transition-duration:var(--admin-motion-fast)}
+.admin-shell .admin-stat-card:hover,.admin-shell .verify-stats>article:hover,.admin-shell .purchase-stats>.wallet-panel:hover{transform:translateY(-1px)}
+@keyframes spikeCompactViewIn{from{opacity:.72;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:1000px){
+  .admin-shell #adminMetrics.wallet-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .admin-shell .report-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .admin-shell{width:calc(100% - 16px);padding-top:7px}
+  .admin-shell .admin-tabs{overflow-x:auto;scrollbar-width:none;justify-content:flex-start}
+  .admin-shell .admin-tabs::-webkit-scrollbar{display:none}
+  .admin-shell .admin-tab{flex:1 0 auto;min-width:max-content;min-height:34px}
+  .admin-shell .admin-tab-icon{min-width:17px;height:17px}
+  .admin-shell #adminMetrics.wallet-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .admin-shell #adminMetrics .admin-stat-card{min-height:58px;padding:7px;gap:6px}
+  .admin-shell #adminMetrics .admin-stat-value{font-size:16px}
+  .admin-shell .user-workspace,.admin-shell .verify-workspace,.admin-shell .report-workspace{grid-template-columns:1fr}
+  .admin-shell .user-directory,.admin-shell .verify-directory,.admin-shell .report-directory{order:1}
+  .admin-shell .user-detail,.admin-shell .verify-detail,.admin-shell .report-detail{order:2;min-height:190px}
+  .admin-shell .user-list,.admin-shell .verify-list,.admin-shell .report-queue{max-height:280px}
+  .admin-shell .verify-stats,.admin-shell .purchase-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-shell .report-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin-shell .purchase-columns{grid-template-columns:1fr}
+  .admin-shell .admin-hero{padding:11px 12px}
+  .admin-shell .admin-hero h2{font-size:16px}
+}
+@media(max-width:380px){
+  .admin-shell .admin-brand h1{font-size:17px}
+  .admin-shell .admin-control-label{display:none}
+  .admin-shell .admin-tab{font-size:8px;padding-inline:6px}
+  .admin-shell #adminMetrics .admin-stat-label{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  .admin-shell .admin-view,.admin-shell .admin-stat-card,.admin-shell .verify-stats>article,
+  .admin-shell .purchase-stats>.wallet-panel,.admin-shell .user-row,.admin-shell .verify-row,
+  .admin-shell .report-row,.admin-shell .purchase-row,.admin-shell .admin-tab{animation:none!important;transition:none!important;transform:none!important}
+}
+
+/* Phase 36 · complete account workspace */
+.admin-shell .user-detail-identity{color:var(--admin-muted,#8b95a7);overflow-wrap:anywhere}
+.admin-shell .spike-user-timeline{display:grid;gap:9px;margin-top:10px}
+.admin-shell .spike-timeline-item{padding:12px 13px;border:1px solid var(--admin-border,rgba(255,255,255,.09));border-radius:14px;background:rgba(255,255,255,.025)}
+.admin-shell .spike-timeline-item p{margin:7px 0 4px;font-weight:650}
+.admin-shell .spike-timeline-item small{display:block;color:var(--admin-muted,#8b95a7);line-height:1.5}
+.admin-shell .user-back-directory{display:none}
+.admin-shell .user-detail-content>section[hidden]{display:none}
+.admin-shell .user-detail-content>section{min-width:0}
+.admin-shell .user-detail-content{overflow-wrap:anywhere}
+@media(max-width:700px){
+ .admin-shell .user-workspace.has-selected-user .user-directory{display:none}
+ .admin-shell .user-workspace.has-selected-user .user-detail{display:block;min-height:70vh;width:100%;max-width:none}
+ .admin-shell .user-workspace.has-selected-user .user-back-directory{display:inline-flex;margin:0 0 10px}
+ .admin-shell .user-detail .admin-detail-heading{align-items:flex-start;gap:8px;flex-wrap:wrap}
+ .admin-shell .detail-tabs{display:flex;overflow-x:auto;overscroll-behavior-x:contain;white-space:nowrap;scrollbar-width:thin;padding-bottom:8px}
+ .admin-shell .detail-tab{flex:0 0 auto}
+ .admin-shell .spike-timeline-item{padding:11px}
+}

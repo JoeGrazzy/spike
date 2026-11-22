@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en" translate="no"><head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
+<meta name="google" content="notranslate">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+  <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
+
+<link rel="stylesheet" href="css/perf.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b10"><title>SPIKE — Settings</title>
+
+
+
+
+
+<link rel="stylesheet" href="css/ui-fix.css">
+<style>
+/* Settings consumes the shared SPIKE five-theme tokens; never pin this page to a private purple/dark palette. */
+:root{--bg:var(--spike-bg,#101216);--surface:var(--spike-surface, var(--spike-surface-1,#191c22));--surface2:var(--spike-surface-2,#232832);--text:var(--spike-text,#f5f6f8);--muted:var(--spike-muted,#c0c5cf);--line:var(--spike-line,#3b424e);--accent:var(--spike-accent,#ffb454);--accent2:var(--spike-accent-2,var(--spike-accent,#ff805f));--danger:#fb7185;--shadow:var(--spike-shadow,0 14px 36px rgba(0,0,0,.28));--radius:22px;--focus:color-mix(in srgb,var(--spike-accent-2,#ff805f) 35%,transparent)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -12%,color-mix(in srgb,var(--accent) 16%,transparent),transparent 34%),var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}.wrap{width:min(100%,860px);margin:auto;padding:18px 16px 46px}.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:13px;padding:10px 0 18px;background:linear-gradient(var(--bg) 72%,transparent);backdrop-filter:blur(14px)}.back{width:44px;height:44px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);font-size:28px;line-height:1;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.12)}.top h1{font-size:26px;letter-spacing:-.035em;margin:0}.top small{display:block;margin-top:4px;color:var(--muted)}.setup{position:relative;overflow:hidden;margin:4px 0 22px;padding:20px 20px 18px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface));box-shadow:var(--shadow)}.setup:after{content:"";position:absolute;width:170px;height:170px;right:-80px;top:-90px;border-radius:50%;background:color-mix(in srgb,var(--accent) 20%,transparent);filter:blur(5px);pointer-events:none}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.15em;text-transform:uppercase;color:var(--accent2)}.setup strong{display:block;margin-top:6px;font-size:18px;letter-spacing:-.02em}.setup p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.5}.summary{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.pill{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface2);font-size:11px;font-weight:750;color:var(--text)}.pill i{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 70%,transparent)}.card{position:relative;overflow:hidden;background:linear-gradient(145deg,var(--surface),color-mix(in srgb,var(--surface) 78%,transparent));border:1px solid var(--line);border-radius:var(--radius);padding:8px;margin:14px 0;box-shadow:var(--shadow)}.section{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;padding:15px 15px 10px;color:var(--accent2);font-size:11px;text-transform:uppercase;letter-spacing:.13em;font-weight:900}.section small{color:var(--muted);font-size:10px;text-transform:none;letter-spacing:0;font-weight:650}.row{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:70px;padding:15px;border-top:1px solid var(--line);transition:background .18s ease}.row:first-of-type{border-top:0}.row:hover{background:color-mix(in srgb,var(--text) 2.5%,transparent)}.row>div:first-child{min-width:0}.row strong{display:block;font-size:14px;letter-spacing:.005em}.row small{display:block;color:var(--muted);margin-top:5px;line-height:1.45;font-size:12px;max-width:590px}.control{min-width:170px;max-width:48%;padding:11px 36px 11px 12px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);color:var(--text);font:inherit;outline:none}.control:focus{border-color:color-mix(in srgb,var(--accent) 65%,transparent);box-shadow:0 0 0 3px var(--focus)}.switch{appearance:none;width:50px;height:30px;border:1px solid var(--line);border-radius:20px;background:var(--spike-surface-3,var(--surface2));position:relative;cursor:pointer;flex:none;transition:.2s ease}.switch:after{content:'';position:absolute;width:22px;height:22px;top:3px;left:3px;border-radius:50%;background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);transition:.2s ease}.switch:checked{background:var(--accent);border-color:transparent}.switch:checked:after{left:24px}.switch:focus-visible,.btn:focus-visible,.back:focus-visible{outline:3px solid var(--focus);outline-offset:2px}.btn{min-height:42px;padding:11px 16px;border:0;border-radius:13px;background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 72%,#111827));color:#fff;font-weight:850;cursor:pointer;box-shadow:0 9px 22px color-mix(in srgb,var(--accent) 20%,transparent);transition:transform .15s ease,filter .15s ease}.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}.btn:disabled{opacity:.55;cursor:wait;transform:none}.btn.danger{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.28);box-shadow:none}.status{font-size:13px;color:var(--muted);min-height:20px;padding:0 15px 12px}.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:20px}.nav button{min-height:44px;padding:11px;border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--text);font-weight:750;cursor:pointer;transition:.18s ease}.nav button:hover{border-color:color-mix(in srgb,var(--accent) 45%,transparent);transform:translateY(-1px)}#save{min-width:94px}.top:after{content:"";position:absolute;right:0;top:12px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px color-mix(in srgb,var(--accent) 75%,transparent)}.notif-grid{display:grid;grid-template-columns:1fr 1fr}.notif-grid .row{min-height:64px}.notif-grid .row:nth-child(odd){border-right:1px solid var(--line)}.theme-select{display:flex;align-items:center;gap:10px;min-width:190px}.theme-dot{width:11px;height:11px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px color-mix(in srgb,var(--accent) 60%,transparent);flex:none}.theme-select .control{min-width:0;max-width:none;width:100%}@media(max-width:700px){.notif-grid{grid-template-columns:1fr}.notif-grid .row:nth-child(odd){border-right:0}.wrap{padding:10px 12px 32px}.top{padding:8px 0 16px}.card{border-radius:19px;margin:11px 0;padding:6px}.row{min-height:66px;padding:14px 11px;gap:12px}.control{min-width:0;width:44%;max-width:44%}.row small{font-size:11.5px}.nav{grid-template-columns:repeat(2,1fr)}.setup{padding:17px 15px;border-radius:20px}.summary{gap:6px}}
+@media(max-width:460px){.row{align-items:flex-start;flex-direction:column}.control{width:100%;max-width:none}.switch{align-self:flex-end;margin-top:-2px}.row .btn{align-self:flex-end}.section{padding-left:11px}.top h1{font-size:22px}.nav{grid-template-columns:1fr 1fr}.theme-select{width:100%}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+.settings-index{position:relative;z-index:3;display:flex;gap:8px;overflow-x:auto;padding:10px 2px;margin:0 0 14px;scrollbar-width:none;background:linear-gradient(180deg,var(--spike-bg),color-mix(in srgb,var(--spike-bg) 88%,transparent));backdrop-filter:blur(14px)}
+.settings-index::-webkit-scrollbar{display:none}.settings-index a{flex:0 0 auto;text-decoration:none;color:var(--spike-muted);border:1px solid var(--spike-line);background:var(--spike-surface);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:700}.settings-index a:hover,.settings-index a:focus-visible{color:var(--spike-text);border-color:var(--spike-accent);outline:none}.settings-index a:first-child{color:var(--spike-text);box-shadow:0 0 0 1px color-mix(in srgb,var(--spike-accent) 22%,transparent) inset}
+/* Final theme binding: settings-specific aliases must follow SPIKE theme selection. */
+html[data-spike-style] body{background-color:var(--spike-bg,var(--bg));color:var(--spike-text,var(--text))}
+html[data-spike-style] .card,html[data-spike-style] .back,html[data-spike-style] .nav button{color:var(--spike-text,var(--text));border-color:var(--spike-line,var(--line))}
+html[data-spike-style] .control{background:var(--spike-surface-2,var(--surface2));color:var(--spike-text,var(--text));border-color:var(--spike-line,var(--line))}
+html[data-spike-style] .settings-index{background:linear-gradient(180deg,var(--spike-bg,var(--bg)),color-mix(in srgb,var(--spike-bg,var(--bg)) 88%,transparent))}
+</style><meta name="description" content="SPIKE account and app settings.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0b0b10">
+<link rel="stylesheet" href="css/premium-back.css">
+
+<script src="js/spike-dialog.js"></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+  <link rel="stylesheet" href="css/spike-unified.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+    <link rel="stylesheet" href="css/spike-beauty.css">
+  <link href="css/spike-theme-experience.css" rel="stylesheet"/>
+  
+<link rel="stylesheet" href="css/spike-android-fullscreen.css">
+
+<script src="js/spike-loader-core.js" defer></script>
+
+
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority.css">
+<link rel="stylesheet" href="css/spike-ux-refinement.css">
+<link rel="stylesheet" href="css/spike-global-page-authority.css">
+<link rel="stylesheet" href="css/spike-theme-runtime.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css">
+<link rel="stylesheet" href="css/spike-touch-hover-guard.css">
+<link href="css/spike-onboarding-help-placement.css" rel="stylesheet">
+<script src="js/theme.js"></script>
+<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
+
+<!-- Settings uses always-visible compact sections; shared smart panels remain enabled on other pages. -->
+    <link rel="stylesheet" href="css/spike-future-engine.css">
+<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
+<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
+<style id="spike-settings-compact-v2">
+/* SPIKE Settings compact control center — all original controls remain visible and functional. */
+.wrap{width:min(100%,900px);padding:12px 14px 34px}
+.top{padding:7px 0 11px;gap:11px}
+.top h1{font-size:clamp(21px,4vw,25px)}
+.top small{font-size:11px}
+.setup{margin:2px 0 12px;padding:12px 15px;border-radius:17px;box-shadow:0 8px 24px rgba(0,0,0,.13)}
+.setup strong{font-size:15px;margin-top:3px}.setup p{font-size:11px;margin-top:3px}
+.summary{gap:5px;margin-top:9px}.pill{padding:5px 8px;font-size:10px}
+.settings-index{position:sticky;top:0;z-index:18;gap:6px;padding:8px 1px;margin:0 0 10px;box-shadow:0 8px 18px rgba(0,0,0,.08)}
+.settings-index a{padding:7px 10px;font-size:11px;border-radius:10px;scroll-margin-top:70px}
+.card{padding:5px;margin:9px 0;border-radius:17px;box-shadow:0 8px 22px rgba(0,0,0,.12);scroll-margin-top:72px}
+.section{padding:10px 12px 8px;font-size:10px;letter-spacing:.12em}
+.section small{font-size:10px}
+.row{min-height:54px;padding:10px 12px;gap:12px}
+.row strong{font-size:12.5px}.row small{font-size:10.5px;line-height:1.35;margin-top:3px}
+.control{min-width:145px;padding:8px 30px 8px 10px;border-radius:10px;font-size:12px}
+.switch{width:44px;height:26px}.switch:after{width:18px;height:18px;top:3px;left:3px}.switch:checked:after{left:21px}
+.btn{min-height:36px;padding:8px 12px;border-radius:10px;font-size:11px}
+.notif-grid{grid-template-columns:1fr 1fr}.notif-grid .row{min-height:50px;padding:9px 11px}
+.notif-grid .row:nth-child(odd){border-right:1px solid var(--line)}
+#notificationPreferences .row strong{font-size:11.5px}#notificationPreferences .row small{font-size:10px}
+.theme-select{min-width:165px}.theme-select .control{min-width:0}
+#status{max-width:420px}
+@media(max-width:600px){.wrap{padding:8px 10px 28px}.setup{padding:11px 12px}.card{margin:8px 0;padding:4px}.row{min-height:50px;padding:9px 10px;gap:9px}.row strong{font-size:12px}.row small{font-size:10px}.settings-index{margin-bottom:8px}.settings-index a{padding:7px 9px;font-size:10.5px}.notif-grid{grid-template-columns:1fr 1fr}.notif-grid .row:nth-child(odd){border-right:1px solid var(--line)}.control{min-width:0;width:42%;max-width:42%;font-size:11px}.theme-select{width:46%;min-width:0}.theme-select .control{width:100%;max-width:100%}.switch{align-self:center;margin:0;flex:0 0 44px}.row .btn{align-self:center;white-space:nowrap}}
+@media(max-width:390px){.notif-grid{grid-template-columns:1fr}.notif-grid .row:nth-child(odd){border-right:0}.row{gap:8px}.row>div:first-child{flex:1}.control{width:46%;max-width:46%}.theme-select{width:48%}.settings-index{gap:5px}.settings-index a{padding:6px 8px}}
+@media(prefers-reduced-motion:reduce){.settings-index,.card,.row{scroll-behavior:auto!important;transition:none!important}}
+
+/* SPIKE ELITE Smart Switch System — one polished, accessible control language. */
+.switch{
+  appearance:none!important;-webkit-appearance:none!important;position:relative;isolation:isolate;
+  display:inline-block;flex:0 0 52px!important;width:52px!important;height:30px!important;min-width:52px;
+  margin:0;padding:0;border:1px solid color-mix(in srgb,var(--spike-line,var(--line)) 88%,transparent)!important;
+  border-radius:999px!important;overflow:hidden;cursor:pointer;vertical-align:middle;
+  background:linear-gradient(145deg,color-mix(in srgb,var(--spike-surface-3,var(--surface2)) 92%,#000),var(--spike-surface-2,var(--surface2)))!important;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.24),0 2px 5px rgba(0,0,0,.10);
+  transition:background-color .22s cubic-bezier(.2,.8,.2,1),border-color .22s ease,box-shadow .22s ease,transform .18s ease!important;
+}
+.switch:before{content:"OFF";position:absolute;z-index:0;right:5px;top:50%;transform:translateY(-50%);font:800 7px/1 Inter,ui-sans-serif,system-ui,sans-serif;letter-spacing:.035em;color:var(--spike-muted,var(--muted));opacity:.9;transition:opacity .16s ease}
+.switch:after{content:"";position:absolute;z-index:1;top:3px!important;left:3px!important;width:22px!important;height:22px!important;border-radius:50%!important;
+  background:linear-gradient(155deg,#fff 0%,#e9eef7 58%,#cbd5e1 100%)!important;
+  border:1px solid rgba(255,255,255,.72);box-shadow:0 2px 5px rgba(0,0,0,.28),inset 0 1px 1px rgba(255,255,255,.9);
+  transform:translateX(0);transition:transform .24s cubic-bezier(.2,.85,.25,1.25),box-shadow .2s ease!important}
+.switch:checked{background:linear-gradient(115deg,#1265d8 0%,#168de8 58%,color-mix(in srgb,var(--spike-accent,var(--accent)) 58%,#168de8))!important;
+  border-color:color-mix(in srgb,#54baff 68%,var(--spike-accent,var(--accent)))!important;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.16),0 0 0 1px rgba(45,150,255,.12),0 0 13px rgba(35,139,255,.20)}
+.switch:checked:before{content:"ON";left:6px;right:auto;color:#fff;opacity:1}
+.switch:checked:after{left:3px!important;transform:translateX(22px);box-shadow:0 2px 7px rgba(0,0,0,.25),0 0 8px rgba(255,255,255,.35),inset 0 1px 1px rgba(255,255,255,.95)}
+.switch:hover{filter:brightness(1.07);box-shadow:inset 0 1px 3px rgba(0,0,0,.18),0 0 0 3px color-mix(in srgb,var(--spike-accent,var(--accent)) 10%,transparent)}
+.switch:active:after{transform:scale(.92) translateX(0)}.switch:checked:active:after{transform:translateX(22px) scale(.92)}
+.switch:focus-visible{outline:3px solid color-mix(in srgb,#36a4ff 62%,var(--spike-accent,var(--accent)))!important;outline-offset:3px}
+.switch:disabled{cursor:not-allowed;opacity:.48;filter:grayscale(.35)}
+.row strong{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:700;letter-spacing:-.012em}
+.row small{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-weight:450;letter-spacing:.002em}
+@media(max-width:600px){.switch{flex-basis:52px!important;width:52px!important;height:30px!important;min-width:52px;margin:0!important;align-self:center}.switch:after{width:22px!important;height:22px!important}.switch:checked:after{transform:translateX(22px)}}
+@media(prefers-reduced-motion:reduce){.switch,.switch:before,.switch:after{transition:none!important}}
+
+/* SPIKE ELITE Settings 3.0 — category-first, mobile-first settings architecture. */
+.settings-home{margin:8px 0 22px}.settings-home[hidden],.settings-detail-head[hidden],.settings-category[hidden]{display:none!important}
+.settings-welcome{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 18px 17px;border:1px solid var(--spike-line,var(--line));border-radius:20px;background:linear-gradient(125deg,color-mix(in srgb,var(--spike-accent,#398bff) 12%,var(--spike-surface,var(--surface))),var(--spike-surface,var(--surface)) 62%,color-mix(in srgb,var(--spike-accent-2,#d6ad54) 8%,var(--spike-surface,var(--surface))));box-shadow:0 12px 30px rgba(0,0,0,.12)}
+.settings-kicker{display:block;color:var(--spike-accent,var(--accent));font-size:9px;font-weight:850;letter-spacing:.16em}
+.settings-welcome h2,.settings-detail-head h2{margin:5px 0 3px;font-size:clamp(20px,4vw,25px);letter-spacing:-.04em;line-height:1.15}
+.settings-welcome p,.settings-detail-head p{margin:0;color:var(--spike-muted,var(--muted));font-size:12px;line-height:1.45}
+.settings-mark{width:54px;height:54px;flex:0 0 54px;display:grid;place-items:center;border-radius:17px;background:linear-gradient(145deg,#163e70,#0b1d34);border:1px solid rgba(112,180,255,.35);box-shadow:inset 0 1px rgba(255,255,255,.14),0 8px 20px rgba(0,0,0,.2)}
+.settings-mark-core{display:grid;place-items:center;width:31px;height:31px;border:1px solid #e0bd72;border-radius:11px;color:#f2d58f;font-size:18px;font-weight:900;text-shadow:0 0 12px rgba(214,173,84,.55)}
+.settings-search{display:flex;align-items:center;gap:10px;height:46px;margin:13px 0 12px;padding:0 12px;border:1px solid var(--spike-line,var(--line));border-radius:14px;background:var(--spike-surface,var(--surface));color:var(--spike-muted,var(--muted));box-shadow:0 5px 16px rgba(0,0,0,.06)}
+.settings-search>span{font-size:23px;line-height:1}.settings-search input{width:100%;min-width:0;border:0;outline:0;background:transparent;color:var(--spike-text,var(--text));font:500 13px Inter,ui-sans-serif,system-ui,sans-serif}.settings-search input::placeholder{color:var(--spike-muted,var(--muted))}.settings-search:focus-within{border-color:var(--spike-accent,#398bff);box-shadow:0 0 0 3px color-mix(in srgb,var(--spike-accent,#398bff) 13%,transparent)}.settings-search kbd{padding:3px 7px;border:1px solid var(--spike-line,var(--line));border-radius:6px;font:600 10px ui-monospace,monospace}
+.settings-overview{padding:11px 13px;margin-bottom:18px;border:1px solid var(--spike-line,var(--line));border-radius:14px;background:color-mix(in srgb,var(--spike-surface,var(--surface)) 85%,transparent)}.overview-label,.settings-category-heading>span{font-size:9px;font-weight:850;letter-spacing:.14em;color:var(--spike-muted,var(--muted))}.settings-overview .summary{gap:6px;margin-top:8px}.settings-overview .pill{padding:5px 8px;font-size:10px}
+.settings-category-heading{display:flex;align-items:center;justify-content:space-between;margin:0 2px 9px}.settings-category-heading small{color:var(--spike-muted,var(--muted));font-size:10px}
+.settings-category-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.settings-category{display:flex;align-items:center;gap:11px;min-width:0;min-height:76px;padding:12px;border:1px solid var(--spike-line,var(--line));border-radius:16px;background:linear-gradient(145deg,var(--spike-surface,var(--surface)),color-mix(in srgb,var(--spike-surface-2,var(--surface2)) 56%,var(--spike-surface,var(--surface))));color:var(--spike-text,var(--text));text-align:left;cursor:pointer;box-shadow:0 5px 16px rgba(0,0,0,.07);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.settings-category:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--spike-accent,#398bff) 55%,var(--spike-line,var(--line)));box-shadow:0 9px 22px rgba(0,0,0,.12)}.settings-category:focus-visible,.settings-home-back:focus-visible{outline:3px solid color-mix(in srgb,var(--spike-accent,#398bff) 55%,transparent);outline-offset:3px}
+.category-icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:12px;background:color-mix(in srgb,var(--spike-accent,#398bff) 12%,var(--spike-surface-2,var(--surface2)));color:var(--spike-accent,var(--accent));border:1px solid color-mix(in srgb,var(--spike-accent,#398bff) 18%,transparent)}.category-icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}.category-copy{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}.category-copy strong{font-size:12px;font-weight:760;letter-spacing:-.015em}.category-copy small{font-size:10px;line-height:1.35;color:var(--spike-muted,var(--muted))}.category-arrow{color:var(--spike-muted,var(--muted));font-size:23px;line-height:1}
+.settings-home-foot{display:flex;align-items:center;justify-content:center;gap:7px;margin:17px 0 4px;color:var(--spike-muted,var(--muted));font-size:9px;letter-spacing:.04em}.settings-foot-dot,.save-status-dot{width:6px;height:6px;flex:0 0 6px;border-radius:50%;background:#35b77a;box-shadow:0 0 9px rgba(53,183,122,.35)}
+.settings-no-results{padding:20px;text-align:center;color:var(--spike-muted,var(--muted));font-size:12px}
+.settings-detail-head{display:flex;align-items:center;gap:12px;margin:9px 0 13px;padding:11px 0 12px;border-bottom:1px solid var(--spike-line,var(--line))}.settings-home-back{display:grid;place-items:center;width:40px;height:40px;flex:0 0 40px;border:1px solid var(--spike-line,var(--line));border-radius:13px;background:var(--spike-surface,var(--surface));color:var(--spike-text,var(--text));font-size:27px;line-height:1;cursor:pointer}.settings-detail-head h2{font-size:19px;margin:3px 0 2px}.settings-detail-head p{font-size:10.5px}
+.settings-pages [data-settings-panel][hidden]{display:none!important}.settings-pages [data-settings-panel]{animation:settingsPanelIn .2s ease both}.settings-pages .card{margin:0 0 12px}.settings-pages .section{font-size:10px}.settings-pages .row{min-height:59px}.settings-pages .row strong{font-size:13px}.settings-pages .row small{font-size:11px}
+.settings-savebar{position:sticky;bottom:0;z-index:22;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:14px -2px 0;padding:11px 12px calc(11px + env(safe-area-inset-bottom));border:1px solid var(--spike-line,var(--line));border-radius:16px;background:color-mix(in srgb,var(--spike-surface,var(--surface)) 92%,transparent);backdrop-filter:blur(18px);box-shadow:0 -8px 26px rgba(0,0,0,.12)}.settings-save-status{display:flex;align-items:center;gap:8px;min-width:0;color:var(--spike-muted,var(--muted));font-size:10px;line-height:1.35}.settings-save-status #status{padding:0;min-height:0;max-width:390px}.settings-save-button{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-width:128px;white-space:nowrap}.settings-save-button span{font-size:16px}
+@keyframes settingsPanelIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.settings-home{margin-top:5px}.settings-welcome{padding:15px;border-radius:17px}.settings-mark{width:46px;height:46px;flex-basis:46px;border-radius:14px}.settings-mark-core{width:28px;height:28px}.settings-category-grid{grid-template-columns:1fr;gap:7px}.settings-category{min-height:65px;padding:10px 11px;border-radius:14px}.category-icon{width:36px;height:36px;flex-basis:36px}.category-copy strong{font-size:12.5px}.category-copy small{font-size:10.5px}.settings-overview{margin-bottom:15px}.settings-savebar{margin-top:12px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));border-radius:14px}.settings-save-status{font-size:9.5px}.settings-save-button{min-width:116px;padding:9px 11px}.settings-pages .row{min-height:55px}}
+@media(max-width:360px){.settings-savebar{align-items:flex-start;flex-direction:column}.settings-save-button{width:100%}}
+@media(prefers-reduced-motion:reduce){.settings-category,.settings-pages [data-settings-panel]{animation:none!important;transition:none!important}}
+
+</style>
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+</head><body data-spike-page="settings"><main class="wrap">
+<header class="top"><button class="back spike-premium-back" id="back" aria-label="Go back to the previous SPIKE page" data-spike-premium-back="1" data-back-fallback="feed.html" title="Go back" type="button">‹</button><div><h1>Settings</h1><small id="accountLabel" style="color:var(--muted)">Loading…</small></div></header>
+
+<section class="settings-home" id="settingsHome" aria-label="Settings home">
+  <div class="settings-welcome"><div><span class="settings-kicker">CONTROL CENTER</span><h2>Make SPIKE yours</h2><p>Manage your account, privacy and app experience.</p></div><div class="settings-mark" aria-hidden="true"><span class="settings-mark-core">S</span></div></div>
+  <label class="settings-search"><span aria-hidden="true">⌕</span><input id="settingsSearch" type="search" placeholder="Search settings" autocomplete="off" aria-label="Search settings"><kbd>Ctrl K</kbd></label>
+  <div class="settings-overview" aria-label="Current settings summary"><span id="setupTitle" hidden>Personal preferences</span><span id="setupDescription" hidden>Your current appearance, privacy and notification choices.</span><span class="overview-label">YOUR CURRENT SETUP</span><div class="summary"><span class="pill"><i></i><span id="setupTheme">Theme</span></span><span class="pill"><i></i><span id="setupPrivacy">Profile: Public</span></span><span class="pill"><i></i><span id="setupPresence">Online</span></span><span class="pill"><i></i><span id="setupNotifications">Notifications</span></span></div></div>
+  <div class="settings-category-heading"><span>SETTINGS</span><small>Choose a category</small></div>
+  <div class="settings-category-grid" id="settingsCategoryGrid">
+    <button class="settings-category" type="button" data-settings-open="account" data-search-terms="account profile email username display name avatar cover website location sign out"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M4.5 20c.5-4 3-6 7.5-6s7 2 7.5 6"/></svg></span><span class="category-copy"><strong>Account</strong><small>Profile and account details</small></span><span class="category-arrow">›</span></button>
+    <button class="settings-category" type="button" data-settings-open="appearance" data-search-terms="appearance theme colour color display style dark light"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9c0-1.1-.9-2-2-2h-1.5a1.5 1.5 0 0 1-1.2-2.4A2 2 0 0 0 14.7 4H12Z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="6.8" cy="15" r="1"/></svg></span><span class="category-copy"><strong>Appearance</strong><small>Themes and display style</small></span><span class="category-arrow">›</span></button>
+    <button class="settings-category" type="button" data-settings-open="notifications" data-search-terms="notifications alerts messages sound likes comments mentions follows browser"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></span><span class="category-copy"><strong>Notifications</strong><small>Alerts and sounds</small></span><span class="category-arrow">›</span></button>
+    <button class="settings-category" type="button" data-settings-open="feed-content" data-search-terms="feed content sensitive spoilers political following muted keywords trust center safety"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span><span class="category-copy"><strong>Feed &amp; Content</strong><small>Control what appears in your feed</small></span><span class="category-arrow">›</span></button>
+    <button class="settings-category" type="button" data-settings-open="privacy" data-search-terms="privacy access online status messages profile posts media friends discovery visibility"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 1 1 8 0v3M12 14v3"/></svg></span><span class="category-copy"><strong>Privacy &amp; Access</strong><small>Visibility and contact permissions</small></span><span class="category-arrow">›</span></button>
+    <button class="settings-category" type="button" data-settings-open="security-tools" data-search-terms="security tools backup chat two factor authenticator 2fa support trust safety"><span class="category-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 19 6v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span><span class="category-copy"><strong>Security &amp; Tools</strong><small>Protection, backups and utilities</small></span><span class="category-arrow">›</span></button>
+  </div>
+  <p class="settings-no-results" id="settingsNoResults" hidden>No matching settings categories. Try another search.</p>
+  <div class="settings-home-foot"><span class="settings-foot-dot"></span> SPIKE ELITE <span>·</span> Your experience, your control</div>
+</section>
+<div class="settings-detail-head" id="settingsDetailHead" hidden><button type="button" id="settingsHomeBack" class="settings-home-back" aria-label="Back to all settings">‹</button><div><span class="settings-kicker">SETTINGS CATEGORY</span><h2 id="settingsDetailTitle">Account</h2><p id="settingsDetailDescription">Manage this part of your experience.</p></div></div>
+<div class="settings-pages" id="settingsPages">
+<section class="card" data-settings-panel="appearance" hidden><div class="section" id="appearance">Appearance</div>
+<div class="row"><div><strong>Theme</strong><small>Use the same SPIKE theme preference across pages.</small></div><div class="theme-select"><span class="theme-dot" aria-hidden="true"></span><select id="theme" class="control" aria-label="SPIKE appearance theme">
+<option value="1">Midnight Luxe</option><option value="2">Arctic Glass</option><option value="3">Emerald Obsidian</option><option value="4">Sandstone Studio</option><option value="5">Cosmic Pulse</option>
+</select></div>
+</div>
+</section>
+<section class="card" data-settings-panel="feed-content" hidden><div class="section" id="feed-content">Feed &amp; Content <small>Following-only and muted-keyword preferences apply to the Feed on this device. Content labels are unavailable until posts support classification.</small></div>
+<div class="row"><div><strong>Show sensitive content</strong><small>Allow posts marked as sensitive to appear in your Feed.</small></div><input id="feedSensitive" class="switch" type="checkbox" aria-label="Show sensitive content"></div>
+<div class="row"><div><strong>Show spoilers</strong><small>Allow spoiler-marked posts to appear in your Feed.</small></div><input id="feedSpoilers" class="switch" type="checkbox" aria-label="Show spoilers"></div>
+<div class="row"><div><strong>Show political content</strong><small>Allow posts marked as political to appear in your Feed.</small></div><input id="feedPolitical" class="switch" type="checkbox" aria-label="Show political content"></div>
+<div class="row"><div><strong>Following only</strong><small>Limit Feed results to accounts you follow, plus your own posts.</small></div><input id="feedFollowingOnly" class="switch" type="checkbox" aria-label="Following only"></div>
+<div class="row"><div><strong>Muted keywords</strong><small>Hide Feed posts containing any of these comma-separated words or phrases.</small></div><input id="feedMutedKeywords" class="control" type="text" aria-label="Muted Feed keywords and phrases" placeholder="word, phrase, topic" autocomplete="off"></div>
+<div class="row"><div><strong>Trust Center &amp; Safety</strong><small>Open SPIKE’s existing Safety Center for protection, reports, trusted contacts, and recovery tools.</small></div><button class="btn" type="button" data-go="feed.html#feedV2Hub">Open Trust Center</button></div></section>
+<section class="card" data-settings-panel="notifications" hidden><div class="section" id="notifications">Notifications</div>
+<div class="row"><div><strong>Message notification sound</strong><small>Play the message alert sound on this device when a new message arrives.</small></div><input id="messageTone" class="switch" type="checkbox" aria-label="Message notification sound"></div>
+<div class="row"><div><strong>Browser notifications</strong><small>Ask this browser for permission to display SPIKE notifications. This permission is device-specific.</small></div><button id="notify" class="btn" type="button">Enable</button></div>
+<div class="section">Notification types</div><div class="notif-grid" id="notificationPreferences">
+<div class="row"><div><strong>Likes</strong><small>When someone likes your content.</small></div><input id="np_likes" class="switch" type="checkbox" aria-label="Likes notifications"></div>
+<div class="row"><div><strong>Comments</strong><small>When someone comments on your content.</small></div><input id="np_comments" class="switch" type="checkbox" aria-label="Comments notifications"></div>
+<div class="row"><div><strong>Mentions</strong><small>When someone mentions you.</small></div><input id="np_mentions" class="switch" type="checkbox" aria-label="Mentions notifications"></div>
+<div class="row"><div><strong>Follows</strong><small>When someone follows you.</small></div><input id="np_follows" class="switch" type="checkbox" aria-label="Follows notifications"></div>
+<div class="row"><div><strong>Friend requests</strong><small>New friend requests and updates.</small></div><input id="np_friend_requests" class="switch" type="checkbox" aria-label="Friend request notifications"></div>
+<div class="row"><div><strong>Messages</strong><small>New private message activity.</small></div><input id="np_messages" class="switch" type="checkbox" aria-label="Message notifications"></div>
+<div class="row"><div><strong>Coins & rewards</strong><small>Rewards, coins and progression updates.</small></div><input id="np_coins" class="switch" type="checkbox" aria-label="Coin notifications"></div>
+<div class="row"><div><strong>Purchases</strong><small>Purchase and transaction updates.</small></div><input id="np_purchases" class="switch" type="checkbox" aria-label="Purchase notifications"></div>
+<div class="row"><div><strong>Announcements</strong><small>Important SPIKE product announcements.</small></div><input id="np_announcements" class="switch" type="checkbox" aria-label="Announcement notifications"></div>
+<div class="row"><div><strong>System</strong><small>Security and system notifications.</small></div><input id="np_system" class="switch" type="checkbox" aria-label="System notifications"></div>
+</div></section>
+<section class="card" data-settings-panel="privacy" hidden><div class="section" id="privacy">Privacy &amp; Access <small>Control visibility, contact and presence.</small></div>
+<div class="row"><div><strong>Show online status</strong><small>Controls whether your presence is published to SPIKE.</small></div><input id="online" class="switch" type="checkbox" aria-label="Show online status"></div>
+<div class="row"><div><strong>Allow messages</strong><small>Who can start private conversations with you.</small></div><select id="messages" class="control" aria-label="Who can send you private messages"><option value="everyone">Everyone</option><option value="friends">Friends</option><option value="nobody">Nobody</option></select></div>
+<div class="row"><div><strong>Profile visibility</strong><small>Who can view your profile.</small></div><select id="profile" class="control" aria-label="Profile visibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
+<div class="row"><div><strong>Posts visibility</strong><small>Who can view your posts.</small></div><select id="posts" class="control" aria-label="Posts visibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
+<div class="row"><div><strong>Media visibility</strong><small>Who can view media on your profile.</small></div><select id="media" class="control" aria-label="Media visibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
+<div class="row"><div><strong>Friends visibility</strong><small>Who can view your friends list.</small></div><select id="friends" class="control" aria-label="Friends list visibility"><option value="public">Public</option><option value="friends">Friends</option><option value="private">Private</option></select></div>
+<div class="row"><div><strong>Profile discovery</strong><small>Allow your profile to appear in profile discovery.</small></div><input id="discovery" class="switch" type="checkbox" aria-label="Allow profile discovery"></div>
+</section>
+<section class="card" data-settings-panel="security-tools" hidden>
+<div class="section" id="security-tools">Security &amp; Tools</div>
+<div class="row"><div><strong>Change your password</strong><small>Confirm your current password before setting a new one. Use a unique password you do not reuse elsewhere.</small></div></div>
+<form id="spikePasswordChangeForm" class="spike-password-change" novalidate>
+<div class="field"><label class="label" for="securityCurrentPassword">Current password</label><input id="securityCurrentPassword" class="control" type="password" autocomplete="current-password" minlength="8" maxlength="128" required></div>
+<div class="field"><label class="label" for="securityNewPassword">New password</label><input id="securityNewPassword" class="control" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+<div class="field"><label class="label" for="securityConfirmPassword">Confirm new password</label><input id="securityConfirmPassword" class="control" type="password" autocomplete="new-password" minlength="8" maxlength="128" required></div>
+<button id="spikePasswordChangeBtn" class="btn" type="submit">Update password</button><p id="spikePasswordChangeStatus" role="status" aria-live="polite"></p>
+</form>
+<div class="row"><div><strong>Authenticator app (2-step verification)</strong><small>Protect sign-ins with a time-based code from an authenticator app. Set up a second factor on another device as a backup before relying on this.</small></div></div>
+<div class="row" style="display:block"><div id="spikeMfaStatus" role="status" aria-live="polite">Checking authenticator status…</div><div id="spikeMfaEnrollArea"><button class="btn" id="spikeMfaEnroll" type="button">Set up authenticator</button></div><div id="spikeMfaPending" hidden><p>Scan this QR code with your authenticator app, or enter the secret manually. Keep the secret private.</p><img id="spikeMfaQr" alt="Authenticator setup QR code" style="display:block;max-width:220px;background:#fff;padding:10px;border-radius:10px"><p><strong>Manual setup key</strong></p><code id="spikeMfaSecret" style="overflow-wrap:anywhere"></code><form id="spikeMfaVerifyForm"><label for="spikeMfaCode">6-digit authenticator code</label><input id="spikeMfaCode" class="control" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required><button class="btn" type="submit">Confirm and enable</button><button class="btn" id="spikeMfaCancel" type="button">Cancel setup</button></form></div><div id="spikeMfaEnabled" hidden><p>Authenticator verification is enabled for this account.</p><button class="btn" id="spikeMfaRemove" type="button">Remove authenticator</button></div></div>
+<div class="row" style="display:block"><div><strong>One-time recovery codes</strong><small>Use a recovery code if you lose access to your authenticator. Each code works once. SPIKE only displays the codes when they are generated or regenerated; save them somewhere secure.</small></div><p id="spikeRecoveryStatus" role="status" aria-live="polite">Checking recovery-code status…</p><button class="btn" id="spikeRecoveryGenerate" type="button" hidden>Generate recovery codes</button><button class="btn" id="spikeRecoveryRegenerate" type="button" hidden>Replace recovery codes</button><div id="spikeRecoveryOutput" hidden><p><strong>Save these codes now. They will not be shown again.</strong></p><pre id="spikeRecoveryCodes" style="white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;background:#111827;border-radius:10px"></pre><button class="btn" id="spikeRecoveryCopy" type="button">Copy recovery codes</button></div></div>
+<div class="row"><div><strong>Security, backups &amp; chat tools</strong><small>Open supported account tools. Authenticator-based 2FA is not enabled yet; do not assume your account has 2FA protection.</small></div><a class="btn" href="spike-tools.html" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap">Open tools</a></div>
+</section>
+<section class="card" data-settings-panel="account" hidden><div class="section" id="account">Account</div><div class="row"><div><strong>Profile details</strong><small>Edit your display name, username, bio, avatar, cover image, website and location. Privacy controls remain in this Settings page.</small></div><a class="btn" href="profile.html?edit=1" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center;white-space:nowrap">Edit profile ↗</a></div><div class="row"><div><strong>Sign out</strong><small>End this session on this device.</small></div><button id="signout" class="btn danger" type="button">Sign out</button></div></section>
+</div>
+<div class="settings-savebar" id="settingsSavebar"><div class="settings-save-status"><span class="save-status-dot"></span><span id="status" role="status" aria-live="polite">Changes are saved to your SPIKE account.</span></div><button id="save" class="btn settings-save-button" type="button">Save changes <span aria-hidden="true">→</span></button></div>
+</main><script id="spike-settings-theme-standalone">(()=>{
+  const select=document.getElementById('theme');
+  if(!select||select.dataset.spikeThemeStandalone==='1')return;
+  select.dataset.spikeThemeStandalone='1';
+  const apply=id=>{
+    const n=Number(id);if(!Number.isInteger(n)||n<1||n>5)return;
+    try{localStorage.setItem('spike-theme-choice-v3',String(n));localStorage.setItem('spike-theme-version','5')}catch(_){}
+    if(window.SPIKE_THEME&&typeof window.SPIKE_THEME.set==='function')window.SPIKE_THEME.set(n,true);
+    else{const mode=[1,3,5].includes(n)?'dark':'light',root=document.documentElement;root.dataset.spikeStyle=String(n);root.dataset.theme=mode;root.dataset.spikeThemeMode=mode;root.dataset.spikeThemeId=String(n);root.dataset.spikeThemeVersion='5';root.style.colorScheme=mode;document.dispatchEvent(new CustomEvent('spike:theme-change',{detail:{id:n,mode}}));}
+    const summary=document.getElementById('setupTheme');if(summary){const names={1:'Midnight Luxe',2:'Arctic Glass',3:'Emerald Obsidian',4:'Sandstone Studio',5:'Cosmic Pulse'};summary.textContent=names[n];}
+  };
+  const stored=Number(localStorage.getItem('spike-theme-choice-v3')||'1');select.value=String(Number.isInteger(stored)&&stored>=1&&stored<=5?stored:1);
+  select.addEventListener('change',()=>apply(select.value));
+  document.addEventListener('spike:theme-change',e=>{if(e.detail?.id)select.value=String(e.detail.id)});
+})();</script>
+<script id="spike-settings-navigation-v3">
+(()=>{
+  const home=document.getElementById('settingsHome'),pages=document.getElementById('settingsPages'),head=document.getElementById('settingsDetailHead');
+  if(!home||!pages||!head)return;
+  const panels=[...pages.querySelectorAll('[data-settings-panel]')],tiles=[...home.querySelectorAll('[data-settings-open]')];
+  const title=document.getElementById('settingsDetailTitle'),description=document.getElementById('settingsDetailDescription'),search=document.getElementById('settingsSearch'),noResults=document.getElementById('settingsNoResults');
+  const meta={account:['Account','Manage your profile and account access.'],appearance:['Appearance','Choose how SPIKE looks on your device.'],notifications:['Notifications','Choose which alerts and sounds you receive.'],'feed-content':['Feed & Content','Shape the content you see in your feed.'],privacy:['Privacy & Access','Manage your visibility and who can contact you.'],'security-tools':['Security & Tools','Access protection, backups and useful tools.']};
+  let active='';
+  function showCategory(key){const panel=panels.find(p=>p.dataset.settingsPanel===key);if(!panel)return;active=key;home.hidden=true;panels.forEach(p=>p.hidden=p!==panel);head.hidden=false;title.textContent=meta[key]?.[0]||'Settings';description.textContent=meta[key]?.[1]||'';if(search)search.value='';tiles.forEach(t=>t.hidden=false);if(noResults)noResults.hidden=true;window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  function showHome(){active='';panels.forEach(p=>p.hidden=true);head.hidden=true;home.hidden=false;if(search){search.value='';filterCategories('')}window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});}
+  function filterCategories(value){const q=String(value||'').trim().toLowerCase();let count=0;tiles.forEach(tile=>{const key=tile.dataset.settingsOpen,panel=panels.find(p=>p.dataset.settingsPanel===key);const hay=(tile.innerText+' '+(tile.dataset.searchTerms||'')+' '+(panel?.innerText||'')).toLowerCase();const match=!q||hay.includes(q);tile.hidden=!match;if(match)count++});if(noResults)noResults.hidden=count!==0;}
+  tiles.forEach(tile=>tile.addEventListener('click',()=>showCategory(tile.dataset.settingsOpen)));
+  document.getElementById('settingsHomeBack')?.addEventListener('click',showHome);
+  search?.addEventListener('input',e=>filterCategories(e.target.value));
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(home.hidden)showHome();search?.focus()}if(e.key==='Escape'&&!home.hidden&&search?.value){search.value='';filterCategories('')}else if(e.key==='Escape'&&active)showHome()});
+  panels.forEach(p=>p.hidden=true);
+  document.getElementById('settingsSavebar')?.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target===e.currentTarget)document.getElementById('save')?.click()});
+  window.SPIKE_SETTINGS_NAV={open:showCategory,home:showHome};
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script type="module" src="js/spike-mfa-settings.js"></script>
+<style>
+#logoutConfirmOverlay{position:fixed;inset:0;z-index:2147483000;display:none;align-items:center;justify-content:center;padding:18px;background:radial-gradient(ellipse at 18% 18%,rgba(0,213,255,.14),transparent 42%),radial-gradient(ellipse at 82% 82%,rgba(255,46,146,.15),transparent 44%),rgba(3,5,12,.84);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+#logoutConfirmOverlay.show{display:flex;animation:spikeLogoutFade .2s ease both}
+#logoutConfirmOverlay .logout-card{position:relative;width:min(370px,100%);padding:25px 23px 22px;border:1px solid rgba(255,255,255,.14);border-radius:26px;text-align:center;color:#f8f9ff;background:radial-gradient(ellipse at 8% 0%,rgba(0,213,255,.14),transparent 48%),radial-gradient(ellipse at 100% 100%,rgba(255,46,146,.15),transparent 52%),linear-gradient(145deg,#171a2b,#090b15);box-shadow:0 30px 100px rgba(0,0,0,.66);animation:spikeLogoutCard .32s cubic-bezier(.2,.8,.2,1) both}
+#logoutConfirmOverlay .logout-icon{width:56px;height:56px;margin:0 auto 16px;display:grid;place-items:center;border-radius:18px;font-size:25px;color:#fff;background:linear-gradient(145deg,rgba(0,213,255,.2),rgba(255,46,146,.2));border:1px solid rgba(0,213,255,.35)}
+#logoutConfirmOverlay h2{margin:0 0 9px;font-size:23px;color:#fff}#logoutConfirmOverlay p{margin:0 auto 20px;max-width:290px;color:rgba(225,228,242,.75);font-size:13px;line-height:1.55}
+#logoutConfirmOverlay .logout-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}#logoutConfirmOverlay .logout-actions button{min-height:48px;border-radius:14px;font:700 13px inherit;cursor:pointer}
+#logoutCancel{background:rgba(255,255,255,.08);color:#f0f2fb;border:1px solid rgba(255,255,255,.15)}#logoutYes{color:#fff;border:1px solid rgba(255,255,255,.15);background:linear-gradient(105deg,#00bfe8,#547bff 48%,#ed3caa);box-shadow:0 9px 25px rgba(0,190,232,.17)}
+@keyframes spikeLogoutFade{from{opacity:0}to{opacity:1}}@keyframes spikeLogoutCard{from{opacity:0;transform:translateY(12px) scale(.965);filter:blur(5px)}to{opacity:1;transform:none;filter:blur(0)}}
+@media(prefers-reduced-motion:reduce){#logoutConfirmOverlay,#logoutConfirmOverlay .logout-card{animation:none}}
+</style>
+<div aria-hidden="true" aria-labelledby="logoutTitle" aria-modal="true" class="overlay" id="logoutConfirmOverlay" role="dialog"><div class="logout-card"><div class="logout-icon" aria-hidden="true">↪</div><h2 id="logoutTitle">Leaving SPIKE?</h2><p>Your session will end on this device. You can return anytime and pick up where you left off.</p><div class="logout-actions"><button id="logoutCancel" type="button">Stay on SPIKE</button><button id="logoutYes" type="button">Log out</button></div></div></div>
+<script src="js/spike-settings-controller.js" defer></script>
+<script src="js/premium-back.js" defer></script>
+
+<script src="js/spike-surface-controls.js"></script>
+
+
+  
+
+
+
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
+</body></html>

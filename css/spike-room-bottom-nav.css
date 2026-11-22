@@ -1,0 +1,28 @@
+/* SPIKE room conversation navigation — additive, reuses the app's five core destinations. */
+.spike-room-bottom-nav{
+  position:fixed;z-index:80;left:50%;bottom:calc(8px + env(safe-area-inset-bottom));
+  transform:translateX(-50%);width:min(540px,calc(100vw - 20px));height:58px;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:center;gap:3px;
+  padding:5px 6px;border:1px solid rgba(148,163,184,.2);border-radius:19px;
+  background:rgba(13,17,31,.91);color:#aeb8ce;
+  box-shadow:0 12px 38px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.055);
+  -webkit-backdrop-filter:blur(22px) saturate(1.35);backdrop-filter:blur(22px) saturate(1.35);
+}
+.spike-room-bottom-nav a{position:relative;min-width:0;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:13px;color:inherit;text-decoration:none;transition:color .18s ease,background .18s ease,transform .18s ease}
+.spike-room-bottom-nav .room-nav-icon{font-size:20px;line-height:1.05;font-weight:650}
+.spike-room-bottom-nav small{font:750 9px/1.1 Inter,system-ui,sans-serif;letter-spacing:.01em}
+.spike-room-bottom-nav a.active{color:#fff;background:linear-gradient(135deg,rgba(124,58,237,.24),rgba(192,38,211,.13));box-shadow:inset 0 0 0 1px rgba(167,139,250,.17)}
+.spike-room-bottom-nav a.active:before{content:"";position:absolute;top:2px;width:15px;height:2px;border-radius:9px;background:linear-gradient(90deg,#a78bfa,#e879f9);box-shadow:0 0 10px #a78bfa88}
+.spike-room-bottom-nav a:active{transform:scale(.95)}
+.spike-room-bottom-nav a:focus-visible{outline:2px solid #c4b5fd;outline-offset:2px}
+/* Reserve real layout space so the bar never covers the final chat controls. */
+html body[data-spike-page="room"] .room-main{padding-bottom:calc(74px + env(safe-area-inset-bottom))!important}
+/* Keep the composer clear while the mobile keyboard is active. */
+@media(max-width:760px){
+ .spike-room-bottom-nav{width:calc(100vw - 18px);height:56px;bottom:calc(6px + env(safe-area-inset-bottom));border-radius:18px}
+ .spike-room-bottom-nav a{height:44px}
+ html body[data-spike-page="room"] .room-main{padding-bottom:calc(68px + env(safe-area-inset-bottom))!important}
+ html body[data-spike-page="room"]:has(#chatMessageInput:focus) .spike-room-bottom-nav{opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,12px)}
+ html body[data-spike-page="room"]:has(#chatMessageInput:focus) .room-main{padding-bottom:0!important}
+}
+@media(prefers-reduced-motion:reduce){.spike-room-bottom-nav,.spike-room-bottom-nav a{transition:none!important}}

@@ -1,0 +1,94 @@
+/* SPIKE profile editor — focused, responsive, accessible form treatment. */
+.spike-profile-editor-overlay{padding:clamp(10px,3vw,24px)!important;align-items:center!important;}
+.spike-profile-editor{width:min(680px,100%)!important;max-height:min(92dvh,900px)!important;overflow:auto!important;padding:clamp(17px,3vw,28px)!important;border-radius:24px!important;background:var(--surface,#0d1117)!important;border:1px solid var(--line,rgba(255,255,255,.1))!important;box-shadow:0 30px 100px rgba(0,0,0,.58)!important;overscroll-behavior:contain;}
+.spike-editor-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding-bottom:20px;border-bottom:1px solid var(--line);}
+.spike-editor-eyebrow{display:block;margin-bottom:7px;color:var(--primary2,#b9a4ff);font-size:9px;font-weight:900;letter-spacing:.16em;}
+.spike-editor-header h2{font-size:clamp(21px,4vw,27px)!important;line-height:1.15;letter-spacing:-.04em;}
+.spike-editor-header p{max-width:440px;margin-top:7px!important;font-size:12px!important;line-height:1.5;color:var(--muted)!important;}
+.spike-editor-close{flex:0 0 38px;width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font-size:24px;line-height:1;color:var(--text);}
+.spike-editor-form{gap:0!important;margin-top:0!important;}
+.spike-editor-section{padding:20px 0;border-bottom:1px solid var(--line);display:grid;gap:14px;}
+.spike-editor-section-heading{display:flex;align-items:center;gap:11px;margin-bottom:1px;}
+.spike-editor-step{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--primary2,#b9a4ff) 13%,transparent);color:var(--primary2,#b9a4ff);font-size:10px;font-weight:950;}
+.spike-editor-section-heading h3{font-size:13px;font-weight:900;}
+.spike-editor-section-heading p{margin-top:3px;color:var(--muted);font-size:10px;}
+.spike-editor-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.spike-editor-field{min-width:0;display:grid;gap:7px;}
+.spike-editor-field>label{font-size:11px!important;font-weight:850;color:var(--text)!important;}
+.spike-editor-field input:not([type=file]),.spike-editor-field textarea{width:100%;min-width:0;min-height:43px;padding:11px 12px!important;border:1px solid var(--line)!important;border-radius:12px!important;background:var(--surface2)!important;color:var(--text)!important;font-size:12px!important;outline:none;transition:border-color .16s,box-shadow .16s;}
+.spike-editor-field textarea{min-height:104px!important;resize:vertical;line-height:1.5;}
+.spike-editor-field input:focus,.spike-editor-field textarea:focus{border-color:var(--primary2,#b9a4ff)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--primary2,#b9a4ff) 14%,transparent);}
+.spike-editor-field input[type=file]{width:100%;min-height:42px;padding:8px;border:1px dashed var(--line);border-radius:12px;background:var(--surface2);color:var(--muted);font-size:11px;}
+.spike-editor-field input[type=file]::file-selector-button{margin-right:10px;padding:7px 10px;border:0;border-radius:8px;background:var(--surface3);color:var(--text);font-size:10px;font-weight:800;}
+.spike-editor-field small{font-size:9px;line-height:1.45;color:var(--muted);}
+.spike-editor-input-prefix{display:flex;align-items:center;gap:7px;min-height:43px;padding-left:12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);color:var(--muted);}
+.spike-editor-input-prefix:focus-within{border-color:var(--primary2);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary2) 14%,transparent);}
+.spike-editor-input-prefix input:not([type=file]){min-height:41px;border:0!important;background:transparent!important;box-shadow:none!important;padding-left:0!important;}
+.spike-editor-privacy-link{display:flex;align-items:center;gap:12px;margin-top:17px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--surface2);text-decoration:none!important;}
+.spike-editor-privacy-icon{width:34px;height:34px;flex:0 0 34px;display:grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--primary2) 14%,transparent);color:var(--primary2);font-size:20px;}
+.spike-editor-privacy-link>span:nth-child(2){min-width:0;flex:1;}
+.spike-editor-privacy-link b,.spike-editor-privacy-link small{display:block;}
+.spike-editor-privacy-link b{font-size:11px;color:var(--text);}
+.spike-editor-privacy-link small{margin-top:3px;font-size:9px;line-height:1.4;color:var(--muted);}
+.spike-editor-privacy-link>span:last-child{color:var(--primary2);font-size:18px;}
+.spike-editor-actions{position:sticky;bottom:calc(-1 * clamp(17px,3vw,28px));display:flex;justify-content:flex-end;gap:9px;margin:20px calc(-1 * clamp(17px,3vw,28px)) calc(-1 * clamp(17px,3vw,28px));padding:14px clamp(17px,3vw,28px) max(14px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(14px);}
+.spike-editor-actions .btn{min-width:104px;min-height:42px;font-size:11px;}
+.spike-editor-actions .btn:disabled{opacity:.6;cursor:wait;}
+@media(max-width:560px){.spike-profile-editor{max-height:94dvh!important;border-radius:20px!important;padding:17px!important}.spike-editor-grid{grid-template-columns:1fr;gap:13px}.spike-editor-section{padding:17px 0}.spike-editor-actions{bottom:-17px;margin:17px -17px -17px;padding:12px 17px max(12px,env(safe-area-inset-bottom));}.spike-editor-actions .btn{flex:1;min-width:0}}
+@media(prefers-reduced-motion:reduce){.spike-editor-field input,.spike-editor-field textarea{transition:none}}
+
+/* Connection list: keep the useful search, remove the low-value sort dropdown. */
+#socialListOverlay .spike-social-tools{grid-template-columns:minmax(0,1fr)!important}
+#socialListOverlay .spike-social-search{width:100%!important}
+
+/* Center the Edit Profile dialog in the viewport and animate it in from below. */
+#editOverlay.spike-profile-editor-overlay{
+  position:fixed!important;
+  inset:0!important;
+  z-index:1200!important;
+  display:none;
+  box-sizing:border-box;
+  width:100%;
+  height:100%;
+  min-height:100dvh;
+  padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;
+  place-items:center!important;
+  align-content:center!important;
+  justify-content:center!important;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  background:rgba(3,6,14,.76)!important;
+  -webkit-backdrop-filter:blur(9px) saturate(115%);
+  backdrop-filter:blur(9px) saturate(115%);
+}
+#editOverlay.spike-profile-editor-overlay.open{
+  display:grid!important;
+  animation:spikeProfileEditorBackdropIn .24s ease-out both;
+}
+#editOverlay .spike-profile-editor{
+  position:relative!important;
+  inset:auto!important;
+  transform:none;
+  align-self:center!important;
+  justify-self:center!important;
+  margin:auto!important;
+  width:min(680px,100%)!important;
+  max-width:100%!important;
+  max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 28px)!important;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  animation:spikeProfileEditorPanelIn .46s cubic-bezier(.2,.8,.2,1) both;
+  will-change:transform,opacity;
+}
+@keyframes spikeProfileEditorBackdropIn{from{opacity:0}to{opacity:1}}
+@keyframes spikeProfileEditorPanelIn{from{opacity:0;transform:translate3d(0,26px,0) scale(.975)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@media(max-width:560px){
+  #editOverlay.spike-profile-editor-overlay{padding:max(10px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left))!important}
+  #editOverlay .spike-profile-editor{width:100%!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px)!important;border-radius:20px!important}
+}
+@media(prefers-reduced-motion:reduce){
+  #editOverlay.spike-profile-editor-overlay.open,
+  #editOverlay .spike-profile-editor{animation:none!important;will-change:auto}
+}

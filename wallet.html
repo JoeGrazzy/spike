@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+<script src="js/spike-wallet-readonly.js" defer></script>
+<script src="js/spike-purchase-flow.js" defer></script>
+
+<meta charset="utf-8"><meta name="google" content="notranslate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020"><meta name="robots" content="noindex,nofollow">
+<title>SPIKE — Wallet</title><meta name="description" content="Manage SP Coins, creator earnings and withdrawals on SPIKE.">
+<link rel="icon" type="image/webp" href="assets/icon/icon.webp">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version",prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<link rel="stylesheet" href="css/spike-wallet-readonly.css"><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/spike-mobile-safe-area.css"><link rel="stylesheet" href="css/spike-theme-experience.css"><link rel="stylesheet" href="css/spike-five-theme-authority.css"><link rel="stylesheet" href="css/spike-theme-runtime.css"><link rel="stylesheet" href="css/spike-theme-final-authority.css"><link rel="stylesheet" href="css/spike-global-page-authority.css"><link rel="stylesheet" href="css/spike-theme-page-bridge.css">
+
+
+<style>
+:root{--wallet-max:1040px}.wallet-shell{width:min(var(--wallet-max),100% - 28px);margin:0 auto;padding:16px 0 56px}.wallet-top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.wallet-top a,.wallet-top button{border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:12px;padding:10px 13px;text-decoration:none;font-weight:800}.wallet-top h1{font-size:clamp(22px,4vw,30px);margin:0}.wallet-top p{margin:3px 0 0;color:var(--muted);font-size:13px}.wallet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.wallet-panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;min-width:0}.wallet-panel h2{font-size:17px;margin:0 0 6px}.wallet-muted{color:var(--muted);font-size:13px;line-height:1.5}.wallet-balance{font-size:clamp(30px,6vw,44px);font-weight:950;letter-spacing:-.04em;margin:12px 0 3px;font-variant-numeric:tabular-nums}.wallet-kicker{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:850}.wallet-wide{grid-column:1/-1}.wallet-packages{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-top:14px}.wallet-package{border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}.wallet-package strong{font-size:20px}.wallet-package button,.wallet-action{border:0;border-radius:11px;padding:11px 14px;background:var(--accent,var(--primary,#6d5dfc));color:white;font-weight:850;cursor:pointer}.wallet-package button:disabled,.wallet-action:disabled{opacity:.5;cursor:not-allowed}.wallet-field{display:flex;flex-direction:column;gap:6px;margin:10px 0;font-size:13px;font-weight:750}.wallet-field input,.wallet-field select{width:100%;min-width:0;border:1px solid var(--line);background:var(--surface2);color:var(--text);border-radius:11px;padding:12px;font:inherit}.wallet-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.wallet-row>*{flex:1;min-width:140px}.wallet-note{border:1px solid var(--line);background:var(--surface2);padding:12px;border-radius:12px;font-size:13px;line-height:1.5;margin-top:12px}.wallet-status{padding:10px 12px;border-radius:11px;background:var(--surface2);color:var(--muted);font-size:13px;margin:10px 0}.wallet-status.error{color:#ef7777}.wallet-table-wrap{overflow:auto;margin-top:12px}.wallet-table{width:100%;border-collapse:collapse;font-size:13px;min-width:550px}.wallet-table th,.wallet-table td{text-align:left;padding:10px;border-bottom:1px solid var(--line);vertical-align:top}.wallet-table th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.07em}.wallet-chip{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:11px;font-weight:800}.wallet-wa{display:inline-flex;text-decoration:none;align-items:center;justify-content:center;background:#168b58;color:#fff;border-radius:11px;padding:10px 13px;font-weight:850}.wallet-section{margin-top:14px}.wallet-separator{height:1px;background:var(--line);margin:14px 0}.wallet-hidden{display:none!important}@media(max-width:700px){.wallet-grid{grid-template-columns:1fr}.wallet-wide{grid-column:auto}.wallet-shell{width:min(100% - 20px,var(--wallet-max));padding-top:10px}.wallet-panel{padding:15px}.wallet-top{align-items:flex-start}.wallet-top h1{font-size:22px}}
+
+/* SP Coin purchase success preview */
+.coin-success-overlay{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:22px;background:rgba(5,10,22,.72);backdrop-filter:blur(12px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}
+.coin-success-overlay.is-visible{opacity:1;visibility:visible}
+.coin-success-card{position:relative;overflow:hidden;width:min(100%,390px);padding:27px 23px 22px;border:1px solid rgba(116,232,190,.28);border-radius:27px;background:linear-gradient(150deg,#142b35 0%,#101a2d 58%,#171b35 100%);color:#f7fffc;text-align:center;box-shadow:0 28px 90px rgba(0,0,0,.48),0 0 45px rgba(63,220,163,.12);transform:translateY(14px) scale(.96);transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.coin-success-overlay.is-visible .coin-success-card{transform:translateY(0) scale(1)}
+.coin-success-card:before{content:"";position:absolute;width:230px;height:230px;left:50%;top:-170px;transform:translateX(-50%);border-radius:50%;background:rgba(67,224,167,.2);filter:blur(25px);pointer-events:none}
+.coin-success-icon{position:relative;display:grid;place-items:center;width:76px;height:76px;margin:0 auto 15px;border-radius:50%;background:linear-gradient(145deg,#1b765d,#164b47);border:1px solid rgba(124,255,205,.48);box-shadow:0 0 0 9px rgba(64,214,160,.08),0 0 32px rgba(64,214,160,.22);animation:coinSuccessPop .48s cubic-bezier(.2,.9,.3,1.3) both}
+.coin-success-icon svg{width:39px;height:39px;stroke:#8dffd0;stroke-width:2.7;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.coin-success-eyebrow{font-size:10px;font-weight:900;letter-spacing:.19em;text-transform:uppercase;color:#8dffd0}
+.coin-success-title{margin:7px 0 5px;font-size:25px;line-height:1.15;font-weight:950;letter-spacing:-.035em}
+.coin-success-copy{margin:0 auto 17px;max-width:285px;color:#c1d4d4;font-size:13px;line-height:1.5}
+.coin-success-details{display:grid;gap:10px;padding:14px 15px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(255,255,255,.055);text-align:left}
+.coin-success-detail{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px}
+.coin-success-detail span{color:#b5c7cd}.coin-success-detail strong{color:#fff;text-align:right;font-size:13px;overflow-wrap:anywhere}
+.coin-success-state{display:inline-flex;align-items:center;gap:7px;margin-top:15px;padding:7px 11px;border:1px solid rgba(255,204,112,.25);border-radius:999px;background:rgba(255,190,78,.1);color:#ffda9b;font-size:11px;font-weight:850}
+.coin-success-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#ffc56d;box-shadow:0 0 9px #ffc56d}
+.coin-success-timer{height:3px;margin:19px -23px -22px;background:rgba(255,255,255,.08);overflow:hidden}.coin-success-timer:after{content:"";display:block;height:100%;width:100%;background:linear-gradient(90deg,#43d9a1,#9dffd2);transform-origin:left;animation:coinSuccessCountdown 4s linear forwards}
+@keyframes coinSuccessPop{from{opacity:0;transform:scale(.55) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes coinSuccessCountdown{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media(prefers-reduced-motion:reduce){.coin-success-overlay,.coin-success-card{transition:none}.coin-success-icon{animation:none}.coin-success-timer:after{animation:none}}
+
+
+/* Mobile-banking style SP Coin dashboard hero */
+.wallet-grid>.wallet-panel:first-child{grid-column:1/-1;position:relative;isolation:isolate;overflow:hidden;min-height:190px;padding:23px 24px;background:linear-gradient(128deg,#092c29 0%,#0b5948 52%,#108766 100%);border:1px solid rgba(130,255,213,.24);box-shadow:0 18px 46px rgba(0,65,48,.24);color:#f4fff9}
+.wallet-grid>.wallet-panel:first-child:after{content:"";position:absolute;z-index:-1;width:260px;height:260px;right:-72px;top:-130px;border:1px solid rgba(222,255,243,.12);border-radius:50%;box-shadow:0 0 0 26px rgba(222,255,243,.035),0 0 0 54px rgba(222,255,243,.025)}
+.wallet-grid>.wallet-panel:first-child .wallet-kicker{color:#a9ead5}
+.wallet-grid>.wallet-panel:first-child h2{color:#f7fffb;font-size:19px}
+.wallet-grid>.wallet-panel:first-child .wallet-balance{position:relative;z-index:1;margin:15px 0 7px;font-size:clamp(42px,8vw,62px);line-height:1.02;letter-spacing:-.055em;color:#fff;text-shadow:0 5px 22px rgba(0,0,0,.16)}
+.wallet-grid>.wallet-panel:first-child .wallet-muted{max-width:650px;color:rgba(235,255,247,.78)}
+.wallet-grid>.wallet-panel:first-child .wallet-note{position:relative;z-index:1;border-color:rgba(221,255,242,.17);background:rgba(255,255,255,.075);color:#e4fff3}
+@media(max-width:700px){.wallet-grid>.wallet-panel:first-child{grid-column:auto;padding:19px;min-height:176px}.wallet-grid>.wallet-panel:first-child .wallet-balance{font-size:clamp(42px,12vw,56px)}}
+
+/* SPIKE Wallet — focused mobile banking dashboard and single feature menu */
+body[data-spike-page="wallet"]{background:#071b17;color:#f4fff9;min-height:100vh}
+body[data-spike-page="wallet"] .wallet-shell{--wallet-ink:#f4fff9;--wallet-muted:#a9c2b8;--wallet-line:rgba(220,255,239,.12);width:min(100% - 28px,680px);padding:16px 0 54px;color:var(--wallet-ink)}
+.wallet-brandbar{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:3px 0}
+.wallet-brandbar .wallet-back,.wallet-brandbar .wallet-notifications{width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--wallet-line);border-radius:15px;background:#102b24;color:#f5fff9;text-decoration:none;font-size:25px;line-height:1}
+.wallet-brand-copy{min-width:0;flex:1}.wallet-brand-copy h1{margin:0;font-size:20px;font-weight:850;letter-spacing:-.035em;color:#f5fff9}.wallet-brand-copy p{margin:3px 0 0;color:#9db9ad;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wallet-brandbar .wallet-notifications{font-size:20px}.wallet-brandbar .wallet-notifications svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wallet-status{padding:8px 11px;border:1px solid rgba(122,220,177,.16);border-radius:12px;background:rgba(19,70,54,.55);color:#bdebd5;font-size:11px;margin:0 0 12px}
+.wallet-status[hidden]{display:none!important}.wallet-status.error{border-color:rgba(255,112,112,.3);background:rgba(100,26,35,.45);color:#ffb9b9}
+.wallet-balance-card{position:relative;overflow:hidden;padding:23px 22px 17px;border:1px solid rgba(141,255,211,.2);border-radius:25px;background:linear-gradient(135deg,#0c3a31 0%,#0b5a48 57%,#08775a 100%);box-shadow:0 20px 45px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.08);isolation:isolate}
+.wallet-balance-card:before{content:"";position:absolute;z-index:-1;width:245px;height:245px;right:-118px;top:-160px;border:1px solid rgba(231,255,246,.13);border-radius:50%;box-shadow:0 0 0 25px rgba(231,255,246,.035),0 0 0 52px rgba(231,255,246,.025)}
+.wallet-balance-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.wallet-balance-label{font-size:11px;letter-spacing:.09em;font-weight:800;color:#b9efdc}.wallet-eye{width:34px;height:34px;border:0;border-radius:50%;background:rgba(255,255,255,.11);color:#fff;font-size:19px;cursor:pointer}
+.wallet-balance-card .wallet-balance{margin:15px 0 6px;font-size:clamp(42px,11vw,58px);line-height:1;font-weight:900;letter-spacing:-.06em;color:#fff;font-variant-numeric:tabular-nums}
+.wallet-balance-caption{margin:0;color:#c5e8dc;font-size:12px}.wallet-balance-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:23px;padding-top:14px;border-top:1px solid rgba(235,255,247,.19);font-size:11px;color:#c3e8da}
+.wallet-quick-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:13px 0 24px}
+.wallet-quick-actions button{min-height:98px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(171,242,212,.08);border-radius:19px;background:#10392f;color:#f1fff8;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:transform .18s ease,background .18s ease,border-color .18s ease}
+.wallet-quick-actions button:active{transform:scale(.97);background:#174a3c}.wallet-action-icon{font-size:27px;line-height:1;display:inline-grid;place-items:center;min-width:34px;min-height:34px;color:inherit;filter:drop-shadow(0 2px 5px rgba(0,0,0,.16))}.wallet-feature-symbol{display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border-radius:14px;font-size:23px;line-height:1;background:rgba(120,220,170,.12);border:1px solid rgba(172,236,207,.14);filter:drop-shadow(0 2px 5px rgba(0,0,0,.12))}
+.wallet-activity-preview{padding:0 2px 17px;border-bottom:1px solid var(--wallet-line)}.wallet-activity-preview h2,.wallet-tools-heading h2{margin:0 0 10px;font-size:17px;font-weight:850;letter-spacing:-.025em;color:#f4fff9}
+.wallet-recent-list{display:grid}.wallet-recent-item{display:flex;align-items:center;gap:11px;min-height:72px;padding:12px 0;border-bottom:1px solid var(--wallet-line)}.wallet-recent-item:last-child{border-bottom:0}.wallet-recent-icon{width:35px;height:35px;display:grid;place-items:center;flex:0 0 35px;border-radius:12px;background:#123e32;font-size:19px;font-weight:900}.wallet-recent-icon.is-credit{color:#76e8b2}.wallet-recent-icon.is-debit{color:#ffb18c}.wallet-recent-copy{min-width:0;flex:1;display:grid;gap:4px}.wallet-recent-copy strong{font-size:13px;color:#effbf5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.wallet-recent-copy small{font-size:10px;color:#91aea1}.wallet-recent-amount{font-size:13px;font-weight:850;white-space:nowrap;font-variant-numeric:tabular-nums}.wallet-recent-amount.is-credit{color:#8af0bd}.wallet-recent-amount.is-debit{color:#ffb18c}
+.wallet-tools-shell{margin-top:20px}.wallet-tools-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.wallet-tools-heading h2{margin:0}.wallet-tools-heading>span{padding:6px 10px;border:1px solid rgba(56,202,132,.17);border-radius:999px;background:rgba(21,120,73,.19);color:#58d894;font-size:11px;font-weight:800}
+.wallet-menu-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 17px;border:1px solid rgba(172,241,211,.1);border-radius:19px;background:linear-gradient(145deg,#143e32,#102e26);color:#f4fff9;text-align:left;cursor:pointer;box-shadow:0 8px 22px rgba(0,0,0,.1)}.wallet-menu-toggle>span:first-child{display:grid;gap:7px}.wallet-menu-toggle strong{font-size:16px}.wallet-menu-toggle small{max-width:470px;color:#a9c6b9;font-size:11px;line-height:1.5}.wallet-menu-chevron,.wallet-feature-chevron{font-size:22px;transition:transform .25s ease}.wallet-menu-toggle.is-open .wallet-menu-chevron,.wallet-feature.is-open .wallet-feature-chevron{transform:rotate(180deg)}
+.wallet-menu-content{display:grid;gap:9px;margin-top:11px;opacity:0;transform:translateY(-5px);transition:opacity .24s ease,transform .24s ease}.wallet-menu-content.is-visible{opacity:1;transform:translateY(0)}.wallet-menu-content[hidden],.wallet-feature-content[hidden]{display:none!important}
+.wallet-feature{overflow:hidden;border:1px solid rgba(170,236,207,.1);border-radius:16px;background:#0e2a23}.wallet-feature-toggle{width:100%;min-height:68px;display:flex;align-items:center;gap:11px;padding:12px 14px;border:0;background:transparent;color:#f1fff7;text-align:left;cursor:pointer}.wallet-feature-symbol{width:36px;height:36px;display:grid;place-items:center;flex:0 0 36px;border-radius:12px;background:#174535;color:#93f0bd;font-size:19px;font-weight:800}.wallet-feature-toggle>span:nth-child(2){min-width:0;flex:1;display:grid;gap:4px}.wallet-feature-toggle strong{font-size:13px}.wallet-feature-toggle small{color:#8eafa0;font-size:10px;line-height:1.4}.wallet-feature-chevron{color:#a8c9b9}.wallet-feature.is-open{border-color:rgba(105,222,165,.25);background:#102f26}.wallet-feature-content{padding:0 14px 16px;opacity:0;transform:translateY(-4px);transition:opacity .22s ease,transform .22s ease}.wallet-feature-content.is-visible{opacity:1;transform:translateY(0)}.wallet-earnings-card{padding:15px;border:1px solid rgba(138,234,190,.13);border-radius:15px;background:#143b30}.wallet-earnings-card .wallet-balance{margin:8px 0;font-size:32px;color:#fff}.wallet-earnings-card .wallet-note{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.055);color:#d6efe2}
+.wallet-feature-content h3,.wallet-subheading{margin:16px 0 8px;color:#eaf8f0;font-size:13px}.wallet-muted{color:#9cb8aa;font-size:11px;line-height:1.55}.wallet-feature-content .wallet-note{border-color:rgba(172,236,207,.12);background:#14382d;color:#d4eee0}.wallet-feature-content .wallet-field{color:#cfe8db;font-size:12px}.wallet-feature-content .wallet-field input,.wallet-feature-content .wallet-field select{border-color:rgba(170,236,207,.15);background:#09231d;color:#f2fff8}.wallet-feature-content .wallet-action{background:#16865e;color:white}.wallet-feature-content .wallet-package{border-color:rgba(172,236,207,.13);background:#14382d;color:#effff6}.wallet-feature-content .wallet-package .wallet-muted{color:#a8c8b8}.wallet-feature-content .wallet-package button{background:#13835d}
+.wallet-table-wrap{border:1px solid rgba(172,236,207,.1);border-radius:12px}.wallet-table{min-width:570px;color:#e6f7ed}.wallet-table th,.wallet-table td{border-color:rgba(172,236,207,.1)}.wallet-table th{color:#9abaaa}.wallet-chip{border-color:rgba(172,236,207,.2);color:#c7ead7}
+@media(max-width:520px){body[data-spike-page="wallet"] .wallet-shell{width:calc(100% - 28px);padding-top:11px}.wallet-balance-card{padding:20px 18px 16px;border-radius:22px}.wallet-quick-actions{gap:8px}.wallet-quick-actions button{min-height:90px;border-radius:16px}.wallet-menu-toggle{padding:16px 14px}.wallet-feature-toggle{padding:11px 12px}.wallet-feature-content{padding:0 12px 14px}}
+@media(prefers-reduced-motion:reduce){.wallet-quick-actions button,.wallet-menu-chevron,.wallet-feature-chevron,.wallet-menu-content,.wallet-feature-content{transition:none}}
+
+
+.wallet-feature-symbol svg,.wallet-action-icon svg{width:22px;height:22px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wallet-action-icon{font-size:0;filter:none}.wallet-feature-symbol{font-size:0;filter:none}
+.wallet-subscription-status{padding:13px;border:1px solid var(--line);border-radius:13px;background:var(--surface2);margin:10px 0 14px;font-size:13px;line-height:1.55}
+.wallet-subscription-status strong{display:block;margin-bottom:4px}
+.wallet-subscription-plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.wallet-subscription-plans[hidden]{display:none!important}
+.wallet-subscription-plan{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surface2);display:grid;gap:8px}
+.wallet-subscription-plan .price{font-size:24px;font-weight:950;letter-spacing:-.03em}
+.wallet-subscription-plan button{border:0;border-radius:10px;padding:11px 13px;background:var(--accent,var(--primary,#6d5dfc));color:#fff;font-weight:850;cursor:pointer}
+.wallet-subscription-plan button:disabled{opacity:.55;cursor:wait}
+.wallet-subscription-history{margin-top:12px}
+.wallet-subscription-countdown{display:grid;gap:5px;margin-top:12px;padding:12px;border-radius:12px;background:var(--surface,var(--surface2));border:1px solid var(--line)}
+.wallet-subscription-countdown>strong{font-size:18px;font-weight:950;letter-spacing:-.02em}
+.wallet-subscription-countdown small{color:var(--muted);font-size:12px}
+.wallet-quote-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:12px}
+.wallet-quote-total{border-top:1px solid var(--line);margin-top:5px;padding-top:9px;font-weight:900}
+.wallet-quote-total strong{color:var(--success,#16a34a)}
+.wallet-verified-mark{display:inline-flex;align-items:center;gap:5px;color:#2589e8;font-weight:850}
+.wallet-verified-mark svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2.2}
+.wallet-package svg{width:18px;height:18px;vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* SPIKE ELITE premium verified membership card */
+.spike-verified-hero{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(138px,210px);align-items:center;gap:8px;overflow:hidden;margin:0 0 17px;padding:17px 18px;min-height:164px;border:1px solid rgba(183,198,220,.2);border-radius:22px;background:radial-gradient(circle at 82% 45%,rgba(143,159,183,.16),transparent 34%),linear-gradient(125deg,#101827,#18243a 62%,#111827);box-shadow:0 16px 34px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.07);isolation:isolate}
+.spike-verified-hero:after{content:"";position:absolute;inset:-80% -30%;z-index:-1;background:linear-gradient(110deg,transparent 42%,rgba(255,255,255,.055) 50%,transparent 58%);transform:translateX(-55%);animation:spikeVerifiedSweep 7s ease-in-out infinite}
+.spike-verified-copy{display:grid;justify-items:start;gap:6px;min-width:0}.spike-verified-eyebrow{font-size:9px;font-weight:900;letter-spacing:.2em;color:#aebbd0}.spike-verified-copy>strong{font-size:clamp(18px,4vw,25px);font-weight:1000;letter-spacing:.035em;color:#f4f7ff;text-shadow:0 2px 14px rgba(150,178,220,.2)}#spikeVerifiedDetail{font-size:11px;line-height:1.45;color:#bac7d9}.spike-verified-state{padding:5px 9px;border:1px solid rgba(195,207,224,.23);border-radius:999px;color:#d3deed;background:rgba(160,177,204,.1);font-size:9px;font-weight:950;letter-spacing:.13em}.spike-verified-copy button{margin-top:4px;padding:9px 12px;border:1px solid rgba(193,208,231,.3);border-radius:10px;background:linear-gradient(135deg,#dce6f4,#899bb5);color:#142033;font-size:10px;font-weight:950;cursor:pointer}.spike-verified-art{display:grid;place-items:center;min-width:0}.spike-silver-medal{width:min(100%,150px);aspect-ratio:1;display:grid;place-items:center;filter:drop-shadow(0 0 16px rgba(157,179,213,.28));animation:spikeSilverFloat 4s ease-in-out infinite}.spike-silver-ring{width:88%;aspect-ratio:1;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff 0,#c9d3e2 15%,#7789a4 38%,#26364e 68%,#aebbd0 82%,#465875 100%);box-shadow:inset 0 3px 8px #fff,inset 0 -8px 13px rgba(8,18,35,.8),0 0 0 5px rgba(184,201,226,.14),0 0 28px rgba(119,161,224,.23)}.spike-silver-ring svg{width:74%;height:74%;fill:none;stroke:#18263b;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 1px rgba(255,255,255,.65))}.spike-verified-art img{width:100%;max-width:210px;height:auto;display:block;object-fit:contain;filter:drop-shadow(0 0 16px rgba(29,115,255,.24));animation:spikeBadgeFloat 5s ease-in-out infinite}.spike-verified-art img[hidden],.spike-silver-medal[hidden]{display:none!important}.spike-verified-hero.is-verified{border-color:rgba(236,190,87,.42);background:radial-gradient(circle at 80% 48%,rgba(24,111,255,.28),transparent 42%),linear-gradient(125deg,#10182b,#122d55 58%,#111827);box-shadow:0 16px 38px rgba(0,0,0,.25),0 0 25px rgba(27,105,255,.12),inset 0 1px rgba(255,255,255,.1)}.spike-verified-hero.is-verified .spike-verified-eyebrow{color:#f2d38c}.spike-verified-hero.is-verified .spike-verified-copy>strong{color:#ffe6a7;text-shadow:0 0 16px rgba(255,191,69,.3)}.spike-verified-hero.is-verified .spike-verified-state{color:#b8ffd6;border-color:rgba(76,236,151,.42);background:rgba(21,159,89,.16)}.spike-verified-hero.is-verified .spike-verified-copy button{border-color:rgba(242,199,111,.4);background:linear-gradient(135deg,#f8dfa0,#c28a2d);color:#241805}.spike-verified-hero.is-pending{border-color:rgba(246,190,93,.38);background:radial-gradient(circle at 80% 45%,rgba(207,139,43,.17),transparent 38%),linear-gradient(125deg,#1c1a1b,#30271d)}.spike-verified-hero.is-pending .spike-verified-state{color:#ffd99a;border-color:rgba(246,190,93,.4);background:rgba(173,107,26,.16);animation:spikePendingPulse 2.2s ease-in-out infinite}.spike-verified-hero.is-pending .spike-verified-copy button{background:linear-gradient(135deg,#f5d69a,#c18b3c);color:#2b1d0a}
+@keyframes spikeVerifiedSweep{0%,25%{transform:translateX(-55%)}70%,100%{transform:translateX(55%)}}@keyframes spikeSilverFloat{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-5px) rotate(3deg)}}@keyframes spikeBadgeFloat{0%,100%{transform:translateY(0) scale(.98)}50%{transform:translateY(-4px) scale(1.02)}}@keyframes spikePendingPulse{0%,100%{box-shadow:0 0 0 rgba(246,190,93,0)}50%{box-shadow:0 0 16px rgba(246,190,93,.22)}}
+@media(max-width:520px){.spike-verified-hero{grid-template-columns:minmax(0,1fr) 118px;gap:2px;padding:15px 13px;min-height:145px;border-radius:19px}.spike-verified-art img{max-width:125px}.spike-silver-medal{width:110px}.spike-verified-copy>strong{font-size:18px}.spike-verified-copy button{padding:8px 9px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.spike-verified-hero:after,.spike-silver-medal,.spike-verified-art img,.spike-verified-hero.is-pending .spike-verified-state{animation:none!important}}
+.spike-verified-hero.is-unverified{border-color:rgba(239,111,111,.38);background:radial-gradient(circle at 82% 45%,rgba(207,67,67,.17),transparent 40%),linear-gradient(125deg,#1b1720,#30202a)}.spike-verified-hero.is-unverified .spike-verified-state{color:#ffc1c1;border-color:rgba(239,111,111,.4);background:rgba(173,44,55,.16);animation:spikePendingPulse 2.2s ease-in-out infinite}.spike-verified-hero.is-unverified .spike-verified-copy>strong{color:#ffd0d0;text-shadow:0 0 15px rgba(239,111,111,.2)}.wallet-feature-close{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin:10px 0 0;padding:9px 12px;border:1px solid var(--line);border-radius:11px;background:var(--surface2);color:var(--text);font:inherit;font-size:10px;font-weight:850;cursor:pointer}.wallet-feature-close:hover{border-color:var(--accent,var(--primary));background:var(--surface)}.wallet-feature-close:focus-visible{outline:2px solid var(--accent,var(--primary));outline-offset:2px}
+
+
+/* SPIKE creator earnings: one continuous withdrawal milestone tracker */
+.creator-balance-meta{display:flex;flex-wrap:wrap;gap:8px 14px;margin:0 0 12px;color:var(--muted);font-size:12px;font-weight:750}
+.creator-progress{margin-top:16px;padding:14px;border:1px solid var(--line);border-radius:15px;background:var(--surface2);min-width:0}
+.creator-progress-title{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;font-size:13px;font-weight:900}
+.creator-progress-title small{font-size:11px;color:var(--muted);font-weight:700}
+.creator-progress-current{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 11px;font-size:12px;color:var(--muted)}
+.creator-progress-current strong{font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.creator-progress-track{position:relative;height:12px;overflow:visible;border-radius:99px;background:var(--line);box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
+.creator-progress-track>span{display:block;height:100%;max-width:100%;border-radius:inherit;background:linear-gradient(90deg,#159b69,#36d399);transition:width .35s ease}
+.creator-progress-track:after{content:"";position:absolute;inset:-2px 0;border-radius:99px;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(20% - 1px),rgba(255,255,255,.8) calc(20% - 1px),rgba(255,255,255,.8) 20%)}
+.creator-progress-labels{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;margin-top:9px}
+.creator-progress-label{position:relative;min-width:0;text-align:center;color:var(--muted);font-size:clamp(8px,2.2vw,10px);font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.creator-progress-label:first-child{text-align:left}.creator-progress-label:last-child{text-align:right}
+.creator-progress-label.is-hit{color:#16a34a}
+.creator-progress-foot{display:flex;justify-content:space-between;gap:8px;margin-top:10px;color:var(--muted);font-size:11px}
+.creator-progress-foot strong{color:var(--success,#16a34a);font-weight:850}
+@media(prefers-reduced-motion:reduce){.creator-progress-track>span{transition:none}}
+.creator-withdraw-window{margin:10px 0;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface2);font-size:12px;line-height:1.55}
+.creator-withdraw-window strong{color:var(--text)}
+.creator-quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.creator-quote-grid>div{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.creator-quote-grid span{display:block;color:var(--muted);font-size:11px}
+.creator-quote-grid strong{display:block;margin-top:4px;font-size:15px;font-variant-numeric:tabular-nums}
+@media(max-width:520px){.creator-quote-grid{grid-template-columns:1fr 1fr}}
+
+</style>
+
+<link rel="stylesheet" href="css/spike-future-engine.css">
+    <link rel="stylesheet" href="css/spike-spatial-experience-core.css">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
+  <link rel="stylesheet" href="css/spike-wallet-coin-bonus.css">
+<style>
+/* SP COIN wallet upgrade — visible package catalogue, ordered by live server price */
+.wallet-buy-feature{border-color:rgba(82,219,157,.28);box-shadow:0 12px 32px rgba(0,0,0,.12)}
+.wallet-buy-feature>.wallet-feature-toggle{background:linear-gradient(115deg,rgba(21,111,76,.2),rgba(15,48,39,.22))}
+.wallet-coin-package{position:relative;gap:9px;min-height:168px;border-color:rgba(123,218,173,.18);background:linear-gradient(155deg,rgba(27,88,64,.45),rgba(10,38,31,.92));box-shadow:inset 0 1px rgba(255,255,255,.035);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.wallet-coin-package:hover{transform:translateY(-2px);border-color:rgba(104,231,168,.42);box-shadow:0 12px 26px rgba(0,0,0,.18)}
+.wallet-coin-package strong{font-size:25px;letter-spacing:-.035em;color:#f4fff8}
+.wallet-coin-package .wallet-package-price{font-size:17px;font-weight:950;color:#9af0c1}
+.wallet-coin-package .wallet-package-badge{align-self:flex-start;padding:4px 8px;border:1px solid rgba(154,240,193,.3);border-radius:999px;background:rgba(21,149,104,.16);color:#a8f3cb;font-size:10px;font-weight:900;letter-spacing:.03em;text-transform:uppercase}
+.wallet-coin-package button{margin-top:auto;min-height:43px;border:1px solid rgba(157,255,203,.16);background:linear-gradient(110deg,#159568,#08764f);box-shadow:0 7px 18px rgba(0,126,80,.2)}
+@media(max-width:520px){.wallet-buy-feature .wallet-packages{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.wallet-coin-package{min-height:158px;padding:11px}.wallet-coin-package strong{font-size:21px}.wallet-coin-package .wallet-package-price{font-size:15px}.wallet-coin-package button{padding:10px 8px;font-size:12px}}
+@media(prefers-reduced-motion:reduce){.wallet-coin-package{transition:none}.wallet-coin-package:hover{transform:none}}
+
+/* SPIKE gift-received experience */
+.wallet-gifts-panel{margin:16px 0 0;padding:16px;border:1px solid rgba(225,190,105,.22);border-radius:21px;background:radial-gradient(circle at 92% 0,rgba(238,190,89,.14),transparent 42%),linear-gradient(145deg,#182b29,#101d20 72%,#171d2d);color:#f8f4e9;box-shadow:0 15px 36px rgba(0,0,0,.16)}.wallet-gifts-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.wallet-gifts-title{display:flex;align-items:center;gap:10px}.wallet-gifts-mark{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,218,144,.24);border-radius:14px;background:rgba(227,178,85,.12);font-size:23px}.wallet-gifts-title h2{margin:0;font-size:16px}.wallet-gifts-title p{margin:3px 0 0;color:#b6c5bd;font-size:11px}.wallet-gifts-count{padding:6px 9px;border:1px solid rgba(255,220,151,.2);border-radius:99px;color:#f6d99d;font-size:10px;font-weight:850}.wallet-gift-list{display:grid;gap:8px}.wallet-gift-item{display:flex;align-items:center;gap:11px;min-width:0;padding:10px;border:1px solid rgba(255,255,255,.075);border-radius:14px;background:rgba(255,255,255,.045);animation:walletGiftEnter .42s cubic-bezier(.2,.8,.2,1) both}.wallet-gift-art{width:45px;height:45px;flex:0 0 45px;display:grid;place-items:center;border-radius:13px;background:linear-gradient(145deg,rgba(255,215,133,.17),rgba(255,255,255,.04));font-size:25px}.wallet-gift-copy{flex:1;min-width:0}.wallet-gift-copy strong{display:block;color:#fff5dc;font-size:12px;overflow-wrap:anywhere}.wallet-gift-copy small{display:block;margin-top:4px;color:#a9bbb1;font-size:10px;line-height:1.4}.wallet-gift-cost{display:grid;justify-items:end;gap:3px;white-space:nowrap;color:#f2d18f;font-size:11px;font-weight:900;text-align:right}.wallet-gift-cost strong{font-size:12px}.wallet-gift-cost small{color:#e8d6b4;font-size:9px;font-weight:750}.wallet-gift-copy .wallet-gift-financial{color:#f2d8a7}.wallet-gifts-empty{padding:16px 10px;text-align:center;color:#afc0b6;font-size:11px}.wallet-gifts-empty span{display:block;margin-bottom:6px;font-size:26px}
+.wallet-gift-celebrate{position:fixed;inset:0;z-index:100005;display:grid;place-items:center;padding:20px;background:rgba(4,9,13,.78);backdrop-filter:blur(13px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease}.wallet-gift-celebrate.is-visible{opacity:1;visibility:visible}.wallet-gift-celebrate[hidden]{display:none}.wallet-gift-celebrate-card{position:relative;isolation:isolate;overflow:hidden;width:min(100%,370px);padding:26px 22px 22px;border:1px solid rgba(245,207,126,.35);border-radius:27px;background:radial-gradient(circle at 50% 0,rgba(235,186,94,.23),transparent 46%),linear-gradient(155deg,#24352f,#111c22 65%,#211b30);color:#fff7e7;text-align:center;box-shadow:0 30px 100px #0009,0 0 48px rgba(233,184,93,.12);transform:translateY(18px) scale(.94);transition:transform .38s cubic-bezier(.2,.85,.25,1.2)}.wallet-gift-celebrate.is-visible .wallet-gift-celebrate-card{transform:translateY(0) scale(1)}.wallet-gift-celebrate-card:before,.wallet-gift-celebrate-card:after{content:"";position:absolute;z-index:-1;width:170px;height:170px;border:1px solid rgba(255,224,163,.16);border-radius:50%;left:50%;top:54px;transform:translateX(-50%);box-shadow:0 0 0 20px rgba(255,224,163,.035),0 0 0 42px rgba(255,224,163,.025);animation:walletGiftOrbit 7s linear infinite}.wallet-gift-celebrate-card:after{width:220px;height:220px;top:28px;animation-direction:reverse}.wallet-gift-celebrate-icon{position:relative;display:grid;place-items:center;width:100px;height:100px;margin:4px auto 18px;border-radius:29px;border:1px solid rgba(255,223,156,.34);background:linear-gradient(145deg,rgba(255,213,133,.24),rgba(255,255,255,.055));font-size:53px;animation:walletGiftPop .65s cubic-bezier(.2,.9,.3,1.25) both}.wallet-gift-celebrate-eyebrow{color:#f1d18e;font-size:10px;font-weight:950;letter-spacing:.2em;text-transform:uppercase}.wallet-gift-celebrate-card h2{margin:8px 0 6px;font-size:25px;letter-spacing:-.04em}.wallet-gift-celebrate-card p{margin:0;color:#c4d0c8;font-size:12px;line-height:1.55}.wallet-gift-celebrate-detail{margin:17px 0 0;padding:12px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:rgba(255,255,255,.055);color:#f5dfb2;font-size:12px;font-weight:800}.wallet-gift-close{margin-top:17px;min-width:125px;padding:11px 18px;border:1px solid rgba(255,225,169,.22);border-radius:12px;background:linear-gradient(110deg,#a97832,#80602d);color:white;font-size:12px;font-weight:900}@keyframes walletGiftEnter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes walletGiftPop{from{opacity:0;transform:scale(.45) rotate(-14deg)}to{opacity:1;transform:scale(1) rotate(0)}}@keyframes walletGiftOrbit{to{transform:translateX(-50%) rotate(360deg)}}@media(max-width:520px){.wallet-gifts-panel{padding:13px;border-radius:18px}.wallet-gift-item{gap:8px;padding:9px}.wallet-gift-art{width:40px;height:40px;flex-basis:40px;font-size:22px}.wallet-gift-celebrate-card{padding:24px 18px 19px}}@media(prefers-reduced-motion:reduce){.wallet-gift-item,.wallet-gift-celebrate-card,.wallet-gift-celebrate,.wallet-gift-celebrate-icon,.wallet-gift-celebrate-card:before,.wallet-gift-celebrate-card:after{animation:none!important;transition:none!important}.wallet-gift-celebrate-card{transform:none!important}}
+</style>
+<style id="spike-wallet-earnings-dashboard-v1">
+.wallet-dashboard-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr);gap:12px;align-items:stretch;margin:0 0 13px}
+.wallet-dashboard-grid>.wallet-balance-card,.wallet-dashboard-grid>.wallet-earnings-value-card{min-width:0;margin:0;min-height:100%}
+.wallet-dashboard-grid>.wallet-balance-card{padding:20px 18px 15px}
+.wallet-dashboard-grid>.wallet-balance-card .wallet-balance{font-size:clamp(32px,7vw,52px);overflow-wrap:anywhere}
+.wallet-earnings-value-card{position:relative;overflow:hidden;padding:20px 18px 15px;border:1px solid rgba(125,239,206,.24);border-radius:25px;background:linear-gradient(145deg,#103a50 0%,#12566a 55%,#087b79 100%);color:#f4fffc;box-shadow:0 18px 38px rgba(0,0,0,.16);display:flex;flex-direction:column;justify-content:space-between}
+.wallet-earnings-value-card:after{content:"";position:absolute;width:150px;height:150px;right:-85px;top:-90px;border:1px solid rgba(255,255,255,.14);border-radius:50%;box-shadow:0 0 0 18px rgba(255,255,255,.035),0 0 0 38px rgba(255,255,255,.025);pointer-events:none}
+.wallet-earnings-value-head{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#b8f4e7}
+.wallet-earnings-value-label{font-size:10px;line-height:1.4;font-weight:850;letter-spacing:.08em}
+.wallet-earnings-value-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.12);font-weight:900}
+.wallet-earnings-value-amount{margin:17px 0 6px;font-size:clamp(28px,6vw,43px);line-height:1.05;font-weight:950;letter-spacing:-.045em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wallet-earnings-value-caption{margin:0;color:#c7e8e5;font-size:11px;line-height:1.45}
+.wallet-earnings-rate{margin-top:15px;padding-top:11px;border-top:1px solid rgba(235,255,247,.18);color:#e0fff5;font-size:11px;line-height:1.5;font-weight:750}
+.wallet-earnings-value-foot{margin-top:10px;color:#a9d9d2;font-size:10px}
+@media(max-width:540px){.wallet-dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}.wallet-dashboard-grid>.wallet-balance-card,.wallet-earnings-value-card{padding:15px 12px 12px;border-radius:19px}.wallet-dashboard-grid>.wallet-balance-card .wallet-balance{font-size:clamp(26px,7vw,38px);margin:13px 0 6px}.wallet-dashboard-grid .wallet-balance-label,.wallet-earnings-value-label{font-size:9px;letter-spacing:.045em}.wallet-dashboard-grid .wallet-eye{width:29px;height:29px}.wallet-dashboard-grid .wallet-balance-caption{font-size:10px;line-height:1.4}.wallet-dashboard-grid .wallet-balance-foot{margin-top:15px;padding-top:10px;font-size:10px}.wallet-earnings-value-amount{font-size:clamp(25px,7vw,36px);margin:13px 0 6px}.wallet-earnings-value-caption,.wallet-earnings-rate{font-size:10px}.wallet-earnings-value-icon{width:26px;height:26px}}
+@media(max-width:360px){.wallet-dashboard-grid{grid-template-columns:minmax(0,1fr)}}
+.wallet-dashboard-grid{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr) minmax(0,1fr)}
+.wallet-dashboard-grid>.wallet-gift-value-card{min-width:0;min-height:100%;margin:0}
+.wallet-gift-value-card{position:relative;overflow:hidden;padding:20px 18px 15px;border:1px solid rgba(245,204,125,.25);border-radius:25px;background:linear-gradient(145deg,#3b2c18 0%,#59401e 55%,#735021 100%);color:#fff8e9;box-shadow:0 18px 38px rgba(0,0,0,.15);display:flex;flex-direction:column;justify-content:space-between}
+.wallet-gift-value-card:after{content:"";position:absolute;width:150px;height:150px;right:-85px;top:-90px;border:1px solid rgba(255,255,255,.14);border-radius:50%;box-shadow:0 0 0 18px rgba(255,255,255,.035),0 0 0 38px rgba(255,255,255,.025);pointer-events:none}
+.wallet-gift-value-card .wallet-earnings-value-head{color:#ffe4ae}
+.wallet-gift-value-amount{margin:17px 0 6px;font-size:clamp(25px,5.5vw,39px);line-height:1.05;font-weight:950;letter-spacing:-.045em;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.wallet-gift-value-caption{margin:0;color:#f0dfc4;font-size:11px;line-height:1.45}
+.wallet-gift-value-meta{margin-top:15px;padding-top:11px;border-top:1px solid rgba(255,245,224,.18);color:#fff0ce;font-size:11px;line-height:1.5;font-weight:800}
+.wallet-gift-value-foot{margin-top:8px;color:#e4cda7;font-size:10px;line-height:1.45}
+@media(max-width:540px){.wallet-dashboard-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.wallet-dashboard-grid>.wallet-gift-value-card{padding:15px 12px 12px;border-radius:19px}.wallet-gift-value-amount{font-size:clamp(23px,6.5vw,33px);margin:13px 0 6px}.wallet-gift-value-caption,.wallet-gift-value-meta{font-size:10px}}
+@media(max-width:360px){.wallet-dashboard-grid{grid-template-columns:minmax(0,1fr)}}
+</style>
+
+<style id="spike-wallet-compact-premium-v2">
+/* Compact SPIKE wallet: restrained surfaces, tighter hierarchy, responsive feature grid. */
+.spike-verified-hero.is-loading .spike-verified-state{opacity:.8;animation:spikePendingPulse 1.8s ease-in-out infinite}.spike-verified-hero.is-loading .spike-verified-copy button{opacity:.65;cursor:wait}
+body[data-spike-page="wallet"]{background:radial-gradient(ellipse at 50% -20%,rgba(27,104,79,.16),transparent 48%),#07130f;color:#f3faf6}
+body[data-spike-page="wallet"] .wallet-shell{width:min(calc(100% - 32px),860px);padding:12px 0 40px}
+.wallet-brandbar{gap:10px;margin-bottom:10px}
+.wallet-brandbar .wallet-back,.wallet-brandbar .wallet-notifications{width:39px;height:39px;border-radius:12px;background:#10251e;border-color:rgba(208,241,223,.12)}
+.wallet-brand-copy h1{font-size:19px;letter-spacing:-.04em}
+.wallet-brand-copy p{font-size:10px}
+.wallet-status{margin-bottom:9px}
+.spike-verified-hero{grid-template-columns:minmax(0,1fr) 78px;gap:8px;min-height:0;margin:0 0 11px;padding:11px 13px;border-radius:17px;box-shadow:0 8px 22px rgba(0,0,0,.14)}
+.spike-verified-copy{gap:4px}.spike-verified-eyebrow{font-size:8px;letter-spacing:.16em}
+.spike-verified-copy>strong{font-size:16px;line-height:1.1}
+#spikeVerifiedDetail{font-size:10px;line-height:1.3}
+.spike-verified-state{padding:4px 7px;font-size:8px}
+.spike-verified-copy button{margin-top:1px;padding:7px 9px;font-size:9px;border-radius:9px}
+.spike-verified-art{width:72px;justify-self:end}
+.spike-silver-medal{width:66px}.spike-verified-art img{max-width:74px}
+.wallet-dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:0 0 10px}
+.wallet-dashboard-grid>.wallet-balance-card,.wallet-dashboard-grid>.wallet-earnings-value-card,.wallet-dashboard-grid>.wallet-gift-value-card{min-width:0;min-height:132px;padding:14px 13px 12px;border-radius:18px;box-shadow:0 10px 24px rgba(0,0,0,.14)}
+.wallet-dashboard-grid>.wallet-balance-card .wallet-balance{font-size:clamp(25px,4vw,37px);margin:12px 0 5px;letter-spacing:-.055em}
+.wallet-dashboard-grid .wallet-balance-label,.wallet-earnings-value-label{font-size:9px;letter-spacing:.045em}
+.wallet-dashboard-grid .wallet-eye{width:27px;height:27px}
+.wallet-dashboard-grid .wallet-balance-caption{font-size:9px;line-height:1.35}
+.wallet-dashboard-grid .wallet-balance-foot{margin-top:10px;padding-top:8px;font-size:9px}
+.wallet-earnings-value-amount,.wallet-gift-value-amount{font-size:clamp(23px,3.7vw,34px);margin:12px 0 5px;letter-spacing:-.05em}
+.wallet-earnings-value-caption,.wallet-gift-value-caption{font-size:9px;line-height:1.35}
+.wallet-earnings-rate,.wallet-gift-value-meta{margin-top:9px;padding-top:8px;font-size:9px;line-height:1.35}
+.wallet-earnings-value-foot,.wallet-gift-value-foot{margin-top:6px;font-size:8px;line-height:1.3}
+.wallet-earnings-value-icon{width:25px;height:25px;border-radius:8px;font-size:12px}
+.wallet-quick-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 13px}
+.wallet-quick-actions button{min-height:53px;flex-direction:row;justify-content:center;gap:7px;padding:8px 7px;border-radius:13px;background:linear-gradient(145deg,#12392d,#0d2b22);font-size:11px;box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.wallet-action-icon{min-width:23px;min-height:23px}.wallet-action-icon svg{width:19px;height:19px}
+.wallet-activity-preview{padding:0 1px 10px}
+.wallet-activity-preview h2,.wallet-tools-heading h2{font-size:14px;margin:0}
+.wallet-activity-heading-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.wallet-activity-all{border:0;background:transparent;color:#83e6b4;font:inherit;font-size:10px;font-weight:800;padding:7px 2px;cursor:pointer}
+.wallet-recent-item{min-height:54px;padding:8px 0;gap:9px}
+.wallet-recent-icon{width:31px;height:31px;flex-basis:31px;border-radius:10px;font-size:16px}
+.wallet-recent-copy{gap:2px}.wallet-recent-copy strong{font-size:11px}.wallet-recent-copy small{font-size:9px}.wallet-recent-amount{font-size:11px}
+.wallet-tools-shell{margin-top:13px}
+.wallet-tools-heading{margin-bottom:8px}.wallet-tools-heading>span{padding:4px 8px;font-size:9px}
+.wallet-menu-toggle{padding:11px 13px;border-radius:14px;box-shadow:none;background:linear-gradient(135deg,#12372c,#0e281f);border-color:rgba(159,225,190,.13)}
+.wallet-menu-toggle>span:first-child{gap:3px}.wallet-menu-toggle strong{font-size:13px}.wallet-menu-toggle small{font-size:9px;line-height:1.35}
+.wallet-menu-chevron{font-size:18px}
+.wallet-menu-content{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}
+.wallet-feature{min-width:0;border-radius:13px;background:linear-gradient(145deg,#10271f,#0c211a);border-color:rgba(170,236,207,.09);transition:border-color .18s ease,background .18s ease}
+.wallet-feature-toggle{min-height:62px;gap:8px;padding:9px 10px}
+.wallet-feature-symbol{width:32px;height:32px;flex-basis:32px;border-radius:10px}
+.wallet-feature-symbol svg{width:18px;height:18px}
+.wallet-feature-toggle>span:nth-child(2){gap:3px}
+.wallet-feature-toggle strong{font-size:11px;line-height:1.2}
+.wallet-feature-toggle small{font-size:8px;line-height:1.3}
+.wallet-feature-chevron{font-size:17px;flex:0 0 auto}
+.wallet-feature.is-open{grid-column:1/-1;border-color:rgba(105,222,165,.28);background:#102d23}
+.wallet-feature-content{padding:0 11px 12px}
+.wallet-feature-content h3,.wallet-subheading{font-size:12px;margin:12px 0 7px}
+.wallet-feature-content .wallet-muted{font-size:10px}
+.wallet-feature-content .wallet-field{font-size:11px;margin:8px 0}
+.wallet-feature-content .wallet-field input,.wallet-feature-content .wallet-field select{padding:10px;border-radius:9px}
+.wallet-feature-content .wallet-action{padding:10px 12px;font-size:11px}
+.wallet-table{font-size:11px}.wallet-table th,.wallet-table td{padding:8px}
+.wallet-table-wrap{max-width:100%;overscroll-behavior-x:contain}
+.wallet-gifts-panel{margin:8px 0 0;padding:12px;border-radius:15px;box-shadow:none}
+.wallet-gifts-mark{width:34px;height:34px;border-radius:11px;font-size:19px}
+.wallet-gifts-title h2{font-size:13px}.wallet-gifts-title p{font-size:9px}.wallet-gifts-count{font-size:9px;padding:4px 7px}
+.wallet-gift-list{gap:6px}.wallet-gift-item{gap:8px;padding:8px;border-radius:11px}
+.wallet-gift-art{width:36px;height:36px;flex-basis:36px;border-radius:10px;font-size:20px}
+.wallet-gift-copy strong{font-size:10px}.wallet-gift-copy small{font-size:8px;margin-top:3px}
+.wallet-gift-cost{font-size:9px}.wallet-gift-cost strong{font-size:10px}.wallet-gift-cost small{font-size:8px}
+.wallet-package{padding:11px;border-radius:12px}.wallet-coin-package{min-height:142px}
+.wallet-coin-package strong{font-size:20px}
+.wallet-subscription-plan{padding:11px;border-radius:12px}.wallet-subscription-plan .price{font-size:20px}
+.wallet-earnings-card{padding:12px;border-radius:12px}
+.wallet-earnings-card .wallet-balance{font-size:27px}
+.wallet-note,.wallet-status{font-size:10px;line-height:1.4;padding:9px 10px}
+.wallet-feature-toggle:active,.wallet-menu-toggle:active{transform:scale(.995)}
+.wallet-feature-toggle:focus-visible,.wallet-menu-toggle:focus-visible,.wallet-quick-actions button:focus-visible,.wallet-action:focus-visible,.wallet-feature-content a:focus-visible{outline:2px solid #83e6b4;outline-offset:2px}
+@media(max-width:620px){
+ body[data-spike-page="wallet"] .wallet-shell{width:calc(100% - 24px);padding-top:9px}
+ .wallet-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .wallet-dashboard-grid>.wallet-balance-card,.wallet-dashboard-grid>.wallet-earnings-value-card{min-height:124px;padding:12px 11px;border-radius:16px}
+ .wallet-dashboard-grid>.wallet-gift-value-card{grid-column:1/-1;min-height:92px;padding:11px 13px;border-radius:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:10px}
+ .wallet-dashboard-grid>.wallet-gift-value-card .wallet-earnings-value-head{grid-column:1/-1}
+ .wallet-gift-value-amount{margin:5px 0 2px;font-size:25px}
+ .wallet-gift-value-caption{grid-column:1/-1}
+ .wallet-gift-value-meta{grid-column:2;grid-row:2;margin:0;padding:0;border:0;text-align:right}
+ .wallet-gift-value-foot{grid-column:1/-1;margin:2px 0 0}
+ .spike-verified-hero{grid-template-columns:minmax(0,1fr) 60px;min-height:0;padding:9px 11px}
+ .spike-verified-art{width:58px}.spike-silver-medal{width:54px}.spike-verified-art img{max-width:60px}
+ .wallet-quick-actions{gap:6px;margin-bottom:10px}.wallet-quick-actions button{min-height:47px;font-size:10px}
+ .wallet-menu-content{gap:7px}.wallet-feature-toggle{min-height:58px;padding:8px}
+ .wallet-feature-symbol{width:29px;height:29px;flex-basis:29px}
+ .wallet-feature-toggle strong{font-size:10px}.wallet-feature-toggle small{font-size:8px}
+}
+@media(max-width:360px){
+ body[data-spike-page="wallet"] .wallet-shell{width:calc(100% - 20px)}
+ .wallet-dashboard-grid>.wallet-balance-card,.wallet-dashboard-grid>.wallet-earnings-value-card{padding:10px 9px}
+ .wallet-dashboard-grid .wallet-balance-label,.wallet-earnings-value-label{font-size:8px}
+ .wallet-menu-content{gap:6px}.wallet-feature-toggle{gap:6px;padding:7px}
+ .wallet-feature-symbol{width:26px;height:26px;flex-basis:26px}
+ .wallet-feature-toggle strong{font-size:9px}
+ .wallet-feature-toggle small{font-size:7px}
+ .wallet-feature-chevron{font-size:15px}
+ .wallet-quick-actions button{font-size:9px;gap:4px;padding:7px 4px}
+}
+.wallet-ledger-controls{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:8px;margin:10px 0}
+.wallet-ledger-controls input,.wallet-ledger-controls select{width:100%;min-width:0;padding:10px 11px;border:1px solid rgba(170,236,207,.14);border-radius:10px;background:#09231d;color:#f2fff8;font:inherit;font-size:11px}
+.wallet-ledger-group{margin:12px 0}.wallet-ledger-group h4{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 7px;color:#dff6e9;font-size:11px}.wallet-ledger-group h4 small{color:#91aea1;font-size:9px;font-weight:600}
+.wallet-ledger-status{display:inline-flex;padding:3px 6px;border:1px solid rgba(116,226,164,.16);border-radius:999px;color:#91e8b8;font-size:9px;font-weight:800}
+.wallet-skeleton-list{display:grid;gap:8px}.wallet-skeleton-row{height:48px;border-radius:12px;background:linear-gradient(90deg,rgba(255,255,255,.035),rgba(255,255,255,.09),rgba(255,255,255,.035));background-size:220% 100%;animation:walletSkeletonSweep 1.35s ease-in-out infinite}
+@keyframes walletSkeletonSweep{to{background-position:-220% 0}}
+@media(max-width:420px){.wallet-ledger-controls{grid-template-columns:minmax(0,1fr) 116px}.wallet-ledger-controls input,.wallet-ledger-controls select{padding:9px 8px;font-size:10px}}
+@media(prefers-reduced-motion:reduce){.wallet-skeleton-row{animation:none}}
+@media(prefers-reduced-motion:reduce){
+ .spike-verified-hero:after,.spike-silver-medal,.spike-verified-art img,.wallet-gift-item,.wallet-gift-celebrate-card:before,.wallet-gift-celebrate-card:after{animation:none!important}
+ .wallet-feature,.wallet-quick-actions button,.wallet-menu-chevron,.wallet-feature-chevron,.wallet-menu-content,.wallet-feature-content{transition:none!important}
+}
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+</head>
+<body data-spike-page="wallet">
+
+<div id="walletGiftCelebration" class="wallet-gift-celebrate" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="walletGiftCelebrateTitle"><section class="wallet-gift-celebrate-card"><div class="wallet-gift-celebrate-icon" id="walletGiftCelebrateIcon" aria-hidden="true">🎁</div><div class="wallet-gift-celebrate-eyebrow">A LITTLE SOMETHING FOR YOU</div><h2 id="walletGiftCelebrateTitle">You received a gift!</h2><p id="walletGiftCelebrateCopy">Someone sent you a gift in SPIKE.</p><div class="wallet-gift-celebrate-detail" id="walletGiftCelebrateDetail"></div><button type="button" class="wallet-gift-close" id="walletGiftCelebrateClose">Lovely</button></section></div>
+<main class="wallet-shell">
+<header class="wallet-top wallet-brandbar">
+ <a class="wallet-back" href="feed.html" aria-label="Back to SPIKE">‹</a>
+ <div class="wallet-brand-copy"><h1>SPIKE Wallet</h1><p id="walletIdentity">Loading your SPIKE account…</p></div>
+ <a class="wallet-notifications" href="notifications.html" aria-label="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></a>
+</header>
+<div id="walletGlobalStatus" class="wallet-status" role="status" aria-live="polite" hidden>Checking your secure wallet session…</div>
+<section id="spikeVerifiedHero" class="spike-verified-hero is-loading" aria-live="polite" aria-label="SPIKE Verified membership status">
+ <div class="spike-verified-copy"><span class="spike-verified-eyebrow">SPIKE ELITE MEMBERSHIP</span><strong id="spikeVerifiedTitle">CHECKING VERIFICATION</strong><span id="spikeVerifiedDetail">Confirming your SPIKE membership status…</span><span id="spikeVerifiedState" class="spike-verified-state">CHECKING STATUS</span><button id="spikeVerifiedAction" type="button" data-wallet-open="walletFeature-verified" disabled>Checking status…</button></div>
+ <div class="spike-verified-art"><div id="spikeVerifiedSilver" class="spike-silver-medal" aria-hidden="true"><span class="spike-silver-ring"><svg viewBox="0 0 100 100"><path d="M50 8 61 18 77 17 82 33 94 45 87 60 90 76 73 83 63 95 48 88 32 94 22 79 7 71 13 55 5 40 20 28 25 13 42 16Z"/><path d="m31 51 13 13 27-29"/></svg></span></div><img id="spikeVerifiedAnimation" data-src="assets/spike-verified-badge.webp" alt="SPIKE ELITE verified gold and blue badge" decoding="async" hidden></div>
+</section>
+<section class="wallet-dashboard-grid" aria-label="Wallet balances">
+<section class="wallet-balance-card" aria-label="SP Coin balance">
+ <div class="wallet-balance-head"><span class="wallet-balance-label"><svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8"><circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.7-.6-1.7-.9-2.8-.9-1.6 0-2.7.8-2.7 2s1 1.7 2.7 2.1 2.7.9 2.7 2.1-1.1 2-2.8 2c-1.1 0-2.2-.4-2.9-1.1M12 5.5v13"/></svg> AVAILABLE SP COIN BALANCE</span><button type="button" id="walletBalanceVisibility" class="wallet-eye" aria-label="Hide balance" aria-pressed="false">◉</button></div>
+ <div class="wallet-balance" id="coinBalance" data-visible-value="—">—</div>
+ <p class="wallet-balance-caption">Your available SP Coins. Pending amounts are shown separately.</p><p id="coinSourceBreakdown" class="wallet-balance-caption">Available: — · Pending: —</p>
+ <div class="wallet-row" style="align-items:center;margin-top:8px"><div id="walletAccountStatus" class="wallet-balance-caption" aria-live="polite">Connecting secure wallet…</div><button type="button" class="wallet-action" data-wallet-refresh style="flex:0 0 auto;min-width:0;padding:8px 11px">Refresh wallet</button></div><div class="wallet-balance-foot"><span><svg viewBox="0 0 24 24" width="16" height="16" style="vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8"><circle cx="12" cy="12" r="9"/><path d="M12 6v12M9 9h4a2 2 0 1 1 0 4H9"/></svg> SP Coin wallet</span></div>
+</section>
+<section class="wallet-earnings-value-card" aria-label="Creator earnings in Nigerian naira">
+ <div class="wallet-earnings-value-head"><span class="wallet-earnings-value-label">NET CREATOR EARNINGS · NGN</span><span class="wallet-earnings-value-icon" aria-hidden="true">₦</span></div>
+ <div class="wallet-earnings-value-amount" id="walletEarningsUsd" aria-live="polite">—</div>
+ <p class="wallet-earnings-value-caption">Your lifetime net creator earnings from verified settlements, shown in Nigerian naira.</p>
+ <div class="wallet-earnings-rate" id="walletEarningsRate">Loading verified creator earnings…</div><div class="wallet-earnings-rate" id="walletEarningsBreakdown">Available — · Reserved — · Paid —</div>
+ <div class="wallet-earnings-value-foot">Earnings stay visible · Payout requests are owner-reviewed</div>
+</section>
+<section class="wallet-gift-value-card" aria-label="Total gift value received">
+ <div class="wallet-earnings-value-head"><span class="wallet-earnings-value-label">GIFT VALUE RECEIVED</span><span class="wallet-earnings-value-icon" aria-hidden="true">🎁</span></div>
+ <div class="wallet-gift-value-amount" id="walletGiftValueNgn" aria-live="polite">₦0.00</div>
+ <p class="wallet-gift-value-caption">Total NGN-backed value of successfully settled gifts sent to you. Reversed gifts are excluded.</p>
+ <div class="wallet-gift-value-meta" id="walletGiftValueMeta">0 SP Coins · 0 gifts</div>
+ <div class="wallet-gift-value-foot" id="walletGiftFundingMeta">Only verified paid-backed gift settlements are counted</div>
+</section>
+</section>
+<nav class="wallet-quick-actions" aria-label="Wallet shortcuts">
+ <button type="button" data-wallet-open="walletFeature-buy"><span class="wallet-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6 15h4"/></svg></span><span>Buy Coins</span></button>
+ <button type="button" data-wallet-open="walletFeature-activity"><span class="wallet-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg></span><span>History</span></button>
+ <button type="button" data-wallet-open="walletFeature-earnings"><span class="wallet-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 19V5m0 14h18"/><path d="m6 15 4-4 3 2 6-7"/><path d="M16 6h3v3"/></svg></span><span>Earnings</span></button>
+</nav>
+
+<section class="wallet-activity-preview" aria-labelledby="walletActivityHeading">
+ <div class="wallet-activity-heading-row"><h2 id="walletActivityHeading"><svg viewBox="0 0 24 24" width="18" height="18" style="vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8"><path d="M3 19V5m0 14h18M6 15l4-4 3 2 6-7"/></svg> Recent activity</h2><button type="button" class="wallet-activity-all" data-wallet-open="walletFeature-activity">View all</button></div>
+ <div id="walletRecentActivity" class="wallet-recent-list" aria-busy="true"><span class="wallet-skeleton-row"></span><span class="wallet-skeleton-row"></span><span class="wallet-skeleton-row"></span></div>
+</section>
+<section class="wallet-tools-shell" aria-labelledby="walletToolsHeading">
+ <div class="wallet-tools-heading"><h2 id="walletToolsHeading"><svg viewBox="0 0 24 24" width="19" height="19" style="vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4V2h8v2M8 9h8M8 13h8"/></svg> Wallet tools</h2><span>8 features</span></div>
+ <button type="button" id="walletMenuToggle" class="wallet-menu-toggle" aria-expanded="false" aria-controls="walletMenuContent">
+  <span><strong><svg viewBox="0 0 24 24" width="17" height="17" style="vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8"><path d="M3 6h7l2 2h9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18"/></svg> Open wallet menu</strong><small>Purchases, received gifts, earnings, withdrawals, bank details, history and verified subscription in one organised menu.</small></span>
+  <span class="wallet-menu-chevron" aria-hidden="true">⌄</span>
+ </button>
+ <div id="walletMenuContent" class="wallet-menu-content" hidden>
+  <section class="wallet-feature wallet-buy-feature" id="walletFeature-buy">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-buy-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5c-.8-.7-1.8-1-3-1-1.7 0-2.8.8-2.8 2s1 1.8 2.8 2.2 2.8 1 2.8 2.2-1.1 2.1-2.9 2.1c-1.2 0-2.4-.4-3.2-1.2M12 5.5v13"/></svg></span><span><strong>Buy SP Coins</strong><small>Choose a package — prices and coin amounts are shown below</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-buy-content" hidden><p class="wallet-muted">Choose a package to create a server-verified order reference. Send the order to SPIKE Admin on WhatsApp, wait for official bank instructions, then send your transfer proof in that same chat. Never transfer money to an unverified account.</p><div id="coinPackages" class="wallet-packages">Loading available packages…</div><div id="coinPurchaseStatus" class="wallet-status" role="status" aria-live="polite"></div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-orders">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-orders-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><span><strong>Purchase requests</strong><small>References and payment-report status</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-orders-content" hidden><p class="wallet-muted">Your order references and WhatsApp payment handoff appear here. Send your order and transfer proof to SPIKE Admin on WhatsApp, then report payment here so the request appears in the admin approval queue.</p><button type="button" class="wallet-action" data-purchase-refresh style="margin:8px 0">Refresh purchase requests</button><div id="coinOrders">Loading purchase history…</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-gifts">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-gifts-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="9" width="18" height="12" rx="2"/><path d="M12 9v12M3 13h18M12 9H7a2.5 2.5 0 1 1 2.5-2.5V9Zm0 0h5a2.5 2.5 0 1 0-2.5-2.5V9Z"/></svg></span><span><strong>Gifts received</strong><small>See gifts members have sent you in SPIKE rooms</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-gifts-content" hidden><div class="wallet-gifts-panel" aria-labelledby="walletGiftsHeading"><div class="wallet-gifts-head"><div class="wallet-gifts-title"><span class="wallet-gifts-mark" aria-hidden="true">🎁</span><span><h2 id="walletGiftsHeading">Your received gifts</h2><p>Gifts sent to you in SPIKE rooms</p></span></div><span class="wallet-gifts-count" id="walletGiftsCount">Loading</span></div><div class="wallet-gift-list" id="walletReceivedGifts" aria-live="polite"><div class="wallet-gifts-empty">Your received gifts will appear here.</div></div></div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-activity">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-activity-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h17"/><path d="m7 15 4-4 3 2 6-7"/></svg></span><span><strong>SP Coin history</strong><small>Ledger-backed coin transactions</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-activity-content" hidden><p class="wallet-muted">Search and filter your latest SP Coin ledger entries. Status is shown for each recorded transaction.</p><div class="wallet-ledger-controls"><input id="coinLedgerSearch" type="search" aria-label="Search SP Coin transactions" placeholder="Search transactions…"><select id="coinLedgerType" aria-label="Filter SP Coin transactions"><option value="all">All activity</option><option value="credit">Coins received</option><option value="debit">Coins spent</option></select></div><div class="wallet-row" style="margin:10px 0"><button type="button" class="wallet-action" data-wallet-refresh>Refresh wallet</button></div><div id="coinLedger">Open this section to load your latest transactions.</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-earnings">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-earnings-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M15 14h3M7 5V3h10v2"/></svg></span><span><strong>Creator earnings</strong><small>Earned SP Coin balance, eligibility and earnings history</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-earnings-content" hidden><div class="wallet-earnings-card"><div id="creatorAccountState" class="wallet-note" aria-live="polite">Checking creator account status…</div><span class="wallet-kicker"><svg viewBox="0 0 24 24" width="17" height="17" style="vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 9h18M15 14h3"/></svg> AVAILABLE CREATOR EARNINGS</span><div class="wallet-balance" id="creatorBalance">Loading…</div><div id="creatorBalanceMeta" class="creator-balance-meta">No verified earnings conversion rate configured</div><p class="wallet-muted">Your net creator earnings are read directly from your private settlement record. Submit a payout request from the Withdraw earnings section when you are ready.</p><div class="wallet-note" id="creatorEligibility">Checking creator withdrawal eligibility…</div><div class="wallet-note" id="creatorGiftReconcileStatus" aria-live="polite">Gift earnings are checked against the settlement ledger.</div><button type="button" class="wallet-action" id="creatorGiftReconcileButton" style="margin-top:8px">Check gift earnings</button><div id="creatorProgress" class="creator-progress" aria-live="polite"><div class="creator-progress-title">Withdrawal progress <small>Owner-configured rules</small></div>Loading your earnings progress…</div><button type="button" class="wallet-action" id="creatorEligibilityRequestButton" style="margin-top:10px" hidden>Request SPIKE Eligible review</button></div><h3 class="wallet-subheading">Earnings history</h3><div id="creatorEarningsHistory">Loading creator earnings…</div><div class="wallet-separator"></div><h3 class="wallet-subheading">Withdrawal history</h3><div id="creatorWithdrawalHistory">Loading withdrawal history…</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-bank">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-bank-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 9 9-6 9 6M4 10h16M5 10v9m4-9v9m6-9v9m4-9v9M3 21h18"/></svg></span><span><strong>Bank account</strong><small>Securely save your creator payout details</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-bank-content" hidden><p class="wallet-muted">Creator payout bank details are not being collected yet. A protected server-side payout-details workflow and Owner review process must be completed first.</p><form id="creatorBankForm"><label class="wallet-field">Bank name<input id="creatorBankName" required maxlength="100" placeholder="e.g. Access Bank"></label><label class="wallet-field">Account name<input id="creatorAccountName" required maxlength="120" placeholder="Name on bank account"></label><label class="wallet-field">10-digit account number<input id="creatorAccountNumber" required inputmode="numeric" pattern="[0-9]{10}" maxlength="10" placeholder="0123456789"></label><button class="wallet-action" type="submit">Save bank account</button></form><div id="creatorBankStatus" class="wallet-status">Bank details have not been loaded.</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-withdraw">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-withdraw-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18m-6-6 6 6 6-6M6 7l6-4 6 4"/></svg></span><span><strong>Withdraw earnings</strong><small>Request an Owner-reviewed payout</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-withdraw-content" hidden><p class="wallet-muted">Request a payout of your full available creator earnings. Funds are reserved while SPIKE reviews the request. Never submit a request unless the bank details are correct.</p><form id="creatorWithdrawForm"><label class="wallet-field">Withdrawal amount (NGN)<input id="creatorWithdrawAmount" type="number" min="0.01" step="0.01" required readonly placeholder="Loading available earnings…"></label><label class="wallet-field">Bank name<input id="withdrawBankName" maxlength="100" required placeholder="e.g. Access Bank"></label><label class="wallet-field">Account name<input id="withdrawAccountName" maxlength="120" required placeholder="Name on bank account"></label><label class="wallet-field">Account number<input id="withdrawAccountNumber" inputmode="numeric" pattern="[0-9]{8,20}" maxlength="20" required placeholder="Bank account number"></label><label class="wallet-field">Note (optional)<textarea id="withdrawUserNote" maxlength="500" placeholder="Optional payout note"></textarea></label><div class="wallet-note" id="creatorWithdrawalQuote">Checking your available creator earnings…</div><button class="wallet-action" id="creatorWithdrawButton" type="submit" disabled>Submit withdrawal request</button></form><div id="creatorWithdrawalRequestStatus" class="wallet-status" aria-live="polite">No withdrawal request loaded.</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-identity">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-identity-content"><span class="wallet-feature-symbol" aria-hidden="true">🛡️</span><span><strong>Identity verification</strong><small>Submit an identity document for SPIKE review</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-identity-content" hidden><p class="wallet-muted">Upload one clear government-issued identity document. Files are stored privately and only SPIKE reviewers can open them. Accepted formats: JPG, PNG or PDF, up to 10 MB.</p><form id="identityVerificationForm"><label class="wallet-field">Document type<select id="identityDocumentType" required><option value="national_id">National ID</option><option value="drivers_license">Driver’s licence</option><option value="voters_card">Voter’s card</option><option value="passport">International passport</option></select></label><label class="wallet-field">Identity document<input id="identityDocumentFile" type="file" accept="image/jpeg,image/png,application/pdf" required></label><label class="wallet-field">Note (optional)<textarea id="identityApplicantNote" maxlength="500" placeholder="Optional note for the reviewer"></textarea></label><button class="wallet-action" id="identitySubmitButton" type="submit" disabled>Submit for verification</button></form><div id="identityVerificationStatus" class="wallet-status" aria-live="polite">Checking your application status…</div></div>
+  </section>
+  <section class="wallet-feature" id="walletFeature-verified">
+   <button type="button" class="wallet-feature-toggle" data-wallet-feature-toggle aria-expanded="false" aria-controls="walletFeature-verified-content"><span class="wallet-feature-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg></span><span><strong>SPIKE Verified subscription</strong><small>Request monthly or yearly verification and manage your badge</small></span><span class="wallet-feature-chevron">⌄</span></button>
+   <div class="wallet-feature-content" id="walletFeature-verified-content" hidden>
+    <div id="verifiedSubscriptionStatus" class="wallet-subscription-status">Checking your SPIKE Verified status…</div>
+    <div id="verifiedSubscriptionPlans" class="wallet-subscription-plans">
+     <article class="wallet-subscription-plan"><span class="wallet-muted">MONTHLY VERIFIED</span><strong class="price">Loading price…</strong><span class="wallet-muted">30 days · manual payment review</span><button type="button" data-verified-subscribe="monthly" disabled>Request monthly subscription</button></article>
+     <article class="wallet-subscription-plan"><span class="wallet-muted">YEARLY VERIFIED</span><strong class="price">Loading price…</strong><span class="wallet-muted">365 days · manual payment review</span><button type="button" data-verified-subscribe="yearly" disabled>Request yearly subscription</button></article>
+    </div>
+    <div id="verifiedSubscriptionActive" class="wallet-subscription-status" hidden aria-live="polite"></div>
+    <p id="verifiedSubscriptionPlanHint" class="wallet-muted">Create a monthly or yearly request here. Your badge activates only after SPIKE verifies the bank transfer.</p>
+    <h3 class="wallet-subheading">Subscription requests</h3><div id="verifiedSubscriptionHistory" class="wallet-subscription-history">Loading subscription history…</div>
+   </div>
+  </section>
+ </div>
+</section>
+</main>
+<script id="wallet-dashboard-interactions">
+(()=>{'use strict';
+ const menu=document.getElementById('walletMenuContent'),menuToggle=document.getElementById('walletMenuToggle');
+ const featureButtons=[...document.querySelectorAll('[data-wallet-feature-toggle]')];
+ document.querySelectorAll('.wallet-feature').forEach(panel=>{const content=panel.querySelector('.wallet-feature-content');if(!content||content.querySelector('.wallet-feature-close'))return;const close=document.createElement('button');close.type='button';close.className='wallet-feature-close';const featureName=panel.querySelector('[data-wallet-feature-toggle] strong')?.textContent||'wallet feature';close.textContent=panel.id==='walletFeature-orders'?'× Close purchase reports':'× Close this feature';close.setAttribute('aria-label','Close '+featureName);content.append(close);close.addEventListener('click',()=>setFeature(panel.id,false));});
+ const setFeature=(id,open)=>{const panel=document.getElementById(id);if(!panel)return;const button=panel.querySelector('[data-wallet-feature-toggle]');const content=button&&document.getElementById(button.getAttribute('aria-controls'));if(!button||!content)return;if(open)featureButtons.forEach(other=>{const otherPanel=other.closest('.wallet-feature');if(otherPanel&&otherPanel.id!==id&&other.getAttribute('aria-expanded')==='true')setFeature(otherPanel.id,false)});button.setAttribute('aria-expanded',String(open));panel.classList.toggle('is-open',open);if(open){content.hidden=false;requestAnimationFrame(()=>content.classList.add('is-visible'));window.dispatchEvent(new CustomEvent('spike:wallet-feature-open',{detail:{id}}));}else{content.classList.remove('is-visible');const finish=()=>{if(button.getAttribute('aria-expanded')!=='true')content.hidden=true;};content.addEventListener('transitionend',finish,{once:true});setTimeout(finish,360);}};
+ const setMenu=open=>{if(!menu||!menuToggle)return;menuToggle.setAttribute('aria-expanded',String(open));menuToggle.classList.toggle('is-open',open);if(open){menu.hidden=false;requestAnimationFrame(()=>menu.classList.add('is-visible'));}else{menu.classList.remove('is-visible');menu.hidden=true;}};
+ menuToggle?.addEventListener('click',()=>setMenu(menuToggle.getAttribute('aria-expanded')!=='true'));
+ featureButtons.forEach(button=>button.addEventListener('click',()=>{const panel=button.closest('.wallet-feature');setFeature(panel.id,button.getAttribute('aria-expanded')!=='true');}));
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape')return;const opened=featureButtons.find(button=>button.getAttribute('aria-expanded')==='true');if(opened){event.preventDefault();setFeature(opened.closest('.wallet-feature').id,false);}else if(menuToggle?.getAttribute('aria-expanded')==='true')setMenu(false);});
+ document.querySelectorAll('[data-wallet-open]').forEach(button=>button.addEventListener('click',()=>{const id=button.dataset.walletOpen;setMenu(true);setFeature(id,true);document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'center'});}));
+ window.__SPIKE_WALLET_BALANCE_HIDDEN=false;document.getElementById('walletBalanceVisibility')?.addEventListener('click',event=>{window.__SPIKE_WALLET_BALANCE_HIDDEN=!window.__SPIKE_WALLET_BALANCE_HIDDEN;const hidden=window.__SPIKE_WALLET_BALANCE_HIDDEN,balance=document.getElementById('coinBalance'),source=document.getElementById('coinSourceBreakdown'),button=event.currentTarget;if(balance)balance.textContent=hidden?'•••••• SP':(balance.dataset.visibleValue||'—');if(source)source.textContent=hidden?'Available: ••• · Pending: •••':(source.dataset.visibleValue||'Available: — · Pending: —');button.setAttribute('aria-pressed',String(hidden));button.setAttribute('aria-label',hidden?'Show balance':'Hide balance');button.textContent=hidden?'◎':'◉';});
+})();
+</script>
+
+<script type="module" src="js/spike-financial-requests.js"></script>
+<script src="js/spike-dialog.js"></script>
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+    <script src="js/spike-spatial-experience-core.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
+</body></html>

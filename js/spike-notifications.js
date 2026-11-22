@@ -1,0 +1,48 @@
+/* SPIKE notifications: RLS-scoped inbox, filters, read state, deletion and realtime. */
+(() => {
+  'use strict';
+  const db=()=>window.SPIKE_SUPABASE||window.db,$=id=>document.getElementById(id);
+  const withTimeout=(promise,ms,message)=>{let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=window.setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>window.clearTimeout(timer));};
+  let user=null,rows=[],filter='all',channel=null,busy=false;
+  const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
+  const time=v=>v?new Date(v).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
+  const notificationPrefs=()=>{try{return JSON.parse(localStorage.getItem('spike-settings-local-v1')||'{}')}catch(_){return {}}};
+  const preferenceKey=row=>{const t=String(row.type||'').toLowerCase();if(t.includes('like'))return'np_likes';if(t.includes('comment'))return'np_comments';if(t.includes('mention'))return'np_mentions';if(t.includes('follow'))return'np_follows';if(t.includes('friend')||t.includes('request'))return'np_friend_requests';if(t.includes('message'))return'np_messages';if(t.includes('coin')||t.includes('reward')||t.includes('gift'))return'np_coins';if(t.includes('purchase')||t.includes('payment'))return'np_purchases';if(t.includes('announcement'))return'np_announcements';if(t.includes('system')||t.includes('security'))return'np_system';return null;};
+  const category=row=>{const t=String(row.type||'').toLowerCase();if(t.includes('mention'))return'mentions';if(t.includes('announcement'))return'announcements';if(t.includes('system')||t.includes('security')||t.includes('wallet'))return'system';return'social';};
+  function toast(message){const n=$('toast');if(n){n.textContent=message;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2800);}else console.info('[SPIKE notifications]',message);}
+  function openModal(row){$('notificationModalIcon').textContent=category(row)==='system'?'⚙️':category(row)==='announcements'?'📢':category(row)==='mentions'?'@':'🔔';$('notificationModalTitle').textContent=row.title||'Notification';$('notificationModalMeta').textContent=`${row.type||'Activity'} · ${time(row.created_at)}`;$('notificationModalBody').textContent=row.body||'No additional details.';$('notificationModal').setAttribute('aria-hidden','false');$('notificationModal').classList.add('open');}
+  function closeModal(){$('notificationModal')?.setAttribute('aria-hidden','true');$('notificationModal')?.classList.remove('open');}
+  async function setRead(id){const {error}=await db().from('notifications').update({is_read:true}).eq('id',id).eq('user_id',user.id);if(error)throw error;const row=rows.find(x=>x.id===id);if(row)row.is_read=true;render();}
+  function render(){
+    const list=$('notificationList');if(!list)return;
+    const query=String($('notificationSearch')?.value||'').trim().toLowerCase();
+    const prefs=notificationPrefs();
+    const visible=rows.filter(r=>{const pref=preferenceKey(r);return (!pref||prefs[pref]!==false)&&(filter!=='unread'||!r.is_read)&&(filter==='all'||filter==='unread'||category(r)===filter)&&(!query||`${r.title} ${r.body} ${r.type}`.toLowerCase().includes(query));});
+    list.replaceChildren();
+    if(!visible.length){const empty=el('div','empty');empty.append(el('div','empty-icon','🔔'),el('strong','',rows.length?'Nothing matches this filter':'You are all caught up'),el('div','muted','New activity will appear here.'));list.append(empty);}
+    visible.forEach(row=>{
+      const card=el('article',`notification${row.is_read?'':' unread'} ${category(row)==='system'?'priority-system':category(row)==='social'?'priority-social':''}`);
+      const button=el('button','notification-open');button.type='button';
+      const avatar=el('span','notif-avatar',category(row)==='system'?'⚙️':category(row)==='announcements'?'📢':category(row)==='mentions'?'@':'🔔');
+      const body=el('span','notif-body');body.append(el('strong','notif-title',row.title||'SPIKE activity'),el('span','notif-preview',row.body||''));
+      const meta=el('span','notif-meta');meta.append(el('time','notif-time',time(row.created_at)),el('span','notif-chip',String(row.type||'activity').replace(/[_-]+/g,' ')));body.append(meta);button.append(avatar,body);if(!row.is_read)button.append(el('span','notif-new','NEW'));button.addEventListener('click',async()=>{try{if(!row.is_read)await setRead(row.id);openModal(row);}catch(e){toast(e.message||'Could not update notification.');}});card.append(button);list.append(card);
+    });
+    const unread=rows.filter(x=>!x.is_read).length;$('unreadCount').textContent=String(unread);$('markAll').disabled=!unread;
+    $('statusSub').textContent=`${rows.length} notification${rows.length===1?'':'s'} · Activity from people on SPIKE`;
+  }
+  async function load(){if(busy||!user)return;busy=true;$('statusSub').textContent='Syncing your activity…';try{const client=db();if(!client)throw new Error('SPIKE database is not ready. Refresh this page and try again.');const {data,error}=await withTimeout(client.from('notifications').select('id,user_id,actor_id,type,entity_type,entity_id,title,body,is_read,created_at').eq('user_id',user.id).order('created_at',{ascending:false}).limit(100),15000,'Notifications took too long to load. Check your connection and retry.');if(error)throw error;rows=data||[];render();}catch(e){console.error('[SPIKE notifications]',e);const list=$('notificationList');if(list){list.replaceChildren();const message=el('div','empty error',e.message||'Notifications could not load.');const retry=el('button','btn primary','Retry');retry.type='button';retry.addEventListener('click',load);message.append(retry);list.append(message);}$('statusSub').textContent='Connection issue · Retry loading your activity';}finally{busy=false;$('loader')?.classList.add('hide');}}
+  async function markAll(){const ids=rows.filter(x=>!x.is_read).map(x=>x.id);if(!ids.length)return;const {error}=await db().from('notifications').update({is_read:true}).in('id',ids).eq('user_id',user.id);if(error)throw error;rows.forEach(x=>x.is_read=true);render();toast('All notifications marked as read.');}
+  async function removeWhere(predicate,message){const ids=rows.filter(predicate).map(x=>x.id);if(!ids.length){toast('There is nothing to delete.');return;}if(!await window.SPIKEPremiumDialog.confirm({title:'Confirm notification removal',message,confirmText:'Delete',cancelText:'Keep notifications',danger:true}))return;const {error}=await db().from('notifications').delete().in('id',ids).eq('user_id',user.id);if(error)throw error;rows=rows.filter(x=>!ids.includes(x.id));render();toast('Notifications deleted.');}
+  async function boot(){const client=db();if(!client)throw new Error('SPIKE database did not initialize. Refresh this page and try again.');const {data,error}=await withTimeout(client.auth.getUser(),12000,'Session verification timed out. Check your connection and retry.');if(error)throw error;if(!data.user)throw new Error('Your session has expired. Please sign in again.');user=data.user;
+    $('refreshBtn')?.addEventListener('click',load);$('markAll')?.addEventListener('click',()=>markAll().catch(e=>toast(e.message)));document.querySelectorAll('[data-spike-nav=\"discover\"]').forEach(button=>button.addEventListener('click',()=>{location.href='feed.html#discover';}));
+    $('moreActionsBtn')?.addEventListener('click',()=>{const p=$('bulkPanel');p.hidden=!p.hidden;p.style.display=p.hidden?'none':'flex';$('moreActionsBtn').setAttribute('aria-expanded',String(!p.hidden));});
+    $('clearAll')?.addEventListener('click',()=>removeWhere(()=>true,'Delete all your notifications? This cannot be undone.').catch(e=>toast(e.message)));
+    $('deleteRead')?.addEventListener('click',()=>removeWhere(x=>x.is_read,'Delete all read notifications? This cannot be undone.').catch(e=>toast(e.message)));
+    $('notificationSearch')?.addEventListener('input',render);document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});render();}));
+    $('notificationModalClose')?.addEventListener('click',closeModal);$('notificationModal')?.addEventListener('click',e=>{if(e.target.id==='notificationModal')closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+    await load();channel=client.channel('spike-notifications-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${user.id}`},payload=>{rows.unshift(payload.new);rows=rows.slice(0,100);render();try{const key=preferenceKey(payload.new),prefs=notificationPrefs();if(key==='np_messages'&&localStorage.getItem('spike-setting-messageTone')!=='0')$('notificationTone')?.play()?.catch(()=>{});}catch(_){}}).subscribe();
+  }
+  function showBootError(error){const message=error?.message||'Could not initialize notifications.';$('statusSub').textContent=message;const list=$('notificationList');if(list){list.replaceChildren();const panel=el('div','empty error',message);const retry=el('button','btn primary','Retry');retry.type='button';retry.addEventListener('click',()=>location.reload());panel.append(retry);list.append(panel);}$('loader')?.classList.add('hide');}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot().catch(showBootError),{once:true});else boot().catch(showBootError);
+  window.addEventListener('pagehide',()=>{if(channel&&db())db().removeChannel(channel);},{once:true});
+})();

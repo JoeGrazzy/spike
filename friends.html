@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en" translate="no">
+<head>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://veagqanfilmbchlvlpcc.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="//veagqanfilmbchlvlpcc.supabase.co">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script src="js/spike-platform-bootstrap.js"></script>
+
+<meta name="google" content="notranslate">
+  <link rel="stylesheet" href="css/perf.css">
+<script id="spike-performance-bootstrap">
+/* SPIKE performance bootstrap — no application logic changes */
+(()=>{try{
+const c=navigator.connection;
+if(c&&c.saveData) document.documentElement.dataset.saveData="1";
+if("contentVisibility" in document.documentElement.style){
+document.documentElement.classList.add("spike-cv-ready");
+}
+}catch(_){}})();
+</script>
+<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<script src="js/spike-navigation.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Friends</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css" />
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+}
+body {
+font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+background: #0a0a1a;
+color: #ffffff;
+height: 100vh;
+overflow: hidden;
+display: flex;
+flex-direction: column;
+}
+/* ── header ── */
+.header {
+padding: 20px 20px 12px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+background: linear-gradient(180deg, rgba(10, 10, 30, 0.98) 60%, transparent);
+position: sticky;
+top: 0;
+z-index: 10;
+flex-shrink: 0;
+}
+.header h1 {
+font-size: 24px;
+font-weight: 700;
+background: linear-gradient(135deg, #e94560, #a855f7);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.header-actions {
+display: flex;
+gap: 16px;
+}
+.header-actions button {
+background: rgba(255, 255, 255, 0.06);
+color: #ccc;
+width: 38px;
+height: 38px;
+border-radius: 50%;
+font-size: 16px;
+cursor: pointer;
+transition: 0.2s;
+backdrop-filter: blur(6px);
+border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.header-actions button:hover {
+background: rgba(233, 69, 96, 0.2);
+color: #fff;
+}
+.header-actions .badge {
+position: relative;
+}
+.header-actions .badge::after {
+content: '3';
+position: absolute;
+top: -4px;
+right: -4px;
+background: #e94560;
+color: #fff;
+font-size: 10px;
+font-weight: 700;
+width: 18px;
+height: 18px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+border: 2px solid #0a0a1a;
+}
+/* ── tabs ── */
+.tabs {
+display: flex;
+gap: 4px;
+padding: 0 20px 14px;
+flex-shrink: 0;
+background: #0a0a1a;
+}
+.tab {
+flex: 1;
+padding: 8px 0;
+border: none;
+background: transparent;
+color: rgba(255, 255, 255, 0.4);
+font-size: 13px;
+font-weight: 600;
+border-radius: 20px;
+cursor: pointer;
+transition: 0.25s;
+letter-spacing: 0.3px;
+position: relative;
+}
+.tab.active {
+color: #fff;
+background: rgba(233, 69, 96, 0.15);
+}
+.tab.active::after {
+content: '';
+position: absolute;
+bottom: -2px;
+left: 50%;
+transform: translateX(-50%);
+width: 20px;
+height: 2.5px;
+background: #e94560;
+border-radius: 4px;
+}
+.tab .count {
+background: rgba(255, 255, 255, 0.08);
+padding: 0 8px;
+border-radius: 10px;
+font-size: 11px;
+margin-left: 4px;
+color: rgba(255, 255, 255, 0.5);
+}
+.tab.active .count {
+background: rgba(233, 69, 96, 0.2);
+color: #e94560;
+}
+/* ── search bar ── */
+.search-wrap {
+padding: 0 20px 14px;
+flex-shrink: 0;
+}
+.search-wrap input {
+width: 100%;
+padding: 10px 16px 10px 42px;
+border-radius: 24px;
+border: 1px solid rgba(255, 255, 255, 0.06);
+background: rgba(255, 255, 255, 0.04);
+color: #fff;
+font-size: 14px;
+outline: none;
+transition: 0.25s;
+backdrop-filter: blur(4px);
+}
+.search-wrap input::placeholder {
+color: rgba(255, 255, 255, 0.25);
+}
+.search-wrap input:focus {
+border-color: rgba(233, 69, 96, 0.3);
+background: rgba(255, 255, 255, 0.07);
+}
+.search-wrap .icon {
+position: relative;
+}
+.search-wrap .icon button{border:0;background:transparent;color:inherit;padding:6px;cursor:pointer}.search-wrap .icon button[hidden]{display:none}.search-wrap .icon i {
+position: absolute;
+left: 16px;
+top: 50%;
+transform: translateY(-50%);
+color: rgba(255, 255, 255, 0.2);
+font-size: 14px;
+}
+/* ── content ── */
+.content {
+flex: 1;
+overflow-y: auto;
+padding: 0 20px 90px;
+}
+/* ── section label ── */
+.section-label {
+font-size: 13px;
+font-weight: 600;
+color: rgba(255, 255, 255, 0.25);
+letter-spacing: 0.5px;
+text-transform: uppercase;
+margin: 18px 0 12px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.section-label span {
+background: rgba(255, 255, 255, 0.04);
+padding: 0 10px;
+border-radius: 12px;
+font-size: 11px;
+color: rgba(255, 255, 255, 0.3);
+}
+/* ── friend card ── */
+.friend-card {
+display: flex;
+align-items: center;
+padding: 12px 14px;
+border-radius: 16px;
+background: rgba(255, 255, 255, 0.03);
+border: 1px solid rgba(255, 255, 255, 0.04);
+margin-bottom: 8px;
+transition: 0.2s;
+cursor: pointer;
+backdrop-filter: blur(4px);
+}
+.friend-card:hover {
+background: rgba(255, 255, 255, 0.06);
+border-color: rgba(255, 255, 255, 0.07);
+}
+.friend-avatar {
+width: 48px;
+height: 48px;
+border-radius: 50%;
+flex-shrink: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 18px;
+color: #fff;
+position: relative;
+background: linear-gradient(135deg, #1a1a3e, #2d1b4e);
+border: 2px solid rgba(255, 255, 255, 0.06);
+}
+.friend-avatar img {
+width: 100%;
+height: 100%;
+border-radius: 50%;
+object-fit: cover;
+}
+.friend-avatar .status-dot {
+position: absolute;
+bottom: 0;
+right: 0;
+width: 12px;
+height: 12px;
+border-radius: 50%;
+border: 2px solid #0a0a1a;
+}
+.status-dot.online {
+background: #22c55e;
+}
+.status-dot.offline {
+background: #4b5563;
+}
+.status-dot.idle {
+background: #f59e0b;
+}
+.friend-info {
+flex: 1;
+margin-left: 14px;
+min-width: 0;
+}
+.friend-info .name {
+font-size: 15px;
+font-weight: 600;
+color: #fff;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+.friend-info .name .mutual {
+font-size: 10px;
+font-weight: 400;
+color: rgba(255, 255, 255, 0.25);
+background: rgba(255, 255, 255, 0.04);
+padding: 0 8px;
+border-radius: 10px;
+}
+.friend-info .sub {
+font-size: 12px;
+color: rgba(255, 255, 255, 0.3);
+margin-top: 2px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.friend-info .sub i {
+font-size: 10px;
+color: rgba(255, 255, 255, 0.15);
+}
+.friend-action {
+flex-shrink: 0;
+margin-left: 8px;
+}
+.friend-action button {
+padding: 6px 14px;
+border-radius: 20px;
+border: none;
+font-size: 12px;
+font-weight: 600;
+cursor: pointer;
+transition: 0.2s;
+background: rgba(233, 69, 96, 0.15);
+color: #e94560;
+}
+.friend-action button:hover {
+background: rgba(233, 69, 96, 0.25);
+}
+.friend-action button.primary {
+background: linear-gradient(135deg, #e94560, #a855f7);
+color: #fff;
+}
+.friend-action button.primary:hover {
+opacity: 0.85;
+}
+.friend-action button.outline {
+background: transparent;
+border: 1px solid rgba(255, 255, 255, 0.08);
+color: rgba(255, 255, 255, 0.5);
+}
+.friend-action button.outline:hover {
+border-color: rgba(255, 255, 255, 0.15);
+color: #fff;
+}
+.friend-action button.icon-btn {
+width: 32px;
+height: 32px;
+padding: 0;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+background: rgba(255, 255, 255, 0.04);
+color: rgba(255, 255, 255, 0.3);
+border: 1px solid rgba(255, 255, 255, 0.04);
+}
+.friend-action button.icon-btn:hover {
+background: rgba(255, 255, 255, 0.08);
+color: #fff;
+}
+/* ── suggestion card ── */
+.network-recommendation-card{position:relative;display:flex;align-items:center;gap:12px;padding:13px 14px;margin-bottom:9px;border-radius:17px;background:linear-gradient(135deg,rgba(233,69,96,.09),rgba(255,255,255,.025));border:1px solid rgba(233,69,96,.12);box-shadow:0 8px 28px rgba(0,0,0,.12);transition:transform .2s,border-color .2s,background .2s}.network-recommendation-card:hover{transform:translateY(-1px);border-color:rgba(233,69,96,.24);background:linear-gradient(135deg,rgba(233,69,96,.12),rgba(255,255,255,.04))}.network-recommendation-card .network-reason{margin-top:3px;font-size:10px;color:rgba(255,255,255,.42);display:flex;align-items:center;gap:5px}.network-recommendation-card .network-reason i{font-size:9px;color:#e94560}.network-recommendation-card .friend-info{min-width:0;flex:1}.network-recommendation-card .connection-action{flex-shrink:0}
+.suggestion-card {
+display: flex;
+align-items: center;
+padding: 12px 14px;
+border-radius: 16px;
+background: rgba(255, 255, 255, 0.02);
+border: 1px solid rgba(255, 255, 255, 0.03);
+margin-bottom: 8px;
+transition: 0.2s;
+cursor: pointer;
+}
+.suggestion-card:hover {
+background: rgba(255, 255, 255, 0.04);
+}
+.suggestion-card .friend-info .sub {
+color: rgba(255, 255, 255, 0.2);
+}
+/* ── empty state ── */
+.empty-state {
+text-align: center;
+padding: 40px 20px;
+color: rgba(255, 255, 255, 0.2);
+}
+.empty-state i {
+font-size: 48px;
+margin-bottom: 12px;
+opacity: 0.3;
+}
+.empty-state p {
+font-size: 14px;
+}
+/* ── bottom nav ── */
+.bottom-nav {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+display: flex;
+justify-content: space-around;
+padding: 10px 0 18px;
+background: rgba(10, 10, 26, 0.92);
+backdrop-filter: blur(16px);
+border-top: 1px solid rgba(255, 255, 255, 0.04);
+z-index: 20;
+flex-shrink: 0;
+}
+.nav-item {
+flex:1;
+min-width:0;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 2px;
+background: none;
+border: none;
+color: rgba(255, 255, 255, 0.2);
+font-size: 10px;
+cursor: pointer;
+transition: 0.2s;
+padding: 4px 5px;
+position: relative;
+text-decoration: none;
+}
+.nav-item i {
+font-size: 20px;
+transition: 0.2s;
+}
+.nav-item span {
+font-size: 9px;
+font-weight: 500;
+letter-spacing: 0.3px;
+opacity: 0.6;
+}
+.nav-item.active {
+color: #e94560;
+}
+.nav-item.active span {
+color: rgba(255, 255, 255, 0.5);
+opacity: 1;
+}
+.nav-item .nav-badge {
+position: absolute;
+top: 0;
+right: 2px;
+background: #e94560;
+color: #fff;
+font-size: 9px;
+font-weight: 700;
+width: 17px;
+height: 17px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
+border: 2px solid #0a0a1a;
+}
+/* ── responsive tweaks ── */
+@media (max-width: 400px) {
+.friend-card,
+.suggestion-card {
+padding: 10px 12px;
+}
+.friend-avatar {
+width: 40px;
+height: 40px;
+font-size: 14px;
+}
+.friend-info .name {
+font-size: 14px;
+}
+}
+</style>
+<style id="friends-visual-fix">
+html, body {
+width: 100%;
+min-height: 100%;
+margin: 0;
+background: #080816;
+}
+body {
+min-height: 100dvh;
+height: 100dvh;
+overflow: hidden;
+}
+.header {
+padding: max(14px, env(safe-area-inset-top)) 18px 10px;
+min-height: 64px;
+background: linear-gradient(180deg, #0b0b1c 0%, rgba(11,11,28,.98) 72%, rgba(11,11,28,0) 100%);
+}
+.header h1 { font-size: 23px; letter-spacing: -.2px; }
+.header-actions { gap: 10px; }
+.header-actions button { width: 40px; height: 40px; }
+.header-actions .badge::after { content: none; }
+.header-count { top: -3px; right: -3px; min-width: 17px; height: 17px; border: 2px solid #0b0b1c; }
+.tabs {
+gap: 6px;
+padding: 2px 14px 12px;
+overflow-x: auto;
+scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+flex: 0 0 auto;
+min-width: 78px;
+padding: 9px 11px;
+font-size: 12px;
+white-space: nowrap;
+}
+.tab:last-child { min-width: 96px; }
+.search-wrap { padding: 2px 14px 12px; }
+.search-wrap input {
+height: 46px;
+padding: 0 16px 0 42px;
+background: rgba(255,255,255,.045);
+border-color: rgba(255,255,255,.07);
+}
+.content {
+min-height: 0;
+padding: 0 14px calc(28px + env(safe-area-inset-bottom));
+overscroll-behavior: contain;
+}
+.section-label {
+margin: 12px 4px 8px;
+font-size: 12px;
+color: rgba(255,255,255,.38);
+}
+.section-label span { padding: 2px 8px; }
+.friend-card, .suggestion-card {
+min-height: 68px;
+padding: 10px 12px;
+margin-bottom: 7px;
+border-radius: 14px;
+}
+.friend-avatar { width: 44px; height: 44px; font-size: 16px; }
+.friend-info { margin-left: 11px; }
+.friend-info .name { font-size: 14px; }
+.friend-info .sub { font-size: 11px; margin-top: 2px; }
+.friend-action { margin-left: 8px; }
+.icon-btn { width: 36px; height: 36px; }
+.connection-action { padding: 7px 10px; font-size: 10px; }
+.empty { padding: 18px 10px; }
+.empty-state { padding: 24px 12px; }
+.notice { margin: 6px 0; }
+@media (max-width: 380px) {
+.header { padding-left: 14px; padding-right: 14px; }
+.tabs { padding-left: 10px; padding-right: 10px; }
+.search-wrap { padding-left: 10px; padding-right: 10px; }
+.content { padding-left: 10px; padding-right: 10px; }
+.tab { min-width: 70px; padding-left: 8px; padding-right: 8px; }
+.friend-card, .suggestion-card { padding-left: 10px; padding-right: 10px; }
+}
+</style>
+<style>
+/* SPIKE: stop page horizontal shake/layout shift */
+html { width:100%; max-width:100%; overflow-x:hidden; scrollbar-gutter:stable; }
+body { width:100%; max-width:100%; overflow-x:hidden; }
+*, *::before, *::after { box-sizing:border-box; }
+.app, main, header, section, article, .content, .main, .grid, .layout { min-width:0; max-width:100%; }
+img, video, iframe { max-width:100%; }
+</style>
+<style id="spike-performance-css">
+/* Keep offscreen content from consuming layout/paint work. */
+@media (min-width:761px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 520px}
+}
+@media (max-width:760px){
+.spike-defer,.feed-item,.post-card,.card[data-lazy-section],section[data-lazy-section]{content-visibility:auto;contain-intrinsic-size:1px 360px}
+}
+img[loading="lazy"],video[preload="none"]{content-visibility:auto}
+</style>
+<style id="spike-performance-layer">
+/* SPIKE 2027 performance layer: rendering containment + cheaper media defaults */
+.spike-cv-ready .feed-item,.spike-cv-ready .post-card,.spike-cv-ready .spike-cv-ready .notification,.spike-cv-ready .friend-card{content-visibility:auto;contain-intrinsic-size:1px 320px}
+video{contain:layout paint}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+@media (hover:none){button,.btn,a{touch-action:manipulation}}
+</style>
+
+<style id="spike-premium-notices">:root{--spn-line:rgba(255,255,255,.13);--spn-text:#f7f8fb;--spn-muted:rgba(247,248,251,.62)}.spike-premium-stack{position:fixed;right:18px;bottom:18px;width:min(430px,calc(100vw - 28px));display:grid;gap:10px;z-index:99999;pointer-events:none}.spike-premium-toast{position:relative;display:grid;grid-template-columns:42px 1fr 30px;gap:11px;align-items:center;min-height:66px;padding:11px 12px;border:1px solid var(--spn-line);border-radius:20px;background:linear-gradient(145deg,rgba(27,31,43,.97),rgba(12,15,23,.96));box-shadow:0 24px 70px rgba(0,0,0,.46),0 0 34px rgba(124,92,255,.12);backdrop-filter:blur(22px);overflow:hidden;pointer-events:auto;animation:spnIn .28s cubic-bezier(.2,.8,.2,1)}.spike-premium-toast:after{content:"";position:absolute;left:0;bottom:0;height:2px;width:100%;transform-origin:left;animation:spnLife var(--spn-life,3600ms) linear forwards;background:linear-gradient(90deg,#8b5cf6,#22d3ee)}.spike-premium-toast.success{border-color:rgba(52,211,153,.34)}.spike-premium-toast.success:after{background:linear-gradient(90deg,#34d399,#10b981)}.spike-premium-toast.error{border-color:rgba(251,113,133,.38)}.spike-premium-toast.error:after{background:linear-gradient(90deg,#fb7185,#ef4444)}.spike-premium-toast.warning{border-color:rgba(251,191,36,.36)}.spike-premium-toast.warning:after{background:linear-gradient(90deg,#fbbf24,#f59e0b)}.spike-premium-toast.info{border-color:rgba(96,165,250,.34)}.spn-icon{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;font-size:18px;font-weight:950;background:rgba(139,92,246,.13);border:1px solid rgba(167,139,250,.2)}.success .spn-icon{color:#6ee7b7;background:rgba(16,185,129,.12)}.error .spn-icon{color:#fda4af;background:rgba(239,68,68,.12)}.warning .spn-icon{color:#fcd34d;background:rgba(245,158,11,.12)}.info .spn-icon{color:#93c5fd}.spn-copy{min-width:0}.spn-title{font-size:12px;font-weight:950;color:var(--spn-text)}.spn-message{margin-top:3px;font-size:10.5px;line-height:1.4;color:var(--spn-muted);overflow-wrap:anywhere}.spn-close{width:30px;height:30px;border:0;border-radius:10px;background:transparent;color:rgba(255,255,255,.48);font-size:18px;cursor:pointer}.spn-close:hover{background:rgba(255,255,255,.08);color:#fff}@keyframes spnIn{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}@keyframes spnLife{from{transform:scaleX(1)}to{transform:scaleX(0)}}@media(max-width:600px){.spike-premium-stack{right:10px;left:10px;bottom:14px;width:auto}.spike-premium-toast{border-radius:18px}}</style>
+<style id="spike-global-presence-style">
+.spike-presence-target{position:relative!important}
+.spike-presence-target::after{content:attr(data-presence-status);position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);white-space:nowrap;max-width:150px;overflow:hidden;text-overflow:ellipsis;padding:2px 6px;border-radius:999px;background:var(--card,#10141d);border:1px solid rgba(255,255,255,.10);color:var(--muted,#aab2c0);font:700 8px/1.1 system-ui,sans-serif;z-index:5;pointer-events:none}
+</style>
+
+<link rel="stylesheet" href="css/ui-fix.css">
+
+<style id="spike-menu-nav-css-fixed">
+/* SPIKE menu-aware bottom navigation */
+.spike-menu-nav-hidden .spike-bottom-nav,
+.spike-menu-nav-hidden .bottom-nav,
+.spike-menu-nav-hidden #spikeBottomNav,
+.spike-menu-nav-hidden #bottomNav {
+  transform: translate3d(0, calc(100% + 24px), 0) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease !important;
+}
+.spike-bottom-nav, .bottom-nav, #spikeBottomNav, #bottomNav {
+  transition: transform .24s ease, opacity .18s ease, visibility .18s ease;
+}
+/* Premium, smart circular avatars; never cover adjacent post text. */
+.spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+.post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+#chatAvatar img, #profileAvatar img {
+  width: 48px; height: 48px; min-width: 48px; min-height: 48px;
+  aspect-ratio: 1 / 1; border-radius: 50% !important;
+  object-fit: cover !important; object-position: 50% 50%;
+  display: block; overflow: hidden; flex: 0 0 auto;
+}
+.post-header, .post-head, .user-row, .profile-head, .comment-head {
+  min-width: 0;
+}
+.post-header .avatar, .post-head .avatar, .user-row .avatar { position: static !important; }
+.post-header .user-info, .post-head .user-info, .user-row .user-info { min-width: 0; }
+@media (max-width:600px){
+ .spike-avatar, .avatar, .profile-avatar, .user-avatar, .post-avatar, .comment-avatar,
+ .post .avatar, .post-header .avatar, .story-avatar, .suggestion-avatar, .chat-avatar,
+ #chatAvatar img, #profileAvatar img { width:44px; height:44px; min-width:44px; min-height:44px; }
+}
+</style>
+<meta name="description" content="SPIKE friends and people discovery.">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta name="theme-color" content="#0b0b10">
+<link rel="stylesheet" href="css/premium-back.css">
+
+
+<script src="js/spike-dialog.js"></script>
+<link rel="stylesheet" href="css/spike-adaptive-nav.css">
+  <link rel="stylesheet" href="css/spike-unified.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-beauty.css">
+  <link href="css/spike-theme-experience.css" rel="stylesheet"/>
+  
+<link rel="stylesheet" href="css/spike-android-fullscreen.css">
+
+<script src="js/spike-loader-core.js" defer></script>
+
+<script src="js/spike-empty-state.js" defer></script>
+<script src="js/theme.js" defer></script><link rel="stylesheet" href="css/spike-surface-controls.css">
+
+<style id="friends-page-quality-fix">
+/* Keep Friends readable in every SPIKE theme and compact on touch screens. */
+.friend-info .name{color:var(--sp-text,#172033)!important}
+.friend-info .sub,.network-recommendation-card .network-reason{color:var(--sp-muted,#667085)!important}
+.friend-info .sub i{color:var(--sp-muted,#667085)!important}
+.network-recommendation-card{background:linear-gradient(135deg,rgba(233,69,96,.07),transparent),var(--sp-surface,rgba(255,255,255,.88))!important;border-color:var(--sp-line,rgba(17,24,39,.10))!important;box-shadow:var(--sp-shadow-soft,0 8px 28px rgba(31,41,55,.07))!important}
+.network-recommendation-card:hover{border-color:color-mix(in srgb,var(--sp-accent,#7c3aed) 28%,var(--sp-line,rgba(17,24,39,.10)))!important}
+.friend-info .name .mutual{color:var(--sp-muted,#667085)!important;background:var(--sp-surface-2,rgba(17,24,39,.06))!important}
+.friend-avatar.spike-presence-target::after{display:none!important}
+.friend-avatar .status-dot{border-color:var(--sp-surface-solid,#fff)!important}
+.tabs{background:var(--sp-bg,#f6f7fb)!important;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;min-width:max-content;padding-left:13px;padding-right:13px;white-space:nowrap;scroll-snap-align:start;color:var(--sp-muted,#667085)}
+.tab.active{color:var(--sp-text,#172033)!important;background:var(--sp-surface-2,rgba(124,58,237,.10))!important}
+.search-wrap .icon>i{left:16px}
+.search-wrap .icon button{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:2}
+.search-wrap input{padding-right:42px}
+@media(max-width:420px){.tabs{padding-left:8px;padding-right:8px;overflow-x:hidden}.tab{flex:1 1 0;min-width:0;padding-left:3px;padding-right:3px;font-size:10px;letter-spacing:0}.tab .count{padding-left:3px;padding-right:3px;margin-left:1px;font-size:8.5px}}
+</style>
+<link rel="stylesheet" href="css/friends-page-polish.css">
+
+<style>
+.notice{margin:10px 14px;padding:10px 12px;border-radius:10px;background:rgba(124,58,237,.15);font-size:12px;color:#ddd}.notice.error{background:rgba(233,69,96,.15);color:#ffb4bf}.loading,.empty{padding:24px 14px;text-align:center;color:rgba(255,255,255,.45);font-size:13px}.header-actions button{position:relative}.header-count{position:absolute;top:-5px;right:-5px;min-width:16px;height:16px;padding:0 4px;border-radius:9px;background:#e94560;color:#fff;font-size:9px;display:none;align-items:center;justify-content:center}.friend-action{display:flex;gap:6px;align-items:center}.friend-action button{font:inherit}.connection-action{padding:6px 12px;border-radius:18px;border:0;font-size:11px;font-weight:700;cursor:pointer}.connection-action.secondary{background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}.connection-action:disabled{opacity:.5;cursor:wait}.unfriend-btn{color:#fda4af!important;border:1px solid rgba(244,63,94,.16)!important;background:rgba(244,63,94,.06)!important}.unfriend-btn:hover{color:#fff!important;background:rgba(244,63,94,.16)!important;border-color:rgba(244,63,94,.34)!important;transform:translateY(-1px)}.unfriend-btn:disabled{opacity:.55;cursor:wait;transform:none}.status-dot.offline{background:#555}.mutual{font-size:10px}.sub{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.friend-profile-link{cursor:pointer}.friend-profile-link:focus-visible{outline:2px solid var(--sp-accent,#e94560);outline-offset:3px}.friends-load-more{display:block;width:calc(100% - 28px);margin:12px 14px 20px;padding:12px;border:1px solid var(--sp-line,rgba(255,255,255,.12));border-radius:14px;background:var(--sp-surface,rgba(255,255,255,.06));color:var(--sp-text,#fff);font:inherit;font-weight:700;cursor:pointer}.friends-load-more:disabled{opacity:.55;cursor:wait}
+/* Shared SPIKE component styling; colors resolve through the active theme tokens. */
+:root{
+--sp-bg:#f6f7fb;
+--sp-surface:rgba(255,255,255,.88);
+--sp-surface-solid:#ffffff;
+--sp-surface-2:rgba(248,249,253,.94);
+--sp-text:#172033;
+--sp-muted:#667085;
+--sp-line:rgba(17,24,39,.10);
+--sp-accent:#7c3aed;
+--sp-accent-2:#ec4899;
+--sp-accent-3:#4f46e5;
+--sp-good:#10b981;
+--sp-danger:#ef476f;
+--sp-shadow:0 18px 55px rgba(31,41,55,.10);
+--sp-shadow-soft:0 8px 28px rgba(31,41,55,.07);
+}
+@media (prefers-color-scheme:dark){html:not([data-theme="light"]){
+--sp-bg:#080912;--sp-surface:rgba(18,20,31,.86);--sp-surface-solid:#12141f;--sp-surface-2:rgba(24,27,41,.92);--sp-text:#f7f8fc;--sp-muted:#9aa2b5;--sp-line:rgba(255,255,255,.095);--sp-shadow:0 22px 70px rgba(0,0,0,.38);--sp-shadow-soft:0 10px 32px rgba(0,0,0,.24)
+}}
+html,body{background:var(--sp-bg)!important;color:var(--sp-text)}
+body{
+background-image:
+radial-gradient(circle at 8% 0%,rgba(124,58,237,.12),transparent 28%),
+radial-gradient(circle at 94% 8%,rgba(236,72,153,.09),transparent 24%),
+linear-gradient(180deg,transparent 0%,var(--sp-bg) 52%)!important;
+background-attachment:fixed;
+}
+/* common surfaces */
+.card,.panel,.hero,.stat,.post,.story,.composer,.friend-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.package,.notice,.empty,.formgrid,.toolbar,.content,.side,.main,.profile-top,.covergrid,.tabs{
+border-color:var(--sp-line)!important;
+}
+.card,.panel,.stat,.post,.story,.composer,.friend-card,.usercard,.audit,.audititem,.xp-card,.spid-card,.recommendations,.about-item,.chat,.list,.thread,.modalbox,.sheet,.sheethead,.premium-dialog-card,.rd-card,.package,.notice,.empty,.formgrid,.toolbar,.profile-top-overview-card{
+background:var(--sp-surface)!important;
+box-shadow:var(--sp-shadow-soft);
+color:var(--sp-text);
+backdrop-filter:blur(18px);
+-webkit-backdrop-filter:blur(18px);
+}
+.hero-hero{
+background:linear-gradient(135deg,rgba(124,58,237,.13),rgba(236,72,153,.08),rgba(79,70,229,.08)),var(--sp-surface)!important;
+box-shadow:var(--sp-shadow);
+}
+.header,.top,.chathead,.fm-head,.rm-head{
+background:color-mix(in srgb,var(--sp-surface-solid) 82%,transparent)!important;
+border-color:var(--sp-line)!important;
+backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+}
+.header h1,.brand,.logo,.header-title{color:var(--sp-text)}
+.muted,.sub,.meta,.time,.preview,.status,.eyebrow,.role,.section-label,.form-note,.spid-sub,.spid-label,.xp-foot{color:var(--sp-muted)!important}
+input,textarea,select,.input,.search input,.field input,.field textarea,.field select{
+background:var(--sp-surface-solid)!important;color:var(--sp-text)!important;border-color:var(--sp-line)!important;
+box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
+}
+input::placeholder,textarea::placeholder{color:var(--sp-muted)!important;opacity:.85}
+input:focus,textarea:focus,select:focus,.input:focus{border-color:rgba(124,58,237,.55)!important;box-shadow:0 0 0 3px rgba(124,58,237,.11)!important}
+.btn,.ghost,.icon-btn,.header-btn,.connection-action,.tab,.filter,.pill,.role,.tag,.coin,.post-btn,.react-trigger,.spid-btn,.rd-btn,.premium-media-action{
+border-color:var(--sp-line)!important;color:var(--sp-text)!important;background:var(--sp-surface-2)!important;
+}
+.btn:hover,.ghost:hover,.icon-btn:hover,.header-btn:hover,.tab:hover,.filter:hover,.pill:hover{transform:translateY(-1px);box-shadow:var(--sp-shadow-soft)}
+.primary,.btn.primary,.post-btn,.rd-primary{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border-color:transparent!important;box-shadow:0 10px 28px rgba(124,58,237,.24)}
+.danger{color:#fff!important;background:linear-gradient(135deg,#ef476f,#e11d48)!important;border-color:transparent!important}
+.active{border-color:rgba(124,58,237,.28)!important}
+.avatar,.friend-avatar,.post-avatar,.comment-avatar,.mini-avatar{border-color:var(--sp-line)!important;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+.footer{color:var(--sp-muted)!important}
+.modal,.overlay,.modal-backdrop,.premium-media-modal{background:rgba(3,5,12,.64)!important;backdrop-filter:blur(8px)}
+.toast,.notice{border-color:var(--sp-line)!important}
+.progress,.xp-track{background:var(--sp-surface-2)!important}
+::-webkit-scrollbar{width:7px;height:7px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(124,58,237,.28);border-radius:99px}
+:focus-visible{outline:3px solid rgba(124,58,237,.30)!important;outline-offset:2px}
+@media(max-width:720px){
+.app{padding-left:12px!important;padding-right:12px!important}
+.card,.panel,.hero,.post,.composer,.friend-card{border-radius:20px!important}
+.header{padding-left:12px!important;padding-right:12px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority.css">
+<link rel="stylesheet" href="css/spike-ux-refinement.css">
+<link rel="stylesheet" href="css/spike-global-page-authority.css">
+<link rel="stylesheet" href="css/spike-theme-runtime.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css">
+<link rel="stylesheet" href="css/spike-touch-hover-guard.css">
+<link href="css/spike-onboarding-help-placement.css" rel="stylesheet">
+<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
+
+<link rel="stylesheet" href="css/spike-future-engine.css">
+<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
+<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+<style id="friends-direct-tabs-v27">
+/* Friends navigation: five explicit tabs, never a dropdown or nested toggle. */
+#tabs.tabs{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  align-items:stretch;
+  gap:5px;
+  width:100%;
+  padding:4px 12px 11px;
+  overflow:visible;
+  background:var(--sp-bg,#0a0a1a);
+}
+#tabs .tab{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  min-width:0!important;
+  width:100%;
+  padding:10px 3px;
+  border:1px solid transparent;
+  border-radius:12px;
+  background:transparent;
+  color:var(--sp-muted,rgba(255,255,255,.58));
+  font-size:clamp(9px,2.7vw,12px);
+  line-height:1.2;
+  font-weight:700;
+  letter-spacing:0;
+  white-space:nowrap;
+  text-overflow:clip;
+  overflow:hidden;
+  box-shadow:none;
+  transform:none;
+  -webkit-tap-highlight-color:transparent;
+}
+#tabs .tab::before{content:none!important;display:none!important}
+#tabs .tab.active{
+  color:var(--sp-text,#fff)!important;
+  background:var(--sp-surface-2,rgba(233,69,96,.14))!important;
+  border-color:rgba(233,69,96,.24);
+}
+#tabs .tab.active::after{
+  content:"";
+  position:absolute;
+  bottom:3px;
+  left:50%;
+  width:15px;
+  height:2px;
+  border-radius:2px;
+  transform:translateX(-50%);
+  background:var(--sp-accent,#e94560);
+}
+#tabs .tab .count{
+  flex:0 0 auto;
+  margin:0;
+  padding:1px 5px;
+  font-size:9px;
+  line-height:1.35;
+  border-radius:999px;
+}
+#tabs .tab:focus-visible{
+  outline:2px solid var(--sp-accent,#e94560);
+  outline-offset:2px;
+}
+/* Final page-scoped authority: global theme bundles must not turn these into
+   select-like controls, dropdown triggers, or oversized horizontal pills. */
+body[data-spike-page="friends"] #tabs.tabs{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:clamp(2px,.8vw,6px)!important;
+  padding:5px clamp(8px,2.5vw,14px) 10px!important;
+  overflow:visible!important;
+  border:0!important;
+  border-radius:0!important;
+}
+body[data-spike-page="friends"] #tabs .tab{
+  position:relative!important; display:flex!important; flex-direction:row!important;
+  align-items:center!important; justify-content:center!important;
+  min-width:0!important; max-width:100%!important; width:100%!important;
+  min-height:39px!important; height:auto!important; margin:0!important;
+  padding:7px 2px!important; gap:3px!important;
+  border:1px solid transparent!important; border-radius:11px!important;
+  background:transparent!important; box-shadow:none!important;
+  color:var(--sp-muted,rgba(255,255,255,.58))!important;
+  font-size:clamp(8px,2.65vw,11px)!important; font-weight:750!important;
+  line-height:1.15!important; letter-spacing:0!important; white-space:nowrap!important;
+  text-transform:none!important; transform:none!important;
+}
+body[data-spike-page="friends"] #tabs .tab::before{content:none!important;display:none!important}
+body[data-spike-page="friends"] #tabs .tab.active{
+  color:var(--sp-text,#fff)!important;
+  background:var(--sp-surface-2,rgba(233,69,96,.14))!important;
+  border-color:color-mix(in srgb,var(--sp-accent,#e94560) 26%,transparent)!important;
+}
+body[data-spike-page="friends"] #tabs .tab.active::after{
+  content:""!important; display:block!important; position:absolute!important;
+  left:50%!important; bottom:2px!important; width:14px!important; height:2px!important;
+  border:0!important; border-radius:2px!important; transform:translateX(-50%)!important;
+  background:var(--sp-accent,#e94560)!important;
+}
+body[data-spike-page="friends"] #tabs .tab .count{
+  display:inline-flex!important; align-items:center!important; justify-content:center!important;
+  flex:0 0 auto!important; min-width:14px!important; margin:0!important;
+  padding:1px 4px!important; border-radius:999px!important;
+  font-size:8px!important; line-height:1.25!important;
+}
+body[data-spike-page="friends"] #tabs .tab:focus-visible{outline:2px solid var(--sp-accent,#e94560)!important;outline-offset:2px!important}
+body[data-spike-page="friends"] #tabs .tab:active{transform:none!important}
+body[data-spike-page="friends"] #tabs .tab[aria-selected="true"]{font-weight:850!important}
+@media(max-width:350px){
+  body[data-spike-page="friends"] #tabs.tabs{gap:1px!important;padding-left:6px!important;padding-right:6px!important}
+  body[data-spike-page="friends"] #tabs .tab{font-size:8px!important;padding-left:1px!important;padding-right:1px!important}
+  body[data-spike-page="friends"] #tabs .tab .count{min-width:12px!important;font-size:7px!important;padding-left:3px!important;padding-right:3px!important}
+}
+@media(prefers-reduced-motion:reduce){body[data-spike-page="friends"] #tabs .tab{transition:none!important}}
+</style>
+
+<style id="friends-direct-tabs-v30">
+/* Final Friends tab authority: five always-visible, independent tab buttons. */
+body[data-spike-page="friends"] #tabs.tabs{
+  display:grid!important;
+  grid-template-columns:1.05fr 1.05fr 1.35fr .8fr 1.2fr!important;
+  align-items:stretch!important;
+  gap:3px!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:5px clamp(7px,2.5vw,14px) 10px!important;
+  overflow:visible!important;
+  background:var(--sp-bg,#0a0a1a)!important;
+}
+body[data-spike-page="friends"] #tabs .tab{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:3px!important;
+  min-width:0!important;
+  width:100%!important;
+  min-height:40px!important;
+  padding:7px 2px!important;
+  border:1px solid transparent!important;
+  border-radius:11px!important;
+  color:var(--sp-muted,rgba(255,255,255,.62))!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-size:clamp(9px,2.7vw,11px)!important;
+  line-height:1.15!important;
+  font-weight:750!important;
+  letter-spacing:0!important;
+  white-space:nowrap!important;
+  text-overflow:clip!important;
+  overflow:visible!important;
+  text-transform:none!important;
+  transform:none!important;
+  -webkit-tap-highlight-color:transparent;
+}
+body[data-spike-page="friends"] #tabs .tab::before{content:none!important;display:none!important}
+body[data-spike-page="friends"] #tabs .tab.active{
+  color:var(--sp-text,#fff)!important;
+  background:var(--sp-surface-2,rgba(233,69,96,.14))!important;
+  border-color:color-mix(in srgb,var(--sp-accent,#e94560) 28%,transparent)!important;
+}
+body[data-spike-page="friends"] #tabs .tab.active::after{
+  content:""!important;display:block!important;position:absolute!important;
+  left:50%!important;bottom:2px!important;width:14px!important;height:2px!important;
+  border:0!important;border-radius:2px!important;transform:translateX(-50%)!important;
+  background:var(--sp-accent,#e94560)!important;
+}
+body[data-spike-page="friends"] #tabs .tab .count{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  flex:0 0 auto!important;min-width:14px!important;margin:0!important;padding:1px 4px!important;
+  border-radius:999px!important;font-size:8px!important;line-height:1.25!important;
+}
+body[data-spike-page="friends"] #tabs .tab:focus-visible{outline:2px solid var(--sp-accent,#e94560)!important;outline-offset:2px!important}
+body[data-spike-page="friends"] #tabs .tab[aria-selected="true"]{font-weight:850!important}
+@media(max-width:350px){
+  body[data-spike-page="friends"] #tabs.tabs{gap:2px!important;padding-left:5px!important;padding-right:5px!important}
+  body[data-spike-page="friends"] #tabs .tab{font-size:8.5px!important;gap:2px!important;padding-left:1px!important;padding-right:1px!important}
+  body[data-spike-page="friends"] #tabs .tab .count{min-width:12px!important;padding-left:3px!important;padding-right:3px!important;font-size:7.5px!important}
+}
+@media(prefers-reduced-motion:reduce){body[data-spike-page="friends"] #tabs .tab{transition:none!important}}
+</style>
+
+<style id="friends-no-section-dropdowns-v28">
+/* Friends hub: section headings remain static labels across every tab.
+   Keep the five direct tabs and the Follow / Unfollow / Block model intact. */
+body[data-spike-page="friends"] #content .section-label{
+  cursor:default!important;
+  user-select:text;
+}
+body[data-spike-page="friends"] #content .section-label::before,
+body[data-spike-page="friends"] #content .section-label::after{
+  content:none!important;
+  display:none!important;
+}
+body[data-spike-page="friends"] #content .section-label [aria-expanded],
+body[data-spike-page="friends"] #content .section-label [data-accordion],
+body[data-spike-page="friends"] #content .section-label .accordion-toggle,
+body[data-spike-page="friends"] #content .section-label .dropdown-toggle,
+body[data-spike-page="friends"] #content .section-label button{
+  display:none!important;
+  pointer-events:none!important;
+}
+</style>
+  <link rel="stylesheet" href="css/spike-select-experience.css">
+  <link rel="stylesheet" href="css/spike-friends-native.css">
+<style id="spike-friends-presence-style">.friend-presence{font-size:11px;color:var(--muted,#98a2b3);margin-top:4px}.friend-presence.is-online{color:#27c783;font-weight:700}.friend-presence.is-online:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#27c783;margin-right:6px}.connection-activity-row{padding:12px 0;border-bottom:1px solid var(--border,rgba(255,255,255,.08))}.connection-activity-row p{margin:0 0 4px}.connection-activity-row time{font-size:11px;color:var(--muted,#98a2b3)}.friend-action{flex-wrap:wrap}</style>
+
+<style id="spike-follow-only-final-authority">
+body[data-spike-page="friends"] .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;}
+body[data-spike-page="friends"] .tab{min-width:0!important;white-space:nowrap;text-decoration:none!important;text-underline-offset:0!important;}
+body[data-spike-page="friends"] .tab::after{pointer-events:none;}
+body[data-spike-page="friends"] a,body[data-spike-page="friends"] button{text-decoration:none!important;-webkit-text-decoration:none!important;}
+body[data-spike-page="friends"] .friend-card{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--sp-line);border-radius:18px;margin:0 0 10px;background:var(--sp-surface);box-shadow:var(--sp-shadow-soft);}
+body[data-spike-page="friends"] .friend-action{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;}
+body[data-spike-page="friends"] .friend-action .connection-action{border-radius:12px;min-height:36px;padding:8px 12px;font-weight:800;text-decoration:none!important;}
+body[data-spike-page="friends"] .friend-action .message-link{background:linear-gradient(135deg,var(--sp-accent),var(--sp-accent-2))!important;color:#fff!important;border:0!important;}
+@media(max-width:520px){body[data-spike-page="friends"] .friend-card{align-items:flex-start;flex-wrap:wrap;}body[data-spike-page="friends"] .friend-action{width:100%;padding-left:58px;justify-content:flex-start;}body[data-spike-page="friends"] .tabs{gap:3px!important;}body[data-spike-page="friends"] .tab{font-size:clamp(8px,2.7vw,11px)!important;padding:8px 2px!important;}}
+</style>
+
+
+<style id="spike-compact-premium-2026-v1">
+/* SPIKE Compact Premium: shared, non-destructive density and interaction layer */
+:root{--spike-compact-control-h:34px;--spike-compact-radius:12px}
+html{scroll-behavior:smooth;text-size-adjust:100%;-webkit-text-size-adjust:100%}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button,[role="button"],input,select,textarea{font:inherit}
+button,.btn,[role="button"],.icon-btn,.header-btn,.connection-action,.tab,.filter,.pill,.post-btn,.rd-btn,.premium-media-action{min-height:var(--spike-compact-control-h);text-decoration:none!important;transition:background-color .16s ease,border-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease}
+a,a:hover,a:focus,button,button:hover,button:focus,.btn,.tab,.filter,.pill{text-decoration:none!important}
+button,.btn,[role="button"]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid color-mix(in srgb,var(--spike-accent,#a78bfa) 72%,white)!important;outline-offset:2px}
+/* Compact surfaces without changing layout semantics or hiding controls */
+.card,.panel,.hero,.post,.composer,.friend-card,.suggestion-card,.message-card,.conversation-card{border-radius:var(--spike-compact-radius)!important}
+.friend-card,.suggestion-card{padding:8px 10px!important;margin-bottom:6px!important;min-height:58px}
+.friend-avatar{width:38px!important;height:38px!important;font-size:14px!important}
+.friend-info{margin-left:8px!important;gap:2px!important}
+.friend-info .name{font-size:13px!important;line-height:1.25}
+.friend-info .sub{font-size:10.5px!important;line-height:1.25;margin-top:1px!important}
+.friend-action{margin-left:6px!important}
+.friend-action button,.connection-action{min-height:30px!important;padding:5px 9px!important;font-size:11px!important;border-radius:10px!important}
+.icon-btn{width:32px!important;height:32px!important;min-height:32px!important}
+#tabs.tabs,.tabs{gap:5px!important}
+#tabs .tab,.tabs .tab{min-height:32px!important;padding:6px 9px!important;font-size:11px!important}
+.search-wrap{padding-top:7px!important;padding-bottom:7px!important}
+input,select,textarea{min-height:36px}
+.messageMenu{padding:14px!important;border-radius:18px!important}
+.messageMenu h3{font-size:15px!important}
+.messageMenu .menuSub{font-size:11px!important;margin-bottom:10px!important}
+.messageMenu .menuGrid{gap:6px!important}
+.messageMenu button{min-height:42px!important;padding:9px 10px!important;border-radius:11px!important;font-size:12px!important;gap:8px!important}
+.recordingTray{padding:7px 9px!important;margin-bottom:6px!important;border-radius:11px!important;font-size:11px!important}
+/* Keep the chat composer and conversation controls compact on short screens */
+@media(max-width:600px){
+  .app{padding-left:10px!important;padding-right:10px!important}
+  .header{padding:8px 10px!important}
+  .content{padding-left:10px!important;padding-right:10px!important}
+  .card,.panel,.hero,.post,.composer{padding:10px!important}
+  .friend-card,.suggestion-card{padding:7px 8px!important}
+  button,.btn,.header-btn,.post-btn,.rd-btn{min-height:32px}
+}
+@media(max-width:360px){
+  .friend-avatar{width:34px!important;height:34px!important}
+  .friend-info .name{font-size:12px!important}
+  .friend-action button{padding:4px 7px!important;font-size:10px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+
+<link rel="stylesheet" href="css/spike-social-suite.css">
+</head>
+<body data-spike-page="friends">
+<header class="header">
+<button class="smart-back spike-premium-back" id="spikeSmartBack" type="button" aria-label="Go back to the previous SPIKE page" title="Go back" data-spike-premium-back="1" data-back-fallback="feed.html"><span class="smart-back-arrow" aria-hidden="true">←</span><span class="smart-back-label">Back</span></button>
+<h1>Friends</h1>
+<div class="header-actions">
+<button id="searchButton" type="button" aria-label="Search people"><i class="fas fa-search"></i></button>
+</div>
+</header>
+<div class="tabs" id="tabs" role="tablist" aria-label="Your connections">
+<button id="friendsTabAll" class="tab active" type="button" role="tab" aria-selected="true" tabindex="0" data-tab="all">Following <span class="count" id="allCount">0</span></button>
+<button id="friendsTabOnline" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="online">Online <span class="count" id="onlineCount">0</span></button>
+<button id="friendsTabDiscover" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="suggestions">Discover</button>
+<button id="friendsTabBlocked" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="blocked">Blocked <span class="count" id="blockedCount">0</span></button>
+<button id="friendsTabActivity" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="activity">Activity</button>
+</div>
+<div class="search-wrap" id="searchWrap">
+<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search people you follow or discover…" id="searchInput" autocomplete="off" aria-label="Search friends or people"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
+</div>
+<div class="content" id="content">
+<div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+<section id="friendsSection" role="tabpanel" tabindex="0" aria-label="People you follow">
+<div class="section-label">People You Follow <span id="friendsCount">0</span></div>
+<div id="friendsContainer"></div>
+</section>
+<section id="suggestionsSection" role="tabpanel" tabindex="0" aria-label="Discover people" hidden>
+<div class="section-label">Suggested For You <span id="networkCount">0</span></div>
+<div id="networkRecommendationsContainer"></div>
+<div class="section-label" style="margin-top:24px">Discover People <span id="suggestionCount">0</span></div>
+<div id="suggestionsContainer"></div>
+<button class="friends-load-more" id="friendsLoadMore" type="button" hidden>Load more people</button>
+</section>
+<section id="blockedSection" role="tabpanel" tabindex="0" aria-label="Blocked accounts" hidden>
+<div class="section-label">Blocked Accounts <span id="blockedSectionCount">0</span></div>
+<div id="blockedContainer"></div>
+</section>
+<section id="activitySection" role="tabpanel" tabindex="0" aria-label="Connection activity" hidden>
+<div class="section-label">Recent Connection Activity</div>
+<div id="connectionActivityContainer"></div>
+</section>
+</div>
+<nav class="bottom-nav" aria-label="Main navigation">
+  <a class="nav-item" href="feed.html"><i class="fas fa-house" aria-hidden="true"></i><span>Feed</span></a>
+  <a class="nav-item active" href="friends.html" aria-current="page"><i class="fas fa-user-group" aria-hidden="true"></i><span>Friends</span></a>
+  <a class="nav-item" href="rooms.html"><i class="fas fa-headphones" aria-hidden="true"></i><span>Rooms</span></a>
+  <a class="nav-item" href="messages.html"><i class="fas fa-comments" aria-hidden="true"></i><span>Messages</span></a>
+  <a class="nav-item" href="profile.html"><i class="fas fa-user" aria-hidden="true"></i><span>Profile</span></a>
+</nav>
+
+
+
+
+
+<script src="js/spike-identity.js"></script>
+
+
+
+<!-- Service worker registration intentionally omitted until a tested sw.js is shipped. -->
+
+<script id="spike-premium-notice-js">(()=>{if(typeof window.spikePremiumToast==='function')return;const stack=()=>{let s=document.getElementById('spikePremiumStack');if(!s){s=document.createElement('div');s.id='spikePremiumStack';s.className='spike-premium-stack';document.body.appendChild(s)}return s};const classify=(m,t)=>{if(t)return t;m=String(m||'').toLowerCase();if(/error|failed|fail|could not|cannot|unable|denied|invalid|wrong|expired|blocked/.test(m))return'error';if(/warning|careful|required|please|maximum|limit|permission|future|choose|enter|complete/.test(m))return'warning';if(/success|successful|saved|sent|posted|updated|copied|accepted|declined|published|scheduled|started|signed in|welcome/.test(m))return'success';return'info'};window.spikePremiumToast=(m,t,ms)=>{m=String(m??'');t=classify(m,t);ms=Number(ms)||3600;const s=stack(),k=t+'|'+m.trim().toLowerCase();if(s.dataset.k===k&&Date.now()-Number(s.dataset.at)<1200)return;s.dataset.k=k;s.dataset.at=Date.now();const e=document.createElement('div');e.className='spike-premium-toast '+t;e.style.setProperty('--spn-life',ms+'ms');const i=t==='success'?'✓':t==='error'?'×':t==='warning'?'⚠':'✦';const title=t==='success'&&/welcome/i.test(m)?'Welcome to SPIKE':t==='success'?'Success':t==='error'?'Something needs attention':t==='warning'?'Please check this':'SPIKE update';e.innerHTML='<div class="spn-icon">'+i+'</div><div class="spn-copy"><div class="spn-title"></div><div class="spn-message"></div></div><button class="spn-close" type="button" aria-label="Dismiss">×</button>';e.querySelector('.spn-title').textContent=title;e.querySelector('.spn-message').textContent=m;e.querySelector('.spn-close').onclick=()=>e.remove();s.appendChild(e);setTimeout(()=>e.remove(),ms)}})();</script><script src="js/ui-fix.js"></script>
+
+<script id="spike-menu-nav-controller-fixed">
+(function(){
+  if(window.__SPIKE_MENU_NAV_FIXED__) return; window.__SPIKE_MENU_NAV_FIXED__=true;
+  const root=document.documentElement, body=document.body;
+  const menuButtonSelector='#menuBtn, #menuButton, .menu-btn, .spike-menu-left, [aria-label*="menu" i], [title*="menu" i]';
+  const closeSelector='[id*="menuClose" i], [id*="closeMenu" i], [data-close-menu], .spike-menu-close';
+  function navHidden(v){ body.classList.toggle('spike-menu-nav-hidden',!!v); root.classList.toggle('spike-menu-nav-hidden',!!v); }
+  function openDetected(){
+    return !!document.querySelector('.spike-menu-overlay.open, .spike-menu-overlay[aria-hidden="false"], .overlay.open[id*="menu" i], [id*="menu" i].open, .side-menu.open, .drawer.open');
+  }
+  let syncQueued=false;
+  function sync(){ syncQueued=false; navHidden(openDetected()); }
+  function scheduleSync(){ if(syncQueued)return; syncQueued=true; requestAnimationFrame(sync); }
+  // Observe only menu-related state changes; a perpetual 750 ms DOM scan needlessly
+  // wakes mobile CPUs and competes with scrolling, typing and realtime rendering.
+  const menuNodes=()=>document.querySelectorAll('.spike-menu-overlay, .overlay[id*="menu" i], [id*="menu" i].open, .side-menu, .drawer');
+  const observer=new MutationObserver(scheduleSync);
+  function observeMenus(){ menuNodes().forEach(node=>{ if(!node.dataset.spikeNavObserved){node.dataset.spikeNavObserved='1';observer.observe(node,{attributes:true,attributeFilter:['class','aria-hidden','hidden','open']});} }); }
+  const additions=new MutationObserver(()=>{observeMenus();scheduleSync();});
+  additions.observe(document.body,{childList:true,subtree:true});
+  document.addEventListener('click',function(e){
+    const menu=e.target.closest?.(menuButtonSelector);
+    if(menu){ navHidden(true); scheduleSync(); return; }
+    const close=e.target.closest?.(closeSelector);
+    if(close){ scheduleSync(); return; }
+    const overlay=e.target.closest?.('.spike-menu-overlay, .overlay[id*="menu" i]');
+    if(overlay && e.target===overlay) scheduleSync();
+  },true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') scheduleSync(); });
+  observeMenus(); sync();
+  window.addEventListener('pagehide',()=>{observer.disconnect();additions.disconnect();},{once:true});
+})();
+</script>
+<script id="spike-network-guard">(()=>{let last=0;const isNet=e=>{const m=String(e?.message||e?.reason?.message||e||'').toLowerCase();return !navigator.onLine||/failed to fetch|networkerror|network request failed|load failed|fetch failed|timeout|timed out/.test(m)};const notice=(msg)=>{const now=Date.now();if(now-last<5000)return;last=now;try{if(typeof window.spikePremiumToast==='function')window.spikePremiumToast(msg,'warning',4500);else console.warn('[SPIKE network]',msg)}catch{console.warn('[SPIKE network]',msg)}};window.addEventListener('offline',()=>notice('You are offline. Actions will resume when your connection returns.'));window.addEventListener('online',()=>notice('Connection restored. Retry the last action if needed.'));window.addEventListener('unhandledrejection',e=>{if(isNet(e)){e.preventDefault();notice(navigator.onLine?'SPIKE could not complete a network request. Please retry.':'You are offline. Please reconnect and retry.')}})})();</script>
+
+
+<script src="js/premium-back.js" defer></script>
+
+<script src="js/spike-adaptive-nav.js" defer></script>
+
+
+  
+
+
+<script src="js/spike-surface-controls.js"></script>
+
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+  <link rel="stylesheet" href="css/spike-friends-compact-polish.css">
+<script src="js/spike-friends-controller.js" defer></script>
+<script type="module" src="js/spike-supabase-guard.js"></script>
+</body>
+</html>

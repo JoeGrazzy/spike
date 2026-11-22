@@ -1,0 +1,160 @@
+/* SPIKE MESSAGE COMPACT AUTHORITY V1
+   Final page-scoped layout layer. Preserves message behavior and theme tokens. */
+body[data-spike-page="message"] {
+  width:100%; max-width:100%; min-width:0; overflow-x:clip;
+  padding:0; font-size:13.5px; line-height:1.42;
+}
+body[data-spike-page="message"] .app {
+  width:100%; max-width:760px; height:100dvh; min-height:0; min-width:0;
+  margin-inline:auto; overflow:hidden; display:flex; flex-direction:column;
+}
+body[data-spike-page="message"] .top {
+  flex:0 0 auto; min-width:0; gap:7px;
+  padding:calc(8px + env(safe-area-inset-top)) 10px 8px !important;
+}
+body[data-spike-page="message"] .back,
+body[data-spike-page="message"] .iconbtn {
+  width:38px !important; height:38px !important; min-width:38px; min-height:38px;
+  flex:0 0 38px; border-radius:12px !important; padding:0 !important;
+}
+body[data-spike-page="message"] .person { min-width:0; flex:1 1 auto; gap:7px; }
+body[data-spike-page="message"] .person .avatar {
+  width:36px !important; height:36px !important; flex:0 0 36px !important;
+}
+body[data-spike-page="message"] .titlewrap { min-width:0; flex:1 1 auto; }
+body[data-spike-page="message"] .brand {
+  max-width:100%; font-size:14px; line-height:1.2; letter-spacing:-.025em;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+body[data-spike-page="message"] .subtitle {
+  max-width:100%; margin-top:1px; font-size:10.5px; line-height:1.25;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+body[data-spike-page="message"] .content {
+  flex:1 1 auto; min-height:0; min-width:0; width:100%; max-width:100%;
+  overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain;
+  padding:8px 12px 6px !important; scrollbar-width:thin;
+}
+body[data-spike-page="message"] .thread {
+  width:100%; max-width:760px; min-width:0; margin:0 auto;
+  gap:7px; padding:5px 0 12px;
+}
+body[data-spike-page="message"] .bubble {
+  max-width:min(86%, 620px) !important; min-width:0; padding:8px 10px !important;
+  border-radius:15px; font-size:13.5px; line-height:1.4;
+  overflow-wrap:anywhere; word-break:normal;
+}
+body[data-spike-page="message"] .bubble time {
+  margin-top:3px; font-size:9.5px; line-height:1.2;
+}
+body[data-spike-page="message"] .bubble .msgReaction { right:6px; bottom:-9px; }
+body[data-spike-page="message"] .bubble .attachmentImage,
+body[data-spike-page="message"] .bubble video {
+  max-width:100%; max-height:min(42dvh,300px); object-fit:contain;
+}
+body[data-spike-page="message"] .bubble audio { width:min(230px,100%); max-width:100%; }
+body[data-spike-page="message"] .composer {
+  flex:0 0 auto; min-width:0; width:100%; max-width:100%;
+  padding:7px 10px calc(7px + env(safe-area-inset-bottom) + var(--dm-keyboard-inset,0px)) !important;
+}
+body[data-spike-page="message"] .composebox {
+  min-width:0; min-height:48px; gap:5px !important; padding:4px !important;
+  border-radius:15px !important; align-items:flex-end !important;
+}
+body[data-spike-page="message"] .mediaPlus,
+body[data-spike-page="message"] .voiceNoteBtn,
+body[data-spike-page="message"] .send {
+  width:38px !important; height:38px !important; min-width:38px; min-height:38px;
+  flex:0 0 38px !important; padding:0 !important; border-radius:12px !important;
+  font-size:15px !important;
+}
+body[data-spike-page="message"] .composebox textarea {
+  min-width:0; min-height:38px !important; max-height:112px !important;
+  flex:1 1 0%; padding:8px 5px !important; font-size:14px !important;
+  line-height:1.35 !important; overflow-y:auto; overflow-wrap:anywhere;
+}
+body[data-spike-page="message"] .composer .status {
+  padding:4px 3px 0 !important; font-size:10px !important; line-height:1.25;
+  overflow-wrap:anywhere;
+}
+body[data-spike-page="message"] .replyPreview,
+body[data-spike-page="message"] .mediaPreview,
+body[data-spike-page="message"] .recordingTray {
+  min-width:0; margin-bottom:6px; padding:7px 9px; border-radius:11px;
+  gap:7px; font-size:11px; overflow-wrap:anywhere;
+}
+body[data-spike-page="message"] .replyPreview button,
+body[data-spike-page="message"] .mediaPreview button,
+body[data-spike-page="message"] .recordingTray button {
+  min-width:34px; min-height:34px; padding:6px 8px; border-radius:9px; font-size:11px;
+}
+body[data-spike-page="message"] .messageMenuShade {
+  padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));
+}
+body[data-spike-page="message"] .messageMenu {
+  width:min(460px,100%); max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
+  padding:14px; border-radius:18px; overflow:auto;
+}
+body[data-spike-page="message"] .messageMenu h3 { font-size:15px; margin-bottom:3px; }
+body[data-spike-page="message"] .messageMenu .menuSub { font-size:11px; margin-bottom:10px; }
+body[data-spike-page="message"] .messageMenu .menuGrid {
+  grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px;
+}
+body[data-spike-page="message"] .messageMenu button {
+  min-width:0; min-height:40px; padding:8px 9px; gap:7px;
+  border-radius:11px; font-size:11.5px; line-height:1.2;
+}
+body[data-spike-page="message"] .messageMenu button i { width:16px; flex:0 0 16px; font-size:13px; }
+body[data-spike-page="message"] .mediaShade {
+  padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom));
+}
+body[data-spike-page="message"] .mediaSheet {
+  width:min(480px,100%); max-height:calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  overflow:auto; padding:14px; border-radius:18px;
+}
+body[data-spike-page="message"] .mediaSheetHead { margin-bottom:9px; }
+body[data-spike-page="message"] .mediaSheetHead strong { font-size:15px; }
+body[data-spike-page="message"] .mediaGrid { gap:7px; }
+body[data-spike-page="message"] .mediaGrid button {
+  min-height:68px; gap:5px; padding:8px 5px; border-radius:12px; font-size:11px;
+}
+body[data-spike-page="message"] .mediaGrid i { font-size:19px; }
+body[data-spike-page="message"] .mediaSheetNote { font-size:10px; margin-top:9px; }
+body[data-spike-page="message"] .dmViewerTop { min-height:42px; gap:7px; }
+body[data-spike-page="message"] .dmViewerAction { width:38px; height:38px; min-height:38px; border-radius:11px; }
+body[data-spike-page="message"] .dmViewerBottom { min-height:42px; gap:7px; }
+body[data-spike-page="message"] .profilePhotoClose { width:40px; height:40px; }
+body[data-spike-page="message"] :where(img,video,iframe,canvas,svg) { max-width:100%; }
+body[data-spike-page="message"] :where(button,input,textarea,select) { max-width:100%; }
+body[data-spike-page="message"] :where(.messageMenu,.mediaSheet,.dmViewer,.profilePhotoShade) { box-sizing:border-box; }
+@media(max-width:380px) {
+  body[data-spike-page="message"] .top { gap:5px; padding-inline:8px !important; }
+  body[data-spike-page="message"] .back,
+  body[data-spike-page="message"] .iconbtn { width:36px !important; height:36px !important; min-width:36px; min-height:36px; flex-basis:36px; }
+  body[data-spike-page="message"] .person .avatar { width:34px !important; height:34px !important; flex-basis:34px !important; }
+  body[data-spike-page="message"] .brand { font-size:13px; }
+  body[data-spike-page="message"] .content { padding-inline:10px !important; }
+  body[data-spike-page="message"] .composer { padding-inline:8px !important; }
+  body[data-spike-page="message"] .mediaPlus,
+  body[data-spike-page="message"] .voiceNoteBtn,
+  body[data-spike-page="message"] .send { width:36px !important; height:36px !important; min-width:36px; min-height:36px; flex-basis:36px !important; }
+}
+@media(max-width:340px) {
+  body[data-spike-page="message"] .top { gap:4px; }
+  body[data-spike-page="message"] .back,
+  body[data-spike-page="message"] #refresh { width:34px !important; min-width:34px; flex-basis:34px; }
+  body[data-spike-page="message"] .messageMenu button { font-size:10.5px; padding-inline:7px; }
+}
+@media(orientation:landscape) and (max-height:500px) {
+  body[data-spike-page="message"] .top { padding-block:5px !important; }
+  body[data-spike-page="message"] .composer { padding-block:5px !important; }
+  body[data-spike-page="message"] .messageMenu { max-height:calc(100dvh - 12px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  body[data-spike-page="message"] *,
+  body[data-spike-page="message"] *::before,
+  body[data-spike-page="message"] *::after {
+    animation-duration:.01ms !important; animation-iteration-count:1 !important;
+    transition-duration:.01ms !important; scroll-behavior:auto !important;
+  }
+}

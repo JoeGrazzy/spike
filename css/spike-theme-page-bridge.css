@@ -1,0 +1,98 @@
+/* SPIKE PAGE THEME BRIDGE V1
+   Last-loaded compatibility layer. The five-theme registry is the sole palette
+   authority; page-local components consume its semantic tokens instead of
+   falling back to browser Canvas colors or legacy fixed dark palettes.
+*/
+html[data-spike-style][data-theme] {
+  color-scheme: var(--spike-theme-color-scheme, normal);
+  --hc-bg: var(--spike-bg) !important;
+  --hc-panel: var(--spike-surface) !important;
+  --hc-panel2: var(--spike-surface-2) !important;
+  --hc-text: var(--spike-text) !important;
+  --hc-muted: var(--spike-muted) !important;
+  --hc-line: var(--spike-line) !important;
+  --hc-accent: var(--spike-accent) !important;
+  --hc-accent2: var(--spike-accent-2) !important;
+  --hc-shadow: var(--spike-shadow) !important;
+  --bg: var(--spike-bg) !important;
+  --surface: var(--spike-surface) !important;
+  --surface2: var(--spike-surface-2) !important;
+  --surface3: var(--spike-surface-3) !important;
+  --text: var(--spike-text) !important;
+  --muted: var(--spike-muted) !important;
+  --line: var(--spike-line) !important;
+  --accent: var(--spike-accent) !important;
+  --accent2: var(--spike-accent-2) !important;
+  --primary: var(--spike-action-bg) !important;
+  --shadow: var(--spike-shadow) !important;
+}
+html[data-spike-style="1"], html[data-spike-style="3"], html[data-spike-style="5"] { --spike-theme-color-scheme: dark; }
+html[data-spike-style="2"], html[data-spike-style="4"] { --spike-theme-color-scheme: light; }
+html[data-spike-style] body {
+  background-color: var(--spike-bg) !important;
+  background-image: var(--spike-body-image) !important;
+  color: var(--spike-text) !important;
+  color-scheme: var(--spike-theme-color-scheme, normal);
+}
+html[data-spike-style] :is(header.header, header.top, .header, .top, .topbar, .app-header, .site-header, .page-header, .messages-header, .social-top, .admin-top, .profile-command-head, .profile-theme-head, .navbar, .hc-header) {
+  background: color-mix(in srgb, var(--spike-surface) 96%, transparent) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] :is(header.header, header.top, .header, .top, .topbar, .app-header, .site-header, .page-header, .messages-header, .social-top, .admin-top, .profile-command-head, .profile-theme-head, .navbar, .hc-header) :is(a, button, span, strong, small, i, svg, .brand-title, .brand-subtitle, .page-title) {
+  color: inherit;
+}
+html[data-spike-style] :is(.card, .panel, .surface, .tile, .modal-card, .dialog, .settings-card, .message-card, .notification-item, .friend-card, .hc-panel, .hc-card, .hc-faq details, .hc-contact a, .setup) {
+  background-color: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] :is(.card, .panel, .surface, .tile, .modal-card, .dialog, .settings-card, .message-card, .notification-item, .friend-card, .hc-panel, .hc-card, .hc-faq details, .hc-contact a, .setup) :is(p, small, .muted, .subtitle, .description, .meta) { color: var(--spike-muted); }
+html[data-spike-style] :is(input, textarea, select, .control) {
+  background-color: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+  color-scheme: var(--spike-theme-color-scheme, normal);
+}
+html[data-spike-style] :is(input, textarea, select)::placeholder { color: var(--spike-muted) !important; }
+html[data-spike-style] :is(.hc-icon, .back, .icon, .iconbtn, .icon-btn, .header-btn, .nav button, .tab, .chip) {
+  background-color: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] :is(.hc-btn:not(.primary), .btn:not(.primary), .secondary, .ghost) {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] :is(.hc-kicker, .hc-card .hc-link, .hc-iconbox, .eyebrow, .section-label) { color: var(--spike-accent) !important; }
+html[data-spike-style] a { color: var(--spike-accent); }
+html[data-spike-style] :is(.primary, .btn.primary, .btn-primary, button.primary, [type="submit"]) {
+  background: linear-gradient(135deg, var(--spike-action-bg), var(--spike-action-bg-2)) !important;
+  color: var(--spike-action-text) !important;
+  border-color: transparent !important;
+}
+/* Feed bundle previously used Canvas/CanvasText, which follows device appearance
+   rather than the user's SPIKE selection. Override those declarations explicitly. */
+html[data-spike-style] body[data-spike-page="feed"] > header.header {
+  background: var(--spike-surface) !important;
+  color: var(--spike-text) !important;
+  border-bottom-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header :is(.brand, .brand-title, .brand-subtitle, .feed-header-title, .header-actions, .header-actions a, .header-actions button, .icon) {
+  color: var(--spike-text) !important;
+}
+html[data-spike-style] body[data-spike-page="feed"] > header.header :is(.header-actions button, .icon) {
+  background: var(--spike-surface-2) !important;
+  border-color: var(--spike-line) !important;
+}
+/* The settings chooser remains usable even if account synchronization fails. */
+html[data-spike-style] body[data-spike-page="settings"] #theme {
+  background: var(--spike-surface-2) !important;
+  color: var(--spike-text) !important;
+  border: 1px solid var(--spike-line) !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+

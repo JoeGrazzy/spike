@@ -1,0 +1,66 @@
+/* SPIKE profile five-theme polish — loaded after legacy profile component CSS. */
+/* Profile page compatibility bridge. Older profile widgets used page-local
+   dark palettes; normalize their chrome through the five canonical tokens. */
+html[data-spike-style] body[data-spike-page="profile"] {
+  color: var(--spike-text) !important; background: var(--spike-bg) !important;
+}
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-hero,.profile-cover,.profile-content,.profile-section,.profile-card,
+  .profile-stat,.profile-stat-card,.profile-tabs,.profile-tab-panel,.profile-post-card,
+  .profile-empty,.profile-info-card,.profile-link-card,.profile-feature-card,
+  .profile-command-modal,.profile-theme-sheet,.privacy-premium-panel,.qr-sheet,
+  .connect-card,.modal,.modal-content,.modal-card,.card,.panel,.section
+) {
+  background-color: var(--spike-surface) !important; color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-command-head,.profile-theme-head,.profile-command-foot,.profile-tabs,
+  .profile-stat,.profile-stat-card,.profile-info-row,.profile-detail-row
+) { border-color: var(--spike-line) !important; }
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-command-heading h2,.profile-command-action strong,.profile-theme-option strong,
+  .profile-name,.profile-display-name,.profile-title,.profile-stat strong,
+  .profile-section h2,.profile-section h3,.profile-card h2,.profile-card h3,
+  .profile-command-modal h2,.profile-theme-sheet h2
+) { color: var(--spike-text) !important; }
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-command-heading p,.profile-command-action small,.profile-theme-option small,
+  .profile-bio,.profile-muted,.profile-meta,.profile-stat span,.feature-muted,
+  .profile-command-foot,.profile-section p,.profile-card p,.profile-empty p
+) { color: var(--spike-muted) !important; }
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-command-action,.profile-theme-option,.profile-command-close,
+  .profile-theme-head button,.profile-tab,.profile-action,.btn:not(.primary),
+  .qr-btn,.scanner-icon-btn,.icon-btn,.iconbtn
+) {
+  background: var(--spike-surface-2) !important; color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important;
+}
+html[data-spike-style] body[data-spike-page="profile"] :is(
+  .profile-command-action:hover,.profile-theme-option:hover,.profile-tab:hover,
+  .profile-action:hover,.btn:not(.primary):hover,.qr-btn:hover
+) { background: color-mix(in srgb,var(--spike-accent) 10%,var(--spike-surface-2)) !important; }
+html[data-spike-style] body[data-spike-page="profile"] :is(input,textarea,select) {
+  background: var(--spike-surface-2) !important; color: var(--spike-text) !important;
+  border-color: var(--spike-line) !important; color-scheme: var(--spike-theme-color-scheme,normal);
+}
+html[data-spike-style] body[data-spike-page="profile"] :is(input,textarea,select)::placeholder { color: var(--spike-muted) !important; }
+html[data-spike-style] body[data-spike-page="profile"] :is(a,.profile-link,.profile-command-arrow) { color: var(--spike-accent); }
+html[data-spike-style] body[data-spike-page="profile"] :is(button,a,input,textarea,select,[tabindex]):focus-visible {
+  outline: 3px solid var(--spike-focus) !important; outline-offset: 2px !important;
+}
+html[data-spike-style="2"] body[data-spike-page="profile"],
+html[data-spike-style="4"] body[data-spike-page="profile"] { color-scheme: light; }
+html[data-spike-style="2"] body[data-spike-page="profile"] :is(.profile-command-icon,.theme-swatch),
+html[data-spike-style="4"] body[data-spike-page="profile"] :is(.profile-command-icon,.theme-swatch) {
+  color: var(--spike-accent) !important;
+}
+
+html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-state {
+  min-height:100vh; display:grid; place-items:center; padding:24px; text-align:center;
+  background:var(--spike-bg); color:var(--spike-text); font-family:var(--spike-font,system-ui);
+}
+html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-icon { font-size:42px; }
+html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-state p { color:var(--spike-muted); }
+html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-state a { color:var(--spike-accent); }

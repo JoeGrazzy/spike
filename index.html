@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en" translate="no">
+<head>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://veagqanfilmbchlvlpcc.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="//veagqanfilmbchlvlpcc.supabase.co">
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.1"></script>
+<script defer src="js/spike-platform-bootstrap.js"></script>
+
+<meta name="google" content="notranslate">
+  <script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090d">
+<meta name="description" content="Stay close to the people who matter. Sign in or join SPIKE.">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>SPIKE — Welcome</title>
+<link rel="icon" type="image/webp" href="assets/icon/icon.webp">
+<link rel="stylesheet" href="css/index.css">
+<link rel="stylesheet" href="css/perf.css">
+
+
+
+
+<script src="js/spike-dialog.js"></script>
+  <link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-theme-final-authority.css">
+
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+  <link href="css/spike-theme-experience.css" rel="stylesheet"/>
+<link href="css/spike-index-authority.css" rel="stylesheet"/>
+  
+<link rel="stylesheet" href="css/spike-android-fullscreen.css">
+
+<script src="js/spike-loader-core.js" defer></script>
+  <link rel="stylesheet" href="css/spike-premium-loader.css">
+
+<script src="js/spike-welcome.js" defer></script>
+
+<link rel="stylesheet" href="css/spike-ux-refinement.css">
+<link rel="stylesheet" href="css/spike-global-page-authority.css">
+<link rel="stylesheet" href="css/spike-theme-runtime.css">
+<link rel="stylesheet" href="css/spike-five-theme-authority.css">
+<link rel="stylesheet" href="css/spike-touch-hover-guard.css">
+<link rel="stylesheet" href="css/ui-fix.css">
+<script src="js/theme.js" defer></script>
+<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
+    <link rel="stylesheet" href="css/spike-future-engine.css">
+<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
+<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
+<link rel="stylesheet" href="css/spike-index-visual-upgrade.css">
+<link rel="stylesheet" href="css/spike-auth-flow-upgrade.css">
+<link rel="stylesheet" href="css/spike-compact-premium.css">
+  <link rel="stylesheet" href="css/spike-select-experience.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
+<link rel="stylesheet" href="css/spike-index-modern.css">
+
+<link rel="stylesheet" href="css/spike-index-mobile-rebuild.css">
+</head>
+<body data-spike-page="index">
+<div class="loader spike-profile-loader" id="loader" role="status" aria-live="polite" aria-atomic="true" aria-label="Getting SPIKE ready">
+  <div class="spike-profile-loader-card">
+    <div class="spike-loader-brand" aria-label="SPIKE"><span class="spike-loader-monogram">S</span><span class="spike-loader-wordmark">SPIKE</span></div>
+    <div class="spike-profile-orbit" aria-hidden="true"><span class="spike-profile-orbit-ring"></span><span class="spike-profile-orbit-core">S</span><i></i></div>
+    <div class="spike-profile-loader-copy"><span class="spike-profile-eyebrow">YOUR WORLD. YOUR CONNECTIONS.</span><strong class="spike-profile-loader-title">Getting SPIKE ready</strong><span class="spike-profile-loader-subtitle">Preparing your secure SPIKE experience</span></div>
+    <div class="spike-profile-progress" aria-hidden="true"><span></span></div>
+    <div class="spike-profile-loader-foot"><span class="spike-profile-live-dot"></span><span>STARTING SPIKE</span></div>
+  </div>
+</div>
+<script>
+/* Production-safe login boot watchdog: registered before page feature scripts. */
+(()=>{
+  const loader=document.getElementById('loader');
+  if(!loader)return;
+  let released=false;
+  const release=()=>{
+    if(released)return;
+    released=true;
+    loader.classList.add('hide');
+    loader.setAttribute('aria-hidden','true');
+  };
+  window.SPIKE_HIDE_BOOT_LOADER=release;
+  window.setTimeout(()=>{
+    if(!window.SPIKE_AUTH_READY){
+      const status=document.getElementById('status');
+      if(status&&!status.textContent){
+        status.textContent='SPIKE is taking longer than expected to start. You can still retry sign-in or refresh the page.';
+        status.className='status show error';
+      }
+    }
+    release();
+  },10000);
+})();
+</script>
+
+<div class="auth-page">
+  <section class="hero" aria-label="SPIKE introduction">
+    <div class="hero-inner">
+      <div class="brand-row"><img class="brand-mark" src="assets/icon/icon.webp" alt="SPIKE"><span class="brand-name">SPIKE</span></div>
+      <div class="hero-copy">
+        <span class="eyebrow">Stay close to what matters</span>
+        <h1>Your people.<br><span>Your moments.</span></h1>
+        <p>Share what matters, talk with friends, stay connected — all in one calm place.</p>
+        <div class="feature-strip" aria-label="SPIKE features">
+          <span class="feature-chip">Feed</span><span class="feature-chip">Messages</span><span class="feature-chip">Friends</span><span class="feature-chip">Discover</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-foot"><span>© 2026 SPIKE. All Rights Reserved.</span><a href="legal-center.html">Legal</a><a href="policy.html">Privacy &amp; Safety</a></div>
+  </section>
+
+  <section class="auth-side" aria-label="Account access">
+    <div class="auth-wrap">
+      <div class="tabs" role="tablist" aria-label="Account access">
+        <button class="tab active" id="loginTab" type="button" role="tab" aria-selected="true" aria-controls="loginPanel">Sign In</button>
+        <button class="tab" id="registerTab" type="button" role="tab" aria-selected="false" aria-controls="registerPanel">Join SPIKE</button>
+      </div>
+      <section class="auth-card">
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+
+        <section class="panel active" id="loginPanel" role="tabpanel" aria-labelledby="loginTab">
+          <h3 class="title">Welcome back</h3><p class="subtitle">Good to see you again.</p>
+          <form id="loginForm" novalidate>
+            <div class="field"><label class="label" for="loginEmail">Email</label><div class="input-wrap"><input id="loginEmail" type="email" autocomplete="email" placeholder="you@example.com" required aria-describedby="loginEmailHint"><div class="field-hint" id="loginEmailHint">Use the email connected to your SPIKE account.</div></div></div>
+            <div class="field"><label class="label" for="loginPassword">Password</label><div class="input-wrap"><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password" required aria-describedby="loginPasswordHint"><button class="password-toggle" type="button" data-target="loginPassword">Show</button><div class="field-hint" id="loginPasswordHint">Passwords are case-sensitive.</div></div></div>
+            <div class="row"><label class="check"><input id="remember" type="checkbox" checked> Remember me</label><button class="link" type="button" id="forgotBtn">Forgot password?</button></div>
+            <button class="primary" id="loginBtn" type="submit">Sign In</button>
+          </form>
+          <div class="oauth-divider"><span>or continue with</span></div>
+          <div class="oauth-grid">
+            <button class="oauth-btn" id="googleLoginBtn" type="button"><span class="oauth-icon google-icon"><svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.61 20.083H42V20H24v8h11.303C33.65 32.657 29.178 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.153 7.967 3.033L37.627 9.373C34.046 6.053 29.31 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.39-3.917Z"/><path fill="#FF3D00" d="M6.306 14.691 12.88 19.51C14.657 15.108 18.999 12 24 12c3.059 0 5.842 1.153 7.967 3.033L37.627 9.373C34.046 6.053 29.31 4 24 4 16.318 4 9.656 8.337 6.306 14.691Z"/><path fill="#4CAF50" d="M24 44c5.209 0 9.869-1.997 13.409-5.255l-6.19-5.238C29.135 35.091 26.715 36 24 36c-5.157 0-9.616-3.318-11.283-7.946l-6.525 5.026C9.532 39.482 16.227 44 24 44Z"/><path fill="#1976D2" d="M43.61 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.084 5.507l.003-.002 6.19 5.238C36.973 39.21 44 34 44 24c0-1.341-.138-2.65-.39-3.917Z"/></svg></span><span>Google</span></button>
+            <button class="oauth-btn" id="githubLoginBtn" type="button"><span class="oauth-icon github-icon"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 .297a12 12 0 0 0-3.79 23.39c.6.111.82-.26.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.73.083-.73 1.205.085 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.304 3.492.997.108-.775.418-1.305.762-1.605-2.665-.303-5.467-1.332-5.467-5.93 0-1.31.465-2.377 1.235-3.221-.124-.303-.535-1.523.117-3.176 0 0 1.008-.322 3.301 1.23A11.49 11.49 0 0 1 12 6.844c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.873.118 3.176.77.844 1.233 1.911 1.233 3.221 0 4.61-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .32.216.694.825.576A12 12 0 0 0 12 .297Z"/></svg></span><span>GitHub</span></button>
+          </div>
+          <div class="bottom">New to SPIKE? <button type="button" id="goCreate">Create an account</button></div>
+        </section>
+
+        <section class="panel" id="registerPanel" role="tabpanel" aria-labelledby="registerTab">
+          <h3 class="title">Join SPIKE</h3><p class="subtitle">Create your account and start connecting.</p>
+          <div class="form-note">Your SPK ID is created automatically when your account is ready.</div>
+          <form id="registerForm" novalidate>
+            <div class="field"><label class="label" for="regName">Full name</label><div class="input-wrap"><input id="regName" type="text" minlength="2" maxlength="100" autocomplete="name" placeholder="Your full name" required><div class="field-hint" id="regNameHint">This is the name shown on your profile.</div></div></div>
+            <div class="field"><label class="label" for="regEmail">Email</label><div class="input-wrap"><input id="regEmail" type="email" autocomplete="email" placeholder="you@example.com" required><div class="field-hint" id="regEmailHint">Use an email you can access for password recovery.</div></div></div>
+            <div class="field"><label class="label" for="regPassword">Password</label><div class="input-wrap"><input id="regPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Create a strong password" required><button class="password-toggle" type="button" data-target="regPassword">Show</button></div></div>
+            <div class="strength"><div class="strength-bars"><span id="b1"></span><span id="b2"></span><span id="b3"></span><span id="b4"></span></div><div id="strengthText">Use 8+ characters</div></div>
+            <div class="password-help"><button type="button" id="passwordHelpBtn" aria-controls="passwordRequirements" aria-expanded="false">Password requirements</button></div>
+            <div class="requirements" id="passwordRequirements"><span class="req" id="r1">○ 8+ characters</span><span class="req" id="r2">○ Upper &amp; lowercase</span><span class="req" id="r3">○ Contains a number</span><span class="req" id="r4">○ Special character</span></div>
+            <div class="field"><label class="label" for="regConfirm">Confirm password</label><div class="input-wrap"><input id="regConfirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" placeholder="Repeat your password" required></div></div>
+            <div class="terms"><label class="check"><input id="terms" type="checkbox" required> I agree to the <a href="legal-center.html" class="link">Terms</a> and <a href="policy.html" class="link">Privacy Policy</a></label></div>
+            <button class="primary" id="registerBtn" type="submit">Join SPIKE</button>
+          </form>
+          <div class="bottom">Already have an account? <button type="button" id="goLogin">Sign in</button></div>
+        </section>
+
+        <section class="panel" id="forgotPanel" role="tabpanel">
+          <button class="back-link" id="forgotBackBtn" type="button">← Back to sign in</button>
+          <h3 class="title" id="forgotTitle">Reset your password</h3><p class="subtitle">Enter your email and we'll send a secure password reset link.</p>
+          <form id="resetForm" novalidate><div class="field"><label class="label" for="resetEmail">Email</label><div class="input-wrap"><input id="resetEmail" type="email" autocomplete="email" placeholder="you@example.com" required></div></div><button class="primary" id="resetBtn" type="submit">Send Reset Link</button></form>
+        </section>
+
+      </section>
+    </div>
+  </section>
+</div>
+
+<div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+<div id="successModal" class="success-modal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+  <div class="success-card">
+    <div class="success-badge">✓</div>
+    <h2 id="welcomeTitle">Welcome to SPIKE!</h2>
+    <p id="welcomeIntro">Your account is ready.</p>
+    <div class="spid" id="spidValue">SPK-000000</div>
+    <p id="welcomeDetails">Your SPK ID is your unique SPIKE account identification number.</p>
+    <p id="welcomeNote" style="margin-top:7px">Keep it handy.</p>
+    <div class="success-actions" style="margin-top:16px"><button class="copy-btn" id="copySpid" type="button">Copy SPK ID</button><button class="continue-btn" id="continueBtn" type="button">Enter SPIKE</button></div>
+  </div>
+</div>
+
+<script src="js/spike-navigation.js"></script>
+
+
+
+
+
+
+
+
+<script src="js/spike-feedback-center.js"></script>
+    <script src="js/spike-future-engine.js" defer></script>
+  <script src="js/spike-select-experience.js"></script>
+<script type="module" src="js/spike-auth.js"></script>
+</body></html>

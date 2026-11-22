@@ -1,0 +1,63 @@
+/* SPIKE MOBILE COMPACT AUTHORITY V1
+   Shared responsive containment layer. Page-specific components retain their own visual identity.
+*/
+:root{
+  --spike-mobile-gutter:clamp(10px,3.2vw,16px);
+  --spike-mobile-gap:clamp(8px,2.4vw,12px);
+  --spike-control-height:40px;
+}
+html{max-width:100%;min-width:0;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+body{max-width:100%;min-width:0;overflow-x:clip;}
+ :where(.flex,.row,.grid,.header,.header-actions,.top,.topin,.wrap,.main,.content,.app,.toolbar,.action-row) > *{min-width:0;}
+img,video,canvas,iframe,svg{max-width:100%;}
+button,input,select,textarea{max-width:100%;}
+:where(main,.main,.page-main,.page-content,.workspace,.dashboard-content,.scv-shell,.sc-shell,.social-page,.shell,.wallet-shell,.hc-wrap,.titlewrap,.search-wrap,.wrap){min-width:0;max-width:100%;}
+:where(table){max-width:100%;}
+:where(pre,code){overflow-wrap:anywhere;}
+:where([role=dialog],.modal,.modal-card,.dialog,.drawer,.sheet,.sheet-wrap,.spike-menu-sheet){max-width:min(100vw,100%);}
+@media(max-width:600px){
+  :root{--spike-mobile-gutter:12px;--spike-mobile-gap:9px;}
+  body{padding-left:0;padding-right:0;}
+  :where(main,.main,.page-main,.page-content,.workspace,.dashboard-content,.scv-shell,.sc-shell,.social-page,.shell,.wallet-shell,.hc-wrap,.titlewrap,.search-wrap,.wrap){
+    width:100%;max-width:100%;margin-inline:auto;
+    padding-left:var(--spike-mobile-gutter);padding-right:var(--spike-mobile-gutter);
+  }
+  :where(.card,.panel,.surface,.section-card,.settings-card,.list-card,.workspace-card){
+    min-width:0;max-width:100%;
+  }
+  :where(.card,.panel,.surface,.section-card,.settings-card,.list-card,.workspace-card) :where(img,video,iframe){max-width:100%;}
+  :where(h1){font-size:clamp(1.25rem,5.2vw,1.65rem);line-height:1.2;}
+  :where(h2){font-size:clamp(1.08rem,4.5vw,1.35rem);line-height:1.25;}
+  :where(h3){font-size:clamp(1rem,4vw,1.15rem);line-height:1.3;}
+  :where(p,li){overflow-wrap:anywhere;}
+  :where(button,input,select,textarea){font-size:16px;}
+  :where(button){min-height:38px;}
+  :where(input,select,textarea){min-height:40px;}
+  :where(textarea){min-height:76px;}
+  :where(.header,.topbar,.top,.chat-head){max-width:100%;}
+  :where(.header,.topbar,.top,.chat-head) :where(button,a){min-width:38px;}
+  :where(.filters,.tabs,.tab-list,.toolbar,.action-row,.header-actions,.top-actions){
+    max-width:100%;min-width:0;flex-wrap:wrap;
+  }
+  :where(.filters,.tabs,.tab-list){overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;}
+  :where(.filters,.tabs,.tab-list)::-webkit-scrollbar{display:none;}
+  :where(table){display:block;width:100%;overflow-x:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;}
+  :where([role=dialog],.modal,.modal-card,.dialog,.drawer,.sheet,.sheet-wrap,.spike-menu-sheet){
+    max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 16px);
+    overflow:auto;overscroll-behavior:contain;
+  }
+  :where(.spike-bottom-nav,nav.bottom-nav){max-width:100vw;}
+  :where(.composer,.message-composer,.chat-composer){max-width:100%;}
+  :where(.grid,.cards-grid,.dashboard-grid){min-width:0;}
+}
+@media(max-width:380px){
+  :root{--spike-mobile-gutter:10px;}
+  :where(.header,.topbar,.top,.chat-head){gap:6px;}
+  :where(.header,.topbar,.top,.chat-head) :where(.title,h1){max-width:55vw;}
+}
+@media(orientation:landscape) and (max-height:500px){
+  :where([role=dialog],.modal,.modal-card,.dialog,.drawer,.sheet,.sheet-wrap){max-height:calc(100dvh - 12px);}
+}
+@media(prefers-reduced-motion:reduce){
+  :where(*, *::before, *::after){scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}

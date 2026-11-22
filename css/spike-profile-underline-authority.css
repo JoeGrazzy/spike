@@ -1,0 +1,26 @@
+/* SPIKE Profile underline authority — loaded after every profile/theme stylesheet.
+   Keep separators and focus outlines; remove only text-decoration styling. */
+html body[data-spike-page="profile"] *,
+html body[data-spike-page="profile"] *::before,
+html body[data-spike-page="profile"] *::after {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  text-decoration-style: solid !important;
+  text-decoration-color: transparent !important;
+  text-decoration-thickness: 0 !important;
+  text-underline-offset: 0 !important;
+  -webkit-text-decoration: none !important;
+}
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary, label, u, ins),
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary, label, u, ins) * {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+  -webkit-text-decoration: none !important;
+}
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary)::before,
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary)::after,
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary) *::before,
+html body[data-spike-page="profile"] :is(a, button, [role="button"], [role="tab"], summary) *::after {
+  text-decoration: none !important;
+  text-decoration-line: none !important;
+}
