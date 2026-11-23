@@ -8,7 +8,7 @@
   const state = {
     db: null, me: null, tab: 'all', friends: [], suggestions: [], recommendations: [],
     verified: new Set(), busy: new Set(), presence: new Map(), blocked: [], activity: [], search: '', discoverOffset: 0, discoverHasMore: true,
-    loading: false, refreshPromise: null, poll: null, searchTimer: null, discoverQuery: '', discoverRequest: 0, recommendationRequest: 0
+    loading: false, refreshPromise: null, poll: null, presenceHandler: null, searchTimer: null, discoverQuery: '', discoverRequest: 0, recommendationRequest: 0
   };
   const escapeText = value => String(value ?? '');
   const profileUrl = id => `user-profile.html?uid=${encodeURIComponent(id)}`;
@@ -74,8 +74,9 @@
   }
 
   async function loadPresence() {
-    const { data, error } = await state.db.rpc('spike_get_friends_presence');
-    if (error) throw error;
+    let data;
+    if (window.SPIKE_PRESENCE) { const snapshot=window.SPIKE_PRESENCE.getSnapshot(); data=snapshot.length?snapshot:await window.SPIKE_PRESENCE.refresh(); }
+    else { const result=await state.db.rpc('spike_get_friends_presence'); if(result.error)throw result.error; data=result.data; }
     state.presence = new Map((Array.isArray(data) ? data : []).map(row => [String(row.user_id), {
       online: row.is_online === true,
       lastSeenAt: row.last_seen_at || null
@@ -435,13 +436,21 @@
     // Connection data is mostly static; refresh only presence in the background.
     // Re-fetching follows, blocks, recommendations and activity every 30s caused
     // avoidable database traffic and repeated full-list rendering.
-    const refreshPresenceOnly = async () => {
+    const refreshPresenceOnly = rows => {
       if (document.hidden || !navigator.onLine || state.refreshPromise) return;
-      try { await loadPresence(); render(); } catch (error) { console.info('[SPIKE FRIENDS PRESENCE]', error?.message || error); }
+      const data=Array.isArray(rows)?rows:(window.SPIKE_PRESENCE?.getSnapshot?.()||[]);
+      state.presence=new Map(data.map(row=>[String(row.user_id),{online:row.is_online===true,lastSeenAt:row.last_seen_at||null}]));
+      state.friends=state.friends.map(person=>({...person,presence:state.presence.get(person.id)||null}));
+      render();
     };
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshPresenceOnly(); });
-    state.poll = setInterval(refreshPresenceOnly, 60000);
-    window.addEventListener('pagehide', () => clearInterval(state.poll), { once: true });
+    if(window.SPIKE_PRESENCE){
+      state.presenceHandler=event=>refreshPresenceOnly(event.detail?.rows);
+      window.addEventListener('spike:presence-update',state.presenceHandler);
+      refreshPresenceOnly();
+    } else {
+      state.poll=setInterval(async()=>{try{await loadPresence();render();}catch(error){console.info('[SPIKE FRIENDS PRESENCE]',error?.message||error);}},60000);
+    }
+    window.addEventListener('pagehide',()=>{if(state.poll)clearInterval(state.poll);if(state.presenceHandler)window.removeEventListener('spike:presence-update',state.presenceHandler);},{once:true});
   }
 
   boot().catch(error => {

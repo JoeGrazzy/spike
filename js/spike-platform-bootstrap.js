@@ -23,6 +23,13 @@
   let activityHeartbeatBusy = false;
   let lastActivityHeartbeatAt = 0;
   let heartbeatTimer = null;
+  let presenceTimer = null;
+  let presenceBusy = false;
+  let presenceRefreshPromise = null;
+  let presenceRefreshUserId = null;
+  let presenceRows = [];
+  let presenceLoaded = false;
+  let lastPresenceRefreshAt = 0;
   let currentSession = null;
   const HEARTBEAT_INTERVAL = 60000;
   const HEARTBEAT_COOLDOWN = 25000;
@@ -50,24 +57,73 @@
     }
   };
 
+  const stopPresence = () => {
+    if (presenceTimer !== null) window.clearInterval(presenceTimer);
+    presenceTimer = null;
+  };
+  const refreshPresence = async ({ force = false } = {}) => {
+    if (!currentSession?.user || document.visibilityState === 'hidden' || !navigator.onLine) return presenceRows;
+    const requestingUserId = currentSession.user.id;
+    if (presenceRefreshPromise && presenceRefreshUserId === requestingUserId) return presenceRefreshPromise;
+    if (!force && Date.now() - lastPresenceRefreshAt < 12000) return presenceRows;
+    presenceBusy = true;
+    const request = (async () => {
+      try {
+        const { data, error } = await client.rpc('spike_get_friends_presence');
+        if (error) throw error;
+        if (currentSession?.user?.id !== requestingUserId) return presenceRows;
+        presenceRows = Array.isArray(data) ? data : [];
+        presenceLoaded = true;
+        lastPresenceRefreshAt = Date.now();
+        window.dispatchEvent(new CustomEvent('spike:presence-update', { detail: { rows: presenceRows, at: lastPresenceRefreshAt } }));
+      } catch (error) {
+        console.info('[SPIKE presence] Shared presence refresh unavailable:', error?.message || error);
+      } finally {
+        if (presenceRefreshPromise === request) { presenceBusy = false; presenceRefreshPromise = null; presenceRefreshUserId = null; }
+      }
+      return presenceRows;
+    })();
+    presenceRefreshPromise = request;
+    presenceRefreshUserId = requestingUserId;
+    return request;
+  };
+  const startPresence = () => {
+    if (presenceTimer !== null || !currentSession?.user || document.visibilityState === 'hidden') return;
+    void refreshPresence({ force: true });
+    presenceTimer = window.setInterval(() => { void refreshPresence(); }, 30000);
+  };
+  window.SPIKE_PRESENCE = Object.freeze({
+    getSnapshot: () => presenceRows.slice(),
+    isLoaded: () => presenceLoaded,
+    getUser: id => presenceRows.find(row => String(row.user_id) === String(id)) || null,
+    refresh: () => refreshPresence({ force: true }),
+    subscribe: callback => {
+      const handler = event => callback(event.detail?.rows || []);
+      window.addEventListener('spike:presence-update', handler);
+      return () => window.removeEventListener('spike:presence-update', handler);
+    }
+  });
+
   client.auth.onAuthStateChange((event, session) => {
     currentSession = session || null;
     if (currentSession?.user) {
       startHeartbeat();
+      startPresence();
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
         window.setTimeout(() => { void touchSpikeActivity({ force: true }); }, 0);
       }
     } else {
       stopHeartbeat();
-      if (event === 'SIGNED_OUT') lastActivityHeartbeatAt = 0;
+      stopPresence();
+      if (event === 'SIGNED_OUT') { lastActivityHeartbeatAt = 0; presenceRows = []; presenceLoaded = true; lastPresenceRefreshAt = 0; window.dispatchEvent(new CustomEvent('spike:presence-update', { detail: { rows: [], at: 0 } })); }
     }
   });
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') stopHeartbeat();
-    else { startHeartbeat(); void touchSpikeActivity(); }
+    if (document.visibilityState === 'hidden') { stopHeartbeat(); stopPresence(); }
+    else { startHeartbeat(); startPresence(); void touchSpikeActivity(); }
   });
-  window.addEventListener('online', () => { startHeartbeat(); void touchSpikeActivity(); });
-  window.addEventListener('pagehide', stopHeartbeat, { once: true });
+  window.addEventListener('online', () => { startHeartbeat(); startPresence(); void touchSpikeActivity(); });
+  window.addEventListener('pagehide', () => { stopHeartbeat(); stopPresence(); }, { once: true });
   window.SPIKE_PLATFORM = Object.freeze({
     getClient: () => client,
     getSession: async () => {
@@ -80,7 +136,7 @@
       if (error) throw error;
       return data.user;
     },
-    signOut: () => client.auth.signOut()
+    signOut: async () => { try { await window.SPIKE_CALLS?.end('Call ended because you signed out.'); } catch (_) {} return client.auth.signOut(); }
   });
 
   const social = {

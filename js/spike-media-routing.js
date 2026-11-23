@@ -18,7 +18,7 @@
   const uuid = () => (window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2)}`);
   const MIME_BY_EXTENSION = { zip:'application/zip', rar:'application/vnd.rar', '7z':'application/x-7z-compressed', pdf:'application/pdf', txt:'text/plain', csv:'text/csv', json:'application/json', doc:'application/msword', docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document', xls:'application/vnd.ms-excel', xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', ppt:'application/vnd.ms-powerpoint', pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
   const mimeFor = (file) => {
-    const declared = String(file?.type || '').toLowerCase();
+    const declared = String(file?.type || '').toLowerCase().split(';', 1)[0].trim();
     if (declared && declared !== 'application/octet-stream') return declared;
     const ext = String(file?.name || '').split('.').pop().toLowerCase();
     return MIME_BY_EXTENSION[ext] || declared || 'application/octet-stream';

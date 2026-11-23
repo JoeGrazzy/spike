@@ -3,9 +3,9 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), camera=(self), microphone=(self), payment=(), usb=()
-  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://veagqanfilmbchlvlpcc.supabase.co wss://veagqanfilmbchlvlpcc.supabase.co https://api.cloudinary.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; connect-src 'self' https://veagqanfilmbchlvlpcc.supabase.co wss://veagqanfilmbchlvlpcc.supabase.co https://api.cloudinary.com; media-src 'self' blob: https:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
 
-# HTML must never be cached aggressively — prevents stale offline / broken shells
+# HTML shells must revalidate so deployments never leave users on stale application code.
 /*.html
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
@@ -14,22 +14,13 @@
   Cache-Control: no-cache, no-store, must-revalidate, max-age=0
   Pragma: no-cache
 
-/room.html
-  Cache-Control: no-store, no-cache, must-revalidate, max-age=0
-  Pragma: no-cache
+# Versioned deployments may cache application code briefly; files are not content-hashed.
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
 
-# Long-lived immutable assets
-/css/spike-menu-final-v10.css
-  Cache-Control: public, max-age=31536000, immutable
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
 
-/css/spike-room-page.css
-  Cache-Control: public, max-age=31536000, immutable
-
-/js/spike-room-page.js
-  Cache-Control: public, max-age=31536000, immutable
-
-/js/spike-room-chat-v2.js
-  Cache-Control: public, max-age=31536000, immutable
-
-/js/supabase.min.js
-  Cache-Control: public, max-age=31536000, immutable
+# Stable media and fonts can be cached for one week.
+/assets/*
+  Cache-Control: public, max-age=604800

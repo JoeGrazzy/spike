@@ -1,10 +1,11 @@
 {
-  "$schema": "https://unpkg.com/wrangler@latest/config-schema.json",
-  "name": "spike-frontend",
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "spike",
+  "main": "worker.js",
   "compatibility_date": "2025-09-04",
   "assets": {
     "directory": ".",
-    "not_found_handling": "404-page",
-    "exclude": [".git/**", ".github/**", "docs/**", "tests/**", "node_modules/**", "build.js", "package.json", "*.md", "wrangler.jsonc"]
+    "binding": "ASSETS",
+    "not_found_handling": "404-page"
   }
 }

@@ -10,8 +10,11 @@
   const time = value => value ? new Date(value).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
   const day = value => { if(!value)return ''; const d=new Date(value); if(Number.isNaN(d.getTime()))return ''; const now=new Date(); const same=d.toDateString()===now.toDateString(); const yesterday=new Date(now); yesterday.setDate(now.getDate()-1); return same?d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):d.toDateString()===yesterday.toDateString()?'Yesterday':d.toLocaleDateString([],{month:'short',day:'numeric'}); };
   const presenceLabel = row => { if(!row)return 'Presence unavailable'; if(row.online)return 'Online now'; if(row.lastSeenAt){const d=new Date(row.lastSeenAt);if(!Number.isNaN(d.getTime()))return `Last seen ${day(d)}`;} return 'Offline'; };
-  let user = null, conversationId = null, channel = null, inboxChannel = null, oldest = null, busy = false, currentPeer = null, inboxRefreshQueued = false, selectedMessage = null, replyToId = null, newIncomingCount = 0, pendingIncomingConversationId = null, threadPresenceTimer = null;
+  let user = null, conversationId = null, channel = null, inboxChannel = null, oldest = null, busy = false, currentPeer = null, currentPeerId = null, inboxRefreshQueued = false, selectedMessage = null, replyToId = null, newIncomingCount = 0, pendingIncomingConversationId = null, threadPresenceTimer = null, typingStopTimer = null, peerTypingTimer = null, lastTypingSentAt = 0, peerTypingUntil = 0, currentConversationIsGroup = false;
   const say = (message, error = false) => { const node = $('status') || $('notice'); if (node) { node.textContent = message; node.classList.toggle('error', !!error); if (node.id === 'notice') node.hidden = false; } };
+  const renderPeerTyping = () => { const node=$('typingIndicator'); if(!node)return; const active=peerTypingUntil>Date.now(); node.hidden=!active; node.textContent=active?(currentConversationIsGroup?'A member is typing…':`${currentPeer?.display_name||currentPeer?.username||'Someone'} is typing…`):''; };
+  const sendTyping = async typing => { if(!channel || !conversationId || !user || $('body')?.disabled)return; try { await channel.send({type:'broadcast',event:'typing',payload:{user_id:user.id,typing:!!typing,at:Date.now()}}); } catch(error) { console.info('[SPIKE messaging] typing signal unavailable',error?.message||error); } };
+  const scheduleTyping = () => { if(!channel)return; const now=Date.now(); if(now-lastTypingSentAt>900){lastTypingSentAt=now;void sendTyping(true);} if(typingStopTimer)clearTimeout(typingStopTimer); typingStopTimer=window.setTimeout(()=>{void sendTyping(false);typingStopTimer=null;},1600); };
   const getUser = async () => { const {data,error} = await db().auth.getUser(); if (error) throw error; if (!data.user) throw new Error('Please sign in again.'); return data.user; };
 
   async function openOrCreateConversation() {
@@ -50,8 +53,8 @@
   }
 
   async function getInboxPresence() {
-    const result = await db().rpc('spike_get_friends_presence');
-    if(result.error) { console.warn('[SPIKE inbox presence]',result.error.message||result.error); return new Map(); }
+    if(window.SPIKE_PRESENCE){let rows=window.SPIKE_PRESENCE.getSnapshot();if(!window.SPIKE_PRESENCE.isLoaded?.())rows=await window.SPIKE_PRESENCE.refresh();return new Map((rows||[]).map(row=>[String(row.user_id),{online:row.is_online===true,lastSeenAt:row.last_seen_at||null}]));}
+    const result=await db().rpc('spike_get_friends_presence');if(result.error){console.warn('[SPIKE inbox presence]',result.error.message||result.error);return new Map();}
     return new Map((result.data||[]).map(row=>[String(row.user_id),{online:row.is_online===true,lastSeenAt:row.last_seen_at||null}]));
   }
 
@@ -59,7 +62,7 @@
     const list = $('list');
     if (!list || !user || document.hidden || !navigator.onLine) return;
     try {
-      const presence = await getInboxPresence();
+      const presence = window.SPIKE_PRESENCE ? new Map(window.SPIKE_PRESENCE.getSnapshot().map(row=>[String(row.user_id),{online:row.is_online===true,lastSeenAt:row.last_seen_at||null}])) : await getInboxPresence();
       list.querySelectorAll('.item[data-peer-id]').forEach(item => {
         const peer = presence.get(item.dataset.peerId);
         const node = item.querySelector('.inbox-presence');
@@ -68,6 +71,7 @@
         node.textContent = presenceLabel(peer);
         node.setAttribute('aria-label', node.textContent);
       });
+      if(contactRows.length){contactRows=contactRows.map(row=>({...row,presence:presence.get(String(row.id))||null})).sort((a,b)=>Number(b.presence?.online===true)-Number(a.presence?.online===true)||String(a.profile.display_name||a.profile.username||'').localeCompare(String(b.profile.display_name||b.profile.username||'')));renderContacts();}
     } catch (error) {
       console.info('[SPIKE inbox presence refresh]', error?.message || error);
     }
@@ -302,6 +306,45 @@
     $('scroll')?.scrollTo({top:$('scroll').scrollHeight,behavior:'smooth'});
   }
 
+  function bindVoiceNotes() {
+    const button=$('voiceNote'), input=$('mediaInput'), tray=$('recordingTray'), cancel=$('voiceRecordingCancel'), label=$('voiceRecordingText');
+    if(!button || !input || button.dataset.voiceBound==='1')return;
+    button.dataset.voiceBound='1';
+    let recorder=null,stream=null,chunks=[],discard=false,startedAt=0,timer=null;
+    const paint=(recording)=>{button.classList.toggle('recording',recording);button.setAttribute('aria-label',recording?'Stop voice note recording':'Record voice note');button.title=recording?'Stop recording':'Record voice note';button.innerHTML=recording?'<i class="fa-solid fa-stop"></i>':'<i class="fa-solid fa-microphone"></i>';};
+    const cleanup=()=>{if(timer)clearInterval(timer);timer=null;stream?.getTracks().forEach(track=>track.stop());stream=null;recorder=null;paint(false);if(tray)tray.hidden=true;};
+    const cancelRecording=()=>{if(!recorder||recorder.state==='inactive')return;discard=true;recorder.stop();};
+    button.addEventListener('click',async()=>{
+      if(recorder?.state==='recording'){recorder.stop();return;}
+      if(!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder==='undefined'){say('Voice recording is not supported by this browser. Try an updated browser over HTTPS.',true);return;}
+      button.disabled=true;
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+        const types=['audio/webm;codecs=opus','audio/mp4'];
+        const mimeType=types.find(type=>MediaRecorder.isTypeSupported?.(type));
+        recorder=new MediaRecorder(stream,mimeType?{mimeType}:undefined);chunks=[];discard=false;startedAt=Date.now();
+        recorder.addEventListener('dataavailable',event=>{if(event.data?.size)chunks.push(event.data);});
+        recorder.addEventListener('stop',()=>{
+          const finalType=recorder?.mimeType||chunks[0]?.type||'audio/webm';
+          const blob=new Blob(chunks,{type:finalType});
+          cleanup();
+          if(discard){chunks=[];say('Voice recording cancelled.');return;}
+          if(!blob.size){say('No audio was captured. Please try again.',true);return;}
+          const ext=finalType.includes('ogg')?'ogg':finalType.includes('mp4')?'m4a':'webm';
+          const file=new File([blob],`spike-voice-${Date.now()}.${ext}`,{type:finalType});
+          try{const transfer=new DataTransfer();transfer.items.add(file);input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));say('Voice note ready. Tap Send to share it privately.');}
+          catch(error){say('The recording is ready but could not be attached. Please try again.',true);console.warn('[SPIKE voice note] file attach failed',error);}
+          chunks=[];
+        },{once:true});
+        recorder.start(250);paint(true);if(tray)tray.hidden=false;
+        const update=()=>{const elapsed=Math.floor((Date.now()-startedAt)/1000);if(label)label.textContent=`Recording voice note · ${elapsed}s`;if(elapsed>=180&&recorder?.state==='recording')recorder.stop();};update();timer=window.setInterval(update,500);
+      }catch(error){cleanup();say(error?.name==='NotAllowedError'?'Microphone permission was denied. Allow microphone access and try again.':error?.message||'Could not start voice recording.',true);}
+      finally{button.disabled=false;}
+    });
+    cancel?.addEventListener('click',cancelRecording);
+    window.addEventListener('pagehide',()=>{discard=true;if(recorder&&recorder.state!=='inactive')recorder.stop();cleanup();},{once:true});
+  }
+
   async function setupThread() {
     const refreshButton=$('refresh');
     if(refreshButton && refreshButton.dataset.messagingBound!=='1'){
@@ -319,7 +362,12 @@
     if(error) throw error;if(conversationError)throw conversationError;
     const peerIds=(members||[]).map(x=>x.user_id).filter(id=>id!==user.id);
     const isGroup=conversation?.kind==='group';
+    if($('voiceCallBtn'))$('voiceCallBtn').hidden=isGroup;
+    if($('videoCallBtn'))$('videoCallBtn').hidden=isGroup; currentConversationIsGroup=isGroup;
     const peerId=peerIds[0];
+    // The call engine needs the resolved recipient ID, not only the profile object.
+    // Groups deliberately have no one-to-one call recipient.
+    currentPeerId = !isGroup && peerId ? String(peerId) : null;
     if(peerId&&!isGroup){
       const {data:allowed,error:privacyError}=await db().rpc('can_message_spike_user',{p_sender:user.id,p_recipient:peerId});
       if(privacyError)throw privacyError;
@@ -348,7 +396,7 @@
         const host=$('name')?.closest('[data-presence-user]');if(host)host.dataset.presenceState=peer?.online?'online':'offline';
       }catch(error){console.info('[SPIKE messaging] peer presence unavailable',error?.message||error);}
     };
-    if(!isGroup&&peerId){await refreshThreadPresence();threadPresenceTimer=window.setInterval(()=>{if(!document.hidden&&navigator.onLine)refreshThreadPresence();},60000);}
+    if(!isGroup&&peerId){await refreshThreadPresence();threadPresenceHandler=()=>{if(!document.hidden&&navigator.onLine)void refreshThreadPresence();};window.addEventListener('spike:presence-update',threadPresenceHandler);}
     if($('avatar')) { $('avatar').replaceChildren(); const imageUrl=!isGroup?avatarUrl(currentPeer.avatar_path):''; if(imageUrl){const img=document.createElement('img');img.src=imageUrl;img.alt='';$('avatar').append(img);}else $('avatar').textContent=isGroup?'G':initials(currentPeer.display_name||currentPeer.username); }
 
     // Bind the composer and controls before loading optional history metadata. A failed
@@ -359,18 +407,20 @@
     $('messageMenuShade')?.querySelectorAll('[data-msg-action]').forEach(button=>button.addEventListener('click',()=>handleMessageAction(button.dataset.msgAction)));
     $('cancelReply')?.addEventListener('click',()=>{replyToId=null;$('replyPreview')?.classList.remove('show');});
     document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMessageMenu();});
+    input?.addEventListener('input',()=>{ if(String(input.value||'').trim())scheduleTyping(); else { if(typingStopTimer)clearTimeout(typingStopTimer); typingStopTimer=null; void sendTyping(false); } });
+    bindVoiceNotes();
     form?.addEventListener('submit',async event=>{
       if(event.defaultPrevented || $('mediaInput')?.files?.length) return;
       event.preventDefault(); if(busy)return;
       const body=String(input?.value||'').trim(); if(!body)return;
       busy=true; const send=$('send'); if(send)send.disabled=true;
-      try { const {data,error}=await db().from('messages').insert({conversation_id:conversationId,sender_id:user.id,body,reply_to_id:replyToId}).select('id,conversation_id,sender_id,body,reply_to_id,attachment_path,attachment_type,is_edited,deleted_at,created_at').single(); if(error)throw error; await appendMessage(data); input.value=''; replyToId=null; $('replyPreview')?.classList.remove('show'); }
+      try { const {data,error}=await db().from('messages').insert({conversation_id:conversationId,sender_id:user.id,body,reply_to_id:replyToId}).select('id,conversation_id,sender_id,body,reply_to_id,attachment_path,attachment_type,is_edited,deleted_at,created_at').single(); if(error)throw error; await appendMessage(data); input.value=''; if(typingStopTimer)clearTimeout(typingStopTimer); typingStopTimer=null; void sendTyping(false); replyToId=null; $('replyPreview')?.classList.remove('show'); }
       catch(error){say(error.message||'Message could not be sent.',true);} finally{busy=false;if(send)send.disabled=false;}
     });
     $('loadOlderMessages')?.addEventListener('click',()=>loadMessages({older:true}).catch(e=>say(e.message,true)));
 
     try {
-      channel=db().channel(`spike-dm-${conversationId}`).on('postgres_changes',{event:'*',schema:'public',table:'messages',filter:`conversation_id=eq.${conversationId}`},async payload=>{
+      channel=db().channel(`spike-dm:${conversationId}`,{config:{private:true,broadcast:{ack:true,self:false}}}).on('broadcast',{event:'typing'},payload=>{const signal=payload?.payload||{};if(!signal.user_id||signal.user_id===user.id)return;peerTypingUntil=signal.typing===true?Date.now()+2600:0;renderPeerTyping();if(peerTypingTimer)clearTimeout(peerTypingTimer);if(peerTypingUntil>Date.now())peerTypingTimer=window.setTimeout(renderPeerTyping,2700);}).on('postgres_changes',{event:'*',schema:'public',table:'messages',filter:`conversation_id=eq.${conversationId}`},async payload=>{
         if(payload.eventType==='UPDATE'){await loadMessages();return;}
         if(payload.eventType!=='INSERT' || payload.new.sender_id===user.id)return;
         const row=payload.new; await appendMessage(row); await markRead();
@@ -467,18 +517,18 @@
     loadInbox().catch(error=>say(error.message||'Could not refresh the inbox.',true));
   }
 
-  let inboxPresenceTimer = null;
+  let inboxPresenceTimer = null, threadPresenceHandler = null;
   async function start(){
     if(!db())throw new Error('SPIKE database is not ready. Reload the page.');
     user=await getUser();
-    if(document.body.dataset.spikePage==='message') { $('voiceNote')?.setAttribute('disabled','disabled'); if($('voiceNote')) $('voiceNote').title='Voice notes are not enabled yet'; await setupThread(); }
-    else { bindContactPicker(); await loadInbox(); inboxPresenceTimer=window.setInterval(refreshInboxPresence,60000); document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshInboxPresence();}); window.addEventListener('online',refreshInboxPresence); inboxChannel=db().channel('spike-inbox-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{ if(payload.new.sender_id===user.id || inboxRefreshQueued)return; inboxRefreshQueued=true; setTimeout(()=>{inboxRefreshQueued=false;showIncomingMessage(payload).catch(e=>say(e.message,true));},250); }).subscribe();
+    if(document.body.dataset.spikePage==='message') { await setupThread(); }
+    else { bindContactPicker(); await loadInbox(); if(window.SPIKE_PRESENCE){window.addEventListener('spike:presence-update',refreshInboxPresence);void refreshInboxPresence();}else{inboxPresenceTimer=window.setInterval(refreshInboxPresence,60000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshInboxPresence();});window.addEventListener('online',refreshInboxPresence);} inboxChannel=db().channel('spike-inbox-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},payload=>{ if(payload.new.sender_id===user.id || inboxRefreshQueued)return; inboxRefreshQueued=true; setTimeout(()=>{inboxRefreshQueued=false;showIncomingMessage(payload).catch(e=>say(e.message,true));},250); }).subscribe();
       $('incomingToastOpen')?.addEventListener('click',()=>{if(!pendingIncomingConversationId)return;newIncomingCount=0;const badge=$('newMessagesBadge');if(badge)badge.hidden=true;location.href=`message.html?conversation_id=${encodeURIComponent(pendingIncomingConversationId)}`;}); }
   }
-  window.SPIKE_MESSAGING = Object.freeze({ getReplyToId:()=>replyToId, clearReply:()=>{replyToId=null;$('replyPreview')?.classList.remove('show');}, appendMessage });
+  window.SPIKE_MESSAGING = Object.freeze({ getReplyToId:()=>replyToId, getCallContext:()=>({conversationId,peerId:currentPeerId,isGroup:currentConversationIsGroup}), clearReply:()=>{replyToId=null;$('replyPreview')?.classList.remove('show');}, appendMessage });
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>start().catch(e=>say(e.message,true)),{once:true});else start().catch(e=>say(e.message,true));
   let inboxSearchTimer=null;
   if($('search')) $('search').addEventListener('input',()=>{clearTimeout(inboxSearchTimer);inboxSearchTimer=window.setTimeout(()=>loadInbox().catch(e=>say(e.message,true)),180);});
   document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===button));loadInbox().catch(e=>say(e.message,true));}));
-  window.addEventListener('pagehide',()=>{if(inboxPresenceTimer)clearInterval(inboxPresenceTimer);if(threadPresenceTimer)clearInterval(threadPresenceTimer);if(channel)db().removeChannel(channel);if(inboxChannel)db().removeChannel(inboxChannel);});
+  window.addEventListener('pagehide',()=>{if(typingStopTimer)clearTimeout(typingStopTimer);if(peerTypingTimer)clearTimeout(peerTypingTimer);if(channel)void sendTyping(false);if(inboxPresenceTimer)clearInterval(inboxPresenceTimer);if(threadPresenceTimer)clearInterval(threadPresenceTimer);window.removeEventListener('spike:presence-update',refreshInboxPresence);if(threadPresenceHandler)window.removeEventListener('spike:presence-update',threadPresenceHandler);if(channel)db().removeChannel(channel);if(inboxChannel)db().removeChannel(inboxChannel);});
 })();

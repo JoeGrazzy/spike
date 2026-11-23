@@ -3,12 +3,13 @@
 <head>
 <script src="js/supabase.min.js"></script>
 <script src="js/spike-platform-bootstrap.js"></script>
+<script src="js/spike-call-engine.js" defer></script>
 
 <meta name="google" content="notranslate">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
   <link rel="stylesheet" href="css/perf.css">
-<script id="spike-theme-bootstrap">(()=>{try{const k="spike-theme-choice-v3",v="spike-theme-version";const prior=localStorage.getItem(k);let n=parseInt(prior||"1",10);if(localStorage.getItem(v)!=="5"){if(prior!==null){if(n<1||n>5)n=1;localStorage.setItem(k,String(n))}localStorage.setItem(v,"5");localStorage.removeItem("spike-theme-2-mode")}if(n<1||n>5)n=1;const t={1:"dark",2:"light",3:"dark",4:"light",5:"dark"};document.documentElement.dataset.spikeStyle=String(n);document.documentElement.dataset.theme=t[n];document.documentElement.dataset.spikeThemeMode=t[n];document.documentElement.dataset.spikeThemeId=String(n);document.documentElement.dataset.spikeThemeVersion="5";document.documentElement.style.colorScheme=t[n]}catch(_){}})();</script>
+<script src="js/spike-theme-bootstrap.js"></script>
 <script src="js/spike-navigation.js"></script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -169,7 +170,7 @@ const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const qp=new URLSearchParams(location.search); const target=qp.get('uid')||qp.get('user')||qp.get('user_id')||'';
 let authSubscription=null,destroyed=false;
-const state={me:null,uid:null,profile:null,privacy:{},posts:[],following:false,friendship:'none',requestId:null,followersCount:0,followingCount:0,canSeePosts:false,canSeeMedia:false,canSeeFriends:true,canSeeOnline:false,canMessage:false};
+const state={me:null,uid:null,profile:null,privacy:{},posts:[],following:false,friendship:'none',requestId:null,followersCount:0,followingCount:0,canSeePosts:false,canSeeMedia:false,canSeeFriends:true,canSeeOnline:false,canMessage:false,presence:null,presenceTimer:null,presenceHandler:null};
 const nameOf=p=>p?.display_name||p?.full_name||p?.name||p?.username||'SPIKE member';
 const avatarOf=p=>p?.avatar_url||p?.avatar||'';
 const ago=v=>{const d=new Date(v);if(!v||Number.isNaN(d.getTime()))return'Just now';const s=Math.max(0,(Date.now()-d.getTime())/1000);if(s<60)return'now';if(s<3600)return Math.floor(s/60)+'m';if(s<86400)return Math.floor(s/3600)+'h';if(s<604800)return Math.floor(s/86400)+'d';return d.toLocaleDateString(undefined,{month:'short',day:'numeric'});};
@@ -203,6 +204,7 @@ async function boot(){
   accessCall('can_message_spike_user',{p_sender:state.me.id,p_recipient:state.uid})
  ]);state.canSeePosts=postsOk===true;state.canSeeMedia=mediaOk===true;state.canSeeFriends=friendsOk===true;state.canSeeOnline=onlineOk===true;state.canMessage=messageOk===true;
  await loadRelationship();
+ if(state.canSeeOnline){await refreshProfilePresence();state.presenceHandler=()=>{if(!document.hidden&&navigator.onLine)refreshProfilePresence().then(renderIdentity).catch(()=>{});};window.addEventListener('spike:presence-update',state.presenceHandler);}
  await loadFollowCounts();
  if(state.canSeePosts)await loadPosts();
  render();
@@ -235,8 +237,9 @@ async function loadPosts(){
 async function loadFollowCounts(){const x=await window.SPIKE.social.getCounts(db,state.uid);state.followersCount=x.followers;state.followingCount=x.following;}
 function mediaItems(p){if(Array.isArray(p.mediaItems)&&p.mediaItems.length)return p.mediaItems.map(x=>typeof x==='string'?{url:x,type:'image'}:x).filter(x=>x?.url);return p.mediaUrl?[{url:p.mediaUrl,type:p.mediaType||'image'}]:[]}
 function mediaType(x){const t=String(x?.type||x?.mediaType||'').toLowerCase(),u=String(x?.url||'');return t==='video'||/\.(mp4|webm|mov)(?:[?#].*)?$/i.test(u)?'video':'image'}
+async function refreshProfilePresence(){try{let rows=window.SPIKE_PRESENCE?.getSnapshot?.()||[];if(window.SPIKE_PRESENCE&&!window.SPIKE_PRESENCE.isLoaded?.())rows=await window.SPIKE_PRESENCE.refresh();else if(!window.SPIKE_PRESENCE){const r=await db.rpc('spike_get_friends_presence');if(r.error)throw r.error;rows=r.data||[];}const row=rows.find(x=>String(x.user_id)===String(state.uid));state.presence=row?{online:row.is_online===true,lastSeenAt:row.last_seen_at||null}:{online:false,lastSeenAt:null};}catch(error){console.info('[SPIKE VIEW PROFILE] presence unavailable',error?.message||error);state.presence=null;}}
 function render(){renderIdentity();renderActions();renderStats();renderPosts();renderMedia();renderAbout();observeViewUserVideos()}
-function renderIdentity(){const p=state.profile,n=window.SPIKE_IDENTITY?.normalizeProfile?.(state.profile)?.display_name||nameOf(p),a=avatarOf(p);$('headerTitle').textContent=n;$('displayName').textContent=n;$('username').textContent=p.username?'@'+String(p.username).replace(/^@/,''):'';$('bio').textContent=p.bio||p.about||'';$('verified').classList.toggle('hidden',p.verified!==true);$('avatar').innerHTML=window.SPIKE_IDENTITY.avatarMarkup(p,'profile-avatar',n);const cover=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(cover){$('coverImg').src=safeHttpUrl(cover);$('coverImg').classList.remove('hidden')}else{$('coverImg').classList.add('hidden');const c=$('cover');if(c&&!c.querySelector('[data-spike-identity=\"cover\"]'))c.insertAdjacentHTML('afterbegin',window.SPIKE_IDENTITY.coverMarkup(p));}$('meta').innerHTML=[p.location?`📍 ${esc(p.location)}`:'',p.website?`🔗 ${esc(String(p.website).replace(/^https?:\/\//i,''))}`:'',p.created_at?`◷ Joined ${esc(dateLabel(p.created_at))}`:''].filter(Boolean).map(x=>`<span>${x}</span>`).join('');$('onlineDot').classList.remove('on');$('onlineDot').title='Live presence is not enabled';const sp=p.sp_id;if(sp){$('spidCard').classList.remove('hidden');$('spidValue').textContent=String(sp).replace(/^SP-/i,'SPK-');$('copySpid').onclick=async()=>{try{await navigator.clipboard.writeText(sp);toast('SPK ID copied')}catch{toast(sp)}}}}
+function renderIdentity(){const p=state.profile,n=window.SPIKE_IDENTITY?.normalizeProfile?.(state.profile)?.display_name||nameOf(p),a=avatarOf(p);$('headerTitle').textContent=n;$('displayName').textContent=n;$('username').textContent=p.username?'@'+String(p.username).replace(/^@/,''):'';$('bio').textContent=p.bio||p.about||'';$('verified').classList.toggle('hidden',p.verified!==true);$('avatar').innerHTML=window.SPIKE_IDENTITY.avatarMarkup(p,'profile-avatar',n);const cover=p.cover_url||p.coverUrl||p.banner_url||p.banner;if(cover){$('coverImg').src=safeHttpUrl(cover);$('coverImg').classList.remove('hidden')}else{$('coverImg').classList.add('hidden');const c=$('cover');if(c&&!c.querySelector('[data-spike-identity=\"cover\"]'))c.insertAdjacentHTML('afterbegin',window.SPIKE_IDENTITY.coverMarkup(p));}$('meta').innerHTML=[p.location?`📍 ${esc(p.location)}`:'',p.website?`🔗 ${esc(String(p.website).replace(/^https?:\/\//i,''))}`:'',p.created_at?`◷ Joined ${esc(dateLabel(p.created_at))}`:''].filter(Boolean).map(x=>`<span>${x}</span>`).join('');$('onlineDot').classList.toggle('on',state.canSeeOnline&&state.presence?.online===true);$('onlineDot').title=!state.canSeeOnline?'Presence is private':state.presence?.online?'Online now':state.presence?.lastSeenAt?`Last seen ${ago(state.presence.lastSeenAt)}`:'Offline';const sp=p.sp_id;if(sp){$('spidCard').classList.remove('hidden');$('spidValue').textContent=String(sp).replace(/^SP-/i,'SPK-');$('copySpid').onclick=async()=>{try{await navigator.clipboard.writeText(sp);toast('SPK ID copied')}catch{toast(sp)}}}}
 function renderActions(){
  let html='';
  if(state.following){
@@ -325,7 +328,7 @@ function setup(){
 }
 async function setupRealtime(){if(destroyed)return;try{if(state.channel)try{await db.removeChannel(state.channel)}catch{};const ch=db.channel(`view-profile:${state.uid}:${state.me?.id||'anon'}`,{config:{private:true}}).on('broadcast',{event:'UPDATE'},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path===`users/${state.uid}`||r?.collection_name==='posts')loadPosts().then(render).catch(()=>{})}).subscribe();state.channel=ch}catch(e){console.warn('[SPIKE VIEW PROFILE REALTIME]',e)}}
 authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('/?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
-window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{if(state.channel)db.removeChannel(state.channel)}catch{}});
+window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;if(state.presenceTimer)clearInterval(state.presenceTimer);if(state.presenceHandler)window.removeEventListener('spike:presence-update',state.presenceHandler);try{authSubscription?.unsubscribe?.()}catch{};try{if(state.channel)db.removeChannel(state.channel)}catch{}});
 setup();boot().then(()=>{$('menuBtn').disabled=false}).catch(e=>{console.error('[SPIKE VIEW PROFILE]',{message:e?.message||'',code:e?.code||'',details:e?.details||'',hint:e?.hint||'',error:e});$('loaderText').textContent=e?.message||e?.details||'Could not load profile';setTimeout(()=>{$('loader').classList.add('hidden');$('posts').innerHTML='<div class="empty"><div class="empty-icon">⚠</div><b>Profile unavailable</b><span>Please return to Feed and try again.</span></div>'},350)});
 </script>
 

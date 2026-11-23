@@ -1,0 +1,2 @@
+-- Duplicate remote migration-history entry; the idempotent call-session schema is already installed by 20261123230328.
+-- Intentionally no-op to keep local migration history aligned with the linked production project.
