@@ -22,7 +22,7 @@ document.getElementById('signout')?.addEventListener('click',e=>{
   cancel?.addEventListener('click',()=>{overlay.remove();});
   confirm?.addEventListener('click',async()=>{
     confirm.disabled=true;confirm.textContent='Signing out…';
-    try{const {error}=await withTimeout(supabase.auth.signOut({scope:'local'}),10000,'Sign-out timed out. Check your connection and try again.');if(error)throw error;location.replace(new URL('index.html?signed_out=1',location.href).href);}
+    try{const {error}=await withTimeout(supabase.auth.signOut({scope:'local'}),10000,'Sign-out timed out. Check your connection and try again.');if(error)throw error;location.replace(new URL('/?signed_out=1',location.origin).href);}
     catch(err){say(err.message||'Could not sign out. Please try again.');confirm.disabled=false;confirm.textContent='Log out';}
   },{once:true});
 });

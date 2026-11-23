@@ -8,11 +8,11 @@
 (function(){
   'use strict';
   const FEED='feed.html';
-  const ENTRY=new Set(['index.html']);
+  const ENTRY=new Set(['']);
   const SELECTOR='[data-spike-premium-back]';
 
   function currentPage(){
-    return (location.pathname.split('/').pop()||'index.html').toLowerCase();
+    return (location.pathname.split('/').filter(Boolean).pop()||'').toLowerCase();
   }
 
   function safeReferrer(){
@@ -20,7 +20,7 @@
       if(!document.referrer)return null;
       const ref=new URL(document.referrer);
       if(ref.origin!==location.origin)return null;
-      const previous=(ref.pathname.split('/').pop()||'').toLowerCase();
+      const previous=(ref.pathname.split('/').filter(Boolean).pop()||'').toLowerCase();
       if(!previous||previous===currentPage()||ENTRY.has(previous))return null;
       return ref;
     }catch(_){return null;}
@@ -31,7 +31,8 @@
     try{
       const fallback=new URL(requested,location.href);
       if(fallback.origin!==location.origin)return new URL(FEED,location.href);
-      const page=(fallback.pathname.split('/').pop()||'').toLowerCase();
+      const page=(fallback.pathname.split('/').filter(Boolean).pop()||'').toLowerCase();
+      if(fallback.pathname==='/' || fallback.pathname.endsWith('/'))return fallback;
       if(!page||page===currentPage())return new URL(FEED,location.href);
       return fallback;
     }catch(_){return new URL(FEED,location.href);}

@@ -44,7 +44,7 @@ $('resetForm')?.addEventListener('submit', async (event) => {
   } catch (error) { showStatus(error.message || 'Unable to update password.', 'error'); }
   finally { busy(false); }
 });
-$('backBtn')?.addEventListener('click', () => location.replace('index.html'));
+$('backBtn')?.addEventListener('click', () => location.replace('/'));
 $('continueBtn')?.addEventListener('click', () => location.replace('feed.html'));
 
 supabase.auth.getSession().then(({ data }) => {

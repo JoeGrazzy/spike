@@ -387,7 +387,7 @@
       new Promise((_, reject) => setTimeout(() => reject(new Error('Session check timed out.')), 15000))
     ]);
     if (!session?.user) {
-      location.replace('index.html?reauth=1');
+      location.replace('/?reauth=1');
       return;
     }
     state.me = session.user;

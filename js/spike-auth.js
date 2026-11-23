@@ -24,11 +24,21 @@ const updatePasswordMeter = () => {
 const withTimeout = (promise, ms, message) => { let timer; return Promise.race([promise, new Promise((_, reject) => { timer = window.setTimeout(() => reject(new Error(message)), ms); })]).finally(() => window.clearTimeout(timer)); };
 const busy = (button, value, label) => {
   if (!button) return;
-  button.disabled = value;
+  button.disabled = Boolean(value);
   button.setAttribute('aria-busy', String(Boolean(value)));
   button.classList.toggle('loading', Boolean(value));
-  if (value) { button.dataset.originalLabel ||= button.textContent; button.textContent = label || 'Please wait…'; }
-  else if (button.dataset.originalLabel) button.textContent = button.dataset.originalLabel;
+  // Preserve provider marks, arrow icons and the original button structure.
+  // Replacing textContent here permanently deleted those child elements after
+  // the first login attempt (including the Google and GitHub provider marks).
+  if (value) {
+    if (!Object.hasOwn(button.dataset, 'originalMarkup')) button.dataset.originalMarkup = button.innerHTML;
+    const span = document.createElement('span');
+    span.textContent = label || 'Please wait…';
+    button.replaceChildren(span);
+  } else if (Object.hasOwn(button.dataset, 'originalMarkup')) {
+    button.innerHTML = button.dataset.originalMarkup;
+    delete button.dataset.originalMarkup;
+  }
 };
 const showPanel = (id) => {
   document.querySelectorAll('.panel').forEach((panel) => {
@@ -40,6 +50,8 @@ const showPanel = (id) => {
   $('registerTab')?.classList.toggle('active', id === 'registerPanel');
   $('loginTab')?.setAttribute('aria-selected', String(id === 'loginPanel'));
   $('registerTab')?.setAttribute('aria-selected', String(id === 'registerPanel'));
+  $('loginTab')?.setAttribute('tabindex', id === 'loginPanel' ? '0' : '-1');
+  $('registerTab')?.setAttribute('tabindex', id === 'registerPanel' ? '0' : '-1');
   clearStatus();
 };
 const friendlyError = (error) => {
@@ -66,6 +78,23 @@ const redirectToApp = async () => {
 
 $('loginTab')?.addEventListener('click', () => showPanel('loginPanel'));
 $('registerTab')?.addEventListener('click', () => showPanel('registerPanel'));
+// Complete the tab pattern for keyboard and assistive-technology users.
+$('loginTab')?.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    const target = event.key === 'Home' || event.key === 'ArrowLeft' ? $('loginTab') : $('registerTab');
+    showPanel(target === $('loginTab') ? 'loginPanel' : 'registerPanel');
+    target?.focus();
+  }
+});
+$('registerTab')?.addEventListener('keydown', (event) => {
+  if (event.key === 'ArrowRight' || event.key === 'ArrowLeft' || event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    const target = event.key === 'End' || event.key === 'ArrowRight' ? $('registerTab') : $('loginTab');
+    showPanel(target === $('loginTab') ? 'loginPanel' : 'registerPanel');
+    target?.focus();
+  }
+});
 $('goCreate')?.addEventListener('click', () => showPanel('registerPanel'));
 $('goLogin')?.addEventListener('click', () => showPanel('loginPanel'));
 $('forgotBtn')?.addEventListener('click', () => showPanel('forgotPanel'));
@@ -177,7 +206,7 @@ async function oauth(provider, button) {
   try {
     // Return through the login page so Supabase PKCE can restore the session
     // before the same MFA-aware destination logic used by password login runs.
-    const callback = new URL('index.html', location.origin);
+    const callback = new URL('/', location.origin);
     callback.searchParams.set('auth_callback', '1');
     callback.searchParams.set('next', postAuthDestination());
     const { error } = await withTimeout(

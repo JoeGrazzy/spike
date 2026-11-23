@@ -11,7 +11,7 @@
     if(!client){status('Connection unavailable','Supabase did not initialize. Check your network and reload.',true);$('retryButton').hidden=false;return;}
     try{
       const session=await window.SPIKE_PLATFORM.getSession();
-      if(!session?.user){location.replace('index.html');return;}
+      if(!session?.user){location.replace('/');return;}
       const user=session.user;
       const params=new URLSearchParams(location.search), roomId=params.get('id')||params.get('room_id')||params.get('room');
       if(!roomId){status('Room not found','Open a room from the discovery page.',true);$('roomsButton').hidden=false;return;}

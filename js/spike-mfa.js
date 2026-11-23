@@ -18,7 +18,7 @@ export function safeAuthDestination(destination = 'feed.html') {
     if (url.origin !== location.origin) return fallback;
     const path = url.pathname.replace(/^\/+/, '');
     if (!/^[a-z0-9][a-z0-9._/-]*\.html$/i.test(path) || path.includes('..')) return fallback;
-    if (path.toLowerCase() === 'index.html' || path.toLowerCase() === 'mfa.html') return fallback;
+    if (path.toLowerCase() === 'mfa.html') return fallback;
     return `${path}${url.search}${url.hash}`;
   } catch (_) {
     return fallback;

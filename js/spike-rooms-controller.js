@@ -71,7 +71,7 @@
     if(!state.client){window.__SPIKE_ROOMS_BOOT_STATE__='failed';status('Supabase did not initialize. Check your connection.');return;}
     try {
       const session=await window.SPIKE_PLATFORM.getSession();
-      if(!session?.user){location.replace('index.html');return;}
+      if(!session?.user){location.replace('/');return;}
       state.user=session.user;
       const following=await state.client.from('follows').select('following_id').eq('follower_id',state.user.id).eq('status','accepted').limit(5000);
       if(!following.error)state.following=new Set((following.data||[]).map(x=>x.following_id));

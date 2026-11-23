@@ -1,6 +1,6 @@
 import { supabase } from './spike-supabase-client.js';
 
-const path = location.pathname.split('/').pop() || 'index.html';
+const path = location.pathname.split('/').filter(Boolean).pop() || '' ;
 const protectedPages = new Set([
   'feed.html','profile.html','friends.html','followers.html','following.html','messages.html','message.html',
   'notifications.html','rooms.html','room.html','wallet.html','referrals.html','settings.html','admin.html',
@@ -41,7 +41,7 @@ function showGuardFailure(message) {
       finally { if (retry.isConnected) { retry.disabled = false; retry.textContent = 'Try again'; } }
     });
     const login = document.createElement('a');
-    login.href = 'index.html'; login.textContent = 'Return to sign in';
+    login.href = '/'; login.textContent = 'Return to sign in';
     login.style.cssText = 'padding:11px 18px;border:1px solid #64748b;border-radius:10px;color:#fff;text-decoration:none';
     actions.append(retry, login); panel.append(title, copy, actions); document.body.append(panel);
   }
@@ -57,7 +57,7 @@ async function guard() {
   if (sessionError) throw sessionError;
   const session = sessionData?.session;
   if (!session?.user) {
-    location.replace(`index.html?next=${encodeURIComponent(path + location.search)}`);
+    location.replace(`/?next=${encodeURIComponent(path + location.search)}`);
     return;
   }
 
@@ -93,7 +93,7 @@ async function guard() {
   }
   if (!profile || profile.account_status !== 'active') {
     await withTimeout(supabase.auth.signOut({ scope: 'local' }), 10000, 'Sign-out could not be completed. Please retry.');
-    location.replace('index.html?reason=account_unavailable');
+    location.replace('/?reason=account_unavailable');
     return;
   }
   if (path === 'admin.html' && (profile.role !== 'admin' || String(session.user.email || '').trim().toLowerCase() !== 'eletexjoeytex@gmail.com')) {
@@ -147,7 +147,7 @@ logoutButton?.addEventListener('click', async (event) => {
     closeLogoutDialog();
     // A one-time query flag prevents the index page's session auto-redirect
     // from racing the just-completed local sign-out and trapping the loader.
-    location.replace(new URL('index.html?signed_out=1', location.href).href);
+    location.replace(new URL('/?signed_out=1', location.origin).href);
   } catch (error) {
     console.error('[SPIKE sign out]', error);
     let message = logoutOverlay?.querySelector('[data-logout-error]');

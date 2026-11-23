@@ -34,7 +34,7 @@
     if(!client){say('Account settings could not connect to SPIKE.',true);return;}
     try{
       const session=await window.SPIKE_PLATFORM.getSession();
-      if(!session?.user){location.replace('index.html');return;}
+      if(!session?.user){location.replace('/');return;}
       const {data,error}=await client.from('profiles').select('id,username,display_name,is_private,presence_visible,message_privacy,account_status').eq('id',session.user.id).maybeSingle();
       if(error)throw error;if(!data)throw new Error('Your account profile could not be found.');
       const accountLabel=$('accountLabel');

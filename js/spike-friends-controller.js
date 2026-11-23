@@ -401,7 +401,7 @@
     if (!state.db || !window.SPIKE?.social) throw new Error('SPIKE connection services did not start. Reload the page.');
     const { data, error } = await state.db.auth.getUser();
     if (error) throw error;
-    if (!data?.user) { location.replace('index.html?next=friends.html'); return; }
+    if (!data?.user) { location.replace('/?next=friends.html'); return; }
     state.me = data.user;
     await refresh();
     document.addEventListener('click', event => {

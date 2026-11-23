@@ -182,7 +182,7 @@ async function accessCall(fn,args){const r=await db.rpc(fn,args);if(r.error){con
 async function boot(){
  if(destroyed)return false;
  if(!target||!UUID.test(target)){throw new Error('No valid SPIKE profile was specified.')}
- const session=await window.SPIKE_PLATFORM.getSession();if(!session?.user){location.replace('index.html?reauth=1');return false}state.me=session.user;state.uid=target;
+ const session=await window.SPIKE_PLATFORM.getSession();if(!session?.user){location.replace('/?reauth=1');return false}state.me=session.user;state.uid=target;
  if(state.me.id===state.uid){location.replace('profile.html');return false}
  const access=await accessCall('can_view_spike_profile',{p_viewer:state.me.id,p_owner:state.uid});
  if(access===false){renderPrivate();return false}
@@ -324,7 +324,7 @@ function setup(){
  $('followerCount')?.closest('.stat')?.addEventListener('click',()=>{if(state.canSeeFriends)location.href='followers.html?uid='+encodeURIComponent(state.uid)});$('followingCount')?.closest('.stat')?.addEventListener('click',()=>{if(state.canSeeFriends)location.href='following.html?uid='+encodeURIComponent(state.uid)});
 }
 async function setupRealtime(){if(destroyed)return;try{if(state.channel)try{await db.removeChannel(state.channel)}catch{};const ch=db.channel(`view-profile:${state.uid}:${state.me?.id||'anon'}`,{config:{private:true}}).on('broadcast',{event:'UPDATE'},p=>{const r=p.payload?.record||p.payload?.new;if(r?.path===`users/${state.uid}`||r?.collection_name==='posts')loadPosts().then(render).catch(()=>{})}).subscribe();state.channel=ch}catch(e){console.warn('[SPIKE VIEW PROFILE REALTIME]',e)}}
-authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('index.html?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
+authSubscription=db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'||!session?.user)location.replace('/?reauth=1');});authSubscription=authSubscription?.data?.subscription||null;
 window.addEventListener('pagehide',e=>{if(e.persisted)return;destroyed=true;try{authSubscription?.unsubscribe?.()}catch{};try{if(state.channel)db.removeChannel(state.channel)}catch{}});
 setup();boot().then(()=>{$('menuBtn').disabled=false}).catch(e=>{console.error('[SPIKE VIEW PROFILE]',{message:e?.message||'',code:e?.code||'',details:e?.details||'',hint:e?.hint||'',error:e});$('loaderText').textContent=e?.message||e?.details||'Could not load profile';setTimeout(()=>{$('loader').classList.add('hidden');$('posts').innerHTML='<div class="empty"><div class="empty-icon">⚠</div><b>Profile unavailable</b><span>Please return to Feed and try again.</span></div>'},350)});
 </script>
