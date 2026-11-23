@@ -19,21 +19,30 @@
   window.addEventListener('online', updateConnection);
   window.addEventListener('offline', updateConnection);
   updateConnection();
+
   const deadline = Date.now() + 12000;
   const start = () => {
     if (window.SPIKE_SUPABASE_READY && window.SPIKE_SUPABASE) {
       import('./spike-auth.js').catch((error) => {
         console.error('[SPIKE entry auth]', error);
-        showError('SPIKE could not start secure sign-in. Check your connection and reload the page.');
+        showError('SPIKE could not start secure sign-in. Reload the page or check your connection.');
       });
       return;
     }
     if (Date.now() >= deadline) {
-      showError('Secure sign-in could not connect. Check your internet connection and reload the page.');
+      // Clearer, non-"offline" language so it is never confused with a PWA offline shell
+      const reason = !navigator.onLine
+        ? 'You are offline. Reconnect and reload the page.'
+        : 'Secure sign-in could not initialize. Reload the page. If this keeps happening, clear site data for this domain.';
+      showError(reason);
       return;
     }
     window.setTimeout(start, 100);
   };
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
-  else start();
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start, { once: true });
+  } else {
+    start();
+  }
 })();

@@ -5,7 +5,7 @@
   const KEY = 'sb_publishable_kf1MuQm41BREfWDIKWEXzg_jQlA7_mE';
   const sdk = window.supabase;
   if (!sdk || typeof sdk.createClient !== 'function') {
-    console.error('[SPIKE] Supabase SDK did not load. Check the CDN connection and CSP.');
+    console.error('[SPIKE] Supabase SDK did not load. Ensure js/supabase.min.js is present and reachable.');
     return;
   }
   const client = sdk.createClient(URL, KEY, {
