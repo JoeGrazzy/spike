@@ -31,8 +31,8 @@
   let presenceLoaded = false;
   let lastPresenceRefreshAt = 0;
   let currentSession = null;
-  const HEARTBEAT_INTERVAL = 60000;
-  const HEARTBEAT_COOLDOWN = 25000;
+  const HEARTBEAT_INTERVAL = 30000;
+  const HEARTBEAT_COOLDOWN = 15000;
 
   const stopHeartbeat = () => {
     if (heartbeatTimer !== null) window.clearInterval(heartbeatTimer);
@@ -69,7 +69,7 @@
     presenceBusy = true;
     const request = (async () => {
       try {
-        const { data, error } = await client.rpc('spike_get_friends_presence');
+        const { data, error } = await client.rpc('spike_get_messaging_presence');
         if (error) throw error;
         if (currentSession?.user?.id !== requestingUserId) return presenceRows;
         presenceRows = Array.isArray(data) ? data : [];
@@ -122,7 +122,9 @@
     if (document.visibilityState === 'hidden') { stopHeartbeat(); stopPresence(); }
     else { startHeartbeat(); startPresence(); void touchSpikeActivity(); }
   });
-  window.addEventListener('online', () => { startHeartbeat(); startPresence(); void touchSpikeActivity(); });
+  window.addEventListener('online', () => { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); });
+  window.addEventListener('focus', () => { if (!document.hidden) { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); void refreshPresence({ force: true }); } });
+  window.addEventListener('pageshow', () => { if (!document.hidden) { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); void refreshPresence({ force: true }); } });
   window.addEventListener('pagehide', () => { stopHeartbeat(); stopPresence(); }, { once: true });
   window.SPIKE_PLATFORM = Object.freeze({
     getClient: () => client,
