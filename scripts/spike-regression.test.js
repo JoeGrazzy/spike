@@ -233,3 +233,25 @@ test('friend-request notifications use the friend-request preference instead of 
   const notifications = fs.readFileSync(new URL('../js/spike-notifications.js', import.meta.url), 'utf8');
   assert.match(notifications, /t\.includes\('friend'\)\|\|t\.includes\('request'\)\)return'np_friend_requests';if\(t\.includes\('follow'\)\)return'np_follows'/);
 });
+
+const platformBootstrap = fs.readFileSync(new URL('../js/spike-platform-bootstrap.js', import.meta.url), 'utf8');
+const androidDeviceMigration = fs.readFileSync(new URL('../supabase/migrations/20261124110500_spike_single_active_android_device_v1.sql', import.meta.url), 'utf8');
+
+test('Android account sessions register one current device and sign out replaced devices locally', () => {
+  assert.match(platformBootstrap, /const isAndroidDevice = \/Android\/i\.test\(navigator\.userAgent/);
+  assert.match(platformBootstrap, /spike_register_android_device/);
+  assert.match(platformBootstrap, /spike_is_current_android_device/);
+  assert.match(platformBootstrap, /ANDROID_CHECK_INTERVAL = 20000/);
+  assert.match(platformBootstrap, /signOut\(\{ scope: 'local' \}\)/);
+  assert.match(platformBootstrap, /Your SPIKE account was opened on another Android device/);
+  assert.match(platformBootstrap, /spike\.android\.device-id\.v1/);
+});
+
+test('Android device lock is private and only authenticated users can use its RPCs', () => {
+  assert.match(androidDeviceMigration, /enable row level security/i);
+  assert.match(androidDeviceMigration, /revoke all on table public\.spike_android_device_lock from anon, authenticated/i);
+  assert.match(androidDeviceMigration, /revoke all on function public\.spike_register_android_device\(text, text\) from public, anon/i);
+  assert.match(androidDeviceMigration, /grant execute on function public\.spike_register_android_device\(text, text\) to authenticated/i);
+  assert.match(androidDeviceMigration, /grant execute on function public\.spike_is_current_android_device\(text\) to authenticated/i);
+  assert.match(androidDeviceMigration, /auth\.uid\(\)/);
+});

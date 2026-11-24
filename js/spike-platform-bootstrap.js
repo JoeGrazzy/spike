@@ -34,6 +34,91 @@
   const HEARTBEAT_INTERVAL = 30000;
   const HEARTBEAT_COOLDOWN = 15000;
 
+  // SPIKE allows one active Android device per account. Desktop and iOS
+  // sessions are intentionally unaffected. A stable origin-local ID keeps
+  // multiple tabs on the same Android browser from logging one another out.
+  const ANDROID_DEVICE_KEY = 'spike.android.device-id.v1';
+  const ANDROID_CHECK_INTERVAL = 20000;
+  const isAndroidDevice = /Android/i.test(navigator.userAgent || '');
+  let androidDeviceId = null;
+  let androidDeviceRegistered = false;
+  let androidDeviceCheckTimer = null;
+  let androidDeviceCheckBusy = false;
+  let androidDeviceLogoutStarted = false;
+  const getAndroidDeviceId = () => {
+    if (androidDeviceId) return androidDeviceId;
+    try {
+      androidDeviceId = localStorage.getItem(ANDROID_DEVICE_KEY);
+      if (!androidDeviceId) {
+        androidDeviceId = (window.crypto?.randomUUID?.() || `spike-${Date.now()}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`);
+        localStorage.setItem(ANDROID_DEVICE_KEY, androidDeviceId);
+      }
+    } catch (error) {
+      console.warn('[SPIKE device security] Persistent device storage unavailable:', error?.message || error);
+      androidDeviceId = `spike-tab-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    }
+    return androidDeviceId;
+  };
+  const showAndroidDeviceReplacedMessage = () => {
+    let panel = document.getElementById('spike-android-device-replaced');
+    if (panel) return;
+    panel = document.createElement('section');
+    panel.id = 'spike-android-device-replaced';
+    panel.setAttribute('role', 'alertdialog');
+    panel.setAttribute('aria-live', 'assertive');
+    panel.style.cssText = 'position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:22px;background:rgba(5,8,18,.96);color:#f8fafc;font:16px/1.5 system-ui,sans-serif;text-align:center';
+    const card = document.createElement('div');
+    card.style.cssText = 'width:min(100%,440px);padding:28px 22px;border:1px solid rgba(167,139,250,.42);border-radius:22px;background:#11182b;box-shadow:0 24px 80px rgba(0,0,0,.45)';
+    const icon = document.createElement('div'); icon.textContent = '🔐'; icon.style.cssText = 'font-size:34px;margin-bottom:10px';
+    const title = document.createElement('h1'); title.textContent = 'SPIKE Security'; title.style.cssText = 'font-size:23px;margin:0 0 12px';
+    const copy = document.createElement('p'); copy.textContent = 'Your SPIKE account was opened on another Android device. For your security, only one Android device can use this account at a time. This device has been signed out.'; copy.style.cssText = 'margin:0 0 20px;color:#cbd5e1';
+    const button = document.createElement('button'); button.type = 'button'; button.textContent = 'Return to sign in'; button.style.cssText = 'padding:12px 20px;border:0;border-radius:12px;background:#a78bfa;color:#171329;font-weight:800';
+    button.addEventListener('click', () => location.replace('/'));
+    card.append(icon, title, copy, button); panel.append(card); document.body.append(panel);
+  };
+  if (new URLSearchParams(location.search).get('reason') === 'android_device_replaced') {
+    window.addEventListener('DOMContentLoaded', showAndroidDeviceReplacedMessage, { once: true });
+  }
+  const stopAndroidDeviceChecks = () => {
+    if (androidDeviceCheckTimer !== null) window.clearInterval(androidDeviceCheckTimer);
+    androidDeviceCheckTimer = null;
+  };
+  const signOutReplacedAndroidDevice = async () => {
+    if (androidDeviceLogoutStarted) return;
+    androidDeviceLogoutStarted = true;
+    stopAndroidDeviceChecks();
+    try { await window.SPIKE_CALLS?.end('Call ended because this account was opened on another Android device.'); } catch (_) {}
+    try { await client.auth.signOut({ scope: 'local' }); }
+    catch (error) { console.error('[SPIKE device security] Local sign-out failed:', error); }
+    showAndroidDeviceReplacedMessage();
+  };
+  const checkAndroidDeviceIsCurrent = async () => {
+    if (!isAndroidDevice || !androidDeviceRegistered || !currentSession?.user || androidDeviceCheckBusy || document.visibilityState === 'hidden' || !navigator.onLine || androidDeviceLogoutStarted) return;
+    androidDeviceCheckBusy = true;
+    try {
+      const { data, error } = await client.rpc('spike_is_current_android_device', { p_device_id: getAndroidDeviceId() });
+      if (error) throw error;
+      if (data === false) await signOutReplacedAndroidDevice();
+    } catch (error) {
+      console.warn('[SPIKE device security] Could not verify active Android device; keeping session during a temporary failure:', error?.message || error);
+    } finally { androidDeviceCheckBusy = false; }
+  };
+  const registerAndroidDevice = async (session) => {
+    if (!isAndroidDevice || !session?.user || androidDeviceLogoutStarted) return;
+    try {
+      const { error } = await client.rpc('spike_register_android_device', {
+        p_device_id: getAndroidDeviceId(), p_user_agent: navigator.userAgent || 'Android'
+      });
+      if (error) throw error;
+      androidDeviceRegistered = true;
+      if (androidDeviceCheckTimer === null) androidDeviceCheckTimer = window.setInterval(() => { void checkAndroidDeviceIsCurrent(); }, ANDROID_CHECK_INTERVAL);
+      window.dispatchEvent(new CustomEvent('spike:android-device-registered'));
+    } catch (error) {
+      androidDeviceRegistered = false;
+      console.error('[SPIKE device security] Could not register this Android device:', error?.message || error);
+    }
+  };
+
   const stopHeartbeat = () => {
     if (heartbeatTimer !== null) window.clearInterval(heartbeatTimer);
     heartbeatTimer = null;
@@ -107,6 +192,7 @@
   client.auth.onAuthStateChange((event, session) => {
     currentSession = session || null;
     if (currentSession?.user) {
+      if (isAndroidDevice && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) window.setTimeout(() => { void registerAndroidDevice(currentSession); }, 0);
       startHeartbeat();
       startPresence();
       if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'USER_UPDATED') {
@@ -115,15 +201,17 @@
     } else {
       stopHeartbeat();
       stopPresence();
+      stopAndroidDeviceChecks();
+      androidDeviceRegistered = false;
       if (event === 'SIGNED_OUT') { lastActivityHeartbeatAt = 0; presenceRows = []; presenceLoaded = true; lastPresenceRefreshAt = 0; window.dispatchEvent(new CustomEvent('spike:presence-update', { detail: { rows: [], at: 0 } })); }
     }
   });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') { stopHeartbeat(); stopPresence(); }
-    else { startHeartbeat(); startPresence(); void touchSpikeActivity(); }
+    else { startHeartbeat(); startPresence(); void touchSpikeActivity(); void checkAndroidDeviceIsCurrent(); }
   });
   window.addEventListener('online', () => { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); });
-  window.addEventListener('focus', () => { if (!document.hidden) { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); void refreshPresence({ force: true }); } });
+  window.addEventListener('focus', () => { if (!document.hidden) { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); void refreshPresence({ force: true }); void checkAndroidDeviceIsCurrent(); } });
   window.addEventListener('pageshow', () => { if (!document.hidden) { startHeartbeat(); startPresence(); void touchSpikeActivity({ force: true }); void refreshPresence({ force: true }); } });
   window.addEventListener('pagehide', () => { stopHeartbeat(); stopPresence(); }, { once: true });
   window.SPIKE_PLATFORM = Object.freeze({
