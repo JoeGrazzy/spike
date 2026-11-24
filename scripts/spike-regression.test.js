@@ -288,3 +288,27 @@ test('Android device lock is private and only authenticated users can use its RP
   assert.match(androidDeviceMigration, /grant execute on function public\.spike_is_current_android_device\(text\) to authenticated/i);
   assert.match(androidDeviceMigration, /auth\.uid\(\)/);
 });
+
+
+test('voice connected badge only appears after WebRTC peer connection is connected', () => {
+  assert.match(calls, /live\.textContent = state\.pc\?\.connectionState === 'connected' \? 'VOICE CONNECTED' : 'CONNECTING VOICE'/);
+  assert.match(calls, /live\.textContent=connection==='connected'\?'VOICE CONNECTED':'CONNECTING VOICE'/);
+});
+
+
+test('private signaling rejoin verifies durable call session before joining and recovers accepted caller state', () => {
+  assert.match(calls, /async function reconcileCallSession\(callId\)/);
+  assert.ok(calls.indexOf('if(!await reconcileCallSession(callId))return;') < calls.indexOf('const channel=db.channel(`spike-call:${callId}`'));
+  assert.match(calls, /if\(data\.status==='accepted' && state\.role==='caller'\)state\.peerAccepted=true/);
+  assert.match(calls, /if\(state\.role==='caller' && state\.peerAccepted\)void beginCallerNegotiation\(\)/);
+});
+
+test('Metered TURN function supports credential keys and reuses expiring credentials without exposing the Secret Key', () => {
+  const fn = fs.readFileSync(new URL('../supabase/functions/metered-turn-credentials/index.ts', import.meta.url), 'utf8');
+  assert.match(fn, /METERED_API_KEY/);
+  assert.match(fn, /api\/v1\/turn\/credentials\?apiKey=/);
+  assert.match(fn, /api\/v2\/turn\/credentials\?secretKey=/);
+  assert.match(fn, /credentialLabel = "spike-rotating"/);
+  assert.match(fn, /Metered credential creation rejected:/);
+  assert.doesNotMatch(fn, /console\.(?:log|error)\([^\n]*(?:configuredKey|secretKey|apiKey)/i);
+});

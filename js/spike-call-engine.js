@@ -39,7 +39,7 @@
       .spike-call-name{font-size:clamp(24px,6vw,32px);font-weight:850;letter-spacing:-.055em;margin:0;color:#fff;max-width:100%;overflow-wrap:anywhere}
       .spike-call-status{font-size:13px;color:#b9b8cc;margin:0;min-height:20px;line-height:1.5}
       .spike-call-live{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #ffffff13;border-radius:999px;background:#ffffff09;color:#d7d2e8;font-size:10px;font-weight:750;letter-spacing:.04em}
-      .spike-call-live:before{content:"";width:6px;height:6px;border-radius:50%;background:#49dfa3;box-shadow:0 0 10px #49dfa3}
+      .spike-call-live:before{content:"";width:6px;height:6px;border-radius:50%;background:#49dfa3;box-shadow:0 0 10px #49dfa3}.spike-call-live[data-state="connecting"]:before{background:#fbbf24;box-shadow:0 0 10px #fbbf24}
       .spike-call-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:34px;margin:10px 0 0}.spike-call-wave i{display:block;width:3px;height:9px;border-radius:5px;background:linear-gradient(#c4a5fd,#e879b9);animation:spikeCallWave .9s ease-in-out infinite alternate}.spike-call-wave i:nth-child(2n){animation-delay:.18s}.spike-call-wave i:nth-child(3n){animation-delay:.35s}.spike-call-wave i:nth-child(4n){animation-delay:.5s}
       .spike-call-video{position:absolute;inset:0;width:100%;height:100%;margin:0;background:#05070d;overflow:hidden}
       .spike-call-video video{display:block;width:100%;height:100%;object-fit:cover;background:#05070d}
@@ -121,7 +121,7 @@
     const status = document.createElement('div'); status.className = 'spike-call-status'; status.id = 'spikeCallStatus'; status.textContent = statusText || '';
     person.append(avatar, name, status);
     if (kind === 'active' && state.callType === 'voice') {
-      const live = document.createElement('span'); live.className = 'spike-call-live'; live.textContent = 'VOICE CONNECTED'; person.append(live);
+      const live = document.createElement('span'); live.id = 'spikeCallLive'; live.className = 'spike-call-live'; live.dataset.state = state.pc?.connectionState === 'connected' ? 'connected' : 'connecting'; live.textContent = state.pc?.connectionState === 'connected' ? 'VOICE CONNECTED' : 'CONNECTING VOICE'; person.append(live);
       const wave = document.createElement('div'); wave.className = 'spike-call-wave'; wave.setAttribute('aria-hidden', 'true');
       for (let i = 0; i < 13; i++) wave.append(document.createElement('i'));
       person.append(wave);
@@ -148,7 +148,7 @@
     }
     card.append(controls);
     const foot = document.createElement('div'); foot.className = 'spike-call-foot';
-    foot.textContent = 'Peer-to-peer WebRTC · STUN-assisted connection'; card.append(foot);
+    foot.textContent = 'Secure WebRTC · TURN relay with STUN fallback'; card.append(foot);
     overlay.append(card);
     if (kind === 'active') attachMediaElements();
   }
@@ -328,6 +328,32 @@
     },delay);
   }
 
+  async function reconcileCallSession(callId) {
+    const {data,error}=await client().from('spike_call_sessions')
+      .select('id,caller_id,callee_id,status,expires_at,last_activity_at')
+      .eq('id',callId).maybeSingle();
+    if(error)throw error;
+    if(!data || ![ 'ringing', 'accepted' ].includes(data.status)) {
+      cleanup('Call session has ended.');
+      return false;
+    }
+    const now=Date.now();
+    if(data.status==='ringing' && new Date(data.expires_at).getTime()<=now) {
+      cleanup('Call invitation expired.');
+      return false;
+    }
+    if(data.status==='accepted' && data.last_activity_at && new Date(data.last_activity_at).getTime()<=now-4*60*1000) {
+      cleanup('Call session expired.');
+      return false;
+    }
+    if(data.caller_id!==state.user?.id && data.callee_id!==state.user?.id) {
+      cleanup('Call session is not available to this account.');
+      return false;
+    }
+    if(data.status==='accepted' && state.role==='caller')state.peerAccepted=true;
+    return true;
+  }
+
   async function joinCallChannel() {
     const callId=state.callId;
     const attempt=state.callAttempt;
@@ -339,6 +365,8 @@
       // Do not attempt a private join until Realtime has the same authenticated
       // account/token as the call session. This also runs on every retry.
       await ensureRealtimeAuth();
+      if(state.callId!==callId || state.callAttempt!==attempt || state.status==='idle' || state.channel)return;
+      if(!await reconcileCallSession(callId))return;
       if(state.callId!==callId || state.callAttempt!==attempt || state.status==='idle' || state.channel)return;
       if(state.channelRetryTimer){clearTimeout(state.channelRetryTimer);state.channelRetryTimer=null;}
       const generation=++state.channelGeneration;
@@ -354,6 +382,7 @@
           state.channelReady=true;state.channelRetryDelay=1000;
           void flushQueuedSignals();
           if(state.status==='joining' && state.role==='callee')void sendSignal('accepted',{});
+          if(state.role==='caller' && state.peerAccepted)void beginCallerNegotiation();
         } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
           state.channelReady=false;
           console.warn('[SPIKE calls] private signaling channel failed',status,error||'');
@@ -679,7 +708,10 @@
     const elapsed=state.startedAt?Math.max(0,Math.floor((Date.now()-state.startedAt)/1000)):0;
     const mm=String(Math.floor(elapsed/60)).padStart(2,'0'),ss=String(elapsed%60).padStart(2,'0');
     if(!$('spikeCallOverlay'))showUI('active','Connected');
-    setStatus(state.pc?.connectionState==='connected'?`Connected · ${mm}:${ss}`:'Connecting…');
+    const connection=state.pc?.connectionState;
+    const live=$('spikeCallLive');
+    if(live){live.dataset.state=connection==='connected'?'connected':'connecting';live.textContent=connection==='connected'?'VOICE CONNECTED':'CONNECTING VOICE';}
+    setStatus(connection==='connected'?`Connected · ${mm}:${ss}`:connection==='failed'?'Connection failed.':'Connecting securely…');
     if(!state.callTimer)state.callTimer=window.setInterval(()=>{if(state.status==='active')renderActive();},1000);
     attachMediaElements();
   }

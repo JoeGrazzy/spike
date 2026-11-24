@@ -1,27 +1,23 @@
-# SPIKE — Metered Open Relay TURN setup
+# SPIKE — Metered TURN relay setup
 
-The call engine now requests Metered's full ICE server array before microphone/camera setup. Both the caller and receiver use the same ICE configuration. If the Metered request fails or times out, calls retain the existing public STUN servers as a direct-connection fallback.
+The call engine requests ICE servers from the authenticated Supabase Edge Function `metered-turn-credentials`. Both participants use the same returned ICE server array, with public STUN servers retained as fallback.
 
-## Configure the credential-scoped API URL
+## Metered configuration
 
-Open `js/spike-call-engine.js` and find `METERED_TURN_CREDENTIAL_URL` near the top of the file. Replace:
+- Metered app domain: `spikemediachat.metered.live`.
+- Supabase secret `METERED_API_KEY` may contain either:
+  - the credential-scoped API key from Metered **Get credential → Show API Key**, or
+  - the account Secret Key from Metered **Developers**.
+- Keep the account Secret Key only in Supabase Edge Function secrets. Never place it in browser JavaScript or a public Cloudflare asset.
+- The Edge Function supports both key types. With a credential-scoped key it fetches the ICE array directly. With an account Secret Key it reuses a valid `spike-rotating` credential and only creates one if needed.
 
-- `YOUR_METERED_APP` with the Metered app name/domain shown in your dashboard (without `.metered.live`).
-- `YOUR_CREDENTIAL_SCOPED_API_KEY` with the API key shown under the SPIKE TURN credential's **Get credential → Show API Key** action.
+The Metered REST API uses the app domain and either a credential API key or account Secret Key; the dashboard App ID is not part of those request URLs.
 
-The resulting URL format is:
+## Verification
 
-`https://YOUR_APP_NAME.metered.live/api/v1/turn/credentials?apiKey=YOUR_CREDENTIAL_SCOPED_API_KEY`
+1. Deploy the V12 static assets to the Cloudflare Workers site.
+2. Reload both signed-in devices and test voice, then video.
+3. Confirm both devices reach `VOICE CONNECTED` only after WebRTC reports a connected peer connection.
+4. On restrictive mobile networks, inspect WebRTC diagnostics and confirm the selected candidate pair is `relay` when direct connectivity is unavailable.
 
-Use the API key for this one TURN credential, not the account-wide Metered Secret Key. Metered documents the credential-scoped API key as safe for front-end use. Never put the account Secret Key in browser code.
-
-The username/password previously pasted into chat should be rotated in Metered. This build does not contain those exposed values.
-
-## Verify
-
-1. Wait up to two minutes after creating or rotating a TURN credential so it propagates.
-2. Deploy the updated static assets.
-3. Test a voice call and a video call between two signed-in devices, first on Wi-Fi and then with one device on mobile data.
-4. In browser WebRTC diagnostics, verify that the selected candidate pair is `relay` on a network where direct connectivity is blocked. A connected call alone does not prove TURN was used.
-
-No Supabase schema, RLS policy, signaling, or call-session migration is changed by this TURN integration.
+Metered notes that newly created TURN credentials may take up to two minutes to propagate. A successful call alone does not prove that TURN relay was selected.
