@@ -56,3 +56,99 @@ html{scroll-behavior:smooth;}
     scroll-behavior:auto!important;
   }
 }
+
+/* SPIKE Modern Finish v2 — cohesive surface, control and navigation polish.
+   Deliberately presentation-only: no layout geometry, routes, data or event logic. */
+:root{
+  --spike-radius-card:20px;
+  --spike-radius-control:13px;
+  --spike-surface-border:color-mix(in srgb,var(--spike-focus-color) 13%,var(--spike-border,rgba(255,255,255,.12)));
+  --spike-surface-shadow:0 14px 38px rgba(0,0,0,.13);
+  --spike-surface-highlight:inset 0 1px 0 rgba(255,255,255,.055);
+}
+
+/* Unified, restrained surfaces across the existing page-specific components. */
+:where(.hc-card,.hc-panel,.panel,.card,.feed-v2-panel,.wallet-panel,.purchase-panel,
+       .admin-stat-card,.admin-hero,.settings-category,.room-feature-tile,
+       .profile-command-action,.spike-command-row,.user-hero,.report-stat){
+  border-color:var(--spike-surface-border);
+  box-shadow:var(--spike-surface-highlight),var(--spike-surface-shadow);
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+}
+:where(.hc-card,.hc-panel,.panel,.card,.feed-v2-panel,.wallet-panel,.purchase-panel,
+       .admin-stat-card,.settings-category,.room-feature-tile,.profile-command-action){
+  border-radius:var(--spike-radius-card);
+}
+:where(.hc-section-head,.admin-section-head,.purchase-panel-head){
+  text-wrap:balance;
+}
+:where(.eyebrow,.admin-kicker,.section-label,.section-label-text){
+  letter-spacing:.105em;
+}
+
+/* Clearer, consistent controls while retaining each page's existing colour system. */
+:where(button,.btn,[role="button"],.tab,.seg-btn,.filter-chip,.category-chip){
+  border-radius:var(--spike-radius-control);
+  font-weight:650;
+  -webkit-tap-highlight-color:transparent;
+}
+:where(button,.btn):not(:disabled):active,
+:where([role="button"]):not([aria-disabled="true"]):active{
+  transform:scale(.985);
+}
+:where(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+  border-radius:var(--spike-radius-control);
+  border-color:var(--spike-surface-border);
+  transition:border-color var(--spike-motion-fast) ease,box-shadow var(--spike-motion-fast) ease;
+}
+:where(input:not([type="checkbox"]):not([type="radio"]),select,textarea):focus{
+  border-color:var(--spike-focus-color);
+}
+:where(.primary,.btn.primary,button[type="submit"]){
+  font-weight:750;
+}
+
+/* Existing app headers and bottom navigation: visual refinement only. */
+:where(.header,.spike-header,.topbar){
+  border-bottom-color:var(--spike-surface-border);
+  -webkit-backdrop-filter:blur(18px) saturate(1.25);
+  backdrop-filter:blur(18px) saturate(1.25);
+}
+:where(.bottom-nav,.spike-bottom-nav,.msg-bottom-nav,.rooms-bottom-nav,.spike-room-bottom-nav){
+  border-top-color:var(--spike-surface-border);
+  -webkit-backdrop-filter:blur(20px) saturate(1.25);
+  backdrop-filter:blur(20px) saturate(1.25);
+}
+:where(.bottom-nav,.spike-bottom-nav,.msg-bottom-nav,.rooms-bottom-nav,.spike-room-bottom-nav)
+  :where(a,button,[role="button"]){
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* Improve scanability and avoid awkward wrapping on narrow screens. */
+:where(h1,h2,h3,.admin-hero h1,.hc-section-head h2){
+  text-wrap:balance;
+}
+:where(.admin-stat-value,.wallet-balance,.user-hero,.profile-command-copy){
+  overflow-wrap:anywhere;
+}
+:where(.empty,.report-empty,[class*="empty-state"]){
+  text-wrap:pretty;
+}
+
+@media(hover:hover) and (pointer:fine){
+  :where(.hc-card,.panel,.card,.feed-v2-panel,.wallet-panel,.purchase-panel,
+         .admin-stat-card,.settings-category,.room-feature-tile,.profile-command-action):hover{
+    border-color:color-mix(in srgb,var(--spike-focus-color) 27%,var(--spike-surface-border));
+  }
+}
+@media(max-width:720px){
+  :root{--spike-radius-card:17px;--spike-radius-control:12px;}
+  :where(.hc-card,.panel,.card,.feed-v2-panel,.wallet-panel,.purchase-panel){
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  :where(button,.btn,[role="button"]):active{transform:none!important;}
+}
