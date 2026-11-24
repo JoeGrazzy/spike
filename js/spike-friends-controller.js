@@ -7,7 +7,7 @@
   const $ = id => document.getElementById(id);
   const state = {
     db: null, me: null, tab: 'all', friends: [], suggestions: [], recommendations: [],
-    verified: new Set(), busy: new Set(), presence: new Map(), blocked: [], activity: [], search: '', discoverOffset: 0, discoverHasMore: true,
+    verified: new Set(), busy: new Set(), presence: new Map(), blocked: [], activity: [], incoming: [], outgoing: [], search: '', discoverOffset: 0, discoverHasMore: true,
     loading: false, refreshPromise: null, poll: null, presenceHandler: null, searchTimer: null, discoverQuery: '', discoverRequest: 0, recommendationRequest: 0
   };
   const escapeText = value => String(value ?? '');
@@ -64,6 +64,45 @@
         username: person.username || '', avatar_url: avatarUrl(person.avatar_path || person.avatar_url),
         verified: person.verified === true };
     });
+  }
+
+
+  async function loadRequests() {
+    let incoming = [], outgoing = [];
+    try {
+      if (window.SPIKE?.social?.listIncomingRequests) {
+        incoming = await window.SPIKE.social.listIncomingRequests(state.db, 200);
+        outgoing = await window.SPIKE.social.listOutgoingRequests(state.db, 200);
+      } else {
+        const inc = await state.db.from('follows').select('follower_id,created_at')
+          .eq('following_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
+        if (inc.error) throw inc.error;
+        incoming = (inc.data || []).map(r => ({ id: String(r.follower_id), created_at: r.created_at }));
+        const out = await state.db.from('follows').select('following_id,created_at')
+          .eq('follower_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
+        if (out.error) throw out.error;
+        outgoing = (out.data || []).map(r => ({ id: String(r.following_id), created_at: r.created_at }));
+      }
+    } catch (e) {
+      console.warn('[SPIKE friends requests]', e);
+      incoming = []; outgoing = [];
+    }
+    const ids = [...incoming.map(x => x.id), ...outgoing.map(x => x.id)];
+    const profiles = await getProfiles(ids);
+    const map = new Map(profiles.map(person => [String(person.id), person]));
+    const hydrate = row => {
+      const person = map.get(row.id) || {};
+      return {
+        id: row.id,
+        created_at: row.created_at,
+        display_name: person.display_name || person.username || 'SPIKE member',
+        username: person.username || '',
+        avatar_url: avatarUrl(person.avatar_path || person.avatar_url),
+        verified: person.verified === true
+      };
+    };
+    state.incoming = incoming.map(hydrate);
+    state.outgoing = outgoing.map(hydrate);
   }
 
   async function loadPresence() {
@@ -239,10 +278,19 @@
     }
     const actions = document.createElement('div'); actions.className = 'friend-action';
 
-    if (mode === 'suggestion') {
-      // QR is the friendship source — guide people to scan instead of one-way follow
+    if (mode === 'incoming') {
+      const accept = document.createElement('button'); accept.type = 'button'; accept.className = 'connection-action primary';
+      accept.textContent = 'Accept'; accept.dataset.action = 'accept'; accept.dataset.userId = id;
+      const decline = document.createElement('button'); decline.type = 'button'; decline.className = 'connection-action secondary';
+      decline.textContent = 'Decline'; decline.dataset.action = 'decline'; decline.dataset.userId = id;
+      actions.append(accept, decline);
+    } else if (mode === 'outgoing') {
+      const cancel = document.createElement('button'); cancel.type = 'button'; cancel.className = 'connection-action secondary';
+      cancel.textContent = 'Cancel request'; cancel.dataset.action = 'cancel'; cancel.dataset.userId = id;
+      actions.append(cancel);
+    } else if (mode === 'suggestion') {
       const scanHint = document.createElement('button'); scanHint.type = 'button'; scanHint.className = 'connection-action primary';
-      scanHint.textContent = 'Scan QR to connect';
+      scanHint.textContent = 'Scan QR to add';
       scanHint.dataset.action = 'scan'; scanHint.dataset.userId = id;
       const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
       block.dataset.action = 'block'; block.dataset.userId = id; actions.append(scanHint, block);
@@ -281,14 +329,18 @@
 
   function render() {
     const visibleFriends = state.tab === 'online' ? state.friends.filter(person => person.presence?.online) : state.friends;
-    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No SPIKE friends are online right now.' : 'No SPIKE friends yet. Open your profile and scan someone’s QR to connect instantly.');
-    renderList('networkRecommendationsContainer', state.recommendations, 'suggestion', 'No recommendations yet.');
-    renderList('suggestionsContainer', state.suggestions, 'suggestion', 'No new public members match your search.');
+    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No SPIKE friends are online right now.' : 'No SPIKE friends yet. Open Profile → Scan QR to send a friend request.');
+    renderList('incomingRequestsContainer', state.incoming, 'incoming', 'No incoming friend requests.');
+    renderList('outgoingRequestsContainer', state.outgoing, 'outgoing', 'No sent requests waiting.');
+    renderList('networkRecommendationsContainer', state.recommendations, 'suggestion', 'No recommendations yet. Scan a QR to add friends.');
+    renderList('suggestionsContainer', state.suggestions, 'suggestion', 'Discover is only a directory. Add friends by scanning their SPIKE QR.');
     renderList('blockedContainer', state.blocked, 'blocked', 'You have not blocked anyone.');
-    renderActivity();
     setCount('allCount', state.friends.length);
     setCount('onlineCount', state.friends.filter(person => person.presence?.online).length);
     setCount('friendsCount', state.friends.length);
+    setCount('requestsCount', state.incoming.length + state.outgoing.length);
+    setCount('incomingCount', state.incoming.length);
+    setCount('outgoingCount', state.outgoing.length);
     setCount('networkCount', state.recommendations.length);
     setCount('suggestionCount', state.suggestions.length);
     setCount('blockedCount', state.blocked.length);
@@ -306,12 +358,13 @@
       button.setAttribute('aria-selected', String(active));
       button.tabIndex = active ? 0 : -1;
     });
-    $('friendsSection').hidden = !['all', 'online'].includes(tab);
-    $('suggestionsSection').hidden = tab !== 'suggestions';
-    $('blockedSection').hidden = tab !== 'blocked';
-    $('activitySection').hidden = tab !== 'activity';
+    if ($('friendsSection')) $('friendsSection').hidden = !['all', 'online'].includes(tab);
+    if ($('requestsSection')) $('requestsSection').hidden = tab !== 'requests';
+    if ($('suggestionsSection')) $('suggestionsSection').hidden = tab !== 'suggestions';
+    if ($('blockedSection')) $('blockedSection').hidden = tab !== 'blocked';
+    if ($('activitySection')) $('activitySection').hidden = true;
     render();
-    if (tab === 'suggestions') $('suggestionsSection').scrollIntoView({ block: 'start', behavior: 'smooth' });
+    if (tab === 'suggestions') $('suggestionsSection')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
 
   function applySearch() {
@@ -336,14 +389,21 @@
     const key = `${action}:${userId || ''}`;
     await withBusy(key, button, async () => {
       if (action === 'scan') {
-        // Primary friendship path: open profile QR scanner
         location.href = 'profile.html#scan';
         return;
       } else if (action === 'follow') {
-        // Legacy path retained but discouraged — QR is the friendship system
-        toast('SPIKE friends are added by scanning a QR code. Open your profile and tap Scan QR.', 'info');
+        toast('SPIKE uses friend requests, not follow. Scan their QR on Profile to send a request.', 'info');
         location.href = 'profile.html#scan';
         return;
+      } else if (action === 'accept') {
+        await window.SPIKE.social.acceptFriendRequest(state.db, userId);
+        toast('You are now SPIKE friends.', 'success');
+      } else if (action === 'decline') {
+        await window.SPIKE.social.declineFriendRequest(state.db, userId);
+        toast('Request declined.', 'success');
+      } else if (action === 'cancel') {
+        await window.SPIKE.social.cancelFriendRequest(state.db, userId);
+        toast('Request cancelled.', 'success');
       } else if (action === 'unfriend' || action === 'unfollow') {
         if (!window.confirm('Remove this SPIKE friend?')) return;
         if (window.SPIKE?.social?.unfriend) await window.SPIKE.social.unfriend(state.db, userId);
@@ -372,7 +432,7 @@
     setNotice('Updating your connections…');
     state.refreshPromise = (async () => {
       try {
-        await Promise.all([loadFriends(), loadBlocked(), loadActivity()]);
+        await Promise.all([loadFriends(), loadRequests(), loadBlocked()]);
         await loadPresence();
         if (state.tab === 'suggestions' || state.suggestions.length) {
           await loadRecommendations();

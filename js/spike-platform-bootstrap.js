@@ -214,20 +214,58 @@
     },
     async toggleFollow(db, targetId, shouldFollow) { return this.setFollow(db, targetId, shouldFollow); },
 
-    /** QR-first mutual friendship (both directions accepted). */
-    async connectViaQr(db, targetId) {
+    /** Send a pending friend request (QR / Add friend). */
+    async sendFriendRequest(db, targetId) {
       const session = await window.SPIKE_PLATFORM.getSession();
-      if (!session?.user) throw new Error('Sign in to connect on SPIKE.');
-      if (!targetId || targetId === session.user.id) throw new Error('You cannot connect with yourself.');
-      const { data, error } = await db.rpc('spike_connect_via_qr', { p_target_user_id: targetId });
+      if (!session?.user) throw new Error('Sign in to send a friend request.');
+      if (!targetId || targetId === session.user.id) throw new Error('You cannot send a request to yourself.');
+      const { data, error } = await db.rpc('spike_send_friend_request', { p_target_user_id: targetId });
       if (error) throw error;
       const row = Array.isArray(data) ? data[0] : data;
       return {
         ok: row?.ok !== false,
-        already_friends: row?.already_friends === true,
-        friend_id: String(row?.friend_id || targetId),
-        message: row?.message || (row?.already_friends ? 'You are already SPIKE friends.' : 'You are now SPIKE friends.')
+        state: row?.state || 'pending_out',
+        friend_id: String(targetId),
+        message: row?.message || 'Friend request sent.'
       };
+    },
+
+    /** Alias: QR confirm uses the same request path (not instant friendship). */
+    async connectViaQr(db, targetId) {
+      return this.sendFriendRequest(db, targetId);
+    },
+
+    async acceptFriendRequest(db, fromUserId) {
+      const { data, error } = await db.rpc('spike_accept_friend_request', { p_from_user_id: fromUserId });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return { ok: true, state: 'friends', message: row?.message || 'You are now SPIKE friends.' };
+    },
+
+    async declineFriendRequest(db, fromUserId) {
+      const { data, error } = await db.rpc('spike_decline_friend_request', { p_from_user_id: fromUserId });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return { ok: true, state: 'declined', message: row?.message || 'Request declined.' };
+    },
+
+    async cancelFriendRequest(db, targetId) {
+      const { data, error } = await db.rpc('spike_cancel_friend_request', { p_target_user_id: targetId });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return { ok: true, state: 'cancelled', message: row?.message || 'Request cancelled.' };
+    },
+
+    async listIncomingRequests(db, limit = 100) {
+      const { data, error } = await db.rpc('spike_list_incoming_friend_requests', { p_limit: limit });
+      if (error) throw error;
+      return (data || []).map(r => ({ id: String(r.user_id), created_at: r.created_at }));
+    },
+
+    async listOutgoingRequests(db, limit = 100) {
+      const { data, error } = await db.rpc('spike_list_outgoing_friend_requests', { p_limit: limit });
+      if (error) throw error;
+      return (data || []).map(r => ({ id: String(r.user_id), created_at: r.created_at }));
     },
 
     /** Remove mutual friendship (both directions). */

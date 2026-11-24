@@ -246,21 +246,22 @@
     const btn = $('connectConfirm');
     if (btn) {
       btn.disabled = true;
-      btn.textContent = 'Connecting…';
+      btn.textContent = 'Sending request…';
     }
     try {
-      if (!window.SPIKE?.social?.connectViaQr) {
-        throw new Error('SPIKE connect service is not ready. Reload and try again.');
+      const send = window.SPIKE?.social?.sendFriendRequest || window.SPIKE?.social?.connectViaQr;
+      if (!send) {
+        throw new Error('SPIKE friend request service is not ready. Reload and try again.');
       }
-      const result = await window.SPIKE.social.connectViaQr(db(), targetId);
-      notify(result.message || 'You are now SPIKE friends.', result.already_friends ? 'info' : 'success');
+      const result = await send.call(window.SPIKE.social, db(), targetId);
+      notify(result.message || 'Friend request sent.', (result.state === 'friends') ? 'success' : 'success');
       closeConnectPreview();
     } catch (error) {
       notify(error.message || 'Could not connect on SPIKE.', 'error');
     } finally {
       if (btn) {
         btn.disabled = false;
-        btn.textContent = 'SPIKE Connect instantly';
+        btn.textContent = 'Send friend request';
       }
     }
   }

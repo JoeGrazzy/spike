@@ -1027,20 +1027,27 @@ input,select,textarea{min-height:36px}
 </div>
 </header>
 <div class="tabs" id="tabs" role="tablist" aria-label="Your connections">
-<button id="friendsTabAll" class="tab active" type="button" role="tab" aria-selected="true" tabindex="0" data-tab="all">Following <span class="count" id="allCount">0</span></button>
+<button id="friendsTabAll" class="tab active" type="button" role="tab" aria-selected="true" tabindex="0" data-tab="all">Friends <span class="count" id="allCount">0</span></button>
+<button id="friendsTabRequests" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="requests">Requests <span class="count" id="requestsCount">0</span></button>
 <button id="friendsTabOnline" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="online">Online <span class="count" id="onlineCount">0</span></button>
 <button id="friendsTabDiscover" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="suggestions">Discover</button>
 <button id="friendsTabBlocked" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="blocked">Blocked <span class="count" id="blockedCount">0</span></button>
-<button id="friendsTabActivity" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="activity">Activity</button>
 </div>
 <div class="search-wrap" id="searchWrap">
-<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search people you follow or discover…" id="searchInput" autocomplete="off" aria-label="Search friends or people"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
+<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search friends…" id="searchInput" autocomplete="off" aria-label="Search friends"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
 </div>
 <div class="content" id="content">
 <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
-<section id="friendsSection" role="tabpanel" tabindex="0" aria-label="People you follow">
-<div class="section-label">People You Follow <span id="friendsCount">0</span></div>
+<section id="friendsSection" role="tabpanel" tabindex="0" aria-label="Your SPIKE friends">
+<div class="section-label">Your Friends <span id="friendsCount">0</span></div>
+<p class="friends-hint" style="margin:0 0 12px;font-size:12px;opacity:.75">Add friends by scanning a SPIKE QR on Profile. Requests appear under Requests.</p>
 <div id="friendsContainer"></div>
+</section>
+<section id="requestsSection" role="tabpanel" tabindex="0" aria-label="Friend requests" hidden>
+<div class="section-label">Incoming requests <span id="incomingCount">0</span></div>
+<div id="incomingRequestsContainer"></div>
+<div class="section-label" style="margin-top:22px">Sent requests <span id="outgoingCount">0</span></div>
+<div id="outgoingRequestsContainer"></div>
 </section>
 <section id="suggestionsSection" role="tabpanel" tabindex="0" aria-label="Discover people" hidden>
 <div class="section-label">Suggested For You <span id="networkCount">0</span></div>
