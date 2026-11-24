@@ -424,7 +424,7 @@
     state.pc.onconnectionstatechange=()=>{
       const connection=state.pc?.connectionState;
       if(connection==='connected'){if(state.negotiationTimer)clearTimeout(state.negotiationTimer);state.negotiationTimer=null;state.status='active';state.startedAt=state.startedAt||Date.now();renderActive();}
-      else if(connection==='failed')setStatus('Could not connect directly on this network. Try switching between Wi-Fi and mobile data, then call again.');
+      else if(connection==='failed')void endCall('Could not connect directly on this network. Try switching between Wi-Fi and mobile data, then call again.');
       else if(connection==='disconnected')setStatus('Connection interrupted. Trying to reconnect…');
     };
     // The callee may receive the offer/ICE while the browser is still waiting

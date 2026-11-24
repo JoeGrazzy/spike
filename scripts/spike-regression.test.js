@@ -91,6 +91,10 @@ test('outgoing call UI is rendered before asynchronous auth restoration', () => 
   assert.match(outgoing, /try \{[\s\S]*?await getCurrentUser\(\)/);
 });
 
+test('a failed peer connection ends the call instead of leaving it stuck', () => {
+  assert.match(calls, /connection==='failed'\)void endCall\('Could not connect directly on this network/);
+});
+
 test('call auth listener is attached before initial session lookup and can recover after delayed auth', () => {
   const startup = calls.slice(calls.indexOf('async function start()'), calls.indexOf('window.SPIKE_CALLS='));
   assert.ok(startup.indexOf('db.auth.onAuthStateChange') < startup.indexOf('db.auth.getSession'));
