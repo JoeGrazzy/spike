@@ -821,7 +821,7 @@
   }
 
   async function reportMessage(messageId) {
-    const reason = await window.SPIKEPremiumDialog.prompt('Why are you reporting this message?', { title: 'Report message', confirmText: 'Submit report', cancelText: 'Cancel' });
+    const reason = await window.SPIKEPremiumDialog.prompt('Why are you reporting this message?', { title: 'Report message', confirmText: 'Submit report', cancelText: 'Cancel', icon: 'report', kicker: 'COMMUNITY SAFETY' });
     if (!reason) return;
     const trimmed = String(reason).trim();
     if (trimmed.length < 3) throw new Error('Please provide a reason of at least 3 characters.');
@@ -832,7 +832,7 @@
 
   async function deleteMessage(row) {
     if (row.sender_id !== user.id) throw new Error('You can only delete messages you sent.');
-    const confirmed = await window.SPIKEPremiumDialog.confirm({ title: 'Delete this message?', message: 'This message will be removed from your conversation.', confirmText: 'Delete message', cancelText: 'Cancel', danger: true });
+    const confirmed = await window.SPIKEPremiumDialog.confirm({ title: 'Delete this message?', message: 'This message will be removed from your conversation.', confirmText: 'Delete message', cancelText: 'Cancel', danger: true, icon: 'delete' });
     if (!confirmed) return;
     const { data, error } = await db().from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', row.id).eq('sender_id', user.id).select('id').maybeSingle();
     if (error) throw error;

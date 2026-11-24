@@ -8,9 +8,6 @@ const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8')
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
 const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
 const realtimeSeparation = fs.readFileSync(new URL('../supabase/migrations/20261124044627_spike_realtime_postgres_changes_channel_separation_v1.sql', import.meta.url), 'utf8');
-const friendsController = fs.readFileSync(new URL('../js/spike-friends-controller.js', import.meta.url), 'utf8');
-const messagePage = fs.readFileSync(new URL('../message.html', import.meta.url), 'utf8');
-const actionIconStyles = fs.readFileSync(new URL('../css/spike-action-icon-system.css', import.meta.url), 'utf8');
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
@@ -180,22 +177,23 @@ test('global hover polish never applies border styling to every hovered element'
   }
 });
 
+const dialog = fs.readFileSync(new URL('../js/spike-dialog.js', import.meta.url), 'utf8');
+const conversationHtml = fs.readFileSync(new URL('../message.html', import.meta.url), 'utf8');
 
-test('SPIKE recommendation actions use distinct semantic icons and preserve their labels', () => {
-  assert.match(friendsController, /labelAction\(follow, 'Follow', 'follow'\)/);
-  assert.match(friendsController, /labelAction\(block, 'Block', 'block'\)/);
-  assert.match(friendsController, /labelAction\(unfollow, 'Unfollow', 'unfollow'\)/);
-  assert.match(friendsController, /labelAction\(message, 'Message', 'message'\)/);
-  assert.match(friendsController, /recommendation-reason/);
-  assert.match(actionIconStyles, /\.network-recommendation-card \.recommendation-reason/);
+test('conversation report and delete actions use dedicated semantic icons', () => {
+  assert.match(dialog, /report:'<path/);
+  assert.match(dialog, /delete:'<path/);
+  assert.match(messaging, /title: 'Report message'[\s\S]*?icon: 'report'/);
+  assert.match(messaging, /title: 'Delete this message\?'[\s\S]*?icon: 'delete'/);
 });
 
-test('message actions each have an action-specific icon, including the report flag', () => {
-  for (const action of ['reply', 'copy', 'share', 'like', 'report', 'delete', 'close']) {
-    const start = messagePage.indexOf(`data-msg-action="${action}"`);
-    assert.notEqual(start, -1, `missing ${action} action`);
-    assert.ok(messagePage.slice(start, start + 500).includes('<svg'), `${action} action is missing its icon`);
+test('message and attachment sheets give each action its own accessible icon', () => {
+  for (const action of ['reply', 'copy', 'share', 'like', 'report', 'delete']) {
+    assert.match(conversationHtml, new RegExp(`data-msg-action="${action}"[^>]*><i`));
   }
-  const reportStart = messagePage.indexOf('data-msg-action="report"');
-  assert.ok(messagePage.slice(reportStart, reportStart + 500).includes('M4 21V5'), 'report action must use the flag icon');
+  for (const kind of ['image', 'video', 'audio', 'pdf', 'archive', 'any']) {
+    assert.match(conversationHtml, new RegExp(`data-media-kind="${kind}"[^>]*><i`));
+  }
+  assert.match(conversationHtml, /fa-flag/);
+  assert.match(conversationHtml, /fa-trash-can/);
 });

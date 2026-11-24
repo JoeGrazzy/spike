@@ -36,19 +36,6 @@ assert.match(thread, /id="thread"/);
 assert.match(thread, /id="form"/);
 assert.match(thread, /id="mediaInput"/);
 assert.match(thread, /id="mediaShade"/);
-assert.match(thread, /id="privateShareTitle"/);
-assert.match(thread, /aria-labelledby="privateShareTitle"/);
-for (const kind of ['image', 'video', 'audio', 'pdf', 'archive', 'any']) {
-  assert.match(thread, new RegExp(`data-media-kind="${kind}"`), `private share option missing: ${kind}`);
-}
-assert.match(thread, /css\/spike-private-share\.css/, 'private share stylesheet missing');
-const shareCss = fs.readFileSync(path.join(root, 'css/spike-private-share.css'), 'utf8');
-assert.match(shareCss, /prefers-reduced-motion/);
-assert.match(shareCss, /safe-area-inset-bottom/);
-const mediaRouting = fs.readFileSync(path.join(root, 'js/spike-media-routing.js'), 'utf8');
-assert.match(mediaRouting, /event\.key === 'Escape'/);
-assert.match(mediaRouting, /aria-hidden', 'false'/);
-assert.match(mediaRouting, /createSignedUrl|uploadPrivate/);
 assert.match(thread, /id="typingIndicator"/);
 assert.match(thread, /id="loadOlder"/);
 

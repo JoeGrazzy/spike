@@ -39,7 +39,20 @@
     if(active)return new Promise(resolve=>pending.push({opts,resolve}));
     const root=ensure(),type=opts.type||'confirm',danger=!!opts.danger,kind=opts.kind||opts.tone||(danger?'danger':opts.warning?'warning':opts.success?'success':'');root.innerHTML='';
     const card=document.createElement('section');card.className='spike-dialog-card'+(kind?' is-'+kind:'');card.setAttribute('role','alertdialog');card.setAttribute('aria-modal','true');const xClose=document.createElement('button');xClose.type='button';xClose.className='spike-dialog-xclose';xClose.setAttribute('aria-label','Close dialog');xClose.textContent='×';xClose.addEventListener('click',()=>close(type==='input'?null:false));card.append(xClose);
-    const hero=document.createElement('div');hero.className='spike-dialog-hero';hero.setAttribute('aria-hidden','true');if(opts.icon==='alert-triangle'){hero.innerHTML='<svg viewBox="0 0 24 24"><path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20.4h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 3h.01"/></svg>';}else hero.textContent=safe(opts.icon||(danger?'!':kind==='success'?'✓':kind==='warning'?'⚠':'✦'));
+    const hero=document.createElement('div');hero.className='spike-dialog-hero';hero.setAttribute('aria-hidden','true');
+    const dialogIcons={
+      report:'<path d="M5 21V4m0 0c5-3 9 3 14 0v11c-5 3-9-3-14 0"/>',
+      flag:'<path d="M5 21V4m0 0c5-3 9 3 14 0v11c-5 3-9-3-14 0"/>',
+      delete:'<path d="M3 6h18m-2 0-.9 14H5.9L5 6m4 0V4h6v2m-5 4v6m4-6v6"/>',
+      edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"/>',
+      security:'<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',
+      info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>',
+      success:'<path d="m5 12 4 4L19 6"/>',
+      warning:'<path d="M10.3 3.9 2.5 17.4A2 2 0 0 0 4.2 20.4h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4m0 3h.01"/>'
+    };
+    const iconKey=safe(opts.icon||(danger?'delete':kind==='success'?'success':kind==='warning'?'warning':'info'));
+    if(dialogIcons[iconKey])hero.innerHTML='<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">'+dialogIcons[iconKey]+'</svg>';
+    else hero.textContent=iconKey;
     const kicker=document.createElement('div');kicker.className='spike-dialog-kicker';kicker.textContent=safe(opts.kicker||(danger?'SPIKE SECURITY':kind==='warning'?'SPIKE ATTENTION':'SPIKE NOTICE'));
     const title=document.createElement('div');title.className='spike-dialog-title';title.id='spikeDialogTitle';title.textContent=safe(opts.title||'SPIKE action');
     const msg=document.createElement('div');msg.className='spike-dialog-message';msg.id='spikeDialogMessage';msg.textContent=safe(opts.message||'');card.setAttribute('aria-labelledby',title.id);card.setAttribute('aria-describedby',msg.id);card.append(hero,kicker,title,msg);

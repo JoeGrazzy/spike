@@ -73,3 +73,13 @@
   .msg-thread-app .msg-composer .msg-icon { width: 39px; min-width: 39px; height: 42px; min-height: 42px; }
   .msg-thread-app .msg-composer .msg-primary { min-height: 42px; padding-inline: 12px; }
 }
+
+/* Semantic action icons: every conversation action has its own recognizable symbol. */
+.msg-sheet button[data-msg-action],
+.msg-sheet button[data-media-kind]{display:flex;align-items:center;gap:12px;text-align:left}
+.msg-sheet button[data-msg-action] > i,
+.msg-sheet button[data-media-kind] > i{width:18px;flex:0 0 18px;text-align:center;font-size:15px;line-height:1;color:var(--spike-accent,var(--accent,#9b7bff))}
+.msg-sheet button[data-msg-action="report"] > i{color:#f0a44b}
+.msg-sheet button[data-msg-action="delete"] > i{color:#ff6b78}
+.msg-sheet button[data-msg-action] > span,
+.msg-sheet button[data-media-kind] > span{min-width:0}
