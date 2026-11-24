@@ -1,4 +1,19 @@
-worker.js
-supabase
-*.sql
+# Only browser-facing website files belong in the Workers static asset manifest.
+# Keep the root-level website layout unchanged; exclude build/runtime and project files.
+node_modules/
+**/node_modules/**
+.git/
+**/.git/**
+.wrangler/
+**/.wrangler/**
+supabase/
+scripts/
+tests/
 package.json
+package-lock.json
+bun.lock
+bun.lockb
+wrangler.jsonc
+worker.js
+.gitignore
+*.md

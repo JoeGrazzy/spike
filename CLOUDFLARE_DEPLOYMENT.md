@@ -13,4 +13,4 @@
 - Deploy command: `npx wrangler deploy`
 - Build output directory: leave empty
 
-The static asset directory is `.` so Cloudflare serves the root-level website layout. Keep development dependencies out of the deployment archive and review which non-page files are present before publishing.
+The static asset directory is `.` so Cloudflare serves the root-level website layout. The root `.assetsignore` excludes `node_modules`, Wrangler/runtime files, tests, scripts, Supabase migrations, and Markdown reports from the public asset manifest. Keep `.assetsignore` at the repository root; do not change the asset directory to `node_modules` or the whole repository without the ignore file.
