@@ -68,12 +68,32 @@
     try { return db().storage.from('avatars').getPublicUrl(raw).data.publicUrl || ''; } catch { return ''; }
   };
 
-  const say = (message, isError = false) => {
+  let noticeTimer = 0;
+  const say = (message, type = false) => {
+    // type: true | 'error' → error, 'success', 'warning', 'cautious', 'info', or false/empty → neutral
     const node = $('notice');
     if (!node) return;
-    node.textContent = message;
-    node.classList.toggle('error', isError);
-    node.hidden = !message;
+    if (noticeTimer) { clearTimeout(noticeTimer); noticeTimer = 0; }
+    node.textContent = message || '';
+    node.classList.remove('error', 'success', 'warning', 'cautious', 'info');
+    if (!message) {
+      node.hidden = true;
+      return;
+    }
+    const kind = type === true || type === 'error' ? 'error'
+      : (type === 'success' || type === 'warning' || type === 'cautious' || type === 'info') ? type
+      : '';
+    if (kind) node.classList.add(kind);
+    node.hidden = false;
+    // Success and info auto-dismiss after a short beautiful pause
+    if (kind === 'success' || kind === 'info') {
+      noticeTimer = window.setTimeout(() => {
+        node.hidden = true;
+        node.textContent = '';
+        node.classList.remove('success', 'info');
+        noticeTimer = 0;
+      }, 3200);
+    }
   };
   const emptyNode = (message, isError = false) => {
     const node = document.createElement('div');
@@ -575,13 +595,21 @@
     if (row.deleted_at) {
       const gone = document.createElement('span');
       gone.className = 'msg-deleted';
-      gone.textContent = 'Message deleted';
+      // Original Spike deleted icon (soft ban / eye-slash style)
+      const icon = document.createElement('span');
+      icon.className = 'spk-del-icon';
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg>`;
+      const label = document.createElement('span');
+      label.textContent = 'Message deleted';
+      gone.append(icon, label);
       bubble.append(gone);
     } else {
       if (replyInfo) {
         const quote = document.createElement('div');
         quote.className = 'msg-quote';
         quote.textContent = `↪ ${replyInfo.deleted_at ? 'Deleted message' : (replyInfo.body || 'Attachment').slice(0, 140)}`;
+        if (replyInfo.deleted_at) quote.classList.add('msg-quote-deleted');
         bubble.append(quote);
       }
       if (row.body) {
@@ -811,11 +839,11 @@
     if (existing) {
       const { error } = await db().from('message_reactions').delete().eq('message_id', messageId).eq('user_id', user.id).eq('reaction', HEART);
       if (error) throw error;
-      say('Reaction removed.');
+      say('Reaction removed.', 'success');
     } else {
       const { error } = await db().from('message_reactions').insert({ message_id: messageId, user_id: user.id, reaction: HEART });
       if (error) throw error;
-      say(`You reacted ${HEART}`);
+      say(`You reacted ${HEART}`, 'success');
     }
     await refreshReaction(messageId);
   }
@@ -827,7 +855,7 @@
     if (trimmed.length < 3) throw new Error('Please provide a reason of at least 3 characters.');
     const { error } = await db().from('reports').insert({ reporter_id: user.id, target_type: 'message', target_id: messageId, reason: trimmed.slice(0, 100), details: '' });
     if (error) throw error;
-    say('Message report submitted.');
+    say('Message report submitted.', 'success');
   }
 
   async function deleteMessage(row) {
@@ -837,7 +865,7 @@
     const { data, error } = await db().from('messages').update({ deleted_at: new Date().toISOString() }).eq('id', row.id).eq('sender_id', user.id).select('id').maybeSingle();
     if (error) throw error;
     if (!data) throw new Error('Message was not deleted. Refresh the conversation and try again.');
-    say('Message deleted.');
+    say('Message deleted.', 'success');
     await loadMessages();
   }
 
@@ -847,11 +875,11 @@
     try {
       if (action === 'close') { closeMessageMenu(); return; }
       if (action === 'reply') { setReply(row); closeMessageMenu(); return; }
-      if (action === 'copy') { await navigator.clipboard.writeText(row.body || ''); say('Message text copied.'); }
+      if (action === 'copy') { await navigator.clipboard.writeText(row.body || ''); say('Message text copied.', 'success'); }
       if (action === 'share') {
         const text = row.body || 'Shared a message on SPIKE';
         if (navigator.share) await navigator.share({ title: 'SPIKE message', text });
-        else { await navigator.clipboard.writeText(text); say('Message text copied for sharing.'); }
+        else { await navigator.clipboard.writeText(text); say('Message text copied for sharing.', 'success'); }
       }
       if (action === 'like') await toggleHeart(row.id);
       if (action === 'report') await reportMessage(row.id);
@@ -974,7 +1002,7 @@
         transfer.items.add(file);
         input.files = transfer.files;
         input.dispatchEvent(new Event('change', { bubbles: true }));
-        say('Voice note ready. Tap Send to share it privately.');
+        say('Voice note ready. Tap Send to share it privately.', 'success');
       } catch (error) {
         console.warn('[SPIKE messages] voice note could not be attached', error);
         say('The recording is ready but could not be attached. Please try again.', true);
@@ -1036,10 +1064,12 @@
 
   function setConnectionState(status, error) {
     const node = $('connectionState');
+    if (!node) return;
     if (status === 'SUBSCRIBED') {
       node.hidden = false;
       node.textContent = 'Live updates connected';
       node.dataset.state = 'connected';
+      node.className = 'msg-connection';
       renderReadReceipt();
       refreshReadReceipt();
       return;
@@ -1048,7 +1078,16 @@
       node.hidden = false;
       node.textContent = 'Live updates unavailable. Reconnecting…';
       node.dataset.state = 'error';
+      node.className = 'msg-connection';
       console.warn('[SPIKE messages] realtime channel status', status, error || '');
+      return;
+    }
+    // other states stay subtle
+    if (status === 'JOINING' || status === 'CHANNEL_JOINED') {
+      node.hidden = false;
+      node.textContent = 'Connecting live updates…';
+      node.dataset.state = 'cautious';
+      node.className = 'msg-connection';
     }
   }
 
