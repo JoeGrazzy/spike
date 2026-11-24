@@ -7,7 +7,7 @@
   const $ = id => document.getElementById(id);
   const state = {
     user: null, callId: null, callType: null, role: null, status: 'idle',
-    channel: null, channelReady: false, channelRetryTimer: null, channelRetryDelay: 1000, channelGeneration: 0, channelFlushing: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
+    channel: null, channelReady: false, channelJoiningCallId: null, channelRetryTimer: null, channelRetryDelay: 1000, channelGeneration: 0, channelFlushing: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
     queuedIce: [], incomingSignals: [], incomingFlushing: false, callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
     muted: false, cameraOff: false, audioPlaybackBlocked: false, audioContext: null, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
@@ -175,6 +175,31 @@
     return session.user.id;
   }
 
+  // A valid Supabase Auth user does not by itself guarantee that the Realtime
+  // WebSocket has the same, current JWT. Refresh/synchronize it immediately
+  // before every private call-channel join (including reconnects) so a stale
+  // token cannot trap both participants in an authorization retry loop.
+  async function ensureRealtimeAuth() {
+    const db=client();
+    if(!db?.auth?.getSession || !db?.realtime?.setAuth) throw new Error('Secure call authentication is unavailable.');
+    let {data,error}=await db.auth.getSession();
+    if(error)throw error;
+    let session=data?.session;
+    if(!session?.access_token || !session?.user?.id)throw new Error('Your sign-in session has expired. Sign in again to call.');
+    const expectedUserId=state.user?.id;
+    if(expectedUserId && session.user.id!==expectedUserId)throw new Error('Your SPIKE account changed. Reopen the conversation and try again.');
+    if(session.expires_at && session.expires_at*1000<=Date.now()+30000){
+      const refreshed=await db.auth.refreshSession();
+      if(refreshed.error)throw refreshed.error;
+      session=refreshed.data?.session;
+      if(!session?.access_token || !session?.user?.id)throw new Error('Your sign-in session could not be refreshed. Sign in again to call.');
+      if(expectedUserId && session.user.id!==expectedUserId)throw new Error('Your SPIKE account changed. Reopen the conversation and try again.');
+    }
+    await db.realtime.setAuth(session.access_token);
+    state.user=session.user;
+    return session;
+  }
+
   async function loadPendingCalls() {
     const userId=state.user?.id;
     if(!userId || state.status!=='idle' || state.pendingLookupBusy || document.hidden || !navigator.onLine)return;
@@ -301,30 +326,47 @@
   }
 
   async function joinCallChannel() {
-    if(state.channel || !state.callId || state.status==='idle')return;
-    const db=client();if(!db?.channel){scheduleCallChannelReconnect(state.channelGeneration);return;}
-    if(state.channelRetryTimer){clearTimeout(state.channelRetryTimer);state.channelRetryTimer=null;}
-    const generation=++state.channelGeneration;
     const callId=state.callId;
-    const channel=db.channel(`spike-call:${callId}`,{config:{private:true,broadcast:{ack:true,self:false}}})
-      .on('broadcast',{event:'signal'},payload=>{
-        if(generation!==state.channelGeneration || state.callId!==callId)return;
-        void handleSignal(payload?.payload||{});
+    const attempt=state.callAttempt;
+    if(state.channel || !callId || state.status==='idle' || state.channelJoiningCallId===callId)return;
+    const db=client();
+    if(!db?.channel){scheduleCallChannelReconnect(state.channelGeneration);return;}
+    state.channelJoiningCallId=callId;
+    try {
+      // Do not attempt a private join until Realtime has the same authenticated
+      // account/token as the call session. This also runs on every retry.
+      await ensureRealtimeAuth();
+      if(state.callId!==callId || state.callAttempt!==attempt || state.status==='idle' || state.channel)return;
+      if(state.channelRetryTimer){clearTimeout(state.channelRetryTimer);state.channelRetryTimer=null;}
+      const generation=++state.channelGeneration;
+      const channel=db.channel(`spike-call:${callId}`,{config:{private:true,broadcast:{ack:true,self:false}}})
+        .on('broadcast',{event:'signal'},payload=>{
+          if(generation!==state.channelGeneration || state.callId!==callId)return;
+          void handleSignal(payload?.payload||{});
+        });
+      state.channel=channel;state.channelReady=false;
+      channel.subscribe((status,error)=>{
+        if(generation!==state.channelGeneration || state.channel!==channel || state.callId!==callId)return;
+        if(status==='SUBSCRIBED'){
+          state.channelReady=true;state.channelRetryDelay=1000;
+          void flushQueuedSignals();
+          if(state.status==='joining' && state.role==='callee')void sendSignal('accepted',{});
+        } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+          state.channelReady=false;
+          console.warn('[SPIKE calls] private signaling channel failed',status,error||'');
+          if(state.status!=='idle')setStatus('Reconnecting secure call signalling…');
+          scheduleCallChannelReconnect(generation);
+        }
       });
-    state.channel=channel;state.channelReady=false;
-    channel.subscribe((status,error)=>{
-      if(generation!==state.channelGeneration || state.channel!==channel || state.callId!==callId)return;
-      if(status==='SUBSCRIBED'){
-        state.channelReady=true;state.channelRetryDelay=1000;
-        void flushQueuedSignals();
-        if(state.status==='joining' && state.role==='callee')void sendSignal('accepted',{});
-      } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
-        state.channelReady=false;
-        console.warn('[SPIKE calls] private signaling channel failed',status,error||'');
-        if(state.status!=='idle')setStatus('Reconnecting secure call signalling…');
-        scheduleCallChannelReconnect(generation);
+    } catch(error) {
+      if(state.callId===callId && state.callAttempt===attempt && state.status!=='idle'){
+        console.warn('[SPIKE calls] private signaling authentication failed',error?.message||error);
+        setStatus('Reconnecting secure call signalling…');
+        scheduleCallChannelReconnect(state.channelGeneration);
       }
-    });
+    } finally {
+      if(state.channelJoiningCallId===callId)state.channelJoiningCallId=null;
+    }
   }
 
   async function sendSignal(event,payload) {
@@ -414,6 +456,7 @@
     showUI('outgoing','Starting secure call…');
     try {
       state.user=state.user||await getCurrentUser();
+      await ensureRealtimeAuth();
       if(state.callAttempt!==attempt || state.status==='idle')return;
       void profileFor(peerId).then(profile=>{
         if(state.callAttempt!==attempt || state.status==='idle')return;
@@ -525,6 +568,7 @@
     if(state.status!=='incoming')return;
     const accept=$('spikeCallAccept');if(accept)accept.disabled=true;
     try {
+      await ensureRealtimeAuth();
       const {error}=await client().rpc('spike_respond_to_call',{p_call_id:state.callId,p_action:'accept'});if(error)throw error;
       if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;
       state.status='joining';

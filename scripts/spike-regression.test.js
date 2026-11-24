@@ -187,6 +187,19 @@ test('call event subscriptions wait for the authenticated Realtime token handoff
   assert.match(calls, /if\(state\.user\?\.id===userId && !state\.eventsChannel\) return subscribeEvents\(\)/);
 });
 
+test('private call channel joins and reconnects only after the current account JWT is synchronized', () => {
+  assert.match(calls, /async function ensureRealtimeAuth\(\)/);
+  assert.match(calls, /await db\.realtime\.setAuth\(session\.access_token\)/);
+  assert.match(calls, /if\(expectedUserId && session\.user\.id!==expectedUserId\)/);
+  const join = calls.slice(calls.indexOf('async function joinCallChannel'), calls.indexOf('async function sendSignal'));
+  assert.ok(join.indexOf('await ensureRealtimeAuth()') < join.indexOf('db.channel(`spike-call:${callId}`'));
+  assert.match(join, /state\.channelJoiningCallId===callId/);
+  assert.match(join, /state\.callAttempt!==attempt/);
+  assert.match(join, /config:\{private:true,broadcast:\{ack:true,self:false\}\}/);
+  const start = calls.slice(calls.indexOf('async function startCall'), calls.indexOf('function loadIceServers'));
+  assert.ok(start.indexOf('await ensureRealtimeAuth()') < start.indexOf("rpc('spike_create_call'"));
+});
+
 
 test('global hover polish never applies border styling to every hovered element', () => {
   for (const file of ['../css/feed-experience-bundle.css', '../css/spike-beauty.css']) {
