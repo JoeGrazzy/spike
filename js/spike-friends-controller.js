@@ -39,30 +39,23 @@
   }
 
   async function loadFriends() {
-    // Fetch 1,000-row pages in expanding parallel waves. Most accounts finish
-    // with one request; large accounts avoid the old 100-request waterfall.
-    const rows = [];
-    let pageStart = 0, pageCount = 1;
-    while (pageStart < 10000) {
-      const pageIds = Array.from({ length: pageCount }, (_, i) => pageStart + i);
-      const results = await Promise.all(pageIds.map(page =>
-        state.db.from('follows').select('following_id,created_at,status')
-          .eq('follower_id', state.me.id).eq('status', 'accepted')
-          .order('created_at', { ascending: false }).range(page * 1000, page * 1000 + 999)
-      ));
-      let hasFullPage = false;
-      for (const result of results) {
-        if (result.error) throw result.error;
-        const batch = Array.isArray(result.data) ? result.data : [];
-        rows.push(...batch);
-        if (batch.length === 1000) hasFullPage = true;
-      }
-      pageStart += pageCount;
-      if (!hasFullPage) break;
-      pageCount = Math.min(pageCount * 2, 10 - pageStart);
-      if (pageCount <= 0) break;
+    // QR friendship system: mutual accepted follows only.
+    let mutual = [];
+    if (window.SPIKE?.social?.listMutualFriends) {
+      mutual = await window.SPIKE.social.listMutualFriends(state.db, { limit: 2000, offset: 0 });
+    } else {
+      const outgoing = await state.db.from('follows').select('following_id,created_at')
+        .eq('follower_id', state.me.id).eq('status', 'accepted').limit(5000);
+      if (outgoing.error) throw outgoing.error;
+      const ids = (outgoing.data || []).map(r => String(r.following_id));
+      if (!ids.length) { state.friends = []; return; }
+      const incoming = await state.db.from('follows').select('follower_id')
+        .eq('following_id', state.me.id).eq('status', 'accepted').in('follower_id', ids);
+      if (incoming.error) throw incoming.error;
+      const set = new Set((incoming.data || []).map(r => String(r.follower_id)));
+      mutual = ids.filter(id => set.has(id)).map(id => ({ id }));
     }
-    const ids = rows.map(row => String(row.following_id));
+    const ids = mutual.map(row => String(row.id || row.user_id)).filter(Boolean);
     const profiles = await getProfiles(ids);
     const map = new Map(profiles.map(person => [String(person.id), person]));
     state.friends = ids.map(id => {
@@ -121,7 +114,7 @@
       const personId = String(outgoing ? row.following_id : row.follower_id);
       const person = map.get(personId);
       const personName = person?.display_name || person?.username || 'SPIKE member';
-      const label = outgoing ? `You started following ${personName}` : `${personName} started following you`;
+      const label = outgoing ? `You connected with ${personName}` : `${personName} connected with you`;
       return { personId, personName, label, createdAt: row.created_at };
     });
   }
@@ -247,20 +240,22 @@
     const actions = document.createElement('div'); actions.className = 'friend-action';
 
     if (mode === 'suggestion') {
-      const follow = document.createElement('button'); follow.type = 'button'; follow.className = 'connection-action primary'; follow.textContent = 'Follow';
-      follow.dataset.action = 'follow'; follow.dataset.userId = id;
+      // QR is the friendship source — guide people to scan instead of one-way follow
+      const scanHint = document.createElement('button'); scanHint.type = 'button'; scanHint.className = 'connection-action primary';
+      scanHint.textContent = 'Scan QR to connect';
+      scanHint.dataset.action = 'scan'; scanHint.dataset.userId = id;
       const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
-      block.dataset.action = 'block'; block.dataset.userId = id; actions.append(follow, block);
+      block.dataset.action = 'block'; block.dataset.userId = id; actions.append(scanHint, block);
     } else if (mode === 'blocked') {
       const unblock = document.createElement('button'); unblock.type = 'button'; unblock.className = 'connection-action outline'; unblock.textContent = 'Unblock';
       unblock.dataset.action = 'unblock'; unblock.dataset.userId = id; actions.append(unblock);
     } else {
       const message = document.createElement('a'); message.className = 'connection-action message-link'; message.href = `message.html?user_id=${encodeURIComponent(id)}`; message.textContent = 'Message';
-      const unfollow = document.createElement('button'); unfollow.type = 'button'; unfollow.className = 'connection-action unfriend-btn'; unfollow.textContent = 'Unfollow';
-      unfollow.dataset.action = 'unfollow'; unfollow.dataset.userId = id;
+      const unfriend = document.createElement('button'); unfriend.type = 'button'; unfriend.className = 'connection-action unfriend-btn'; unfriend.textContent = 'Unfriend';
+      unfriend.dataset.action = 'unfriend'; unfriend.dataset.userId = id;
       const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
       block.dataset.action = 'block'; block.dataset.userId = id;
-      actions.append(message, unfollow, block);
+      actions.append(message, unfriend, block);
       const presence = person.presence;
       const status = document.createElement('div'); status.className = `friend-presence ${presence?.online ? 'is-online' : ''}`;
       status.textContent = presence?.online ? 'Online now' : presence?.lastSeenAt ? `Last seen ${new Date(presence.lastSeenAt).toLocaleString()}` : 'Status unavailable';
@@ -286,7 +281,7 @@
 
   function render() {
     const visibleFriends = state.tab === 'online' ? state.friends.filter(person => person.presence?.online) : state.friends;
-    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No followed members are online right now.' : 'You are not following anyone yet. Discover people to get started.');
+    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No SPIKE friends are online right now.' : 'No SPIKE friends yet. Open your profile and scan someone’s QR to connect instantly.');
     renderList('networkRecommendationsContainer', state.recommendations, 'suggestion', 'No recommendations yet.');
     renderList('suggestionsContainer', state.suggestions, 'suggestion', 'No new public members match your search.');
     renderList('blockedContainer', state.blocked, 'blocked', 'You have not blocked anyone.');
@@ -340,20 +335,23 @@
     const userId = button.dataset.userId;
     const key = `${action}:${userId || ''}`;
     await withBusy(key, button, async () => {
-      if (action === 'follow') {
-        const existing = await state.db.from('follows').select('status').eq('follower_id', state.me.id).eq('following_id', userId).maybeSingle();
-        if (existing.error) throw existing.error;
-        if (existing.data?.status === 'accepted') { toast('You already follow this member.', 'info'); }
+      if (action === 'scan') {
+        // Primary friendship path: open profile QR scanner
+        location.href = 'profile.html#scan';
+        return;
+      } else if (action === 'follow') {
+        // Legacy path retained but discouraged — QR is the friendship system
+        toast('SPIKE friends are added by scanning a QR code. Open your profile and tap Scan QR.', 'info');
+        location.href = 'profile.html#scan';
+        return;
+      } else if (action === 'unfriend' || action === 'unfollow') {
+        if (!window.confirm('Remove this SPIKE friend?')) return;
+        if (window.SPIKE?.social?.unfriend) await window.SPIKE.social.unfriend(state.db, userId);
         else {
-          if (existing.data) { const { error } = await state.db.from('follows').delete().eq('follower_id', state.me.id).eq('following_id', userId); if (error) throw error; }
-          const { error } = await state.db.from('follows').insert({ follower_id: state.me.id, following_id: userId, status: 'accepted' });
-          if (error) throw new Error('This account cannot be followed directly. No follow request was sent.');
-          toast('You are now following this member.', 'success');
+          await state.db.from('follows').delete()
+            .or(`and(follower_id.eq.${state.me.id},following_id.eq.${userId}),and(follower_id.eq.${userId},following_id.eq.${state.me.id})`);
         }
-      } else if (action === 'unfollow') {
-        if (!window.confirm('Unfollow this member?')) return;
-        await window.SPIKE.social.setFollow(state.db, userId, false);
-        toast('You unfollowed this member.', 'success');
+        toast('Friend removed.', 'success');
       } else if (action === 'block') {
         if (!window.confirm('Block this member? They will no longer be able to connect with you.')) return;
         const { error } = await state.db.rpc('spike_block_member', { p_target_id: userId });

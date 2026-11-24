@@ -1,360 +1,324 @@
 /* =========================================================
-   SPIKE CONVERSATION — BEAUTIFUL LAYER
-   Original Spike visual language for conversation UI.
-   Status chips (success / error / warning / cautious / info),
-   refined deleted messages, icon treatments, micro-motion.
-   Link after spike-messages.css and spike-conversation-refined.css
+   SPIKE CONVERSATION — BEAUTIFUL LAYER (FORCE VISIBLE)
+   High-specificity overrides so the Spike Beautiful system
+   always wins over base + refined styles.
    ========================================================= */
 
 :root {
   --spk-success: #34d399;
-  --spk-success-soft: rgba(52, 211, 153, 0.16);
+  --spk-success-soft: rgba(52, 211, 153, 0.22);
   --spk-warning: #f6c453;
-  --spk-warning-soft: rgba(246, 196, 83, 0.15);
+  --spk-warning-soft: rgba(246, 196, 83, 0.18);
   --spk-danger: #ff5d78;
-  --spk-danger-soft: rgba(255, 93, 120, 0.15);
-  --spk-info: #7c9cff;
-  --spk-info-soft: rgba(124, 156, 255, 0.14);
+  --spk-danger-soft: rgba(255, 93, 120, 0.18);
+  --spk-info: #a78bfa;
   --spk-cyan: #24c8e8;
   --spk-purple: #9b7bff;
   --spk-pink: #ec3fba;
 }
 
-/* ---------- Centered smart status system ---------- */
-.msg-connection,
-.spk-status,
-.msg-notice:not([hidden]) {
-  align-self: center;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  max-width: min(94%, 360px);
-  margin: 8px auto;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
-  letter-spacing: 0.01em;
-  line-height: 1.25;
-  text-align: center;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+/* ========== CENTERED SMART STATUS (very visible) ========== */
+.msg-thread-app .msg-connection,
+.msg-thread-app .msg-notice:not([hidden]),
+.msg-thread-app .spk-status {
+  align-self: center !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 9px !important;
+  max-width: min(94%, 380px) !important;
+  margin: 10px auto !important;
+  padding: 9px 18px !important;
+  border-radius: 999px !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.015em !important;
+  line-height: 1.3 !important;
+  text-align: center !important;
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  animation: spk-status-in 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+    0 12px 32px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  animation: spk-status-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both !important;
 }
 
 @keyframes spk-status-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.94);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(10px) scale(0.92); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .msg-connection,
-  .spk-status,
-  .msg-notice:not([hidden]) {
-    animation: none;
+  .msg-thread-app .msg-connection,
+  .msg-thread-app .msg-notice:not([hidden]) {
+    animation: none !important;
   }
 }
 
-/* Status variants */
-.msg-connection[data-state="connected"],
-.spk-status--success,
-.msg-notice.success {
-  background: linear-gradient(135deg, var(--spk-success-soft), rgba(36, 200, 232, 0.08));
-  color: #6ee7b7;
-  border-color: rgba(52, 211, 153, 0.32);
+/* Live connected — strong green glass + pulse */
+.msg-thread-app .msg-connection[data-state="connected"] {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.22), rgba(36, 200, 232, 0.12)) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(52, 211, 153, 0.42) !important;
 }
 
-.msg-connection[data-state="error"],
-.spk-status--error,
-.msg-notice.error {
-  background: linear-gradient(135deg, var(--spk-danger-soft), rgba(255, 93, 120, 0.06));
-  color: #fda4af;
-  border-color: rgba(255, 93, 120, 0.34);
-}
-
-.spk-status--warning,
-.msg-notice.warning {
-  background: linear-gradient(135deg, var(--spk-warning-soft), rgba(246, 196, 83, 0.06));
-  color: #fcd34d;
-  border-color: rgba(246, 196, 83, 0.34);
-}
-
-.spk-status--cautious,
-.spk-status--info,
-.msg-notice.info,
-.msg-notice.cautious {
-  background: linear-gradient(135deg, rgba(155, 123, 255, 0.14), rgba(124, 156, 255, 0.08));
-  color: #c4b5fd;
-  border-color: rgba(155, 123, 255, 0.28);
-}
-
-/* Icon inside status */
-.spk-status-icon,
-.msg-connection::before,
-.msg-notice:not([hidden])::before {
-  flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
-  display: grid;
-  place-items: center;
-  font-size: 12px;
-  line-height: 1;
-  opacity: 0.95;
-}
-
-/* Live connected — soft pulse dot */
-.msg-connection[data-state="connected"]::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--spk-success);
-  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55);
-  animation: spk-pulse 1.8s ease-out infinite;
+.msg-thread-app .msg-connection[data-state="connected"]::before {
+  content: "" !important;
+  display: block !important;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50% !important;
+  background: #34d399 !important;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  animation: spk-pulse 1.7s ease-out infinite !important;
+  flex-shrink: 0 !important;
 }
 
 @keyframes spk-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
-  70% { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+  0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(52, 211, 153, 0); }
   100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
-.msg-connection[data-state="error"]::before {
-  content: "⚠";
-  font-size: 12px;
-  color: #fda4af;
+/* Error connection */
+.msg-thread-app .msg-connection[data-state="error"] {
+  background: linear-gradient(135deg, rgba(255, 93, 120, 0.2), rgba(255, 93, 120, 0.08)) !important;
+  color: #fda4af !important;
+  border-color: rgba(255, 93, 120, 0.4) !important;
 }
 
-/* ---------- Deleted message — Spike intentional look ---------- */
+.msg-thread-app .msg-connection[data-state="error"]::before {
+  content: "!" !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 93, 120, 0.35) !important;
+  color: #fda4af !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  flex-shrink: 0 !important;
+}
+
+/* Notice variants */
+.msg-thread-app .msg-notice.success {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(36, 200, 232, 0.1)) !important;
+  color: #6ee7b7 !important;
+  border-color: rgba(52, 211, 153, 0.4) !important;
+}
+.msg-thread-app .msg-notice.error {
+  background: linear-gradient(135deg, rgba(255, 93, 120, 0.2), rgba(255, 93, 120, 0.08)) !important;
+  color: #fda4af !important;
+  border-color: rgba(255, 93, 120, 0.4) !important;
+}
+.msg-thread-app .msg-notice.warning {
+  background: linear-gradient(135deg, rgba(246, 196, 83, 0.2), rgba(246, 196, 83, 0.08)) !important;
+  color: #fcd34d !important;
+  border-color: rgba(246, 196, 83, 0.4) !important;
+}
+.msg-thread-app .msg-notice.info,
+.msg-thread-app .msg-notice.cautious {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.18), rgba(124, 156, 255, 0.1)) !important;
+  color: #c4b5fd !important;
+  border-color: rgba(167, 139, 250, 0.35) !important;
+}
+
+/* ========== DELETED MESSAGE — Spike original icon ========== */
 .msg-thread-app .bubble .msg-deleted {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 1px 0 2px;
-  font-size: 13px;
-  font-style: italic;
-  font-weight: 500;
-  color: #94a3b8;
-  opacity: 0.92;
-  letter-spacing: 0.01em;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 2px 0 3px !important;
+  font-size: 13px !important;
+  font-style: italic !important;
+  font-weight: 550 !important;
+  color: #94a3b8 !important;
+  opacity: 0.95 !important;
+  letter-spacing: 0.01em !important;
 }
 
 .msg-thread-app .bubble.mine .msg-deleted {
-  color: rgba(16, 21, 29, 0.72);
+  color: rgba(16, 21, 29, 0.75) !important;
 }
 
 .msg-thread-app .bubble .msg-deleted .spk-del-icon {
-  flex: 0 0 auto;
-  width: 14px;
-  height: 14px;
-  opacity: 0.78;
+  flex: 0 0 auto !important;
+  width: 15px !important;
+  height: 15px !important;
+  opacity: 0.85 !important;
+  display: inline-grid !important;
+  place-items: center !important;
 }
 
-/* Soft ban / deleted glyph via CSS mask */
 .msg-thread-app .bubble .msg-deleted .spk-del-icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
 }
 
-/* ---------- Header & action icon polish ---------- */
+/* Quote of deleted message */
+.msg-thread-app .msg-quote.msg-quote-deleted {
+  font-style: italic !important;
+  opacity: 0.85 !important;
+}
+
+/* ========== SHEET BUTTONS — force icons visible + Spike colors ========== */
+.msg-sheet button[data-msg-action],
+.msg-sheet button[data-media-kind] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  text-align: left !important;
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+  font-weight: 600 !important;
+  transition: background 0.15s ease, transform 0.12s ease !important;
+}
+
+.msg-sheet button[data-msg-action] > i,
+.msg-sheet button[data-media-kind] > i {
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 22px !important;
+  min-width: 22px !important;
+  height: 22px !important;
+  flex: 0 0 22px !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.msg-sheet button[data-msg-action] > span,
+.msg-sheet button[data-media-kind] > span {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
+/* Semantic Spike colors — high visibility */
+.msg-sheet button[data-msg-action="reply"] > i { color: #a78bfa !important; }
+.msg-sheet button[data-msg-action="copy"] > i { color: #94a3b8 !important; }
+.msg-sheet button[data-msg-action="share"] > i { color: #24c8e8 !important; }
+.msg-sheet button[data-msg-action="like"] > i { color: #ec3fba !important; }
+.msg-sheet button[data-msg-action="report"] > i { color: #f6c453 !important; }
+.msg-sheet button[data-msg-action="delete"] > i,
+.msg-sheet button.danger > i { color: #ff5d78 !important; }
+.msg-sheet button[data-msg-action="close"] > i { color: #94a3b8 !important; }
+
+.msg-sheet button[data-media-kind="image"] > i { color: #34d399 !important; }
+.msg-sheet button[data-media-kind="video"] > i { color: #78b8f4 !important; }
+.msg-sheet button[data-media-kind="audio"] > i { color: #e879f9 !important; }
+.msg-sheet button[data-media-kind="pdf"] > i { color: #f87171 !important; }
+.msg-sheet button[data-media-kind="archive"] > i { color: #fbbf24 !important; }
+.msg-sheet button[data-media-kind="any"] > i { color: #a5b4fc !important; }
+
+/* Fallback: if Font Awesome glyph fails, still show a colored mark */
+.msg-sheet button[data-msg-action] > i:empty::before,
+.msg-sheet button[data-media-kind] > i:empty::before {
+  content: "●";
+  font-size: 10px;
+}
+
+/* ========== HEADER ACTION ICONS ========== */
+.msg-thread-app #voiceCallBtn i { color: #24c8e8 !important; }
+.msg-thread-app #videoCallBtn i { color: #78b8f4 !important; }
+.msg-thread-app #refresh i { color: #a78bfa !important; }
+
 .msg-thread-app .msg-back,
 .msg-thread-app .msg-icon {
-  transition: transform 0.16s ease, background 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 
 .msg-thread-app .msg-back:not(:disabled):active,
 .msg-thread-app .msg-icon:not(:disabled):active {
-  transform: scale(0.94);
+  transform: scale(0.93) !important;
 }
-
-.msg-thread-app .msg-icon i,
-.msg-thread-app .msg-back i {
-  font-size: 15px;
-  line-height: 1;
-}
-
-/* Distinct Spike color accents for header actions */
-.msg-thread-app #voiceCallBtn i { color: var(--spk-cyan); }
-.msg-thread-app #videoCallBtn i { color: #78b8f4; }
-.msg-thread-app #refresh i { color: var(--spk-purple); }
 
 .msg-thread-app .msg-icon:not(:disabled):hover {
-  border-color: rgba(155, 123, 255, 0.35);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  border-color: rgba(167, 139, 250, 0.4) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2) !important;
 }
 
 /* Composer icons */
-.msg-thread-app .msg-composer .msg-icon i {
-  font-size: 16px;
-}
-.msg-thread-app #mediaPlus i { color: var(--spk-purple); }
-.msg-thread-app #voiceNote i { color: #e879f9; }
+.msg-thread-app #mediaPlus i { color: #a78bfa !important; }
+.msg-thread-app #voiceNote i { color: #e879f9 !important; }
 .msg-thread-app #voiceNote.recording {
-  background: rgba(239, 68, 68, 0.22);
-  border-color: rgba(239, 68, 68, 0.45);
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
 }
-.msg-thread-app #voiceNote.recording i { color: #fda4af; }
+.msg-thread-app #voiceNote.recording i { color: #fda4af !important; }
 
-/* ---------- Sheet action icons — Spike semantic colors ---------- */
-.msg-sheet button[data-msg-action] > i,
-.msg-sheet button[data-media-kind] > i {
-  width: 20px;
-  flex: 0 0 20px;
-  text-align: center;
-  font-size: 15px;
-  line-height: 1;
-  transition: transform 0.15s ease;
-}
-
-.msg-sheet button[data-msg-action]:active > i,
-.msg-sheet button[data-media-kind]:active > i {
-  transform: scale(0.92);
-}
-
-.msg-sheet button[data-msg-action="reply"] > i { color: var(--spk-purple); }
-.msg-sheet button[data-msg-action="copy"] > i { color: #94a3b8; }
-.msg-sheet button[data-msg-action="share"] > i { color: var(--spk-cyan); }
-.msg-sheet button[data-msg-action="like"] > i { color: var(--spk-pink); }
-.msg-sheet button[data-msg-action="report"] > i { color: var(--spk-warning); }
-.msg-sheet button[data-msg-action="delete"] > i,
-.msg-sheet button.danger > i { color: var(--spk-danger); }
-.msg-sheet button[data-msg-action="close"] > i { color: #94a3b8; }
-
-.msg-sheet button[data-media-kind="image"] > i { color: #34d399; }
-.msg-sheet button[data-media-kind="video"] > i { color: #78b8f4; }
-.msg-sheet button[data-media-kind="audio"] > i { color: #e879f9; }
-.msg-sheet button[data-media-kind="pdf"] > i { color: #f87171; }
-.msg-sheet button[data-media-kind="archive"] > i { color: #fbbf24; }
-.msg-sheet button[data-media-kind="any"] > i { color: #a5b4fc; }
-
-/* Quote of a deleted message */
-.msg-thread-app .msg-quote.msg-quote-deleted {
-  font-style: italic;
-  opacity: 0.85;
-}
-
-/* ---------- Day separators — more Spike ---------- */
+/* ========== DAY SEPARATORS ========== */
 .msg-thread-app .msg-day {
-  align-self: center;
-  margin: 14px 0 10px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  align-self: center !important;
+  margin: 14px 0 10px !important;
+  padding: 6px 15px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  letter-spacing: 0.02em !important;
+  color: #94a3b8 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.09) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14) !important;
 }
 
-/* ---------- Typing indicator polish ---------- */
-.msg-thread-app .msg-typing {
-  align-self: flex-start;
-  padding: 4px 10px;
-  font-size: 12px;
-  color: #94a3b8;
-  animation: spk-fade 0.25s ease;
-}
-
-@keyframes spk-fade {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ---------- Composer status line ---------- */
-.msg-thread-app .msg-status {
-  text-align: center;
-  font-size: 12px;
-  font-weight: 550;
-  color: #94a3b8;
-  min-height: 0;
-  margin: 0 0 6px;
-  transition: color 0.2s ease;
-}
-
-.msg-thread-app .msg-status.error { color: #fda4af; }
-.msg-thread-app .msg-status.success { color: #6ee7b7; }
-.msg-thread-app .msg-status.warning { color: #fcd34d; }
-
-/* ---------- Bubble action button polish ---------- */
-.msg-thread-app .bubble .msg-bubble-action {
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
-}
-
-.msg-thread-app .bubble .msg-bubble-action:active {
-  transform: scale(0.9);
-}
-
-/* ---------- Load older button ---------- */
+/* ========== LOAD OLDER / STATUS LINE ========== */
 .msg-thread-app .msg-load-older {
-  align-self: center;
-  margin: 6px auto;
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  color: #aab7c3;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  align-self: center !important;
+  margin: 8px auto !important;
+  padding: 9px 18px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #aab7c3 !important;
 }
 
-.msg-thread-app .msg-load-older:hover {
-  background: rgba(155, 123, 255, 0.12);
-  border-color: rgba(155, 123, 255, 0.28);
-  color: #c4b5fd;
+.msg-thread-app .msg-status {
+  text-align: center !important;
+  font-weight: 600 !important;
 }
+.msg-thread-app .msg-status.error { color: #fda4af !important; }
+.msg-thread-app .msg-status.success { color: #6ee7b7 !important; }
+.msg-thread-app .msg-status.warning { color: #fcd34d !important; }
 
-/* ---------- Reply / recording / media preview trays ---------- */
+/* ========== REPLY / RECORDING / MEDIA TRAYS ========== */
 .msg-thread-app .msg-reply,
 .msg-thread-app .msg-media-preview {
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(155, 123, 255, 0.12), rgba(124, 156, 255, 0.06));
-  border: 1px solid rgba(155, 123, 255, 0.18);
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.14), rgba(124, 156, 255, 0.07)) !important;
+  border: 1px solid rgba(167, 139, 250, 0.22) !important;
 }
 
 .msg-thread-app .msg-recording:not([hidden]) {
-  border-radius: 14px;
-  background: linear-gradient(135deg, rgba(255, 93, 120, 0.14), rgba(255, 93, 120, 0.05));
-  border: 1px solid rgba(255, 93, 120, 0.25);
-  color: #fda4af;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(255, 93, 120, 0.16), rgba(255, 93, 120, 0.06)) !important;
+  border: 1px solid rgba(255, 93, 120, 0.28) !important;
+  color: #fda4af !important;
 }
 
-/* ---------- Presence online indicator ---------- */
+/* Online presence glow */
 .msg-thread-app .msg-person[data-presence-state="online"] .msg-avatar {
-  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.55);
+  box-shadow: 0 0 0 2.5px rgba(52, 211, 153, 0.6) !important;
 }
-
 .msg-thread-app .msg-person[data-presence-state="online"] #sub {
-  color: #6ee7b7;
+  color: #6ee7b7 !important;
 }
 
-/* ---------- Final touch: empty / notice base ---------- */
-.msg-empty {
-  border-radius: 16px;
-  padding: 20px 16px;
-  text-align: center;
-  font-size: 13px;
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed rgba(255, 255, 255, 0.08);
+/* Empty state */
+.msg-thread-app .msg-empty {
+  border-radius: 16px !important;
+  padding: 22px 16px !important;
+  text-align: center !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px dashed rgba(255, 255, 255, 0.1) !important;
 }
-
-.msg-empty.error {
-  color: #fda4af;
-  border-color: rgba(255, 93, 120, 0.25);
-  background: rgba(255, 93, 120, 0.06);
+.msg-thread-app .msg-empty.error {
+  color: #fda4af !important;
+  border-color: rgba(255, 93, 120, 0.28) !important;
+  background: rgba(255, 93, 120, 0.07) !important;
 }

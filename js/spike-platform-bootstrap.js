@@ -212,7 +212,64 @@
       if (error) throw error;
       return { following: false, requested: false };
     },
-    async toggleFollow(db, targetId, shouldFollow) { return this.setFollow(db, targetId, shouldFollow); }
+    async toggleFollow(db, targetId, shouldFollow) { return this.setFollow(db, targetId, shouldFollow); },
+
+    /** QR-first mutual friendship (both directions accepted). */
+    async connectViaQr(db, targetId) {
+      const session = await window.SPIKE_PLATFORM.getSession();
+      if (!session?.user) throw new Error('Sign in to connect on SPIKE.');
+      if (!targetId || targetId === session.user.id) throw new Error('You cannot connect with yourself.');
+      const { data, error } = await db.rpc('spike_connect_via_qr', { p_target_user_id: targetId });
+      if (error) throw error;
+      const row = Array.isArray(data) ? data[0] : data;
+      return {
+        ok: row?.ok !== false,
+        already_friends: row?.already_friends === true,
+        friend_id: String(row?.friend_id || targetId),
+        message: row?.message || (row?.already_friends ? 'You are already SPIKE friends.' : 'You are now SPIKE friends.')
+      };
+    },
+
+    /** Remove mutual friendship (both directions). */
+    async unfriend(db, targetId) {
+      const session = await window.SPIKE_PLATFORM.getSession();
+      if (!session?.user) throw new Error('Sign in to manage friends.');
+      const { data, error } = await db.rpc('spike_unfriend', { p_target_user_id: targetId });
+      if (error) {
+        // Fallback if RPC not yet applied: delete both directions client-side
+        const me = session.user.id;
+        const del = await db.from('follows').delete()
+          .or(`and(follower_id.eq.${me},following_id.eq.${targetId}),and(follower_id.eq.${targetId},following_id.eq.${me})`);
+        if (del.error) throw error;
+        return { ok: true, friend_id: targetId };
+      }
+      return { ok: true, friend_id: String(data?.friend_id || targetId) };
+    },
+
+    /** Mutual friends only (QR friendship system). */
+    async listMutualFriends(db, options = {}) {
+      const limit = options.limit || 500;
+      const offset = options.offset || 0;
+      const { data, error } = await db.rpc('spike_list_mutual_friends', { p_limit: limit, p_offset: offset });
+      if (!error && Array.isArray(data)) {
+        return data.map(row => ({ id: String(row.user_id), created_at: row.created_at }));
+      }
+      // Fallback: compute mutuals from follows if RPC missing
+      const session = await window.SPIKE_PLATFORM.getSession();
+      if (!session?.user) throw new Error('Sign in to continue.');
+      const me = session.user.id;
+      const outgoing = await db.from('follows').select('following_id,created_at')
+        .eq('follower_id', me).eq('status', 'accepted').limit(5000);
+      if (outgoing.error) throw outgoing.error;
+      const ids = (outgoing.data || []).map(r => String(r.following_id));
+      if (!ids.length) return [];
+      const incoming = await db.from('follows').select('follower_id,created_at')
+        .eq('following_id', me).eq('status', 'accepted').in('follower_id', ids);
+      if (incoming.error) throw incoming.error;
+      const mutualSet = new Set((incoming.data || []).map(r => String(r.follower_id)));
+      const created = new Map((outgoing.data || []).map(r => [String(r.following_id), r.created_at]));
+      return ids.filter(id => mutualSet.has(id)).map(id => ({ id, created_at: created.get(id) }));
+    }
   };
   window.SPIKE = Object.assign(window.SPIKE || {}, { social });
   window.dispatchEvent(new CustomEvent('spike:supabase-ready', { detail: { client } }));
