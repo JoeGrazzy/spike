@@ -111,7 +111,7 @@ test('pending-call recovery polls independently of the Realtime subscription whi
   assert.match(calls, /function startPendingCallPolling\(\)/);
   assert.match(calls, /window\.setInterval\(\(\)=>\{\s*if\(state\.user && state\.status==='idle' && !document\.hidden && navigator\.onLine\)void loadPendingCalls\(\);\s*\},6000\)/);
   assert.match(calls, /function stopPendingCallPolling\(\)/);
-  assert.match(calls, /startPendingCallPolling\(\);\s*if\(!state\.eventsChannel\)void subscribeEvents\(\)/);
+  assert.match(calls, /startPendingCallPolling\(\);\s*void loadPendingCalls\(\);\s*if\(!state\.eventsChannel\)void subscribeEvents\(\)/);
 });
 
 test('caller negotiation is recovered from durable accepted database state', () => {
@@ -151,4 +151,11 @@ test('queued call signals remain queued until acknowledged after a channel rejoi
   assert.match(calls, /if\(!sent\)break/);
   assert.match(calls, /state\.channelFlushing=true/);
   assert.match(calls, /state\.channelFlushing=false/);
+});
+
+test('call event subscriptions wait for the authenticated Realtime token handoff', () => {
+  assert.match(calls, /async function syncRealtimeAuth\(session\)/);
+  assert.match(calls, /await client\(\)\.realtime\.setAuth\(session\.access_token\)/);
+  assert.match(calls, /syncRealtimeAuth\(session\)\.then\(userId=>/);
+  assert.match(calls, /if\(state\.user\?\.id===userId && !state\.eventsChannel\) return subscribeEvents\(\)/);
 });

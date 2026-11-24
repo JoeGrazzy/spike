@@ -1108,6 +1108,16 @@
       const { data, error } = await db().auth.getUser();
       if (error) throw error;
       if (!data.user) throw new Error('Please sign in again.');
+      // Do not join a private Realtime topic until its authorization JWT is
+      // installed. Supabase's auth listener updates this asynchronously; the
+      // explicit await closes the startup race without changing RLS policies.
+      const { data: sessionData, error: sessionError } = await db().auth.getSession();
+      if (sessionError) throw sessionError;
+      const session = sessionData?.session;
+      if (!session?.access_token || session.user?.id !== data.user.id) {
+        throw new Error('Your sign-in session is still synchronizing. Please retry.');
+      }
+      await db().realtime.setAuth(session.access_token);
       user = data.user;
       if (document.body.dataset.spikePage === 'message') {
         bindThreadPage();

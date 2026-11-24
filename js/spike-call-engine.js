@@ -152,6 +152,12 @@
     return data.user;
   }
 
+  async function syncRealtimeAuth(session) {
+    if (!session?.access_token || !session.user?.id) throw new Error('A valid sign-in session is required for call notifications.');
+    await client().realtime.setAuth(session.access_token);
+    return session.user.id;
+  }
+
   async function loadPendingCalls() {
     const userId=state.user?.id;
     if(!userId || state.status!=='idle' || state.pendingLookupBusy || document.hidden || !navigator.onLine)return;
@@ -606,13 +612,23 @@
           state.user=session.user;
         }
         startPendingCallPolling();
-        if(!state.eventsChannel)void subscribeEvents();
+        // Auth callbacks must stay synchronous (Supabase holds an auth lock).
+        // Defer the awaited Realtime token handoff, then join only if this is
+        // still the active account; this prevents stale-account subscriptions.
+        void syncRealtimeAuth(session).then(userId=>{
+          if(state.user?.id===userId && !state.eventsChannel) return subscribeEvents();
+        }).catch(error=>console.warn('[SPIKE calls] Realtime auth synchronization failed',error?.message||error));
       }
     });
     try {
       const {data,error}=await db.auth.getSession();
       if(error)throw error;
-      if(data?.session?.user){state.user=data.session.user;startPendingCallPolling();await subscribeEvents();}
+      if(data?.session?.user){
+        const userId=await syncRealtimeAuth(data.session);
+        if(state.user?.id===userId || !state.user) state.user=data.session.user;
+        startPendingCallPolling();
+        if(state.user?.id===userId) await subscribeEvents();
+      }
     } catch(error) {
       console.warn('[SPIKE calls] session bootstrap deferred; waiting for auth recovery',error?.message||error);
     }

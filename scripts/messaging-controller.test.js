@@ -25,3 +25,9 @@ test('call buttons stay disabled until one-to-one recipient and messaging permis
   assert.match(source, /const setCallButtonsReady = ready =>/);
   assert.match(source, /if \(peerId\) \{\s*composerOpen = await canMessage\(peerId\);\s*setCallButtonsReady\(composerOpen\);/);
 });
+
+test('message private subscriptions wait for the authenticated Realtime token handoff', () => {
+  assert.match(source, /await db\(\)\.auth\.getSession\(\)/);
+  assert.match(source, /await db\(\)\.realtime\.setAuth\(session\.access_token\)/);
+  assert.ok(source.indexOf('await db().realtime.setAuth(session.access_token)') < source.indexOf('await setupThread()'));
+});
