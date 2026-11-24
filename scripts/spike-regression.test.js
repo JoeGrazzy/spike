@@ -31,6 +31,22 @@ test('Worker no longer exposes a TURN credential endpoint', () => {
   assert.doesNotMatch(worker, /call-ice|TURN_KEY|generate-ice-servers/);
 });
 
+test('voice and video calls always use a dedicated unmuted remote audio sink', () => {
+  assert.match(calls, /id = 'spikeCallRemoteAudio'/);
+  assert.match(calls, /audio\.muted = false; audio\.volume = 1/);
+  assert.match(calls, /audio\.srcObject=state\.remoteStream/);
+  assert.match(calls, /remote\.muted=true/);
+  assert.match(calls, /function enableRemoteAudio\(\)/);
+  assert.match(calls, /add\('spikeCallEnableSound', 'Enable sound', '', enableRemoteAudio, 'sound'\)/);
+});
+
+test('call start and accept prime mobile audio output during the user gesture', () => {
+  assert.match(calls, /async function startCall\(type, context\) \{\n    primeAudioOutput\(\)/);
+  assert.match(calls, /async function acceptCall\(\) \{\n    primeAudioOutput\(\)/);
+  assert.match(calls, /AudioContextCtor/);
+  assert.match(calls, /audioPlaybackBlocked/);
+});
+
 test('Realtime hardening requires private topics and active call sessions', () => {
   assert.equal((dmMigration.match(/private is true/g) || []).length, 6);
   assert.match(dmMigration, /s\.status in \('ringing','accepted'\)/);
@@ -235,7 +251,7 @@ test('friend-request notifications use the friend-request preference instead of 
 });
 
 const platformBootstrap = fs.readFileSync(new URL('../js/spike-platform-bootstrap.js', import.meta.url), 'utf8');
-const androidDeviceMigration = fs.readFileSync(new URL('../supabase/migrations/20261124110500_spike_single_active_android_device_v1.sql', import.meta.url), 'utf8');
+const androidDeviceMigration = fs.readFileSync(new URL('../supabase/migrations/20261124110714_spike_single_active_android_device_v1.sql', import.meta.url), 'utf8');
 
 test('Android account sessions register one current device and sign out replaced devices locally', () => {
   assert.match(platformBootstrap, /const isAndroidDevice = \/Android\/i\.test\(navigator\.userAgent/);

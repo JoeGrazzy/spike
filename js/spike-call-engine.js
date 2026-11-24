@@ -10,7 +10,7 @@
     channel: null, channelReady: false, channelRetryTimer: null, channelRetryDelay: 1000, channelGeneration: 0, channelFlushing: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
     queuedIce: [], incomingSignals: [], incomingFlushing: false, callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
-    muted: false, cameraOff: false, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
+    muted: false, cameraOff: false, audioPlaybackBlocked: false, audioContext: null, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
   };
 
   const ICE_SERVERS = Object.freeze([
@@ -40,6 +40,7 @@
       .spike-call-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:34px;margin:10px 0 0}.spike-call-wave i{display:block;width:3px;height:9px;border-radius:5px;background:linear-gradient(#c4a5fd,#e879b9);animation:spikeCallWave .9s ease-in-out infinite alternate}.spike-call-wave i:nth-child(2n){animation-delay:.18s}.spike-call-wave i:nth-child(3n){animation-delay:.35s}.spike-call-wave i:nth-child(4n){animation-delay:.5s}
       .spike-call-video{position:absolute;inset:0;width:100%;height:100%;margin:0;background:#05070d;overflow:hidden}
       .spike-call-video video{display:block;width:100%;height:100%;object-fit:cover;background:#05070d}
+      .spike-call-remote-audio{position:absolute;width:1px;height:1px;opacity:.001;pointer-events:none;left:-10px;bottom:0}
       .spike-call-video .remote{position:absolute;inset:0}
       .spike-call-video .local{position:absolute;right:16px;top:max(70px,calc(env(safe-area-inset-top) + 58px));width:clamp(104px,28vw,148px);height:clamp(142px,25vh,190px);border:1px solid #ffffff55;border-radius:20px;object-fit:cover;box-shadow:0 12px 34px #0008;z-index:2}
       .spike-call-card.is-video{background:#05070d;padding:0;justify-content:flex-end}.spike-call-card.is-video:before{z-index:1;background:linear-gradient(180deg,rgba(3,5,12,.56),transparent 24%,transparent 58%,rgba(3,5,12,.88) 100%)}
@@ -97,11 +98,16 @@
 
     if (videoMode) {
       const video = document.createElement('div'); video.className = 'spike-call-video';
-      const remote = document.createElement('video'); remote.id = 'spikeCallRemoteVideo'; remote.className = 'remote'; remote.autoplay = true; remote.playsInline = true;
+      const remote = document.createElement('video'); remote.id = 'spikeCallRemoteVideo'; remote.className = 'remote'; remote.autoplay = true; remote.playsInline = true; remote.muted = true;
       const local = document.createElement('video'); local.id = 'spikeCallLocalVideo'; local.autoplay = true; local.muted = true; local.playsInline = true; local.className = 'local';
       video.append(remote, local); card.append(video);
-    } else if (state.callType === 'voice' && kind === 'active') {
-      const audio = document.createElement('audio'); audio.id = 'spikeCallRemoteAudio'; audio.autoplay = true; audio.playsInline = true; card.append(audio);
+    }
+    // Keep remote sound independent from the video element so Android autoplay
+    // restrictions on audible video do not mute the entire video call.
+    if (kind === 'active') {
+      const audio = document.createElement('audio'); audio.id = 'spikeCallRemoteAudio';
+      audio.className = 'spike-call-remote-audio'; audio.autoplay = true; audio.playsInline = true;
+      audio.muted = false; audio.volume = 1; audio.setAttribute('aria-label', 'Remote call audio'); card.append(audio);
     }
 
     const person = document.createElement('div'); person.className = 'spike-call-person';
@@ -123,7 +129,7 @@
     const add = (id, label, cls, handler, action) => {
       const b = document.createElement('button'); b.id = id; b.type = 'button'; b.textContent = label;
       if (cls) b.className = cls; if (action) b.dataset.action = action;
-      b.setAttribute('aria-label', label); b.addEventListener('click', handler); controls.append(b);
+      b.setAttribute('aria-label', label); b.addEventListener('click', handler); controls.append(b); return b;
     };
     if (kind === 'incoming') {
       add('spikeCallAccept', 'Accept', 'primary', acceptCall, 'accept');
@@ -132,6 +138,8 @@
       add('spikeCallHangup', 'Cancel call', 'danger', endCall, 'cancel');
     } else {
       add('spikeCallMute', state.muted ? 'Unmute' : 'Mute', '', toggleMute, 'mute');
+      const soundButton = add('spikeCallEnableSound', 'Enable sound', '', enableRemoteAudio, 'sound');
+      soundButton.hidden = !state.audioPlaybackBlocked;
       if (state.callType === 'video') add('spikeCallCamera', state.cameraOff ? 'Camera on' : 'Camera off', '', toggleCamera, 'camera');
       add('spikeCallEnd', 'End call', 'danger', endCall, 'end');
     }
@@ -362,7 +370,37 @@
     state.heartbeatTimer=window.setInterval(async()=>{if(!state.callId||state.status==='idle')return;try{const {data,error}=await client().rpc('spike_touch_call',{p_call_id:state.callId});if(error)throw error;if(data===false)cleanup('Call session expired.');}catch(error){console.info('[SPIKE calls] call heartbeat failed',error?.message||error);}},30000);
   }
 
+  function primeAudioOutput() {
+    // Invoke synchronously from Start/Accept before awaiting Auth or media.
+    try {
+      const AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+      if (AudioContextCtor) {
+        if (!state.audioContext || state.audioContext.state === 'closed') state.audioContext = new AudioContextCtor();
+        if (state.audioContext.state === 'suspended') void state.audioContext.resume().catch(() => {});
+      }
+    } catch (error) { console.info('[SPIKE calls] audio output could not be primed', error?.message || error); }
+  }
+
+  async function enableRemoteAudio() {
+    primeAudioOutput();
+    const audio = $('spikeCallRemoteAudio');
+    if (!audio) return;
+    audio.muted = false; audio.volume = 1;
+    try {
+      await audio.play();
+      state.audioPlaybackBlocked = false;
+      const button = $('spikeCallEnableSound'); if (button) button.hidden = true;
+      setStatus('Sound enabled.');
+    } catch (error) {
+      state.audioPlaybackBlocked = true;
+      setStatus('Sound is blocked by your browser. Check media volume and tap Enable sound again.');
+      const button = $('spikeCallEnableSound'); if (button) button.hidden = false;
+      console.warn('[SPIKE calls] remote audio playback blocked', error?.name || error);
+    }
+  }
+
   async function startCall(type, context) {
+    primeAudioOutput();
     if(state.status!=='idle')throw new Error('Another call is already active.');
     if(!['voice','video'].includes(type))throw new Error('Choose a voice or video call.');
     const conversationId=context?.conversationId;
@@ -467,12 +505,23 @@
   function attachMediaElements() {
     const local=$('spikeCallLocalVideo'),remote=$('spikeCallRemoteVideo'),audio=$('spikeCallRemoteAudio');
     if(local && state.localStream)local.srcObject=state.localStream;
-    if(remote && state.remoteStream)remote.srcObject=state.remoteStream;
-    if(audio && state.remoteStream)audio.srcObject=state.remoteStream;
-    const play=[local,remote,audio].filter(Boolean);play.forEach(node=>{const p=node.play?.();if(p?.catch)p.catch(()=>{});});
+    if(remote && state.remoteStream){remote.srcObject=state.remoteStream;remote.muted=true;}
+    if(audio && state.remoteStream){audio.srcObject=state.remoteStream;audio.muted=false;audio.volume=1;}
+    if(local){const p=local.play?.();if(p?.catch)p.catch(error=>console.info('[SPIKE calls] local preview playback unavailable',error?.name||error));}
+    if(remote){const p=remote.play?.();if(p?.catch)p.catch(error=>console.info('[SPIKE calls] remote video playback unavailable',error?.name||error));}
+    if(audio){
+      const p=audio.play?.();
+      if(p?.then)p.then(()=>{state.audioPlaybackBlocked=false;const button=$('spikeCallEnableSound');if(button)button.hidden=true;}).catch(error=>{
+        state.audioPlaybackBlocked=true;
+        const button=$('spikeCallEnableSound');if(button)button.hidden=false;
+        setStatus('Call connected. Tap Enable sound if you cannot hear the other person.');
+        console.warn('[SPIKE calls] remote audio autoplay blocked',error?.name||error);
+      });
+    }
   }
 
   async function acceptCall() {
+    primeAudioOutput();
     if(state.status!=='incoming')return;
     const accept=$('spikeCallAccept');if(accept)accept.disabled=true;
     try {
@@ -587,7 +636,7 @@
     state.remoteStream?.getTracks().forEach(track=>track.stop());state.remoteStream=null;
     if(state.channel){client()?.removeChannel(state.channel).catch?.(()=>{});state.channel=null;}state.channelReady=false;
     $('spikeCallOverlay')?.remove();
-    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.incomingSignals=[];state.incomingFlushing=false;state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
+    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.incomingSignals=[];state.incomingFlushing=false;state.startedAt=0;state.muted=false;state.cameraOff=false;state.audioPlaybackBlocked=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
     if(message && typeof window.spikePremiumToast==='function') {
       const toast=window.spikePremiumToast(message,'info',2600);
       const stack=toast?.parentElement;
