@@ -87,9 +87,10 @@ if(versions.length!==expectedLocalVersions.length||versions.some((version,index)
 const messagingSource=fs.readFileSync(path.join(root,'js','spike-messages.js'),'utf8');
 if(!/currentPeerId\s*=\s*!isGroup\s*&&\s*peerId/.test(messagingSource))errors.push('Direct-message setup must assign the resolved one-to-one call recipient');
 const callSource=fs.readFileSync(path.join(root,'js','spike-call-engine.js'),'utf8');
-if(callSource.includes('/api/call-ice'))errors.push('STUN-only call engine must not depend on the external TURN credential endpoint');
-if(callSource.includes('await loadIceServers()'))errors.push('STUN-only ICE server selection must not perform an unnecessary async credential lookup');
-if(fs.readFileSync(path.join(root,'worker.js'),'utf8').includes('call-ice'))errors.push('Unused TURN credential route must not remain in the Worker');
+if(!callSource.includes("functions.invoke('metered-turn-credentials'"))errors.push('Call engine must fetch Metered ICE servers through the authenticated Supabase Edge Function');
+if(!callSource.includes('await loadIceServers()'))errors.push('Call media setup must await Metered ICE server loading before peer creation');
+if(!callSource.includes('state.iceServers = ICE_SERVERS'))errors.push('Call engine must retain STUN fallback when Metered is unavailable');
+if(fs.readFileSync(path.join(root,'worker.js'),'utf8').includes('call-ice'))errors.push('Unused legacy TURN credential route must not remain in the Worker');
 if(!callSource.includes("client().rpc(callerMissed?'spike_mark_call_missed':'spike_end_call'"))errors.push('Caller no-answer path must finalize the call as missed');
 if(!callSource.includes('client().channel(`spike-call-events-${userId}`)'))errors.push('Call Postgres Changes listener must use the separate table-RLS-protected channel');
 if(!callSource.includes('db.channel(`spike-call:${callId}`,{config:{private:true,broadcast:{ack:true,self:false}}})'))errors.push('SDP/ICE signaling channel must remain private with delivery acknowledgements');

@@ -13,7 +13,10 @@
     muted: false, cameraOff: false, audioPlaybackBlocked: false, audioContext: null, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
   };
 
+  // STUN servers remain available as a direct-connect fallback. TURN credentials
+  // are fetched securely from the authenticated Supabase Edge Function.
   const ICE_SERVERS = Object.freeze([
+    { urls: 'stun:stun.relay.metered.ca:80' },
     { urls: 'stun:stun.cloudflare.com:3478' },
     { urls: 'stun:stun.l.google.com:19302' }
   ]);
@@ -487,14 +490,41 @@
     }
   }
 
-  function loadIceServers() {
-    // Keep calling self-contained: use public STUN only and do not require a
-    // TURN provider account, Worker secret, or external credential endpoint.
-    state.iceServers=ICE_SERVERS;
+  async function loadIceServers() {
+    if (state.iceServers) return state.iceServers;
+    state.iceServers = ICE_SERVERS;
+    const supabase = client();
+    if (!supabase?.functions?.invoke) {
+      console.warn('[SPIKE calls] Supabase Functions client is unavailable; using STUN fallback.');
+      return state.iceServers;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke('metered-turn-credentials', {
+        body: {},
+      });
+      if (error) throw error;
+      const servers = data?.iceServers;
+      if (!Array.isArray(servers) || !servers.some(server => {
+        const urls = Array.isArray(server?.urls) ? server.urls : [server?.urls];
+        return urls.some(url => typeof url === 'string' && url.startsWith('turn'));
+      })) {
+        throw new Error('TURN endpoint returned an invalid ICE server list.');
+      }
+      state.iceServers = [...servers, ...ICE_SERVERS.filter(fallback => !servers.some(server => {
+        const urls = Array.isArray(server?.urls) ? server.urls : [server?.urls];
+        return urls.includes(fallback.urls);
+      }))];
+      console.info('[SPIKE calls] Secure Metered TURN ICE servers loaded.');
+    } catch (error) {
+      console.warn('[SPIKE calls] Secure Metered TURN unavailable; using STUN fallback.', error?.message || error);
+      state.iceServers = ICE_SERVERS;
+    }
+    return state.iceServers;
   }
 
   async function prepareMedia(attempt=state.callAttempt) {
-    loadIceServers();
+    await loadIceServers();
     if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone and camera access require a supported browser over HTTPS.');
     try {
       const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:state.callType==='video'?{facingMode:'user',width:{ideal:1280},height:{ideal:720}}:false});

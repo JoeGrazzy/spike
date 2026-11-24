@@ -20,11 +20,15 @@ test('group conversations do not expose a call recipient', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId/);
 });
 
-test('calls use local STUN configuration without a TURN credential fetch', () => {
-  assert.match(calls, /stun:stun\.cloudflare\.com:3478/);
-  assert.match(calls, /stun:stun\.l\.google\.com:19302/);
-  assert.doesNotMatch(calls, /fetch\(\s*['"]\/api\/call-ice/);
-  assert.doesNotMatch(calls, /TURN_KEY|turnAvailable/);
+test('calls fetch secure Metered TURN ICE servers through Supabase and retain STUN fallback', () => {
+  assert.match(calls, /stun:stun\.relay\.metered\.ca:80/);
+  assert.match(calls, /async function loadIceServers\(\)/);
+  assert.match(calls, /functions\.invoke\('metered-turn-credentials'/);
+  assert.match(calls, /data\?\.iceServers/);
+  assert.match(calls, /await loadIceServers\(\)/);
+  assert.match(calls, /state\.iceServers = ICE_SERVERS/);
+  assert.match(calls, /new RTCPeerConnection\(\{iceServers:state\.iceServers\|\|ICE_SERVERS/);
+  assert.doesNotMatch(calls, /METERED_TURN_USERNAME|METERED_TURN_CREDENTIAL|secretKey=|YOUR_METERED_ACCOUNT_SECRET/);
 });
 
 test('Worker no longer exposes a TURN credential endpoint', () => {

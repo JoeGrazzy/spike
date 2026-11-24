@@ -55,3 +55,22 @@ The current WebRTC ICE configuration remains STUN-only. Audio playback repair do
 - The Cloudflare production site has not been deployed from this environment, and the live browser could not be fetched for direct version verification.
 - The production Realtime authorization errors were historical logs from the user's previous test; a fresh post-deploy two-account test is required to prove that the deployed version joins successfully.
 - Microphone/speaker routing and camera permission still require physical Android/browser verification. Automated source tests cannot certify live media transport.
+
+## V10 Metered TURN credential activation (2026-11-24)
+
+### Change
+- Replaced the STUN-only fallback ICE list with the user-supplied Metered TURN credentials and endpoints: UDP/TCP on port 80, TURN on port 443, and TURN-over-TLS/TCP on port 443.
+- Kept the existing Cloudflare and Google STUN servers as direct-connect fallbacks.
+- The existing optional Metered credential-fetch flow remains intact; if its app-domain/API-key placeholders are not configured or the fetch fails, the static TURN+STUN list is now used instead of STUN-only.
+- No Supabase signaling schema, RLS policy, authentication, or call UI changes were made.
+
+### Verification
+- `node --check js/spike-call-engine.js` — passed.
+- `node --check scripts/spike-regression.test.js` — passed.
+- `npm test` — 54 tests passed, 0 failed; message-page smoke test passed.
+- `npm run check` — passed: 62 JavaScript files, 28 HTML pages, 64 CSS files; project references and migration baseline consistent.
+- ZIP integrity check performed after packaging.
+
+### Security and live-test boundary
+- TURN username/credential are embedded in this test build because the supplied configuration was requested. Anyone who can inspect the public client bundle can extract them. Rotate these credentials after validation and switch to short-lived credentials issued by a trusted server before public production deployment.
+- Static code tests do not prove that Metered accepts the credentials, that both mobile devices negotiate media, or that a live call has two-way audio/video. Those require a deployed build and two-device test.
