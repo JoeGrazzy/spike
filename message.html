@@ -21,6 +21,9 @@
   <link rel="stylesheet" href="css/spike-modern-finish.css">
   <link rel="stylesheet" href="css/spike-conversation-refined.css?v=20261124">
   <link rel="stylesheet" href="css/spike-private-share.css?v=20261124-1">
+<script src="js/spike-icons.js?v=semantic-icons-2"></script>
+<style>.msg-sheet [data-msg-action]{display:flex;align-items:center;gap:12px}.msg-action-icon{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--spike-accent,#00d5ff) 11%,transparent);color:var(--spike-accent,#00d5ff)}.msg-action-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.msg-sheet [data-msg-action=report] .msg-action-icon{color:#f6b94b;background:rgba(246,185,75,.12)}.msg-sheet [data-msg-action=delete] .msg-action-icon{color:#fb7185;background:rgba(251,113,133,.12)}@media(prefers-reduced-motion:reduce){.msg-sheet [data-msg-action]{transition:none!important}}</style>
+<link rel="stylesheet" href="css/spike-icons.css?v=semantic-icons-2">
 </head>
 <body data-spike-page="message">
 <script src="js/spike-dialog.js"></script>
@@ -32,8 +35,8 @@
     <div class="msg-person-text"><strong id="name">SPIKE member</strong><small id="sub">Direct message</small></div>
   </div>
   <div class="msg-call-actions">
-    <button class="msg-icon" id="voiceCallBtn" disabled aria-disabled="true" type="button" aria-label="Voice call" title="Voice call"><i class="fa-solid fa-phone" aria-hidden="true"></i></button>
-    <button class="msg-icon" id="videoCallBtn" disabled aria-disabled="true" type="button" aria-label="Video call" title="Video call"><i class="fa-solid fa-video" aria-hidden="true"></i></button>
+    <button class="msg-icon" id="voiceCallBtn" disabled aria-disabled="true" type="button" aria-label="Voice call" title="Voice call"><span data-spike-icon="phone" data-spike-icon-size="20"></span></button>
+    <button class="msg-icon" id="videoCallBtn" disabled aria-disabled="true" type="button" aria-label="Video call" title="Video call"><span data-spike-icon="video" data-spike-icon-size="20"></span></button>
   </div>
   <button class="msg-icon" id="refresh" type="button" aria-label="Refresh conversation" title="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
 </header>
@@ -64,13 +67,13 @@
 <div class="msg-sheet-shade" id="messageMenuShade">
   <div class="msg-sheet" role="dialog" aria-modal="true" aria-label="Message options">
     <p class="msg-sheet-sub" id="menuSub"></p>
-    <button type="button" data-msg-action="reply">Reply</button>
-    <button type="button" data-msg-action="copy">Copy text</button>
-    <button type="button" data-msg-action="share">Share</button>
-    <button type="button" data-msg-action="like">❤️ React</button>
-    <button type="button" data-msg-action="report">Report</button>
-    <button type="button" class="danger" id="messageMenuDelete" data-msg-action="delete">Delete message</button>
-    <button type="button" data-msg-action="close">Cancel</button>
+    <button type="button" data-msg-action="reply"><span class="msg-action-icon" data-spike-icon="reply" data-spike-icon-size="17"></span>Reply</button>
+    <button type="button" data-msg-action="copy"><span class="msg-action-icon" data-spike-icon="copy" data-spike-icon-size="17"></span>Copy text</button>
+    <button type="button" data-msg-action="share"><span class="msg-action-icon" data-spike-icon="share" data-spike-icon-size="17"></span>Share</button>
+    <button type="button" data-msg-action="like"><span class="msg-action-icon" data-spike-icon="heart" data-spike-icon-size="17"></span>React</button>
+    <button type="button" data-msg-action="report"><span class="msg-action-icon" data-spike-icon="flag" data-spike-icon-size="17"></span>Report</button>
+    <button type="button" class="danger" id="messageMenuDelete" data-msg-action="delete"><span class="msg-action-icon" data-spike-icon="trash" data-spike-icon-size="17"></span>Delete message</button>
+    <button type="button" data-msg-action="close"><span class="msg-action-icon" data-spike-icon="x" data-spike-icon-size="17"></span>Cancel</button>
   </div>
 </div>
 
