@@ -98,3 +98,32 @@ test('pending-call recovery polls independently of the Realtime subscription whi
   assert.match(calls, /function stopPendingCallPolling\(\)/);
   assert.match(calls, /startPendingCallPolling\(\);\s*if\(!state\.eventsChannel\)void subscribeEvents\(\)/);
 });
+
+test('caller negotiation is recovered from durable accepted database state', () => {
+  assert.match(calls, /row\.status==='accepted' && state\.role==='caller'/);
+  assert.match(calls, /state\.peerAccepted=true/);
+  assert.match(calls, /if\(state\.peerAccepted\)void beginCallerNegotiation\(\)/);
+  assert.match(calls, /if\(state\.role!=='caller' \|\| !state\.peerAccepted \|\| !state\.pc/);
+});
+
+test('ICE and offer signalling wait for private channel readiness and check delivery', () => {
+  assert.match(calls, /if\(!state\.channelReady\)\{[\s\S]*?state\.queuedSignals\.push/);
+  assert.match(calls, /void flushQueuedSignals\(\)/);
+  assert.match(calls, /result!=='ok'/);
+  assert.match(calls, /if\(!delivered\)throw new Error/);
+});
+
+test('active call signalling channel retries after failure and rejoins on connectivity recovery', () => {
+  assert.match(calls, /function scheduleCallChannelReconnect\(generation\)/);
+  assert.match(calls, /state\.channelRetryDelay=Math\.min\(15000,Math\.round\(delay\*1\.8\)\)/);
+  assert.match(calls, /status==='CHANNEL_ERROR'\|\|status==='TIMED_OUT'\|\|status==='CLOSED'/);
+  assert.match(calls, /if\(state\.callId && !state\.channel\)void joinCallChannel\(\)/);
+  assert.match(calls, /state\.channelGeneration\+\+/);
+});
+
+test('queued call signals remain queued until acknowledged after a channel rejoin', () => {
+  assert.match(calls, /while\(state\.channelReady && state\.queuedSignals\.length\)/);
+  assert.match(calls, /if\(!sent\)break/);
+  assert.match(calls, /state\.channelFlushing=true/);
+  assert.match(calls, /state\.channelFlushing=false/);
+});

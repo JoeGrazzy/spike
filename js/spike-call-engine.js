@@ -7,10 +7,10 @@
   const $ = id => document.getElementById(id);
   const state = {
     user: null, callId: null, callType: null, role: null, status: 'idle',
-    channel: null, channelReady: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
+    channel: null, channelReady: false, channelRetryTimer: null, channelRetryDelay: 1000, channelGeneration: 0, channelFlushing: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
     queuedIce: [], callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
-    muted: false, cameraOff: false, pending: null, disposed: false, callAttempt: 0
+    muted: false, cameraOff: false, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
   };
 
   const ICE_SERVERS = Object.freeze([
@@ -226,6 +226,11 @@
     if(row.callee_id===state.user.id && row.status==='ringing' && state.status==='idle' && new Date(row.expires_at).getTime()>Date.now()){
       void incomingCall(row);return;
     }
+    if(row.id===state.callId && row.status==='accepted' && state.role==='caller') {
+      state.peerAccepted=true;
+      void beginCallerNegotiation();
+      return;
+    }
     if(row.id===state.callId && ['rejected','ended','missed','failed'].includes(row.status)){
       const message=row.status==='rejected'?'Call declined.':row.status==='missed'?'No answer.':'Call ended.';
       cleanup(message);
@@ -250,26 +255,77 @@
     state.ringTimer=window.setTimeout(()=>{if(state.callId===row.id && state.status==='incoming')void rejectCall('missed');},remaining);
   }
 
+  function scheduleCallChannelReconnect(generation) {
+    if(state.channelRetryTimer || !state.callId || state.status==='idle')return;
+    const delay=state.channelRetryDelay;
+    state.channelRetryDelay=Math.min(15000,Math.round(delay*1.8));
+    state.channelRetryTimer=window.setTimeout(()=>{
+      state.channelRetryTimer=null;
+      if(generation!==state.channelGeneration || !state.callId || state.status==='idle')return;
+      const old=state.channel;state.channel=null;state.channelReady=false;
+      if(old)void client()?.removeChannel(old).catch(()=>{});
+      void joinCallChannel();
+    },delay);
+  }
+
   async function joinCallChannel() {
-    if(state.channel || !state.callId)return;
-    const topic=`spike-call:${state.callId}`;
-    state.channel=client().channel(topic,{config:{private:true,broadcast:{ack:true,self:false}}})
-      .on('broadcast',{event:'signal'},payload=>{void handleSignal(payload?.payload||{});})
-      .subscribe((status,error)=>{
-        if(status==='SUBSCRIBED'){
-          state.channelReady=true;
-          if(state.status==='joining' && state.role==='callee')void sendSignal('accepted',{});
-        } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
-          setStatus('Secure call signaling could not connect. Check your connection and retry.');
-          console.warn('[SPIKE calls] private signaling channel failed',status,error||'');
-        }
+    if(state.channel || !state.callId || state.status==='idle')return;
+    const db=client();if(!db?.channel){scheduleCallChannelReconnect(state.channelGeneration);return;}
+    if(state.channelRetryTimer){clearTimeout(state.channelRetryTimer);state.channelRetryTimer=null;}
+    const generation=++state.channelGeneration;
+    const callId=state.callId;
+    const channel=db.channel(`spike-call:${callId}`,{config:{private:true,broadcast:{ack:true,self:false}}})
+      .on('broadcast',{event:'signal'},payload=>{
+        if(generation!==state.channelGeneration || state.callId!==callId)return;
+        void handleSignal(payload?.payload||{});
       });
+    state.channel=channel;state.channelReady=false;
+    channel.subscribe((status,error)=>{
+      if(generation!==state.channelGeneration || state.channel!==channel || state.callId!==callId)return;
+      if(status==='SUBSCRIBED'){
+        state.channelReady=true;state.channelRetryDelay=1000;
+        void flushQueuedSignals();
+        if(state.status==='joining' && state.role==='callee')void sendSignal('accepted',{});
+      } else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'||status==='CLOSED'){
+        state.channelReady=false;
+        console.warn('[SPIKE calls] private signaling channel failed',status,error||'');
+        if(state.status!=='idle')setStatus('Reconnecting secure call signalling…');
+        scheduleCallChannelReconnect(generation);
+      }
+    });
   }
 
   async function sendSignal(event,payload) {
-    if(!state.channel)return;
-    try { await state.channel.send({type:'broadcast',event:'signal',payload:{event,from:state.user.id,call_id:state.callId,...payload}}); }
-    catch(error){console.warn('[SPIKE calls] signaling event failed',event,error?.message||error);}
+    if(!state.channel || !state.callId || !state.user)return false;
+    if(!state.channelReady){
+      // ICE can be produced before the private topic finishes joining. Keep
+      // those candidates instead of silently dropping them.
+      state.queuedSignals.push({event,payload});
+      return true;
+    }
+    try {
+      const result=await state.channel.send({type:'broadcast',event:'signal',payload:{event,from:state.user.id,call_id:state.callId,...payload}});
+      if(result!=='ok')throw new Error(`Realtime broadcast returned ${String(result)}`);
+      return true;
+    } catch(error){
+      console.warn('[SPIKE calls] signaling event failed',event,error?.message||error);
+      state.channelReady=false;
+      scheduleCallChannelReconnect(state.channelGeneration);
+      return false;
+    }
+  }
+
+  async function flushQueuedSignals() {
+    if(!state.channelReady || !state.queuedSignals.length || state.channelFlushing)return;
+    state.channelFlushing=true;
+    try {
+      while(state.channelReady && state.queuedSignals.length){
+        const item=state.queuedSignals[0];
+        const sent=await sendSignal(item.event,item.payload);
+        if(!sent)break;
+        state.queuedSignals.shift();
+      }
+    } finally { state.channelFlushing=false; }
   }
 
   function startNegotiationTimeout() {
@@ -290,7 +346,7 @@
     if(!conversationId || !peerId || context?.isGroup)throw new Error('Voice and video calls are currently available in one-to-one conversations.');
     state.user=state.user||await getCurrentUser();
     const attempt=++state.callAttempt;
-    state.callType=type;state.role='caller';state.status='creating';state.conversationId=conversationId;
+    state.callType=type;state.role='caller';state.status='creating';state.conversationId=conversationId;state.peerAccepted=false;state.offerStarted=false;
     state.peer={display_name:'SPIKE member',username:'',avatar_url:''};
     // Show a real, cancellable call state before any network, profile or device-permission work.
     showUI('outgoing','Starting secure call…');
@@ -316,6 +372,7 @@
       await joinCallChannel();
       if(state.callAttempt!==attempt || state.status==='idle')return;
       state.status='outgoing';showUI('outgoing','Calling… waiting for the other member.');
+      if(state.peerAccepted)void beginCallerNegotiation();
       state.ringTimer=window.setTimeout(()=>{if(state.callId===data && state.status==='outgoing')void endCall('No answer.');},50000);
     } catch(error) {
       if(state.callAttempt===attempt)await endCall().catch(()=>{});
@@ -398,15 +455,33 @@
     cleanup(reason==='missed'?'Missed call.':reason==='failed'?'Call could not start.':'Call declined.');
   }
 
+  async function beginCallerNegotiation() {
+    // The durable database status is authoritative. Realtime broadcast is only
+    // a low-latency hint and may arrive before local media/peer setup completes.
+    if(state.role!=='caller' || !state.peerAccepted || !state.pc || state.status==='idle' || state.offerStarted)return;
+    state.offerStarted=true;
+    try {
+      startCallHeartbeat();
+      if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;
+      state.status='negotiating';showUI('active','Connecting…');startNegotiationTimeout();
+      const offer=await state.pc.createOffer();
+      await state.pc.setLocalDescription(offer);
+      const delivered=await sendSignal('offer',{sdp:state.pc.localDescription});
+      if(!delivered)throw new Error('Secure signalling could not deliver the call offer.');
+    } catch(error) {
+      state.offerStarted=false;
+      console.warn('[SPIKE calls] offer creation failed',error?.message||error);
+      setStatus('Could not start call negotiation. Please retry.');
+      await endCall('Call setup failed.');
+    }
+  }
+
   async function handleSignal(signal) {
     if(!signal || signal.call_id!==state.callId || signal.from===state.user?.id)return;
     try {
-      if(signal.event==='accepted' && state.role==='caller' && state.status==='outgoing'){
-        startCallHeartbeat();
-        if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;
-        state.status='negotiating';showUI('active','Connecting…');startNegotiationTimeout();
-        const offer=await state.pc.createOffer();await state.pc.setLocalDescription(offer);
-        await sendSignal('offer',{sdp:state.pc.localDescription});
+      if(signal.event==='accepted' && state.role==='caller'){
+        state.peerAccepted=true;
+        await beginCallerNegotiation();
       } else if(signal.event==='offer' && state.role==='callee' && state.status==='joining'){
         await state.pc.setRemoteDescription(new RTCSessionDescription(signal.sdp));
         await flushIce();
@@ -454,7 +529,8 @@
   }
 
   function cleanup(message='') {
-    state.callAttempt++;
+    state.callAttempt++;state.channelGeneration++;
+    if(state.channelRetryTimer)clearTimeout(state.channelRetryTimer);state.channelRetryTimer=null;state.channelRetryDelay=1000;state.channelFlushing=false;
     if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;if(state.negotiationTimer)clearTimeout(state.negotiationTimer);state.negotiationTimer=null;
     if(state.callTimer)clearInterval(state.callTimer);state.callTimer=null;if(state.heartbeatTimer)clearInterval(state.heartbeatTimer);state.heartbeatTimer=null;
     try{state.pc?.close();}catch(_){}state.pc=null;
@@ -462,7 +538,7 @@
     state.remoteStream?.getTracks().forEach(track=>track.stop());state.remoteStream=null;
     if(state.channel){client()?.removeChannel(state.channel).catch?.(()=>{});state.channel=null;}state.channelReady=false;
     $('spikeCallOverlay')?.remove();
-    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;
+    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
     if(message)window.spikePremiumToast?.(message,'info',3000);
   }
 
@@ -515,6 +591,7 @@
       startPendingCallPolling();
       void loadPendingCalls();
       if(!state.eventsChannel)void subscribeEvents();
+      if(state.callId && !state.channel)void joinCallChannel();
     };
     window.addEventListener('online',resumeEvents);
     window.addEventListener('focus',resumeEvents);
