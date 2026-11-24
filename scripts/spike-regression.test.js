@@ -8,6 +8,8 @@ const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8')
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
 const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
 const realtimeSeparation = fs.readFileSync(new URL('../supabase/migrations/20261124044627_spike_realtime_postgres_changes_channel_separation_v1.sql', import.meta.url), 'utf8');
+const profileRuntime = fs.readFileSync(new URL('../js/spike-profile-runtime.js', import.meta.url), 'utf8');
+const profileHtml = fs.readFileSync(new URL('../profile.html', import.meta.url), 'utf8');
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
@@ -196,4 +198,38 @@ test('message and attachment sheets give each action its own accessible icon', (
   }
   assert.match(conversationHtml, /fa-flag/);
   assert.match(conversationHtml, /fa-trash-can/);
+});
+
+
+test('profile Friends stat counts mutual friendships and Add remains an action', () => {
+  assert.match(profileRuntime, /listMutualFriends\(db\(\),\{limit:2000,offset:0\}\)/);
+  assert.match(profileRuntime, /setText\('friendCount'/);
+  assert.match(profileRuntime, /kind==='friends'\|\|kind==='add'\)location\.href='friends\.html'/);
+  assert.match(profileHtml, /data-stat=\"friends\"[^>]*><b id=\"friendCount\"/);
+  assert.match(profileHtml, /data-stat=\"add\"[^>]*><b aria-hidden=\"true\">\+</);
+  assert.doesNotMatch(profileHtml, /id=\"followerCount\"|id=\"followingCount\"/);
+});
+
+
+const friendsPage = fs.readFileSync(new URL('../friends.html', import.meta.url), 'utf8');
+const friendsController = fs.readFileSync(new URL('../js/spike-friends-controller.js', import.meta.url), 'utf8');
+
+test('Friends discovery uses manual Add friend requests and contains no QR scanner path', () => {
+  assert.match(friendsPage, /Find people in Discover and tap Add friend/);
+  assert.doesNotMatch(friendsPage, /profile\.html#scan|Scan QR to add|Add friends by scanning/i);
+  assert.match(friendsController, /add\.dataset\.action = 'add'/);
+  assert.match(friendsController, /sendFriendRequest\(state\.db, userId\)/);
+  assert.doesNotMatch(friendsController, /location\.href = 'profile\.html#scan'|Scan QR to add/);
+});
+
+test('Manual Add action refreshes requests and mutual-friend state through the shared refresh path', () => {
+  assert.match(friendsController, /if \(action === 'add'\)[\s\S]*?sendFriendRequest\(state\.db, userId\)[\s\S]*?await refresh\(\)/);
+  assert.match(friendsController, /data-tab="suggestions"|tab === 'suggestions'/);
+  assert.match(friendsController, /acceptFriendRequest\(state\.db, userId\)/);
+});
+
+
+test('friend-request notifications use the friend-request preference instead of follow preference', () => {
+  const notifications = fs.readFileSync(new URL('../js/spike-notifications.js', import.meta.url), 'utf8');
+  assert.match(notifications, /t\.includes\('friend'\)\|\|t\.includes\('request'\)\)return'np_friend_requests';if\(t\.includes\('follow'\)\)return'np_follows'/);
 });

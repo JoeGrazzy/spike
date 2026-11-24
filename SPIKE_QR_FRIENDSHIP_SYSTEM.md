@@ -4,11 +4,12 @@ Date: 24 November 2026
 
 ## Product rule
 
-**Scanning a SPIKE QR (and confirming) is how friendships are created.**
+**Scanning a SPIKE QR and confirming sends a friend request. Friendship is created only when the recipient accepts.**
 
 - Mutual accepted follows = friends
-- One-way follow is no longer the primary social graph for “friends”
-- No friend request for the QR path — connect is instant after confirm
+- QR scan → owner card → Send friend request → Requests → Accept
+- One-way follow is not the primary social graph for “friends”
+- A reciprocal pending request may be accepted automatically because both people have already requested each other
 
 ## Backend
 
@@ -18,11 +19,11 @@ New migration:
 
 | RPC | Purpose |
 |-----|---------|
-| `spike_connect_via_qr(p_target_user_id)` | Creates mutual accepted follows (both directions). Blocks self, blocked users, inactive accounts. Idempotent. |
+| `spike_connect_via_qr(p_target_user_id)` | Compatibility alias for sending a friend request; never creates instant friendship. |
 | `spike_unfriend(p_target_user_id)` | Deletes both directions. |
 | `spike_list_mutual_friends(limit, offset)` | Lists mutual friends for the signed-in user. |
 
-Apply this migration on your Supabase project before relying on the RPCs in production.
+Apply both migrations in timestamp order on your Supabase project before relying on the RPCs in production. The request migration expands the follows status constraint to support pending requests and converts legacy requested rows.
 
 ## Client
 
@@ -45,11 +46,12 @@ Apply this migration on your Supabase project before relying on the RPCs in prod
 
 ## User flow
 
-1. You open **My SPIKE QR** on profile
+1. You open **My SPIKE QR** on Profile
 2. Friend opens **Scan QR** (camera or gallery)
-3. Confirm sheet → **SPIKE Connect instantly**
-4. Both become mutual friends
-5. Friends page shows them under Friends; Message / Unfriend available
+3. Scan opens the owner preview card
+4. Confirm sheet → **Send friend request**
+5. Recipient opens **Friends → Requests** and accepts
+6. Both users appear under **Friends**; Message / Unfriend available
 
 ## Deploy notes
 

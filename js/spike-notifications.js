@@ -4,10 +4,18 @@
   const db=()=>window.SPIKE_SUPABASE||window.db,$=id=>document.getElementById(id);
   const withTimeout=(promise,ms,message)=>{let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=window.setTimeout(()=>reject(new Error(message)),ms);})]).finally(()=>window.clearTimeout(timer));};
   let user=null,rows=[],filter='all',channel=null,busy=false;
+  const heardNotificationIds=new Set();
+  function playIncomingAlert(row){
+    const id=String(row?.id||'');
+    if(!id||heardNotificationIds.has(id))return;
+    heardNotificationIds.add(id);
+    if(heardNotificationIds.size>300){const oldest=heardNotificationIds.values().next().value;heardNotificationIds.delete(oldest);}
+    try{window.SPIKENotificationSound?.play({force:true});}catch(error){console.info('[SPIKE notifications] alert sound unavailable',error?.message||error);}
+  }
   const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
   const time=v=>v?new Date(v).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):'';
   const notificationPrefs=()=>{try{return JSON.parse(localStorage.getItem('spike-settings-local-v1')||'{}')}catch(_){return {}}};
-  const preferenceKey=row=>{const t=String(row.type||'').toLowerCase();if(t.includes('like'))return'np_likes';if(t.includes('comment'))return'np_comments';if(t.includes('mention'))return'np_mentions';if(t.includes('follow'))return'np_follows';if(t.includes('friend')||t.includes('request'))return'np_friend_requests';if(t.includes('message')||t.includes('call'))return'np_messages';if(t.includes('coin')||t.includes('reward')||t.includes('gift'))return'np_coins';if(t.includes('purchase')||t.includes('payment'))return'np_purchases';if(t.includes('announcement'))return'np_announcements';if(t.includes('system')||t.includes('security'))return'np_system';return null;};
+  const preferenceKey=row=>{const t=String(row.type||'').toLowerCase();if(t.includes('like'))return'np_likes';if(t.includes('comment'))return'np_comments';if(t.includes('mention'))return'np_mentions';if(t.includes('friend')||t.includes('request'))return'np_friend_requests';if(t.includes('follow'))return'np_follows';if(t.includes('message')||t.includes('call'))return'np_messages';if(t.includes('coin')||t.includes('reward')||t.includes('gift'))return'np_coins';if(t.includes('purchase')||t.includes('payment'))return'np_purchases';if(t.includes('announcement'))return'np_announcements';if(t.includes('system')||t.includes('security'))return'np_system';return null;};
   const category=row=>{const t=String(row.type||'').toLowerCase();if(t.includes('mention'))return'mentions';if(t.includes('announcement'))return'announcements';if(t.includes('system')||t.includes('security')||t.includes('wallet'))return'system';return'social';};
   function toast(message){const n=$('toast');if(n){n.textContent=message;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2800);}else console.info('[SPIKE notifications]',message);}
   async function openModal(row){$('notificationModalIcon').textContent=String(row.type||'').includes('call')?'📞':category(row)==='system'?'⚙️':category(row)==='announcements'?'📢':category(row)==='mentions'?'@':'🔔';$('notificationModalTitle').textContent=row.title||'Notification';$('notificationModalMeta').textContent=`${row.type||'Activity'} · ${time(row.created_at)}`;$('notificationModalBody').textContent=row.body||'No additional details.';const actions=$('notificationModalAction');if(actions)actions.replaceChildren();$('notificationModal').setAttribute('aria-hidden','false');$('notificationModal').classList.add('open');if(row.type==='missed_call'&&row.entity_id&&actions){try{const {data,error}=await db().from('spike_call_sessions').select('conversation_id,callee_id,status').eq('id',row.entity_id).maybeSingle();if(!error&&data&&data.callee_id===user.id){const button=el('button','','Call back');button.type='button';button.addEventListener('click',()=>{location.href=`message.html?conversation_id=${encodeURIComponent(data.conversation_id)}`;});actions.append(button);}}catch(error){console.info('[SPIKE notifications] call-back context unavailable',error?.message||error);}}}
@@ -40,7 +48,12 @@
     $('deleteRead')?.addEventListener('click',()=>removeWhere(x=>x.is_read,'Delete all read notifications? This cannot be undone.').catch(e=>toast(e.message)));
     $('notificationSearch')?.addEventListener('input',render);document.querySelectorAll('[data-filter]').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',String(x===b));});render();}));
     $('notificationModalClose')?.addEventListener('click',closeModal);$('notificationModal')?.addEventListener('click',e=>{if(e.target.id==='notificationModal')closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
-    await load();channel=client.channel('spike-notifications-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${user.id}`},payload=>{rows.unshift(payload.new);rows=rows.slice(0,100);render();try{const key=preferenceKey(payload.new),prefs=notificationPrefs();if(key==='np_messages'&&localStorage.getItem('spike-setting-messageTone')!=='0')$('notificationTone')?.play()?.catch(()=>{});}catch(_){}}).subscribe();
+    await load();channel=client.channel('spike-notifications-'+user.id).on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${user.id}`},payload=>{
+      const incoming=payload?.new;
+      if(!incoming||!incoming.id||rows.some(row=>String(row.id)===String(incoming.id)))return;
+      rows.unshift(incoming);rows=rows.slice(0,100);render();
+      playIncomingAlert(incoming);
+    }).subscribe();
   }
   function showBootError(error){const message=error?.message||'Could not initialize notifications.';$('statusSub').textContent=message;const list=$('notificationList');if(list){list.replaceChildren();const panel=el('div','empty error',message);const retry=el('button','btn primary','Retry');retry.type='button';retry.addEventListener('click',()=>location.reload());panel.append(retry);list.append(panel);}$('loader')?.classList.add('hide');}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>boot().catch(showBootError),{once:true});else boot().catch(showBootError);

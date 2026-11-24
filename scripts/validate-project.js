@@ -20,6 +20,14 @@ for(const file of jsFiles){
 }
 for(const file of htmlFiles){
   const source=fs.readFileSync(file,'utf8');
+  const ids=[...source.matchAll(/\bid=["']([^"']+)["']/gi)].map(match=>match[1]);
+  if(new Set(ids).size!==ids.length)errors.push(`Duplicate HTML id: ${path.relative(root,file)}`);
+  for(const attr of ['src','href']){
+    const refs=[...source.matchAll(new RegExp(`${attr}=[\"']([^\"']+)[\"']`,'gi'))]
+      .map(match=>match[1].split(/[?#]/,1)[0])
+      .filter(ref=>ref.endsWith('.js'));
+    if(new Set(refs).size!==refs.length)errors.push(`Duplicate JavaScript include: ${path.relative(root,file)}`);
+  }
   for(const match of source.matchAll(/(?:src|href)=["']([^"']+)["']/gi)){
     const ref=match[1].trim();
     if(!ref||ref.includes('${')||/^(?:#|data:|javascript:|mailto:|tel:|https?:|\/\/)/i.test(ref))continue;
@@ -28,6 +36,25 @@ for(const file of htmlFiles){
     const target=clean.startsWith('/')?path.join(root,clean.slice(1)):path.resolve(path.dirname(file),clean);
     if(!fs.existsSync(target))errors.push(`Missing local reference: ${path.relative(root,file)} -> ${ref}`);
   }
+}
+// Catch duplicate stylesheet tags per page and truly orphaned CSS files without
+// treating intentional selector overrides across ordered theme layers as dead code.
+const referencedCss=new Set();
+for(const file of htmlFiles){
+  const source=fs.readFileSync(file,'utf8');
+  const pageCss=[...source.matchAll(/<link\b[^>]*href=[\"']([^\"']+\.css(?:\?[^\"']*)?)[\"'][^>]*>/gi)]
+    .map(match=>match[1].split(/[?#]/,1)[0])
+    .filter(ref=>! /^(?:https?:|\/\/)/i.test(ref));
+  const seen=new Set();
+  for(const ref of pageCss){
+    const clean=ref.replace(/^\.\//,'').replace(/^\//,'');
+    referencedCss.add(path.resolve(root,clean));
+    if(seen.has(clean))errors.push(`Duplicate stylesheet include: ${path.relative(root,file)} -> ${clean}`);
+    seen.add(clean);
+  }
+}
+for(const file of cssFiles){
+  if(!referencedCss.has(path.resolve(file)))errors.push(`Unreferenced CSS file: ${path.relative(root,file)}`);
 }
 for(const file of cssFiles){
   const source=fs.readFileSync(file,'utf8');
@@ -53,8 +80,8 @@ if(new Set(versions).size!==versions.length)errors.push('Duplicate active Supaba
 const expectedRemoteVersions=`
 20261118182458 20261118182603 20261118182628 20261118182902 20261118183107 20261118183158 20261118183405 20261118183414 20261118183706 20261118183728 20261118183749 20261118183944 20261118184329 20261118184342 20261118184507 20261118205843 20261118205959 20261118211133 20261118224629 20261118230201 20261118230538 20261119044607 20261119044619 20261119050842 20261119063522 20261119064905 20261119065029 20261119065139 20261119074429 20261119074503 20261119074546 20261119075042 20261119081130 20261119090209 20261119091740 20261119095009 20261119095028 20261119095202 20261119100135 20261119100349 20261119100416 20261119101227 20261119101333 20261119101510 20261119110754 20261119111029 20261119111036 20261119112435 20261119112616 20261119113516 20261119113552 20261119113639 20261119113856 20261119130823 20261119130844 20261119131019 20261119131222 20261119131758 20261119131823 20261119173201 20261119174015 20261119174345 20261119174436 20261119174552 20261122114755 20261122162047 20261122162317 20261123230119 20261123230328 20261123230519 20261123230619 20261123231104 20261123231108 20261123231157 20261123231216 20261123231416 20261123231607 20261123232806 20261123232852
 `.trim().split(/\s+/).sort();
-const additiveLocalVersions=['20261123234241','20261124001015','20261124002203','20261124002243','20261124002409','20261124044627'];
-const expectedLocalVersions=[...expectedRemoteVersions,...additiveLocalVersions].sort();
+const additiveDeployedVersions=['20261123234241','20261124001015','20261124002203','20261124002243','20261124002409','20261124044627','20261124094633','20261124094659','20261124095527','20261124095713','20261124101914','20261124102041'];
+const expectedLocalVersions=[...expectedRemoteVersions,...additiveDeployedVersions].sort();
 if(versions.length!==expectedLocalVersions.length||versions.some((version,index)=>version!==expectedLocalVersions[index]))errors.push('Local Supabase migration versions do not match the known production baseline plus explicitly reviewed additive migrations');
 const messagingSource=fs.readFileSync(path.join(root,'js','spike-messages.js'),'utf8');
 if(!/currentPeerId\s*=\s*!isGroup\s*&&\s*peerId/.test(messagingSource))errors.push('Direct-message setup must assign the resolved one-to-one call recipient');

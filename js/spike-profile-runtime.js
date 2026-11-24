@@ -57,10 +57,10 @@
   async function loadStats() {
     const tasks = await Promise.allSettled([
       db().from('posts').select('id',{count:'exact',head:true}).eq('author_id',state.user.id).eq('status','published'),
-      window.SPIKE.social.getCounts(db(),state.user.id)
+      window.SPIKE.social.listMutualFriends(db(),{limit:2000,offset:0})
     ]);
     const posts=tasks[0]; if(posts.status==='fulfilled'&&!posts.value.error)setText('postCount',String(posts.value.count||0));else setText('postCount','—');
-    const counts=tasks[1]; if(counts.status==='fulfilled'){setText('followerCount',String(counts.value.followers));setText('followingCount',String(counts.value.following));}else{setText('followerCount','—');setText('followingCount','—');console.warn('[SPIKE profile counts]',counts.reason);}
+    const friends=tasks[1]; if(friends.status==='fulfilled'){setText('friendCount',String(Array.isArray(friends.value)?friends.value.length:0));}else{setText('friendCount','—');console.warn('[SPIKE profile friend count]',friends.reason);}
   }
   async function loadPosts() {
     const {data,error}=await db().from('posts').select('id,author_id,body,visibility,comments_enabled,status,created_at').eq('author_id',state.user.id).eq('status','published').order('created_at',{ascending:false}).limit(100);
@@ -159,6 +159,14 @@
     stopScanner();
     if (state.user?.id && String(userId).toLowerCase() === String(state.user.id).toLowerCase()) {
       notify('That is your own SPIKE QR.', 'info');
+      return;
+    }
+    const { data: blocked, error: blockError } = await db().rpc('spike_is_member_blocked', {
+      p_target_user_id: userId
+    });
+    if (blockError) throw blockError;
+    if (blocked === true) {
+      notify('You cannot connect with this member.', 'info');
       return;
     }
     pendingConnectId = userId;
@@ -288,23 +296,74 @@
 
   async function decodeQrFromFile(file) {
     await loadProfileLibrary('jsqr');
-    const bitmap = await createImageBitmap(file);
-    // Downscale large photos for reliable mobile decode
-    const maxSide = 1200;
-    let w = bitmap.width;
-    let h = bitmap.height;
-    const scale = Math.min(1, maxSide / Math.max(w, h));
-    w = Math.max(1, Math.round(w * scale));
-    h = Math.max(1, Math.round(h * scale));
-    const canvas = document.createElement('canvas');
-    canvas.width = w;
-    canvas.height = h;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    ctx.drawImage(bitmap, 0, 0, w, h);
-    try { bitmap.close?.(); } catch (_) {}
-    const code = decodeQrFromImageData(ctx.getImageData(0, 0, w, h).data, w, h);
-    if (!code?.data) throw new Error('No SPIKE QR code was found in that image. Try a clearer photo of their QR.');
-    return code.data;
+    if (!file || !String(file.type || '').startsWith('image/')) {
+      throw new Error('Choose an image containing a SPIKE QR code.');
+    }
+
+    let source = null;
+    let width = 0;
+    let height = 0;
+    let cleanup = () => {};
+
+    // Prefer ImageBitmap for speed, but retain an HTMLImageElement fallback
+    // for mobile browsers that do not implement createImageBitmap for Files.
+    if (typeof createImageBitmap === 'function') {
+      try {
+        source = await createImageBitmap(file);
+        width = source.width;
+        height = source.height;
+        cleanup = () => { try { source.close?.(); } catch (_) {} };
+      } catch (bitmapError) {
+        console.info('[SPIKE QR gallery] ImageBitmap decode unavailable; trying image element.', bitmapError);
+      }
+    }
+
+    if (!source) {
+      const objectUrl = URL.createObjectURL(file);
+      try {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = objectUrl;
+        if (typeof img.decode === 'function') {
+          await img.decode();
+        } else {
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = () => reject(new Error('This image format could not be opened. Try a JPG or PNG.'));
+          });
+        }
+        source = img;
+        width = img.naturalWidth || img.width;
+        height = img.naturalHeight || img.height;
+        cleanup = () => URL.revokeObjectURL(objectUrl);
+      } catch (imageError) {
+        URL.revokeObjectURL(objectUrl);
+        throw new Error('This image could not be opened. Try a clear JPG or PNG of the SPIKE QR.');
+      }
+    }
+
+    try {
+      if (!width || !height) throw new Error('The selected image has no readable dimensions.');
+      // Downscale large photos for reliable mobile decode and lower memory use.
+      const maxSide = 1200;
+      const scale = Math.min(1, maxSide / Math.max(width, height));
+      const w = Math.max(1, Math.round(width * scale));
+      const h = Math.max(1, Math.round(height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) throw new Error('Your browser could not prepare this image. Try another photo.');
+      ctx.drawImage(source, 0, 0, w, h);
+      const pixels = ctx.getImageData(0, 0, w, h);
+      const code = decodeQrFromImageData(pixels.data, w, h);
+      if (!code?.data) {
+        throw new Error('No SPIKE QR code was found in that image. Try a clearer, well-lit photo of their QR.');
+      }
+      return code.data;
+    } finally {
+      cleanup();
+    }
   }
 
   async function scanQr() {
@@ -406,9 +465,9 @@
     $('connectCancel')?.addEventListener('click',closeConnectPreview);
     $('connectPreview')?.addEventListener('click',e=>{if(e.target===$('connectPreview'))closeConnectPreview();});
     $('scannerClose')?.addEventListener('click',()=>stopScanner());
-    $('findPeopleAction')?.addEventListener('click',()=>location.href='feed.html#discover');$('copySpid')?.addEventListener('click',()=>copy(state.profile?.spike_id ? String(state.profile.spike_id).replace(/^SP-/i, 'SPK-') : '').then(()=>notify('SPK ID copied.','success')).catch(e=>notify(e.message,'error')));$('shareSpid')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),`Connect with ${nameOf(state.profile)} on SPIKE`).catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));
+    $('findPeopleAction')?.addEventListener('click',()=>location.href='friends.html');$('copySpid')?.addEventListener('click',()=>copy(state.profile?.spike_id ? String(state.profile.spike_id).replace(/^SP-/i, 'SPK-') : '').then(()=>notify('SPK ID copied.','success')).catch(e=>notify(e.message,'error')));$('shareSpid')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),`Connect with ${nameOf(state.profile)} on SPIKE`).catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));
     document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
-    const stats=$('profileStats');if(stats){let hold=null;try{state.hiddenCounts=localStorage.getItem(`spike-profile-counts-hidden:${state.user.id}`)==='1';}catch(_){}const paintCounts=()=>{stats.querySelectorAll('.stat-action').forEach(b=>{b.classList.toggle('is-count-hidden',state.hiddenCounts);b.setAttribute('aria-label',`${b.dataset.stat} ${state.hiddenCounts?'count hidden':'count visible'}; tap to open, hold to ${state.hiddenCounts?'show':'hide'} counts`);const n=b.querySelector('b');if(n)n.classList.toggle('stat-count-hidden',state.hiddenCounts);});};paintCounts();stats.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-stat]');if(!b)return;state.suppressStatClick=false;hold=setTimeout(()=>{state.hiddenCounts=!state.hiddenCounts;state.suppressStatClick=true;try{localStorage.setItem(`spike-profile-counts-hidden:${state.user.id}`,state.hiddenCounts?'1':'0');}catch(_){}paintCounts();},520);});const cancel=()=>{if(hold){clearTimeout(hold);hold=null;}};['pointerup','pointercancel','pointerleave'].forEach(type=>stats.addEventListener(type,cancel));stats.addEventListener('click',e=>{const b=e.target.closest('[data-stat]');if(!b)return;if(state.suppressStatClick){e.preventDefault();state.suppressStatClick=false;return;}const kind=b.dataset.stat;if(kind==='posts')openList('posts');else location.href=`${kind}.html?uid=${encodeURIComponent(state.user.id)}`;});}
+    const stats=$('profileStats');if(stats){let hold=null;try{state.hiddenCounts=localStorage.getItem(`spike-profile-counts-hidden:${state.user.id}`)==='1';}catch(_){}const paintCounts=()=>{stats.querySelectorAll('.stat-action').forEach(b=>{b.classList.toggle('is-count-hidden',state.hiddenCounts);b.setAttribute('aria-label',`${b.dataset.stat} ${state.hiddenCounts?'count hidden':'count visible'}; tap to open, hold to ${state.hiddenCounts?'show':'hide'} counts`);const n=b.querySelector('b');if(n)n.classList.toggle('stat-count-hidden',state.hiddenCounts);});};paintCounts();stats.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-stat]');if(!b)return;state.suppressStatClick=false;hold=setTimeout(()=>{state.hiddenCounts=!state.hiddenCounts;state.suppressStatClick=true;try{localStorage.setItem(`spike-profile-counts-hidden:${state.user.id}`,state.hiddenCounts?'1':'0');}catch(_){}paintCounts();},520);});const cancel=()=>{if(hold){clearTimeout(hold);hold=null;}};['pointerup','pointercancel','pointerleave'].forEach(type=>stats.addEventListener(type,cancel));stats.addEventListener('click',e=>{const b=e.target.closest('[data-stat]');if(!b)return;if(state.suppressStatClick){e.preventDefault();state.suppressStatClick=false;return;}const kind=b.dataset.stat;if(kind==='posts')openList('posts');else if(kind==='friends'||kind==='add')location.href='friends.html';else location.href=`${kind}.html?uid=${encodeURIComponent(state.user.id)}`;});}
     $('socialListSearch')?.addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();$('socialListItems')?.querySelectorAll('[data-social-search]').forEach(row=>{row.hidden=!!q&&!row.dataset.socialSearch.includes(q);});});
     $('openBlockedList')?.addEventListener('click',()=>openList('blocked'));$('socialListClose')?.addEventListener('click',closeList);$('socialListOverlay')?.addEventListener('click',e=>{if(e.target===$('socialListOverlay')||e.target.matches('[data-social-close]'))closeList();});
     $('mediaViewerClose')?.addEventListener('click',closeMedia);$('mediaViewerPrev')?.addEventListener('click',()=>{if(state.viewerEntries.length)openMedia((state.viewerIndex-1+state.viewerEntries.length)%state.viewerEntries.length,state.viewerEntries);});$('mediaViewerNext')?.addEventListener('click',()=>{if(state.viewerEntries.length)openMedia((state.viewerIndex+1)%state.viewerEntries.length,state.viewerEntries);});$('mediaViewer')?.addEventListener('click',e=>{if(e.target.matches('[data-media-close]'))closeMedia();});

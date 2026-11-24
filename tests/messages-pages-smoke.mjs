@@ -12,7 +12,7 @@ for (const page of pages) {
   const html = fs.readFileSync(path.join(root, page), 'utf8');
   assert.match(html, /<html lang="en"/i, `${page}: document language missing`);
   assert.match(html, /name="viewport"/, `${page}: viewport missing`);
-  assert.match(html, /js\/spike-messages\.js\?v=messages-v1-fix-20261124/, `${page}: cache-busted message runtime missing`);
+  assert.match(html, /js\/spike-messages\.js\?v=[A-Za-z0-9._-]+/, `${page}: versioned message runtime missing`);
   const ids = [...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]);
   assert.equal(new Set(ids).size, ids.length, `${page}: duplicate HTML IDs`);
   for (const [, src] of html.matchAll(/<(?:script|link)\b[^>]*(?:src|href)="([^"]+)"/gi)) {

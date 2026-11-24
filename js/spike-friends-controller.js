@@ -1,4 +1,4 @@
-/* SPIKE Friends & Connections — uses the existing, RLS-protected follows model. */
+/* SPIKE Friends — manual friend requests; mutual accepted relationships are friends. */
 (() => {
   'use strict';
   if (window.__SPIKE_FRIENDS_CONTROLLER__) return;
@@ -39,7 +39,7 @@
   }
 
   async function loadFriends() {
-    // QR friendship system: mutual accepted follows only.
+    // Friend list is based on mutual accepted relationships only.
     let mutual = [];
     if (window.SPIKE?.social?.listMutualFriends) {
       mutual = await window.SPIKE.social.listMutualFriends(state.db, { limit: 2000, offset: 0 });
@@ -69,23 +69,18 @@
 
   async function loadRequests() {
     let incoming = [], outgoing = [];
-    try {
-      if (window.SPIKE?.social?.listIncomingRequests) {
-        incoming = await window.SPIKE.social.listIncomingRequests(state.db, 200);
-        outgoing = await window.SPIKE.social.listOutgoingRequests(state.db, 200);
-      } else {
-        const inc = await state.db.from('follows').select('follower_id,created_at')
-          .eq('following_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
-        if (inc.error) throw inc.error;
-        incoming = (inc.data || []).map(r => ({ id: String(r.follower_id), created_at: r.created_at }));
-        const out = await state.db.from('follows').select('following_id,created_at')
-          .eq('follower_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
-        if (out.error) throw out.error;
-        outgoing = (out.data || []).map(r => ({ id: String(r.following_id), created_at: r.created_at }));
-      }
-    } catch (e) {
-      console.warn('[SPIKE friends requests]', e);
-      incoming = []; outgoing = [];
+    if (window.SPIKE?.social?.listIncomingRequests) {
+      incoming = await window.SPIKE.social.listIncomingRequests(state.db, 200);
+      outgoing = await window.SPIKE.social.listOutgoingRequests(state.db, 200);
+    } else {
+      const inc = await state.db.from('follows').select('follower_id,created_at')
+        .eq('following_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
+      if (inc.error) throw inc.error;
+      incoming = (inc.data || []).map(r => ({ id: String(r.follower_id), created_at: r.created_at }));
+      const out = await state.db.from('follows').select('following_id,created_at')
+        .eq('follower_id', state.me.id).eq('status', 'pending').order('created_at', { ascending: false }).limit(200);
+      if (out.error) throw out.error;
+      outgoing = (out.data || []).map(r => ({ id: String(r.following_id), created_at: r.created_at }));
     }
     const ids = [...incoming.map(x => x.id), ...outgoing.map(x => x.id)];
     const profiles = await getProfiles(ids);
@@ -289,11 +284,12 @@
       cancel.textContent = 'Cancel request'; cancel.dataset.action = 'cancel'; cancel.dataset.userId = id;
       actions.append(cancel);
     } else if (mode === 'suggestion') {
-      const scanHint = document.createElement('button'); scanHint.type = 'button'; scanHint.className = 'connection-action primary';
-      scanHint.textContent = 'Scan QR to add';
-      scanHint.dataset.action = 'scan'; scanHint.dataset.userId = id;
+      const add = document.createElement('button'); add.type = 'button'; add.className = 'connection-action primary';
+      add.textContent = 'Add friend';
+      add.dataset.action = 'add'; add.dataset.userId = id;
+      add.setAttribute('aria-label', `Send a friend request to ${name}`);
       const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
-      block.dataset.action = 'block'; block.dataset.userId = id; actions.append(scanHint, block);
+      block.dataset.action = 'block'; block.dataset.userId = id; actions.append(add, block);
     } else if (mode === 'blocked') {
       const unblock = document.createElement('button'); unblock.type = 'button'; unblock.className = 'connection-action outline'; unblock.textContent = 'Unblock';
       unblock.dataset.action = 'unblock'; unblock.dataset.userId = id; actions.append(unblock);
@@ -329,11 +325,11 @@
 
   function render() {
     const visibleFriends = state.tab === 'online' ? state.friends.filter(person => person.presence?.online) : state.friends;
-    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No SPIKE friends are online right now.' : 'No SPIKE friends yet. Open Profile → Scan QR to send a friend request.');
+    renderList('friendsContainer', visibleFriends, 'friend', state.tab === 'online' ? 'No SPIKE friends are online right now.' : 'No SPIKE friends yet. Visit Discover to find people and send a friend request.');
     renderList('incomingRequestsContainer', state.incoming, 'incoming', 'No incoming friend requests.');
     renderList('outgoingRequestsContainer', state.outgoing, 'outgoing', 'No sent requests waiting.');
-    renderList('networkRecommendationsContainer', state.recommendations, 'suggestion', 'No recommendations yet. Scan a QR to add friends.');
-    renderList('suggestionsContainer', state.suggestions, 'suggestion', 'Discover is only a directory. Add friends by scanning their SPIKE QR.');
+    renderList('networkRecommendationsContainer', state.recommendations, 'suggestion', 'No suggestions yet. Browse Discover to find people to add.');
+    renderList('suggestionsContainer', state.suggestions, 'suggestion', 'No people found. Try another name or username.');
     renderList('blockedContainer', state.blocked, 'blocked', 'You have not blocked anyone.');
     setCount('allCount', state.friends.length);
     setCount('onlineCount', state.friends.filter(person => person.presence?.online).length);
@@ -388,13 +384,9 @@
     const userId = button.dataset.userId;
     const key = `${action}:${userId || ''}`;
     await withBusy(key, button, async () => {
-      if (action === 'scan') {
-        location.href = 'profile.html#scan';
-        return;
-      } else if (action === 'follow') {
-        toast('SPIKE uses friend requests, not follow. Scan their QR on Profile to send a request.', 'info');
-        location.href = 'profile.html#scan';
-        return;
+      if (action === 'add') {
+        const result = await window.SPIKE.social.sendFriendRequest(state.db, userId);
+        toast(result.state === 'friends' ? 'Friend request accepted. You are now SPIKE friends.' : 'Friend request sent.', 'success');
       } else if (action === 'accept') {
         await window.SPIKE.social.acceptFriendRequest(state.db, userId);
         toast('You are now SPIKE friends.', 'success');
@@ -404,7 +396,7 @@
       } else if (action === 'cancel') {
         await window.SPIKE.social.cancelFriendRequest(state.db, userId);
         toast('Request cancelled.', 'success');
-      } else if (action === 'unfriend' || action === 'unfollow') {
+      } else if (action === 'unfriend') {
         if (!window.confirm('Remove this SPIKE friend?')) return;
         if (window.SPIKE?.social?.unfriend) await window.SPIKE.social.unfriend(state.db, userId);
         else {

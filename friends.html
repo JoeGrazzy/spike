@@ -932,7 +932,7 @@ body[data-spike-page="friends"] #tabs .tab[aria-selected="true"]{font-weight:850
 
 <style id="friends-no-section-dropdowns-v28">
 /* Friends hub: section headings remain static labels across every tab.
-   Keep the five direct tabs and the Follow / Unfollow / Block model intact. */
+   Keep the five direct tabs and the manual friend-request model intact. */
 body[data-spike-page="friends"] #content .section-label{
   cursor:default!important;
   user-select:text;
@@ -955,7 +955,7 @@ body[data-spike-page="friends"] #content .section-label button{
   <link rel="stylesheet" href="css/spike-friends-native.css">
 <style id="spike-friends-presence-style">.friend-presence{font-size:11px;color:var(--muted,#98a2b3);margin-top:4px}.friend-presence.is-online{color:#27c783;font-weight:700}.friend-presence.is-online:before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#27c783;margin-right:6px}.connection-activity-row{padding:12px 0;border-bottom:1px solid var(--border,rgba(255,255,255,.08))}.connection-activity-row p{margin:0 0 4px}.connection-activity-row time{font-size:11px;color:var(--muted,#98a2b3)}.friend-action{flex-wrap:wrap}</style>
 
-<style id="spike-follow-only-final-authority">
+<style id="spike-friends-layout-authority">
 body[data-spike-page="friends"] .tabs{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;}
 body[data-spike-page="friends"] .tab{min-width:0!important;white-space:nowrap;text-decoration:none!important;text-underline-offset:0!important;}
 body[data-spike-page="friends"] .tab::after{pointer-events:none;}
@@ -1034,13 +1034,13 @@ input,select,textarea{min-height:36px}
 <button id="friendsTabBlocked" class="tab" type="button" role="tab" aria-selected="false" tabindex="-1" data-tab="blocked">Blocked <span class="count" id="blockedCount">0</span></button>
 </div>
 <div class="search-wrap" id="searchWrap">
-<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search friends…" id="searchInput" autocomplete="off" aria-label="Search friends"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
+<div class="icon"><i class="fas fa-search" aria-hidden="true"></i><input type="search" placeholder="Search friends and people…" id="searchInput" autocomplete="off" aria-label="Search friends"><button type="button" id="clearSearchButton" aria-label="Clear search" hidden><i class="fas fa-times" aria-hidden="true"></i></button></div>
 </div>
 <div class="content" id="content">
 <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
 <section id="friendsSection" role="tabpanel" tabindex="0" aria-label="Your SPIKE friends">
 <div class="section-label">Your Friends <span id="friendsCount">0</span></div>
-<p class="friends-hint" style="margin:0 0 12px;font-size:12px;opacity:.75">Add friends by scanning a SPIKE QR on Profile. Requests appear under Requests.</p>
+<p class="friends-hint" style="margin:0 0 12px;font-size:12px;opacity:.75">Find people in Discover and tap Add friend. They can accept your request in Requests.</p>
 <div id="friendsContainer"></div>
 </section>
 <section id="requestsSection" role="tabpanel" tabindex="0" aria-label="Friend requests" hidden>

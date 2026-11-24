@@ -182,35 +182,15 @@
       const incoming = rows.find(row => row.follower_id === targetId && row.following_id === me);
       const mutual = outgoing?.status === 'accepted' && incoming?.status === 'accepted';
       return {
-        following: outgoing?.status === 'accepted',
-        friendship: mutual ? 'mutual' : outgoing?.status === 'accepted' ? 'following' : incoming?.status === 'accepted' ? 'follower' : 'none',
+        following: mutual,
+        friendship: mutual ? 'mutual' : outgoing?.status === 'pending' ? 'outgoing_pending' : incoming?.status === 'pending' ? 'incoming_pending' : 'none',
         request_id: incoming?.id || null
       };
     },
+    // Compatibility wrapper: never create one-way accepted follows from a profile CTA.
     async setFollow(db, targetId, shouldFollow) {
-      const session = await window.SPIKE_PLATFORM.getSession();
-      if (!session?.user) throw new Error('Sign in to continue.');
-      const userId = session.user.id;
-      if (shouldFollow) {
-        if (!targetId || targetId === userId) throw new Error('You cannot follow this account.');
-        const { data: target, error: targetError } = await db.from('profiles').select('id,is_private,account_status').eq('id', targetId).maybeSingle();
-        if (targetError) throw targetError;
-        if (!target || target.account_status !== 'active') throw new Error('This account is unavailable.');
-        if (target.is_private) throw new Error('This profile is private. SPIKE currently supports direct follows only; no follow request was sent.');
-        const existing = await db.from('follows').select('status').eq('follower_id', userId).eq('following_id', targetId).maybeSingle();
-        if (existing.error) throw existing.error;
-        if (existing.data?.status === 'accepted') return { following: true, requested: false };
-        if (existing.data) {
-          const removed = await db.from('follows').delete().eq('follower_id', userId).eq('following_id', targetId);
-          if (removed.error) throw removed.error;
-        }
-        const { error } = await db.from('follows').insert({ follower_id: userId, following_id: targetId, status: 'accepted' });
-        if (error) throw error;
-        return { following: true, requested: false };
-      }
-      const { error } = await db.from('follows').delete().eq('follower_id', userId).eq('following_id', targetId);
-      if (error) throw error;
-      return { following: false, requested: false };
+      if (shouldFollow) return this.sendFriendRequest(db, targetId);
+      return this.unfriend(db, targetId);
     },
     async toggleFollow(db, targetId, shouldFollow) { return this.setFollow(db, targetId, shouldFollow); },
 
@@ -278,7 +258,7 @@
         const me = session.user.id;
         const del = await db.from('follows').delete()
           .or(`and(follower_id.eq.${me},following_id.eq.${targetId}),and(follower_id.eq.${targetId},following_id.eq.${me})`);
-        if (del.error) throw error;
+        if (del.error) throw del.error;
         return { ok: true, friend_id: targetId };
       }
       return { ok: true, friend_id: String(data?.friend_id || targetId) };
