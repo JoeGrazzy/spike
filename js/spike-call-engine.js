@@ -9,7 +9,7 @@
     user: null, callId: null, callType: null, role: null, status: 'idle',
     channel: null, channelReady: false, channelRetryTimer: null, channelRetryDelay: 1000, channelGeneration: 0, channelFlushing: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
-    queuedIce: [], callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
+    queuedIce: [], incomingSignals: [], incomingFlushing: false, callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
     muted: false, cameraOff: false, pending: null, disposed: false, callAttempt: 0, peerAccepted: false, offerStarted: false, queuedSignals: []
   };
 
@@ -202,6 +202,11 @@
     if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
     const generation=++state.eventsGeneration;
     const userId=state.user.id;
+    // The deployed Realtime policies require private=true for this per-user
+    // topic. Postgres Changes delivery is still filtered by the table's
+    // participant-only SELECT RLS policy; this topic policy only authorizes the
+    // signed-in user to join their own event channel. SDP/ICE remains on its
+    // separate call-ID topic with caller/callee authorization.
     const channel=client().channel(`spike-call-events-${userId}`,{config:{private:true}})
       .on('postgres_changes',{event:'*',schema:'public',table:'spike_call_sessions'},handleCallRow);
     state.eventsChannel=channel;
@@ -344,18 +349,20 @@
     const conversationId=context?.conversationId;
     const peerId=context?.peerId;
     if(!conversationId || !peerId || context?.isGroup)throw new Error('Voice and video calls are currently available in one-to-one conversations.');
-    state.user=state.user||await getCurrentUser();
     const attempt=++state.callAttempt;
     state.callType=type;state.role='caller';state.status='creating';state.conversationId=conversationId;state.peerAccepted=false;state.offerStarted=false;
     state.peer={display_name:'SPIKE member',username:'',avatar_url:''};
-    // Show a real, cancellable call state before any network, profile or device-permission work.
+    // Render synchronously on the user's click. Auth restoration, profile lookup,
+    // database RPCs and media permission prompts must never gate the outgoing UI.
     showUI('outgoing','Starting secure call…');
-    void profileFor(peerId).then(profile=>{
-      if(state.callAttempt!==attempt || state.status==='idle')return;
-      state.peer=profile;
-      showUI('outgoing',state.callId?'Preparing microphone and camera…':'Starting secure call…');
-    });
     try {
+      state.user=state.user||await getCurrentUser();
+      if(state.callAttempt!==attempt || state.status==='idle')return;
+      void profileFor(peerId).then(profile=>{
+        if(state.callAttempt!==attempt || state.status==='idle')return;
+        state.peer=profile;
+        showUI('outgoing',state.callId?'Preparing microphone and camera…':'Starting secure call…');
+      }).catch(error=>console.info('[SPIKE calls] peer profile lookup deferred',error?.message||error));
       const {data,error}=await client().rpc('spike_create_call',{p_conversation_id:conversationId,p_call_type:type});
       if(error)throw error;
       if(!data)throw new Error('The call invitation could not be created.');
@@ -420,6 +427,22 @@
       else if(connection==='failed')setStatus('Could not connect directly on this network. Try switching between Wi-Fi and mobile data, then call again.');
       else if(connection==='disconnected')setStatus('Connection interrupted. Trying to reconnect…');
     };
+    // The callee may receive the offer/ICE while the browser is still waiting
+    // for microphone/camera permission. Drain those messages only after the
+    // peer connection exists and the accept RPC has moved the call to joining.
+    void flushIncomingSignals();
+  }
+
+  async function flushIncomingSignals() {
+    if(state.incomingFlushing || !state.pc || !state.incomingSignals.length)return;
+    if(state.role==='callee' && !['joining','negotiating'].includes(state.status))return;
+    state.incomingFlushing=true;
+    try {
+      while(state.pc && state.incomingSignals.length && (state.role!=='callee' || ['joining','negotiating'].includes(state.status))) {
+        const signal=state.incomingSignals.shift();
+        await handleSignal(signal);
+      }
+    } finally { state.incomingFlushing=false; }
   }
 
   function attachMediaElements() {
@@ -478,6 +501,13 @@
 
   async function handleSignal(signal) {
     if(!signal || signal.call_id!==state.callId || signal.from===state.user?.id)return;
+    // Offers and ICE are not replayed by Realtime. Preserve early messages
+    // instead of dropping them while getUserMedia is still pending or the
+    // callee's accept RPC has not yet completed.
+    if(['offer','answer','ice'].includes(signal.event) && (!state.pc || (signal.event==='offer' && state.role==='callee' && state.status!=='joining'))) {
+      state.incomingSignals.push(signal);
+      return;
+    }
     try {
       if(signal.event==='accepted' && state.role==='caller'){
         state.peerAccepted=true;
@@ -538,7 +568,7 @@
     state.remoteStream?.getTracks().forEach(track=>track.stop());state.remoteStream=null;
     if(state.channel){client()?.removeChannel(state.channel).catch?.(()=>{});state.channel=null;}state.channelReady=false;
     $('spikeCallOverlay')?.remove();
-    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
+    state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.incomingSignals=[];state.incomingFlushing=false;state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
     if(message)window.spikePremiumToast?.(message,'info',3000);
   }
 

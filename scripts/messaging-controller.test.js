@@ -17,3 +17,14 @@ test('direct-message typing uses the same private conversation topic for both pa
   assert.match(source, /channel=db\(\)\.channel\(`spike-dm:\$\{conversationId\}`,\{config:\{private:true,broadcast:\{ack:true,self:false\}\}\}\)/);
   assert.match(source, /event:'typing'/);
 });
+
+
+test('call buttons stay disabled until one-to-one recipient and messaging permission are resolved', () => {
+  const page = readFileSync(new URL('../message.html', import.meta.url), 'utf8');
+  assert.match(page, /id="voiceCallBtn" disabled aria-disabled="true"/);
+  assert.match(page, /id="videoCallBtn" disabled aria-disabled="true"/);
+  assert.match(source, /const setCallButtonsReady = ready =>/);
+  assert.match(source, /const peerId=peerIds\.length===1\?peerIds\[0\]:null/);
+  assert.match(source, /if\(allowed===true\) setCallButtonsReady\(true\)/);
+  assert.ok(source.indexOf('setCallButtonsReady(true)') > source.indexOf("rpc('can_message_spike_user'"));
+});

@@ -12,6 +12,7 @@
   const presenceLabel = row => { if(!row)return 'Presence unavailable'; if(row.online)return 'Online now'; if(row.lastSeenAt){const d=new Date(row.lastSeenAt);if(!Number.isNaN(d.getTime()))return `Last seen ${day(d)}`;} return 'Offline'; };
   let user = null, conversationId = null, channel = null, inboxChannel = null, oldest = null, busy = false, currentPeer = null, currentPeerId = null, inboxRefreshQueued = false, selectedMessage = null, replyToId = null, newIncomingCount = 0, pendingIncomingConversationId = null, threadPresenceTimer = null, typingStopTimer = null, peerTypingTimer = null, lastTypingSentAt = 0, peerTypingUntil = 0, currentConversationIsGroup = false, channelReady = false, peerLastReadAt = null;
   const say = (message, error = false) => { const node = $('status') || $('notice'); if (node) { node.textContent = message; node.classList.toggle('error', !!error); if (node.id === 'notice') node.hidden = false; } };
+  const setCallButtonsReady = ready => { ['voiceCallBtn','videoCallBtn'].forEach(id => { const button=$(id); if(!button)return; button.disabled=!ready; button.setAttribute('aria-disabled',String(!ready)); }); };
   const renderPeerTyping = () => { const node=$('typingIndicator'); if(!node)return; const active=peerTypingUntil>Date.now(); node.hidden=!active; node.textContent=active?(currentConversationIsGroup?'A member is typing…':`${currentPeer?.display_name||currentPeer?.username||'Someone'} is typing…`):''; };
   const sendTyping = async typing => { if(!channel || !channelReady || !conversationId || !user || document.hidden || !navigator.onLine)return false; try { const result=await channel.send({type:'broadcast',event:'typing',payload:{user_id:user.id,typing:!!typing,at:Date.now()}}); if(result?.status!=='ok'){console.info('[SPIKE messaging] typing broadcast was not acknowledged',result);return false;} return true; } catch(error) { console.info('[SPIKE messaging] typing signal unavailable',error?.message||error); return false; } };
   const scheduleTyping = () => { if(!channel)return; const now=Date.now(); if(now-lastTypingSentAt>900){lastTypingSentAt=now;void sendTyping(true);} if(typingStopTimer)clearTimeout(typingStopTimer); typingStopTimer=window.setTimeout(()=>{void sendTyping(false);typingStopTimer=null;},1600); };
@@ -383,16 +384,19 @@
     const peerIds=peerMembers.map(x=>x.user_id);
     peerLastReadAt=peerMembers.length===1?peerMembers[0].last_read_at:null;
     const isGroup=conversation?.kind==='group';
+    setCallButtonsReady(false);
     if($('voiceCallBtn'))$('voiceCallBtn').hidden=isGroup;
-    if($('videoCallBtn'))$('videoCallBtn').hidden=isGroup; currentConversationIsGroup=isGroup;
-    const peerId=peerIds[0];
-    // The call engine needs the resolved recipient ID, not only the profile object.
-    // Groups deliberately have no one-to-one call recipient.
+    if($('videoCallBtn'))$('videoCallBtn').hidden=isGroup;
+    currentConversationIsGroup=isGroup;
+    const peerId=peerIds.length===1?peerIds[0]:null;
+    // Do not expose call actions until the direct peer and messaging permission
+    // are resolved. The header is visible before this asynchronous bootstrap ends.
     currentPeerId = !isGroup && peerId ? String(peerId) : null;
     if(peerId&&!isGroup){
       const {data:allowed,error:privacyError}=await db().rpc('can_message_spike_user',{p_sender:user.id,p_recipient:peerId});
       if(privacyError)throw privacyError;
-      if(allowed!==true){
+      if(allowed===true) setCallButtonsReady(true);
+      else {
         const composer=$('form');
         if(composer){composer.querySelectorAll('button,textarea').forEach(node=>node.disabled=true);}
         say('This member is not accepting new messages from your account.',true);

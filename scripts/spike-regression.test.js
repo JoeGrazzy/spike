@@ -6,6 +6,7 @@ const messaging = fs.readFileSync(new URL('../js/spike-messaging.js', import.met
 const calls = fs.readFileSync(new URL('../js/spike-call-engine.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
+const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
@@ -51,8 +52,11 @@ test('caller no-answer finalization records a missed call', () => {
   assert.match(calls, /sendSignal\(signalEvent/);
 });
 
-test('call event subscription uses a private per-user Realtime channel', () => {
-  assert.match(calls, /spike-call-events-\$\{userId\}`,[\s]*\{config:\{private:true\}\}/);
+test('call event Postgres Changes channel is private to match deployed Realtime topic policies', () => {
+  assert.match(calls, /channel\(`spike-call-events-\$\{userId\}`\s*,\s*\{config:\{private:true\}\}\)/);
+  assert.match(dmMigration, /SPIKE call owner can receive private event topic[\s\S]*?private is true[\s\S]*?realtime\.topic\(\) = 'spike-call-events-'/);
+  assert.match(callSchema, /SPIKE call participants can read their calls/);
+  assert.match(callSchema, /auth\.uid\(\)\) in \(caller_id,callee_id\)/);
 });
 
 test('incoming-call reconciliation runs only after the Realtime channel is subscribed', () => {
@@ -78,6 +82,13 @@ test('outgoing call interface renders before the create-call RPC and device perm
   assert.ok(outgoing.indexOf("showUI('outgoing','Starting secure call…')") < outgoing.indexOf("rpc('spike_create_call'"));
   assert.ok(outgoing.indexOf("showUI('outgoing','Preparing microphone and camera…')") < outgoing.indexOf('await prepareMedia(attempt)'));
   assert.match(outgoing, /spike_end_call.*late-created row|late-created row/);
+});
+
+test('outgoing call UI is rendered before asynchronous auth restoration', () => {
+  const outgoing = calls.slice(calls.indexOf('async function startCall'), calls.indexOf('function loadIceServers'));
+  assert.ok(outgoing.indexOf("showUI('outgoing','Starting secure call…')") < outgoing.indexOf('await getCurrentUser()'));
+  assert.ok(outgoing.indexOf('await getCurrentUser()') < outgoing.indexOf("rpc('spike_create_call'"));
+  assert.match(outgoing, /try \{[\s\S]*?await getCurrentUser\(\)/);
 });
 
 test('call auth listener is attached before initial session lookup and can recover after delayed auth', () => {
@@ -111,6 +122,16 @@ test('ICE and offer signalling wait for private channel readiness and check deli
   assert.match(calls, /void flushQueuedSignals\(\)/);
   assert.match(calls, /result!=='ok'/);
   assert.match(calls, /if\(!delivered\)throw new Error/);
+});
+
+
+test('incoming offer and ICE candidates are queued until the callee peer connection is ready', () => {
+  assert.match(calls, /incomingSignals: \[\], incomingFlushing: false/);
+  assert.ok(calls.includes("if(['offer','answer','ice'].includes(signal.event) && (!state.pc || (signal.event==='offer' && state.role==='callee' && state.status!=='joining'))) {\n      state.incomingSignals.push(signal);"));
+  assert.match(calls, /async function flushIncomingSignals\(\)[\s\S]*?await handleSignal\(signal\)/);
+  assert.match(calls, /\['joining','negotiating'\]\.includes\(state\.status\)/);
+  assert.match(calls, /void flushIncomingSignals\(\)/);
+  assert.match(calls, /state\.incomingSignals=\[\]/);
 });
 
 test('active call signalling channel retries after failure and rejoins on connectivity recovery', () => {

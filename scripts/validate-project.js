@@ -59,7 +59,8 @@ if(callSource.includes('/api/call-ice'))errors.push('STUN-only call engine must 
 if(callSource.includes('await loadIceServers()'))errors.push('STUN-only ICE server selection must not perform an unnecessary async credential lookup');
 if(fs.readFileSync(path.join(root,'worker.js'),'utf8').includes('call-ice'))errors.push('Unused TURN credential route must not remain in the Worker');
 if(!callSource.includes("client().rpc(callerMissed?'spike_mark_call_missed':'spike_end_call'"))errors.push('Caller no-answer path must finalize the call as missed');
-if(!callSource.includes("{config:{private:true}}"))errors.push('Per-user call event channel must use private Realtime configuration');
+if(!callSource.includes('client().channel(`spike-call-events-${userId}`,{config:{private:true}})'))errors.push('Call Postgres Changes listener must join the private per-user topic required by production Realtime policies');
+if(!callSource.includes('db.channel(`spike-call:${callId}`,{config:{private:true,broadcast:{ack:true,self:false}}})'))errors.push('SDP/ICE signaling channel must remain private with delivery acknowledgements');
 const callMfaMigration=fs.readFileSync(path.join(migrationDir,'20261124001015_spike_call_sessions_mfa_enforcement_v1.sql'),'utf8');
 if(!callMfaMigration.includes('private.mfa_access_allowed()')||!callMfaMigration.includes('private.enforce_mfa_for_opted_in_user()'))errors.push('Call-session migration must enforce the existing opt-in MFA policy and DML guard');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));

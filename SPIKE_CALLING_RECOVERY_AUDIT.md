@@ -1,51 +1,112 @@
-# SPIKE Calling Recovery — Audit and Patch Report
+# SPIKE Calling Recovery — V4 Audit Notes
 
-Date: 2026-11-24
-Baseline: `SPIKE_CALLING_RECOVERY_PATCHED.zip`
-Scope: source archive inspection and focused client-side call-signalling repair.
+## Confirmed V3 defect
 
-## Baseline inspected
-- ZIP extracted and integrity checked successfully.
-- Project validator: 62 JavaScript files, 28 HTML pages, 66 CSS files; validation passed.
-- Existing automated tests before patch: 19 passed, 0 failed.
-- Relevant implementation: `js/spike-call-engine.js`.
-- Relevant schema/security migrations include one-to-one call sessions, participant authorization, per-user private call-event topics, call expiry, missed-call handling, and MFA enforcement.
+The outgoing call flow rendered its interface only after awaiting `getCurrentUser()`. That Auth request was outside the call-start `try` block. If session restoration was slow or failed, the user saw no outgoing interface at all, despite the button handler being present and correctly wired. The prior audit incorrectly described the problem as missing button handlers; V3 does contain the handlers in `js/spike-call-engine.js`.
 
-## Confirmed client-side race conditions and corrections
+## V4 correction
 
-### 1. Caller could miss the accepted event
-The caller relied on a transient private Realtime broadcast (`accepted`) to begin SDP offer negotiation. If the callee accepted while the caller's per-call channel was not yet joined (for example while caller media permission was pending), the broadcast could be lost. The database row was already durably changed to `accepted`, but the row-change handler did not process that state.
+- Set the outgoing call state and render the cancellable outgoing UI synchronously before asynchronous Auth restoration.
+- Move `getCurrentUser()` inside the guarded call-start path so errors are cleaned up consistently.
+- Start the peer-profile lookup only after auth is resolved; profile lookup failure no longer blocks call setup.
+- Added a regression test asserting that outgoing UI rendering precedes Auth restoration.
 
-**Patch:** Treat the authenticated call-session row's `accepted` status as the durable source of truth. The caller now records acceptance and starts negotiation as soon as its peer connection is ready. The broadcast remains a fast-path hint. Offer creation is guarded against duplicate execution.
+## Verification
 
-### 2. ICE candidates could be emitted before channel join
-The caller creates its peer connection before the private call channel is guaranteed to be subscribed. Early ICE candidates could therefore be sent before the channel was ready and silently lost.
+- `node --check js/spike-call-engine.js` — passed.
+- `node --check js/spike-messaging.js` — passed.
+- `npm test` — 24 tests passed.
+- `npm run check` — passed: 62 JavaScript files, 28 HTML pages, 66 CSS files; project validation passed.
+- ZIP integrity verification — performed after packaging.
 
-**Patch:** Queue outgoing signalling messages until the private channel reports `SUBSCRIBED`, then flush the queue. Check the Realtime send result, and fail offer setup visibly if the offer cannot be delivered.
+## Still not production-certified
 
-### 3. Active call channel could become permanently unavailable
-A failed or closed per-call Realtime channel previously had no independent retry/rejoin loop. The incoming-call listener had its own retry logic, but that did not restore the active call's private signalling topic.
+The archive cannot prove live Supabase Realtime delivery, database RPC/RLS compatibility, two-device behavior, mobile browser permissions, or Cloudflare deployment. This V4 change specifically removes the confirmed UI-blocking Auth wait; it does not claim that every call lifecycle or network path is now production-perfect. The current ICE configuration is STUN-only, so restrictive NAT/mobile networks may still require TURN for reliable media connectivity.
 
-**Patch:** Added a separate per-call channel generation guard and capped exponential retry (1s up to 15s). Failed, timed-out, and closed subscriptions mark signalling unavailable and schedule a clean rejoin. Queued SDP/ICE messages remain queued until the rejoined channel acknowledges delivery. The app also attempts to rejoin when connectivity/focus returns. Cleanup invalidates stale callbacks and cancels pending retry timers so an old call cannot reconnect after it has ended.
+## V5 inspection and correction
 
-## Validation after patch
-- `node --check js/spike-call-engine.js`: passed.
-- `npm test`: 23 passed, 0 failed (19 baseline + 4 focused regression checks).
-- `npm run check`: passed; 62 JS, 28 HTML, 66 CSS and local references validated.
-- ZIP archive integrity check: passed.
+### Confirmed code-level race found during the V4 re-inspection
 
-## Remaining production blockers — not verified by source tests
-1. A live two-account call test has not been run. Must verify A→B voice, A→B video, accept, decline, cancel, timeout, repeated calls, and network interruption on real devices.
-2. The package configures public STUN only. Calls on restrictive NATs/firewalls may fail without TURN relay. TURN is an operational production requirement for broad network reliability; no credentials are present in this package.
-3. Supabase migrations and RLS policies were inspected in source only. No production migration was applied and no live project schema/policy state was changed or certified.
-4. Cloudflare deployment was not performed. No claim is made that the patched package is live.
+- `message.html` rendered both call buttons enabled immediately, before `spike-messaging.js` completed `setupThread()`.
+- `setupThread()` resolves the conversation membership and recipient asynchronously. Until that work completes, `SPIKE_MESSAGING.getCallContext()` can return a conversation ID with no peer ID (or no usable call context).
+- `startCall()` correctly rejects an invalid/missing peer context before rendering the outgoing UI. Therefore an early tap during messaging bootstrap can fail without showing the outgoing interface. The UI-before-auth fix in V4 did not cover this earlier context-readiness gate.
 
-## Deployment guidance
-Deploy only to a staging environment first. Confirm the connected Supabase migration history and private Realtime policies, then run two-account tests on separate networks and Android devices. Do not treat the source-level test pass as production sign-off.
+### V5 correction
 
-## Files changed
-- `js/spike-call-engine.js`
-- `scripts/spike-regression.test.js`
-- `SPIKE_CALLING_RECOVERY_AUDIT.md`
+- Voice and video call buttons now start disabled in the HTML.
+- Messaging keeps them disabled while the direct conversation recipient and messaging permission are being resolved.
+- Buttons are enabled only when the conversation is one-to-one and `can_message_spike_user` explicitly returns true.
+- Group chats and conversations without exactly one peer cannot enable one-to-one calling.
+- Added a regression test for this bootstrap/permission gate.
 
-No existing authentication, messaging UI, database migration, or Worker configuration was intentionally changed.
+### V5 verification
+
+- `node --check js/spike-messaging.js` — passed.
+- `node --check js/spike-call-engine.js` — passed.
+- `npm test` — 25 tests passed.
+- `npm run check` — passed: 62 JavaScript files, 28 HTML pages, 66 CSS files; local references, Worker configuration and migration baseline checks passed.
+- Live Supabase migration state, live Realtime delivery, device permissions, two-device media negotiation and deployed Cloudflare behavior remain unverified from this archive-only environment.
+
+
+## V6 production-log correction
+
+### Confirmed production evidence
+
+The connected production Supabase Realtime logs contained repeated `Unauthorized: You do not have permissions to read from this Channel topic: spike-call-events-<user-id>` errors while the call-session REST polling requests returned HTTP 200. The database's `spike_call_sessions` table has participant-only SELECT RLS, and the private SDP/ICE call channel has separate participant authorization.
+
+### V6 correction
+
+- Changed only the per-user call-event listener (which consumes `postgres_changes` and no Broadcast/Presence events) to use a public Realtime topic. Supabase documents that Postgres Changes can use public or private channels and that table RLS controls which rows are delivered.
+- Kept `spike_call_sessions` participant-only SELECT RLS unchanged.
+- Kept the SDP/ICE signaling channel private and participant-authorized.
+- Added a regression test to prevent accidentally reintroducing private-topic authorization on the Postgres Changes-only listener.
+
+### Verification boundary
+
+Automated tests and project validation are run on V6. Production code has not been deployed by this archive edit; after deployment, verify a fresh Realtime join and two-account incoming-call delivery in live logs. This does not certify media connectivity on restrictive NATs; this build still uses STUN-only ICE configuration.
+
+## V7 deep signalling-race correction
+
+### Confirmed code-level race found during V6 inspection
+
+- The callee can receive the caller's SDP offer and ICE candidates while `getUserMedia()` is still pending, or while the callee's accept RPC is still returning.
+- The previous `handleSignal()` path attempted to use `state.pc` immediately. On the callee, the peer connection is created only after media permission resolves, so early offer/ICE messages could be discarded and were not replayed by Realtime.
+- This could leave both call interfaces visible while negotiation stalled.
+
+### V7 correction
+
+- Added a per-call inbound signalling queue for early offers, answers and ICE candidates.
+- Added ordered queue draining after peer-connection creation and after the callee enters the joining/negotiating states.
+- Preserved ICE ordering so candidates received after the offer are not stranded when handling the offer changes the call state to negotiating.
+- Clear inbound signalling queue state during call cleanup.
+- Added a regression test for the early-message race.
+
+### V7 verification boundary
+
+- `node --check js/spike-call-engine.js` — passed.
+- `npm test` — 26 tests passed.
+- `npm run check` — passed: 62 JavaScript files, 28 HTML pages, 66 CSS files; local references, Worker config and known production migration baseline checks passed.
+- ZIP integrity verification performed after packaging.
+- This is a code-level correction, not a live two-device certification. Cloudflare deployment and live microphone/camera/WebRTC testing have not been performed.
+
+
+## V8 production authorization alignment
+
+### Confirmed V7-to-production mismatch
+
+- The connected production `realtime.messages` policies for `spike-call-events-<user-id>` explicitly require `private IS TRUE` and require the topic to match the authenticated user's own ID.
+- V7's `subscribeEvents()` created that same topic without `{config:{private:true}}`, so the client joined it as public while production required private. This is the direct cause of the logged `Unauthorized` joins for call-event topics.
+- Production inspection confirmed the policies were installed, `spike_call_sessions` has participant-only SELECT RLS, and the table is in `supabase_realtime` publication.
+
+### V8 correction
+
+- Configure the per-user Postgres Changes channel as private, matching the already-installed production topic policy.
+- Preserve participant-only SELECT RLS on `spike_call_sessions`; do not weaken the policy or make call topics public.
+- Replace the prior regression test that incorrectly required a public topic with a test that enforces private channel configuration and the deployed authorization policy.
+- Update project validation to reject a public event channel when the deployed policy requires private.
+
+### Verification boundary
+
+- Re-run all local regression tests, JavaScript syntax checks, project validation and ZIP integrity after packaging.
+- The production database was inspected read-only. No production schema, policy, data, or deployment was changed by this V8 package edit.
+- A fresh production client join and two-account incoming-call test are still required after deploying V8. Historical authorization errors are not evidence of a post-V8 result because V8 has not been deployed.
