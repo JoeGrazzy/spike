@@ -7,7 +7,7 @@
   const $ = id => document.getElementById(id);
   const state = {
     user: null, callId: null, callType: null, role: null, status: 'idle',
-    channel: null, channelReady: false, eventsChannel: null, pc: null, localStream: null,
+    channel: null, channelReady: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
     queuedIce: [], callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
     muted: false, cameraOff: false, pending: null, disposed: false
@@ -152,17 +152,55 @@
     return data.user;
   }
 
+  async function loadPendingCalls() {
+    const userId=state.user?.id;
+    if(!userId || state.status!=='idle')return;
+    try {
+      const {data,error}=await client().from('spike_call_sessions')
+        .select('id,conversation_id,caller_id,callee_id,call_type,status,created_at,expires_at')
+        .eq('callee_id',userId).eq('status','ringing').gt('expires_at',new Date().toISOString())
+        .order('created_at',{ascending:false}).limit(3);
+      if(error)throw error;
+      // The subscription is already live before this lookup. This closes the
+      // startup race where a call was created between the first query and JOIN.
+      if(state.user?.id===userId && state.status==='idle' && data?.length)void incomingCall(data[0]);
+    } catch(error) { console.warn('[SPIKE calls] pending call lookup failed',error?.message||error); }
+  }
+
+  function scheduleEventsReconnect(generation) {
+    if(state.eventsRetryTimer || !state.user || state.disposed)return;
+    const delay=state.eventsRetryDelay;
+    state.eventsRetryDelay=Math.min(15000,Math.round(delay*1.8));
+    state.eventsRetryTimer=window.setTimeout(()=>{
+      state.eventsRetryTimer=null;
+      if(generation!==state.eventsGeneration || !state.user || state.disposed)return;
+      const old=state.eventsChannel;state.eventsChannel=null;state.eventsSubscribed=false;
+      if(old)void client().removeChannel(old).catch(()=>{});
+      void subscribeEvents();
+    },delay);
+  }
+
   async function subscribeEvents() {
-    if(state.eventsChannel || !state.user)return;
-    state.eventsChannel=client().channel(`spike-call-events-${state.user.id}`,{config:{private:true}})
-      .on('postgres_changes',{event:'*',schema:'public',table:'spike_call_sessions'},handleCallRow)
-      .subscribe((status,error)=>{if(status==='CHANNEL_ERROR'||status==='TIMED_OUT')console.warn('[SPIKE calls] call notifications unavailable',error||status);});
-    const {data,error}=await client().from('spike_call_sessions')
-      .select('id,conversation_id,caller_id,callee_id,call_type,status,created_at,expires_at')
-      .eq('callee_id',state.user.id).eq('status','ringing').gt('expires_at',new Date().toISOString())
-      .order('created_at',{ascending:false}).limit(3);
-    if(error)console.warn('[SPIKE calls] pending call lookup failed',error.message);
-    else if(data?.length && state.status==='idle')void incomingCall(data[0]);
+    if(state.eventsChannel || !state.user || state.disposed)return;
+    if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
+    const generation=++state.eventsGeneration;
+    const userId=state.user.id;
+    const channel=client().channel(`spike-call-events-${userId}`,{config:{private:true}})
+      .on('postgres_changes',{event:'*',schema:'public',table:'spike_call_sessions'},handleCallRow);
+    state.eventsChannel=channel;
+    channel.subscribe((status,error)=>{
+      if(generation!==state.eventsGeneration || state.eventsChannel!==channel)return;
+      if(status==='SUBSCRIBED'){
+        state.eventsSubscribed=true;state.eventsRetryDelay=1000;
+        // Always reconcile after JOIN, including every automatic reconnect.
+        // Realtime is the fast path; the query is the loss/reconnect safety net.
+        void loadPendingCalls();
+      } else if(status==='CHANNEL_ERROR' || status==='TIMED_OUT' || status==='CLOSED'){
+        state.eventsSubscribed=false;
+        console.warn('[SPIKE calls] call notifications unavailable',error||status);
+        scheduleEventsReconnect(generation);
+      }
+    });
   }
 
   async function handleCallRow(payload) {
@@ -390,10 +428,36 @@
     bindCallButtons();
     await subscribeEvents();
     db.auth.onAuthStateChange((event,session)=>{
-      if(event==='SIGNED_OUT'||!session?.user){void endCall('Call ended because you signed out.');if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}state.user=null;}
-      else if(session.user && state.user?.id!==session.user.id){state.user=session.user;if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}void subscribeEvents();}
+      if(event==='SIGNED_OUT'||!session?.user){
+        void endCall('Call ended because you signed out.');
+        state.eventsGeneration++;state.eventsSubscribed=false;
+        if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
+        if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
+        state.user=null;
+      } else if(session.user && state.user?.id!==session.user.id){
+        state.eventsGeneration++;state.eventsSubscribed=false;
+        if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
+        if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
+        state.user=session.user;void subscribeEvents();
+      }
     });
-    window.addEventListener('pagehide',()=>{if(state.callId)void endCall('Call ended.');if(state.eventsChannel)db.removeChannel(state.eventsChannel);},{once:true});
+    const resumeEvents=()=>{if(!document.hidden && navigator.onLine && state.user && !state.eventsChannel)void subscribeEvents();};
+    window.addEventListener('online',resumeEvents);
+    window.addEventListener('focus',resumeEvents);
+    document.addEventListener('visibilitychange',resumeEvents);
+    window.addEventListener('pageshow',()=>{
+      state.disposed=false;
+      resumeEvents();
+    });
+    window.addEventListener('pagehide',event=>{
+      // A BFCache transition is temporary: preserve the live call and rejoin
+      // the user event channel when the page is restored.
+      state.disposed=!event.persisted;state.eventsGeneration++;
+      if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
+      if(!event.persisted && state.callId)void endCall('Call ended.');
+      if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
+      state.eventsSubscribed=false;
+    });
   }
 
   window.SPIKE_CALLS=Object.freeze({start:startCall,end:endCall,getState:()=>({callId:state.callId,status:state.status,callType:state.callType})});

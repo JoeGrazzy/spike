@@ -51,6 +51,19 @@ test('caller no-answer finalization records a missed call', () => {
   assert.match(calls, /sendSignal\(signalEvent/);
 });
 
-test('call event subscription uses a private Realtime channel', () => {
-  assert.match(calls, /spike-call-events-\$\{state\.user\.id\}`,\{config:\{private:true\}\}/);
+test('call event subscription uses a private per-user Realtime channel', () => {
+  assert.match(calls, /spike-call-events-\$\{userId\}`,[\s]*\{config:\{private:true\}\}/);
+});
+
+test('incoming-call reconciliation runs only after the Realtime channel is subscribed', () => {
+  assert.match(calls, /if\(status==='SUBSCRIBED'\)[\s\S]*?void loadPendingCalls\(\)/);
+  assert.match(calls, /function loadPendingCalls\(\)/);
+  assert.match(calls, /state\.status==='idle' && data\?\.length/);
+});
+
+test('incoming-call listener retries failed channels and resumes on connectivity return', () => {
+  assert.match(calls, /scheduleEventsReconnect/);
+  assert.match(calls, /status==='CHANNEL_ERROR' \|\| status==='TIMED_OUT' \|\| status==='CLOSED'/);
+  assert.match(calls, /addEventListener\('online',resumeEvents\)/);
+  assert.match(calls, /addEventListener\('visibilitychange',resumeEvents\)/);
 });
