@@ -23,22 +23,40 @@
     const style = document.createElement('style');
     style.id = 'spikeCallStyles';
     style.textContent = `
-      .spike-call-overlay{position:fixed;inset:0;z-index:30000;display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));background:rgba(3,5,12,.82);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
-      .spike-call-card{width:min(440px,100%);max-height:92dvh;overflow:auto;border:1px solid var(--spike-line,rgba(180,150,255,.24));border-radius:28px;padding:22px;background:linear-gradient(150deg,var(--spike-surface,#171426),var(--spike-bg,#090d17) 72%);color:var(--spike-text,#f7f5ff);box-shadow:0 28px 100px #000b;text-align:center;font-family:Inter,system-ui,sans-serif}
-      .spike-call-kicker{font-size:10px;letter-spacing:.16em;font-weight:900;color:var(--spike-accent,#c4a5fd);text-transform:uppercase}
-      .spike-call-avatar{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:18px auto 12px;background:linear-gradient(135deg,var(--spike-action-bg,#6d28d9),var(--spike-accent-2,#be185d));font-size:32px;font-weight:900;overflow:hidden}
+      .spike-call-overlay{position:fixed;inset:0;z-index:30000;display:grid;place-items:center;padding:0;background:rgba(3,5,12,.88);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;animation:spikeCallFade .22s ease-out}
+      .spike-call-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:16px;width:min(100%,560px);height:min(900px,100dvh);min-height:520px;overflow:hidden;padding:max(26px,env(safe-area-inset-top)) 22px max(24px,env(safe-area-inset-bottom));background:radial-gradient(ellipse at 50% 18%,rgba(125,72,214,.28),transparent 43%),linear-gradient(160deg,#17152b 0%,#0b1020 54%,#080b14 100%);text-align:center}
+      .spike-call-card:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(circle at 12% 72%,rgba(219,39,119,.12),transparent 28%),radial-gradient(circle at 90% 38%,rgba(99,102,241,.13),transparent 30%)}
+      .spike-call-top{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#b9b4d2;font-size:10px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+      .spike-call-brand{display:flex;align-items:center;gap:8px}.spike-call-brand-mark{display:grid;place-items:center;width:28px;height:28px;border:1px solid #ffffff20;border-radius:10px;background:linear-gradient(135deg,#9b5cff,#e34a9a);font-size:14px;color:white;box-shadow:0 5px 18px #9b5cff35}
+      .spike-call-secure{display:flex;align-items:center;gap:6px;color:#9de7c4;letter-spacing:.08em}.spike-call-secure:before{content:"";width:6px;height:6px;border-radius:50%;background:#42d99a;box-shadow:0 0 12px #42d99a}
+      .spike-call-person{display:flex;flex:1;min-height:0;width:100%;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+      .spike-call-avatar{position:relative;width:clamp(112px,28vw,158px);height:clamp(112px,28vw,158px);flex:0 0 auto;border-radius:50%;display:grid;place-items:center;margin:0 auto 8px;background:linear-gradient(145deg,#9b5cff,#e34a9a);font-size:48px;font-weight:900;overflow:hidden;box-shadow:0 0 0 8px #ffffff08,0 0 0 18px #ffffff05,0 22px 70px #8b5cf655}
+      .spike-call-avatar:after{content:"";position:absolute;inset:-10px;border:1px solid #c4a5fd55;border-radius:50%;animation:spikeCallPulse 2.5s ease-out infinite}
       .spike-call-avatar img{width:100%;height:100%;object-fit:cover}
-      .spike-call-name{font-size:22px;font-weight:900;letter-spacing:-.04em;margin:0}
-      .spike-call-status{font-size:13px;color:var(--spike-muted,#b6b5c8);margin:8px 0 16px;min-height:20px}
-      .spike-call-video{display:grid;gap:8px;margin:14px 0}
-      .spike-call-video video{width:100%;max-height:38dvh;object-fit:cover;background:#05070d;border-radius:16px}
-      .spike-call-video .local{width:34%;justify-self:end;max-height:18dvh;border:1px solid #ffffff30}
-      .spike-call-controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px}
-      .spike-call-controls button{min-width:58px;min-height:54px;border:1px solid #ffffff25;border-radius:17px;background:var(--spike-surface-2,#ffffff12);color:var(--spike-text,#fff);font-size:12px;font-weight:800;padding:10px 13px}
-      .spike-call-controls button.primary{background:linear-gradient(135deg,var(--spike-action-bg,#7c3aed),var(--spike-accent-2,#a21caf));border:0}
-      .spike-call-controls button.danger{background:var(--spike-danger,#be123c);border:0}
-      .spike-call-controls button:disabled{opacity:.45}
-      .spike-call-foot{font-size:10px;color:var(--spike-muted,#8f91a5);margin-top:16px;line-height:1.5}
+      .spike-call-name{font-size:clamp(24px,6vw,32px);font-weight:850;letter-spacing:-.055em;margin:0;color:#fff;max-width:100%;overflow-wrap:anywhere}
+      .spike-call-status{font-size:13px;color:#b9b8cc;margin:0;min-height:20px;line-height:1.5}
+      .spike-call-live{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid #ffffff13;border-radius:999px;background:#ffffff09;color:#d7d2e8;font-size:10px;font-weight:750;letter-spacing:.04em}
+      .spike-call-live:before{content:"";width:6px;height:6px;border-radius:50%;background:#49dfa3;box-shadow:0 0 10px #49dfa3}
+      .spike-call-wave{display:flex;align-items:center;justify-content:center;gap:4px;height:34px;margin:10px 0 0}.spike-call-wave i{display:block;width:3px;height:9px;border-radius:5px;background:linear-gradient(#c4a5fd,#e879b9);animation:spikeCallWave .9s ease-in-out infinite alternate}.spike-call-wave i:nth-child(2n){animation-delay:.18s}.spike-call-wave i:nth-child(3n){animation-delay:.35s}.spike-call-wave i:nth-child(4n){animation-delay:.5s}
+      .spike-call-video{position:absolute;inset:0;width:100%;height:100%;margin:0;background:#05070d;overflow:hidden}
+      .spike-call-video video{display:block;width:100%;height:100%;object-fit:cover;background:#05070d}
+      .spike-call-video .remote{position:absolute;inset:0}
+      .spike-call-video .local{position:absolute;right:16px;top:max(70px,calc(env(safe-area-inset-top) + 58px));width:clamp(104px,28vw,148px);height:clamp(142px,25vh,190px);border:1px solid #ffffff55;border-radius:20px;object-fit:cover;box-shadow:0 12px 34px #0008;z-index:2}
+      .spike-call-card.is-video{background:#05070d;padding:0;justify-content:flex-end}.spike-call-card.is-video:before{z-index:1;background:linear-gradient(180deg,rgba(3,5,12,.56),transparent 24%,transparent 58%,rgba(3,5,12,.88) 100%)}
+      .spike-call-card.is-video .spike-call-top{position:absolute;z-index:3;top:max(18px,env(safe-area-inset-top));left:0;padding:0 18px;color:#fff}
+      .spike-call-card.is-video .spike-call-person{position:relative;z-index:2;flex:0 0 auto;padding:0 18px 12px;pointer-events:none}
+      .spike-call-card.is-video .spike-call-person .spike-call-avatar{display:none}
+      .spike-call-card.is-video .spike-call-name{font-size:19px;text-shadow:0 2px 12px #000}
+      .spike-call-card.is-video .spike-call-status{color:#e4e1ed;text-shadow:0 2px 10px #000}
+      .spike-call-controls{position:relative;z-index:4;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;width:100%;margin:0;padding:16px 12px 6px}
+      .spike-call-controls button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:68px;min-height:68px;border:1px solid #ffffff20;border-radius:22px;background:rgba(255,255,255,.105);color:#fff;font-size:10px;font-weight:800;padding:10px 12px;cursor:pointer;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .18s ease,background .18s ease,border-color .18s ease}
+      .spike-call-controls button:before{font-size:19px;line-height:1}.spike-call-controls button[data-action="mute"]:before{content:"🎙"}.spike-call-controls button[data-action="camera"]:before{content:"▣"}.spike-call-controls button[data-action="accept"]:before{content:"↗"}.spike-call-controls button[data-action="reject"]:before,.spike-call-controls button[data-action="end"]:before,.spike-call-controls button[data-action="cancel"]:before{content:"☎"}
+      .spike-call-controls button:active{transform:scale(.95)}.spike-call-controls button.primary{background:linear-gradient(135deg,#8b5cf6,#d946a5);border:0;box-shadow:0 8px 24px #a855f744}.spike-call-controls button.danger{background:linear-gradient(135deg,#f04462,#c51d4a);border:0;box-shadow:0 8px 24px #e11d4840}.spike-call-controls button:disabled{opacity:.45;cursor:wait}
+      .spike-call-foot{position:relative;z-index:3;font-size:10px;color:#898aa2;line-height:1.5;max-width:340px;margin:0 auto;text-align:center}
+      .spike-call-card.is-video .spike-call-foot{padding:0 20px 8px;color:#b2b0c4}
+      @keyframes spikeCallFade{from{opacity:0}to{opacity:1}}@keyframes spikeCallPulse{0%{transform:scale(.94);opacity:.65}100%{transform:scale(1.12);opacity:0}}@keyframes spikeCallWave{from{height:7px;opacity:.55}to{height:27px;opacity:1}}
+      @media(min-width:700px){.spike-call-card{height:min(860px,94dvh);border:1px solid #ffffff1a;border-radius:30px;box-shadow:0 35px 120px #000b}.spike-call-card.is-video{width:min(100%,920px);height:min(860px,94dvh)}}
+      @media(max-width:380px){.spike-call-controls{gap:8px}.spike-call-controls button{min-width:62px;min-height:62px;border-radius:19px;padding:8px}.spike-call-card:not(.is-video){padding-left:16px;padding-right:16px}}
       @media(prefers-reduced-motion:reduce){.spike-call-overlay *{animation:none!important;transition:none!important}}
     `;
     document.head.append(style);
@@ -57,38 +75,62 @@
       document.body.append(overlay);
     }
     overlay.replaceChildren();
-    const card = document.createElement('section'); card.className = 'spike-call-card';
-    const kicker = document.createElement('div'); kicker.className = 'spike-call-kicker'; kicker.textContent = state.callType === 'video' ? 'SPIKE VIDEO CALL' : 'SPIKE VOICE CALL';
-    const avatar = document.createElement('div'); avatar.className = 'spike-call-avatar';
-    if (state.peer?.avatar_url) { const img=document.createElement('img'); img.src=state.peer.avatar_url; img.alt=''; avatar.append(img); }
-    else avatar.textContent=String(state.peer?.display_name||state.peer?.username||'S').trim().slice(0,1).toUpperCase()||'S';
-    const name=document.createElement('h2');name.className='spike-call-name';name.textContent=state.peer?.display_name||state.peer?.username||'SPIKE member';
-    const status=document.createElement('div');status.className='spike-call-status';status.id='spikeCallStatus';status.textContent=statusText||'';
-    card.append(kicker,avatar,name,status);
-    if (state.callType === 'video' && kind === 'active') {
-      const video=document.createElement('div');video.className='spike-call-video';
-      const remote=document.createElement('video');remote.id='spikeCallRemoteVideo';remote.autoplay=true;remote.playsInline=true;
-      const local=document.createElement('video');local.id='spikeCallLocalVideo';local.autoplay=true;local.muted=true;local.playsInline=true;local.className='local';
-      video.append(remote,local);card.append(video);
+    const videoMode = state.callType === 'video' && kind === 'active';
+    const card = document.createElement('section');
+    card.className = `spike-call-card${videoMode ? ' is-video' : ''}`;
+    const top = document.createElement('div'); top.className = 'spike-call-top';
+    const brand = document.createElement('div'); brand.className = 'spike-call-brand';
+    const mark = document.createElement('span'); mark.className = 'spike-call-brand-mark'; mark.textContent = 'S';
+    const brandText = document.createElement('span'); brandText.textContent = state.callType === 'video' ? 'SPIKE VIDEO' : 'SPIKE VOICE';
+    brand.append(mark, brandText);
+    const secure = document.createElement('span'); secure.className = 'spike-call-secure'; secure.textContent = 'PRIVATE CALL';
+    top.append(brand, secure); card.append(top);
+
+    if (videoMode) {
+      const video = document.createElement('div'); video.className = 'spike-call-video';
+      const remote = document.createElement('video'); remote.id = 'spikeCallRemoteVideo'; remote.className = 'remote'; remote.autoplay = true; remote.playsInline = true;
+      const local = document.createElement('video'); local.id = 'spikeCallLocalVideo'; local.autoplay = true; local.muted = true; local.playsInline = true; local.className = 'local';
+      video.append(remote, local); card.append(video);
     } else if (state.callType === 'voice' && kind === 'active') {
-      const audio=document.createElement('audio');audio.id='spikeCallRemoteAudio';audio.autoplay=true;audio.playsInline=true;card.append(audio);
+      const audio = document.createElement('audio'); audio.id = 'spikeCallRemoteAudio'; audio.autoplay = true; audio.playsInline = true; card.append(audio);
     }
-    const controls=document.createElement('div');controls.className='spike-call-controls';
-    const add=(id,label,cls,handler)=>{const b=document.createElement('button');b.id=id;b.type='button';b.textContent=label;if(cls)b.className=cls;b.addEventListener('click',handler);controls.append(b);};
-    if(kind==='incoming'){
-      add('spikeCallAccept','Accept','primary',acceptCall);
-      add('spikeCallReject','Decline','danger',()=>rejectCall('rejected'));
-    } else if(kind==='outgoing') {
-      add('spikeCallHangup','Cancel','danger',endCall);
+
+    const person = document.createElement('div'); person.className = 'spike-call-person';
+    const avatar = document.createElement('div'); avatar.className = 'spike-call-avatar';
+    if (state.peer?.avatar_url) { const img = document.createElement('img'); img.src = state.peer.avatar_url; img.alt = ''; avatar.append(img); }
+    else avatar.textContent = String(state.peer?.display_name || state.peer?.username || 'S').trim().slice(0, 1).toUpperCase() || 'S';
+    const name = document.createElement('h2'); name.className = 'spike-call-name'; name.textContent = state.peer?.display_name || state.peer?.username || 'SPIKE member';
+    const status = document.createElement('div'); status.className = 'spike-call-status'; status.id = 'spikeCallStatus'; status.textContent = statusText || '';
+    person.append(avatar, name, status);
+    if (kind === 'active' && state.callType === 'voice') {
+      const live = document.createElement('span'); live.className = 'spike-call-live'; live.textContent = 'VOICE CONNECTED'; person.append(live);
+      const wave = document.createElement('div'); wave.className = 'spike-call-wave'; wave.setAttribute('aria-hidden', 'true');
+      for (let i = 0; i < 13; i++) wave.append(document.createElement('i'));
+      person.append(wave);
+    }
+    card.append(person);
+
+    const controls = document.createElement('div'); controls.className = 'spike-call-controls';
+    const add = (id, label, cls, handler, action) => {
+      const b = document.createElement('button'); b.id = id; b.type = 'button'; b.textContent = label;
+      if (cls) b.className = cls; if (action) b.dataset.action = action;
+      b.setAttribute('aria-label', label); b.addEventListener('click', handler); controls.append(b);
+    };
+    if (kind === 'incoming') {
+      add('spikeCallAccept', 'Accept', 'primary', acceptCall, 'accept');
+      add('spikeCallReject', 'Decline', 'danger', () => rejectCall('rejected'), 'reject');
+    } else if (kind === 'outgoing') {
+      add('spikeCallHangup', 'Cancel call', 'danger', endCall, 'cancel');
     } else {
-      add('spikeCallMute',state.muted?'Unmute':'Mute','',toggleMute);
-      if(state.callType==='video')add('spikeCallCamera',state.cameraOff?'Camera on':'Camera off','',toggleCamera);
-      add('spikeCallEnd','End call','danger',endCall);
+      add('spikeCallMute', state.muted ? 'Unmute' : 'Mute', '', toggleMute, 'mute');
+      if (state.callType === 'video') add('spikeCallCamera', state.cameraOff ? 'Camera on' : 'Camera off', '', toggleCamera, 'camera');
+      add('spikeCallEnd', 'End call', 'danger', endCall, 'end');
     }
     card.append(controls);
-    const foot=document.createElement('div');foot.className='spike-call-foot';foot.textContent='Calls use encrypted peer-to-peer WebRTC with STUN-assisted connection setup. Some restrictive networks may prevent a connection.';card.append(foot);
+    const foot = document.createElement('div'); foot.className = 'spike-call-foot';
+    foot.textContent = 'Peer-to-peer WebRTC · STUN-assisted connection'; card.append(foot);
     overlay.append(card);
-    if(kind==='active')attachMediaElements();
+    if (kind === 'active') attachMediaElements();
   }
 
   function setStatus(message) { const node=$('spikeCallStatus');if(node)node.textContent=message; }
