@@ -38,3 +38,24 @@ test('message private subscriptions wait for the authenticated Realtime token ha
   assert.match(source, /await db\(\)\.realtime\.setAuth\(session\.access_token\)/);
   assert.ok(source.indexOf('await db().realtime.setAuth(session.access_token)') < source.indexOf('await setupThread()'));
 });
+
+test('inbox previews refresh after message edits and deletes', () => {
+  assert.match(source, /event: 'UPDATE', schema: 'public', table: 'messages'/);
+  assert.match(source, /event: 'DELETE', schema: 'public', table: 'messages'/);
+});
+
+test('older-message pagination uses a stable timestamp and UUID cursor', () => {
+  assert.match(source, /\.order\('created_at', \{ ascending: false \}\)\s*\.order\('id', \{ ascending: false \}\)/);
+  assert.match(source, /created_at\.lt\.\$\{stamp\},and\(created_at\.eq\.\$\{stamp\},id\.lt\.\$\{oldest\.id\}\)/);
+  assert.match(source, /existingIds = older \? new Set/);
+});
+
+test('live appended messages create a day divider when the date changes', () => {
+  assert.match(source, /dateKey\(previousBubble\.dataset\.createdAt\) !== dateKey\(row\.created_at\)/);
+  assert.match(source, /thread\.append\(dayDivider\(row\.created_at\)\)/);
+});
+
+test('presence fallback polling and event listeners are cleaned up on page exit', () => {
+  assert.match(source, /if \(presenceRefreshTimer\) \{ clearInterval\(presenceRefreshTimer\)/);
+  assert.match(source, /removeEventListener\('visibilitychange', presenceVisibilityHandler\)/);
+});

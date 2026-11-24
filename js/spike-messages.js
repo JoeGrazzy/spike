@@ -14,14 +14,15 @@
   let currentPeerId = null;
   let currentPeer = null;
   let peerLastReadAt = null;
-  let oldest = null;
+  let oldest = null; // Stable pagination cursor: { created_at, id }.
+  let presenceRefreshTimer = null;
+  let presenceVisibilityHandler = null;
   let busy = false;
   let replyToId = null;
   let selectedMessage = null;
   let threadChannel = null; // Private Broadcast channel for typing only.
   let threadDbChannel = null; // Postgres Changes channel; table RLS protects rows.
   let inboxChannel = null;
-  let channelReady = false;
   let typingChannelReady = false;
   let typingStopTimer = null;
   let peerTypingTimer = null;
@@ -155,10 +156,16 @@
   }
 
   function watchPresence(refresh) {
-    if (window.SPIKE_PRESENCE) window.addEventListener('spike:presence-update', refresh);
-    else window.setInterval(refresh, 60000);
+    if (window.SPIKE_PRESENCE) {
+      window.addEventListener('spike:presence-update', refresh);
+    } else if (!presenceRefreshTimer) {
+      presenceRefreshTimer = window.setInterval(refresh, 60000);
+    }
     window.addEventListener('online', refresh);
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    if (!presenceVisibilityHandler) {
+      presenceVisibilityHandler = () => { if (!document.hidden) refresh(); };
+      document.addEventListener('visibilitychange', presenceVisibilityHandler);
+    }
   }
 
   /* Inbox */
@@ -323,7 +330,17 @@
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
         showIncomingMessage(payload.new).catch(error => say(error.message || 'Could not refresh the inbox.', true));
       })
-      .subscribe();
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, () => {
+        loadInbox().catch(error => say(error.message || 'The inbox could not be refreshed.', true));
+      })
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages' }, () => {
+        loadInbox().catch(error => say(error.message || 'The inbox could not be refreshed.', true));
+      })
+      .subscribe((status, error) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn('[SPIKE messages] inbox realtime unavailable', status, error || '');
+        }
+      });
   }
 
   /* Contact picker */
@@ -655,12 +672,21 @@
     const pageSize = older ? 40 : 60;
     const previousHeight = scroll.scrollHeight;
     const previousTop = scroll.scrollTop;
-    let query = db().from('messages').select(MESSAGE_FIELDS).eq('conversation_id', conversationId).order('created_at', { ascending: false }).limit(pageSize);
-    if (older && oldest) query = query.lt('created_at', oldest);
+    let query = db().from('messages').select(MESSAGE_FIELDS)
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(pageSize);
+    if (older && oldest) {
+      const stamp = oldest.created_at;
+      query = query.or(`created_at.lt.${stamp},and(created_at.eq.${stamp},id.lt.${oldest.id})`);
+    }
     const { data, error } = await query;
     if (error) throw error;
-    const rows = (data || []).reverse();
-    if (rows.length) oldest = rows[0].created_at;
+    const existingIds = older ? new Set([...thread.querySelectorAll('.bubble[data-message-id]')].map(node => node.dataset.messageId)) : null;
+    const rows = (data || []).reverse().filter(row => !existingIds || !existingIds.has(row.id));
+    if (rows.length) oldest = { created_at: rows[0].created_at, id: rows[0].id };
+    if (!older) rowsById.clear();
     const messageIds = rows.map(row => row.id);
     const replyIds = [...new Set(rows.map(row => row.reply_to_id).filter(Boolean))];
     const [people, reactionResult, replyResult] = await Promise.all([
@@ -675,8 +701,9 @@
     if (!older) thread.replaceChildren();
     if (!rows.length && !older) thread.append(emptyNode('No messages yet. Say hello 👋'));
     const fragment = document.createDocumentFragment();
+    const existingFirst = older ? thread.querySelector('.bubble[data-created-at]')?.dataset.createdAt : null;
     rows.forEach((row, index) => {
-      const previous = rows[index - 1];
+      const previous = rows[index - 1] || (existingFirst ? { created_at: existingFirst } : null);
       const key = dateKey(row.created_at);
       if (key && key !== dateKey(previous?.created_at)) fragment.append(dayDivider(row.created_at));
       const sameSender = previous && previous.sender_id === row.sender_id && dateKey(previous.created_at) === key;
@@ -710,6 +737,10 @@
     const people = await loadProfiles([row.sender_id]).catch(() => ({}));
     const replyInfo = row.reply_to_id ? await loadReply(row.reply_to_id) : null;
     thread.querySelector('.msg-empty')?.remove();
+    const previousBubble = [...thread.querySelectorAll('.bubble[data-created-at]')].at(-1);
+    if (!previousBubble || dateKey(previousBubble.dataset.createdAt) !== dateKey(row.created_at)) {
+      thread.append(dayDivider(row.created_at));
+    }
     thread.append(renderBubble(row, people[row.sender_id], null, replyInfo, true));
     if (row.attachment_path) await hydrateAttachments(thread, [row]);
     $('scroll').scrollTo({ top: $('scroll').scrollHeight, behavior: 'smooth' });
@@ -1005,8 +1036,7 @@
 
   function setConnectionState(status, error) {
     const node = $('connectionState');
-    channelReady = status === 'SUBSCRIBED';
-    if (channelReady) {
+    if (status === 'SUBSCRIBED') {
       node.hidden = false;
       node.textContent = 'Live updates connected';
       node.dataset.state = 'connected';
@@ -1029,10 +1059,15 @@
     // table subscriptions.
     threadDbChannel = db().channel(`spike-dm-db:${conversationId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, async payload => {
-        if (payload.eventType === 'UPDATE') { await loadMessages(); return; }
+        if (payload.eventType === 'UPDATE' || payload.eventType === 'DELETE') { await loadMessages(); return; }
         if (payload.eventType === 'INSERT' && payload.new.sender_id !== user.id) {
-          await appendMessage(payload.new);
-          await markRead();
+          try { await appendMessage(payload.new); }
+          catch (error) {
+            console.warn('[SPIKE messages] live message render failed; reloading thread', error);
+            await loadMessages();
+          } finally {
+            await markRead();
+          }
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'message_reactions' }, payload => {
@@ -1157,10 +1192,15 @@
   window.addEventListener('pagehide', () => {
     clearTimeout(typingStopTimer);
     clearTimeout(peerTypingTimer);
+    if (presenceRefreshTimer) { clearInterval(presenceRefreshTimer); presenceRefreshTimer = null; }
+    if (presenceVisibilityHandler) { document.removeEventListener('visibilitychange', presenceVisibilityHandler); presenceVisibilityHandler = null; }
+    window.removeEventListener('online', refreshInboxPresence);
+    window.removeEventListener('online', refreshThreadPresence);
+    window.removeEventListener('spike:presence-update', refreshInboxPresence);
+    window.removeEventListener('spike:presence-update', refreshThreadPresence);
     if (threadChannel) { sendTyping(false); db().removeChannel(threadChannel); threadChannel = null; }
     typingChannelReady = false;
     if (threadDbChannel) { db().removeChannel(threadDbChannel); threadDbChannel = null; }
-    channelReady = false;
     if (inboxChannel) db().removeChannel(inboxChannel);
   });
 
