@@ -7,6 +7,7 @@ const calls = fs.readFileSync(new URL('../js/spike-call-engine.js', import.meta.
 const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
 const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
+const realtimeSeparation = fs.readFileSync(new URL('../supabase/migrations/20261124044627_spike_realtime_postgres_changes_channel_separation_v1.sql', import.meta.url), 'utf8');
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
@@ -52,11 +53,19 @@ test('caller no-answer finalization records a missed call', () => {
   assert.match(calls, /sendSignal\(signalEvent/);
 });
 
-test('call event Postgres Changes channel is private to match deployed Realtime topic policies', () => {
-  assert.match(calls, /channel\(`spike-call-events-\$\{userId\}`\s*,\s*\{config:\{private:true\}\}\)/);
-  assert.match(dmMigration, /SPIKE call owner can receive private event topic[\s\S]*?private is true[\s\S]*?realtime\.topic\(\) = 'spike-call-events-'/);
+test('call event Postgres Changes channel relies on participant table RLS, not private Broadcast authorization', () => {
+  assert.match(calls, /channel\(`spike-call-events-\$\{userId\}`\)/);
+  assert.doesNotMatch(calls, /channel\(`spike-call-events-\$\{userId\}`\s*,\s*\{config:\{private:true\}\}\)/);
   assert.match(callSchema, /SPIKE call participants can read their calls/);
   assert.match(callSchema, /auth\.uid\(\)\) in \(caller_id,callee_id\)/);
+  assert.match(realtimeSeparation, /drop policy if exists \"SPIKE call owner can receive private event topic\"/);
+});
+
+test('private DM typing remains scoped to conversation members on its own topic', () => {
+  assert.match(realtimeSeparation, /spike-dm-typing:/);
+  assert.match(realtimeSeparation, /cm\.conversation_id = private\.try_uuid\(substring\(realtime\.topic\(\) from 17\)\)/);
+  assert.match(realtimeSeparation, /cm\.user_id = \(select auth\.uid\(\)\)/);
+  assert.match(calls, /channel\(`spike-call:\$\{callId\}`,\{config:\{private:true,broadcast:\{ack:true,self:false\}\}\}\)/);
 });
 
 test('incoming-call reconciliation runs only after the Realtime channel is subscribed', () => {

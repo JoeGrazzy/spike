@@ -18,9 +18,11 @@
   let busy = false;
   let replyToId = null;
   let selectedMessage = null;
-  let threadChannel = null;
+  let threadChannel = null; // Private Broadcast channel for typing only.
+  let threadDbChannel = null; // Postgres Changes channel; table RLS protects rows.
   let inboxChannel = null;
   let channelReady = false;
+  let typingChannelReady = false;
   let typingStopTimer = null;
   let peerTypingTimer = null;
   let lastTypingSentAt = 0;
@@ -845,7 +847,7 @@
   }
 
   async function sendTyping(typing) {
-    if (!threadChannel || !channelReady || !conversationId || document.hidden || !navigator.onLine) return;
+    if (!threadChannel || !typingChannelReady || !conversationId || document.hidden || !navigator.onLine) return;
     try {
       const result = await threadChannel.send({ type: 'broadcast', event: 'typing', payload: { user_id: user.id, typing, at: Date.now() } });
       if (result?.status !== 'ok') console.info('[SPIKE messages] typing broadcast was not acknowledged', result);
@@ -1021,8 +1023,11 @@
   }
 
   function subscribeThread() {
-    threadChannel = db().channel(`spike-dm:${conversationId}`, { config: { private: true, broadcast: { ack: true, self: false } } })
-      .on('broadcast', { event: 'typing' }, payload => receiveTyping(payload?.payload || {}))
+    // Database changes use their own channel. Postgres Changes delivery is
+    // authorized by RLS on messages, reactions and conversation_members.
+    // Do not require realtime.messages private-topic authorization for these
+    // table subscriptions.
+    threadDbChannel = db().channel(`spike-dm-db:${conversationId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` }, async payload => {
         if (payload.eventType === 'UPDATE') { await loadMessages(); return; }
         if (payload.eventType === 'INSERT' && payload.new.sender_id !== user.id) {
@@ -1040,6 +1045,17 @@
         renderReadReceipt();
       })
       .subscribe(setConnectionState);
+
+    // Typing is ephemeral Broadcast data, so it remains on a private topic
+    // with membership authorization in realtime.messages.
+    threadChannel = db().channel(`spike-dm-typing:${conversationId}`, { config: { private: true, broadcast: { ack: true, self: false } } })
+      .on('broadcast', { event: 'typing' }, payload => receiveTyping(payload?.payload || {}))
+      .subscribe((status, error) => {
+        typingChannelReady = status === 'SUBSCRIBED';
+        if (!typingChannelReady && (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED')) {
+          console.warn('[SPIKE messages] private typing channel unavailable', error || status);
+        }
+      });
   }
 
   async function setupThread() {
@@ -1141,7 +1157,10 @@
   window.addEventListener('pagehide', () => {
     clearTimeout(typingStopTimer);
     clearTimeout(peerTypingTimer);
-    if (threadChannel) { sendTyping(false); db().removeChannel(threadChannel); }
+    if (threadChannel) { sendTyping(false); db().removeChannel(threadChannel); threadChannel = null; }
+    typingChannelReady = false;
+    if (threadDbChannel) { db().removeChannel(threadDbChannel); threadDbChannel = null; }
+    channelReady = false;
     if (inboxChannel) db().removeChannel(inboxChannel);
   });
 

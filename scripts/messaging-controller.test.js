@@ -14,9 +14,16 @@ test('messaging controller startup is single-flight and can retry after failure'
   assert.match(source, /catch \(error\) \{ messagingStartPromise = null; throw error; \}/);
 });
 
-test('direct-message typing uses the private conversation topic', () => {
-  assert.match(source, /db\(\)\.channel\(`spike-dm:\$\{conversationId\}`, \{ config: \{ private: true, broadcast: \{ ack: true, self: false \} \} \}\)/);
+test('direct-message typing uses a dedicated private Broadcast topic', () => {
+  assert.match(source, /db\(\)\.channel\(`spike-dm-typing:\$\{conversationId\}`, \{ config: \{ private: true, broadcast: \{ ack: true, self: false \} \} \}\)/);
   assert.match(source, /\{ event: 'typing' \}/);
+  assert.match(source, /typingChannelReady = status === 'SUBSCRIBED'/);
+});
+
+test('direct-message Postgres Changes use a separate RLS-protected channel', () => {
+  assert.match(source, /db\(\)\.channel\(`spike-dm-db:\$\{conversationId\}`\)/);
+  assert.doesNotMatch(source, /channel\(`spike-dm-db:\$\{conversationId\}`\s*,\s*\{\s*config:\s*\{\s*private:\s*true/);
+  assert.match(source, /threadDbChannel = db\(\)\.channel/);
 });
 
 test('call buttons stay disabled until one-to-one recipient and messaging permission are resolved', () => {

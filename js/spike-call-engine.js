@@ -55,6 +55,15 @@
       .spike-call-foot{position:relative;z-index:3;font-size:10px;color:#898aa2;line-height:1.5;max-width:340px;margin:0 auto;text-align:center}
       .spike-call-card.is-video .spike-call-foot{padding:0 20px 8px;color:#b2b0c4}
       @keyframes spikeCallFade{from{opacity:0}to{opacity:1}}@keyframes spikeCallPulse{0%{transform:scale(.94);opacity:.65}100%{transform:scale(1.12);opacity:0}}@keyframes spikeCallWave{from{height:7px;opacity:.55}to{height:27px;opacity:1}}
+      /* Call completion is a quiet status hint, not a second full-screen dialog. */
+      .spike-premium-stack.spike-call-toast-stack{top:auto;right:auto;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;width:min(300px,calc(100vw - 32px));transform:translateX(-50%);gap:6px}
+      .spike-premium-stack.spike-call-toast-stack .spike-premium-toast{grid-template-columns:30px minmax(0,1fr) 26px;gap:9px;min-height:48px;padding:8px 10px;border-radius:15px;box-shadow:0 12px 34px rgba(0,0,0,.32);animation:spikeCallToastIn .22s cubic-bezier(.2,.8,.2,1) both}
+      .spike-premium-stack.spike-call-toast-stack .spn-icon{width:30px;height:30px;border-radius:10px;font-size:14px}
+      .spike-premium-stack.spike-call-toast-stack .spn-title{font-size:11px}
+      .spike-premium-stack.spike-call-toast-stack .spn-message{margin-top:1px;font-size:10px;line-height:1.3}
+      .spike-premium-stack.spike-call-toast-stack .spn-close{width:26px;height:26px;font-size:17px}
+      @keyframes spikeCallToastIn{from{opacity:0;transform:translateY(9px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+      @media(prefers-reduced-motion:reduce){.spike-premium-stack.spike-call-toast-stack .spike-premium-toast{animation:none!important}}
       @media(min-width:700px){.spike-call-card{height:min(860px,94dvh);border:1px solid #ffffff1a;border-radius:30px;box-shadow:0 35px 120px #000b}.spike-call-card.is-video{width:min(100%,920px);height:min(860px,94dvh)}}
       @media(max-width:380px){.spike-call-controls{gap:8px}.spike-call-controls button{min-width:62px;min-height:62px;border-radius:19px;padding:8px}.spike-call-card:not(.is-video){padding-left:16px;padding-right:16px}}
       @media(prefers-reduced-motion:reduce){.spike-call-overlay *{animation:none!important;transition:none!important}}
@@ -213,7 +222,11 @@
     // participant-only SELECT RLS policy; this topic policy only authorizes the
     // signed-in user to join their own event channel. SDP/ICE remains on its
     // separate call-ID topic with caller/callee authorization.
-    const channel=client().channel(`spike-call-events-${userId}`,{config:{private:true}})
+    // This channel carries Postgres Changes only. Keep it public at the
+    // Realtime transport layer and rely on spike_call_sessions SELECT RLS,
+    // which exposes rows only to their caller/callee. Private-channel RLS on
+    // realtime.messages is for Broadcast/Presence and must not gate this feed.
+    const channel=client().channel(`spike-call-events-${userId}`)
       .on('postgres_changes',{event:'*',schema:'public',table:'spike_call_sessions'},handleCallRow);
     state.eventsChannel=channel;
     channel.subscribe((status,error)=>{
@@ -575,7 +588,16 @@
     if(state.channel){client()?.removeChannel(state.channel).catch?.(()=>{});state.channel=null;}state.channelReady=false;
     $('spikeCallOverlay')?.remove();
     state.callId=null;state.callType=null;state.role=null;state.status='idle';state.iceServers=null;state.peer=null;state.conversationId=null;state.queuedIce=[];state.incomingSignals=[];state.incomingFlushing=false;state.startedAt=0;state.muted=false;state.cameraOff=false;state.pending=null;state.peerAccepted=false;state.offerStarted=false;state.queuedSignals=[];
-    if(message)window.spikePremiumToast?.(message,'info',3000);
+    if(message && typeof window.spikePremiumToast==='function') {
+      const toast=window.spikePremiumToast(message,'info',2600);
+      const stack=toast?.parentElement;
+      if(stack?.classList?.contains('spike-premium-stack')) {
+        stack.classList.add('spike-call-toast-stack');
+        window.setTimeout(()=>{
+          if(stack.isConnected && !stack.querySelector('.spike-premium-toast')) stack.classList.remove('spike-call-toast-stack');
+        },2800);
+      }
+    }
   }
 
   function bindCallButtons() {

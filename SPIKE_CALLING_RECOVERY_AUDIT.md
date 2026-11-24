@@ -110,3 +110,37 @@ Automated tests and project validation are run on V6. Production code has not be
 - Re-run all local regression tests, JavaScript syntax checks, project validation and ZIP integrity after packaging.
 - The production database was inspected read-only. No production schema, policy, data, or deployment was changed by this V8 package edit.
 - A fresh production client join and two-account incoming-call test are still required after deploying V8. Historical authorization errors are not evidence of a post-V8 result because V8 has not been deployed.
+
+## V9 Realtime authorization and channel separation
+
+### Fresh inspection
+
+- Inspected `SPIKE_COMPACT_CALL_END_TOAST_PATCHED.zip` as the current source baseline. ZIP integrity passed before edits.
+- The call event listener used a private Realtime topic for Postgres Changes only.
+- The DM thread used one private topic for both typing Broadcast and Postgres Changes (`messages`, `message_reactions`, and `conversation_members`).
+- Production Realtime logs showed authorization failures at the private-topic join stage. The affected database tables already had participant/member SELECT RLS, so database row authorization did not require those Postgres Changes feeds to be coupled to `realtime.messages` private-Broadcast policies.
+- Production publication inspection confirmed `messages`, `message_reactions`, `conversation_members`, and `spike_call_sessions` are included in `supabase_realtime`.
+
+### V9 correction
+
+- Moved the per-user call-session Postgres Changes listener to a separate public topic. The `spike_call_sessions` SELECT policy remains participant-only (`caller_id` or `callee_id` equals `auth.uid()`). The SDP/ICE signaling topic remains private and participant-authorized.
+- Split DM thread subscriptions: `spike-dm-db:<conversation-id>` carries Postgres Changes and relies on each table's existing RLS; `spike-dm-typing:<conversation-id>` carries typing Broadcast only and remains private.
+- Added membership-scoped SELECT/INSERT policies for the new private typing topic. Removed the obsolete call-event private-topic policies and old DM-topic policies. No permissive `USING (true)` policy was added and no application table RLS was weakened.
+- Added regression tests for channel separation, private typing membership scope, and private call signaling.
+
+### Production migration
+
+- Applied migration `20261124044627_spike_realtime_postgres_changes_channel_separation_v1` to the connected production Supabase project `Spikemediachat` (`veagqanfilmbchlvlpcc`).
+- Confirmed the migration is recorded in remote migration history and the two new DM typing policies are present. The obsolete call-event and old DM topic policies are absent.
+- No application data was changed. Cloudflare Worker code was not deployed.
+
+### Verification
+
+- `npm test` — **31 passed, 0 failed**.
+- `npm run check` — **passed**: 62 JavaScript files, 28 HTML pages and 61 CSS files; local references, Worker config and migration baseline checks passed.
+- JavaScript syntax checks for the modified call engine, messaging engine, tests and project validator — passed.
+- Production table publication and RLS policy presence — confirmed.
+
+### Remaining live acceptance tests
+
+A fresh browser deployment and two-account test are still required to prove live call notifications, incoming/outgoing call UI, DM delivery, typing, read receipts and media negotiation. This source ZIP is not deployed. STUN-only ICE remains less reliable on restrictive mobile networks than a configured TURN relay.
