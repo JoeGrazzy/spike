@@ -7,10 +7,10 @@
   const $ = id => document.getElementById(id);
   const state = {
     user: null, callId: null, callType: null, role: null, status: 'idle',
-    channel: null, channelReady: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pc: null, localStream: null,
+    channel: null, channelReady: false, eventsChannel: null, eventsRetryTimer: null, eventsRetryDelay: 1000, eventsGeneration: 0, eventsSubscribed: false, pendingCallsTimer: null, pendingLookupBusy: false, pc: null, localStream: null,
     remoteStream: null, peer: null, conversationId: null,
     queuedIce: [], callTimer: null, ringTimer: null, heartbeatTimer: null, negotiationTimer: null, startedAt: 0, iceServers: null,
-    muted: false, cameraOff: false, pending: null, disposed: false
+    muted: false, cameraOff: false, pending: null, disposed: false, callAttempt: 0
   };
 
   const ICE_SERVERS = Object.freeze([
@@ -154,17 +154,34 @@
 
   async function loadPendingCalls() {
     const userId=state.user?.id;
-    if(!userId || state.status!=='idle')return;
+    if(!userId || state.status!=='idle' || state.pendingLookupBusy || document.hidden || !navigator.onLine)return;
+    state.pendingLookupBusy=true;
     try {
       const {data,error}=await client().from('spike_call_sessions')
         .select('id,conversation_id,caller_id,callee_id,call_type,status,created_at,expires_at')
         .eq('callee_id',userId).eq('status','ringing').gt('expires_at',new Date().toISOString())
         .order('created_at',{ascending:false}).limit(3);
       if(error)throw error;
-      // The subscription is already live before this lookup. This closes the
-      // startup race where a call was created between the first query and JOIN.
+      // This database reconciliation is deliberately independent of Realtime.
+      // It recovers invitations even when a private channel cannot subscribe.
       if(state.user?.id===userId && state.status==='idle' && data?.length)void incomingCall(data[0]);
     } catch(error) { console.warn('[SPIKE calls] pending call lookup failed',error?.message||error); }
+    finally { state.pendingLookupBusy=false; }
+  }
+
+  function startPendingCallPolling() {
+    if(state.pendingCallsTimer || !state.user)return;
+    void loadPendingCalls();
+    // Realtime is the low-latency path; this lightweight foreground poll is the
+    // independent safety net for missed subscription events and reconnect gaps.
+    state.pendingCallsTimer=window.setInterval(()=>{
+      if(state.user && state.status==='idle' && !document.hidden && navigator.onLine)void loadPendingCalls();
+    },6000);
+  }
+
+  function stopPendingCallPolling() {
+    if(state.pendingCallsTimer)clearInterval(state.pendingCallsTimer);
+    state.pendingCallsTimer=null;
   }
 
   function scheduleEventsReconnect(generation) {
@@ -217,12 +234,20 @@
 
   async function incomingCall(row) {
     if(state.status!=='idle' || !state.user || row.callee_id!==state.user.id)return;
+    const attempt=++state.callAttempt;
     state.callId=row.id;state.callType=row.call_type;state.role='callee';state.status='incoming';state.conversationId=row.conversation_id;
-    state.peer=await profileFor(row.caller_id);state.pending=row;
-    showUI('incoming',`${state.callType==='video'?'Incoming video call':'Incoming voice call'} · SPIKE`);
+    state.peer={display_name:'SPIKE member',username:'',avatar_url:''};state.pending=row;
+    const incomingLabel=`${state.callType==='video'?'Incoming video call':'Incoming voice call'} · SPIKE`;
+    // Render the incoming screen immediately. Profile lookup must never gate the ringtone UI.
+    showUI('incoming',incomingLabel);
+    void profileFor(row.caller_id).then(profile=>{
+      if(state.callAttempt!==attempt || state.callId!==row.id || state.status!=='incoming')return;
+      state.peer=profile;
+      showUI('incoming',incomingLabel);
+    });
     await joinCallChannel();
     const remaining=Math.max(0,new Date(row.expires_at).getTime()-Date.now());
-    state.ringTimer=window.setTimeout(()=>{if(state.status==='incoming')void rejectCall('missed');},remaining);
+    state.ringTimer=window.setTimeout(()=>{if(state.callId===row.id && state.status==='incoming')void rejectCall('missed');},remaining);
   }
 
   async function joinCallChannel() {
@@ -264,19 +289,38 @@
     const peerId=context?.peerId;
     if(!conversationId || !peerId || context?.isGroup)throw new Error('Voice and video calls are currently available in one-to-one conversations.');
     state.user=state.user||await getCurrentUser();
+    const attempt=++state.callAttempt;
     state.callType=type;state.role='caller';state.status='creating';state.conversationId=conversationId;
-    state.peer=await profileFor(peerId);
+    state.peer={display_name:'SPIKE member',username:'',avatar_url:''};
+    // Show a real, cancellable call state before any network, profile or device-permission work.
+    showUI('outgoing','Starting secure call…');
+    void profileFor(peerId).then(profile=>{
+      if(state.callAttempt!==attempt || state.status==='idle')return;
+      state.peer=profile;
+      showUI('outgoing',state.callId?'Preparing microphone and camera…':'Starting secure call…');
+    });
     try {
       const {data,error}=await client().rpc('spike_create_call',{p_conversation_id:conversationId,p_call_type:type});
       if(error)throw error;
       if(!data)throw new Error('The call invitation could not be created.');
+      if(state.callAttempt!==attempt || state.status==='idle'){
+        // The user cancelled while the create RPC was in flight; close the late-created row.
+        await client().rpc('spike_end_call',{p_call_id:data});
+        return;
+      }
       state.callId=data;
-      await prepareMedia();
+      showUI('outgoing','Preparing microphone and camera…');
+      const mediaReady=await prepareMedia(attempt);
+      if(!mediaReady || state.callAttempt!==attempt || state.status==='idle')return;
       createPeerConnection();
       await joinCallChannel();
+      if(state.callAttempt!==attempt || state.status==='idle')return;
       state.status='outgoing';showUI('outgoing','Calling… waiting for the other member.');
-      state.ringTimer=window.setTimeout(()=>{if(state.status==='outgoing')void endCall('No answer.');},50000);
-    } catch(error) { await endCall().catch(()=>{});throw error; }
+      state.ringTimer=window.setTimeout(()=>{if(state.callId===data && state.status==='outgoing')void endCall('No answer.');},50000);
+    } catch(error) {
+      if(state.callAttempt===attempt)await endCall().catch(()=>{});
+      throw error;
+    }
   }
 
   function loadIceServers() {
@@ -285,11 +329,17 @@
     state.iceServers=ICE_SERVERS;
   }
 
-  async function prepareMedia() {
+  async function prepareMedia(attempt=state.callAttempt) {
     loadIceServers();
     if(!navigator.mediaDevices?.getUserMedia)throw new Error('Microphone and camera access require a supported browser over HTTPS.');
     try {
-      state.localStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:state.callType==='video'?{facingMode:'user',width:{ideal:1280},height:{ideal:720}}:false});
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:state.callType==='video'?{facingMode:'user',width:{ideal:1280},height:{ideal:720}}:false});
+      if(state.callAttempt!==attempt || state.status==='idle'){
+        stream.getTracks().forEach(track=>track.stop());
+        return false;
+      }
+      state.localStream=stream;
+      return true;
     } catch(error) {
       const message=error?.name==='NotAllowedError'?'Allow microphone and camera permissions to start this call.':error?.name==='NotFoundError'?'This device does not have the required microphone or camera.':error?.message||'Could not access your microphone or camera.';
       throw new Error(message);
@@ -329,7 +379,11 @@
     try {
       const {error}=await client().rpc('spike_respond_to_call',{p_call_id:state.callId,p_action:'accept'});if(error)throw error;
       if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;
-      state.status='joining';await prepareMedia();createPeerConnection();
+      state.status='joining';
+      const attempt=state.callAttempt;
+      const mediaReady=await prepareMedia(attempt);
+      if(!mediaReady || state.callAttempt!==attempt || state.status==='idle')return;
+      createPeerConnection();
       showUI('active','Connecting securely…');startNegotiationTimeout();
       if(state.channelReady)void sendSignal('accepted',{});startCallHeartbeat();
     } catch(error) { setStatus(error.message||'Could not accept this call.');if(accept)accept.disabled=false;await rejectCall('failed'); }
@@ -400,6 +454,7 @@
   }
 
   function cleanup(message='') {
+    state.callAttempt++;
     if(state.ringTimer)clearTimeout(state.ringTimer);state.ringTimer=null;if(state.negotiationTimer)clearTimeout(state.negotiationTimer);state.negotiationTimer=null;
     if(state.callTimer)clearInterval(state.callTimer);state.callTimer=null;if(state.heartbeatTimer)clearInterval(state.heartbeatTimer);state.heartbeatTimer=null;
     try{state.pc?.close();}catch(_){}state.pc=null;
@@ -424,24 +479,43 @@
 
   async function start() {
     const db=client();if(!db?.auth)return;
-    try { state.user=await getCurrentUser(); } catch (_) { return; }
     bindCallButtons();
-    await subscribeEvents();
+    // Attach auth handling before reading the stored session. If session restoration
+    // is late or getUser() cannot reach Auth, a later INITIAL_SESSION/SIGNED_IN
+    // event must still bring the call listener online.
     db.auth.onAuthStateChange((event,session)=>{
       if(event==='SIGNED_OUT'||!session?.user){
-        void endCall('Call ended because you signed out.');
+        if(state.user || state.callId)void endCall('Call ended because you signed out.');
         state.eventsGeneration++;state.eventsSubscribed=false;
         if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
-        if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
+        if(state.eventsChannel){void db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
         state.user=null;
-      } else if(session.user && state.user?.id!==session.user.id){
-        state.eventsGeneration++;state.eventsSubscribed=false;
-        if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
-        if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
-        state.user=session.user;void subscribeEvents();
+        stopPendingCallPolling();
+      } else if(session.user){
+        const changed=state.user?.id!==session.user.id;
+        if(changed){
+          state.eventsGeneration++;state.eventsSubscribed=false;
+          if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
+          if(state.eventsChannel){void db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
+          state.user=session.user;
+        }
+        startPendingCallPolling();
+        if(!state.eventsChannel)void subscribeEvents();
       }
     });
-    const resumeEvents=()=>{if(!document.hidden && navigator.onLine && state.user && !state.eventsChannel)void subscribeEvents();};
+    try {
+      const {data,error}=await db.auth.getSession();
+      if(error)throw error;
+      if(data?.session?.user){state.user=data.session.user;startPendingCallPolling();await subscribeEvents();}
+    } catch(error) {
+      console.warn('[SPIKE calls] session bootstrap deferred; waiting for auth recovery',error?.message||error);
+    }
+    const resumeEvents=()=>{
+      if(document.hidden || !navigator.onLine || !state.user)return;
+      startPendingCallPolling();
+      void loadPendingCalls();
+      if(!state.eventsChannel)void subscribeEvents();
+    };
     window.addEventListener('online',resumeEvents);
     window.addEventListener('focus',resumeEvents);
     document.addEventListener('visibilitychange',resumeEvents);
@@ -454,7 +528,10 @@
       // the user event channel when the page is restored.
       state.disposed=!event.persisted;state.eventsGeneration++;
       if(state.eventsRetryTimer){clearTimeout(state.eventsRetryTimer);state.eventsRetryTimer=null;}
-      if(!event.persisted && state.callId)void endCall('Call ended.');
+      if(!event.persisted){
+        stopPendingCallPolling();
+        if(state.callId)void endCall('Call ended.');
+      }
       if(state.eventsChannel){db.removeChannel(state.eventsChannel);state.eventsChannel=null;}
       state.eventsSubscribed=false;
     });
