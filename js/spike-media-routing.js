@@ -156,10 +156,36 @@
       if (name) name.textContent = '';
       if (meta) meta.textContent = '';
     };
-    document.getElementById('mediaPlus')?.addEventListener('click', () => document.getElementById('mediaShade')?.classList.add('show'));
-    document.getElementById('closeMediaSheet')?.addEventListener('click', () => document.getElementById('mediaShade')?.classList.remove('show'));
-    document.getElementById('mediaShade')?.addEventListener('click', event => {
-      if (event.target.id === 'mediaShade') event.currentTarget.classList.remove('show');
+    const shade = document.getElementById('mediaShade');
+    const sheet = shade?.querySelector('[role="dialog"]');
+    const closeButton = document.getElementById('closeMediaSheet');
+    let returnFocus = null;
+    const closeSheet = () => {
+      if (!shade?.classList.contains('show')) return;
+      shade.classList.remove('show');
+      shade.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('msg-private-share-open');
+      if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
+    };
+    document.getElementById('mediaPlus')?.addEventListener('click', event => {
+      if (!shade) return;
+      returnFocus = event.currentTarget;
+      shade.classList.add('show');
+      shade.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('msg-private-share-open');
+      requestAnimationFrame(() => closeButton?.focus({ preventScroll: true }));
+    });
+    closeButton?.addEventListener('click', closeSheet);
+    shade?.addEventListener('click', event => { if (event.target === shade) closeSheet(); });
+    document.addEventListener('keydown', event => {
+      if (!shade?.classList.contains('show')) return;
+      if (event.key === 'Escape') { event.preventDefault(); closeSheet(); return; }
+      if (event.key !== 'Tab' || !sheet) return;
+      const focusable = [...sheet.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(node => node.getClientRects().length);
+      if (!focusable.length) { event.preventDefault(); sheet.focus(); return; }
+      const first = focusable[0], last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     });
     document.querySelectorAll('[data-media-kind]').forEach(button => button.addEventListener('click', () => {
       const kind = button.dataset.mediaKind;
@@ -172,7 +198,7 @@
         any: 'image/jpeg,image/png,image/webp,image/avif,video/mp4,audio/mpeg,audio/mp4,audio/webm,application/pdf,.zip,.rar,.7z,.txt,.csv,.json,.doc,.docx,.xls,.xlsx,.ppt,.pptx'
       };
       input.accept = accepts[kind] || accepts.any;
-      document.getElementById('mediaShade')?.classList.remove('show');
+      closeSheet();
       input.click();
     }));
     input.addEventListener('change', () => {

@@ -20,6 +20,7 @@
 <script src="js/spike-navigation.js"></script>
   <link rel="stylesheet" href="css/spike-modern-finish.css">
   <link rel="stylesheet" href="css/spike-conversation-refined.css?v=20261124">
+  <link rel="stylesheet" href="css/spike-private-share.css?v=20261124-1">
 </head>
 <body data-spike-page="message">
 <script src="js/spike-dialog.js"></script>
@@ -73,16 +74,27 @@
   </div>
 </div>
 
-<div class="msg-sheet-shade" id="mediaShade">
-  <div class="msg-sheet" role="dialog" aria-modal="true" aria-label="Attach media">
-    <div class="msg-sheet-head"><strong>Share privately</strong><button type="button" id="closeMediaSheet" aria-label="Close">×</button></div>
-    <button type="button" data-media-kind="image">Photo</button>
-    <button type="button" data-media-kind="video">Video (MP4)</button>
-    <button type="button" data-media-kind="audio">Audio file</button>
-    <button type="button" data-media-kind="pdf">PDF</button>
-    <button type="button" data-media-kind="archive">Archive (ZIP, RAR, 7Z)</button>
-    <button type="button" data-media-kind="any">Any supported file</button>
-  </div>
+<div class="msg-sheet-shade msg-private-share-shade" id="mediaShade" aria-hidden="true">
+  <section class="msg-sheet msg-private-share" role="dialog" aria-modal="true" aria-labelledby="privateShareTitle" aria-describedby="privateShareDescription" tabindex="-1">
+    <div class="msg-private-share-grabber" aria-hidden="true"></div>
+    <div class="msg-sheet-head msg-private-share-head">
+      <div class="msg-private-share-heading">
+        <span class="msg-private-share-eyebrow">PRIVATE CONVERSATION</span>
+        <strong id="privateShareTitle">Share privately</strong>
+        <p id="privateShareDescription">Choose what you want to share in this chat.</p>
+      </div>
+      <button type="button" id="closeMediaSheet" aria-label="Close file picker"><i class="fa-solid fa-xmark" aria-hidden="true"></i></button>
+    </div>
+    <div class="msg-private-share-options" aria-label="File types">
+      <button type="button" class="msg-private-share-option" data-media-kind="image"><span class="msg-private-share-icon photo"><i class="fa-regular fa-image" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>Photos</strong><small>JPG, PNG, WebP and AVIF</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+      <button type="button" class="msg-private-share-option" data-media-kind="video"><span class="msg-private-share-icon video"><i class="fa-solid fa-film" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>Videos</strong><small>MP4 video files</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+      <button type="button" class="msg-private-share-option" data-media-kind="audio"><span class="msg-private-share-icon audio"><i class="fa-solid fa-music" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>Audio</strong><small>MP3, M4A and WebM audio</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+      <button type="button" class="msg-private-share-option" data-media-kind="pdf"><span class="msg-private-share-icon document"><i class="fa-regular fa-file-pdf" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>PDF documents</strong><small>Portable Document Format</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+      <button type="button" class="msg-private-share-option" data-media-kind="archive"><span class="msg-private-share-icon archive"><i class="fa-solid fa-file-zipper" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>Archives</strong><small>ZIP, RAR and 7Z files</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+      <button type="button" class="msg-private-share-option" data-media-kind="any"><span class="msg-private-share-icon browse"><i class="fa-regular fa-folder-open" aria-hidden="true"></i></span><span class="msg-private-share-copy"><strong>Browse all files</strong><small>Documents and other supported formats</small></span><i class="fa-solid fa-chevron-right msg-private-share-arrow" aria-hidden="true"></i></button>
+    </div>
+    <div class="msg-private-share-foot"><i class="fa-solid fa-lock" aria-hidden="true"></i><span>Shared only with members of this conversation</span><span class="msg-private-share-limit">Up to 50 MB</span></div>
+  </section>
 </div>
 
 <script src="js/spike-messages.js?v=messages-v1-fix-20261124" defer></script>
