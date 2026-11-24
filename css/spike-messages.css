@@ -103,3 +103,147 @@
 .msg-sheet-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
 .msg-sheet-head button{width:36px;height:36px;padding:0;text-align:center}
 .msg-sheet-sub{margin:0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--msg-muted)}
+
+/* SPIKE conversation refinement — additive overrides in the existing message layer. */
+.msg-thread-app{
+  width:100%;
+  max-width:760px;
+  margin-inline:auto;
+  background:
+    radial-gradient(ellipse at 12% 0%,color-mix(in srgb,var(--msg-accent) 7%,transparent),transparent 42%),
+    var(--spike-bg,#090b14);
+}
+.msg-thread-app .msg-topbar{
+  gap:10px;
+  padding-inline:clamp(12px,3.5vw,20px);
+  background:color-mix(in srgb,var(--msg-surface) 92%,transparent);
+  -webkit-backdrop-filter:blur(18px) saturate(135%);
+  backdrop-filter:blur(18px) saturate(135%);
+  border-bottom-color:color-mix(in srgb,var(--msg-line) 78%,transparent);
+}
+.msg-thread-app .msg-back,
+.msg-thread-app .msg-icon{
+  width:42px;
+  height:42px;
+  min-width:42px;
+  min-height:42px;
+  padding:0;
+  border-radius:14px;
+  background:color-mix(in srgb,var(--msg-surface2) 86%,transparent);
+  box-shadow:0 5px 16px rgba(0,0,0,.12);
+  transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.msg-thread-app .msg-back:active,
+.msg-thread-app .msg-icon:active{transform:scale(.95)}
+.msg-thread-app .msg-person{gap:11px}
+.msg-thread-app .msg-person .msg-avatar{
+  width:42px;height:42px;flex:0 0 42px;
+  border:1px solid var(--msg-line);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--msg-accent) 8%,transparent);
+}
+.msg-thread-app .msg-person-text strong{font-size:14px;font-weight:750;letter-spacing:-.015em}
+.msg-thread-app .msg-person-text small{margin-top:3px;font-size:11px}
+.msg-thread-app .msg-call-actions{gap:7px}
+.msg-thread-main{
+  padding:16px clamp(12px,3.5vw,22px) 20px;
+  scroll-padding-block:18px;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  scrollbar-color:color-mix(in srgb,var(--msg-muted) 24%,transparent) transparent;
+}
+.msg-thread{gap:9px}
+.msg-day{
+  margin:12px 0;
+  padding:6px 11px;
+  border:1px solid color-mix(in srgb,var(--msg-line) 72%,transparent);
+  border-radius:999px;
+  background:color-mix(in srgb,var(--msg-surface) 78%,transparent);
+  font-size:10px;
+  letter-spacing:.015em;
+}
+.msg-connection{padding:6px 12px;border:1px solid var(--msg-line);background:color-mix(in srgb,var(--msg-surface) 88%,transparent)}
+.msg-thread-app .bubble{
+  max-width:min(82%,560px);
+  padding:27px 14px 22px;
+  border-radius:18px 18px 18px 7px;
+  border-color:color-mix(in srgb,var(--msg-line) 90%,transparent);
+  background:linear-gradient(145deg,color-mix(in srgb,var(--msg-surface2) 92%,transparent),var(--msg-surface));
+  box-shadow:0 5px 18px rgba(0,0,0,.10);
+  line-height:1.48;
+  overflow:visible;
+}
+.msg-thread-app .bubble.mine{
+  border-color:color-mix(in srgb,var(--msg-accent) 42%,var(--msg-line));
+  border-radius:18px 18px 7px 18px;
+  background:linear-gradient(135deg,color-mix(in srgb,var(--msg-accent) 90%,#fff 10%),color-mix(in srgb,var(--spike-accent-2,var(--msg-accent)) 86%,#fff 14%));
+  color:#10151d;
+  box-shadow:0 7px 20px color-mix(in srgb,var(--msg-accent) 14%,transparent);
+}
+.msg-thread-app .bubble.mine time,
+.msg-thread-app .bubble.mine .msg-seen{color:rgba(16,21,29,.68)}
+.msg-thread-app .bubble time{right:12px;bottom:5px;font-size:10px;font-variant-numeric:tabular-nums}
+.msg-thread-app .bubble .msg-seen{left:12px;bottom:5px;font-size:10px}
+.msg-thread-app .bubble .msg-bubble-action{
+  top:5px;right:7px;
+  display:grid;place-items:center;
+  width:27px;height:24px;
+  border:1px solid color-mix(in srgb,var(--msg-line) 72%,transparent);
+  border-radius:9px;
+  background:color-mix(in srgb,var(--msg-surface) 62%,transparent);
+  color:inherit;
+  line-height:1;
+}
+.msg-thread-app .bubble.mine .msg-bubble-action{
+  border-color:rgba(16,21,29,.12);
+  background:rgba(255,255,255,.20);
+  color:#10151d;
+}
+.msg-thread-app .msg-deleted{
+  display:block;
+  padding:2px 0 1px;
+  font-size:13px;
+  font-style:italic;
+  opacity:.82;
+}
+.msg-thread-app .msg-quote{margin-bottom:2px;background:rgba(0,0,0,.06)}
+.msg-thread-app .msg-composer-wrap{
+  padding:11px clamp(10px,3vw,18px) calc(12px + env(safe-area-inset-bottom));
+  background:color-mix(in srgb,var(--msg-surface) 94%,transparent);
+  -webkit-backdrop-filter:blur(18px) saturate(135%);
+  backdrop-filter:blur(18px) saturate(135%);
+  border-top-color:color-mix(in srgb,var(--msg-line) 78%,transparent);
+}
+.msg-thread-app .msg-composer{gap:8px;align-items:flex-end}
+.msg-thread-app .msg-composer textarea{
+  min-height:44px;
+  max-height:132px;
+  padding:12px 14px;
+  border-radius:17px;
+  border-color:var(--msg-line);
+  background:var(--msg-surface2);
+  line-height:1.35;
+}
+.msg-thread-app .msg-composer .msg-icon{width:44px;height:44px;min-width:44px;min-height:44px;border-radius:15px}
+.msg-thread-app .msg-composer .msg-primary{
+  min-height:44px;
+  padding:0 18px;
+  border-radius:15px;
+  background:linear-gradient(135deg,var(--msg-accent),var(--spike-accent-2,var(--msg-accent)));
+  color:#10151d;
+  box-shadow:0 6px 18px color-mix(in srgb,var(--msg-accent) 18%,transparent);
+}
+.msg-thread-app :where(button,a,textarea):focus-visible{outline:2px solid var(--msg-accent);outline-offset:3px}
+@media(max-width:420px){
+  .msg-thread-app .msg-topbar{gap:7px}
+  .msg-thread-app .msg-back,.msg-thread-app .msg-icon{width:40px;height:40px;min-width:40px;min-height:40px;border-radius:13px}
+  .msg-thread-app .msg-person{gap:8px}
+  .msg-thread-app .msg-person .msg-avatar{width:38px;height:38px;flex-basis:38px}
+  .msg-thread-app .msg-call-actions{gap:5px}
+  .msg-thread-app .bubble{max-width:88%;padding:26px 12px 22px}
+  .msg-thread-app .msg-composer{gap:6px}
+  .msg-thread-app .msg-composer .msg-icon{width:40px;height:42px;min-width:40px;min-height:42px}
+  .msg-thread-app .msg-composer .msg-primary{padding-inline:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  .msg-thread-app .msg-back,.msg-thread-app .msg-icon{transition:none}
+}

@@ -274,3 +274,20 @@
     transition: none !important;
   }
 }
+
+
+/* SPIKE V4 — friends discovery hierarchy and touch targets. */
+body[data-spike-page="friends"] .tabs { gap:7px; padding:5px; border-radius:16px; }
+body[data-spike-page="friends"] .tab { min-height:42px; border-radius:12px; font-weight:750; }
+body[data-spike-page="friends"] .search-wrap input,
+body[data-spike-page="friends"] #searchInput { min-height:46px; border-radius:14px; }
+body[data-spike-page="friends"] .suggestion-card,
+body[data-spike-page="friends"] .network-recommendation-card {
+  border-radius:18px; border:1px solid color-mix(in srgb,var(--spike-line,var(--line,#888)) 75%,transparent);
+  box-shadow:0 10px 28px rgba(0,0,0,.045);
+}
+body[data-spike-page="friends"] .friends-load-more { min-height:44px; border-radius:14px; font-weight:750; }
+body[data-spike-page="friends"] .tab:focus-visible,
+body[data-spike-page="friends"] #searchInput:focus-visible,
+body[data-spike-page="friends"] .friends-load-more:focus-visible { outline:3px solid color-mix(in srgb,var(--spike-accent,#8067ef) 42%,transparent); outline-offset:2px; }
+@media(max-width:520px){body[data-spike-page="friends"] .tabs{gap:4px}body[data-spike-page="friends"] .tab{padding-inline:9px;min-height:40px}}

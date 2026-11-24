@@ -642,7 +642,7 @@ button:focus-visible,.btn:focus-visible,input:focus-visible,textarea:focus-visib
   border:1px solid var(--spk-border)!important;border-radius:var(--spk-radius)!important;
   box-shadow:var(--spk-shadow);overflow:hidden;
 }
-.card:hover,.item:hover,.tile:hover,.settings-card:hover,:hover,.conversation-card:hover,.notification-card:hover{border-color:rgba(125,112,255,.28)!important}
+.card:hover,.item:hover,.tile:hover,.settings-card:hover,.conversation-card:hover,.notification-card:hover{border-color:rgba(125,112,255,.28)!important}
 .card,.panel,.surface,.item,.tile{box-shadow:0 12px 42px rgba(0,0,0,.22)}
 input,textarea,select,.input,.field input,.field textarea,.field select{
   color:var(--spk-text)!important;background:rgba(5,9,18,.7)!important;border:1px solid rgba(139,151,188,.18)!important;border-radius:14px!important;
@@ -3640,3 +3640,25 @@ input, textarea, [contenteditable],
 }
 @media(prefers-reduced-motion:reduce) { .spike-onboarding-header-help { transition:none!important; } }
 
+
+
+/* SPIKE V4 — feed surface refinement (existing feed components only). */
+body[data-spike-page="feed"] #posts { gap:16px; }
+body[data-spike-page="feed"] #posts > *, body[data-spike-page="feed"] .feed-v2-panel {
+  border-radius:20px;
+}
+body[data-spike-page="feed"] .feed-v2-panel {
+  border:1px solid color-mix(in srgb,var(--spike-line,var(--line,#888)) 72%,transparent);
+  box-shadow:0 12px 34px rgba(0,0,0,.055);
+}
+body[data-spike-page="feed"] #filters .filter,
+body[data-spike-page="feed"] .filter {
+  min-height:38px; border-radius:999px; font-weight:700;
+  transition:background-color .18s ease,border-color .18s ease,transform .18s ease;
+}
+body[data-spike-page="feed"] .filter:focus-visible,
+body[data-spike-page="feed"] #feedHeaderSearch:focus-visible {
+  outline:3px solid color-mix(in srgb,var(--spike-accent,#8067ef) 42%,transparent); outline-offset:2px;
+}
+@media(max-width:600px){body[data-spike-page="feed"] #posts{gap:12px}body[data-spike-page="feed"] .feed-v2-panel{border-radius:16px}}
+@media(prefers-reduced-motion:reduce){body[data-spike-page="feed"] .filter{transition:none}}

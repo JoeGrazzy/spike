@@ -168,3 +168,11 @@ test('call event subscriptions wait for the authenticated Realtime token handoff
   assert.match(calls, /syncRealtimeAuth\(session\)\.then\(userId=>/);
   assert.match(calls, /if\(state\.user\?\.id===userId && !state\.eventsChannel\) return subscribeEvents\(\)/);
 });
+
+
+test('global hover polish never applies border styling to every hovered element', () => {
+  for (const file of ['../css/feed-experience-bundle.css', '../css/spike-beauty.css']) {
+    const css = fs.readFileSync(new URL(file, import.meta.url), 'utf8');
+    assert.doesNotMatch(css, /(?:^|,)\\s*:hover\\s*(?:,|\\{)/m);
+  }
+});

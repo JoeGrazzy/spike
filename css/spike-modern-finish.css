@@ -1,0 +1,58 @@
+/* SPIKE Modern Finish — shared, geometry-safe interaction and accessibility layer.
+   This file complements existing page-specific layouts and the canonical theme runtime.
+   It intentionally adds no new navigation, storage, API, or feature behavior.
+*/
+:root{
+  --spike-motion-fast:160ms;
+  --spike-motion-standard:220ms;
+  --spike-focus-color:var(--spike-accent,var(--sp-accent,#8b5cf6));
+  --spike-focus-shadow:0 0 0 3px color-mix(in srgb,var(--spike-focus-color) 24%,transparent);
+}
+
+html{scroll-behavior:smooth;}
+
+:where(a[href],button,input,select,textarea,[role="button"],[tabindex]:not([tabindex="-1"])){ 
+  -webkit-tap-highlight-color:transparent;
+}
+
+:where(a[href],button,input,select,textarea,[role="button"],[tabindex]:not([tabindex="-1"])):focus-visible{
+  outline:2px solid var(--spike-focus-color)!important;
+  outline-offset:3px;
+  box-shadow:var(--spike-focus-shadow);
+}
+
+:where(button,input,select,textarea):disabled,
+:where([role="button"],[aria-controls])[aria-disabled="true"]{
+  cursor:not-allowed;
+  opacity:.58;
+}
+
+:where(input,select,textarea){accent-color:var(--spike-focus-color);}
+
+::selection{
+  color:#fff;
+  background:color-mix(in srgb,var(--spike-focus-color) 72%,#171329);
+}
+
+@media(hover:hover) and (pointer:fine){
+  :where(button:not(:disabled),a[href],[role="button"]:not([aria-disabled="true"])){
+    transition-property:color,background-color,border-color,box-shadow,transform,opacity;
+    transition-duration:var(--spike-motion-fast);
+    transition-timing-function:cubic-bezier(.2,.7,.2,1);
+  }
+}
+
+@media(max-width:720px){
+  :where(input,select,textarea){max-width:100%;min-width:0;}
+  html,body{overscroll-behavior-x:none;}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto!important;}
+  *,*::before,*::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+    scroll-behavior:auto!important;
+  }
+}

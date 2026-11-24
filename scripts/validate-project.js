@@ -31,6 +31,7 @@ for(const file of htmlFiles){
 }
 for(const file of cssFiles){
   const source=fs.readFileSync(file,'utf8');
+  if(/(?:^|,)\s*:hover\s*(?:,|\{)/m.test(source))errors.push(`Overbroad bare :hover selector: ${path.relative(root,file)}`);
   for(const match of source.matchAll(/url\(\s*(['"]?)(.*?)\1\s*\)/gi)){
     const ref=match[2].trim();
     if(!ref||/^(?:data:|https?:|blob:|#|var\()/i.test(ref))continue;

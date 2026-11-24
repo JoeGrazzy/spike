@@ -64,3 +64,15 @@ html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-st
 html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-icon { font-size:42px; }
 html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-state p { color:var(--spike-muted); }
 html[data-spike-style] body[data-spike-page="profile"] .spike-profile-private-state a { color:var(--spike-accent); }
+
+
+/* SPIKE V4 — profile identity and action consistency. */
+body[data-spike-page="profile"] #coverArea { overflow:clip; }
+body[data-spike-page="profile"] #displayName { letter-spacing:-.025em; text-wrap:balance; }
+body[data-spike-page="profile"] #profileStats .stat { border-radius:16px; }
+body[data-spike-page="profile"] .profile-command-action,
+body[data-spike-page="profile"] .spid-btn { min-height:44px; border-radius:14px; }
+body[data-spike-page="profile"] .profile-theme-option:focus-visible,
+body[data-spike-page="profile"] .profile-command-action:focus-visible,
+body[data-spike-page="profile"] .spid-btn:focus-visible { outline:3px solid color-mix(in srgb,var(--spike-accent,#8067ef) 42%,transparent); outline-offset:2px; }
+@media(max-width:600px){body[data-spike-page="profile"] #coverArea{border-radius:0 0 22px 22px}body[data-spike-page="profile"] #displayName{font-size:clamp(22px,6vw,30px)}}
