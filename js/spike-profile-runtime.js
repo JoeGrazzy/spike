@@ -94,65 +94,142 @@
   function openMenu(){const o=$('menuOverlay');o?.classList.add('open');o?.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';}
   function closeMenu(){const o=$('menuOverlay');o?.classList.remove('open');o?.setAttribute('aria-hidden','true');document.body.style.overflow='';}
   async function openQr(){const overlay=$('qrOverlay'),box=$('qrCodeBox');if(!overlay||!box)return;try{await loadProfileLibrary('qrcode');box.replaceChildren();const value=location.origin+profileUrl(state.user.id)+'&connect=1';const qr=window.qrcode(0,'M');qr.addData(value);qr.make();const wrap=document.createElement('div');wrap.innerHTML=qr.createSvgTag(5,2);box.append(wrap.firstElementChild);overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');}catch(error){notify(error.message||'Could not create your QR code.','error');}}
+
   let pendingConnectId = null;
+  let scannerStream = null;
+  let scannerHandled = false;
+  let scannerRaf = 0;
 
   function parseSpikeUserIdFromPayload(raw) {
     const text = String(raw || '').trim();
     if (!text) return null;
-    const match = text.match(/[?&](?:uid|user_id)=([0-9a-f-]{36})/i);
-    if (match) return match[1];
-    if (/^[0-9a-f-]{36}$/i.test(text)) return text;
+    let match = text.match(/[?&](?:uid|user_id)=([0-9a-f-]{36})/i);
+    if (match) return match[1].toLowerCase();
+    match = text.match(/\/(?:profile\.html|u\/|user\/)[^?\s]*[?&](?:uid|user_id)=([0-9a-f-]{36})/i);
+    if (match) return match[1].toLowerCase();
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(text)) {
+      return text.toLowerCase();
+    }
     try {
       const url = new URL(text, location.origin);
       const id = url.searchParams.get('uid') || url.searchParams.get('user_id');
-      if (id && /^[0-9a-f-]{36}$/i.test(id)) return id;
+      if (id && /^[0-9a-f-]{36}$/i.test(id)) return id.toLowerCase();
     } catch (_) {}
     return null;
   }
 
+  function stopScanner() {
+    scannerHandled = true;
+    if (scannerRaf) {
+      try { cancelAnimationFrame(scannerRaf); } catch (_) {}
+      scannerRaf = 0;
+    }
+    try {
+      if (scannerStream) {
+        scannerStream.getTracks().forEach(t => { try { t.stop(); } catch (_) {} });
+        scannerStream = null;
+      }
+    } catch (_) {}
+    const video = $('scannerVideo');
+    if (video) {
+      try { video.pause(); } catch (_) {}
+      try { video.srcObject = null; } catch (_) {}
+    }
+    const overlay = $('scannerOverlay');
+    if (overlay) {
+      overlay.classList.remove('open');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+  }
+
+  function avatarPublicUrl(path) {
+    const raw = String(path || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return raw;
+    try {
+      return db().storage.from('avatars').getPublicUrl(raw).data.publicUrl || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
   async function openConnectPreview(userId) {
     if (!userId) throw new Error('Invalid SPIKE member.');
-    if (state.user?.id && userId === state.user.id) {
+    stopScanner();
+    if (state.user?.id && String(userId).toLowerCase() === String(state.user.id).toLowerCase()) {
       notify('That is your own SPIKE QR.', 'info');
       return;
     }
     pendingConnectId = userId;
     const preview = $('connectPreview');
     if (!preview) {
-      // Fallback: open profile if preview markup is missing
-      location.href = profileUrl(userId);
+      location.href = profileUrl(userId) + '&connect=1';
       return;
     }
-    setText('connectName', 'SPIKE member');
+
+    setText('connectName', 'Loading member…');
     setText('connectSpId', '');
     const wrap = $('connectAvatarWrap');
-    if (wrap) wrap.replaceChildren();
+    if (wrap) {
+      wrap.replaceChildren();
+      const loading = document.createElement('div');
+      loading.className = 'connect-avatar-fallback';
+      loading.textContent = '…';
+      wrap.append(loading);
+    }
+
+    // Show sheet immediately so the camera never stays on screen
+    preview.classList.add('open');
+    preview.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+
     try {
-      const profiles = await window.SPIKE.social.getPublicProfiles(db(), [userId]);
-      const person = profiles?.[0] || {};
-      setText('connectName', person.display_name || person.username || 'SPIKE member');
+      let person = {};
+      if (window.SPIKE?.social?.getPublicProfiles) {
+        const profiles = await window.SPIKE.social.getPublicProfiles(db(), [userId]);
+        person = profiles?.[0] || {};
+      } else {
+        const { data, error } = await db().from('profiles')
+          .select('id,username,display_name,spike_id,avatar_path')
+          .eq('id', userId).maybeSingle();
+        if (error) throw error;
+        person = data || {};
+      }
+
+      const name = person.display_name || person.username || 'SPIKE member';
+      setText('connectName', name);
       const sp = person.spike_id ? String(person.spike_id).replace(/^SP-/i, 'SPK-') : '';
-      setText('connectSpId', sp ? `SPK ID · ${sp}` : '');
+      setText('connectSpId', sp ? `SPK ID · ${sp}` : 'SPIKE member');
+
       if (wrap) {
-        if (person.avatar_path || person.avatar_url) {
+        wrap.replaceChildren();
+        const url = person.avatar_url || avatarPublicUrl(person.avatar_path);
+        if (url) {
           const img = document.createElement('img');
-          img.alt = '';
-          img.src = person.avatar_url || (function () {
-            try { return db().storage.from('avatars').getPublicUrl(person.avatar_path).data.publicUrl; } catch { return ''; }
-          })();
+          img.className = 'connect-avatar';
+          img.alt = name;
+          img.src = url;
+          img.onerror = () => {
+            wrap.replaceChildren();
+            const div = document.createElement('div');
+            div.className = 'connect-avatar connect-avatar-fallback';
+            div.textContent = name.slice(0, 1).toUpperCase();
+            wrap.append(div);
+          };
           wrap.append(img);
         } else {
           const div = document.createElement('div');
-          div.className = 'connect-avatar-fallback';
-          div.textContent = (person.display_name || person.username || 'S').slice(0, 1).toUpperCase();
+          div.className = 'connect-avatar connect-avatar-fallback';
+          div.textContent = name.slice(0, 1).toUpperCase();
           wrap.append(div);
         }
       }
     } catch (e) {
       console.warn('[SPIKE connect preview]', e);
+      setText('connectName', 'SPIKE member');
+      setText('connectSpId', 'Could not load full profile details');
     }
-    preview.classList.add('open');
-    preview.setAttribute('aria-hidden', 'false');
   }
 
   function closeConnectPreview() {
@@ -160,21 +237,31 @@
     const preview = $('connectPreview');
     preview?.classList.remove('open');
     preview?.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
   }
 
   async function confirmConnect() {
     const targetId = pendingConnectId;
     if (!targetId) return;
     const btn = $('connectConfirm');
-    if (btn) btn.disabled = true;
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Connecting…';
+    }
     try {
+      if (!window.SPIKE?.social?.connectViaQr) {
+        throw new Error('SPIKE connect service is not ready. Reload and try again.');
+      }
       const result = await window.SPIKE.social.connectViaQr(db(), targetId);
       notify(result.message || 'You are now SPIKE friends.', result.already_friends ? 'info' : 'success');
       closeConnectPreview();
     } catch (error) {
       notify(error.message || 'Could not connect on SPIKE.', 'error');
     } finally {
-      if (btn) btn.disabled = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = 'SPIKE Connect instantly';
+      }
     }
   }
 
@@ -184,54 +271,113 @@
       await openConnectPreview(userId);
       return;
     }
-    if (/^https?:\/\//i.test(String(raw || ''))) {
-      // Non-SPIKE URL: open safely in same app only if same origin profile-like
-      try {
-        const u = new URL(raw);
-        if (u.origin === location.origin) location.href = u.pathname + u.search + u.hash;
-        else notify('QR code is not a SPIKE profile link.', 'warning');
-      } catch {
-        notify('QR code is not a SPIKE profile link.', 'warning');
-      }
-      return;
-    }
-    notify('QR code is not a SPIKE profile link.', 'warning');
+    stopScanner();
+    notify('This QR code is not a SPIKE profile link. Ask them to open Profile → Show QR code.', 'warning');
   }
 
-  async function scanQr(){
-    if(!navigator.mediaDevices?.getUserMedia){notify('Camera scanning is not supported in this browser.','error');return;}
-    const overlay=$('scannerOverlay'),video=$('scannerVideo');
-    if(!overlay||!video)return;
-    try{
+  function decodeQrFromImageData(imageData, width, height) {
+    if (!window.jsQR || !imageData) return null;
+    try {
+      return window.jsQR(imageData, width, height, { inversionAttempts: 'attemptBoth' });
+    } catch (e) {
+      console.warn('[SPIKE jsQR]', e);
+      return null;
+    }
+  }
+
+  async function decodeQrFromFile(file) {
+    await loadProfileLibrary('jsqr');
+    const bitmap = await createImageBitmap(file);
+    // Downscale large photos for reliable mobile decode
+    const maxSide = 1200;
+    let w = bitmap.width;
+    let h = bitmap.height;
+    const scale = Math.min(1, maxSide / Math.max(w, h));
+    w = Math.max(1, Math.round(w * scale));
+    h = Math.max(1, Math.round(h * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    try { bitmap.close?.(); } catch (_) {}
+    const code = decodeQrFromImageData(ctx.getImageData(0, 0, w, h).data, w, h);
+    if (!code?.data) throw new Error('No SPIKE QR code was found in that image. Try a clearer photo of their QR.');
+    return code.data;
+  }
+
+  async function scanQr() {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      notify('Camera scanning is not supported here. Use Gallery to upload their QR image instead.', 'warning');
+      $('qrFile')?.click();
+      return;
+    }
+    const overlay = $('scannerOverlay');
+    const video = $('scannerVideo');
+    if (!overlay || !video) {
+      notify('Scanner is not available on this page.', 'error');
+      return;
+    }
+    stopScanner();
+    scannerHandled = false;
+    try {
       await loadProfileLibrary('jsqr');
-      const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-      video.srcObject=stream;
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        },
+        audio: false
+      });
+      scannerStream = stream;
+      video.srcObject = stream;
+      video.setAttribute('playsinline', 'true');
+      video.muted = true;
       await video.play();
       overlay.classList.add('open');
-      overlay.setAttribute('aria-hidden','false');
-      let handled=false;
-      const scan=()=>{
-        if(!overlay.classList.contains('open')||handled)return;
-        try{
-          const canvas=document.createElement('canvas');
-          canvas.width=video.videoWidth;canvas.height=video.videoHeight;
-          if(!canvas.width||!canvas.height){requestAnimationFrame(scan);return;}
-          const ctx=canvas.getContext('2d');
-          ctx.drawImage(video,0,0);
-          const result=window.jsQR?.(ctx.getImageData(0,0,canvas.width,canvas.height).data,canvas.width,canvas.height);
-          if(result?.data){
-            handled=true;
-            stream.getTracks().forEach(t=>t.stop());
-            overlay.classList.remove('open');
-            handleScannedPayload(result.data).catch(e=>notify(e.message||'Could not read that QR.','error'));
-            return;
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      const tick = () => {
+        if (scannerHandled || !overlay.classList.contains('open')) return;
+        try {
+          const vw = video.videoWidth;
+          const vh = video.videoHeight;
+          if (vw && vh) {
+            // Downscale for speed on phones
+            const maxSide = 640;
+            const scale = Math.min(1, maxSide / Math.max(vw, vh));
+            const w = Math.max(1, Math.round(vw * scale));
+            const h = Math.max(1, Math.round(vh * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(video, 0, 0, w, h);
+            const result = decodeQrFromImageData(ctx.getImageData(0, 0, w, h).data, w, h);
+            if (result?.data) {
+              scannerHandled = true;
+              stopScanner();
+              handleScannedPayload(result.data).catch(e =>
+                notify(e.message || 'Could not read that QR.', 'error')
+              );
+              return;
+            }
           }
-        }catch(e){console.warn('[SPIKE QR scan]',e);}
-        requestAnimationFrame(scan);
+        } catch (e) {
+          console.warn('[SPIKE QR scan frame]', e);
+        }
+        scannerRaf = requestAnimationFrame(tick);
       };
-      requestAnimationFrame(scan);
-      $('scannerClose')?.addEventListener('click',()=>stream.getTracks().forEach(t=>t.stop()),{once:true});
-    }catch(e){notify(e.message||'Camera permission was not granted.','error');}
+      scannerRaf = requestAnimationFrame(tick);
+    } catch (e) {
+      stopScanner();
+      const msg = e?.name === 'NotAllowedError'
+        ? 'Camera permission was denied. Allow camera access, or use Gallery to upload their QR image.'
+        : (e.message || 'Could not open the camera.');
+      notify(msg, 'error');
+    }
   }
 
   function bind(){
@@ -239,8 +385,26 @@
     $('menuBtn')?.addEventListener('click',openMenu);$('closeMenu')?.addEventListener('click',closeMenu);$('menuOverlay')?.addEventListener('click',e=>{if(e.target===$('menuOverlay'))closeMenu();});
     $('copyProfile')?.addEventListener('click',async()=>{try{await copy(location.origin+profileUrl(state.user.id));notify('Profile link copied.','success');}catch(e){notify(e.message,'error');}});
     $('shareProfileAction')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),`${nameOf(state.profile)} on SPIKE`).catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));
-    $('showQr')?.addEventListener('click',openQr);$('qrClose')?.addEventListener('click',()=>{$('qrOverlay')?.classList.remove('open');$('qrOverlay')?.setAttribute('aria-hidden','true');});$('qrCopy')?.addEventListener('click',()=>copy(location.origin+profileUrl(state.user.id)).then(()=>notify('Profile link copied.','success')).catch(e=>notify(e.message,'error')));$('qrShare')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),'SPIKE profile').catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));$('galleryQr')?.addEventListener('click',()=>$('qrFile')?.click());$('qrFile')?.addEventListener('change',async e=>{const file=e.target.files?.[0];if(!file)return;try{await loadProfileLibrary('jsqr');const bitmap=await createImageBitmap(file);const canvas=document.createElement('canvas');canvas.width=bitmap.width;canvas.height=bitmap.height;const ctx=canvas.getContext('2d');ctx.drawImage(bitmap,0,0);const code=window.jsQR(ctx.getImageData(0,0,canvas.width,canvas.height).data,canvas.width,canvas.height);if(!code?.data)throw new Error('No QR code was detected in that image.');await handleScannedPayload(code.data);}catch(err){notify(err.message||'Could not read that QR image.','error');}finally{e.target.value='';}});
-    $('scanQr')?.addEventListener('click',scanQr);$('connectConfirm')?.addEventListener('click',()=>confirmConnect());$('connectCancel')?.addEventListener('click',closeConnectPreview);$('connectPreview')?.addEventListener('click',e=>{if(e.target===$('connectPreview'))closeConnectPreview();});$('scannerClose')?.addEventListener('click',()=>{$('scannerVideo')?.srcObject?.getTracks().forEach(t=>t.stop());$('scannerOverlay')?.classList.remove('open');});
+    $('showQr')?.addEventListener('click',openQr);$('qrClose')?.addEventListener('click',()=>{$('qrOverlay')?.classList.remove('open');$('qrOverlay')?.setAttribute('aria-hidden','true');});$('qrCopy')?.addEventListener('click',()=>copy(location.origin+profileUrl(state.user.id)).then(()=>notify('Profile link copied.','success')).catch(e=>notify(e.message,'error')));$('qrShare')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),'SPIKE profile').catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));$('galleryQr')?.addEventListener('click',()=>{$('qrFile')?.click();});
+    $('qrFile')?.addEventListener('change',async e=>{
+      const file=e.target.files?.[0];
+      if(!file)return;
+      try{
+        stopScanner();
+        notify('Reading QR image…','info');
+        const payload=await decodeQrFromFile(file);
+        await handleScannedPayload(payload);
+      }catch(err){
+        notify(err.message||'Could not read that QR image.','error');
+      }finally{
+        e.target.value='';
+      }
+    });
+    $('scanQr')?.addEventListener('click',scanQr);
+    $('connectConfirm')?.addEventListener('click',()=>confirmConnect());
+    $('connectCancel')?.addEventListener('click',closeConnectPreview);
+    $('connectPreview')?.addEventListener('click',e=>{if(e.target===$('connectPreview'))closeConnectPreview();});
+    $('scannerClose')?.addEventListener('click',()=>stopScanner());
     $('findPeopleAction')?.addEventListener('click',()=>location.href='feed.html#discover');$('copySpid')?.addEventListener('click',()=>copy(state.profile?.spike_id ? String(state.profile.spike_id).replace(/^SP-/i, 'SPK-') : '').then(()=>notify('SPK ID copied.','success')).catch(e=>notify(e.message,'error')));$('shareSpid')?.addEventListener('click',()=>share(location.origin+profileUrl(state.user.id),`Connect with ${nameOf(state.profile)} on SPIKE`).catch(e=>{if(e.name!=='AbortError')notify(e.message,'error');}));
     document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
     const stats=$('profileStats');if(stats){let hold=null;try{state.hiddenCounts=localStorage.getItem(`spike-profile-counts-hidden:${state.user.id}`)==='1';}catch(_){}const paintCounts=()=>{stats.querySelectorAll('.stat-action').forEach(b=>{b.classList.toggle('is-count-hidden',state.hiddenCounts);b.setAttribute('aria-label',`${b.dataset.stat} ${state.hiddenCounts?'count hidden':'count visible'}; tap to open, hold to ${state.hiddenCounts?'show':'hide'} counts`);const n=b.querySelector('b');if(n)n.classList.toggle('stat-count-hidden',state.hiddenCounts);});};paintCounts();stats.addEventListener('pointerdown',e=>{const b=e.target.closest('[data-stat]');if(!b)return;state.suppressStatClick=false;hold=setTimeout(()=>{state.hiddenCounts=!state.hiddenCounts;state.suppressStatClick=true;try{localStorage.setItem(`spike-profile-counts-hidden:${state.user.id}`,state.hiddenCounts?'1':'0');}catch(_){}paintCounts();},520);});const cancel=()=>{if(hold){clearTimeout(hold);hold=null;}};['pointerup','pointercancel','pointerleave'].forEach(type=>stats.addEventListener(type,cancel));stats.addEventListener('click',e=>{const b=e.target.closest('[data-stat]');if(!b)return;if(state.suppressStatClick){e.preventDefault();state.suppressStatClick=false;return;}const kind=b.dataset.stat;if(kind==='posts')openList('posts');else location.href=`${kind}.html?uid=${encodeURIComponent(state.user.id)}`;});}
