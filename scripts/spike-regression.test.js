@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const messaging = fs.readFileSync(new URL('../public/js/spike-messages.js', import.meta.url), 'utf8');
-const calls = fs.readFileSync(new URL('../public/js/spike-call-engine.js', import.meta.url), 'utf8');
+const messaging = fs.readFileSync(new URL('../js/spike-messages.js', import.meta.url), 'utf8');
+const calls = fs.readFileSync(new URL('../js/spike-call-engine.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
 const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
@@ -36,7 +36,7 @@ test('Realtime hardening requires private topics and active call sessions', () =
 });
 
 test('deployment revalidates application code after releases', () => {
-  const headers = fs.readFileSync(new URL('../public/_headers', import.meta.url), 'utf8');
+  const headers = fs.readFileSync(new URL('../_headers', import.meta.url), 'utf8');
   assert.match(headers, /\/js\/\*\s+Cache-Control: public, max-age=0, must-revalidate/);
   assert.match(headers, /\/css\/\*\s+Cache-Control: public, max-age=0, must-revalidate/);
 });

@@ -9,10 +9,10 @@ const walk = dir => fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>{
   if(entry.isDirectory())return walk(full);
   return [full];
 });
-const publicDir=path.join(root,'public');
+const publicDir=root;
 const htmlFiles=walk(publicDir).filter(file=>file.endsWith('.html'));
-const cssFiles=walk(path.join(publicDir,'css')).filter(file=>file.endsWith('.css'));
-const jsFiles=walk(path.join(publicDir,'js')).filter(file=>file.endsWith('.js'));
+const cssFiles=walk(path.join(root,'css')).filter(file=>file.endsWith('.css'));
+const jsFiles=walk(path.join(root,'js')).filter(file=>file.endsWith('.js'));
 jsFiles.push(path.join(root,'worker.js'));
 for(const file of jsFiles){
   const result=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
@@ -25,7 +25,7 @@ for(const file of htmlFiles){
     if(!ref||ref.includes('${')||/^(?:#|data:|javascript:|mailto:|tel:|https?:|\/\/)/i.test(ref))continue;
     const clean=ref.split(/[?#]/,1)[0];
     if(!clean)continue;
-    const target=clean.startsWith('/')?path.join(publicDir,clean.slice(1)):path.resolve(path.dirname(file),clean);
+    const target=clean.startsWith('/')?path.join(root,clean.slice(1)):path.resolve(path.dirname(file),clean);
     if(!fs.existsSync(target))errors.push(`Missing local reference: ${path.relative(root,file)} -> ${ref}`);
   }
 }
@@ -35,16 +35,16 @@ for(const file of cssFiles){
     const ref=match[2].trim();
     if(!ref||/^(?:data:|https?:|blob:|#|var\()/i.test(ref))continue;
     const clean=ref.split(/[?#]/,1)[0];
-    const target=clean.startsWith('/')?path.join(publicDir,clean.slice(1)):path.resolve(path.dirname(file),clean);
+    const target=clean.startsWith('/')?path.join(root,clean.slice(1)):path.resolve(path.dirname(file),clean);
     if(!fs.existsSync(target))errors.push(`Missing CSS asset: ${path.relative(root,file)} -> ${ref}`);
   }
 }
 const wrangler=JSON.parse(fs.readFileSync(path.join(root,'wrangler.jsonc'),'utf8'));
 if(wrangler.main!=='worker.js')errors.push('Wrangler main must point to worker.js');
 if(!fs.existsSync(path.join(root,wrangler.main||'worker.js')))errors.push('Worker entrypoint is missing');
-if(wrangler.assets?.directory!=='./public')errors.push('Wrangler static assets must be isolated in ./public');
-if(!fs.existsSync(publicDir))errors.push('Public asset directory is missing');
-if(wrangler.assets?.not_found_handling==='404-page'&&!fs.existsSync(path.join(publicDir,'404.html')))errors.push('404-page handling requires public/404.html');
+if(wrangler.assets?.directory!=='.')errors.push('Wrangler static assets must point to the archive root (.)');
+if(!fs.existsSync(path.join(root,'index.html')))errors.push('Root index.html is missing');
+if(wrangler.assets?.not_found_handling==='404-page'&&!fs.existsSync(path.join(root,'404.html')))errors.push('404-page handling requires root 404.html');
 if(wrangler.assets?.binding!=='ASSETS')errors.push('Wrangler assets binding must be ASSETS');
 const migrationDir=path.join(root,'supabase','migrations');
 const versions=fs.readdirSync(migrationDir).filter(name=>name.endsWith('.sql')).map(name=>name.slice(0,14)).sort();
@@ -55,9 +55,9 @@ const expectedRemoteVersions=`
 const additiveLocalVersions=['20261123234241','20261124001015','20261124002203','20261124002243','20261124002409','20261124044627'];
 const expectedLocalVersions=[...expectedRemoteVersions,...additiveLocalVersions].sort();
 if(versions.length!==expectedLocalVersions.length||versions.some((version,index)=>version!==expectedLocalVersions[index]))errors.push('Local Supabase migration versions do not match the known production baseline plus explicitly reviewed additive migrations');
-const messagingSource=fs.readFileSync(path.join(publicDir,'js','spike-messages.js'),'utf8');
+const messagingSource=fs.readFileSync(path.join(root,'js','spike-messages.js'),'utf8');
 if(!/currentPeerId\s*=\s*!isGroup\s*&&\s*peerId/.test(messagingSource))errors.push('Direct-message setup must assign the resolved one-to-one call recipient');
-const callSource=fs.readFileSync(path.join(publicDir,'js','spike-call-engine.js'),'utf8');
+const callSource=fs.readFileSync(path.join(root,'js','spike-call-engine.js'),'utf8');
 if(callSource.includes('/api/call-ice'))errors.push('STUN-only call engine must not depend on the external TURN credential endpoint');
 if(callSource.includes('await loadIceServers()'))errors.push('STUN-only ICE server selection must not perform an unnecessary async credential lookup');
 if(fs.readFileSync(path.join(root,'worker.js'),'utf8').includes('call-ice'))errors.push('Unused TURN credential route must not remain in the Worker');
@@ -68,7 +68,7 @@ const callMfaMigration=fs.readFileSync(path.join(migrationDir,'20261124001015_sp
 if(!callMfaMigration.includes('private.mfa_access_allowed()')||!callMfaMigration.includes('private.enforce_mfa_for_opted_in_user()'))errors.push('Call-session migration must enforce the existing opt-in MFA policy and DML guard');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 if(!pkg.scripts?.deploy||!pkg.devDependencies?.wrangler)errors.push('package.json must include a Wrangler deployment script and dependency');
-if(fs.existsSync(path.join(publicDir,'node_modules')))errors.push('node_modules must never be inside the public asset directory');
-if(fs.existsSync(path.join(publicDir,'supabase')))errors.push('Supabase source must never be inside the public asset directory');
+if(fs.existsSync(path.join(root,'node_modules')))errors.push('node_modules must never be included in the deployment archive');
+if(!fs.existsSync(path.join(root,'supabase','migrations')))errors.push('Supabase migrations are missing');
 if(errors.length){console.error(`SPIKE validation failed (${errors.length} issue(s))`);for(const error of errors)console.error(`\n- ${error}`);process.exit(1);}
 console.log(`SPIKE validation passed: ${jsFiles.length} JavaScript files, ${htmlFiles.length} HTML pages and ${cssFiles.length} CSS files checked; local references, Worker config and known production migration baseline and additive migrations are consistent.`);
