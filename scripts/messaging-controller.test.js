@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const source = readFileSync(new URL('../js/spike-messages.js', import.meta.url), 'utf8');
-const page = readFileSync(new URL('../message.html', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../public/js/spike-messages.js', import.meta.url), 'utf8');
+const page = readFileSync(new URL('../public/message.html', import.meta.url), 'utf8');
 
 test('direct conversation bootstrap fetches the peer read timestamp', () => {
   assert.match(source, /db\(\)\.from\('conversation_members'\)\.select\('user_id,last_read_at'\)\.eq\('conversation_id',\s*conversationId\)/);
