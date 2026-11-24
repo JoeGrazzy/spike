@@ -1,0 +1,75 @@
+/* SPIKE conversation readability and compact-layout refinement */
+.msg-thread-app .bubble.mine {
+  color: #10151d !important;
+  -webkit-text-fill-color: #10151d;
+  background: linear-gradient(135deg, #55d6c5 0%, #78b8f4 100%);
+  border-color: rgba(16, 21, 29, .14);
+}
+.msg-thread-app .bubble.mine > div:not(.msg-quote),
+.msg-thread-app .bubble.mine > span:not(.msg-reaction),
+.msg-thread-app .bubble.mine .msg-deleted {
+  color: #10151d !important;
+  -webkit-text-fill-color: #10151d;
+  opacity: 1;
+  text-shadow: none;
+}
+.msg-thread-app .bubble.mine .msg-quote {
+  color: #24313b;
+  background: rgba(16, 21, 29, .09);
+  border-left-color: #176f69;
+}
+.msg-thread-app .bubble.mine time,
+.msg-thread-app .bubble.mine .msg-seen {
+  color: rgba(16, 21, 29, .78) !important;
+  -webkit-text-fill-color: rgba(16, 21, 29, .78);
+}
+.msg-thread-app .bubble.mine .msg-bubble-action {
+  color: #10151d !important;
+  background: rgba(255,255,255,.42);
+  border-color: rgba(16,21,29,.18);
+}
+.msg-thread-app .bubble {
+  padding: 31px 14px 22px;
+  min-width: 64px;
+}
+.msg-thread-app .bubble:not(.mine) {
+  color: #f2f5f8;
+}
+.msg-thread-app .bubble:not(.mine) > div:not(.msg-quote),
+.msg-thread-app .bubble:not(.mine) > span:not(.msg-reaction) {
+  color: #f2f5f8;
+}
+.msg-thread-app .bubble:not(.mine) .msg-deleted,
+.msg-thread-app .bubble:not(.mine) .msg-quote {
+  color: #c5d0da;
+}
+.msg-thread-app .msg-thread { gap: 7px; }
+.msg-thread-app .msg-day { margin: 9px 0; }
+.msg-thread-app .msg-composer-wrap {
+  padding: 9px clamp(9px, 2.8vw, 16px) calc(10px + env(safe-area-inset-bottom));
+}
+.msg-thread-app .msg-composer { gap: 7px; }
+.msg-thread-app .msg-composer textarea {
+  min-height: 46px;
+  max-height: 116px;
+  color: #f2f5f8;
+  caret-color: #55d6c5;
+}
+.msg-thread-app .msg-composer textarea::placeholder { color: #aab7c3; opacity: 1; }
+.msg-thread-app .msg-composer .msg-primary {
+  color: #10151d;
+  font-weight: 750;
+}
+@media (max-width: 390px) {
+  .msg-thread-app .msg-topbar { gap: 6px; padding-inline: 9px; }
+  .msg-thread-app .msg-person { min-width: 0; flex: 1 1 auto; }
+  .msg-thread-app .msg-person-text { min-width: 0; }
+  .msg-thread-app .msg-person-text strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .msg-thread-app .msg-call-actions { gap: 4px; }
+  .msg-thread-app .msg-call-actions .msg-icon,
+  .msg-thread-app #refresh { width: 38px; min-width: 38px; height: 40px; min-height: 40px; }
+  .msg-thread-app .bubble { max-width: 88%; padding: 29px 12px 22px; }
+  .msg-thread-app .msg-composer { gap: 5px; }
+  .msg-thread-app .msg-composer .msg-icon { width: 39px; min-width: 39px; height: 42px; min-height: 42px; }
+  .msg-thread-app .msg-composer .msg-primary { min-height: 42px; padding-inline: 12px; }
+}
