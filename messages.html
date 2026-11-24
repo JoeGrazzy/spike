@@ -1,169 +1,81 @@
 <!doctype html>
 <html lang="en" translate="no"><head>
+<meta charset="utf-8"><meta name="google" content="notranslate"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b14"><meta name="description" content="SPIKE direct messages">
+<title>SPIKE — Messages</title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://veagqanfilmbchlvlpcc.supabase.co" crossorigin>
-<link rel="dns-prefetch" href="//cdn.jsdelivr.net">
-<link rel="dns-prefetch" href="//veagqanfilmbchlvlpcc.supabase.co">
 <script src="js/supabase.min.js"></script>
 <script src="js/spike-platform-bootstrap.js?v=rt-20261124"></script>
 <script src="js/spike-call-engine.js" defer></script>
-
-<meta name="google" content="notranslate">
-  <script src="js/spike-theme-bootstrap.js"></script><script src="js/spike-empty-state.js" defer></script>
-<script src="js/theme.js" defer></script>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080811"><meta name="description" content="SPIKE direct messages">
-<title>SPIKE — Messages</title>
+<script src="js/spike-theme-bootstrap.js"></script>
 <link rel="stylesheet" href="css/perf.css">
-<link rel="stylesheet" href="css/spike-identity.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
-<script>try{let n=parseInt(localStorage.getItem('spike-theme-choice-v3')||'1',10);document.documentElement.dataset.spikeStyle=String(n>=1&&n<=3?n:1)}catch(e){}</script>
-
-
+<link rel="stylesheet" href="css/spike-identity.css">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/spike-mobile-safe-area.css">
+<link rel="stylesheet" href="css/spike-messages.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
 <script src="js/spike-identity.js"></script>
-
-<link rel="stylesheet" href="css/spike-typing.css?v=rt-20261124">
-<style>
-:root{color-scheme:dark;--bg:var(--spike-bg,#0b1020);--panel:var(--spike-surface,#121a2d);--panel2:var(--spike-surface-2,#1b2540);--line:var(--spike-line,#35415f);--text:var(--spike-text,#f5f6ff);--muted:var(--spike-muted,#c0c8df);--a:var(--spike-accent,#a78bfa);--b:var(--spike-accent-2,#c4b5fd)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif}body{min-height:100dvh;padding-bottom:calc(104px + env(safe-area-inset-bottom));}button,input,textarea{font:inherit}button,a{-webkit-tap-highlight-color:transparent}a,a:link,a:visited,a:hover,a:active,a:focus{color:inherit;text-decoration:none!important;-webkit-text-decoration:none!important}.app{max-width:760px;margin:auto;min-height:100dvh;display:flex;flex-direction:column}.top{position:sticky;top:0;z-index:5;padding:calc(12px + env(safe-area-inset-top)) 16px 14px;background:rgba(8,8,17,.96);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px}.back,.iconbtn{width:42px;height:42px;display:grid;place-items:center;border:1px solid var(--line);border-radius:14px;background:var(--panel2);color:var(--text);cursor:pointer}.titlewrap{flex:1;min-width:0}.brand{font-weight:950;letter-spacing:-.04em;font-size:19px}.subtitle{font-size:12px;color:var(--muted);margin-top:2px}.content{padding:16px;flex:1}.hero{padding:18px;border:1px solid var(--line);border-radius:22px;background:radial-gradient(120% 120% at 0 0,rgba(168,85,247,.18),transparent 60%),var(--panel);margin-bottom:14px}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.13em;color:#d8a7ff;font-weight:900}.hero h1{font-size:28px;letter-spacing:-.05em;margin:7px 0}.hero p{color:var(--muted);margin:0;line-height:1.5;font-size:14px}.search{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:0 14px;margin:14px 0}.search input{background:transparent;border:0;outline:0;color:var(--text);padding:14px 0;width:100%;min-width:0}.filters{display:flex;gap:8px;margin:14px 0;overflow:auto}.chip{white-space:nowrap;border:1px solid var(--line);border-radius:999px;padding:9px 13px;background:var(--panel);color:var(--muted);cursor:pointer}.chip.active{background:rgba(168,85,247,.18);border-color:#8750b7;color:#fff}.countBadge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:999px;background:#ec4899;color:#fff;font-size:11px;font-weight:950;line-height:1}.newMessagesBadge{margin-left:6px;background:#22c55e;color:#07120a}.rowUnreadBadge{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#a855f7;color:#fff;font-size:11px;font-weight:950;margin-top:5px}.list{display:grid;gap:9px}.itemRow{display:flex;align-items:stretch;gap:8px}.pinAction{font-size:21px;min-width:42px;color:var(--text)}.pinAction[aria-pressed="true"]{color:var(--spike-accent);border-color:color-mix(in srgb,var(--spike-accent) 55%,var(--line))}.item{display:flex;align-items:center;gap:12px;flex:1;padding:13px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(255,255,255,.025),transparent),var(--panel);min-width:0}.unarchive{align-self:center;flex:0 0 auto;border:1px solid var(--line);border-radius:12px;padding:9px 10px;background:var(--panel2);color:var(--text);font-size:12px;cursor:pointer}.avatar{width:48px;height:48px;flex:0 0 48px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--spike-action-bg,#6544c8),var(--spike-accent,#a78bfa));font-weight:900;overflow:hidden}.avatar img{width:100%;height:100%;object-fit:cover}.details{flex:1;min-width:0}.name{font-weight:850;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.presence-time-label{display:block;font-size:10px;font-weight:500;color:var(--muted);margin-top:3px;white-space:normal}.presence-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#777;vertical-align:middle;margin-left:6px}.presence-dot.online{background:#22c55e;box-shadow:0 0 0 2px rgba(34,197,94,.14)}.preview{font-size:13px;color:var(--muted);margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.meta{font-size:11px;color:var(--muted);white-space:nowrap;flex:0 0 auto;min-width:54px;text-align:right;align-self:flex-start;padding-top:2px}.message-time{display:block;font-variant-numeric:tabular-nums;line-height:1.35}.item{align-items:center}.item .details{min-width:0}.item .meta{max-width:84px;overflow:visible}.empty,.notice{padding:24px 16px;text-align:center;border:1px dashed var(--line);border-radius:18px;color:var(--muted);line-height:1.55}.notice{margin-bottom:12px}.spike-message-toast{position:fixed;z-index:9999;left:14px;right:14px;top:calc(12px + env(safe-area-inset-top));max-width:560px;margin:auto;padding:14px 16px;border:1px solid #8750b7;border-radius:16px;background:#171126;box-shadow:0 12px 40px #0009;color:#fff;display:block}.spike-message-toast[hidden]{display:none}.spike-message-toast button{display:block;width:100%;text-align:left;background:transparent;border:0;color:inherit;padding:0;cursor:pointer}.spike-message-toast strong{display:block;color:#d8a7ff;margin-bottom:4px}.spike-message-toast span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d8d0e5;font-size:13px}.primary{border:0;border-radius:14px;background:linear-gradient(110deg,#9333ea,#db2777);color:white;font-weight:850;padding:12px 15px;cursor:pointer}.primary:disabled{opacity:.5}.row{display:flex;gap:10px;align-items:center}.thread{display:flex;flex-direction:column;gap:10px;padding:8px 0 18px}.bubble{max-width:84%;padding:11px 13px;border-radius:18px;background:var(--panel2);border:1px solid var(--line);align-self:flex-start;overflow-wrap:anywhere;white-space:pre-wrap;line-height:1.45}.bubble.mine{align-self:flex-end;background:linear-gradient(135deg,rgba(126,34,206,.9),rgba(190,24,93,.88));border-color:transparent}.bubble time{display:block;text-align:right;font-size:10px;opacity:.7;margin-top:5px}.composer{position:sticky;bottom:0;background:linear-gradient(180deg,rgba(8,8,17,.9),var(--bg) 25%);padding:12px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line)}.composebox{display:flex;gap:8px;align-items:flex-end;border:1px solid var(--line);border-radius:18px;padding:7px;background:var(--panel)}.composebox textarea{resize:none;max-height:140px;min-height:42px;flex:1;min-width:0;background:transparent;color:var(--text);border:0;outline:0;padding:10px 7px;line-height:1.4}.send{width:44px;height:44px;flex:0 0 44px;border:0;border-radius:14px;background:linear-gradient(135deg,#9333ea,#db2777);color:white;font-weight:900}.status{font-size:12px;color:var(--muted);padding:4px 2px}.skeleton{height:76px;border-radius:18px;background:linear-gradient(90deg,var(--panel),var(--panel2),var(--panel));background-size:200% 100%;animation:shimmer 1.4s infinite}@keyframes shimmer{to{background-position:-200% 0}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
-
-/* SPIKE inbox identity + presence: keep names, activity and timestamps visible on mobile. */
-.inbox-title-line{display:flex;align-items:center;gap:7px;min-width:0;flex-wrap:nowrap}
-.inbox-title-line .name{flex:0 1 auto;min-width:0}
-.inbox-presence{display:inline-flex;align-items:center;gap:5px;flex:0 0 auto;max-width:112px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;font-weight:650;color:var(--muted)}
-.inbox-presence:before{content:"";width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#8b93a7}
-.inbox-presence.online{color:#4ade80}
-.inbox-presence.online:before{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.14)}
-.item .meta{font-variant-numeric:tabular-nums}
-@media(max-width:380px){.inbox-presence{font-size:9px;max-width:88px}.inbox-title-line{gap:5px}}
-</style><link rel="stylesheet" href="css/theme.css"><link rel="stylesheet" href="css/spike-theme-experience.css"><link rel="stylesheet" href="css/spike-android-fullscreen.css"><link rel="stylesheet" href="css/spike-mobile-safe-area.css"><link rel="stylesheet" href="css/spike-theme-final-authority.css">  <link rel="stylesheet" href="css/spike-ux-refinement.css">
-
-<script src="js/spike-loader-core.js" defer></script>
-
-<link rel="stylesheet" href="css/spike-theme-runtime.css">
-<link rel="stylesheet" href="css/spike-five-theme-authority.css">
-<link rel="stylesheet" href="css/spike-touch-hover-guard.css">
-<link rel="stylesheet" href="css/ui-fix.css">
-<link rel="stylesheet" href="css/spike-dm-theme.css">
-<link href="css/spike-onboarding-help-placement.css" rel="stylesheet">
-<link rel="stylesheet" href="css/spike-theme-page-bridge.css">
-    <link rel="stylesheet" href="css/spike-future-engine.css">
-<link rel="stylesheet" href="css/spike-spatial-experience-layout.css">
-<link rel="stylesheet" href="css/spike-spatial-structure.css">
-<link rel="stylesheet" href="./css/spike-sci-fi-technology.css">
-<link rel="stylesheet" href="css/spike-mobile-compact-authority.css">
-<link rel="stylesheet" href="css/spike-compact-premium.css">
-  <link rel="stylesheet" href="css/spike-select-experience.css">
-<style id="spike-messages-compact-premium">
-/* SPIKE messages page: compact premium inbox refinement (messages.html only) */
-body[data-spike-page="messages"] .app{max-width:680px}
-body[data-spike-page="messages"] .top{gap:10px;padding:calc(8px + env(safe-area-inset-top)) 13px 9px;min-height:64px}
-body[data-spike-page="messages"] .back,body[data-spike-page="messages"] .iconbtn{width:38px;height:38px;min-width:38px;border-radius:12px}
-body[data-spike-page="messages"] .brand{font-size:18px;line-height:1.1}
-body[data-spike-page="messages"] .subtitle{font-size:11px;margin-top:2px;line-height:1.2}
-body[data-spike-page="messages"] .content{padding:10px 12px 18px}
-body[data-spike-page="messages"] .search{min-height:44px;gap:9px;margin:2px 0 10px;padding:0 12px;border-radius:14px}
-body[data-spike-page="messages"] .search>i{font-size:14px;color:var(--muted)}
-body[data-spike-page="messages"] .search input{min-height:42px;padding:9px 0;font-size:14px}
-body[data-spike-page="messages"] .filters{gap:7px;margin:0 0 11px;padding:1px 0 4px;scrollbar-width:none;overscroll-behavior-x:contain}
-body[data-spike-page="messages"] .filters::-webkit-scrollbar{display:none}
-body[data-spike-page="messages"] .chip{min-height:34px;padding:7px 12px;font-size:12px;font-weight:700;border-radius:999px}
-body[data-spike-page="messages"] .countBadge{min-width:18px;height:18px;font-size:10px}
-body[data-spike-page="messages"] .list{gap:6px}
-body[data-spike-page="messages"] .inbox-section-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:14px 2px 8px}
-body[data-spike-page="messages"] .inbox-section-heading>div{display:grid;gap:2px}
-body[data-spike-page="messages"] .inbox-section-heading strong{font-size:14px;letter-spacing:-.02em}
-body[data-spike-page="messages"] .inbox-live-note{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;white-space:nowrap}
-body[data-spike-page="messages"] .inbox-live-note i{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.12)}
-body[data-spike-page="messages"] .itemRow{gap:6px;align-items:center;min-width:0}
-body[data-spike-page="messages"] .item{gap:10px;min-height:70px;padding:9px 10px;border-radius:15px;box-shadow:0 2px 9px rgba(0,0,0,.08)}
-body[data-spike-page="messages"] .avatar{width:44px;height:44px;flex-basis:44px;font-size:14px}
-body[data-spike-page="messages"] .name{font-size:13px;line-height:1.25}
-body[data-spike-page="messages"] .presence-time-label{font-size:9px;margin-top:1px;line-height:1.25}
-body[data-spike-page="messages"] .preview{font-size:12px;line-height:1.3;margin-top:3px}
-body[data-spike-page="messages"] .meta{min-width:42px;max-width:62px;font-size:10px;padding-top:1px}
-body[data-spike-page="messages"] .message-time{font-size:10px}
-body[data-spike-page="messages"] .rowUnreadBadge{min-width:18px;height:18px;font-size:10px;margin-top:4px;padding:0 5px}
-body[data-spike-page="messages"] .pinAction{width:36px;min-width:36px;height:40px;padding:0;border-radius:12px;font-size:19px;display:grid;place-items:center}
-body[data-spike-page="messages"] .unarchive:not(.pinAction){padding:8px 9px;font-size:11px;border-radius:10px}
-body[data-spike-page="messages"] .content>.hero{margin:12px 0 0!important;padding:12px 14px;border-radius:15px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(120deg,rgba(168,85,247,.10),transparent 70%),var(--panel)}
-body[data-spike-page="messages"] .content>.hero .eyebrow{font-size:10px;letter-spacing:.09em;flex:1 1 100%;margin:0}
-body[data-spike-page="messages"] .content>.hero p{font-size:12px;line-height:1.4;flex:1 1 210px;margin:0!important}
-body[data-spike-page="messages"] .content>.hero .primary{padding:9px 12px;border-radius:11px;font-size:12px;white-space:nowrap}
-body[data-spike-page="messages"] .notice{padding:12px;margin:0 0 10px;font-size:12px;border-radius:13px}
-body[data-spike-page="messages"] .empty{padding:22px 14px;font-size:13px;border-radius:15px}
-body[data-spike-page="messages"] .skeleton{height:68px;border-radius:15px}
-@media(min-width:700px){body[data-spike-page="messages"] .content{padding:14px 18px 22px}body[data-spike-page="messages"] .item{min-height:74px}}
-@media(max-width:380px){body[data-spike-page="messages"] .content{padding:8px 9px 16px}body[data-spike-page="messages"] .item{gap:8px;padding:8px}body[data-spike-page="messages"] .avatar{width:40px;height:40px;flex-basis:40px}body[data-spike-page="messages"] .preview{font-size:11px}body[data-spike-page="messages"] .meta{min-width:36px;max-width:48px}}
-body[data-spike-page="messages"] .contact-selection-footer{position:sticky;bottom:0;z-index:2;margin-top:10px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:0 -8px 24px rgba(0,0,0,.12)}
-body[data-spike-page="messages"] .contact-group-title{display:grid;gap:5px;font-size:11px;color:var(--muted);margin-bottom:9px}
-body[data-spike-page="messages"] .contact-group-title input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);padding:10px;font:inherit}
-body[data-spike-page="messages"] .contact-selection-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px}
-body[data-spike-page="messages"] .contact-message-button.selected{background:var(--accent);color:white;border-color:var(--accent)}
-
-
-.contact-relationship,.contact-presence{display:block;font-size:10px;color:var(--muted);margin-top:3px}.contact-presence.online{color:#4ade80;font-weight:750}
-</style>
-
-<link rel="stylesheet" href="css/spike-social-suite.css">
-</head><body data-spike-page="messages">
-<script src="js/spike-dialog.js"></script><div class="app">
-<header class="top"><a class="back" href="feed.html" aria-label="Back to Feed"><i class="fa-solid fa-arrow-left"></i></a><div class="titlewrap"><div class="brand">SPIKE <span class="dm-brand-accent">Messages</span></div><div class="subtitle">Your conversations, in one place <span id="newMessagesBadge" class="countBadge newMessagesBadge" hidden aria-live="polite" aria-label="New messages">0 new</span></div></div><button class="iconbtn" id="openContactPicker" type="button" aria-label="New message" title="New message"><i class="fa-solid fa-user-plus"></i></button></header>
-<main class="content">
-<div id="notice" class="notice" hidden></div><aside id="incomingToast" class="spike-message-toast" hidden aria-live="polite" aria-atomic="true"><button id="incomingToastOpen" type="button"><strong id="incomingToastTitle">New message</strong><span id="incomingToastPreview"></span></button></aside><label class="search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="search" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations"></label>
-<div class="filters" role="group" aria-label="Filter conversations"><button class="chip active" data-filter="all" type="button">Inbox <span id="unreadTotalBadge" class="countBadge" hidden>0</span></button><button class="chip" data-filter="unread" type="button">Unread <span id="unreadFilterBadge" class="countBadge" hidden>0</span></button><button class="chip" data-filter="online" type="button">Online</button></div>
-<div class="inbox-section-heading"><div><span class="eyebrow">YOUR INBOX</span><strong>Recent conversations</strong></div><span class="inbox-live-note"><i></i> Live updates</span></div>
-<div id="list" class="list"><div class="skeleton"></div><div class="skeleton"></div></div>
-<section class="contact-picker" id="contactPicker" role="dialog" aria-modal="true" aria-labelledby="contactPickerTitle" hidden>
-  <div class="contact-picker-head"><div><div class="eyebrow">NEW CONVERSATION</div><h2 id="contactPickerTitle">Choose someone</h2><p>Message people already connected to you on SPIKE.</p></div><button class="contact-close" id="closeContactPicker" type="button" aria-label="Close contact selector">×</button></div>
-  <div class="contact-tabs" role="tablist" aria-label="Contact source"><button type="button" class="contact-tab active" data-contact-tab="all" role="tab" aria-selected="true">All</button><button type="button" class="contact-tab" data-contact-tab="following" role="tab" aria-selected="false">Following</button><button type="button" class="contact-tab" data-contact-tab="followers" role="tab" aria-selected="false">Followers</button></div>
-  <label class="contact-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="contactSearch" type="search" placeholder="Search name or username" autocomplete="off" aria-label="Search contacts"></label>
-  <div id="contactList" class="contact-list" aria-live="polite"><div class="skeleton"></div><div class="skeleton"></div></div>
-  <div class="contact-selection-footer" id="contactSelectionFooter" hidden><label class="contact-group-title"><span>Group name (optional)</span><input id="contactGroupTitle" type="text" maxlength="100" placeholder="SPIKE Group"></label><div class="contact-selection-actions"><span><strong id="contactSelectionCount">0</strong> selected</span><button class="primary" id="startSelectedConversation" type="button">Start conversation</button></div></div>
-  <p class="contact-picker-note">Online people appear first. Select one person for a private chat or several people to create a group. Messaging privacy and block settings are checked before a conversation opens.</p>
-</section>
-</main></div>
-
-
-<nav aria-label="Main navigation" class="spike-bottom-nav" id="spikeBottomNav">
-  <a data-spike-nav="home" href="feed.html" aria-label="Home"><span aria-hidden="true">⌂</span><small>Home</small></a>
-  <a data-spike-nav="discover" href="feed.html#discover" aria-label="Discover"><span aria-hidden="true">⌕</span><small>Discover</small></a>
-  <a data-spike-nav="rooms" href="rooms.html" aria-label="Rooms"><span aria-hidden="true">◉</span><small>Rooms</small></a>
-  <a data-spike-nav="messages" href="messages.html" class="active" aria-current="page" aria-label="Messages"><span aria-hidden="true">💬</span><small>Messages</small></a>
-  <a data-spike-nav="profile" href="profile.html" aria-label="Profile"><span aria-hidden="true">◉</span><small>Me</small></a>
-</nav>
 <script src="js/spike-navigation.js"></script>
+</head>
+<body data-spike-page="messages">
+<script src="js/spike-dialog.js"></script>
+<div class="msg-app">
+<header class="msg-topbar">
+  <a class="msg-back" href="feed.html" aria-label="Back to Feed"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i></a>
+  <div class="msg-title">
+    <span class="eyebrow">Direct</span>
+    <h1>Messages <span id="newMessagesBadge" class="msg-count" hidden aria-live="polite">0 new</span></h1>
+  </div>
+  <button class="msg-icon" id="openContactPicker" type="button" aria-label="New message" title="New message"><i class="fa-solid fa-user-plus" aria-hidden="true"></i></button>
+</header>
+<main class="msg-main">
+  <div id="notice" class="msg-notice" role="status" hidden></div>
+  <aside id="incomingToast" class="msg-toast" aria-live="polite" hidden>
+    <button id="incomingToastOpen" type="button"><strong id="incomingToastTitle">New message</strong><span id="incomingToastPreview"></span></button>
+  </aside>
+  <label class="msg-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="search" type="search" placeholder="Search conversations" autocomplete="off" aria-label="Search conversations"></label>
+  <div class="msg-filters" role="group" aria-label="Filter conversations">
+    <button class="msg-chip active" data-filter="all" type="button">Inbox <span id="unreadTotalBadge" class="msg-count" hidden>0</span></button>
+    <button class="msg-chip" data-filter="unread" type="button">Unread <span id="unreadFilterBadge" class="msg-count" hidden>0</span></button>
+    <button class="msg-chip" data-filter="online" type="button">Online</button>
+  </div>
+  <div id="list" class="msg-list" aria-live="polite"><div class="msg-skeleton"></div><div class="msg-skeleton"></div></div>
+</main>
 
+<section class="msg-picker" id="contactPicker" role="dialog" aria-modal="true" aria-labelledby="contactPickerTitle" hidden>
+  <div class="msg-picker-card">
+    <header class="msg-picker-head">
+      <div>
+        <span class="eyebrow">New conversation</span>
+        <h2 id="contactPickerTitle">Choose someone</h2>
+        <p>Message people connected to you on SPIKE.</p>
+      </div>
+      <button class="msg-icon" id="closeContactPicker" type="button" aria-label="Close contact picker">×</button>
+    </header>
+    <div class="msg-tabs" role="tablist" aria-label="Contact source">
+      <button type="button" class="msg-chip active" data-contact-tab="all" role="tab" aria-selected="true">All</button>
+      <button type="button" class="msg-chip" data-contact-tab="following" role="tab" aria-selected="false">Following</button>
+      <button type="button" class="msg-chip" data-contact-tab="followers" role="tab" aria-selected="false">Followers</button>
+    </div>
+    <label class="msg-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input id="contactSearch" type="search" placeholder="Search name or username" autocomplete="off" aria-label="Search contacts"></label>
+    <div id="contactList" class="msg-contacts" aria-live="polite"></div>
+    <div class="msg-picker-footer" id="contactSelectionFooter" hidden>
+      <label class="msg-group-name"><span>Group name (optional)</span><input id="contactGroupTitle" type="text" maxlength="100" placeholder="SPIKE Group"></label>
+      <div class="msg-footer-row"><span><strong id="contactSelectionCount">0</strong> selected</span><button class="msg-primary" id="startSelectedConversation" type="button">Start conversation</button></div>
+    </div>
+  </div>
+</section>
+</div>
 
+<nav class="msg-bottom-nav" aria-label="Main navigation">
+  <a href="feed.html" data-spike-nav="home"><i class="fa-solid fa-house" aria-hidden="true"></i><span>Feed</span></a>
+  <a href="rooms.html" data-spike-nav="rooms"><i class="fa-solid fa-headphones" aria-hidden="true"></i><span>Rooms</span></a>
+  <a href="friends.html" data-spike-nav="friends"><i class="fa-solid fa-user-group" aria-hidden="true"></i><span>Friends</span></a>
+  <a class="active" href="messages.html" data-spike-nav="messages" aria-current="page"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Messages</span></a>
+  <a href="profile.html" data-spike-nav="profile"><i class="fa-solid fa-user" aria-hidden="true"></i><span>Profile</span></a>
+</nav>
 
-
-
-
-<script src="js/spike-feedback-center.js"></script>
-    <script src="js/spike-future-engine.js" defer></script>
-<script src="js/spike-spatial-experience-layout.js" defer></script>
-  <script src="js/spike-select-experience.js"></script>
-  <link rel="stylesheet" href="css/spike-messages-rebuild.css">
-<link rel="stylesheet" href="css/spike-messages-bottom-nav.css">
-<link rel="stylesheet" href="css/spike-message-contact-picker.css">
-<style id="spike-inbox-phase5-hard-override">
-/* Phase 5: harden conversation rows against cross-page/global layout rules. */
-body[data-spike-page="messages"] #list{display:flex!important;flex-direction:column!important;gap:9px!important;width:100%!important}
-body[data-spike-page="messages"] #list > a.item{position:relative!important;display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;align-items:center!important;column-gap:12px!important;width:100%!important;min-width:0!important;min-height:82px!important;height:auto!important;max-height:none!important;padding:12px 13px!important;margin:0!important;overflow:hidden!important;border:1px solid rgba(211,145,235,.24)!important;border-radius:17px!important;background:linear-gradient(135deg,rgba(190,86,220,.09),rgba(255,255,255,.015)),rgba(28,17,39,.97)!important;box-shadow:0 5px 16px rgba(0,0,0,.15)!important;text-decoration:none!important}
-body[data-spike-page="messages"] #list > a.item::before,body[data-spike-page="messages"] #list > a.item::after{content:none!important;display:none!important}
-body[data-spike-page="messages"] #list > a.item > .avatar{position:relative!important;display:grid!important;grid-column:1!important;grid-row:1!important;width:46px!important;height:46px!important;min-width:46px!important;max-width:46px!important;min-height:46px!important;max-height:46px!important;flex:none!important;aspect-ratio:1/1!important;border-radius:50%!important;overflow:hidden!important;justify-self:start!important;align-self:center!important;box-shadow:0 0 0 2px rgba(216,121,245,.18)!important;z-index:1!important}
-body[data-spike-page="messages"] #list > a.item > .avatar::before,body[data-spike-page="messages"] #list > a.item > .avatar::after{content:none!important;display:none!important}
-body[data-spike-page="messages"] #list > a.item > .details{display:flex!important;flex-direction:column!important;justify-content:center!important;grid-column:2!important;grid-row:1!important;align-self:center!important;width:auto!important;min-width:0!important;max-width:100%!important;height:auto!important;overflow:hidden!important;opacity:1!important;visibility:visible!important}
-body[data-spike-page="messages"] #list > a.item .inbox-title-line{display:flex!important;align-items:center!important;gap:7px!important;width:100%!important;min-width:0!important;overflow:hidden!important}
-body[data-spike-page="messages"] #list > a.item .name{display:block!important;flex:0 1 auto!important;min-width:0!important;max-width:100%!important;color:#fff2ff!important;font-size:13px!important;font-weight:850!important;line-height:1.3!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;opacity:1!important;visibility:visible!important}
-body[data-spike-page="messages"] #list > a.item .inbox-presence{display:inline-flex!important;flex:0 0 auto!important;align-items:center!important;font-size:9px!important;line-height:1.2!important;max-width:86px!important;white-space:nowrap!important}
-body[data-spike-page="messages"] #list > a.item .presence-time-label{display:block!important;margin-top:3px!important;color:#c5b4d0!important;font-size:10px!important;line-height:1.25!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;opacity:1!important;visibility:visible!important}
-body[data-spike-page="messages"] #list > a.item .preview{display:block!important;margin-top:5px!important;max-width:100%!important;color:#d5c9dc!important;font-size:11px!important;line-height:1.3!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;opacity:1!important;visibility:visible!important}
-body[data-spike-page="messages"] #list > a.item > .meta{display:flex!important;flex-direction:column!important;align-items:flex-end!important;justify-content:flex-start!important;grid-column:3!important;grid-row:1!important;align-self:start!important;min-width:42px!important;max-width:72px!important;padding:2px 0 0!important;color:#cbbbd4!important;font-size:10px!important;line-height:1.25!important;text-align:right!important;white-space:nowrap!important;opacity:1!important;visibility:visible!important}
-body[data-spike-page="messages"] #list > a.item .rowUnreadBadge{display:inline-grid!important;margin-top:6px!important}
-body[data-spike-page="messages"] .search{display:flex!important;min-height:46px!important;height:46px!important;box-shadow:none!important;border:1px solid rgba(211,145,235,.23)!important;outline:0!important}
-body[data-spike-page="messages"] .search:focus-within{box-shadow:0 0 0 2px rgba(216,121,245,.12)!important;border-color:rgba(216,121,245,.58)!important}
-@media(max-width:390px){body[data-spike-page="messages"] #list > a.item{grid-template-columns:42px minmax(0,1fr) auto!important;column-gap:9px!important;min-height:76px!important;padding:10px!important}body[data-spike-page="messages"] #list > a.item > .avatar{width:40px!important;height:40px!important;min-width:40px!important;max-width:40px!important;min-height:40px!important;max-height:40px!important}body[data-spike-page="messages"] #list > a.item .name{font-size:12px!important}body[data-spike-page="messages"] #list > a.item .preview{font-size:10px!important}}
-</style>
-<script src="js/spike-messaging.js?v=rt-20261124" defer></script>
+<script src="js/spike-messages.js" defer></script>
 <script type="module" src="js/spike-supabase-guard.js"></script>
 </body></html>

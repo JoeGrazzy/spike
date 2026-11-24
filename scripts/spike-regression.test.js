@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const messaging = fs.readFileSync(new URL('../js/spike-messaging.js', import.meta.url), 'utf8');
+const messaging = fs.readFileSync(new URL('../js/spike-messages.js', import.meta.url), 'utf8');
 const calls = fs.readFileSync(new URL('../js/spike-call-engine.js', import.meta.url), 'utf8');
 const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8');
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
@@ -10,7 +10,7 @@ const callSchema = fs.readFileSync(new URL('../supabase/migrations/2026112323032
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
-  assert.match(messaging, /getCallContext:\(\)=>\(\{conversationId,peerId:currentPeerId,isGroup:currentConversationIsGroup\}\)/);
+  assert.match(messaging, /getCallContext:\s*\(\)\s*=>\s*\(\{\s*conversationId,\s*peerId:\s*currentPeerId,\s*isGroup:\s*currentConversationIsGroup\s*\}\)/);
 });
 
 test('group conversations do not expose a call recipient', () => {

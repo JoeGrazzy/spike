@@ -52,7 +52,7 @@ const expectedRemoteVersions=`
 const additiveLocalVersions=['20261123234241','20261124001015','20261124002203','20261124002243','20261124002409'];
 const expectedLocalVersions=[...expectedRemoteVersions,...additiveLocalVersions].sort();
 if(versions.length!==expectedLocalVersions.length||versions.some((version,index)=>version!==expectedLocalVersions[index]))errors.push('Local Supabase migration versions do not match the known production baseline plus explicitly reviewed additive migrations');
-const messagingSource=fs.readFileSync(path.join(root,'js','spike-messaging.js'),'utf8');
+const messagingSource=fs.readFileSync(path.join(root,'js','spike-messages.js'),'utf8');
 if(!/currentPeerId\s*=\s*!isGroup\s*&&\s*peerId/.test(messagingSource))errors.push('Direct-message setup must assign the resolved one-to-one call recipient');
 const callSource=fs.readFileSync(path.join(root,'js','spike-call-engine.js'),'utf8');
 if(callSource.includes('/api/call-ice'))errors.push('STUN-only call engine must not depend on the external TURN credential endpoint');
