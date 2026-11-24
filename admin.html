@@ -148,8 +148,6 @@ body{visibility:hidden}
   <link rel="stylesheet" href="css/spike-admin-compact-intelligence.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@7.2.0/css/all.min.css">
   <link rel="stylesheet" href="css/spike-modern-finish.css">
-<script src="js/spike-icons.js?v=semantic-icons-2"></script>
-<link rel="stylesheet" href="css/spike-icons.css?v=semantic-icons-2">
 </head>
 <body data-spike-page="admin">
 <main class="wallet-shell admin-shell">
@@ -159,14 +157,14 @@ body{visibility:hidden}
   <span class="admin-kicker admin-control-label">CONTROL</span>
  </header>
  <nav class="admin-tabs" aria-label="Admin sections">
-  <button class="admin-tab is-active" type="button" data-view="overview"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="chart" data-spike-icon-size="18"></span><span>Overview</span></button>
-  <button class="admin-tab" type="button" data-view="users"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="users" data-spike-icon-size="18"></span><span>User management</span></button>
-  <button class="admin-tab" type="button" data-view="verification"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="shield" data-spike-icon-size="18"></span><span>Verification</span></button>
-  <button class="admin-tab" type="button" data-view="purchases"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="receipt" data-spike-icon-size="18"></span><span>Purchases</span></button>
-  <button class="admin-tab" type="button" data-view="monetization"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="gift" data-spike-icon-size="18"></span><span>Gifts & earnings</span></button>
-  <button class="admin-tab" type="button" data-view="reports"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="flag" data-spike-icon-size="18"></span><span>Reports</span></button>
-  <button class="admin-tab" type="button" data-view="enforcement"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="scale" data-spike-icon-size="18"></span><span>Enforcement</span></button>
-  <button class="admin-tab" type="button" data-view="audit"><span class="admin-tab-icon" aria-hidden="true" data-spike-icon="file" data-spike-icon-size="18"></span><span>Audit & permissions</span></button>
+  <button class="admin-tab is-active" type="button" data-view="overview"><span class="admin-tab-icon" aria-hidden="true">📊</span><span>Overview</span></button>
+  <button class="admin-tab" type="button" data-view="users"><span class="admin-tab-icon" aria-hidden="true">👥</span><span>User management</span></button>
+  <button class="admin-tab" type="button" data-view="verification"><span class="admin-tab-icon" aria-hidden="true">🛡️</span><span>Verification</span></button>
+  <button class="admin-tab" type="button" data-view="purchases"><span class="admin-tab-icon" aria-hidden="true">🧾</span><span>Purchases</span></button>
+  <button class="admin-tab" type="button" data-view="monetization"><span class="admin-tab-icon" aria-hidden="true">🎁</span><span>Gifts & earnings</span></button>
+  <button class="admin-tab" type="button" data-view="reports"><span class="admin-tab-icon" aria-hidden="true">🚨</span><span>Reports</span></button>
+  <button class="admin-tab" type="button" data-view="enforcement"><span class="admin-tab-icon" aria-hidden="true">⚖️</span><span>Enforcement</span></button>
+  <button class="admin-tab" type="button" data-view="audit"><span class="admin-tab-icon" aria-hidden="true">🧾</span><span>Audit & permissions</span></button>
  </nav>
  <section id="viewOverview" class="admin-view">
   <section class="admin-hero wallet-wide" aria-label="Admin overview introduction">
@@ -351,7 +349,7 @@ body{visibility:hidden}
      <select id="reportSourceFilter" aria-label="Filter by source"><option value="">All sources</option><option value="post">Feed posts</option><option value="profile">Profiles</option><option value="room">Rooms & room messages</option><option value="message">Direct messages</option><option value="comment">Comments</option></select>
      <button class="admin-refresh" type="submit">🎛️ Apply filters</button>
     </form>
-    <div class="report-toolbar"><span id="reportQueueStatus" role="status">Loading reports…</span><button id="reportLoadRefresh" class="admin-refresh" type="button"><span data-spike-icon="refresh" data-spike-icon-size="16"></span> Refresh</button></div>
+    <div class="report-toolbar"><span id="reportQueueStatus" role="status">Loading reports…</span><button id="reportLoadRefresh" class="admin-refresh" type="button">🔄 Refresh</button></div>
     <div id="reportQueue" class="report-queue" aria-live="polite"></div><button id="reportLoadMore" class="user-more" type="button" hidden>➕ Load more reports</button>
     <p class="report-hint">Potential duplicates are highlighted when multiple cases reference the same source and content ID within the currently loaded results. Review each report independently; this is a review aid, not an automatic duplicate verdict.</p>
    </aside>

@@ -821,7 +821,7 @@
   }
 
   async function reportMessage(messageId) {
-    const reason = await window.SPIKEPremiumDialog.prompt('Why are you reporting this message?', { title: 'Report message', confirmText: 'Submit report', cancelText: 'Cancel', icon: 'flag', kind: 'warning', kicker: 'SPIKE TRUST & SAFETY' });
+    const reason = await window.SPIKEPremiumDialog.prompt('Why are you reporting this message?', { title: 'Report message', confirmText: 'Submit report', cancelText: 'Cancel' });
     if (!reason) return;
     const trimmed = String(reason).trim();
     if (trimmed.length < 3) throw new Error('Please provide a reason of at least 3 characters.');

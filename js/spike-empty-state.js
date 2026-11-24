@@ -3,7 +3,14 @@
   'use strict';
   if (window.SPIKEEmpty) return;
 
-  const ICONS = { messages: 'message', friends: 'users', notifications: 'bell', feed: 'sparkle', search: 'search', generic: 'sparkle' };
+  const ICONS = {
+    messages: '💬',
+    friends: '🤝',
+    notifications: '🔔',
+    feed: '✨',
+    search: '🔎',
+    generic: '🌱'
+  };
 
   /* Warm, useful defaults by context */
   const PRESETS = {
@@ -57,8 +64,7 @@
       className = ''
     } = options;
 
-    const iconName = ICONS[icon] || ICONS.generic;
-    const iconChar = window.SPIKEIcons?.svg(iconName, 'spike-icon', 28) || '✦';
+    const iconChar = ICONS[icon] || ICONS.generic;
     const action = actionLabel
       ? (actionHref
           ? `<a class="spike-empty-action" href="${actionHref}">${actionLabel}</a>`

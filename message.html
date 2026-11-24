@@ -21,9 +21,7 @@
   <link rel="stylesheet" href="css/spike-modern-finish.css">
   <link rel="stylesheet" href="css/spike-conversation-refined.css?v=20261124">
   <link rel="stylesheet" href="css/spike-private-share.css?v=20261124-1">
-<script src="js/spike-icons.js?v=semantic-icons-2"></script>
-<style>.msg-sheet [data-msg-action]{display:flex;align-items:center;gap:12px}.msg-action-icon{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:10px;background:color-mix(in srgb,var(--spike-accent,#00d5ff) 11%,transparent);color:var(--spike-accent,#00d5ff)}.msg-action-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.msg-sheet [data-msg-action=report] .msg-action-icon{color:#f6b94b;background:rgba(246,185,75,.12)}.msg-sheet [data-msg-action=delete] .msg-action-icon{color:#fb7185;background:rgba(251,113,133,.12)}@media(prefers-reduced-motion:reduce){.msg-sheet [data-msg-action]{transition:none!important}}</style>
-<link rel="stylesheet" href="css/spike-icons.css?v=semantic-icons-2">
+  <link rel="stylesheet" href="css/spike-action-icon-system.css">
 </head>
 <body data-spike-page="message">
 <script src="js/spike-dialog.js"></script>
@@ -35,8 +33,8 @@
     <div class="msg-person-text"><strong id="name">SPIKE member</strong><small id="sub">Direct message</small></div>
   </div>
   <div class="msg-call-actions">
-    <button class="msg-icon" id="voiceCallBtn" disabled aria-disabled="true" type="button" aria-label="Voice call" title="Voice call"><span data-spike-icon="phone" data-spike-icon-size="20"></span></button>
-    <button class="msg-icon" id="videoCallBtn" disabled aria-disabled="true" type="button" aria-label="Video call" title="Video call"><span data-spike-icon="video" data-spike-icon-size="20"></span></button>
+    <button class="msg-icon" id="voiceCallBtn" disabled aria-disabled="true" type="button" aria-label="Voice call" title="Voice call"><i class="fa-solid fa-phone" aria-hidden="true"></i></button>
+    <button class="msg-icon" id="videoCallBtn" disabled aria-disabled="true" type="button" aria-label="Video call" title="Video call"><i class="fa-solid fa-video" aria-hidden="true"></i></button>
   </div>
   <button class="msg-icon" id="refresh" type="button" aria-label="Refresh conversation" title="Refresh"><i class="fa-solid fa-rotate" aria-hidden="true"></i></button>
 </header>
@@ -67,13 +65,13 @@
 <div class="msg-sheet-shade" id="messageMenuShade">
   <div class="msg-sheet" role="dialog" aria-modal="true" aria-label="Message options">
     <p class="msg-sheet-sub" id="menuSub"></p>
-    <button type="button" data-msg-action="reply"><span class="msg-action-icon" data-spike-icon="reply" data-spike-icon-size="17"></span>Reply</button>
-    <button type="button" data-msg-action="copy"><span class="msg-action-icon" data-spike-icon="copy" data-spike-icon-size="17"></span>Copy text</button>
-    <button type="button" data-msg-action="share"><span class="msg-action-icon" data-spike-icon="share" data-spike-icon-size="17"></span>Share</button>
-    <button type="button" data-msg-action="like"><span class="msg-action-icon" data-spike-icon="heart" data-spike-icon-size="17"></span>React</button>
-    <button type="button" data-msg-action="report"><span class="msg-action-icon" data-spike-icon="flag" data-spike-icon-size="17"></span>Report</button>
-    <button type="button" class="danger" id="messageMenuDelete" data-msg-action="delete"><span class="msg-action-icon" data-spike-icon="trash" data-spike-icon-size="17"></span>Delete message</button>
-    <button type="button" data-msg-action="close"><span class="msg-action-icon" data-spike-icon="x" data-spike-icon-size="17"></span>Cancel</button>
+    <button type="button" data-msg-action="reply"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17 4 12l5-5M4 12h10a6 6 0 0 1 6 6"/></svg><span>Reply</span></button>
+    <button type="button" data-msg-action="copy"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg><span>Copy text</span></button>
+    <button type="button" data-msg-action="share"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.7 10.7 6.6-4.4m-6.6 9 6.6 4.4"/></svg><span>Share</span></button>
+    <button type="button" data-msg-action="like"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.7c0 5.1-8.8 11-8.8 11s-8.8-5.9-8.8-11A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5Z"/></svg><span>React</span></button>
+    <button type="button" data-msg-action="report"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5m0 0c5-4 9 4 16 0v11c-7 4-11-4-16 0"/><path d="M4 16v5"/></svg><span>Report</span></button>
+    <button type="button" class="danger" id="messageMenuDelete" data-msg-action="delete"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18m-2 0-1 14H6L5 6m4 0V4h6v2m-5 4v6m4-6v6"/></svg><span>Delete message</span></button>
+    <button type="button" data-msg-action="close"><svg class="spike-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m18 6-12 12M6 6l12 12"/></svg><span>Cancel</span></button>
   </div>
 </div>
 

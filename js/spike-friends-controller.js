@@ -13,6 +13,26 @@
   const escapeText = value => String(value ?? '');
   const profileUrl = id => `user-profile.html?uid=${encodeURIComponent(id)}`;
   const avatarFallback = name => (String(name || 'S').trim()[0] || 'S').toUpperCase();
+  const actionIconPaths = {
+    follow: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6m-3-3h6"/>',
+    block: '<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 9 6 6m0-6-6 6"/>',
+    message: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z"/>',
+    unfollow: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M16 11h6"/>',
+    unblock: '<path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/>',
+    discover: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>'
+  };
+  function actionIcon(name) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false'); svg.classList.add('spike-action-icon');
+    svg.innerHTML = actionIconPaths[name] || actionIconPaths.discover;
+    return svg;
+  }
+  function labelAction(button, label, iconName) {
+    button.append(actionIcon(iconName), document.createTextNode(label));
+    button.classList.add('has-action-icon');
+    return button;
+  }
   const avatarUrl = value => {
     const raw = String(value || '').trim();
     if (/^https:\/\//i.test(raw)) return raw;
@@ -241,24 +261,24 @@
     if (mode === 'suggestion' && person.recommendationReason) {
       const reason = document.createElement('div');
       reason.className = 'mutual recommendation-reason';
-      reason.textContent = person.recommendationReason;
+      reason.append(actionIcon('discover'), document.createTextNode(person.recommendationReason));
       info.append(reason);
     }
     const actions = document.createElement('div'); actions.className = 'friend-action';
 
     if (mode === 'suggestion') {
-      const follow = document.createElement('button'); follow.type = 'button'; follow.className = 'connection-action primary'; follow.textContent = 'Follow';
+      const follow = document.createElement('button'); follow.type = 'button'; follow.className = 'connection-action primary'; labelAction(follow, 'Follow', 'follow');
       follow.dataset.action = 'follow'; follow.dataset.userId = id;
-      const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
+      const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; labelAction(block, 'Block', 'block');
       block.dataset.action = 'block'; block.dataset.userId = id; actions.append(follow, block);
     } else if (mode === 'blocked') {
-      const unblock = document.createElement('button'); unblock.type = 'button'; unblock.className = 'connection-action outline'; unblock.textContent = 'Unblock';
+      const unblock = document.createElement('button'); unblock.type = 'button'; unblock.className = 'connection-action outline'; labelAction(unblock, 'Unblock', 'unblock');
       unblock.dataset.action = 'unblock'; unblock.dataset.userId = id; actions.append(unblock);
     } else {
-      const message = document.createElement('a'); message.className = 'connection-action message-link'; message.href = `message.html?user_id=${encodeURIComponent(id)}`; message.textContent = 'Message';
-      const unfollow = document.createElement('button'); unfollow.type = 'button'; unfollow.className = 'connection-action unfriend-btn'; unfollow.textContent = 'Unfollow';
+      const message = document.createElement('a'); message.className = 'connection-action message-link'; message.href = `message.html?user_id=${encodeURIComponent(id)}`; labelAction(message, 'Message', 'message');
+      const unfollow = document.createElement('button'); unfollow.type = 'button'; unfollow.className = 'connection-action unfriend-btn'; labelAction(unfollow, 'Unfollow', 'unfollow');
       unfollow.dataset.action = 'unfollow'; unfollow.dataset.userId = id;
-      const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; block.textContent = 'Block';
+      const block = document.createElement('button'); block.type = 'button'; block.className = 'connection-action secondary'; labelAction(block, 'Block', 'block');
       block.dataset.action = 'block'; block.dataset.userId = id;
       actions.append(message, unfollow, block);
       const presence = person.presence;

@@ -1,0 +1,34 @@
+/* SPIKE semantic action icons — shared visual language, distinct meaning per action. */
+.spike-action-icon,.msg-sheet [data-msg-action] .spike-icon {
+  width: 15px; height: 15px; flex: 0 0 15px; display: inline-block;
+  fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+  vertical-align: -3px;
+}
+.has-action-icon { display: inline-flex !important; align-items: center; justify-content: center; gap: 6px; }
+.network-recommendation-card { position: relative; isolation: isolate; }
+.network-recommendation-card::before {
+  content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; border-radius: inherit;
+  background: linear-gradient(180deg,var(--spike-accent,#9b7bff),color-mix(in srgb,var(--spike-accent,#9b7bff) 20%,transparent));
+  opacity: .8; pointer-events: none;
+}
+.network-recommendation-card .recommendation-reason {
+  display: inline-flex !important; align-items: center; gap: 5px; max-width: 100%;
+  margin-top: 5px !important; padding: 3px 7px; border-radius: 999px;
+  color: var(--spike-muted,var(--sp-muted,#7b8498)) !important;
+  background: color-mix(in srgb,var(--spike-accent,#8b70ee) 9%,transparent);
+  font-size: 10px; line-height: 1.35; font-weight: 650;
+}
+.network-recommendation-card .recommendation-reason .spike-action-icon { width: 12px; height: 12px; flex-basis: 12px; color: var(--spike-accent,#8b70ee); }
+.network-recommendation-card .friend-action { display: flex; flex: 0 0 auto; align-items: center; gap: 6px; }
+.network-recommendation-card .connection-action { min-height: 34px; border-radius: 11px; font-weight: 700; white-space: nowrap; }
+.network-recommendation-card .connection-action.primary { box-shadow: 0 5px 14px color-mix(in srgb,var(--spike-accent,#8b70ee) 18%,transparent); }
+.msg-sheet [data-msg-action] { display: flex; align-items: center; gap: 12px; text-align: left; }
+.msg-sheet [data-msg-action] .spike-icon { width: 18px; height: 18px; flex-basis: 18px; color: var(--msg-accent,#a78bfa); }
+.msg-sheet [data-msg-action="report"] .spike-icon { color: #e0a34b; }
+.msg-sheet [data-msg-action="delete"] .spike-icon { color: #ef6b79; }
+@media(max-width:390px) {
+  .network-recommendation-card .friend-action { gap: 4px; }
+  .network-recommendation-card .connection-action { min-height: 31px; padding-inline: 7px; font-size: 10px; gap: 4px; }
+  .network-recommendation-card .spike-action-icon { width: 13px; height: 13px; flex-basis: 13px; }
+}
+@media(prefers-reduced-motion:reduce) { .network-recommendation-card,.network-recommendation-card * { transition-duration:.01ms !important; animation-duration:.01ms !important; } }

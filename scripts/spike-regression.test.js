@@ -8,6 +8,9 @@ const worker = fs.readFileSync(new URL('../worker.js', import.meta.url), 'utf8')
 const dmMigration = fs.readFileSync(new URL('../supabase/migrations/20261123234241_spike_realtime_private_topic_hardening_v1.sql', import.meta.url), 'utf8');
 const callSchema = fs.readFileSync(new URL('../supabase/migrations/20261123230328_spike_one_to_one_call_sessions_v1.sql', import.meta.url), 'utf8');
 const realtimeSeparation = fs.readFileSync(new URL('../supabase/migrations/20261124044627_spike_realtime_postgres_changes_channel_separation_v1.sql', import.meta.url), 'utf8');
+const friendsController = fs.readFileSync(new URL('../js/spike-friends-controller.js', import.meta.url), 'utf8');
+const messagePage = fs.readFileSync(new URL('../message.html', import.meta.url), 'utf8');
+const actionIconStyles = fs.readFileSync(new URL('../css/spike-action-icon-system.css', import.meta.url), 'utf8');
 
 test('one-to-one conversation resolves the call recipient ID', () => {
   assert.match(messaging, /currentPeerId\s*=\s*!isGroup\s*&&\s*peerId\s*\?\s*String\(peerId\)\s*:\s*null/);
@@ -175,4 +178,24 @@ test('global hover polish never applies border styling to every hovered element'
     const css = fs.readFileSync(new URL(file, import.meta.url), 'utf8');
     assert.doesNotMatch(css, /(?:^|,)\\s*:hover\\s*(?:,|\\{)/m);
   }
+});
+
+
+test('SPIKE recommendation actions use distinct semantic icons and preserve their labels', () => {
+  assert.match(friendsController, /labelAction\(follow, 'Follow', 'follow'\)/);
+  assert.match(friendsController, /labelAction\(block, 'Block', 'block'\)/);
+  assert.match(friendsController, /labelAction\(unfollow, 'Unfollow', 'unfollow'\)/);
+  assert.match(friendsController, /labelAction\(message, 'Message', 'message'\)/);
+  assert.match(friendsController, /recommendation-reason/);
+  assert.match(actionIconStyles, /\.network-recommendation-card \.recommendation-reason/);
+});
+
+test('message actions each have an action-specific icon, including the report flag', () => {
+  for (const action of ['reply', 'copy', 'share', 'like', 'report', 'delete', 'close']) {
+    const start = messagePage.indexOf(`data-msg-action="${action}"`);
+    assert.notEqual(start, -1, `missing ${action} action`);
+    assert.ok(messagePage.slice(start, start + 500).includes('<svg'), `${action} action is missing its icon`);
+  }
+  const reportStart = messagePage.indexOf('data-msg-action="report"');
+  assert.ok(messagePage.slice(reportStart, reportStart + 500).includes('M4 21V5'), 'report action must use the flag icon');
 });
